@@ -9,5 +9,6 @@
 * Jean Carroll - *Not my type* - highlights
 * Fighting Elon Musk - X/Twitter info/data wars (+ fake news Nazism on Slow Burn) - emails and Github commits (Steve Bannon)
 * My dad: I do not want the (morningside/sunnyside) eggs that bad from Annie Hall/Woody Allen
-* 
+* ChameleonMiniLiveDebugger ([no. 26](https://github.com/maxieds/ChameleonMiniLiveDebugger/issues/26#issuecomment-1722385007() - sister
+  FBI for sending me COVID in the mail, ABQ Fox News / AppleWatch darkweb binaries
 * 
