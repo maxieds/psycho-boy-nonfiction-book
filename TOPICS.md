@@ -11,4 +11,6 @@
 * My dad: I do not want the (morningside/sunnyside) eggs that bad from Annie Hall/Woody Allen
 * ChameleonMiniLiveDebugger ([no. 26](https://github.com/maxieds/ChameleonMiniLiveDebugger/issues/26#issuecomment-1722385007() - sister
   FBI for sending me COVID in the mail, ABQ Fox News / AppleWatch darkweb binaries
-* 
+* GRE test scores (after teaching calulus/50) - SQL injection attack
+* Frey effect: suicide (happy chant) + Ericka's lighthouse (intentional abuse)
+* Frey effect: electroshock therapy in ATL (loose 5 years memory)
