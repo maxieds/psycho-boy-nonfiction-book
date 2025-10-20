@@ -11,6 +11,10 @@
 * My dad: I do not want the (morningside/sunnyside) eggs that bad from Annie Hall/Woody Allen
 * ChameleonMiniLiveDebugger ([no. 26](https://github.com/maxieds/ChameleonMiniLiveDebugger/issues/26#issuecomment-1722385007() - sister
   FBI for sending me COVID in the mail, ABQ Fox News / AppleWatch darkweb binaries
-* GRE test scores (after teaching calulus/50) - SQL injection attack
-* Frey effect: suicide (happy chant) + Ericka's lighthouse (intentional abuse)
-* Frey effect: electroshock therapy in ATL (loose 5 years memory)
+* Jesus Christ had a pet turkey (Frey radio + YouTube extravaganza)
+* Frey radio: I'm thinking reposession of a (Tesla) car
+* Github/public-file-stashes: satellite control, chimera (chim-er-axe, LC)
+  and Area-51 core dumps + Clash outros on OTH for the network data
+  (see ``_projects``).
+*
+*
