@@ -1,3 +1,8 @@
+# Working titles of the book
+
+* Don't piss me off
+* Because he raped me...
+
 # Topics
 
 * GT bee sting / expermimental psych project
