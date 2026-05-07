@@ -42,3 +42,21 @@ Non-technical notes on artifacts that are not to be missed:
 * See the [annotations on satellite phone connections](https://github.com/maxieds/GEyesThemes/releases/tag/Codename-BackOrifice53) for examples, network logins and passwords stored in plaintext, more detail and a discussion of artifacts like a configuration file that aims to disable encryption entirely in Russia
 * Timezone profiles that show links with special preferences towards users in Indiana, Kentucky and safari destinations in the tunnel system underneath Antarctica are [written down here](https://github.com/maxieds/public-file-stashes/blob/main/_project/AGO-COMPONENT-TIMEZONES.md) 
 
+## Neuralink (Frey effect) radio abuse
+
+Commentary and some quotes (will obtain audio recordings soon - sick filters):
+* SARS! How would he have known that before the CDC in Atlanta?
+* Electroshock 
+* Christine is a high school teacher
+* X Musk (2020): Your apartment is like a Faraday cage (one option to block the RF technology he uses to do this)
+
+Success at blocking or disabling the technology:
+* Expensive professional-grade sound proofing and RF shielding at the UIC audiologist office will kill it. Cost to install this material nearby is a barrier. 
+* Anarchist Cookbook type reasoning about whether to try to use rubbing alcohol versus water as a solvent (it turns out, the latter works). Perforation experience (three days silent), as soon as I left my apartment again I was drugged and they continued to abuse this technology.
+* The human brain and body operate on frequencies - as in, someone on your wavelength - it's a really sick way to try to control and manipulate human physiology. 
+* Radiation is a component
+* How it works (Neuralink): My experience and observations being subjected to this formerly classified technology (before Trump's first term in office). Like having an external person's personality act on your neurons - the reaction it produces by pressing on your neurons is what you would say if asked, except that your personality (under normal circumstances) would not ask the question that way. It's much like an amplified (and insultingly audio effect filtered) version of you if you had his offensive personality. Not cool! It seems to be a problem moving forward that the human brain did not evolve with a need to firewall external impulses. 
+* Audible in close proximity. Skinheads from Indiana are able to tune the frequency. I have to resort to asking local ham radio experts nicely to help document this abuse.  
+
+
+
