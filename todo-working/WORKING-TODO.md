@@ -45,7 +45,8 @@ Clips to add to my [Youtube topical / misc playlist](https://www.youtube.com/wat
 * Sonia Soto Mayor: Immunity case dissent (read it)
 * Dramatic readings by Hollywood actors of Trump's indictments (multiple podcasts)
 * Item that most CS majors at the U of I have come to synonymously associate with the following expression of grief on one's Unix system of choice: SEGMENTATION FAULT (dated, lost-to-time video reference implied)
-
+* Accurate CNN vault recordings of the live cell phone streaming video around Trump in the early morning of January 7th, 2021 - as witnessed in midtown Atlanta due to new fiberoptic feeds from CNN headquarters nearby to parts of the city. 
+* The eulogy of congressman and civil rights hero, John Lewis: Hillary Clinton doing Trump's job by speaking for him after (in sequence) every other living president regardless of political party affiliation: Bill Clinton, George W. Bush, Barack Obama, and then the live CNN broadcast is cut off with President Clinton herself taking the podium right before she the completion of the first word of her speech. The once or twice a month that things like this were allowed to appear on CNN is the reason I used to believe that CNN was an independent news source worthy of keeping on at all times in the background. 
 
 
 

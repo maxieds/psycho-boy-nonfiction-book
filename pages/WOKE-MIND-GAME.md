@@ -52,6 +52,7 @@ The beauty of getting to write the accounts in this non-fiction book is really t
 * Warped usage of the language: *Jesus Christ (as in the trageted video game avatar) died for your sins*. What does/do *he/they* mean by that?
 * Much of the psychological warfare tactics are juvenile or seem to be something that a third grader might respond to. Am I the first adult they have ever done this to?
 * Similarities or parallells to so -termed "vampire culture" such as the terms "vampire killers" (or killer vampires) forming a particularly racist ideology from Adolf Hitler's occult
+<img src="https://github.com/maxieds/psycho-boy-nonfiction-book/tree/main/images/HangoutsChat-DemonicPoetryForTheLadiesByAModernManOfTheNeoNaziRenaissanceInAmerica-102985306-f80c9480-44dc-11eb-90ce-a8a3efe4ad3d.png" height="300" "alt="Whew, psychopath! Which one of Elon Musk-s son-s I don-t remember meeting is this one?" />
 * Ties to the Antarctic (or South American) Roswell crash landing - yes, it's real, it's not small and you can take (or be led into) a surreal roadtrip that drives over this reference to cult mythology.
 * How do the central objections to big government within Satanism fit in with the political ideology of the MAGA-Musk era Reupublican party under Trump? 
 

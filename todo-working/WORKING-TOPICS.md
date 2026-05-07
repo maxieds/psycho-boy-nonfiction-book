@@ -4,6 +4,7 @@
 
 * One idea: Don't piss me off!
 * More like *Not my Type* by Jean Carroll: Because he raped me...
+* An idea after reviewing old file archives in full this morning: *I find your swastika to be offensive. Keep it in your pants, Trumpy, or it's coming off your body - like right, right now!* 
 
 ## Laundry list of unorganized topics
 
@@ -23,8 +24,16 @@
 * Github/public-file-stashes: satellite control, chimera (chim-er-axe, LC)
   and Area-51 core dumps + Clash outros on OTH for the network data
   (see ``_projects``).
-* Apocalyptic AndroidGo "government phone" access suggests an end-of-humanity (or even life on this planet) plans for domination. Is this really Trump with Elon Musk? Jesus Christ! I wish some smart people I still keep in contact with would give me an email response that reflects actually parsing this sort of thing and having a genuine reaction - it's not hard to infer what I witnessed and was able to partially archive under the circumstances if you know what key details you are looking for in otherwise technical-looking cell phone system and application data - the better 50% of this country absolutely need to see this and some other video I will find a way to post online. They get really pissy about the Bluetooth/BLE device MAC address videos on YouTube. Therefore, I am making a note to go back and review [these videos](https://drive.google.com/drive/folders/1-ddoS6Se63OxMYBJfwbne8--ZIMob7_v?usp=sharing) and also [these audio recordings](https://drive.google.com/drive/folders/1-qlV87p992a6EXxCT6RdBFBy9Hsd4C4E?usp=sharing) again later.
-*
+* Apocalyptic AndroidGo "government phone" access suggests an end-of-humanity (or even life on this planet) plans for domination. Is this really Trump with Elon Musk? Jesus Christ! I wish some smart people I still keep in contact with would give me an email response that reflects actually parsing this sort of thing and having a genuine reaction - it's not hard to infer what I witnessed and was able to partially archive under the circumstances if you know what key details you are looking for in otherwise technical-looking cell phone system and application data - the better 50% of this country absolutely need to see this and some other video I will find a way to post online. They get really pissy about the Bluetooth/BLE device MAC address videos on YouTube. Therefore, I am making a note to go back and review [these videos](https://drive.google.com/drive/folders/1-ddoS6Se63OxMYBJfwbne8--ZIMob7_v?usp=sharing) and also [these audio recordings](https://drive.google.com/drive/folders/1-qlV87p992a6EXxCT6RdBFBy9Hsd4C4E?usp=sharing) again later. You can read what the men who organized the insurrection mean (cf. Kamala Harris' concession speech mentioning a "billion" stars) clear as day [in this image](https://github.com/maxieds/public-file-stashes/blob/main/_images/AndroidGoBillions.png). 
+* Get the darkweb ipad legal notices (not legally binding) and the OSS credits including an old link to the ``Casper WY`` (no comma) experience from the older UIUC.edu domain whereas these days the link should be rooted at CS.ILLINOIS.EDU. 
+* Hard-to-pin-down contact points (emails and phone numbers):
+1. ``northbranchnatives@gmail.com`` (Ivanka, and possibly Laura, Trump)
+2. The mob wives of VH1 did what the smart one working at Wendy's for minimum wage in Florida knew not to do. Here are some of their collected email addresses: ``lorriemac19@gmail.com`` (Lorrie, one of John Gotti's daughters, iirc), ``diciemail1@gmail.com`` (Dicie, or Dixie, named after Bebop and Rocksteady from the Teenage Mutant Ninja Turtles movies around the time of her conception)``Whismanjennifer3@gmail.com`` (Jen), ``ladyc740@gmail.com`` (Crystal), ``gbaby.hairstoom@gmail.com`` (Glenda), ``gitalittlejohn1977@gmail.com`` (GeeGee - friend, not gangster - witnessed the spectacle); Also: ``rabbi@templebethelofpensacola.org`` (Rabbi Joel Fleekop, pronounced Flea-Cock). 
+* 
+* 
+* 
+
+
 
 ## Text and other writing snippets
 
