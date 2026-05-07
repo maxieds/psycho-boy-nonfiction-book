@@ -40,6 +40,7 @@ Observed usage include the following:
 * Calling most gamers "kids" (as in children of the Anglo-Christian devil in Western religion).
 * Interpretation of "music" (as in Frey effect radio). Cf. "sirens" from the *Oddyssey* or warped references to *Jesus Christ on Broadway*?
 * Interpretation of "art" (as in genocide being Hitler's art). Cf. actual Argentinian children's artwork in a recognizable UNICEF airport entrance - apparently in reference to rumors that Hitler escaped to South America after World War II and the need for that covert destination.  
+* Ruminations about diatribes in the game that begin with: "*It started with...*"
 
 ## Open questions to document
 
