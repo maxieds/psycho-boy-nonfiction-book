@@ -86,7 +86,8 @@
 <img src="https://github.com/maxieds/psycho-boy-nonfiction-book/blob/mistress/images/SoundsJustLikeTrump-SandiaRetaliationDOJPenaltyOfPerjuryAndConsentToGiveBackSSMedicareBenefitsEarnedAsAnEmployee.png" height="400" />
 * 
 * GSO NASCAR railroading with famous stock car personalities dressed in airport police uniform and AK-47 semi-automatic assault rifles. Get some write-ups of the circumstances sitting outside the Greenboro (famous city from civil rights) public library that night - decided by the morning to just get on a Greyhound bus into Chicago - story with Michelle Obama and Gwen Ifill detailing how I actually had to get from Gary, Indiana into East Chicago conveys quite a bit about the mentality of these vicious men.  
-
+* PEP after getting stuck with an IV needle about a YouTube comment about Elon Musk's drug habits
+* Trump's son at highlands: How do you get back to the North Pole? Moron.
 
 ## Text and other writing snippets
 
