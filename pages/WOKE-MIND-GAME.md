@@ -42,6 +42,7 @@ Observed usage include the following:
 * Interpretation of "art" (as in genocide being Hitler's art). Cf. actual Argentinian children's artwork in a recognizable UNICEF airport entrance - apparently in reference to rumors that Hitler escaped to South America after World War II and the need for that covert destination.  
 * Ruminations about diatribes in the game that begin with: "*It started with...*"
 * Always complaining, usually about groups like Gays or Jews. Everything has to be offensive to hear or warped, twisted or otherwise 
+* Holes in clothes are a tag
 * TODO: Pedophila plays into the mindset (consider the cult leader has a severe mental illness)
 * TODO: AI bot anecdote about their interpretation of human laughter (also: GitMo)
 
