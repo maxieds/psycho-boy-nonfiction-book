@@ -88,6 +88,38 @@
 * GSO NASCAR railroading with famous stock car personalities dressed in airport police uniform and AK-47 semi-automatic assault rifles. Get some write-ups of the circumstances sitting outside the Greenboro (famous city from civil rights) public library that night - decided by the morning to just get on a Greyhound bus into Chicago - story with Michelle Obama and Gwen Ifill detailing how I actually had to get from Gary, Indiana into East Chicago conveys quite a bit about the mentality of these vicious men.  
 * PEP after getting stuck with an IV needle about a YouTube comment about Elon Musk's drug habits
 * Trump's son at highlands: How do you get back to the North Pole? Moron.
+* AI artifacts: Censorship in scanning Long COVID article at the library + long COVID letter draft (see notes)* See AndroidGo (so-called *government phone*) notes here and in the YouTube videoa (get links): [https://github.com/maxieds/public-file-stashes/tree/main/_project](https://github.com/maxieds/public-file-stashes/tree/main/_project)
+* See darkweb ipad analytics logs, or X/Twitter info/data wars ammo reloads: [https://github.com/maxieds/public-file-stashes/blob/main/ipad-darkweb-analytics-logs/new-year-2024-rhymes-with-hey-lon/README.md](https://github.com/maxieds/public-file-stashes/blob/main/ipad-darkweb-analytics-logs/new-year-2024-rhymes-with-hey-lon/README.md)
+* See [https://github.com/maxieds/public-file-stashes/blob/main/README.md](https://github.com/maxieds/public-file-stashes/blob/main/README.md)
+* See [https://github.com/maxieds/public-file-stashes/blob/main/PROJECTS.md](https://github.com/maxieds/public-file-stashes/blob/main/PROJECTS.md)
+* Supportive gestures - Spotify podcast of Tony Bourdain on Joe Rogan's show - Always entertaining: See [YouTube video clip here](https://youtu.be/YC2zGaypmeU)
+* Apple Notes - Trump's John Gotti moment - Appears after posting the video with the title (end audio): See [YouTube video here](https://youtu.be/xHefTK60Nv4)
+* YouTube videos: darkweb ipad recordings + legal + readmes + UIUC/Casper reference/link
+* YouTube videos: Getting away from Trump? See the [YouTube playlist here](https://www.youtube.com/watch?v=mpFQiSHJqAI&list=PLKuEX1pHu60oYCNGPN-3HwV4vwge80OwP)
+* Crap in my tub in South Shore, Chicago - scraped X in it - clogged it, because Satanists believe their victims should have to bathe in their feces - YouTube videos + mario toilet bombs
+* Howard Sambol and Elon Musk's victimless rape culture (two videos)
+* Chicago apartment living near Anthony/X - January 2024 - Night of quilt square hunt - V: [YouTube video here](https://youtu.be/Rg2Z0GLijLM)
+* Chicago apartment living near Anthony/X - January 2024 - Night of quilt square hunt - VI: [YouTube video here](https://youtu.be/GoPmqyLhWrU)
+* Chicago apartment living near Anthony/X - January 2024 - Night of quilt square hunt - VII: [YouTube video here](https://youtu.be/oHbSI5zJiIw)
+* YouTube videos: High Holidays of 2023-2024 with Flu - Jesus Christ had a pet turkey and other assortia - Numbered XX
+* ChimeraX annotated notes start - Kush 2 needs a loving home if I cannot adopt him - GUCCI pet BEEP!!: [YouTube video here](https://youtu.be/J8ubAkOUH78)
+* ChimeraX annotated notes start - Kush II needs a loving home if I cannot adopt him - GUCCI pet BEEP!: [YouTube video here](https://youtu.be/j6AnrqeWRes)
+* iHEAR (aXis/matriX/Xplore) device (L/R) - Hidden traces - Making friends with a female spider: [YouTube video here](https://youtu.be/L8Xwh6tcB3U) + AndroidGo government phone screen recordings detectings and interacting with the ELKBLEDOM Bluetooth/BLE device (see [here](https://youtu.be/gkli1TaQqg8)). 
+* Sandia NL: DoE + termination image highlights and dead giveaways to who was responsible for the setup and attacking me there + Hostile EHS video link + Kirtland/China and videos of the maps taken in PFL on the darkweb ipad + ID badge: [employee onboarding benefits](https://youtu.be/bWcNSNAH2pQ) (also [see here](https://youtu.be/aCzFSygSmbU)) and [training and orientation booklet](https://youtu.be/ohmgatcPluE) 
+* YouTube videos: Greensboro (USO-to-GSO) into Chicago trip - Video xx
+* Personal artifacts and tokens of recent life experiences: [YouTube video here](https://youtu.be/XdJz0vMRG4w)
+* Start of public stashes of collected documents and notes - ABQ, Yellowstone and forward: [YouTube video here](https://youtu.be/WBq-LJoSNIY)
+* Yellowstone magazines and brochures collected (the one or two they redacted) + YouTube video commentary [here](https://youtu.be/bX04LbOJMsk) and [here](https://youtu.be/Xv7nA4ZaYrQ) 
+* NASCAR in Yellowstone
+* Safari hospitality (with business card image) + coming into ``Rawlins WY`` (no comma)
+* Legal Docs & Records - Summary Packet - Compiled in Denver, COL: [YouTube video here](https://youtu.be/pCqiKJjO5fA)
+* Legal Docs & Records - Highlands Personal Records Folder - From Imprisonment in Denver, COL: [YouTube video here](https://youtu.be/ELUBrhKiGGs)
+* Legal Notes - MDS (2024) - Scared my stuff would be suppressed: [YouTube video here](https://youtu.be/E0OjvgQcIf8)
+* 
+* 
+* 
+
+
 
 ## Text and other writing snippets
 

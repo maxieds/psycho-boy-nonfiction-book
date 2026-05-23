@@ -32,10 +32,11 @@ These are observed to include the following:
 * Fixation at drugging victims through alcohol or prescription medications versus other convenient avenues to acomplish the same goal (cf. Jesus/blood for the former)
 * Preoccupation with fire safety (as in due to Hitler or Regan who codified this into federal US lay circa 1981: accept the surveillance or be burned alive). Similarly, as this pertains to "surveillance testing" during the COVID-19 pandemic. 
 * Harsh backlash to "telling the kid(s) no". Cf. AI dramatization of Trump: "*Tell the kid no? What do you mean tell the kid no! What're you going to do next? Tell me no? Tell the kid no!*"
+* Obsession with disease: Syphilis (Hitler), HIV (Regan/NWO), COVID (Trump/Musk)
 
 ## Coded language, codeword terminology and other bastardized abuses of communication in the English language to formally point out
 
-Observed usage include the following: 
+It's really, really unhealthy to have to interact with psychopaths! When you have been around the far right nutjobs surrounding Donald Trump and Elon Musk, you get used to spotting and picking out hidden meanings within common expressions and/or use cases of the English language. You will almost always find that anything they say reflects coded language that is much different in meaning than what it should otherwise appear on the surface to outsiders not familiar with the lingo or far right ideologies at play. Observed usage include the following: 
 * "*That's a hint*". Is this a reference to Archie Unix passwords or UUIDs of illicit video feeds on underdocumented right-wing media network distributions?
 * Calling most gamers "kids" (as in children of the Anglo-Christian devil in Western religion).
 * Interpretation of "music" (as in Frey effect radio). Cf. "sirens" from the *Oddyssey* or warped references to *Jesus Christ on Broadway*?
@@ -45,6 +46,10 @@ Observed usage include the following:
 * Holes in clothes are a tag
 * TODO: Pedophila plays into the mindset (consider the cult leader has a severe mental illness)
 * TODO: AI bot anecdote about their interpretation of human laughter (also: GitMo)
+* *Jane Fonda was a liberal*: What does McDonald mean (think about it)?
+* Donald Trump refering to his son in law, Jared Kushner, as a Jew: what does he really mean when he says that?
+* Pat Buchannan (apparent precursor to Trump in America): *radical feminism* means what precisely in context? By all means, please refer to [this YouTube video snippet](https://youtu.be/wtO0_KceKtE). 
+* NPR Politics podcast audio retweet - Mike Johnson protests and annoying "I can't hear you" rhetoric: See [YouTube video here]( https://youtu.be/xyS2atCa2Hc)
 
 ## Open questions to document
 
@@ -59,6 +64,7 @@ The beauty of getting to write the accounts in this non-fiction book is really t
 <img src="https://github.com/maxieds/psycho-boy-nonfiction-book/tree/main/images/HangoutsChat-DemonicPoetryForTheLadiesByAModernManOfTheNeoNaziRenaissanceInAmerica-102985306-f80c9480-44dc-11eb-90ce-a8a3efe4ad3d.png" height="300" "alt="Whew, psychopath! Which one of Elon Musk-s son-s I don-t remember meeting is this one?" />
 * Ties to the Antarctic (or South American) Roswell crash landing - yes, it's real, it's not small and you can take (or be led into) a surreal roadtrip that drives over this reference to cult mythology.
 * How do the central objections to big government within Satanism fit in with the political ideology of the MAGA-Musk era Reupublican party under Trump? 
+* The New World Order (neo-nazism) coming out of Texas in the 1980's. Get pot package image (TODO). Sound bites from senator Chuck Schumer (JEW-dicial committee and reading into that the senator from Texas who said is *dead*) and Barack Obama's fierce opposition to running for a third term in office. 
 
 ## TODO - Working topics list of topics and open questions to document
 

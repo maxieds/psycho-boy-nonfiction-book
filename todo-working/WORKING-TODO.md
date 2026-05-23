@@ -16,6 +16,13 @@
 * Android phone from Casper -- developer options + Kushy frequency screenshots in the Tesla car
 * Lacey external hard drive with easy-to-crack (I made sure setting it up, but still forgotten) Mac TimeMachine setup -- records from the Fall of 2022 including Jan6 organization notes by the Fox News Business app with signer keys in Arabic that these paranoid morons removed while the rest of the binary data was allowed to remain 
 * AndroidGo BLU government phone device
+* Devices stolen at Highlands: MacBook with Global Protect VPN onto their darkweb connection, Moto G7 Power phone with classified data type censorship (also tracking information by Elon Musk and company: cite images of this) giving more accurate timelines and involvement of Mike Pence from ABQ (also Jan6 Github post link that night), Sandia YubiKey login device (also images of the default configuration printouts) 
+* 
+* 
+* 
+* 
+* 
+
 
 ## Links
 
