@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <options customize='never'/>
+    <options hostArchitectures='i386,ppc'/>
+    <options rootVolumeOnly='true'/>
+    <platforms>
+        <client arch='ppc,intel'/>
+    </platforms>
+    <title>SU_TITLE</title>
+    <!-- manual outline -->
+    <choices-outline>
+        <line choice='manual_Samsung_SPL2Drivers'/>
+    </choices-outline>
+    <!-- end manual outline -->
+    <!-- SU outline -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='auto'/>
+    </choices-outline>
+    <!-- end SU outline -->
+    <!-- SU choice -->
+    <choice id='auto' title='SU_TITLE' versStr='SU_VERS'/>
+    <choice id='auto' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='auto' secondaryDescription='SU_DESC2'/>
+    <choice id='auto' visible="printerConnected(&quot;all&quot;) &amp;&amp; driverNeedsUpdating(&quot;all&quot;)"/>
+    <!-- end SU choice -->
+    <!-- SU invis outline -->
+    <choices-outline ui='invisible'>
+        <line choice='invis_Samsung_SPL2Drivers'/>
+    </choices-outline>
+    <!-- end SU invis outline -->
+    <!-- SU invis Samsung_SPL2Drivers choice -->
+    <choice id='invis_Samsung_SPL2Drivers' selected="!isInstalled() &amp;&amp; choices.auto.selected &amp;&amp; printerConnected(&quot;Samsung_SPL2Drivers&quot;) &amp;&amp; driverNeedsUpdating(&quot;Samsung_SPL2Drivers&quot;)"/>
+    <choice id='invis_Samsung_SPL2Drivers' suDisabledGroupID='Samsung_SPL2Drivers'>
+        <pkg-ref id='com.apple.pkg.Samsung_SPL2Drivers' auth='Root'>Samsung_SPL2Drivers.pkg</pkg-ref>
+    </choice>
+    <!-- end SU invis Samsung_SPL2Drivers choice -->
+    <!-- SU manual Samsung_SPL2Drivers choice -->
+    <choice id='manual_Samsung_SPL2Drivers' selected="!isInstalled() &amp;&amp; printerConnected(&quot;Samsung_SPL2Drivers&quot;) &amp;&amp; driverNeedsUpdating(&quot;Samsung_SPL2Drivers&quot;)"/>
+    <choice id='manual_Samsung_SPL2Drivers' suDisabledGroupID='Samsung_SPL2Drivers'>
+        <pkg-ref id='com.apple.pkg.Samsung_SPL2Drivers.manual' auth='Root'>Samsung_SPL2Drivers.pkg</pkg-ref>
+    </choice>
+    <!-- end SU manual Samsung_SPL2Drivers choice -->
+    <volume-check script='VolumeCheck()'/>
+    <script>
+        <!-- printerIDs -->
+        
+		// ID Strings: printerIDs
+		<!-- end printerIDs -->
+        
+            
+        function VolumeCheck()
+        {
+            if (system.env.OS_INSTALL == 1) {
+                return true;
+            }
+			
+			if(system.files.fileExistsAtPath(my.target.mountpoint + "/var/db/.AppleTier3Language")) {
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_LANG');
+				return false;
+			}
+		  
+			if(-1 != system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.0')) {
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_VOLUME');
+				return false;
+			}
+           
+		   	if(! isNotDowngrade()) {
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_NEWER');
+				return false;
+			}
+		    
+			return true;
+        }
+				
+		function isInstalled()
+		{
+		    var action = my.choice.packageUpgradeAction;
+			if ((action == 'clean') || (action == 'upgrade')) {
+				return false;
+			}
+			return true;
+		}
+		
+		function isNotDowngrade()
+		{
+		    var action = my.choice.packageUpgradeAction;
+			if ((action == 'mixed') || (action == 'downgrade')) {
+				return false;
+			}
+			return true;
+		}
+		
+        <!-- printerConnected -->
+        
+		function printerConnected()
+		{
+			var argv = printerConnected.arguments;
+			
+			var possibleIDs = [];
+			
+			if (argv.length == 0 || argv[0] == 'all') { possibleIDs = ["MANUFACTURER:Samsung;MODEL:CLP-300","MANUFACTURER:Samsung;MODEL:Samsung CLP-300","MANUFACTURER:Samsung;MODEL:ML-1630 Series","MANUFACTURER:Samsung;MODEL:Samsung ML-1630 Series","MANUFACTURER:Samsung;MODEL:SCX-4500 Series","MANUFACTURER:Samsung;MODEL:Samsung SCX-4500 Series",]; }
+			else if (argv[0] == 'Samsung_SPL2Drivers') { possibleIDs = ["MANUFACTURER:Samsung;MODEL:CLP-300","MANUFACTURER:Samsung;MODEL:Samsung CLP-300","MANUFACTURER:Samsung;MODEL:ML-1630 Series","MANUFACTURER:Samsung;MODEL:Samsung ML-1630 Series","MANUFACTURER:Samsung;MODEL:SCX-4500 Series","MANUFACTURER:Samsung;MODEL:Samsung SCX-4500 Series"]; }
+            else { possibleIDs = ["MANUFACTURER:Samsung;MODEL:CLP-300","MANUFACTURER:Samsung;MODEL:Samsung CLP-300","MANUFACTURER:Samsung;MODEL:ML-1630 Series","MANUFACTURER:Samsung;MODEL:Samsung ML-1630 Series","MANUFACTURER:Samsung;MODEL:SCX-4500 Series","MANUFACTURER:Samsung;MODEL:Samsung SCX-4500 Series",]; }
+            
+			// Debug for possible distribution merge error
+			if (! possibleIDs.length) {
+				return false;
+			}
+
+			var printerPlist = system.files.plistAtPath("/Library/Printers/InstalledPrinters.plist");
+			if (printerPlist) {
+				var installedIDs = printerPlist.InstalledPrinters;
+				var matchingIDs = [];
+				if (installedIDs) {	
+					for (var i = 0; i &lt; installedIDs.length; i = i + 1) {
+						for (var j = 0; j &lt; possibleIDs.length; j = j + 1) {
+							if (installedIDs[i].toLowerCase() == possibleIDs[j].toLowerCase()) {
+								matchingIDs.push(installedIDs[i]);
+							}
+						}
+					}
+					if (matchingIDs.length) {
+						for (var i = 0; i &lt; matchingIDs.length; i = i + 1) {
+							system.log("Connected printer: " + matchingIDs[i]);
+						}
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+        <!-- end printerConnected -->
+        <!-- driverNeedsUpdating -->
+        
+		function driverNeedsUpdating()
+		{            		
+            var argv = driverNeedsUpdating.arguments;
+
+			var bundlePaths = [];
+			var bundleVersions = [];
+
+			if (argv.length == 0 || argv[0] == 'all') { bundlePaths = ["/Library/Printers/Samsung/ML-1630/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Printer.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Printer.bundle/Contents/Info.plist",]; }
+			else if (argv[0] == 'Samsung_SPL2Drivers') { bundlePaths = ["/Library/Printers/Samsung/ML-1630/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Printer.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Printer.bundle/Contents/Info.plist",]; }
+            else { bundlePaths = ["/Library/Printers/Samsung/ML-1630/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Graphic.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Output.bundle/Contents/Info.plist","/Library/Printers/Samsung/ML-1630/PDEs/Printer.bundle/Contents/Info.plist","/Library/Printers/Samsung/SCX-4500/PDEs/Printer.bundle/Contents/Info.plist",]; }
+
+			if (argv.length == 0 || argv[0] == 'all') { bundleVersions = ["1.04","1.04","1.03","1.03","1.03","1.03",]; }
+			else if (argv[0] == 'Samsung_SPL2Drivers') { bundleVersions = ["1.04","1.04","1.03","1.03","1.03","1.03",]; }
+            else { bundleVersions = ["1.04","1.04","1.03","1.03","1.03","1.03",]; }
+            
+			// Debug for possible distribution merge error
+			if (bundlePaths.length == 0 || bundleVersions.length == 0) {
+				return false;
+			}
+
+			for (var i = 0; i &lt; bundlePaths.length; i = i + 1) {
+				var plist = system.files.plistAtPath(bundlePaths[i]);
+				if (plist) {
+					var version = plist.CFBundleShortVersionString;
+					if (!version) {
+						// no CFBSVS
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 1)");
+						return true;
+					}
+					if (bundleVersions[i] &amp;&amp; (system.compareVersions(version, bundleVersions[i]) == -1)) {
+						// bundle versions are older
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 2)");
+						return true;
+					}
+				}
+				else {
+					// no plist - new files to install
+					system.log("Printing drivers update available for " + argv[0] + ". (return value 3)");
+					return true;
+				}
+			}
+
+			system.log("Printer " + argv[0] + " does not require an update.");			
+			return false;
+		}
+        <!-- end driverNeedsUpdating -->
+    </script>
+    <readme file='SUDescription.html'/>
+    <license file="License.rtf" sla="EA0390"/>
+    <localization>
+        <strings language="en"><![CDATA["SU_TITLE" = "Samsung Printer Drivers Update";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop Systems";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="824.41">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande; color: #071000}
+  </style>
+</head>
+<body>
+<p class="p1">The Samsung Printer Driver Update includes the latest drivers for printers you have used on your system.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

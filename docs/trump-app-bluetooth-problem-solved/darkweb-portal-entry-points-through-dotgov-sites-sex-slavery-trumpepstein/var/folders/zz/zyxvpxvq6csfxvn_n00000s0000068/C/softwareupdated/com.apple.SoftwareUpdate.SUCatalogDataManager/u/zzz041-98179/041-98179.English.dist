@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function compareBuildVersions(lhs, rhs) {
+	var lhsMatch = lhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	var rhsMatch = rhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	return system.compareVersions(lhsMatch.slice(1).join(","), rhsMatch.slice(1).join(","));
+}
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.6') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.7') >= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.0') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_2', '10.6.0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.8') > 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_3', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (compareBuildVersions(my.target.systemVersion.ProductBuildVersion, '10A432') &lt; 0) {
+		my.result.message = system.localizedString('ERROR_4');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (compareBuildVersions(my.target.systemVersion.ProductBuildVersion, '10K1999') > 0) {
+		my.result.message = system.localizedString('ERROR_4');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_4');
+	if (!FileCheck0(my.target.mountpoint) || !LogicalOr1(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function FileCheck0(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/System/Library/CoreServices/ServerVersion.plist') == 0) {
+		return true;
+	}
+	return false;
+}
+function LogicalOr1(prefix) {
+	if (Script2(prefix) || Script3(prefix)) {
+		return true;
+	}
+	return false;
+}
+function Script2(prefix) {
+	if (!(my.target.mountpoint == '/')) {
+		return false;
+	}
+	return true;
+}
+function Script3(prefix) {
+	if (!ProductVersionCheck('/')) {
+		return false;
+	}
+	return true;
+}
+function ProductVersionCheck(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.6.1') &lt;= 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck4(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.6.8') >= 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck5(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.6.7') >= 0) {
+		return false;
+	}
+	return true;
+}
+function LogicalOr6(prefix) {
+	if (FileCheck7(prefix) || Script8(prefix)) {
+		return true;
+	}
+	return false;
+}
+function FileCheck7(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Applications/Utilities/QuickTime Player 7.app') == 1) {
+		return true;
+	}
+	return false;
+}
+function Script8(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.QuickTimePlayer7')) {
+		return false;
+	}
+	return true;
+}
+function LogicalOr9(prefix) {
+	if (FileCheck10(prefix) || Script11(prefix)) {
+		return true;
+	}
+	return false;
+}
+function FileCheck10(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/usr/bin/quartz-wm') == 1) {
+		return true;
+	}
+	return false;
+}
+function Script11(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.X11User')) {
+		return false;
+	}
+	return true;
+}
+function LogicalOr12(prefix) {
+	if (FileCheck13(prefix) || Script14(prefix)) {
+		return true;
+	}
+	return false;
+}
+function FileCheck13(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/usr/libexec/oah/translate') == 1) {
+		return true;
+	}
+	return false;
+}
+function Script14(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.Rosetta')) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacOSXUpdCombo10.6.8" visible="PlistCheck4('/') &amp;&amp; PlistCheck5('/')">
+        <pkg-ref id="comboPart0" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part0" onConclusion="RequireRestart">MacOSXUpdCombo10.6.8.Part0.pkg</pkg-ref>
+        <pkg-ref id="comboPart1" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part1">MacOSXUpdCombo10.6.8.Part1.pkg</pkg-ref>
+        <pkg-ref id="comboPart2" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part2">MacOSXUpdCombo10.6.8.Part2.pkg</pkg-ref>
+        <pkg-ref id="comboPart3" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part3">MacOSXUpdCombo10.6.8.Part3.pkg</pkg-ref>
+        <pkg-ref id="comboPart4" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part4">MacOSXUpdCombo10.6.8.Part4.pkg</pkg-ref>
+        <pkg-ref id="comboPart5" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part5">MacOSXUpdCombo10.6.8.Part5.pkg</pkg-ref>
+        <pkg-ref id="comboPart6" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part6">MacOSXUpdCombo10.6.8.Part6.pkg</pkg-ref>
+        <pkg-ref id="comboPart7" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part7">MacOSXUpdCombo10.6.8.Part7.pkg</pkg-ref>
+        <pkg-ref id="comboPart8" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part8">MacOSXUpdCombo10.6.8.Part8.pkg</pkg-ref>
+        <pkg-ref id="comboPart9" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part9">MacOSXUpdCombo10.6.8.Part9.pkg</pkg-ref>
+        <pkg-ref id="comboPart10" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part10">MacOSXUpdCombo10.6.8.Part10.pkg</pkg-ref>
+        <pkg-ref id="comboPart11" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part11">MacOSXUpdCombo10.6.8.Part11.pkg</pkg-ref>
+        <pkg-ref id="comboPart12" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.6.8.combo.part12">MacOSXUpdCombo10.6.8.Part12.pkg</pkg-ref>
+        <pkg-ref id="SUBaseSystemCombo" auth="Root" packageIdentifier="com.apple.pkg.update.subasesystem.10.6.8.combo">SUBaseSystemCombo10.6.8.pkg</pkg-ref>
+        <pkg-ref id="quicktimeplayer7Combo" auth="Root" packageIdentifier="com.apple.pkg.update.quicktimeplayer7.10.6.8.combo" active="LogicalOr6('/')">QuickTimePlayer7ForCombo10.6.8.pkg</pkg-ref>
+        <pkg-ref id="X11Combo" auth="Root" packageIdentifier="com.apple.pkg.update.X11.10.6.8.combo" active="LogicalOr9('/')">X11ForCombo10.6.8.pkg</pkg-ref>
+        <pkg-ref id="rosettaCombo10.6.8" auth="Root" packageIdentifier="com.apple.pkg.update.rosetta.10.6.8.combo" active="LogicalOr12('/')">RosettaForCombo10.6.8.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Mac OS X Update Combined";
+"SU_VERS" = "10.6.8 v1.1";
+"SU_SERVERCOMMENT" = "For Desktop Systems";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	body {font: 11.0px Lucida Grande;}
+    p {margin: 0.0px 0.0px 0.0px 0.0px;}
+  </style>
+</head>
+<body>
+<p>The 10.6.8 update is recommended for all users running Mac OS X Snow Leopard and includes general operating system fixes that enhance the stability, compatibility, and security of your Mac, including fixes that:</p>
+<p>
+<ul>
+<li>Enhance the Mac App Store to get your Mac ready to upgrade to Mac OS X Lion</li>
+<li>Resolve an issue that may cause Preview to unexpectedly quit</li>
+<li>Improve support for IPv6</li>
+<li>Improve VPN reliability</li>
+<li>Identify and remove known variants of Mac Defender</li>
+</ul>
+</p>
+<p>For detailed information on this update, please visit this website: <a href="http://support.apple.com/kb/HT4561">http://support.apple.com/kb/HT4561</a>.</p>
+<p>For information on the security content of this update, please visit: <a href="http://support.apple.com/kb/HT1222">http://support.apple.com/kb/HT1222</a>.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='comboPart0' installKBytes='23851' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart1' installKBytes='74660' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart10' installKBytes='116091' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart11' installKBytes='323802' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart12' installKBytes='234204' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart2' installKBytes='32917' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart3' installKBytes='143490' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart4' installKBytes='90447' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart5' installKBytes='154230' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart6' installKBytes='61558' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart7' installKBytes='57424' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart8' installKBytes='13568' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='comboPart9' installKBytes='13386' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='quicktimeplayer7Combo' installKBytes='3199' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='rosettaCombo10.6.8' installKBytes='1433' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='SUBaseSystemCombo' installKBytes='634471' version='1.1.0.0.1.1249367152'/>
+	<pkg-ref id='X11Combo' installKBytes='43158' version='1.1.0.0.1.1249367152'/>
+</installer-gui-script>

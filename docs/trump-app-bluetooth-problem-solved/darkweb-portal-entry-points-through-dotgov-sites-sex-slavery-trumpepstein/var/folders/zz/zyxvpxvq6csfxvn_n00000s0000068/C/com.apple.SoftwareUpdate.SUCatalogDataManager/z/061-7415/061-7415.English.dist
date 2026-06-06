@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <script>
+	var updateName			= "DCRCU 2.7"
+	var	RawCameraPath		= "/System/Library/CoreServices/RawCamera.bundle";
+	var RawCameraMinVersion	= "0";
+	var RawCameraMaxVersion	= "2.3";
+</script>
+    <!-- Installer UI-ey stuff -->
+    <title>SU_TITLE</title>
+    <welcome file="SUDescription.html"/>
+    <license auto='false' file="License.rtf" sla="EA0325"/>
+    <options customize="never" rootVolumeOnly="true" hostArchitectures='ppc,i386'/>
+    <platforms>
+        <client arch="ppc,i386"/>
+        <server arch="ppc,i386"/>
+    </platforms>
+    <!-- Manual Install package layout -->
+    <choices-outline>
+        <line choice='manualSnow'/>
+        <line choice='manualLeo'/>
+    </choices-outline>
+    <choice id='manualSnow' title='SU_TITLE' selected='isSnowLeopard()'>
+        <pkg-ref id='manualSnow' auth='Root'>.</pkg-ref>
+    </choice>
+    <choice id='manualLeo' title='SU_TITLE' selected='!isSnowLeopard()'>
+        <pkg-ref id='manualLeo' auth='Root' onConclusion="RequireRestart">.</pkg-ref>
+    </choice>
+    <!-- Software Update package layout -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' visible='needsUpdate(RawCameraPath,RawCameraMinVersion,RawCameraMaxVersion)' start_selected='true' suDisabledGroupID='RAWCamera27' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html' secondaryDescription='SU_SERVERCOMMENT'>
+        <pkg-ref id='suSnow' active="isSnowLeopard()" auth='Root'>RAWCameraUpdate.pkg</pkg-ref>
+        <pkg-ref id='suLeo' active="!isSnowLeopard()" onConclusion="RequireRestart" auth='Root'>RAWCameraUpdate.pkg</pkg-ref>
+    </choice>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck()
+{
+	return (rootVolumeOSGood() &amp;&amp;
+			hasApertureOriPhoto() &amp;&amp;
+			canHasUpdateWithErrors(RawCameraPath, RawCameraMinVersion, RawCameraMaxVersion, '', 'Downgrade')			
+			);
+}
+
+
+function rootVolumeOSGood()
+{
+	// Error if system below 10.5.0
+	if (-1 == system.compareVersions(system.version.ProductVersion, '10.5'))
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_OS_old');
+		my.result.message = system.localizedStringWithFormat('ERROR_OS_old');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	// Error if system below 10.5.8
+	if (-1 == system.compareVersions(system.version.ProductVersion, '10.5.8'))
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_OS_Leopard');
+		my.result.message = system.localizedStringWithFormat('ERROR_OS_Leopard');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	// Error if system between 10.6.0 and 10.6.2
+	if ((-1 != system.compareVersions(system.version.ProductVersion, '10.6')) &amp;&amp;
+		(-1 == system.compareVersions(system.version.ProductVersion, '10.6.2')))
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_OS_Snow');
+		my.result.message = system.localizedStringWithFormat('ERROR_OS_Snow');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+	// System has 10.5.8 or newer, or 10.6.2 or newer -- PASS
+	return true;
+}
+
+function isSnowLeopard()
+{
+	debuglog ("isSnowLeopard will return: " + (-1 != system.compareVersions(system.version.ProductVersion, '10.6')));
+	return (-1 != system.compareVersions(system.version.ProductVersion, '10.6'));
+}
+
+function hasApertureOriPhoto()
+{
+	// Must have Aperture 2.0 or newer, or iPhoto 7.1.2 or newer
+	var path = "/Applications/Aperture.app";
+	var bundle = system.files.bundleAtPath(path);
+	var version = BundleGetCompositeVersion5(bundle);
+		
+	if (version &amp;&amp;(system.compareVersions(version, "2.0.0.0.0") != -1))
+	{
+		debuglog("Aperture.app is 2.0 or newer");
+		return true;
+	}
+		
+	path = "/Applications/iPhoto.app";
+	bundle = system.files.bundleAtPath(path);
+	version = BundleGetCompositeVersion5(bundle);
+		
+	if (version &amp;&amp;(system.compareVersions(version, "7.1.2.0.0") != -1)) 
+	{
+		debuglog("iPhoto.app is 7.1.2 or newer");
+		return true;
+	}
+
+	// nope
+	debuglog("hasApertureOriPhoto fails");
+	my.result.title = system.localizedStringWithFormat('TITLE_MissingApps');
+	my.result.message = system.localizedStringWithFormat('ERROR_MissingApps');
+	my.result.type = 'Fatal';
+	return false;
+}
+
+function canHasUpdateWithErrors(bundlePath, minVersionString, maxVersionString, minErrString, maxErrString)
+{
+	var bundleVersion = PathGetShortVersion(bundlePath);
+	debuglog("canHasUpdateWithErrors is looking for " + bundlePath + " and getting " + bundleVersion);
+	
+	if (bundleVersion==null)
+	{
+		if ((minVersionString == "") || (minVersionString == "0")) return true;
+		else 
+		{
+			debuglog("canHasUpdateWithErrors fails because there's no target bundle, and it is required.");
+			my.result.title = system.localizedStringWithFormat('TITLE_' + minErrString);
+			my.result.message = system.localizedStringWithFormat('ERROR_' + minErrString);
+			my.result.type = 'Fatal';
+			return false;
+		}
+	}
+	
+	if (system.compareVersions(bundleVersion,minVersionString) == -1)
+	{
+		debuglog("canHasUpdateWithErrors fails because bundle is too old");
+		my.result.title = system.localizedStringWithFormat('TITLE_' + minErrString);
+		my.result.message = system.localizedStringWithFormat('ERROR_' + minErrString);
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if (system.compareVersions(bundleVersion,maxVersionString) == 1)
+	{
+		debuglog("canHasUpdateWithErrors fails because bundle is too new");
+		my.result.title = system.localizedStringWithFormat('TITLE_' + maxErrString);
+		my.result.message = system.localizedStringWithFormat('ERROR_' + maxErrString);
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	return true;
+}
+
+function canHasUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;= 0));
+}
+
+function needsUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;0));
+}
+</script>
+    <!-- Common include -->
+    <script>
+	function PathGetShortVersion(path)
+	{
+		var bundle = system.files.bundleAtPath(path);
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		return shortVers;
+	}
+
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length >tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (;components.length&lt;tupleCount;)
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0;i&lt;propObj.length;i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+	
+	function debuglog(message)
+	{
+		if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+	}
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE"			= "Digital Camera Raw Compatibility Update";
+"SU_VERS"			= "2.7";
+"SU_SERVERCOMMENT"	= "For Desktop and Server systems.";
+
+"SU_DESCRIPTION"='<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8"></meta></HEAD>
+<BODY><FONT FACE="Lucida Grande">
+<P>
+This update extends RAW image compatibility for Aperture 2, iPhoto ’08 and iPhoto ’09 
+for the following cameras:
+<ul>
+	<li>Canon EOS-1D Mark IV</li>
+	<li>Canon EOS 7D</li>
+	<li>Canon PowerShot G11</li>
+	<li>Nikon D3S</li>
+	<li>Nikon D300S</li>
+	<li>Nikon D3000</li>
+</ul>
+</P>
+</FONT></BODY></HTML>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

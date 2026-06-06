@@ -1,0 +1,640 @@
+private rule OSACompiled
+{
+    meta:
+        description = "MACOS.OSASCRIPT.OSACOMPILED"
+        uuid = "ED28BE44-6F07-4847-ACFC-A13E25949235"
+        interpreter = "osascript"
+
+    strings:
+        $header_applescript = "FasdUAS"
+        $header_javascript = "JsOsaDAS"
+        $trailer = { FA DE DE AD }
+    condition:
+        ($header_applescript at 0 or $header_javascript at 0) and $trailer at (filesize - 4)
+}
+
+rule XProtect_MACOS_OSASCRIPT_COTABR {
+    meta:
+        description = "MACOS.OSASCRIPT.COTABR"
+        uuid = "FAA3D768-953A-4B4F-9EAA-7E967BD38196"
+        interpreter = "osascript"
+        match_type = 4
+
+    strings:
+        $a0 = "Chromium" nocase
+        $a1 = "Microsoft Edge" nocase
+        $a2 = "Chrome" nocase
+        $a3 = "Opera" nocase
+        $a4 = "Brave" nocase
+        $a5 = "Chrome Beta" nocase
+        $a6 = "Chrome Canary" nocase
+        $a7 = "FireFox" nocase
+        $a8 = "WaterFox" nocase
+        $a9 = "Vivaldi" nocase
+        $a10 = "Cookies.binarycookies" nocase
+        $a11 = "Safari" nocase
+        $a12 = "Brave-Browser" nocase
+        $a13 = "Chrome Dev" nocase
+        $a14 = "Edge" nocase
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+
+rule XProtect_MACOS_OSASCRIPT_COTAAP {
+    meta:
+        description = "MACOS.OSASCRIPT.COTAAP"
+        uuid = "B9263A71-5EFE-4731-9C3B-2B989B7C72CD"
+        interpreter = "osascript"
+        match_type = 4
+
+    strings:
+        $a0 = "Telegram Data" nocase
+        $a1 = "Telegram Desktop" nocase
+        $a2 = "OpenVPN Connect" nocase
+        $a3 = "OpenVPN Connect/profiles/" nocase
+        $a4 = "Telegram Desktop/tdata/" nocase
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUST {
+    meta:
+        description = "MACOS.OSASCRIPT.DUST"
+        uuid = "0FF0E657-8AEC-4E05-94CA-FE485285843C"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "set message to (quoted form of message)" wide ascii
+        $a2 = "curl -fksL -m 6" wide ascii
+        $a3 = "set moduleName to" wide ascii
+        $a4 = "set utmSource to" wide ascii
+        $a5 = "set userName to do shell script" wide ascii
+        $a6 = "global domain" wide ascii
+        $a7 = "ioreg -k IOPlatformSerialNumber | grep IOPlatformSerialNumber | cut -w -f5 | xargs" wide ascii
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUAP {
+    meta:
+        description = "MACOS.OSASCRIPT.DUAP"
+        uuid = "6EF56AD6-B1B7-4C7A-AB07-6AFA01303173"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = { 74 00 6d 00 70 00 3a 00 2e 00 ?? 0a }
+        $a2 = "sysodsct" wide ascii
+
+    condition:
+        OSACompiled and all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUENHA {
+    meta:
+        description = "MACOS.OSASCRIPT.DUENHA"
+        uuid = "BD3F3491-8A81-43C4-84F7-23CB3DFC4931"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = { FF F3 00 ?? 03 FF F2 00 3D 03 FF F1 00 24 03 FF F0 00 28 03 FF EF 00 65 03 FF EE 00 63 03 FF ED 00 68 03 FF EC 00 6F 03 FF EB 00 20 03 FF EA 00 ?? 03 FF E9 00 7C 03 }
+        $a2 = { FF E0 00 62 03 FF DF 00 61 03 FF DE 00 73 03 FF DD 00 36 03 FF DC 00 34 03 FF DB }
+        $a3 = "sysodsct" wide ascii
+        $a4 = "sysoexec" wide ascii
+
+    condition:
+        OSACompiled and all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_TIDOHA {
+    meta:
+        description = "MACOS.OSASCRIPT.TIDOHA"
+        uuid = "9DC4566B-ED84-479D-BF95-705E74BB92B6"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36" wide ascii
+        $a2 = "-F \"buildtxd=$token\"" wide ascii
+        $a3 = "file=@/tmp/osalogging.zip" wide ascii
+        $a4 = "curl -k -X POST \\" wide ascii
+
+    condition:
+        2 of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_TIPEAP {
+    meta:
+        description = "MACOS.OSASCRIPT.TIPEAP"
+        uuid = "44949A48-E76C-4D0E-9B7F-307C74E6C42C"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "do shell script \"cp -R \" & quoted form of TREZORPATH" nocase wide ascii
+        $a2 = "set TREZORNAME to \"Trezor Suite.app\"" nocase wide ascii
+        $a3 = "set TREZORAPPFOLDER to \"/Applications\"" nocase wide ascii
+        $a4 = "do shell script \"killall -9 'Trezor Suite'\"" nocase wide ascii
+        $b1 = "do shell script /\"cp -rf /\" & quoted form of LEDGERDEST" nocase wide ascii
+        $b2 = "set LEDGERAPPFOLDER to \"/Applications\"" nocase wide ascii
+        $b3 = "set LEDGERTMPDEST to \"/tmp/Ledger Wallet.app\"" nocase wide ascii
+        $b4 = "set ledger_installed to true" nocase wide ascii
+
+    condition:
+        all of ( $a* ) or all of ( $b* )
+}
+
+rule XProtect_MACOS_OSASCRIPT_TIPA {
+    meta:
+        description = "MACOS.OSASCRIPT.TIPA"
+        uuid = "7B818808-3FEB-4E4F-A2C2-5498AF7A5127"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "\"MacSync Stealer\\n\\n\"" nocase wide ascii
+        $a2 = "Build Tag:" nocase wide ascii
+        $a3 = "Version:" nocase wide ascii
+        $a4 = "IP:" nocase wide ascii
+        $a5 = "Username: \" & username, writemind & \"info\"" nocase wide ascii
+        $a6 = "\"\\nPassword: \" & password_entered & \"\\n\\n\", writemind & \"info\"" nocase wide ascii
+        $a7 = "system_profiler SPSoftwareDataType SPHardwareDataType SPDisplaysDataType" nocase wide ascii
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_TABUPA {
+    meta:
+        description = "MACOS.OSASCRIPT.TABUPA"
+        uuid = "8D446954-83CB-417B-AB12-476A25C01277"
+        interpreter = "osascript"
+
+    strings:
+        $a0 = "SHub macOS Stealer" ascii nocase wide
+        $a1 = "Build" ascii nocase wide
+        $a2 = "Username" ascii nocase wide
+        $a3 = "Password" ascii nocase wide
+        $a4 = "IP Address" ascii nocase wide
+        $a5 = "External IP" ascii nocase wide
+        $a6 = "Is CIS" ascii nocase wide
+        $a7 = "System Info" nocase wide ascii
+        $a8 = "Hostname" nocase wide ascii
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_REBUPA {
+    meta:
+        description = "MACOS.OSASCRIPT.REBUPA"
+        uuid = "1F61D8DF-EF94-4EBC-84F7-98FC2479B360"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Phexia macOS Stealer" ascii nocase wide
+        $a2 = "Build" ascii nocase wide
+        $a3 = "Username" ascii nocase wide
+        $a4 = "Password" ascii nocase wide
+        $a5 = "IP Address" ascii nocase wide
+        $a6 = "phexiapath" ascii nocase wide
+        $a7 = "UserInformation" ascii nocase wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_EXPA {
+    meta:
+        description = "MACOS.OSASCRIPT.EXPA"
+        uuid = "A881B50B-0532-4AAE-9C73-234745ACF78B"
+        interpreter = "osascript"
+
+    strings:
+        $a0 = "BuildID" nocase wide ascii
+        $a1 = "installbot" nocase wide ascii
+        $a2 = "writemind" nocase wide ascii
+        $a3 = "checkvalid" nocase wide ascii
+        $a4 = "filegrabber" nocase wide ascii
+        $a5 = "login" nocase wide ascii
+        $a6 = "gate" nocase wide ascii
+        $a7 = "/tmp/out.zip" wide ascii
+        $a8 = "ditto -c -k --sequesterRsrc" wide ascii
+        $a9 = "/Library/LaunchDaemons/" wide ascii
+        $a10 = "boturl" nocase wide ascii
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_SYPR {
+    meta:
+        description = "MACOS.OSASCRIPT.SYPR"
+        uuid = "B6700568-B9C5-40C3-B01E-03A2E1BC7333"
+        interpreter = "osascript"
+
+    strings:
+        $b1 = "giving up after 150 with title" nocase wide ascii
+        $b2 = "CloudFlare Security Verification Required" nocase wide ascii
+        $b3 = "Required Application Helper" nocase wide ascii
+        $b4 = "Application wants to install helper" nocase wide ascii
+        $b5 = "macOS needs to access System Settings" nocase wide ascii
+        $b6 = "You need to configure system settings before running this application" nocase wide ascii
+        $b7 = "with title \"System Preferences" nocase wide ascii
+        $b8 = "Your Mac does not support this application" nocase wide ascii
+        $b9 = "Try reinstalling or downloading the version for your system" nocase wide ascii
+        $b10 = "You need to configure system settings before running this application" nocase wide ascii
+        $b11 = "System Preferences wants to make changes" ascii wide nocase
+        $b12 = "You should update the settings to launch the application" ascii wide nocase
+        $b13 = "The current version of the app is not fully compatible with your version of MacOS" nocase wide ascii
+        $a1 = "Please enter password for continue" nocase wide ascii
+        $a2 = "Please enter the device password to continue" nocase wide ascii
+        $a3 = "Please enter your password" nocase wide ascii
+        $a4 = "Please enter device password to continue" ascii wide nocase
+        $a5 = "Type your password to do this" ascii wide nocase
+        $a6 = "For the app to work correctly please, enter password of your system" ascii wide nocase
+        $a7 = "please, enter password of your system" ascii wide nocase
+        $c1 = "with hidden answer" nocase wide ascii
+
+    condition:
+        1 of ( $a* ) and 2 of ( $b* ) and all of ( $c* ) and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_ENAN {
+    meta:
+        description = "MACOS.OSASCRIPT.ENAN"
+        uuid = "845BA76C-0BF2-4441-B32A-FE0747AC4AAC"
+        interpreter = "osascript"
+
+    strings:
+        $a0 = "system_profiler SPSoftwareDataType SPHardwareDataType SPDisplaysDataType" wide ascii
+        $a1 = "Intel Core" nocase wide ascii
+        $a2 = "Z31FHXYQ0J" wide ascii
+        $a3 = "C07T508TG1J2" wide ascii
+        $a4 = "C02TM2ZBHX87" wide ascii
+        $a5 = "VMware" nocase wide ascii
+        $a6 = "QEMU" wide ascii
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_COTAWA {
+    meta:
+        description = "MACOS.OSASCRIPT.COTAWA"
+        uuid = "C7ED27F5-FD07-46D5-880C-3C359463DA10"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Coinomi" nocase wide ascii
+        $a2 = "electrum" nocase wide ascii
+        $a3 = "atomic" nocase wide ascii
+        $a4 = "wasabi" nocase wide ascii
+        $a5 = "Monero" nocase wide ascii
+        $a6 = "Litecoin" nocase wide ascii
+        $a7 = "Bitcoin" nocase wide ascii
+        $a8 = "DashCore" nocase wide ascii
+        $a9 = "Guarda" nocase wide ascii
+        $a10 = "electrum_ltc" nocase wide ascii
+        $a11 = "Dogecoin" nocase wide ascii
+        $a12 = "trezor" nocase wide ascii
+        $a13 = "Binance" nocase wide ascii
+        $a14 = "tonkeeper" nocase wide ascii
+        $a15 = "Ledger Live" nocase wide ascii
+        $a16 = "leveldb" nocase wide ascii
+        $a17 = "Dogecoin_core" nocase wide ascii
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOZO {
+    meta:
+        description = "MACOS.OSASCRIPT.BOZO"
+        uuid = "5B45B958-17FD-4699-9B1E-F4192E055BC3"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Zoom Meeting SDK Support" wide ascii
+        $a2 = "to start the upgrade." wide ascii
+        $a3 = "-- Check Zoom Meeting SDK from here" wide ascii
+        $a4 = "do shell script \"curl" wide ascii
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOWI {
+    meta:
+        description = "MACOS.OSASCRIPT.BOWI"
+        uuid = "1D4A9D7E-8A86-44D5-9FD7-4D4D3E577E31"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "curl -sLk -o" wide ascii
+        $a2 = "& verString & \"&type=\" & cpu_type & \"&langC=\" & langCode" wide ascii
+        $a3 = "Launching the \"Compatibility Wizard\"" wide ascii
+        $a4 = "#################" wide ascii
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOWISP {
+    meta:
+        description = "MACOS.OSASCRIPT.BOWISP"
+        uuid = "CB512178-2E91-4AE9-BDB3-12B33D49C76C"
+        interpreter = "osascript"
+
+    strings:
+        $b1 = "curl -sLk" wide ascii
+        $a1 = "showDLG()" wide ascii
+        $a2 = "showProBar" wide ascii nocase
+        $a3 = "getCSReq" wide ascii nocase
+        $a4 = "autoGrant" wide ascii
+        $c1 = "Enter your password to allow this" wide ascii
+        $c2 = "All issues found were successfully resolved" wide ascii
+
+    condition:
+        all of ( $a* ) and all of ( $b* ) and $c1 and $c2
+}
+
+rule XProtect_MACOS_OSASCRIPT_REFU {
+    meta:
+        description = "MACOS.OSASCRIPT.REFU"
+        uuid = "63BF4171-A437-43DB-ABA0-6BFB127F7BED"
+        interpreter = "osascript"
+
+    strings:
+        $a0 = "BeforeFileName" nocase ascii wide
+        $a1 = "writeText" nocase ascii wide
+        $a2 = "GrabFolder" nocase ascii wide
+        $a3 = "grabPlugins" nocase ascii wide
+        $a4 = "phexiapath" nocase ascii wide
+        $a5 = "chromium_map" nocase ascii wide
+        $a6 = "passmanagerList" nocase ascii wide
+        $a7 = "walletsList" nocase ascii wide
+        $a8 = "Cryptowallets" nocase ascii wide
+        $a9 = "deskwal" nocase ascii wide
+        $a10 = "password_entered" nocase ascii wide
+        $a11 = "desktopCrypto" nocase ascii wide
+        $a12 = "browserChromiumList" nocase ascii wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_GEPEPA {
+    meta:
+        description = "MACOS.OSASCRIPT.GEPEPA"
+        uuid = "EFE7D76C-D7F4-49FB-AC90-287BA22F0FE2"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "domain" nocase wide ascii
+        $a2 = "domainsList" nocase wide ascii
+        $a3 = "activeDomain" nocase wide ascii
+        $a4 = "btxid" nocase wide ascii
+        $b1 = "/api/php?check" nocase wide ascii
+        $b2 = "actualurl" nocase wide ascii
+        $b3 = "activeDomain" nocase wide ascii
+        $b4 = "get.php?txid=" nocase wide ascii
+        $c1 = "/usr/bin/curl -s" nocase wide ascii
+        $c2 = "--connect-timeout 5" nocase wide ascii
+        $d1 = "neverfakebot" nocase wide ascii
+
+    condition:
+        ( 3 of ( $a* ) and 2 of ( $b* ) and all of ( $c* ) ) or ( 3 of ( $a* ) and 2 of ( $b* ) and all of ( $c* ) and $d1 ) or ( all of ( $b* ) and $d1 )
+}
+
+rule XProtect_MACOS_OSASCRIPT_TAPEPA {
+    meta:
+        description = "MACOS.OSASCRIPT.TAPEPA"
+        uuid = "3DA85FA4-6EB6-4845-B70D-09C08B130660"
+        interpreter = "osascript"
+
+    strings:
+        $b1 = "$GATE_URL/api/bot/heartbeat" nocase wide ascii
+        $a1 = "BOT_ID" nocase wide ascii
+        $a2 = "BUILD_ID" nocase wide ascii
+        $a3 = "HOSTNAME" nocase wide ascii
+        $a4 = "os_version" nocase wide ascii
+        $a5 = "OS_VER" nocase wide ascii
+        $a6 = "RESP" nocase wide ascii
+        $a7 = "BUILD_NAME" nocase wide ascii
+        $a8 = "GATE_URL" nocase wide ascii
+        $b2 = "sw_vers -productVersion" nocase wide ascii
+        $b3 = "/tmp/.c.sh" nocase wide ascii
+
+    condition:
+        ( $b1 and 5 of ( $a* ) ) or ( $b1 and 5 of ( $a* ) and $b2 and $b3 ) or ( $b1 and $b3 and 5 of ( $a* ) )
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUVAST {
+    meta:
+        description = "MACOS.OSASCRIPT.DUVAST"
+        uuid = "3AC47C1B-5C31-4DB7-A573-2540A8591776"
+        interpreter = "osascript"
+        match_type = 4
+
+    strings:
+        $a1 = "openssl enc -aes-256-cbc -K" wide ascii
+        $a2 = "xprotect version" wide ascii
+        $a3 = "ioreg -k IOPlatformSerialNumber" wide ascii
+        $a4 = "SimulatorTrampoline|Terminal|Finder" wide ascii
+        $a5 = "\"os\": \"Darwin\"" wide ascii
+        $a6 = "curl -fksL -m 6 -d" wide ascii
+        $a7 = "osascript -e \"$(curl -fskL" wide ascii
+
+    condition:
+        3 of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUCUHA {
+    meta:
+        description = "MACOS.OSASCRIPT.DUCUHA"
+        uuid = "83202676-D665-4E31-A133-2759527B0AA1"
+        interpreter = "osascript"
+        match_type = 4
+
+    strings:
+        $a1 = /do shell script "curl -fskL -o \/tmp\/[a-z_]{,20} 'https:.{,50}' && osascript \/tmp\/[a-z_]{,20} / wide ascii
+        $a2 = "do shell script \"rm -f /tmp/" wide ascii
+
+    condition:
+        all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUSTCO {
+    meta:
+        description = "MACOS.OSASCRIPT.DUSTCO"
+        uuid = "0373563F-C131-458F-833D-7FE69EB14F8F"
+        interpreter = "osascript"
+        match_type = 4
+
+    strings:
+        $a1 = "serialNumber" wide ascii
+        $a2 = "modulename" wide ascii
+        $a3 = "doMainFunc" wide ascii
+        $a4 = "userName" wide ascii
+        $a5 = "sysoexec" wide ascii
+        $a6 = { 63 00 75 00 72 00 6C 00 20 00 2D 00 66 00 6B 00 73 00 4C 00 20 00 2D 00 6D 00 20 00 36 00 20 00 2D 00 64 }
+
+    condition:
+        OSACompiled and all of them and filesize < 1MB
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOPADO {
+    meta:
+        description = "MACOS.OSASCRIPT.BOPADO"
+        uuid = "77B14C6B-1EA7-4516-B57C-1D162C13C66C"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "/tmp/lg4err" ascii wide
+        $a2 = "/Library/Services/services" ascii wide
+        $a3 = "\"/auth.db\"" ascii wide
+        $a4 = "/download?id=" ascii wide
+        $a5 = "chmod 777" ascii wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOSTA {
+    meta:
+        description = "MACOS.OSASCRIPT.BOSTA"
+        uuid = "C2128667-E484-4E9B-9D2A-2F17B6B822CF"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "opcgpfmipidbgpenhmajoajpbobppdil" ascii wide
+        $a2 = "khpkpbbcccdmmclmpigdgddabeilkdpd" ascii wide
+        $a3 = "aeblfdkhhhdcdjpifhhbdiojplfjncoa" ascii wide
+        $a4 = "hnfanknocfeofbddgcijnmhnfnkdnaad" ascii wide
+        $a5 = "curl -X POST -k -H \\\"auth:" ascii wide
+        $a6 = "ls -la /Users/Shared >> /tmp/flog" ascii wide
+        $a7 = "set tempFolder to \"/tmp/CollectedFiles/\"" ascii wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOMSPAA {
+    meta:
+        description = "MACOS.OSASCRIPT.BOMSPAA"
+        uuid = "7ACB76E6-53F7-4054-9CAF-5FB30A14A352"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Microsoft Teams SDK version is deprecated" ascii wide
+        $a2 = "#################################" ascii wide
+        $a3 = "set cont to do shell script \"curl -A" ascii wide
+        $a4 = "/developer/sdk/fix/2/version/" ascii wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_BOMSPAB {
+    meta:
+        description = "MACOS.OSASCRIPT.BOMSPAB"
+        uuid = "8BBE4779-5780-4AEC-A7D8-C714BEC64383"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Microsoft Teams SDK version is deprecated" ascii wide
+        $a2 = "#################################" ascii wide
+        $a3 = "run (load script (POSIX file TempFile))" ascii wide
+        $a4 = "do shell script \"rm \" & TempFile" ascii wide
+        $a5 = "TempFile" ascii wide
+
+    condition:
+        all of them and #a5 > 4
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUCACI {
+    meta:
+        description = "MACOS.OSASCRIPT.DUCACI"
+        uuid = "5DBAC33A-9FCC-48B1-A761-FF0188099DC7"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "considering case" ascii wide
+        $a2 = "end considering" ascii wide
+        $a3 = "mod 26" ascii wide
+        $a4 = "+ 26" ascii wide
+        $b1 = "end script" ascii wide
+        $b2 = "on run" ascii wide
+        $b3 = "run script" ascii wide
+
+    condition:
+        all of ( $a* ) and 2 of ( $b* )
+}
+
+rule XProtect_MACOS_OSASCRIPT_DUCOOB {
+    meta:
+        description = "MACOS.OSASCRIPT.DUCOOB"
+        uuid = "B04B62C9-1DD3-45A0-88BB-C067DEB781E1"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "global rytrnusn" ascii wide
+        $a2 = "set WXWH15IEA6ZD to 1" ascii wide
+        $a3 = "27066267" ascii wide
+        $a4 = "on run _" ascii wide
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_AMSCLUCL {
+    meta:
+        description = "MACOS.OSASCRIPT.AMSCLUCL"
+        uuid = "C401AE0A-6D43-4994-B689-5E86A00FCA14"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "Storage cleanup completed successfully" ascii wide nocase
+        $a2 = "macOS Storage Optimization" ascii wide nocase
+        $a3 = "freed approximately" ascii wide nocase
+        $a4 = "do shell script" ascii wide nocase
+        $a5 = "curl -fSksL" ascii wide nocase
+
+    condition:
+        all of them
+}
+
+rule XProtect_MACOS_OSASCRIPT_TADE {
+    meta:
+        description = "MACOS.OSASCRIPT.TADE"
+        uuid = "A9873193-6289-49F7-8632-DCB9097BECE4"
+        interpreter = "osascript"
+
+    strings:
+        $a1 = "debugLog" ascii wide nocase
+        $a2 = "debugEventLog" ascii wide nocase
+        $a3 = "COPY OK" ascii wide nocase
+        $a4 = "COPY FAIL" ascii wide nocase
+        $a5 = "GrabFolderLimit FAIL" ascii wide nocase
+        $a6 = "=== SCRIPT START ===" ascii wide nocase
+        $a7 = "debugEventURL" ascii wide nocase
+        $a8 = "buildHash" ascii wide nocase
+        $a9 = "=== SCRIPT COMPLETE ===" ascii wide nocase
+        $b1 = "Hostname" ascii wide nocase
+        $b2 = "CIS" ascii wide nocase
+        $b3 = "IP" ascii wide nocase
+        $b4 = "Locale" ascii wide nocase
+        $b5 = "Chromium: starting" ascii wide nocase
+        $b6 = "ChromumWallets: starting" ascii wide nocase
+        $b7 = "Telegram: starting" ascii wide nocase
+        $b8 = "DesktopWallets: starting" ascii wide nocase
+        $b9 = "Persistence: script" ascii wide nocase
+        $b10 = "Persistence: plist" ascii wide nocase
+        $b11 = "Persistence: OK" ascii wide nocase
+        $c1 = "SHub Stealer (DEBUG)" ascii wide nocase
+
+    condition:
+        4 of ( $a* ) and 4 of ( $b* ) and $c1
+}
+

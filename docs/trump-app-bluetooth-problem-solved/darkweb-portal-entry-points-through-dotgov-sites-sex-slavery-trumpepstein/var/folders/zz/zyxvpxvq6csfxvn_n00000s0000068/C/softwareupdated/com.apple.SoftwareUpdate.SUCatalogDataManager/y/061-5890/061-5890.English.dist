@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <!-- Installer UI-ey stuff -->
+    <title>SU_TITLE</title>
+    <welcome file='Welcome.rtf'/>
+    <license file='License.rtf'/>
+    <background file='background.tif' scaling='none' alignment='bottomleft'/>
+    <options customize='never' rootVolumeOnly="true" hostArchitectures='ppc,i386'/>
+    <platforms>
+        <client arch="ppc,i386"/>
+        <server arch="ppc,i386"/>
+    </platforms>
+    <!-- Manual install layout stuff -->
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='manual'>
+        <pkg-ref id='manual' auth='root'>.</pkg-ref>
+    </choice>
+    <choice id='manual' title='SU_TITLE'/>
+    <choice id='manual' versStr='SU_VERS'/>
+    <!-- Software Update layout stuff-->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' suDisabledGroupID='GBExtraContent'>
+        <pkg-ref id='auto' auth='root'>GarageBandExtraContent.pkg</pkg-ref>
+    </choice>
+    <choice id='su' visible='VisibleCheck()'/>
+    <choice id='su' title='SU_TITLE'/>
+    <choice id='su' versStr='SU_VERS'/>
+    <choice id='su' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+	function VisibleCheck()
+	{
+		// Get custom location from PackageRegistry
+		var packageRegistryPlistPath = "/Library/Application Support/GarageBand/Package Registry.plist";
+		if (system.files.fileExistsAtPath(packageRegistryPlistPath))
+		{
+			var packageRegistry = system.files.plistAtPath(packageRegistryPlistPath);
+			if ((typeof packageRegistry) != "undefined")
+			{
+				// walk through all the entries at the root of the plist dictionary
+				for (var prEntryName in packageRegistry)
+				{
+					// if the entry contains "GarageBand" it is interesting
+					if (prEntryName.match("GarageBand") == null) continue;
+					
+					// get the dict from the name
+					var prEntry = packageRegistry[prEntryName];
+					
+					// see if it has a SCU entry
+					var prSCU = prEntry["Show Content Update"];
+					// the key might very well not exist
+					if ((typeof prSCU) != 'undefined')
+					{
+						// this could be a boolean, or, since this is JavaScript,
+						//    it could be null, which has the typeof 'object' YAY!
+						if (prSCU || false) return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	function InstallationCheck()
+	{
+		return(hasNoTier3() &amp;&amp; hasGoodSSW() &amp;&amp; hasEligibleApp());
+	}
+
+	function hasNoTier3()
+	{
+		var path = "/var/db/.AppleTier3Language";
+		if (!system.files.fileExistsAtPath(path))
+			return true;
+			
+		my.result.message = system.localizedStringWithFormat('volumeHasTier3');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	function hasGoodSSW()
+	{
+		var sysVersion = system.version;
+		
+		if (!sysVersion || (1 == system.compareVersions("10.4.9",sysVersion.ProductVersion))) {
+			my.result.message = system.localizedStringWithFormat('systemTooOld');
+			my.result.type = 'Fatal';
+			return false;
+		}
+		
+		return true;
+	}
+
+	function hasEligibleApp()
+	{
+		var path = "/Applications/GarageBand.app";
+		var bundle = system.files.bundleAtPath(path);
+		var version = BundleGetCompositeVersion5(bundle);
+		
+		if (!version || (system.compareVersions(version, "4.0.0.0.0") &lt; 0))
+		{
+			my.result.message = system.localizedStringWithFormat('noAppToUpdate');
+			my.result.type = 'Fatal';
+			return false;
+		}
+				
+		return true;
+	}
+	</script>
+    <!-- Common include -->
+    <script>
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length > tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (; components.length&lt;tupleCount; )
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0; i&lt;propObj.length; i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "GarageBand Instruments and Apple Loops";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Client and Server systems.";
+
+"SU_DESCRIPTION"='<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8"></meta></HEAD>
+<BODY><FONT FACE="Lucida Grande">
+<P>
+This update is recommended to add the complete set of Software Instruments and Apple 
+Loops to use with GarageBand. After the download and installation is complete, you 
+must restart GarageBand to use the new content.
+</p><p>
+The following items will be downloaded and installed:<ul>
+	<li>Over 60 software instruments, including drums, basses, guitars, horns, strings, woodwinds, and synths</li>
+	<li>650+ Apple Loops</li>
+</ul>
+</p><p>
+This update requires 1.2 gigabytes of available storage (or "free disk space") 
+on your Mac. The content will download and install automatically.
+</P>
+</FONT></BODY></HTML>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

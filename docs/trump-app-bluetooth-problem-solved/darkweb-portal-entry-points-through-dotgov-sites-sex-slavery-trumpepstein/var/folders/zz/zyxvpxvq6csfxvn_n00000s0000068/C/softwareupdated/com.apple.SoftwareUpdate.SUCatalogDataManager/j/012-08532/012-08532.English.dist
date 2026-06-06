@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options customize="never" hostArchitectures="i386,x86_64,arm64"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <!-- Apps that should be closed prior to installing -->
+    <pkg-ref id="com.apple.pkg.MobileDeviceSU2.1560A34" auth="root" installKBytes="24615" version="1.0.0.0.1.1653670824">
+        <must-close>
+            <app id="com.apple.iTunes"/>
+            <app id="com.apple.configurator"/>
+            <app id="com.apple.configurator.ui"/>
+            <app id="com.apple.FinalCut"/>
+            <app id="com.apple.dt.Xcode"/>
+            <app id="com.apple.iMovieApp"/>
+            <app id="com.apple.Image_Capture"/>
+        </must-close>
+    </pkg-ref>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="Device Support Update" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="Plist0(my.target.mountpoint)">
+        <pkg-ref id="com.apple.pkg.MobileDeviceSU2.1560A34" auth="Root" packageIdentifier="com.apple.pkg.MobileDeviceSU2.1560A34">MobileDeviceSU2.pkg</pkg-ref>
+        <pkg-ref id="com.apple.pkg.CoreTypes.1560A34" auth="Root" packageIdentifier="com.apple.pkg.CoreTypes.1560A34">CoreTypes.pkg</pkg-ref>
+    </choice>
+    <script>
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.11.4') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.11.4');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.12.6') &gt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_25CBFE41C7', '10.12.6');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Plist0(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/Resources/Info.plist');
+	if (!plist) {
+		return true;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(plistKeyValue, '1369.122.1.100.2') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Device Support Update";
+"SU_VERS" = " ";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/&gt;
+        &lt;meta http-equiv="Content-Style-Type" content="text/css"/&gt;
+        &lt;title&gt;&lt;/title&gt;
+        &lt;style type="text/css"&gt;
+            body {font: 13px -apple-system;}
+            p {margin: 0.0px 0.0px 0.0px 0.0px;}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;p&gt;This update ensures proper updating and restoring for iOS and iPadOS devices with a Mac.&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.CoreTypes.1560A34" installKBytes="204349" version="1.0.0.0.1.1653670824"/>
+</installer-gui-script>

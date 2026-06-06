@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="config-data" customize="never" hostArchitectures="i386,x86_64,arm64e,arm64"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="XProtectPlistConfigData_10_15" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="XProtectPlistConfigData">
+        <pkg-ref id="com.apple.pkg.XProtectPlistConfigData_10_15.16U4333" auth="Root" packageIdentifier="com.apple.pkg.XProtectPlistConfigData_10_15.16U4333">XProtectPlistConfigData_10_15.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.15') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_52D9815263', '10.15');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!Bundle0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Bundle0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Apple/System/Library/CoreServices/XProtect.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '5272') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "XProtectPlistConfigData";
+"SU_VERS" = "5272";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.XProtectPlistConfigData_10_15.16U4333" installKBytes="3310" version="5272.1.1724446543"/>
+</installer-gui-script>

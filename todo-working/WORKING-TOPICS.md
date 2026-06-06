@@ -116,9 +116,15 @@
 * Legal Docs & Records - Highlands Personal Records Folder - From Imprisonment in Denver, COL: [YouTube video here](https://youtu.be/ELUBrhKiGGs)
 * Legal Notes - MDS (2024) - Scared my stuff would be suppressed: [YouTube video here](https://youtu.be/E0OjvgQcIf8)
 * See [https://github.com/maxieds/AndroidBCEmulator/wiki/GTConfidential](https://github.com/maxieds/AndroidBCEmulator/wiki/GTConfidential)
+* See [NSF Internet origins page](https://www.nsf.gov/impacts/internet) 
+* See [Img.lt SDK docs for their URI resolver](https://img.ly/docs/cesdk/android/open-the-editor/uri-resolver-36b624/)
+i* They're back! [https://archive.org/help/wayback_api.php](https://archive.org/help/wayback_api.php) 
+* Wayback CDX server for complex queries [here](https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server) 
 * 
 * 
-
+* 
+* 
+* 
 
 
 ## Text and other writing snippets

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options should-launch-first-login-optimization="false" allow-install-later="true" post-logout="true" should-authenticate-reboot="true"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function compareBuildVersions(lhs, rhs) {
+	var lhsMatch = lhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	var rhsMatch = rhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	return system.compareVersions(lhsMatch.slice(1).join(","), rhsMatch.slice(1).join(","));
+}
+function InstallationCheck(prefix) {
+	var boardIds = ['Mac-9AE82516C7C6B903','Mac-031B6874CF7F642A','Mac-F2268DC8','Mac-50619A408DB004DA','Mac-F22C8AC8','Mac-AFD8A9D944EA4843','Mac-942B59F58194171B','Mac-27ADBB7B4CEE8E61','Mac-F305150B0C7DEEEF','Mac-35C1E88140C3E6CF','Mac-77EB7D7DAF985301','Mac-2E6FAB96566FE58C','Mac-7BA5B2794B2CDB12','Mac-BE0E8AC46FE800CC','Mac-00BE6ED71E35EB86','Mac-4B7AC7E43945597E','Mac-F22C89C8','Mac-937CB26E2E02BB01','Mac-942459F5819B171B','Mac-FFE5EF870D7BA81A','Mac-F222BEC8','Mac-4BC72D62AD45599E','Mac-F2208EC8','Mac-66F35F19FE2A0D05','Mac-189A3D4F975D5FFC','Mac-C08A6BB70A942AC2','Mac-8ED6AF5B48C039E1','Mac-FA842E06C61E91C5','Mac-FC02E91DDD3FA6A4','Mac-06F11FD93F0323C5','Mac-06F11F11946D27C5','Mac-6F01561E16C75D06','Mac-F60DEB81FF30ACF6','Mac-81E3E92DD6088272','Mac-3CBD00234E554E41','Mac-F22586C8','Mac-F221BEC8','Mac-942C5DF58193131B','Mac-F2238BAE','Mac-9F18E312C5C2BF0B','Mac-C3EC7CD22292981F','Mac-F221DCC8','Mac-742912EFDBEE19B3','Mac-B809C3757DA9BB8D','Mac-F65AE981FFA204ED','Mac-031AEE4D24BFF0B1','Mac-DB15BD556843C820','Mac-F22589C8','Mac-F2238AC8','Mac-942452F5819B1C1B','Mac-65CE76090165799A','Mac-35C5E08120C7EEAF','Mac-94245B3640C91C81','Mac-42FD25EABCABB274','Mac-7DF2A3B5E5D671ED','Mac-F2268DAE','Mac-2BD1B31983FE1663','Mac-7DF21CB3ED6977E5','Mac-A369DDC4E67F1C45','Mac-F2268CC8','Mac-94245A3940C91C80','Mac-E43C1C25D4880AD6','Mac-942B5BF58194151B',];
+	var cpuFeatures = system.sysctl( 'machdep.cpu.features' );
+	cpuFeatures=cpuFeatures.split(" ");
+	for( var i = 0; i &lt; cpuFeatures.length; i++ ){
+		if( cpuFeatures[i] == "VMM" ){
+			return true;
+		}
+	}
+	var nonSupportedModels = ['MacBookPro4,1','MacPro2,1','MacBookPro5,1','MacBookPro1,1','MacBookPro5,3','MacBookPro5,2','iMac8,1','MacBookPro5,4','iMac5,1','iMac5,2','iMac6,1','MacBookPro3,1','MacBookPro1,2','iMac9,1','Macmini3,1','Macmini1,1','iMac4,2','MacBookPro2,2','MacBookPro2,1','MacBook3,1','MacBook5,1','MacBook5,2','MacBook2,1','iMac4,1','MacBook1,1','MacBookPro5,5','Xserve2,1','MacBookAir1,1','Xserve3,1','MacBookAir2,1','Xserve1,1','Macmini2,1','MacPro3,1','iMac7,1','MacBook4,1','MacPro1,1','MacPro4,1',];
+	var currentModel = system.sysctl('hw.model');
+	if (nonSupportedModels.indexOf(currentModel) &gt;= 0) {
+		my.result.message = system.localizedString('ERROR_3491501876');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	var boardId = system.ioregistry.fromPath('IOService:/')['board-id'];
+	if (boardIds.indexOf(boardId) == -1) {
+		my.result.message = system.localizedString('ERROR_3491501876');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (system.compareVersions(system.version.ProductVersion, '10.11') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.12') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_7E7AEE96CA', '10.11');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.11') &lt; 0 || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.12') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_7E7AEE96CA', '10.11');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (compareBuildVersions(myTargetSystemVersion.ProductBuildVersion, '15G31') &lt; 0) {
+		my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!PlistCheck0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function PlistCheck0(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.11.6') != 0) {
+		return false;
+	}
+	return true;
+}
+function Not1(prefix) {
+	if (!(Script2(prefix))) {
+		return true;
+	}
+	return false;
+}
+function Script2(prefix) {
+	return !!(my.target.receiptForIdentifier('com.apple.pkg.update.os.10.11.6.appstore.15G1076'));
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="Mac App Store Update for OS X El Capitan" start_selected="true" visible="Not1('/')">
+        <pkg-ref id="MacAppStoreUpdateforElCapitan" auth="Root" packageIdentifier="com.apple.pkg.update.os.10.11.6.appstore.15G1076" onConclusion="RequireRestart">MacAppStoreUpdateforElCapitan.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Mac App Store Update for OS X El Capitan";
+"SU_TITLE_ALT" = "";
+"SU_VERS" = " ";
+"SU_VERS_ALT" = "";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+        &lt;title&gt;&lt;/title&gt;
+        &lt;style type="text/css"&gt;
+            body {font: 11.0px -apple-system;}
+            p {margin: 0.0px 0.0px 0.0px 0.0px;}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;p class="p1"&gt;This update enhances the compatibility of the Mac App Store with future software updates, and is recommended for all users.&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+';
+"SU_DESCRIPTION_ALT" = '';
+</strings>
+    </localization>
+    <pkg-ref id="MacAppStoreUpdateforElCapitan" installKBytes="15447" version="1.0.0.0.1.1493323255"/>
+</installer-gui-script>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <platforms>
+        <client arch="i386,ppc"/>
+    </platforms>
+    <!-- Installer UI-ey stuff -->
+    <title>MANUAL_TITLE</title>
+    <welcome file="Welcome.rtf"/>
+    <license file="License.rtf"/>
+    <background file="background.jpg" scaling="tofit" alignment="bottomleft"/>
+    <options customize="never" rootVolumeOnly="true"/>
+    <options hostArchitectures='ppc,i386'/>
+    <!-- Manual Install package layout -->
+    <choices-outline>
+        <line choice='WaveBurner'/>
+    </choices-outline>
+    <choice id='WaveBurner' start_selected="volumeNeedsWaveBurner()">
+        <pkg-ref auth='Root' id='com.apple.pkg.WaveBurner1.6.1Update'>.</pkg-ref>
+    </choice>
+    <!-- Software Update package layout -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choices-outline ui='invisible'>
+        <line choice="WaveBurnerSU"/>
+    </choices-outline>
+    <choice id='su' visible='volumeNeedsWaveBurner()' start_selected='true' suDisabledGroupID='WaveBurner1.6.1Update.pkg'/>
+    <choice id='su' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id="WaveBurnerSU" title="WaveBurner" selected="volumeNeedsWaveBurner() &amp;&amp; (typeof(choices.su) != &quot;undefined&quot;)">
+        <pkg-ref id='com.apple.pkg.WaveBurnerSU' auth='Root'>WaveBurner1.6.1Update.pkg</pkg-ref>
+    </choice>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+
+	function InstallationCheck()
+	{
+		// Installation check since we are root volume only. That way, the user gets error
+		// right away, not at volume select screen.
+		if ( !checkSystemVersionWarning() )
+		{
+			my.result.message = system.localizedString('OSWARN');
+            my.result.type = 'Fatal';
+		}
+		
+		if( !volumeCanHaveWaveBurner() )
+		{
+			my.result.message = system.localizedStringWithFormat('noApp');
+			my.result.type = 'Fatal';
+		}
+		
+		return(rootVolumeHasNoTier3());
+	}
+
+	function checkSystemVersionWarning()
+	{
+		var path = "/System/Library/CoreServices/SystemVersion.plist";
+		if ( !system.files.fileExistsAtPath(path) )
+		{
+			return false;
+		}
+		
+		var plist = system.files.plistAtPath(path);
+		if (plist)
+		{
+				var property = plist.ProductVersion;
+				system.log(property);
+				if (property &amp;&amp; (system.compareVersions(property,"10.5.7") &lt; 0))
+						return false;
+		}
+
+		return true;
+	}
+
+	function rootVolumeHasNoTier3()
+	{
+		var path = "/var/db/.AppleTier3Language";
+		if (!system.files.fileExistsAtPath(path))
+			return true;
+			
+		my.result.message = system.localizedStringWithFormat('volumeHasTier3');
+		my.result.type = 'Fatal';
+		return false;
+	}
+			
+	function volumeNeedsWaveBurner()
+	{
+		try {
+			var path = "/Applications/WaveBurner.app";
+			var myPlist = system.files.plistAtPath(path + "/Contents/version.plist");
+			var version = myPlist.CFBundleShortVersionString;
+		} catch(err) {
+			return false;
+		}
+		
+		if ((system.compareVersions(version, "1.6.0") != -1) &amp;&amp;
+			(system.compareVersions(version, "1.6.1") == -1))
+			return true;
+
+		
+		// Nope.	
+		return false;
+	}
+			
+	function volumeCanHaveWaveBurner()
+	{
+		try {
+			var path = "/Applications/WaveBurner.app";
+			var myPlist = system.files.plistAtPath(path + "/Contents/version.plist");
+			var version = myPlist.CFBundleShortVersionString;
+		} catch(err) {
+			return false;
+		}
+		
+		if ((system.compareVersions(version, "1.6.0") != -1) &amp;&amp;
+			(system.compareVersions(version, "1.6.2") == -1))
+			return true;
+
+		
+		// Nope.	
+		return false;
+	}
+	
+	function GetBundleFiveTupleVersion( bundle )
+	{
+		if( bundle == null ){ return null; }
+		
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = PadVersion(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = PadVersion(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = PadVersion(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		
+		return fiveTupleVers;
+	}
+
+	function PadVersion( version, tupleCount )
+	{
+		if( version == null ){ version = "0"; }
+		
+		var components = version.split(".");
+		
+		if( components.length > tupleCount )
+		{
+			components = components.slice(0, tupleCount);
+		}
+		else
+		{
+			for( ; components.length&lt;tupleCount; ){ components.push("0"); }
+		}
+		
+		return components.join(".");
+	}
+	
+	function isNotDowngrade()
+	{
+		var action = my.choice.packageUpgradeAction;
+		
+		if( (action == 'downgrade') || (action == 'mixed') )
+		{
+			my.choice.tooltip = system.localizedStringWithFormat('TT_NEWERALREADYINSTALLED');
+			return false;
+		}
+		
+		return true;
+	}
+
+</script>
+    <!-- Common include -->
+    <script>
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length > tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (; components.length&lt;tupleCount; )
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0; i&lt;propObj.length; i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "WaveBurner";
+"SU_VERS" = "1.6.1";
+"SU_SERVERCOMMENT" = "For Desktop systems";
+
+"SU_DESCRIPTION"='<HTML>
+<HEAD> <meta http-equiv="content-type" content="text/html;charset=utf-8"> </meta> </HEAD>
+<BODY>
+<FONT FACE="Lucida Grande">
+<P>This update improves stability and provides numerous fixes.</P>
+<P>Issues addressed include:
+<ul>
+<li>Mastering notes are now properly saved to disk</li>
+<li>Waveform display in the Mix Lane renders more consistently</li>
+</ul>
+</P>
+<P>The update is recommended for all users of WaveBurner 1.6.</P>
+<P>For detailed information on this update, please visit this website: <a href="http://support.apple.com/kb/TS3069">WaveBurner Release Notes</a></P>
+</FONT> 
+</BODY>
+</HTML>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

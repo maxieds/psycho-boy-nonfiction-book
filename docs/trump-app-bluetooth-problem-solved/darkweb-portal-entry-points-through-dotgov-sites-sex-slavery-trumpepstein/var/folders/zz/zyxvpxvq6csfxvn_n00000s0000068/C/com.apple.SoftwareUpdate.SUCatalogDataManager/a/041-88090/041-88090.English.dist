@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options visibleOnlyForPredicate="true" hostArchitectures="ppc,i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <tags>
+        <tag>3.7.0.1_RemoteDesktopClientInstaller.pkg</tag>
+    </tags>
+    <script>
+function InstallationCheck(prefix) {
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.7.5') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_1', '10.7.5');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_2');
+	if (!NotTier3(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function NotTier3(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_3');
+	if (system.files.fileExistsAtPath(prefix + '/var/db/.AppleTier3Language') == 0) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <platforms>
+        <client arch="ppc,intel"/>
+        <server arch="ppc,intel"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="RemoteDesktopClientShell" start_selected="true">
+        <pkg-ref id="RemoteDesktopClientShell" auth="Root" packageIdentifier="com.apple.pkg.RemoteDesktopClientShell">RemoteDesktopClientShell.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Remote Desktop Client Shell";
+"SU_VERS" = "3.7.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1187">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'Lucida Grande\'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'Lucida Grande\'; min-height: 13.0px}
+    span.s1 {text-decoration: underline ; color: #042eee}
+  </style>
+</head>
+<body>
+<p class="p1">The Remote Desktop Client Shell will install the Remote Desktop Client application on a machine that has requested the download through the Software Update tag.</p>
+<p class="p2"><br></p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='RemoteDesktopClientShell' installKBytes='62' version='1.0.0.0.1.1192644438'/>
+</installer-gui-script>

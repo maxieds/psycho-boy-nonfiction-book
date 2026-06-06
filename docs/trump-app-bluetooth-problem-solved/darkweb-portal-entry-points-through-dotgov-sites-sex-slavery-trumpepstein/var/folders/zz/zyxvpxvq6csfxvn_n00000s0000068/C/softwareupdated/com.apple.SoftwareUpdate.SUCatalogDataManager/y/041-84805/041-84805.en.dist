@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion='1'>
+    <options customize='never'/>
+    <options hostArchitectures='i386,ppc'/>
+    <options rootVolumeOnly='true'/>
+    <platforms>
+        <client arch='ppc,intel'/>
+    </platforms>
+    <!-- tag block -->
+    <tags>
+        <tag>printer update</tag>
+        <tag>InfoPrint</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 1107EX PS</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 1357EX PS</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 907EX PS</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 1107EX</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 1357EX</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 907EX</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 1107EX PS3</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 1357EX PS3</tag>
+        <tag>MANUFACTURER:InfoPrint;MODEL:Pro 907EX PS3</tag>
+    </tags>
+    <!-- end tag block -->
+    <title>SU_TITLE</title>
+    <!-- manual outline -->
+    <choices-outline>
+        <line choice='manual_InfoPrint_Drivers'/>
+    </choices-outline>
+    <!-- end manual outline -->
+    <!-- SU outline -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='auto'/>
+    </choices-outline>
+    <!-- end SU outline -->
+    <!-- SU choice -->
+    <choice id='auto' title='SU_TITLE' versStr='SU_VERS'/>
+    <choice id='auto' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='auto' secondaryDescription='SU_DESC2'/>
+    <choice id='auto' visible='true'/>
+    <!-- end SU choice -->
+    <!-- SU invis outline -->
+    <choices-outline ui='invisible'>
+        <line choice='invis_InfoPrint_Drivers'/>
+        <line choice='invis_makequeues_all'/>
+    </choices-outline>
+    <!-- end SU invis outline -->
+    <!-- SU invis InfoPrint_Drivers choice -->
+    <choice id='invis_InfoPrint_Drivers' selected="!isInstalled() &amp;&amp; printerConnected(&quot;InfoPrint_Drivers&quot;) &amp;&amp; driverNeedsUpdating(&quot;InfoPrint_Drivers&quot;)"/>
+    <choice id='invis_InfoPrint_Drivers' suDisabledGroupID='InfoPrint_Drivers'>
+        <pkg-ref id='com.apple.pkg.InfoPrint_Drivers' auth='Root'>InfoPrint_Drivers.pkg</pkg-ref>
+    </choice>
+    <!-- end SU invis InfoPrint_Drivers choice -->
+    <!-- SU manual InfoPrint_Drivers choice -->
+    <choice id='manual_InfoPrint_Drivers' selected="!isInstalled() &amp;&amp; printerConnected(&quot;InfoPrint_Drivers&quot;) &amp;&amp; driverNeedsUpdating(&quot;InfoPrint_Drivers&quot;)"/>
+    <choice id='manual_InfoPrint_Drivers' suDisabledGroupID='InfoPrint_Drivers'>
+        <pkg-ref id='com.apple.pkg.InfoPrint_Drivers.manual' auth='Root'>#InfoPrint_Drivers.pkg</pkg-ref>
+    </choice>
+    <!-- end SU manual InfoPrint_Drivers choice -->
+    <!-- invisible choice 1 -->
+    <!--
+  <choice id='invis_canon_dvd_all' selected='false' visible='false'>
+    <pkg-ref id='com.apple.pkg.CanonPrinterDrivers' auth='Root'>CanonPrinterDrivers.pkg</pkg-ref>
+  </choice>
+  -->
+    <!-- end invisible choice 1 -->
+    <!-- invisible choice 2 -->
+    <choice id='invis_makequeues_all' selected='printerConnectedAndNeedsUpdate()' visible='false'>
+        <pkg-ref id='com.apple.pkg.MakeQueuesScript' auth='Root'>MakeQueuesScript.pkg</pkg-ref>
+    </choice>
+    <!-- end invisible choice 2 -->
+    <volume-check script='VolumeCheck()'/>
+    <script>
+        <!-- printerIDs -->
+        
+		// ID Strings: printerIDs
+		<!-- end printerIDs -->
+        <!-- globalVariables -->
+        
+		var maxOSLimitForPackage={};
+
+	<!-- end globalVariables -->
+        
+            
+        function VolumeCheck()
+        {
+            if (system.env.OS_INSTALL == 1) {
+                return true;
+            }
+			
+			if(system.files.fileExistsAtPath(my.target.mountpoint + "/var/db/.AppleTier3Language")) {
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_LANG');
+				return false;
+			}
+     
+	<!-- SU auto volume check os lower limit -->
+        			
+      if(-1 == system.compareVersions(my.target.systemVersion.ProductVersion, '10.6')) {
+     <!-- end SU auto volume check os lower limit -->
+        
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_VOLUME');
+				return false;
+			}
+     
+	<!-- SU auto volume check os upper limit -->
+        		  
+			if(-1 != system.compareVersions(my.target.systemVersion.ProductVersion, '11.0')) {
+     <!-- end SU auto volume check os upper limit -->
+        
+				my.result.type = 'Fatal';
+            	my.result.message = system.localizedStandardString('GENERIC_FAIL_VOLUME');
+				return false;
+			}
+           
+			return true;
+        }
+				
+		function isInstalled()
+		{
+		    var action = my.choice.packageUpgradeAction;
+			if ((action == 'clean') || (action == 'upgrade')) {
+				return false;
+			}
+			return true;
+		}
+		
+    function isClean()
+    {
+		  var action = my.choice.packageUpgradeAction;
+		  if (action != 'clean') {
+				return false;
+			}
+			return true;
+		}
+	
+		function isNotDowngrade()
+		{
+		    var action = my.choice.packageUpgradeAction;
+			if ((action == 'mixed') || (action == 'downgrade')) {
+				return false;
+			}
+			return true;
+		}
+
+    <!-- printerConnectedAndNeedsUpdate -->
+        
+		function printerConnectedAndNeedsUpdate()
+		{
+			var printers = ["InfoPrint_Drivers"];
+			
+			for(var i=0;i &lt; printers.length; i=i+1)
+			{
+				if (printerConnected(printers[i]) &amp;&amp; driverNeedsUpdating(printers[i]))
+				{
+					return true;
+				}
+			}	
+			return false;
+		}
+    <!-- end printerConnectedAndNeedsUpdate  -->
+        <!-- printerConnected -->
+        
+		function printerConnected()
+		{
+			var argv = printerConnected.arguments;
+			
+			var possibleIDs = [];
+			
+			if (argv.length == 0 || argv[0] == 'all') { possibleIDs = []; }
+			else if (argv[0] == 'InfoPrint_Drivers') { possibleIDs = ["MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 1107EX PS","MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 1357EX PS","MANUFACTURER:InfoPrint;MODEL:InfoPrint Pro 907EX PS","MANUFACTURER:InfoPrint;MODEL:Pro 1107EX","MANUFACTURER:InfoPrint;MODEL:Pro 1357EX","MANUFACTURER:InfoPrint;MODEL:Pro 907EX","MANUFACTURER:InfoPrint;MODEL:Pro 1107EX PS3","MANUFACTURER:InfoPrint;MODEL:Pro 1357EX PS3","MANUFACTURER:InfoPrint;MODEL:Pro 907EX PS3"]; }
+            else { possibleIDs = []; }
+            
+			// Debug for possible distribution merge error
+			if (! possibleIDs.length) {
+				return false;
+			}
+
+			var printerPlist = system.files.plistAtPath("/Library/Printers/InstalledPrinters.plist");
+			if (printerPlist) {
+				var installedIDs = printerPlist.InstalledPrinters;
+				var matchingIDs = [];
+				if (installedIDs) {	
+					for (var i = 0; i &lt; installedIDs.length; i = i + 1) {
+						for (var j = 0; j &lt; possibleIDs.length; j = j + 1) {
+							if (installedIDs[i].toLowerCase() == possibleIDs[j].toLowerCase()) {
+								matchingIDs.push(installedIDs[i]);
+							}
+						}
+					}
+					if (matchingIDs.length) {
+						for (var i = 0; i &lt; matchingIDs.length; i = i + 1) {
+							system.log("Connected printer: " + matchingIDs[i]);
+						}
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+        <!-- end printerConnected -->
+        <!-- driverNeedsUpdating -->
+        
+		function driverNeedsUpdating()
+		{            		
+            var argv = driverNeedsUpdating.arguments;
+
+			var bundlePaths = [];
+			var bundleVersions = [];
+			var ppdPaths = [];
+			var ppdVersions = [];
+
+			if (argv.length == 0 || argv[0] == 'all') { bundlePaths = ["/Library/Printers/InfoPrint/Filters/pstopsRV1.app/Contents/Info.plist","/Library/Printers/InfoPrint/PDEs/JobLogRV1.plugin/Contents/Info.plist",]; }
+			else if (argv[0] == 'InfoPrint_Drivers') { bundlePaths = ["/Library/Printers/InfoPrint/Filters/pstopsRV1.app/Contents/Info.plist","/Library/Printers/InfoPrint/PDEs/JobLogRV1.plugin/Contents/Info.plist",]; }
+            else { bundlePaths = ["/Library/Printers/InfoPrint/Filters/pstopsRV1.app/Contents/Info.plist","/Library/Printers/InfoPrint/PDEs/JobLogRV1.plugin/Contents/Info.plist",]; }
+
+			if (argv.length == 0 || argv[0] == 'all') { bundleVersions = ["2.0.5","2.0.3",]; }
+			else if (argv[0] == 'InfoPrint_Drivers') { bundleVersions = ["2.0.5","2.0.3",]; }
+            else { bundleVersions = ["2.0.5","2.0.3",]; }
+            
+			if (argv.length == 0 || argv[0] == 'all') { ppdPaths = ["/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1357EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 907EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1107EX.gz",]; }			else if (argv[0] == 'InfoPrint_Drivers') { ppdPaths = ["/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1357EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 907EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1107EX.gz",]; }
+
+            else { ppdPaths = ["/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1357EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 907EX.gz","/Library/Printers/PPDs/Contents/Resources/InfoPrint Pro 1107EX.gz",]; }
+
+			if (argv.length == 0 || argv[0] == 'all') { ppdVersions = ["4.0","4.0","4.0",]; }			else if (argv[0] == 'InfoPrint_Drivers') { ppdVersions = ["4.0","4.0","4.0",]; }
+
+            else { ppdVersions = ["4.0","4.0","4.0",]; }
+
+			// Debug for possible distribution merge error
+			if (bundlePaths.length == 0 || bundleVersions.length == 0) {
+				return false;
+			}
+
+      // only allow clean installs for Canon Inkjet series
+      //if ( (argv.length > 0) &amp;&amp; (argv[0] == 'Canon_InkjetPrinterDrivers') ) {
+      //  var action = choices.invis_canon_dvd_all.packageUpgradeAction;
+      //  if ( action &amp;&amp; (action != 'clean') )
+      //    return false;
+      //  if ( !isClean() )
+      //    return false;
+      //}
+		var rejectedBundles = [ ];
+
+			for (var i = 0; i &lt; bundlePaths.length; i = i + 1) {
+				if (rejectedBundles.some(function (x) {
+					return (bundlePaths[i].indexOf(x) == 0);
+				})) {
+					system.log("Skipping search for " + bundlePaths[i]);
+					continue;
+				}
+				
+				var plist = system.files.plistAtPath(bundlePaths[i]);
+				if (plist) {
+					var version = plist.CFBundleShortVersionString;
+					if (!version) {
+						// no CFBSVS
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 1)");
+						return true;
+					}
+					if (bundleVersions[i] &amp;&amp; (system.compareVersions(version, bundleVersions[i]) == 1)) {
+						// bundle versions are newer
+						system.log("Adding " + bundlePaths[i] + " to rejected list");
+						rejectedBundles.push(normalizeBundlePath(bundlePaths[i]));
+					} else if (bundleVersions[i] &amp;&amp; (system.compareVersions(version, bundleVersions[i]) == -1)) {
+						// bundle versions are older
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 2)");
+						return true;
+					}
+				}
+				else {
+					// no plist - new files to install
+					system.log("Printing drivers update available for " + argv[0] + ". (return value 3)");
+					return true;
+				}
+			}
+			
+			for (var i = 0; i &lt; ppdPaths.length; i = i + 1) {
+				if (system.files.fileExistsAtPath(ppdPaths[i])) {
+					var version = system.files.ppdVersionAtPath(ppdPaths[i]);
+					if (!version) {
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 4)");
+						return true;
+					} else if (ppdVersions[i] &amp;&amp; (system.compareVersions(version, ppdVersions[i]) == -1)) {
+						// ppd versions are older
+						system.log("Printing drivers update available for " + argv[0] + ". (return value 5)");
+						return true;
+					}
+				} else {
+					system.log("Printing drivers update available for " + argv[0] + ". (return value 6)");
+					return true;
+				}
+			}
+
+			system.log("Printer " + argv[0] + " does not require an update.");			
+			return false;
+		}
+        <!-- end driverNeedsUpdating -->
+        
+		function normalizeBundlePath(path) {
+			if (path.match(/\/Contents\/Info.plist$/)) {
+				return path.substring(0, path.lastIndexOf("/Contents/Info.plist"));
+			}
+			var matches = path.match(/\/Versions\/[^/]+\/Resources\/Info.plist$/);
+			if (matches) {
+				return path.substring(0, path.length - matches[0].length);
+			}
+			return path;
+		}
+
+		function isWithinOSRange() {
+			var argv = isWithinOSRange.arguments;
+			if (argv.length == 0) {
+				return true;
+			}
+			else if(-1 != system.compareVersions(my.target.systemVersion.ProductVersion, maxOSLimitForPackage[argv[0]])) {
+				return false;
+			}
+			return true;
+		}
+		
+    </script>
+    <readme file='SUDescription.html'/>
+    <license file="License.rtf" sla="EA1050"/>
+    <localization>
+        <strings language="en"><![CDATA["SU_VERS" = "2.2";
+"SU_TITLE" = "InfoPrint Printer Software Update";
+"SU_SERVERCOMMENT" = "For Desktop Systems";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="824.41">
+  <style type="text/css">
+    p.p1 {font: 11.0px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p class="p1">This update installs the latest software for your InfoPrint printer or scanner.</p>
+<p class="p1">For more information about printing and scanning software, see <a href="http://support.apple.com/kb/HT3669">http://support.apple.com/kb/HT3669</a></p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

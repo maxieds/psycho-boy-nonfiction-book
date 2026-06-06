@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.6') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.7') >= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6') &lt; 0 || system.compareVersions(my.target.systemVersion.ProductVersion, '10.7') >= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.8') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_2', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.8') > 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_3', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Not0(prefix) {
+	if (!(Script1(prefix))) {
+		return true;
+	}
+	return false;
+}
+function Script1(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.update.softwareinstallerupdate.1.0')) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="AppleSoftwareInstallerUpdate" visible="Not0('/')">
+        <pkg-ref id="SharkClient" auth="Root" packageIdentifier="com.apple.pkg.update.softwareinstallerupdate.1.0" onConclusion="RequireRestart">AppleSoftwareInstallerUpdate.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Apple Software Installer Update";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Snow Leopard Desktop systems";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p class="p1">This update addresses an issue that may prevent certain Apple software from installing. This update is recommended for all users running Mac OS X 10.6.8.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='SharkClient' installKBytes='1361' version='1.1.0.0.1.1249367152'/>
+</installer-gui-script>

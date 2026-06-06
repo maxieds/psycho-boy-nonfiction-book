@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options customize="never" hostArchitectures="i386,x86_64,arm64"/>
+    <title>SU_TITLE</title>
+    <script>
+function startsWith220Ajs(prefix,path)
+{
+	// Older versions of SafeView have a CFBundleVersion starting with 220A and then an integer.
+	// ALL versions that match this are "too old" and need the update.
+	var bundle = system.files.bundleAtPath(prefix + path);
+	if (!bundle) {
+		system.log("No bundle at" + path)
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		system.log("No CFBundleShortVersionString")
+		return false;
+	}
+	system.log("CFBundleShortVersionString = '" + bundleKeyValue + "'");
+
+	var beginsWith = bundleKeyValue.substring(0,4);
+	system.log("CFBundleShortVersionString starts with '" + beginsWith + "'");
+
+	if ("220A" == beginsWith)
+	{
+		system.log("Match, so update is necessary");
+		return true;
+	}
+	else
+	{
+		system.log("No match, use regular comparison");
+		return false;
+	}
+}
+</script>
+    <installation-check script="InstallationCheck()"/>
+    <pkg-ref id="SafeView" installKBytes="73290" version="10.8.1.1.1407457749">
+        <must-close>
+            <app id="com.apple.Redwood.app"/>
+        </must-close>
+    </pkg-ref>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="SafeView" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="needsUpdate(my.target.mountpoint)">
+        <pkg-ref id="SafeView" auth="Root" packageIdentifier="com.apple.pkg.SafeView">SafeView.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.10') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function needsUpdate(prefix) {
+	if (startsWith220A(prefix) || needsUpdateVer(prefix)) {
+		return true;
+	}
+	return false;
+}
+function startsWith220A(prefix) {
+	if (startsWith220Ajs(prefix,"/Applications/SafeView.app")) {
+		return true;
+	}
+	return false;
+}
+function needsUpdateVer(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/SafeView.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '10.8.1') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "SafeView";
+"SU_VERS" = "10.8.1";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+        &lt;title&gt;&lt;/title&gt;
+        &lt;style type="text/css"&gt;
+            body {font: 11.0px Lucida Grande;}
+            p {margin: 0.0px 0.0px 0.0px 0.0px;}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;SafeView 10.8.1 Release Notes&lt;/h1&gt;
+        &lt;hr/&gt;&lt;/br&gt;
+        &lt;p&gt;
+        &lt;strong&gt;New features:&lt;/strong&gt; SafeView 10.8.1 fixes an issue that cause sharing to fail sometimes.
+        &lt;/p&gt;
+        &lt;/br&gt;&lt;/br&gt;
+        &lt;strong&gt;Release Notes&lt;/strong&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Fixes issue that prompted “Sharing Failed” notification&lt;/li&gt;
+            &lt;li&gt;General bug fixes&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/br&gt;
+        &lt;/br&gt;
+        &lt;h1&gt;Amphora 1.2.0 Release Notes&lt;/h1&gt;
+        &lt;hr/&gt;&lt;/br&gt;
+        &lt;strong&gt;Release Notes&lt;/strong&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Amphora is moving from pilot phase to global rollout as part of the SafeView 10.8.0 release bundle &lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/br&gt;
+        &lt;strong&gt;Share Settings&lt;/strong&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Step-by-Step Help for iOS26 is launching as part of Core 25.8. For interactions where settings are gathered, Core will display an RS card enabling Advisors to view Step-by-Step settings from the customer’s iPhone. &lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/br&gt;
+        &lt;p&gt;
+            For additional release details please visit: &lt;a href="https://chorus.apple.com/page/6606631"&gt;https://chorus.apple.com/page/6606631&lt;/a&gt;
+        &lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+</installer-gui-script>

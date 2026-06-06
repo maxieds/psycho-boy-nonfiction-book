@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="config-data" customize="never" hostArchitectures="i386,x86_64"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="CompatibilityNotificationData_10_14" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="CompatibilityNotificationData" visible="Script1(my.target.mountpoint)">
+        <pkg-ref id="com.apple.pkg.CompatibilityNotificationData_10_14.16U1819" auth="Root" packageIdentifier="com.apple.pkg.CompatibilityNotificationData_10_14.16U1819">CompatibilityNotificationData_10_14.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	my.result.message = system.localizedString('ERROR_3491501876');
+	if (!Bundle0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Bundle0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/System/Library/CoreServices/CompatibilityNotificationData.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.0.6') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.14') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_52D9815263', '10.14');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (myTargetSystemVersion &amp;&amp; system.compareVersions(myTargetSystemVersion.ProductVersion, '10.15') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_52D9815263', '10.15');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script1(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.CompatibilityNotificationData_10_14.16U1819')) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "CompatibilityNotificationData";
+"SU_VERS" = "1.0.6";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.CompatibilityNotificationData_10_14.16U1819" installKBytes="162" version="1.0.6.1.1562184939"/>
+</installer-gui-script>

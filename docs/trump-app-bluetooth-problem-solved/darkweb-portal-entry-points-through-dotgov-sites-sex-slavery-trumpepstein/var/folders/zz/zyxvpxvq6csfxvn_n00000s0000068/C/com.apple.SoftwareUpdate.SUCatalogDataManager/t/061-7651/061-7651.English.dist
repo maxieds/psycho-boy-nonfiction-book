@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion='1'>
+    <script>
+var EntityToFind1	= "IOUSBDevice";
+var vendorID		= 0x86a;
+var productIDArray	= [0x1, 0x2, 0x3];
+</script>
+    <title>SU_TITLE</title>
+    <readme file='ReadMe.rtf'/>
+    <license file="License.rtf" auto='false'/>
+    <options customize='never' hostArchitectures='ppc,i386' rootVolumeOnly='true'/>
+    <platforms>
+        <client arch="ppc,i386"/>
+        <server arch="ppc,i386"/>
+    </platforms>
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html' suDisabledGroupID='UnitorMIDIDriverUpdate' visible='canSeeUpdate()'>
+        <pkg-ref id='auto' auth='Root'>UnitorMIDIDriver.pkg</pkg-ref>
+    </choice>
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='manual' title='SU_TITLE'>
+        <pkg-ref id='manual' auth='Root'>.</pkg-ref>
+    </choice>
+    <installation-check script='InstallationCheck()'/>
+    <volume-check script="VolumeCheck()"/>
+    <script>
+
+function InstallationCheck()
+{
+	debuglog("Debug Logging for Unitor MIDI Driver Software Update 1.0 enabled.");
+	
+	if( -1 == system.compareVersions(system.version.ProductVersion, '10.5.7') )
+	{
+		debuglog("System software version is not correct, got: " + system.version.ProductVersion);
+		my.result.message = system.localizedStringWithFormat('ERROR_OS', '10.5.7');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if( !doesAnyoneMatch("canSeeUpdate",EntityToFind1,vendorID,productIDArray) )
+	{
+		debuglog("Proper USB hardware not found.");
+		my.result.message = system.localizedStringWithFormat('ERROR_HARDWARE');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	return true;
+}
+
+function VolumeCheck()
+{
+	var plist = system.files.plistAtPath(my.target.mountpoint + "/Library/Audio/MIDI Drivers/EmagicUSBMIDIDriver.plugin/Contents/version.plist");
+	if( plist )
+	{
+		var version = plist.CFBundleShortVersionString;
+		if( version &amp;&amp; (system.compareVersions(version, "2.5") > 0))
+		{
+			my.result.message = system.localizedString('ERROR_VOLUME');
+			my.result.type = 'Fatal';
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+function canSeeUpdate()
+{
+	var plist = system.files.plistAtPath(my.target.mountpoint + "/Library/Audio/MIDI Drivers/EmagicUSBMIDIDriver.plugin/Contents/version.plist");
+	if( plist )
+	{
+		var version = plist.CFBundleShortVersionString;
+		if( version &amp;&amp; (system.compareVersions(version, "2.5") >= 0))
+		{
+			my.result.message = system.localizedString('ERROR_VOLUME');
+			my.result.type = 'Fatal';
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+function doesAnyoneMatch(callerID,EntityToFind,vendorID,productIDArray)
+{
+	var devicesToTestArray = system.ioregistry.matchingClass(EntityToFind);
+	for (var index=0; index &lt; 5; index++) 
+	{
+		if (devicesToTestArray.length != 0) break;
+
+		// didnt find any, try again
+		devicesToTestArray = system.ioregistry.matchingClass(EntityToFind);
+	}
+	if (index==0)
+		debuglog(callerID + ": Found " + devicesToTestArray.length + " " + EntityToFind + " entities.");
+	else
+		debuglog(callerID + ": Had to retry " + index + " times to find " + devicesToTestArray.length + " " + EntityToFind + " entities.");
+
+	for( var index=0; index &lt; devicesToTestArray.length; index++ )
+	{
+			// Is this device from Apple?
+			var myVendor = devicesToTestArray[index].idVendor;
+				debuglog(callerID + ": device #" + index + " has vendorID " + myVendor);
+			if (myVendor != vendorID) continue;
+			
+			// Is this device the one for which we have the software?
+			var myProductID = devicesToTestArray[index].idProduct;
+				debuglog(callerID + ": device #" + index + " has productID " + myProductID);
+			if (myProductID in oc(productIDArray)) return true;
+	}
+		
+	debuglog(callerID + ": Didn't find any matching devices, so returning false.");
+	return false;	
+}
+
+function PathGetShortVersion(path)
+{
+	var bundle = system.files.bundleAtPath(path);
+	if (bundle == null)
+		return null;
+	var shortVers = bundle.CFBundleShortVersionString;
+	shortVers = _PadVersionString(shortVers, 3);
+	return shortVers;
+}
+
+function oc(a)
+{
+	var o = {};
+	for(var i=0;i &lt; a.length;i++)
+	{
+		o[a[i]]='';
+	}
+	return o;
+}
+
+function debuglog(message){ if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + message); }
+
+</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Unitor Family Driver";
+"SU_SERVERCOMMENT" = "For Desktop and Server Systems.";
+"SU_VERS" = "2.5";
+
+"SU_DESCRIPTION"='<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8"></meta></HEAD>
+<BODY><FONT FACE="Lucida Grande">
+<P><b>Unitor Driver 2.5</b></P>
+<P>
+The Unitor driver supports the following MIDI interfaces: Unitor8, AMT8, and MT4. This update addresses isolated reliability issues, especially when using multiple Unitors.</p>
+</FONT></BODY></HTML>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

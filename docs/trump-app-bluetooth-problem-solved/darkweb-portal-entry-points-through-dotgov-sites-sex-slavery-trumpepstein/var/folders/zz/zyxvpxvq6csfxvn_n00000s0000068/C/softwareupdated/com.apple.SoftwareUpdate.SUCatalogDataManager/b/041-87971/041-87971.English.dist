@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.6.8') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_1');
+	if (!PlistCheck0("/") || !BundleCheck1("/") || !BundleCheck2("/") || !FileCheck3("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function PlistCheck0(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_2');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.5.7') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function BundleCheck1(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_3');
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/Logic Pro.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '9.0.0') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function BundleCheck2(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_4');
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/Logic Pro.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '9.1.8.0') > 0) {
+		return false;
+	}
+	return true;
+}
+function FileCheck3(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_5');
+	if (system.files.fileExistsAtPath(prefix + '/Applications/Logic Pro.app/Contents/_MASReceipt/receipt') == 0) {
+		return true;
+	}
+	return false;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	my.result.message = system.localizedString('ERROR_6');
+	if (!PlistCheck0(my.target.mountpoint) || !BundleCheck1(my.target.mountpoint) || !BundleCheck2(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function BundleCheck4(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/Logic Pro.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '9.0.0') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '9.1.8.0') >= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="LogicProUpdate918" visible="BundleCheck4('/')">
+        <pkg-ref id="LogicProUpdate" auth="Root" packageIdentifier="com.apple.pkg.LogicPro9.1.8Update">LogicPro9.1.8Update.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Logic Pro Update";
+"SU_VERS" = "9.1.8";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title>Logic Pro 9.1.8 Software Update Text </title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1038.35">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px \'Lucida Grande\'}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'; min-height: 15.0px}
+    li.li2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'}
+    ul.ul1 {list-style-type: disc}
+  </style>
+</head>
+<body>
+<p class="p1">This update addresses overall stability and performance issues including:</p>
+<ul class="ul1">
+  <li class="li2">Fixes an issue that caused an AirPlay dialog to repeatedly appear.</li>
+  <li class="li2">Resolves performance issues when using plug-ins that provide frequent graphic feedback.</li>
+  <li class="li2">Additional content downloads now behave correctly when installing on Lion and Mountain Lion.</li>
+</ul>
+<p class="p3"><br></p>
+<p class="p1">This update is recommended for all users of Logic Pro 9.</p>
+<p class="p1">For detailed information on this update, please visit this website: <a href="http://support.apple.com/kb/TS2565">http://support.apple.com/kb/TS2565</a></p>
+</body>
+</html>';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='LogicProUpdate' installKBytes='236650' version='9.1.8.0.1.1256150330'/>
+</installer-gui-script>

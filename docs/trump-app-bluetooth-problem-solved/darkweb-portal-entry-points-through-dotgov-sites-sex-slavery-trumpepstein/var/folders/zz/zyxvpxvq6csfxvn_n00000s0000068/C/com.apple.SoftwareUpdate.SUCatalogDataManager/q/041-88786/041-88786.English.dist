@@ -1,0 +1,152 @@
+<?xml version="1.0" standalone="yes"?>
+<installer-gui-script minSpecVersion='1'>
+    <title>SU_TITLE</title>
+    <options hostArchitectures='ppc,i386'/>
+    <license file="License.rtf" sla="EA0627"/>
+    <welcome file='Welcome.rtf'/>
+    <background file="background.tiff" scaling="none" alignment="left"/>
+    <options allow-external-scripts="no" customize="never" rootVolumeOnly="true"></options>
+    <platforms>
+        <client arch="i386,ppc"/>
+        <server arch="i386,ppc"/>
+    </platforms>
+    <!-- Lion App Closing -->
+    <pkg-ref id='com.apple.pkg.iPhoneConfigurationUtility'>
+        <must-close>
+            <app id="com.apple.dt.Xcode"/>
+            <app id="com.apple.PurpleRestore"/>
+            <app id="com.apple.iTunes"/>
+        </must-close>
+    </pkg-ref>
+    <!-- manual choices -->
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id="manual">
+        <pkg-ref id="com.apple.pkg.iPhoneConfigurationUtility" auth='Root'>#iPhoneConfigurationUtility.pkg</pkg-ref>
+    </choice>
+    <!-- SU choices -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' suDisabledGroupID='iPhoneConfigurationUtility'>
+        <pkg-ref id='a' auth='Root'>iPhoneConfigurationUtility.pkg</pkg-ref>
+    </choice>
+    <choice id='su' title='SU_TITLE' versStr='SU_VERS'/>
+    <choice id='su' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='su' visible='isVisible()'/>
+    <volume-check script="volumeCheck()"/>
+    <script>
+
+		function isNotServer()
+		{
+			return (system.files.fileExistsAtPath(my.target.mountpoint+ "/System/Library/CoreServices/ServerVersion.plist") == false);
+		}
+	
+		function volumeCheck()
+		{
+			if (system.env.OS_INSTALL == 1 )
+			{
+				return true;
+			}
+
+			if( my.target.mountpoint != '/' )
+			{
+				my.result.message = system.localizedString('BOOT_VOLUME_ERR');
+				my.result.type = 'Fatal';
+
+				return false;
+			}
+
+			// must have an os
+			if( system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist") == false )
+			{
+				my.result.type = 'Fatal';
+				my.result.message = system.localizedString('ERROR_OSVER');
+				return(false);
+			}
+
+			//10.6 or above
+			if( system.compareVersions(my.target.systemVersion.ProductVersion, '10.6') == -1 )
+			{
+				my.result.type = 'Fatal';
+				my.result.message = system.localizedString('ERROR_OSVER');
+				return(false);
+			}
+			
+			return true;
+		}
+		
+		function isNotDowngrade()
+		{
+			var action = my.choice.packageUpgradeAction;
+			
+			if( (action == 'downgrade') || (action == 'mixed') )
+			{
+				my.choice.tooltip = system.localizedStringWithFormat('TT_NEWERALREADYINSTALLED');
+				return false;
+			}
+			
+			return true;
+		}
+		
+		function isVisible()
+		{
+			
+			//Must have old ipcu version
+			var plist = system.files.plistAtPath('/Applications/Utilities/iPhone Configuration Utility.app/Contents/Info.plist');
+			if (!plist)
+			{
+				return false;
+			}
+			
+			//must be less than 3.5
+			if(plist &amp;&amp; (-1 != system.compareVersions(plist.CFBundleShortVersionString, '3.5')))
+			{
+				return false;
+			}
+			
+			//must not have 2.1 receipt
+			//var oldReceipt = my.target.receiptForIdentifier("com.apple.pkg.iPhoneConfigurationUtility");
+			//system.log("receipt");
+			//system.log("receipt version: " + oldReceipt.version);
+			//if (oldReceipt &amp;&amp; (-1 != system.compareVersions(oldReceipt.version, "3.2.0.9999999999")) ){
+			//	return false;
+			//}
+			
+			system.log("final return");
+			return true;
+		}
+		
+		
+		
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "iPhone Configuration Utility";
+"SU_SERVERCOMMENT" = "For Desktop and Server Systems";
+"SU_VERS" = "3.5";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="949.27">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande}
+  </style>
+</head>
+<body>
+<p class="p1">iPhone Configuration Utility lets you easily create, maintain, encrypt, and install configuration profiles, track and install provisioning profiles and authorized applications, and capture device information including console logs.</p>
+<p class="p1"><br></p> 
+<p class="p1">Configuration profiles are XML files that contain device security policies, VPN configuration information, Wi-Fi settings, APN settings, Exchange account settings, mail settings, and certificates that permit iPhone and iPod touch to work with your enterprise systems.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='a' installKBytes='27306' version='3.5.0.0.1.1231511663'/>
+</installer-gui-script>

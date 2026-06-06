@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <options customize='never'/>
+    <options hostArchitectures='i386,ppc'/>
+    <platforms>
+        <server arch='i386,ppc'/>
+    </platforms>
+    <title>SU_TITLE</title>
+    <readme file='SUDescription.html'/>
+    <license file='License.rtf' sla='EA0390'/>
+    <background file='background.tif' alignment='topleft' scaling='proportional'/>
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='su' suDisabledGroupID='SecUpdSrvr2011-004'>
+        <pkg-ref id='com.apple.pkg.update.securityserver.2011.004.leopard' auth='Root' onConclusion='RequireRestart'>SecUpdSrvr2011-004.pkg</pkg-ref>
+        <pkg-ref id='com.apple.pkg.update.security.2011.004.leopard' auth='Root' onConclusion='RequireRestart'>SecUpd2011-004.pkg</pkg-ref>
+    </choice>
+    <choice id='manual' title='SU_TITLE'>
+        <pkg-ref id='manual' auth='Root' onConclusion='RequireRestart'>#SecUpdSrvr2011-004.pkg</pkg-ref>
+        <pkg-ref id='manual2' auth='Root' onConclusion='RequireRestart'>#SecUpd2011-004.pkg</pkg-ref>
+    </choice>
+    <choice id='su' title='SU_TITLE'/>
+    <choice id='su' versStr='SU_VERS'/>
+    <choice id='su' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='su' visible='!alreadyInstalled()'/>
+    <volume-check script='volumeCheck()'/>
+    <script>
+
+        function commonRequirements()
+        {
+			try {
+                // must have an OS
+                if(false == system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist")) {
+                    return (false);
+                }
+
+                // 10.5.8 only
+                if( (my.target.systemVersion.ProductVersion != '10.5.8') ) {
+                    return (false);
+                }
+
+				// server only
+				if (!isServer()) {
+					return false;
+				}
+
+            }
+            catch(err) {return false;}
+            return(true);
+        }
+
+    	function volumeCheck()
+    	{
+            if (commonRequirements()) {
+                return (true);
+            }
+            my.result.type = 'Fatal';
+            my.result.message = system.localizedString('ERROR_INSTALL');
+            return(false);
+        }
+        
+		function alreadyInstalled()
+		{								
+			var path = "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ColorSync.framework/Versions/A/Resources/version.plist";
+			var plist = system.files.plistAtPath(path);
+
+			if( plist )
+			{
+				var version = plist.CFBundleShortVersionString;
+
+				if( version &amp;&amp; (system.compareVersions(version, "4.5.3") > 0) ){ return true; }
+			}
+
+			return false;
+        }
+		
+		function isServer() {
+			if(!my.target['systemVersion'].isServer){
+				return false;
+			}
+          	return true;
+        }
+
+        </script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Security Update 2011-004";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Leopard Server systems.";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="824.41">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p class="p1">Security Update 2011-004 is recommended for all servers and improves the security of Mac OS X. Previous security updates have been incorporated into this security update.</p>
+<br />
+<p class="p1">For information on the security content of this update, please visit this website: <a href="http://support.apple.com/kb/HT1222">http://support.apple.com/kb/HT1222</a>.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='com.apple.pkg.update.security.2011.004.leopard' installKBytes='703610' version='1.0.1.1191932192'/>
+	<pkg-ref id='com.apple.pkg.update.securityserver.2011.004.leopard' installKBytes='599698' version='1.0.1.1191932192'/>
+</installer-gui-script>

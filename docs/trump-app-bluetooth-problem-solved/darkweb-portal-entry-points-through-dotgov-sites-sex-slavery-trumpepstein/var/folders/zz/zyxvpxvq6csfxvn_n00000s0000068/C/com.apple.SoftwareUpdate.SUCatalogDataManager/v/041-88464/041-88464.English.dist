@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386,x86_64" customize="never" type="config-data" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.10') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.11') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_1');
+	if (!LogicalOr0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function LogicalOr0(prefix) {
+	if (BundleCheck1(prefix) || PlistCheck2(prefix)) {
+		return true;
+	}
+	return false;
+}
+function BundleCheck1(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/System/Library/Displays');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '1170.8.10') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck2(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/Displays/version.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['CFBundleShortVersionString'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '1170.8.10') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.10') &lt; 0 || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.11') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_2');
+	if (!LogicalOr0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="AppleDisplays" start_selected="true">
+        <pkg-ref id="AppleDisplays" auth="Root" packageIdentifier="com.apple.pkg.AppleDisplaysConfigData.14U2182">AppleDisplays.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "AppleDisplays";
+"SU_TITLE_ALT" = "";
+"SU_VERS" = "1.0";
+"SU_VERS_ALT" = "";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '';
+"SU_DESCRIPTION_ALT" = '';
+</strings>
+    </localization>
+    <pkg-ref id="AppleDisplays" installKBytes="1829" version="1.0.0.0.1.1464287408"/>
+</installer-gui-script>
