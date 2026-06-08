@@ -1,0 +1,68 @@
+{% set name = "tldextract" %}
+{% set version = "5.1.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c9e17f756f05afb5abac04fe8f766e7e70f9fe387adb1859f0f52408ee060200
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: True  # [py<38]
+  entry_points:
+    - tldextract = tldextract.cli:main
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools >=61.2
+    - setuptools_scm >=6.2
+    - wheel
+    - toml
+  run:
+    - python
+    - filelock >=3.0.8
+    - idna
+    - requests >=2.1.0
+    - requests-file >=1.4
+
+test:
+  imports:
+    - tldextract
+  requires:
+    - pip
+    - pytest
+    - responses
+    - pytest-mock
+  commands:
+    - pip check
+    - tldextract --help
+    # Test test_release.py requires syrupy
+    - pytest tests -v --ignore=tests/test_release.py
+  source_files:
+    - tests
+
+about:
+  home: https://github.com/john-kurkowski/tldextract
+  license_file: LICENSE
+  license: BSD-3-Clause
+  license_family: BSD
+  summary: Accurately separate the TLD from the registered domain andsubdomains of a URL, using the Public Suffix List.
+  description: |
+    tldextract accurately separates a URL's subdomain, domain, and public suffix, using the Public Suffix List (PSL).
+    Say you want just the "google" part of https://www.google.com. Everybody gets this wrong. Splitting on the "." and taking the 2nd-to-last element only works for simple domains, e.g. .com.
+    Consider http://forums.bbc.co.uk: the naive splitting method will give you "co" as the domain, instead of "bbc".
+    Rather than juggle TLDs, gTLDs, or ccTLDs yourself, tldextract extracts the currently living public suffixes according to the Public Suffix List.
+    A public suffix is also sometimes called an effective TLD (eTLD).
+  dev_url: https://github.com/john-kurkowski/tldextract
+  doc_url: https://github.com/john-kurkowski/tldextract/blob/master/README.md
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - jan-janssen
