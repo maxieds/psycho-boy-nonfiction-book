@@ -1,0 +1,68 @@
+// -*- Metal -*-
+//===-- metal_simdgroup_async ---------------------------------------------===//
+// Copyright (c) 2018 Apple Inc. All rights reserved
+//===----------------------------------------------------------------------===//
+
+#ifndef __METAL_SIMDGROUP_ASYNC
+#define __METAL_SIMDGROUP_ASYNC
+
+#if defined(__HAVE_SIMDGROUP_ASYNC_COPY__)
+#include <metal_simdgroup_future>
+
+#pragma METAL internals : enable
+namespace metal
+{
+template <typename T>
+struct _is_simdgroup_async_copy_pointee_impl : bool_constant<__is_metal_simdgroup_async_copy_pointee(T)>
+{
+};
+template <typename T>
+struct is_simdgroup_async_copy_pointee : _is_simdgroup_async_copy_pointee_impl<remove_cv_t<T>>
+{
+};
+template <typename T>
+constexpr constant bool is_simdgroup_async_copy_pointee_v = is_simdgroup_async_copy_pointee<T>::value;
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(threadgroup T *dst, const device T *src, ulong n_elements)
+{
+  return simdgroup_future<void>(__metal_simdgroup_async_copy_1d(sizeof(T), alignof(T), reinterpret_cast<threadgroup void *>(dst), reinterpret_cast<const device void *>(src), n_elements));
+}
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(device T *dst, const threadgroup T *src, ulong n_elements)
+{
+  __metal_simdgroup_event_t event = __metal_simdgroup_async_copy_1d(sizeof(T), alignof(T), reinterpret_cast<device void *>(dst), reinterpret_cast<const threadgroup void *>(src), n_elements);
+  return simdgroup_future<void>(event);
+}
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(threadgroup T *dst, ulong dst_elements_per_row, ulong dst_element_stride, ulong2 dst_tile_dimensions, const device T *src, ulong src_elements_per_row, ulong src_element_stride, ulong2 src_tile_dimensions, long2 offset_in_src_tile, simdgroup_async_copy_clamp_mode clamp_mode)
+{
+  __metal_simdgroup_event_t event = __metal_simdgroup_async_copy_2d(sizeof(T), alignof(T), reinterpret_cast<threadgroup void *>(dst), dst_elements_per_row, dst_element_stride, dst_tile_dimensions, reinterpret_cast<const device void *>(src), src_elements_per_row, src_element_stride, src_tile_dimensions, offset_in_src_tile, static_cast<int>(clamp_mode));
+  return simdgroup_future<void>(event);
+}
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(device T *dst, ulong dst_elements_per_row, ulong dst_element_stride, ulong2 dst_tile_dimensions, long2 offset_in_dst_tile, const threadgroup T *src, ulong src_elements_per_row, ulong src_element_stride, ulong2 src_tile_dimensions)
+{
+  __metal_simdgroup_event_t event = __metal_simdgroup_async_copy_2d(sizeof(T), alignof(T), reinterpret_cast<device void *>(dst), dst_elements_per_row, dst_element_stride, dst_tile_dimensions, reinterpret_cast<const threadgroup void *>(src), src_elements_per_row, src_element_stride, src_tile_dimensions, offset_in_dst_tile, 0);
+  return simdgroup_future<void>(event);
+}
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(threadgroup T *dst, ulong dst_elements_per_row, ulong dst_element_stride, const device T *src, ulong src_elements_per_row, ulong src_element_stride, ulong2 tile_dimensions)
+{
+  return simdgroup_async_copy(dst, dst_elements_per_row, dst_element_stride, tile_dimensions, src, src_elements_per_row, src_element_stride, tile_dimensions, long2(0, 0), simdgroup_async_copy_clamp_mode::clamp_to_zero);
+}
+
+template <typename T, typename _E = typename enable_if<is_simdgroup_async_copy_pointee_v<T>>::type>
+METAL_FUNC simdgroup_future<void> simdgroup_async_copy(device T *dst, ulong dst_elements_per_row, ulong dst_element_stride, const threadgroup T *src, ulong src_elements_per_row, ulong src_element_stride, ulong2 tile_dimensions)
+{
+  return simdgroup_async_copy(dst, dst_elements_per_row, dst_element_stride, tile_dimensions, long2(0, 0), src, src_elements_per_row, src_element_stride, tile_dimensions);
+}
+} // namespace metal
+#pragma METAL internals : disable
+#endif
+
+#endif // __METAL_SIMDGROUP_ASYNC

@@ -1,0 +1,96 @@
+// -*- Metal -*-
+//===-- metal_simdgroup_future --------------------------------------------===//
+// Copyright (c) 2018 Apple Inc. All rights reserved
+//===----------------------------------------------------------------------===//
+
+#ifndef __METAL_SIMDGROUP_FUTURE
+#define __METAL_SIMDGROUP_FUTURE
+
+#if defined(__HAVE_SIMDGROUP_FUTURE__)
+#include <metal_assert>
+#include <metal_utility>
+
+namespace metal
+{
+template <typename T>
+struct simdgroup_future;
+
+enum class simdgroup_async_copy_clamp_mode
+{
+  clamp_to_zero = 0,
+  clamp_to_edge = 1
+};
+
+template <typename T, typename _E>
+simdgroup_future<void> simdgroup_async_copy(threadgroup T *, const device T *, ulong);
+template <typename T, typename _E>
+simdgroup_future<void> simdgroup_async_copy(device T *, const threadgroup T *, ulong);
+template <typename T, typename _E>
+simdgroup_future<void> simdgroup_async_copy(threadgroup T *, ulong, ulong, ulong2, const device T *, ulong, ulong, ulong2, long2, simdgroup_async_copy_clamp_mode = simdgroup_async_copy_clamp_mode::clamp_to_zero);
+template <typename T, typename _E>
+simdgroup_future<void> simdgroup_async_copy(device T *, ulong, ulong, ulong2, long2, const threadgroup T *, ulong, ulong, ulong2);
+
+template <>
+struct simdgroup_future<void>
+{
+  METAL_FUNC simdgroup_future() thread
+      : event(__metal_get_null_simdgroup_event()),
+        can_call_get(false)
+  {
+  }
+  METAL_FUNC simdgroup_future(thread simdgroup_future &&that) thread
+  {
+    *this = move(that);
+  }
+  simdgroup_future(const thread simdgroup_future &that) thread = delete;
+
+  METAL_FUNC thread simdgroup_future &operator=(thread simdgroup_future &&that) thread
+  {
+    event = that.event;
+    can_call_get = that.can_call_get;
+    that.event = __metal_get_null_simdgroup_event();
+    that.can_call_get = false;
+    return *this;
+  }
+  thread simdgroup_future &operator=(const thread simdgroup_future &that) thread = delete;
+
+  METAL_FUNC void get() thread
+  {
+    assert(can_call_get);
+    wait();
+    can_call_get = false;
+  }
+
+  METAL_FUNC bool valid() const thread
+  {
+    return can_call_get;
+  }
+
+  METAL_FUNC void wait() const thread
+  {
+    __metal_wait_simdgroup_events(1, &event);
+  }
+
+private:
+  METAL_FUNC simdgroup_future(__metal_simdgroup_event_t event) thread
+      : event(event),
+        can_call_get(!__metal_is_null_simdgroup_event(event))
+  {
+  }
+
+  __metal_simdgroup_event_t event;
+  bool can_call_get;
+
+  template <typename T, typename _E>
+  friend simdgroup_future<void> metal::simdgroup_async_copy(threadgroup T *, const device T *, ulong);
+  template <typename T, typename _E>
+  friend simdgroup_future<void> metal::simdgroup_async_copy(device T *, const threadgroup T *, ulong);
+  template <typename T, typename _E>
+  friend simdgroup_future<void> metal::simdgroup_async_copy(threadgroup T *, ulong, ulong, ulong2, const device T *, ulong, ulong, ulong2, long2, simdgroup_async_copy_clamp_mode);
+  template <typename T, typename _E>
+  friend simdgroup_future<void> metal::simdgroup_async_copy(device T *, ulong, ulong, ulong2, long2, const threadgroup T *, ulong, ulong, ulong2);
+};
+} // namespace metal
+#endif
+
+#endif // __METAL_SIMDGROUP_FUTURE
