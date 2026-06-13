@@ -1,0 +1,50 @@
+Build and install instructions
+==============================
+
+You need fontforge (http://fontforge.sourceforge.net/) and font-helpers
+(http://code.google.com/p/font-helpers/ ) in order to build the fonts
+from the sources. Also you should have afm2pl, fontware, fontools (the parts of a
+TeX distribution), GNU make and coreutils. Retrieve the svn repositories
+for font-helpers and cyrillic-modern
+
+svn checkout http://font-helpers.googlecode.com/svn/trunk/ font-helpers
+svn checkout http://cyrillic-modern.googlecode.com/svn/trunk/ cyrillic-modern
+
+Next, you must copy files (or make links) from font-helpers into the
+directory where *.sfd files are located. Further, the slanted AMS Type 1
+fonts (cmsl*.pfb, cmbxsl10.pfb, cmssi*.pfb and corresponding *.afm
+files) must be copied to the working directory. Then set the LC_ALL environment 
+variable to C or POSIX and type
+
+make
+
+and the Type 1 fonts will be produced. The nm.map file is produced by
+the "make nm.map" command. On UNIX-like systems, you may do
+
+make install TEXPREFIX=/usr/local/texlive/texmf-local
+
+as root to install the fonts system-wide provided you have TeXLive
+installed with the /usr/local prefix. Otherwise to install the fonts to
+your home directory, execute
+
+make install TEXPREFIX=~/.texlive2013/texmf-var/
+
+Adjust the prefix depending on your TeX distribution. Skip the above instructions 
+if you are installing the pre-built fonts. If you have installed the Cyrillic 
+Modern fonts before, execute
+
+updmap --disable nm.map
+
+At last, run 
+
+updmap --enable Map=nm.map
+
+In order to build the opentype collecton files you must have the "otf2otc.py" 
+python script from Adobe Font Development Kit for OpenType in the working 
+directory. It may be downloaded separately from
+https://github.com/adobe-type-tools/afdko/blob/master/FDK/Tools/SharedData/FDKScripts/otf2otc.py
+It also requires ttx from fonttols (https://github.com/behdad/fonttools) newer than version 2.5.
+The opentype fonts may be produced by invoking 
+
+make otf
+

@@ -1,0 +1,450 @@
+\DocumentMetadata{pdfstandard=A-2b, lang=en-GB}
+\documentclass[a4paper,12pt]{scrartcl}
+
+\usepackage{mathtools, array, varioref}
+\usepackage[british]{babel}
+\usepackage{fourier-orns}
+\usepackage{euler-math}
+\setmainfont{cmunorm.otf}
+    [BoldFont =       cmunobx.otf ,
+     ItalicFont =     cmunoti.otf ,
+     BoldItalicFont = cmunobi.otf
+    ]
+\setsansfont{Cabin}[Scale=MatchLowercase]
+\setmonofont{Inconsolatazi4}[Scale=MatchLowercase,StylisticSet={2,3}]
+\usepackage{subfig}
+\captionsetup[subtable]{position=top}
+\usepackage{realscripts}
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{pdftitle={Euler-Math User’s Guide},
+            pdfauthor={Daniel FLIPO},
+            bookmarksopen,
+            colorlinks
+            }
+\newcommand*{\hlabel}[1]{\phantomsection\label{#1}}
+
+\newcommand*{\NEOTF}{Euler~Math}
+\newcommand*{\pkg}[1]{\texttt{#1}}
+\newcommand*{\file}[1]{\texttt{#1}}
+\newcommand*{\opt}[1]{\texttt{#1}}
+\newcommand*{\cmd}[1]{\texttt{\textbackslash #1}}\newcommand*{\showtchar}[1]{\cmd{#1}~\csname #1\endcsname}
+\newcommand*{\showmchar}[1]{\cmd{#1}~$(\csname #1\endcsname)$}
+\newcommand*{\showmchardollar}[1]{\texttt{\$\cmd{#1}\$}~$(\csname #1\endcsname)$}
+
+\renewcommand{\labelitemi}{\lefthand}
+
+\title{Euler Math font, OTF version}
+\author{Daniel Flipo \\ \texttt{daniel.flipo@free.fr}}
+
+\newcommand*{\version}{0.62}
+
+\begin{document}
+\maketitle
+
+\section{What is \NEOTF{}?}
+
+\NEOTF{} is a fork of the Euler project initiated by Khaled Hosny in 2009
+and abandoned in 2016%
+\footnote{See \url{https://github.com/aliftype/euler-otf}}.
+The original font name `Neo~Euler’, has been changed to `Euler~Math’, the file
+name is now \file{Euler-Math.otf}.
+
+\file{Euler-Math.otf} is an OpenType version of Hermann Zapf’s Euler maths
+font, as the original font it contains three alphabets $Euler Roman$,
+$\symscr{SCRIPT}$ and $\symfrak{Euler Fraktur}$ (none of them being suitable
+for typesetting text) and has some specificities:
+\begin{itemize}
+\item it is an \emph{upright} maths font, Latin and Greek letters are
+  \emph{not available} in italic or bold italic shape (only upright and bold) ;
+\item integral symbols are upright too;
+\item all inequalities symbols are \emph{slanted}, so \cmd{leq} and geq are
+  printed as $\leq$ and $\geq$ (same as \cmd{leqslant} and \cmd{geqslant}).
+\end{itemize}
+
+\NEOTF{} requires LuaTeX or XeTeX as engine and the \pkg{unicode-math} package%
+\footnote{Please read the documentation \file{unicode-math.pdf}.}.
+
+Coverage: currently, all Plain, LaTeX and AMS maths symbols are provided;
+sans-serif (Latin, Greek, digits) and typewriter (Latin, digits) defaults
+are included.
+
+Please note that the current version (\version) is \emph{experimental,
+do expect metrics and glyphs to change} until version 1.0 is reached.
+Comments, suggestions and bug reports are welcome!
+
+\pagebreak[4]
+\section{Usage}
+
+\subsection{Calling \cmd{setmathfont}}
+
+A basic call for \NEOTF{} would be:
+\begin{verbatim}
+\usepackage[math-style=upright]{unicode-math}
+\setmathfont{Euler-Math.otf} % Call by file name or
+\setmathfont{Euler Math}     % Call by font name or
+\end{verbatim}
+this loads \NEOTF{} as maths font%
+\footnote{Both calls work equally well with LuaTeX; with XeTeX a call by font
+  name will fail unless the font is declared as a \emph{system font}.}
+ with the default options, see subsections~\ref{ssection-cv},
+ \ref{ssection-ss} and~\ref{ssec-other-features} for customisation.
+
+Please note that the three sets of text fonts have to be chosen separately.
+
+\subsection{Calling \pkg{euler-math.sty} (recommended)}
+
+As an alternative to load \NEOTF{} you can type:\\[.5\baselineskip]
+\verb+\usepackage{euler-math}+\\[.5\baselineskip]
+\verb+\usepackage[ +\textit{options}
+\footnote{Possible \textit{options} are \opt{Scale=} or any of the options
+  described in sections \ref{ssection-cv}, \ref{ssection-ss} and
+  \ref{ssec-other-features}.}%
+\verb+ ]{euler-math}+\\[.5\baselineskip]
+it loads \pkg{unicode-math} with the \opt{math-style=upright} option and
+sets \NEOTF{} as maths font and does a bit more:
+\begin{enumerate}
+\item it checks at \verb+\begin{document}+ if packages \pkg{amssymb} or
+  \pkg{latexsym} are loaded and issues warnings in case they are;
+\item it provides aliases for glyphs named differently in Unicode, so that
+  \pkg{latexsym} or AMS names are also available;
+\item it defines some specific maths characters \showmchar{varemptyset}, etc.
+\end{enumerate}
+
+The \pkg{euler-math.sty} package is meant to replace the \pkg{eulervm.sty}
+package for users switching from pdfLaTeX to LuaLaTeX or XeLaTeX.
+It does not interfere with text fonts which have to be chosen separately.
+
+\section{What is provided?}
+
+\NEOTF{} provides all glyphs available in the \pkg{amssymb} and \pkg{latexsym}
+packages and many more, f.i. lots of extensible accents and arrows.
+Therefore, the latter two packages \emph{should not} be loaded as they might
+override \NEOTF{} glyphs.
+
+As mentioned above, there is neither italic nor bold italic shapes; for user’s
+convenience, these slots are filled with their upright analogs.
+Sans-serif (Latin, Greek, digits) and typewriter (Latin, digits) alphabets,
+Fraktur and Blackboard Bold styles are included.
+
+A full list of available glyphs is shown in file \file{unimath-euler.pdf}.
+
+\subsection{Character variants}
+\label{ssection-cv}
+
+\NEOTF{} provides fourteen ``Character Variants'' options, listed on
+table~\vref{cv}, to choose between different glyphs for Greek characters
+and some others.
+\begin{table}[ht]
+  \centering  \caption{Character variants.}
+  \hlabel{cv}
+  \begin{tabular}{@{}>{\ttfamily}lccl@{}}
+    \hline
+           & Default       & Variant          & Name\\
+    \hline
+      cv01 & $\hslash$     & $\hbar$          & \cmd{hslash} \\
+      cv02 & $\emptyset$   & $\varemptyset$   & \cmd{emptyset} \\
+      cv03 & $\epsilon$    & $\varepsilon$    & \cmd{epsilon} \\
+      cv04 & $\kappa$      & $\varkappa$      & \cmd{kappa} \\
+      cv05 & $\pi$         & $\varpi$         & \cmd{pi} \\
+      cv06 & $\phi$        & $\varphi$        & \cmd{phi} \\
+      cv09 & $\theta$      & $\vartheta$      & \cmd{theta} \\
+      cv10 & $\Theta$      & $\varTheta$      & \cmd{Theta}\\
+    \hline
+  \end{tabular}
+\end{table}
+
+For instance, to get \cmd{epsilon} and \cmd{phi} typeset as $\varepsilon$
+and $\varphi$ instead of $\epsilon$ and $\phi$ (with matching bold variants
+$\symbf{\varepsilon}$ and $\symbf{\varphi}$), you can
+add option \verb+CharacterVariant={3,6}+ to the \cmd{setmathfont} call:
+\begin{verbatim}
+\setmathfont{Euler-Math.otf}[CharacterVariant={3,6}]
+\end{verbatim}
+
+Please note that curly braces are mandatory whenever more than one
+``Character Variant'' is selected.
+
+Note about \cmd{hbar}: \pkg{unicode-math} defines \cmd{hbar} as
+\cmd{hslash} (U+210F) while \pkg{amsmath} provides two different glyphs
+($h$ with horizontal or diagonal stroke).\\
+\pkg{euler-math} follows \pkg{unicode-math}; the $h$ with horizontal stroke
+can be printed using \cmd{hslash} or \cmd{hbar} together with character
+variant \opt{cv01} or with \cmd{muphbar} (replacement for AMS’ command
+\cmd{hbar}).
+
+\subsection{Stylistic sets}
+\label{ssection-ss}
+
+\NEOTF{} provides two ``Stylistic Sets'' options to choose between different
+glyphs for families of maths symbols.
+
+\verb+StylisticSet=5+, alias \verb+Style=smaller+, converts some symbols into
+their smaller variants, see table~\vref{ss05}.
+
+\verb+StylisticSet=6+, alias \verb+Style=subsetneq+, converts some inclusion
+symbols, see table~\vref{ss06}.
+\begin{table}[ht]
+  \centering
+  \caption{Stylistic Sets 5 and 6}
+  \subfloat[\opt{Style=smaller\quad (+ss05)}]{\hlabel{ss05}%
+  \begin{tabular}[t]{@{}lcc@{}}
+    \hline
+      Command           & Default         & Variant \\
+    \hline
+      \cmd{in}               & $\in$               & $\smallin$ \\
+      \cmd{ni}               & $\ni$               & $\smallni$ \\
+      \cmd{mid}              & $\mid$              & $\shortmid$ \\
+      \cmd{nmid}             & $\nmid$             & $\nshortmid$ \\
+      \cmd{parallel}         & $\parallel$         & $\shortparallel$ \\
+      \cmd{nparallel}        & $\nparallel$        & $\nshortparallel$ \\
+    \hline
+  \end{tabular}
+  }\hspace{10mm} % eof subfloat
+  \subfloat[\opt{Style=subsetneq\quad (+ss06)}]{\hlabel{ss06}%
+  \begin{tabular}[t]{@{}lcc@{}}
+    \hline
+      Command                & Default             & Variant \\
+    \hline
+      \cmd{subsetneq}   & $\subsetneq$    & $\varsubsetneq$ \\
+      \cmd{supsetneq}   & $\supsetneq$    & $\varsupsetneq$ \\
+      \cmd{subsetneqq}  & $\subsetneqq$   & $\varsubsetneqq$ \\
+      \cmd{supsetneqq}  & $\supsetneqq$   & $\varsupsetneqq$ \\
+    \hline
+  \end{tabular}
+  }% eof subfloat
+\end{table}
+
+
+To enable Stylistic Sets 5 and 6 for \NEOTF{}, you should enter
+\begin{verbatim}
+\setmathfont{Euler-Math.otf}[StylisticSet={5,6}]  or
+\usepackage[Style={smaller,subsetneq}]{Euler-Math.otf}
+\end{verbatim}
+{\samepage then, \verb+\[A \subsetneq B\quad x \in E \quad D \parallel D' \]+
+will print as
+\setmathfont{Euler-Math.otf}[StylisticSet={5,6}]
+\[A \subsetneq B\quad x \in E \quad D \parallel D' \]
+instead of
+\setmathfont{Euler-Math.otf}
+\[A \subsetneq B\quad x \in E \quad D \parallel D' \]
+}
+
+\subsection{Other font features}
+\label{ssec-other-features}
+
+To get oldstyle numbers in maths, the feature \opt{+onum} is available:
+\begin{verbatim}
+\setmathfont{Euler-Math.otf}[Numbers=OldStyle]  or
+\usepackage[Style={fulloldstyle}]{euler-math}
+\end{verbatim}
+
+\setmathfont{Euler-Math.otf}[Numbers=OldStyle]
+$0123456789, \symbf{0123456789}$
+\setmathfont{Euler-Math.otf}
+
+\subsection{Standard LaTeX math commands}
+\label{ssec-math-commands}
+
+All standard LaTeX maths commands, all \pkg{amssymb} commands and all
+\pkg{latexsym} commands are supported by \NEOTF{}, for some of them loading
+\pkg{euler-math.sty} is required.
+
+Various wide accents are also supported:
+\begin{itemize}
+\item \cmd{wideoverbar} and \cmd{mathunderbar}%
+  \footnote{\cmd{overline} and \cmd{underline} are not font related,
+     they are based on \cmd{rule}.}
+  \[\wideoverbar{x}\quad \wideoverbar{xy}\quad \wideoverbar{xyz}\quad
+    \wideoverbar{A\cup B}\quad \wideoverbar{A\cup (B\cap C)\cup D}\quad
+    \mathunderbar{m+n+p}\]
+
+\item \cmd{widehat} and \cmd{widetilde}
+\[\widehat{x}\; \widehat{xx} \;\widehat{xxx} \;\widehat{xxxx}\;
+  \widehat{xxxxx} \;\widehat{xxxxxx} \;\widetilde{x}\; \widetilde{xx}\;
+  \widetilde{xxx} \;\widetilde{xxxx} \;\widetilde{xxxxx}\;
+  \widetilde{xxxxxx}\]
+
+\item \cmd{widecheck}  and \cmd{widebreve}
+  \[\widecheck{x}\quad \widecheck{xxxx}\quad \widecheck{xxxxxx}\quad
+    \widebreve{x}\quad \widebreve{xxxx}\quad \widebreve{xxxxxx}\]
+
+\item \cmd{overparen} and \cmd{underparen}
+  \[\overparen{x}\quad \overparen{xy}\quad \overparen{xyz}\quad
+    \mathring{\overparen{A\cup B}}\quad
+    \overparen{A\cup (B\cap C)\cup D}^{\smwhtcircle}\quad
+    \overparen{x+y}^{2}\quad \overparen{a+b+...+z}^{26}\]
+\vspace{-\baselineskip}
+\[\underparen{x}\quad \underparen{xz} \quad \underparen{xyz}
+  \quad \underparen{x+z}_{2}\quad \underparen{a+b+...+z}_{26}\]
+
+\item \cmd{overbrace} and \cmd{underbrace}
+  \[\overbrace{a}\quad \overbrace{ab}\quad \overbrace{abc}\quad
+  \overbrace{abcd}\quad \overbrace{abcde}\quad
+  \overbrace{a+b+c}^{3}\quad \overbrace{ a+b+. . . +z }^{26}\]
+  \vspace{-\baselineskip}
+  \[\underbrace{a}\quad\underbrace{ab}\quad\underbrace{abc}\quad
+  \underbrace{abcd}\quad \underbrace{abcde}\quad
+  \underbrace{a+b+c}_{3}  \quad \underbrace{ a+b+...+z }_{26}\]
+
+\item \cmd{overbracket} and \cmd{underbracket}
+  \[\overbracket{a}\quad \overbracket{ab}\quad \overbracket{abc}\quad
+  \overbracket{abcd}\quad \overbracket{abcde}\quad
+  \overbracket{a+b+c}^{3}\quad \overbracket{ a+b+. . . +z }^{26}\]
+  \vspace{-\baselineskip}
+  \[\underbracket{a}\quad\underbracket{ab}\quad\underbracket{abc}\quad
+  \underbracket{abcd}\quad \underbracket{abcde}\quad
+  \underbracket{a+b+c}_{3}  \quad \underbracket{ a+b+...+z }_{26}\]
+
+\item \cmd{overrightarrow}, \cmd{overleftarrow} and \cmd{overleftrightarrow}
+  \[\overrightarrow{v}\quad \overrightarrow{M}\quad \overrightarrow{vv}
+  \quad \overrightarrow{AB}\quad \overrightarrow{ABC}
+  \quad \overrightarrow{ABCD} \quad \overrightarrow{ABCDEFGH}.
+  \]
+  \vspace{-\baselineskip}
+  \[\overleftarrow{v}\quad \overleftarrow{M}\quad \overleftarrow{vv}
+  \quad \overleftarrow{AB}\quad \overleftarrow{ABC}
+  \quad \overleftarrow{ABCD} \quad \overleftarrow{ABCDEFGH}\]
+  \vspace{-\baselineskip}
+  \[\overleftrightarrow{v}\quad \overleftrightarrow{M}\quad
+    \overleftrightarrow{vv}\quad
+    \overleftrightarrow{AB}\quad \overleftrightarrow{ABC}\quad
+    \overleftrightarrow{ABCD} \quad \overleftrightarrow{ABCDEFGH}\]
+
+\item \cmd{overrightharpoon} and \cmd{overleftharpoon}
+  \[\overrightharpoon{v}\quad \overrightharpoon{M}\quad \overrightharpoon{vv}
+  \quad \overrightharpoon{AB}\quad \overrightharpoon{ABC}
+  \quad \overrightharpoon{ABCD} \quad \overrightharpoon{ABCDEFGH}.
+  \]
+  \vspace{-\baselineskip}
+  \[\overleftharpoon{v}\quad \overleftharpoon{M}\quad \overleftharpoon{vv}
+  \quad \overleftharpoon{AB}\quad \overleftharpoon{ABC}
+  \quad \overleftharpoon{ABCD} \quad \overleftharpoon{ABCDEFGH}\]
+
+\item \cmd{underrightarrow}, \cmd{underleftarrow} and \cmd{underleftrightarrow}
+  \[\underrightarrow{v}\quad \underrightarrow{M}\quad \underrightarrow{vv}
+  \quad \underrightarrow{AB}\quad \underrightarrow{ABC}
+  \quad \underrightarrow{ABCD} \quad \underrightarrow{ABCDEFGH}.
+  \]
+  \vspace{-\baselineskip}
+  \[\underleftarrow{v}\quad \underleftarrow{M}\quad \underleftarrow{vv}
+  \quad \underleftarrow{AB}\quad \underleftarrow{ABC}
+  \quad \underleftarrow{ABCD} \quad \underleftarrow{ABCDEFGH}\]
+  \vspace{-\baselineskip}
+  \[\underleftrightarrow{v}\quad \underleftrightarrow{M}\quad
+    \underleftrightarrow{vv}\quad
+    \underleftrightarrow{AB}\quad \underleftrightarrow{ABC}\quad
+    \underleftrightarrow{ABCD} \quad \underleftrightarrow{ABCDEFGH}\]
+
+\item \cmd{underrightharpoondown} and \cmd{underleftharpoondown}
+  \[\underrightharpoondown{v} \quad \underrightharpoondown{M}\quad
+    \underrightharpoondown{vv}\quad \underrightharpoondown{AB}\quad
+    \underrightharpoondown{ABC}\quad \underrightharpoondown{ABCD}
+    \quad \underrightharpoondown{ABCDEFGH}.
+  \]
+  \vspace{-\baselineskip}
+  \[\underleftharpoondown{v} \quad \underleftharpoondown{M}\quad
+    \underleftharpoondown{vv}\quad \underleftharpoondown{AB}\quad
+    \underleftharpoondown{ABC}\quad \underleftharpoondown{ABCD}
+    \quad \underleftharpoondown{ABCDEFGH}.
+  \]
+
+\item Finally \cmd{widearc} and \cmd{overrightarc} (loading
+  \pkg{euler-math.sty} is required)
+\[\widearc{AMB}\quad \overrightarc{AMB}\]
+\end{itemize}
+
+All the extensible arrows provided by the \pkg{mathtools} package are
+available in the \NEOTF{} font (loading \pkg{euler-math.sty} is required),
+f.i.:
+\[X \xLeftrightarrow{\text{above}} Y \xhookrightarrow[\text{under}]{}
+  Z\xmapsto{\text{above}} W\]
+
+
+\subsection{Mathematical alphabets}
+\label{ssec-math-alphabets}
+
+\begin{itemize}
+\item  All Latin and Greek characters are available in upright
+  and bold via the \verb+\symup{}+ and \verb+\symbf{}+ commands.
+
+\item Calligraphic alphabet (\cmd{symscr} or \cmd{symcal} or
+  \cmd{mathcal} command), uppercase:\\
+  $\symscr{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$\\
+  also in boldface (\cmd{symbfscr},\cmd{symbfcal} or \cmd{mathbfcal} command):\\
+  $\symbfscr{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$
+
+\item Blackboard-bold alphabet (\cmd{symbb} or \cmd{mathbb} command),
+  uppercase, lowercase and digits:
+
+  $\symbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$
+
+  $\symbb{abcdefghijklmnopqrstuvwxyz\quad 0123456789}$
+
+\item Fraktur alphabet medium and bold
+  (\cmd{symfrak}, or \cmd{symbffrak} commands):
+
+  $\symfrak{ABCDEFGHIJKLMNOPQRSTUVWXYZ\quad abcdefghijklmnopqrstuvwxyz}$\\
+  $\symbffrak{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$\\
+  \hphantom{$\symfrak{ABCDEFGHIJKLMNOPQRSTUVWXYZ\quad}$}%
+    $\symbffrak{abcdefghijklmnopqrstuvwxyz}$
+
+\item Sans-serif (Latin and Greek) and Typewriter (Latin) alphabets
+  (commands \verb+\symsf{}+, \verb+\symbfsf{}+, \verb+\symtt{}+):
+
+  $\symsf{ABCDEFGHIJKLMNOPQRSTUVWXYZ}\\
+   \symsfit{abcdefghijklmnopqrstuvwxyz\quad 0123456789}$
+
+  $\symbfsf{ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ}\\
+   \symbfsf{αβγδεζηθικλμνξοπρσςτυφχψω}$
+
+  $\symtt{ABCDEFGHIJKLMNOPQRSTUVWXYZ}\\
+   \symtt{abcdefghijklmnopqrstuvwxyz\quad 0123456789}$
+
+\end{itemize}
+
+
+\subsection{Missing symbols}
+
+\NEOTF{} does not aim at being as complete as \file{STIXTwoMath-Regular} or
+\file{Cambria}, the current glyph coverage compares with TeXGyre math fonts.
+In case some symbols do not show up in the output file, you will see warnings
+in the \file{.log} file, for instance:
+
+\setmathfont{STIXTwoMath-Regular.otf}[range={"2964}]
+\texttt{Missing character: There is no }$⥤$%
+\texttt{ (U+2964) in font Euler Math}
+
+Borrowing them from a more complete font, say \file{Asana-Math},
+is a possible workaround:
+\verb+\setmathfont{Asana-Math.otf}[range={"2964},Scale=1.02]+\\
+scaling is possible, multiple character ranges are separated with commas:\\
+\verb+\setmathfont{Asana-Math.otf}[range={"294A-"2951,"2964,"2ABB-"2ABE}]+
+
+Let’s mention \pkg{albatross}, a useful tool to find out the list of fonts
+providing a given glyph: f.i. type in a terminal ``\texttt{albatross U+2964}'',
+see the manpage or \file{albatross-manual.pdf}.
+
+\section{Acknowledgements}
+
+Khaled Hosni achieved most of the portage of Hermann Zapf’s Euler font to
+Unicode between 2009 and 2016.  After Hermann’s death in 2015, he decided to
+stop the project but his \file{euler.otf} font, although not available on CTAN,
+continued to be used, see
+\href{https://tex.stackexchange.com/questions/425098/which-opentype-math-fonts-are-available}{https://tex.stackexchange.com/questions/425098/}.
+I offered Khaled my help to finalise the font, we agreed I would try to
+complete the font and maintain it on my own.
+
+\bigskip
+\begin{center}\Huge
+\decotwo
+\end{center}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: luatex
+%%% TeX-master: t
+%%% coding: utf-8
+%%% End:

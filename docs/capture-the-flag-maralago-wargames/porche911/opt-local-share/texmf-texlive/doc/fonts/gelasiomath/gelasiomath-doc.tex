@@ -1,0 +1,168 @@
+% !TEX TS-program = lualatexmk
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[11pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+\RequirePackage{etoolbox,trace,bm}
+
+%\geometry{landscape}                % Activate for for rotated page geometry
+\usepackage[parfill]{parskip} 
+\usepackage{graphicx,fonttable}
+\usepackage{array,booktabs}
+\usepackage[T1]{fontenc} % Active encoding for use in math text
+\usepackage[type1,sfdefault,scale=1]{sourcesanspro}% used by \mathsf
+\usepackage[scaled=.98,varqu,varl]{zi4} % for \mathtt
+\usepackage[vvarbb]{gelasiomath}
+
+\iftutex\setmonofont{inconsolata.otf}\fi
+%\else
+%\RequirePackage{pdftexcmds}
+%\usepackage{zi4}
+%\fi
+%\usepackage[gelasio]{newtx}
+%\usepackage{xchsc}
+\usepackage{booktabs}
+%\setsansfont[Scale=MatchLowercase,Ligatures=TeX]{Gill Sans}
+%\setmonofont[Scale=MatchLowercase]{Andale Mono}
+
+\title{Gelasiomath}
+\author{Michael Sharpe}
+%\date{}                                           % Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+The newest versions of {\tt newtx.sty} and {\tt newtxmath.sty} 
+and the new {\tt gelasiomath.sty} 
+provide  support for the {\tt Gelasio} text fonts and the associated {\tt gelasio} package. Its main features are:
+\begin{itemize}
+\item
+Math support for {\tt gelasio};
+\item small caps (regular, italic, bold and bold italic) for {\tt gelasio} by means of a work-around using {\tt XCharter} small caps enlarged by 2\%;
+\item access to numerator, denominator and inferior figures from {\tt pdflatex}. (The {\tt Gelasio}  fonts have these figures but {\tt gelasio.sty} does not offer support for them under {\tt pdflatex}.)
+\item
+Math figures are lining, rather than simply following the text figure style, which is, by default, oldstyle. E.g., \verb|$1X$| gives $1X$, not 1$X$.
+\end{itemize}
+
+The simplest and most capable way to use these support macros is through the small {\tt gelasiomath} package, which works with all LaTeX engines.
+\begin{verbatim}
+\usepackage[<options>]{gelasiomath}
+\end{verbatim}
+The only options handled directly by {\tt gelasiomath} are {\tt scale} and {\tt scosf}. The {\tt scale} option  sets appropriate scales for {\tt gelasio}, {\tt xcharter} and {\tt newtxmath}, taking into account that {\tt gelasio} requires a reduction by the factor {\tt.92} to match {\tt newtxmath}. Option {\tt scosf} specifies that figures in amall caps should be transformed to oldstyle, no matter what the figure style for {\tt gelasio} was set to.
+
+All other options added to {\tt gelasiomath} are passed along to {\tt gelasio} and {\tt newtxmath}.
+E.g., to use {\tt gelasio} with lining figures except in small caps, at its natural size with matching math scale, you could write
+\begin{verbatim}
+\usepackage[scale=1.087,lining,scosf]{gelasiomath}
+\end{verbatim}
+
+%The basic method to load {\tt gelasio} with math support is to include in your preamble the lines
+%\begin{verbatim}
+%\usepackage[scale=.92]{gelasio}
+%\usepackage[gelasio]{newtxmath}
+%\end{verbatim}
+%or just
+%\begin{verbatim}
+%\usepackage[gelasio]{newtx}
+%\end{verbatim}
+%Loading using {\tt newtx} is preferred as it offers scaling both text and math without fiddling arithmetic as well as other enhancements described below. For the remainder of this description, I'll assume you are making use of {\tt newtx}.
+
+%To add support for XCharter small caps, add to your preamble the line
+%\begin{verbatim}
+%\usepackage{xchsc}
+%\end{verbatim}
+%No options are available.
+ 
+%I recommend applying \verb|\textsc| and \verb|\scshape| only to text, not figures, as {\tt XCharter} figures do not match {\tt Gelasio} figures very well. For example:\\
+
+The insertion of {\tt xcharter} small caps is complicated by the fact that xcharter capital letters are not a good match for gelasio capitals, and figures are an even worse mismatch. In {\tt gelasiomath}, LaTeX's font switch \verb|\scshape| is redefined to {\tt xcharter} small caps at the appropriate scale, and this in turn leads to a corresponding change of the macro \verb|\textsc|. The following table illustrates the problems with capitals and figures.
+
+\begin{center}
+  \begin{tabular}{@{} ccc @{}}
+    \toprule
+    Source & Typeset source & Comments \\ 
+    \midrule
+    Reg. 2345 \verb|{\scshape| SmCap 2345\verb|}|& Reg. 2345 {\scshape SmCap 2345} & figures do not match \\ 
+    Reg. 2345 \verb|{\scshape| SmCap\verb|}| 2345& Reg. 2345 {\scshape SmCap} 2345 & Caps not good match  \\ 
+     S\verb|{\scshape| mall\verb|}| C\verb|{\scshape| ap\verb|}|& S{\scshape mall} C{\scshape ap}& Better IMO\\ 
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+The macro \verb|\textsc| is left as is and a new macro \verb|\textSC| is defined so as to exclude capitals and figures from the font change to {\tt xcharter}, making use of an {\tt expl3 regex} method I learned from a posting by Enrico Gregorio. (The regex tries to find all capitals in the argument string---this depends on the use of macros to specify non-ASCII capitals.) I found no way to make an equivalent font switch \verb|\SCshape|. The following lines compare the effects of \verb|\textSC| versus \verb|\textsc| for regular, italic, bold and bold italic.
+
+
+\textSC{Small Caps 2345} v. \textsc{Small Caps 2345}\\
+{\itshape \textSC{Small Caps 2345}  v. \textsc{Small  Caps 2345}}\\
+{\bfseries \textSC{Small Caps 2345}  v. \textsc{Small  Caps 2345}}\\
+{\bfseries\itshape \textSC{Small Caps 2345} v. \textsc{Small  Caps 2345}}
+
+Users of XeLaTeX/LuaLaTeX will have to contend with irritating LaTeX Font Warnings about \verb|TU/Gelasio(?)/m/sc[it]| being undefined, but the output will be correct.
+
+{\bfseries\textSC{New Text Commands}:}
+\begin{itemize}
+\item
+In unicode tex, font switches \verb|\nufigures|, \verb|\defigures| and \verb|\infigures| are defined for numerators, denominators and inferiors as well as the corresponding macros \verb|\textnum|, \verb|\textde|, and \verb|\textinf|.
+\item (All engines)
+\verb|\textlf|, \verb|\texttlf|, \verb|\textosf|, \verb|\texttosf| give their arguments in lining figures, tabular lining figures, oldstyle figures and tabular oldstyle figures respectively.
+\item For {\tt pdflatex}, macros \verb|\textnum|, \verb|\textde|, and \verb|\textinf| are provided, but not the corresponding font switch commands. (These work by changing the baseline of the superior figures.) 
+\item A \verb|\textfrac| macro is provided, intended for regular weight only. E.g., \verb|\textfrac{3}{16}| gives \textfrac{3}{16} and \verb|\textfrac[2]{3}{16}| gives \textfrac[2]{3}{16}.
+\item
+There is a stacked fraction macro, \verb|\textsfrac|. E.g.,  
+\verb|\textsfrac[1]{7}{32}| gives \textsfrac[1]{7}{32}. See the documentation for {\tt newtx} for details about the options available. The small denominator figures have configurable size and are made available for general use with the macro \verb|\textsmde|.
+\end{itemize} 
+See the documentation  for the {\tt newtx} package for detailed information about math typesetting, bearing in mind that {\tt gelasiomath} takes care of loading {\tt gelasio} and {\tt newtxmath}. Here is a sample basic preamble using unicode latex.
+
+\begin{verbatim}
+% !TEX TS-program = lualatex
+\documentclass[11pt,leqno]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{array,booktabs}
+\usepackage[T1]{fontenc} % Active encoding for use in math text
+\usepackage[type1,sfdefault,scale=1]{sourcesanspro}% used by \mathsf
+\usepackage[scaled=.98,varqu,varl]{zi4} % for \mathtt
+% the next line loads fontspec
+\usepackage[amsthm,vvarbb,scosf]{gelasiomath} 
+%\setmonofont and \setsansfont could be set here if
+% necessary for use in text passages
+\end{verbatim}
+Here is a well-known nonsense fragment from \emph{The TeXBook.}
+
+With a price of \pounds 148, almost anything can be found \textsc{Floating In \textbf{Fields}.} --- ?`But aren't Kafka's
+Schlo{\ss} and {\AE}sop's {\OE}uvres often \emph{na{\"\i}ve} vis-\`{a}-vis
+the d{\ae}monic ph{\oe}nix's official r\^{o}le in fluffy souffl\'{e}s?
+
+\newcommand\ibinom[2]{\genfrac\lbrace\rbrace{0pt}{}{#1}{#2}}
+%    \section*{...}
+The following is borrowed from \emph{The \LaTeX\ Companion Third Edition}.
+
+First some large operators both in text:
+\smash{$ \iiint\limits_{\mathcal{Q}} f(x,y,z)\,dx\,dy\,dz $} and
+    $ \prod_{\gamma\in\Gamma_{\widetilde{C}}}
+               \partial(\widetilde{X}_\gamma) $; and also on display:
+
+\begin{equation} \begin{split} \iiiint\limits_{\mathbf{Q}} f(w,x,y,z)dwdxdydz
+      & \leq \oint_{\bm{\partial Q}} f’ \left( \max \left\lbrace
+              \frac{\lVert w \rVert}{\lvert w^2 + x^2 \rvert} ;
+              \frac{\lVert z \rVert}{\lvert y^2 + z^2 \rvert} ;
+              \frac{\lVert w \oplus z \rVert}{\lVert x \oplus y \rVert}
+                                        \right\rbrace \right)          \\
+ & \precapprox \biguplus_{\mathbb{Q} \Subset \bar{\mathbf{Q}}}
+              \left[ f^{\ast} \left(
+                \frac{\left\lmoustache\mathbb{Q}(t)\right\rmoustache}
+                     {\sqrt {1 - t^2}}
+              \right) \right]_{t=\alpha}^{t=\vartheta} - ( \Delta + \nu - v )^3
+    \end{split}  \end{equation}
+
+For $x$ in the open interval $ \left] -1, 1 \right[ $ the infinite
+    sum in Equation~(2) is convergent; however, this does
+    not hold throughout the closed interval $ \left[ -1, 1 \right] $.
+
+ \begin{equation}
+  (1 - x)^{-k} = 1 + \sum_{j=1}^{\infty} (-1)^j \ibinom{k}{j} x^j
+      \text{\quad for $k \in \mathbb{N}$; $k \neq 0$.}  %\label{eq:binom1}
+    \end{equation}
+
+%\fonttable{Gelasio-Regular-tlf-ot1}
+\end{document}  
