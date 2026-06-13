@@ -1,0 +1,45 @@
+#n extract TrIO information from a .log file
+/^This is TeX, Version 3.141592653/{
+   s/^This is.*/\\def\\TrIOeEMnvVfilenames{% password-protected name/p
+}
+/^\*\*/{
+   s/.*/\\ifcase\\TrIOcnt\\iffalse/p
+}
+/^TrIO >>>/{
+   x
+   s/}%%/ \\TrIOfile}%/p
+   x
+   s/\(.*\)/\\TrIOmessage{\1}%%/
+   h
+   s/.*Line /\\else\\TrIOstop{case ( \\TrIOcnt) in auto}\\fi\n\\or\\ifnum\\TrIOcount=/
+   s/: /\\def\\TrIOiocmd{\\/
+   s/input/TRIOinput/
+   s/INPUT/TrIOcCkPxXtransfer\\TRIOinput/
+   s/openin/TRIOaAmNzZopenin/
+   s/immediate /immediate\\/
+   s/openout/TRIObBlOyYopenout/
+   /TRIOinput/s/\\def/\\gdef/
+   s/%%/%/p
+}
+/^Please type another input file name/{
+   s/.*: /\\TrIOenvinput\\gdef\\TrIOfile{/
+   s/$/ }%/
+   x
+   H
+}
+/^\\FilenameOPEN.*=/{
+   s/.*=/\\TrIOenvopen\\def\\TrIOfile{/
+   s/$/}%/
+   x
+   s/^.*\n//g
+   H
+}
+${
+   x
+   s/}%%/ \\TrIOfile}%/p
+   x
+   s/.*/\\else\\TrIOstop{case ( \\TrIOcnt) in auto}\\fi/p
+}
+$a\
+\\else\\TrIOstop{unknown case ( \\TrIOcnt) in auto}%\
+\\fi\\TrIOfFLouUexecute}

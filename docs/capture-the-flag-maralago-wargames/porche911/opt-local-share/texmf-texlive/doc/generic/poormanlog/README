@@ -1,0 +1,121 @@
+POORMANLOG (0.07, 2022/05/25)
+=============================
+
+poormanlog.tex provides (expandable) macros \PMLogZ and \PMPowTen
+for computing base 10 logarithms and powers of 10 with a bit less
+than 9 digits of (fixed point) precision.
+
+It can be used with TeX (\input poormanlog) and has a LaTeX interface
+(\usepackage{poormanlog}).
+
+Regarding TeX, it requires the e-TeX \numexpr primitive, thus etex
+or pdftex or other binaries with the e-TeX extensions are required.
+
+
+Changes
+-------
+
+- 0.04 (2019/02/17): initial release.  The package has no
+  dependencies and alongside two macros \PMLogZ and \PMPowTen
+  also provides some specific additions to xint.
+
+- 0.05 (2019/04/22): the additions/patches to xint originally
+  provided by poormanlog.tex got moved into xint 1.3f itself.
+
+  Thus, poormanlog now reduces to only two macros
+  \PMLogZ and \PMPowTen.  It can be imported by other macro
+  files with no danger of conflicting with future releases of
+  xint in case of concurrent usage.
+
+- 0.06 (2021/04/21): documentation update (warning?) regarding
+  \PMLogZ{999999999} output being surprisingly 000000000.
+
+- 0.07 (2022/05/25): (again cosmetic changes)
+
+  * add a % at end of the \ProvidesPackage line in poormanlog.sty
+
+  * release 0.06 modified only the README and forgot to update the
+    version strings in poormanlog.sty and in poormanlog.tex
+
+Files
+-----
+
+poormanlog.tex
+poormanlog.sty
+README
+
+
+\PMLogZ{#1} computes base-10 logarithms:
+----------------------------------------
+
+expansion: the argument is submitted to f-expansion and the macro
+           itself expands fully in two steps.
+
+input:  #1 must be (or f-expands to) a mantissa ddddddddd with exactly
+        nine digits, standing for D = d.dddddddd, 1 <= D < 10
+
+output: nine digits xxxxxxxxx standing for X = 0.xxxxxxxxx such that
+        log10(D) is about X
+
+        CAUTION: for #1=999999999, the macro outputs 000000000,
+        which are the fractional digits of the correct rounding
+        1.000000000 of log10(9.99999999)=0.9999999995657...
+
+        As outputting 999999999 to represent log10(0.999999999) is not
+        completely satisfactory either, it is better to work out one's
+        own alternate wrapper of "\the\numexpr\PML@#1." as the latter
+        produces exceptionally 1000000000 with ten digits for
+        #1=999999999, and it is actually as simple to test the
+        exceptional case on this ten digit output than on input.
+
+        Please refer to source code and check how \PMLogZ is built on
+        top of \PML@ output and design own user variant: in place of
+        the gobble in the \PMLogZ one only needs to test if first
+        digit is 2 to identify the special case.
+
+precision: It seems from testing that absolute error is not much
+           more than 1 unit in the last (*fixed point*) place,
+           and result differs from rounded mathematical value of
+           log10(D) by at most 1 unit in the last place.
+              (*attention estimate not rigorously proven*).
+
+
+\PMPowTen{#1} computes fractional powers of 10:
+-----------------------------------------------
+
+expansion: the argument is submitted to f-expansion and the macro
+           itself expands fully in two steps.
+
+input:  #1 must be (f-expands to) exactly nine digits xxxxxxxxx, standing
+        for X = 0.xxxxxxxxx
+
+output: nine digits ddddddddd, such that D = d.dddddddd is about 10^X
+        The first digit of output is never zero (i.e. 1 <= D < 10)
+
+precision: It seems from testing that absolute error is less than
+           2 units in the last place, and result D differs from
+           rounded mathematical value of 10^X by at most 2 units in
+           the last place.
+               (*attention estimate not rigorously proven*).
+
+
+LICENSE
+-------
+
+Copyright (C) 2019-2022, Jean-Francois Burnol.
+
+This Work may be distributed and/or modified under the conditions of the
+LaTeX Project Public License version 1.3c. This version of this license
+is in
+
+    <http://www.latex-project.org/lppl/lppl-1-3c.txt>
+
+and version 1.3 or later is part of all distributions of LaTeX version
+2005/12/01 or later.
+
+This Work has the LPPL maintenance status `author-maintained'.
+
+The Author of this Work is Jean-Francois Burnol.
+
+This Work consists of files poormanlog.tex, poormanlog.sty and this
+README.

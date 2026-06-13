@@ -1,0 +1,581 @@
+\catcode`\@=11
+
+\input pdfmsym
+\pdfmsymsetscalefactor{10}
+
+
+\let\@xp=\expandafter
+\font\scten  = cmcsc10
+
+\def\fakebold#1{\pdf@literal{2 Tr .2 w}#1\pdf@literal{0 Tr 1 w}}
+\def\scalebox[#1]#2{{\setbox0=\hbox{#2}\hbox to#1\wd0{\pdf@literal{q #1 0 0 #1 0 0 cm}\rlap{#2}\pdf@literal{Q}\hfil}}}
+\def\begincenter{\bgroup\leftskip=0pt plus 1fill \rightskip=\leftskip}
+\def\endcenter{\par\egroup}
+
+\def\fbox#1{\vbox{\hrule\hbox{\vrule$#1$\vrule}\hrule}}
+
+\def\flip#1{{\setbox0=\hbox{#1}\kern\wd0\pdf@literal{q -1 0 0 1 0 0 cm}\rlap{#1}\pdf@literal{Q}}}
+
+\font\sevenrm = cmr7
+\def\MatheX{Math\kern-.1ex\lower .6ex\hbox {E}\kern -.125emX}
+\def\xetex{X\kern-.125em\lower.5ex\hbox{\flip{E}}\kern-.1667em\TeX}
+\def\LaTeX{L\kern-.36em{\setbox0=\hbox{T}\vbox to\ht0{\hbox{\sevenrm A}\vss}}\kern-.15em\TeX}
+
+\def\fontuse{\afterassignment\@@ \font\@@}
+\def\scalefont{\fontuse \curr@font scaled }
+
+%\def\title#1{\leavevmode\vskip.1\vsize\centerline{\fontuse cmcsc10 scaled 5000 \fakebold{#1}}\bigskip}
+\def\title#1{\leavevmode\vskip.1\vsize\centerline{\scalebox[8]{\fakebold{#1}}}\bigskip}
+
+\newcount\c@section
+\newcount\c@subsection
+\def\section#1{\bigskip\advance\c@section by 1 \c@subsection=0 \hbox{\fontuse cmbx10 scaled 2000 \the\c@section. #1}\par\bigskip}
+\def\subsection#1{\medskip\advance\c@subsection by 1 \hbox{\fontuse cmbx10 scaled 1500 \the\c@section.\the\c@subsection. #1}\par\medskip}
+
+\chardef\fslash=`\/
+{\catcode`\^^M=\active%
+\gdef\begincode{%
+    \bgroup\everypar={}%
+    \medskip%
+    \setbox0=\vbox\bgroup%
+    \global\dimen69=0pt%
+    \tt%
+    \catcode`\^^M=\active%
+    \def^^M{\egroup\ifnum\wd1>\dimen69 \global\dimen69=\wd1\fi\copy1\setbox1=\hbox\bgroup}%
+    \catcode`\ =\active%
+    \catcode`\{=12%
+    \catcode`\}=12%
+    \catcode`\/=0%
+    \catcode`\$=12%
+    \catcode`\\=12%
+    \catcode`\#=12%
+    \catcode`\%=12 \setbox1=\hbox\bgroup}}
+\def\endcode{%
+    \egroup\egroup%
+    \hfil\hbox to \dimen69{\box0}\hfil\par%
+    \medskip%
+    %\let\@par=\par%
+    \egroup%
+}
+
+\def\icode{\bgroup\tt%
+    \catcode`\ =\active%
+    \catcode`\/=0%
+    \catcode`\{=12%
+    \catcode`\}=12%
+    \catcode`\$=12%
+    \catcode`\\=12%
+}
+\def\eicode{\egroup}
+
+{\catcode`\<=\active 
+\gdef\macrousage{\bgroup\setbox0=\hbox\bgroup\tt%
+    \catcode`\ =\active%
+    \catcode`\/=0%
+    \catcode`\{=12%
+    \catcode`\}=12%
+    \catcode`\$=12%
+    \catcode`\\=12%
+    \catcode`\<=\active%
+    \def<##1>{$\langle${\it ##1}$\rangle$}%
+}}
+\def\emacrousage{\egroup\par\smallskip\centerline{\box0}\egroup\par\smallskip}
+\def\emacrousageB{\egroup\box0\egroup}
+
+\def\macroname#1{{\tt\string#1}}
+
+\chardef\lbrace="7B
+\chardef\rbrace="7D
+
+\def\macroexp#1{\par\smallskip\bgroup\leftskip=1cm\leavevmode\kern-1cm\macrousage \scantokens{#1}\emacrousageB:}
+\def\emacroexp{\par\egroup\smallskip}
+
+\def\showcase#1#2{{\openup3\jot\halign{\tt\hskip 1cm\string##\hfil&\quad\hfil##\cr
+    \omit\tt\string#1: & $\displaystyle#1$\cr\noalign{\kern3pt\hrule\kern3pt}
+    \displaystyle & $\displaystyle #2$\cr
+    \textstyle & $\textstyle #2$\cr
+    \scriptstyle & $\scriptstyle #2$\cr
+    \scriptscriptstyle & $\scriptscriptstyle #2$\cr}
+}}
+
+\def\showcasevecc#1#2#3{\hbox to\hsize{\hss\vbox{\tabskip=5pt\openup3\jot%
+\halign{\tt\hskip 1cm\string##\tabskip=0pt\hfil&&\quad##\hfil&\quad\hfil##\tabskip=5pt\cr
+    \omit\tt\string#1: & \tt\string#1 & \tt\expandafter\string\csname short\m@strip#1\endcsname%
+    \cr\noalign{\kern3pt\hrule\kern3pt}
+    \displaystyle       & $\displaystyle #1{#2}$            & $\displaystyle \csname short\m@strip#1\endcsname{#3}$      \cr
+    \textstyle          & $\textstyle #1{#2}$               & $\textstyle \csname short\m@strip#1\endcsname{#3}$         \cr
+    \scriptstyle        & $\scriptstyle #1{#2}$             & $\scriptstyle \csname short\m@strip#1\endcsname{#3}$       \cr
+    \scriptscriptstyle  & $\scriptscriptstyle #1{#2}$       & $\scriptscriptstyle \csname short\m@strip#1\endcsname{#3}$ \cr}
+}\hss}\bigskip}
+
+\def\showcaseveccs#1#2#3#4{\showcasevecc{#1}{#3}{#4}\showcasevecc{#2}{#3}{#4}}
+
+\def\showcasearrow#1#2#3#4{\hbox to\hsize{\hss\vbox{\tabskip=0pt\openup3\jot
+\halign{\tt\hskip 1cm\string##\tabskip=0pt\hfil&\quad##\hfil&\quad\hfil##\hfil\quad&\quad\hfil##\tabskip=5pt\cr
+    \omit\tt\string#1: & \tt\string#1 & \tt\expandafter\string\csname long\m@strip#1\endcsname &
+    \tt\expandafter\string\csname x\m@strip#1\endcsname\cr\noalign{\kern3pt\hrule\kern3pt}
+    \displaystyle      & $\displaystyle #2$      & $\displaystyle #3$        & $\displaystyle #4$\cr
+    \textstyle         & $\textstyle #2$         & $\textstyle #3$           & $\textstyle #4$\cr
+    \scriptstyle       & $\scriptstyle #2$       & $\scriptstyle #3$         & $\scriptstyle #4$\cr
+    \scriptscriptstyle & $\scriptscriptstyle #2$ & $\scriptscriptstyle #3$   & $\scriptscriptstyle #4$\cr}
+}\hss}\bigskip}
+
+\def\showcaseaccent#1#2{{\openup3\jot\halign{\tt\hskip 1cm\string##\hfil&\quad\hfil##\cr
+    \omit\tt\string#1: & \cr\noalign{\kern3pt\hrule\kern3pt}
+    \displaystyle & $\displaystyle #2$\cr
+    \textstyle & $\textstyle #2$\cr
+    \scriptstyle & $\scriptstyle #2$\cr
+    \scriptscriptstyle & $\scriptscriptstyle #2$\cr}
+}}
+
+\parindent=0pt
+\parskip=3pt
+\hoffset=\dimexpr 2cm - 1in \relax
+\advance\hsize by -2\hoffset
+\voffset=2\hoffset
+\advance\vsize by -2\voffset
+
+\nopagenumbers
+\title{\pdfMsym}
+\unskip
+{\setbox0=\hbox{\fakebold{\pdfMsym}}\centerline{\hbox to8\wd0{\hfil\it version \pdfMsymversion}}}
+\centerline{\it S. Lurp}
+\centerline{\tt slurper04@gmail.com}
+\centerline{\it\pdfMsymupdate}
+
+\bigskip
+\hbox to \hsize{\hfil\vbox{\hsize=.7\hsize
+\hrule
+\smallskip
+\begincenter
+The \pdfMsym{} package (the {\scten pdf} Math Symbols package)  was created as an extension to the math macros provided by \TeX{} and \LaTeX{}.
+It provides more obscure symbols not found in popular preexisting and reimpliments macros which were viewed as flawed.
+
+A big part of the package was implemented through \macroname\pdfliteral s and other {\scten pdf} primitives.
+So the \pdfMsym{} package is intended for use with {\scten pdf}\TeX, Lua\TeX, \xetex, and their \LaTeX{} counterparts.
+Unfortunately, some macros are not supported by \xetex.
+\endcenter
+\smallskip
+\hrule
+}\hfil}
+
+\vfill\eject
+
+\footline={\hfil\folio\hfil}
+\section{An Introduction to \scalebox[2]{\fakebold\pdfMsym}}
+
+The main motivator for creating \pdfMsym{} was \TeX's poor implementation of the \macroname\overrightarrow{} macro which many
+times yields unsavory results.
+For example \icode \overrightarrow{\rm ABC}/eicode{} yields:
+
+$$ \overrightarrow{\rm ABC} $$
+
+As you can see, the arrow overlaps with the {\tt ABC} which is undesirable.
+This can be fixed by altering the \macroname\rightarrow{} macro, but I decided to make a more versatile alternative:
+the \pdfMsym{} alternative \macroname\vecc{}:
+
+$$ \vecc{\hbox{ABC}} $$
+
+Along with a few other features, \pdfMsym{} provides a simple interface for creating your own style of arrows.
+
+\pdfMsym{} requires the current font size in order to properly scale its symbols, which must be provided after
+{\tt\string\input}ing {\tt pdfmsym.tex}.
+This can be done with the \macroname\pdfmsymsetscalefactor{} macro.
+If your font is 12pt then you can load \pdfMsym{} like so:
+
+\begincode
+\input pdfmsym
+\pdfmsymsetscalefactor{12}
+/endcode\par
+
+It is {\it imperative} that you set the scale factor after loading {\tt pdfmsym} as otherwise almost none of the macros will
+work.
+
+\section{The Predefined Symbols}
+
+This section will simply be an exhaustive list of all the predefined symbols \pdfMsym{} provides.
+
+\subsection{Math Symbols}
+
+{\tabskip=10pt plus 5pt minus 5pt\openup3\jot\halign to \hsize{{\hsize=.45\hsize#}\hfil&\hfil{\hsize=.45\hsize#}\cr
+\vbox{\showcase\dwedge{A\dwedge B}}                         & \vbox{\showcase\bigdwedge{A\dwedge\bigdwedge_{n=1}^N B_n}}\cr
+\vbox{\showcase\circwedge{A\circwedge B}}                   & \vbox{\showcase\bigcircwedge{A\circwedge\bigcircwedge_{k=1}^n A_k}}\cr
+\noalign{\vfill\eject}
+\vbox{\showcase\dcup{A\dcup B}}                             & \vbox{\showcase\bigdcup{A\dcup\bigdcup_{n=1}^N B_n}}\cr
+\vbox{\showcase\aint{f(x) + \aint_a^b g(x)\, dx}}           & \vbox{\showcase\divs{n\divs m}}\cr
+\vbox{\showcase\ndivs{n\ndivs m}}                           & \vbox{\showcase\bigforall{P: \bigforall_{x\in X}Q(x)}}\cr
+\vbox{\showcase\bigexists{P: \bigexists_{x\in X}Q(x)}}      & \cr}}
+
+\bigskip
+\pdfMsym{} also provides arbitrary length closed loop integrals via
+\macrousage \oiNint{<N>} /emacrousage
+which creates an $N$ dimensional closed loop integral.
+Similarly \macroname\biNint{} creates a similar integral sign but rectangular instead of elliptical.
+Finally there is also \macroname\iNint{} which simply creates multiple integrals (this may be desirable instead of manually doing so since it properly set limits both with \macroname\limits{} and
+\macroname\nolimits).
+
+\line{\hfil$\displaystyle\oiNint{5}_A^B\quad{\textstyle\oiNint{5}_A^B}\hfil\iNint{5}_{A}^{B}\quad{\textstyle\iNint{5}_A^B}\hfil\biNint{3}_{A}^{B}\quad{\textstyle\biNint{3}_A^B}$\hfil}
+
+Additionally, \macroname\lightning{} is provided as a textmode command and renders \lightning.
+
+\subsection{Vector Symbols}
+
+Each vector comes as a pair: the normal form and the short form.
+The normal form is meant to cover longer material while the short form covers shorter material.
+
+\bigskip
+\showcaseveccs\vecc\undervecc{\rm ABC}a
+\showcasevecc\lvecc{\rm ABC}a
+\showcasevecc\underlvecc{\rm ABC}a
+\showcaseveccs\straightvecc\understraightvecc{\rm ABC}a
+\vfill\eject
+\showcaseveccs\straightlvecc\understraightlvecc{\rm ABC}a
+\showcaseveccs\overrightharp\underrightharp{\rm ABC}a
+\showcaseveccs\overleftharp\underleftharp{\rm ABC}a
+\showcaseveccs\overleftrightvecc\underleftrightvecc{\rm ABC}a
+\showcaseveccs\overleftrightharp\underleftrightharp{\rm ABC}a
+\showcaseveccs\overrightleftharp\underrightleftharp{\rm ABC}a
+
+\unless\ifx\pdfxform\undefined
+The \macroname\constvec{} macro has the following usage:
+\macrousage \constvec<vector macro>{<material>} /emacrousage
+And it centers the {\tt vector macro} above {\tt material} as if it had the same height as {\tt x}, cropping anything above
+that height.
+So for example \icode \constvec\vecc{abc}/eicode{} yields $\constvec\vecc{abc}$.
+This macro cannot be used in \xetex.
+\fi
+\subsection{Arrow Symbols}
+
+Each arrow comes as a triplet: the normal form, the long form, and the extendable form.
+The extendable form is similar to \macroname\xrightarrow{} and friends, an extendable arrow has the following use:
+\macrousage \xarrow{<top material>}[<bottom material>] /emacrousage
+And creates an extended arrow to fit both the top and bottom material.
+
+\bigskip
+\showcasearrow\varrightarrow{A\varrightarrow B}{A\longvarrightarrow B}{A\xvarrightarrow{ABC}[abc] B}
+\showcasearrow\varleftarrow{A\varleftarrow B}{A\longvarleftarrow B}{A\xvarleftarrow{ABC}[abc] B}
+\showcasearrow\varrightharp{A\varrightharp B}{A\longvarrightharp B}{A\xvarrightharp{ABC}[abc] B}
+\showcasearrow\varleftharp{A\varleftharp B}{A\longvarleftharp B}{A\xvarleftharp{ABC}[abc] B}
+\showcasearrow\varleftrightarrow{A\varleftrightarrow B}{A\longvarleftrightarrow B}{A\xvarleftrightarrow{ABC}[abc] B}
+\showcasearrow\varleftrightharp{A\varleftrightharp B}{A\longvarleftrightharp B}{A\xvarleftrightharp{ABC}[abc] B}
+\showcasearrow\varrightleftharp{A\varrightleftharp B}{A\longvarrightleftharp B}{A\xvarrightleftharp{ABC}[abc] B}
+\showcasearrow\varmapsto{A\varmapsto B}{A\longvarmapsto B}{A\xvarmapsto{ABC}[abc] B}
+\showcasearrow\varmapsfrom{A\varmapsfrom B}{A\longvarmapsfrom B}{A\xvarmapsfrom{ABC}[abc] B}
+\showcasearrow\varuphookrightarrow{A\varuphookrightarrow B}{A\longvaruphookrightarrow B}{A\xvaruphookrightarrow{ABC}[abc] B}
+\showcasearrow\varuphookleftarrow{A\varuphookleftarrow B}{A\longvaruphookleftarrow B}{A\xvaruphookleftarrow{ABC}[abc] B}
+\showcasearrow\vardownhookrightarrow{A\vardownhookrightarrow B}{A\longvardownhookrightarrow B}{A\xvardownhookrightarrow{ABC}[abc] B}
+\showcasearrow\vardownhookleftarrow{A\vardownhookleftarrow B}{A\longvardownhookleftarrow B}{A\xvardownhookleftarrow{ABC}[abc] B}
+\showcasearrow\vardoublerightarrow{A\vardoublerightarrow B}{A\longvardoublerightarrow B}{A\xvardoublerightarrow{ABC}[abc] B}
+\showcasearrow\vardoubleleftarrow{A\vardoubleleftarrow B}{A\longvardoubleleftarrow B}{A\xvardoubleleftarrow{ABC}[abc] B}
+\showcasearrow\varcirclerightarrow{A\varcirclerightarrow B}{A\longvarcirclerightarrow B}{A\xvarcirclerightarrow{ABC}[abc] B}
+\showcasearrow\varcircleleftarrow{A\varcircleleftarrow B}{A\longvarcircleleftarrow B}{A\xvarcircleleftarrow{ABC}[abc] B}
+
+As well as single-stroke arrows, \pdfMsym{} provides double stroke arrows which are analogous to single stroke arrows and have
+an identical usage.
+
+\bigskip
+\showcasearrow\varRightarrow{A\varRightarrow B}{A\longvarRightarrow B}{A\xvarRightarrow{ABC}[abc] B}
+\showcasearrow\varLeftarrow{A\varLeftarrow B}{A\longvarLeftarrow B}{A\xvarLeftarrow{ABC}[abc] B}
+\showcasearrow\varCirclerightarrow{A\varCirclerightarrow B}{A\longvarCirclerightarrow B}{A\xvarCirclerightarrow{ABC}[abc] B}
+\showcasearrow\varCircleleftarrow{A\varCircleleftarrow B}{A\longvarCircleleftarrow B}{A\xvarCircleleftarrow{ABC}[abc] B}
+\showcasearrow\varSquarerightarrow{A\varSquarerightarrow B}{A\longvarSquarerightarrow B}{A\xvarSquarerightarrow{ABC}[abc] B}
+\showcasearrow\varSquareleftarrow{A\varSquareleftarrow B}{A\longvarSquareleftarrow B}{A\xvarSquareleftarrow{ABC}[abc] B}
+\showcasearrow\varRibbonrightarrow{A\varRibbonrightarrow B}{A\longvarRibbonrightarrow B}{A\xvarRibbonrightarrow{ABC}[abc] B}
+\showcasearrow\varRibbonleftarrow{A\varRibbonleftarrow B}{A\longvarRibbonleftarrow B}{A\xvarRibbonleftarrow{ABC}[abc] B}
+\showcasearrow\squaredarrow{A\squaredarrow B}{A\longsquaredarrow B}{A\xsquaredarrow{ABC}[abc] B}
+\showcasearrow\roundedarrow{A\roundedarrow B}{A\longroundedarrow B}{A\xroundedarrow{ABC}[abc] B}
+\showcasearrow\varrightarrows{A\varrightarrows B}{A\longvarrightarrows B}{A\xvarrightarrows{ABC}[abc] B}
+\showcasearrow\varleftarrows{A\varleftarrows B}{A\longvarleftarrows B}{A\xvarleftarrows{ABC}[abc] B}
+\showcasearrow\varrightleftarrows{A\varrightleftarrows B}{A\longvarrightleftarrows B}{A\xvarrightleftarrows{ABC}[abc] B}
+\showcasearrow\varleftrightarrows{A\varleftrightarrows B}{A\longvarleftrightarrows B}{A\xvarleftrightarrows{ABC}[abc] B}
+
+\pdfMsym{} doesn't stop at two, but it also provides triple stroke arrows which have the same usage as the other two types
+of arrows:
+
+\bigskip
+\showcasearrow\varRrightarrow{A\varRrightarrow B}{A\longvarRrightarrow B}{A\xvarRrightarrow{ABC}[abc] B}
+\showcasearrow\varLleftarrow{A\varLleftarrow B}{A\longvarLleftarrow B}{A\xvarLleftarrow{ABC}[abc] B}
+\showcasearrow\varLleftRrightarrow{A\varLleftRrightarrow B}{A\longvarLleftRrightarrow B}{A\xvarLleftRrightarrow{ABC}[abc] B}
+
+\vfill\eject
+\subsection{Wide Accents}
+Wide accents provide variants to the commonly used accents like \macroname\widehat{} and \macroname\widetilde.
+Unlike these accents, \pdfMsym's wide accents can grow arbitrarily large.
+
+\bigskip
+{\tabskip=20pt plus 10pt minus 5pt\halign{{\hsize=.45\hsize#}\hfil&\hfil{\hsize=.45\hsize#}\cr
+\vbox{\showcaseaccent\varwidehat{\varwidehat{ABC}+D}} & \vbox{\showcaseaccent\varwidecheck{\varwidecheck{ABC}+D}}\cr}}
+\bigskip
+\hbox to\hsize{\hfil\vbox{\tabskip=20pt plus 10pt minus 5pt\showcaseaccent\varwidetilde{\varwidetilde{ABC}+D}}\hfil}
+
+\unless\ifx\pdfxform\undefined
+\subsection{Extendable Operators}
+Extendible operators extend to the width of the material in their limits.
+These operators should only be used in display mode, since they use the display modes of the operators.
+They are \macroname\suum{} and \macroname\prood{}:
+
+$$ \suum_{\hbox{abcdef}}^{\hbox{ABCDEF}} \qquad \prood_{\hbox{abcdef}}^{\hbox{ABCDEF}} $$
+
+These are not available in \xetex.
+\fi
+
+\vfill\penalty-10000
+\section{Defining Your Own Symbols}
+
+The following section outlines the interface which \pdfMsym{} utilizes to create its symbols.
+Some of the macros require knowledge of {\scten pdf}'s native graphics operators, which is not explained here.
+For resources on that, consult Adobe's {\scten pdf} Reference, chapter $4$ (Graphics).
+
+\subsection{The Macros}
+
+\macroexp{\@linehead@type{<pdf code>}{<width>}} This creates a ``linehead'' which is used to cap lines, like
+\macroname\@rarrow{} ($\@rarrow{.4}{2.5}$).
+{\it pdf code} is the actual code used to draw the symbol, and it should be noted that all necessary transformations to the
+linehead are done by \macroname\@linehead@type{} and should not be included in the code.
+This includes the setting of the width and transforming the coordinate system.
+The {\it width} is the width of the drawing of the {\it pdf code}.
+
+This macro actually accepts more parameters, but they're used internally and therefore aren't necessary to explain.
+Therefore the only use this macro should be for is defining line heads.
+For example, the definition of \macroname\@rarrow{} is:
+\begincode
+\def\@rarrow {\@linehead@type{0 0 m 2 0 l 1 0 0 1 0 1.5 c 2 0 m 1 0 0 -1 0 -1.5 c S}{2}}
+/endcode
+
+The following is a table of all the predefined lineheads (scaled for visibility):
+
+\def\fsclh#1{\macroname#1&#1{.4}{1.5}}
+\def\sclh#1{&\macroname#1&#1{.4}{1.5}}
+\quitvmode\hbox to\dimexpr\hsize-\leftskip\relax{\hfil\vbox{\pdfmsymsetscalefactor{20}\everycr{\noalign{\hrule}}
+\halign{\vrule\kern.1cm\strut#\hfil\tabskip=.25cm&\hfil#\hfil\kern.1cm\vrule\tabskip=0pt&&\kern.1cm#\hfil\tabskip=.25cm&\hfil#\hfil\kern.1cm\vrule\tabskip=0pt\cr
+\fsclh\@rarrow \sclh\@larrow \sclh\@rharp \sclh\@lharp\cr
+\fsclh\@rdharp \sclh\@ldharp \sclh\@linecap \sclh\@mapcap\cr
+\fsclh\@mapsfromcap \sclh\@rsarrow \sclh\@lsarrow \sclh\@backuphook\cr
+\fsclh\@frontuphook \sclh\@backdownhook \sclh\@frontdownhook \sclh\@doublerarrow\cr
+\fsclh\@doublelarrow \sclh\@Rarrow \sclh\@Larrow \sclh\@Linecap\cr
+\fsclh\@Rightcirclecap \sclh\@Leftcirclecap \sclh\@Rightsquarecap \sclh\@Leftsquarecap\cr
+\omit\vrule height10pt depth4pt\kern.1cm\fsclh\@Rightribboncap \sclh\@Leftribboncap \sclh\@BigLinecap \sclh\@Rightarrows\cr
+\omit\vrule height10pt depth4pt\kern.1cm\fsclh\@Leftarrows \sclh\@Rightunderarrow \sclh\@Leftunderarrow \sclh\@Rightoverarrow\cr
+\omit\vrule height10pt depth4pt\kern.1cm\fsclh\@Leftoverarrow \sclh\@TripleLinecap \sclh\@TripleRarrow \sclh\@TripleLarrow \cr
+}}\hfil}
+\emacroexp
+
+\macroexp{\@vecc@def{<vector name>}<left cap><right cap>} This creates a vector macro, like \macroname\vecc.
+This creates both the normal and short variations of the vector.
+For example, the definition of the {\tt vecc} vectors is:
+\begincode
+\@vecc@def{vecc}\@linecap\@rarrow
+/endcode
+\emacroexp
+
+\macroexp{\@undervecc@def{<vector name>}<left cap><right cap>} This creates an under-vector macro, like \macroname\undervecc.
+This creates both the normal and short variations of the vector.
+For example, the definition of the {\tt undervecc} vectors is:
+\begincode
+\@undervecc@def{undervecc}\@linecap\@rarrow
+/endcode
+\emacroexp
+
+\macroexp{\@arrow@def{<arrow name>}<left cap><right cap>} This creates an arrow macro, like \macroname\varrightarrow.
+This creates the normal, long, and extendable versions of the arrow.
+For example, the definition of the {\it varrightarrow} vectors is:
+\begincode
+\@arrow@def{varrightarrow}\@linecap\@rarrow
+/endcode
+\emacroexp
+
+\macroexp{\@Arrow@def{<arrow name>}<left cap><right cap>{<height displacement>}} This creates a double-stroked arrow, like
+\macroname\varRightarrow.
+This macro creates the normal, long, and extendable versions of the arrow.
+{\it height displacement} is half the difference in height between the two strokes (the difference of height between one stroke
+and the center).
+For the default double stroke linecaps \pdfMsym{} defines, this should be $1$.
+For example, the definition of \macroname\varRightarrow{} is:
+\begincode
+\@Arrow@def{varRightarrow}\@Linecap\@Rarrow{1}
+/endcode
+\emacroexp
+
+\macroexp{\@multi@Arrow@def{<arrow name>}{<number strokes>}<left cap><right cap>{<height displacement>}} This creates an arrow
+with any number of strokes according to {\tt number strokes}.
+Doing \macroname\@multi@Arrow@def{} with $1$ or $2$ strokes is equivalent to \macroname\@arrow@def{} or \macroname\@Arrow@def{},
+respectively.
+Similar to above, {\it height displacement} is half the difference between two adjacent strokes.
+For example, the definition of \macroname\varRrightarrow{} is:
+\begincode
+\@multi@Arrow@def{varRrightarrow}{3}\@TripleLinecap\@TripleRarrow{1}
+/endcode
+\emacroexp
+
+\macroexp{\@arrow@type<left cap><right cap>{<length>}} This draws a single-stroke arrow whose caps are {\it left cap} and
+{\it right cap} respectively and whose length is {\tt length}.
+This is used by \macroname\@arrow@def{}, for example \macroname\varrightarrow{} is defined to be
+\begincode
+\@arrow@type\@linecap\@rarrow{\arrow@len}
+/endcode
+\emacroexp
+
+\macroexp{\@Arrow@type<left cap><right cap>{<length>}{<height displacement>}} This draws a double-stroke arrow, the parameters
+have the same usage as in \macroname\@Arrow@def.
+This is used by \macroname\@Arrow@def, for example \macroname\varRightarrow{} is defined to be:
+\begincode
+\@Arrow@type\@Linecap\@Rarrow{\Arrow@len}{1}
+/endcode
+\emacroexp
+
+\macroexp{\@multi@Arrow@type{<number strokes>}<left cap><right cap>{<length>}{<height displacement>}} This draws an \penalty-10 arrow with a
+specified number of strokes.
+The usage of the parameters is identical to theirs in\hfill\penalty-1000 \macroname\@multi@Arrow@def.
+This is used by \macroname\@multi@Arrow@def, for example \macroname\varRrightarrow{} is defined to be:
+\message{MEANING: \meaning\varRrightarrow}
+\begincode
+\@multi@Arrow@type{3}\@TripleLinecap\@TripleRarrow{\Arrow@len}{1.5}
+/endcode
+\emacroexp
+
+\macroexp{\@wide@accent{<pdf code>}} This creates a wide accent, like \macroname\varwidecheck.
+The width of the drawing by the {\it pdf code} should be $1$, and it should be filled not stroked (since the accent is
+transformed to stretch over the material beneath it).
+Again this macro should only be used to define wide accents.
+For example, the definition of \macroname\varwidecheck{} is:
+\begincode
+\def\varwidecheck{\@wide@accent{0 1.3 m .5 -.4 l 1 1.3 l 1 1.6 l .5 .3 l 0 1.6 l f}}
+/endcode
+\emacroexp
+
+\macroexp{\pdf@drawing@macro{<name>}{<pdf code>}{<width>}{<height>}{<depth>}{<horizontal skew>}} This creates a text mode
+symbol like \macroname\lightning.
+It is important that the {\it pdf code} fits inside the box created by {\it width, height,\/} and {\it depth} since the
+drawing is placed inside of an XForm and so anything outside the box will be cropped.
+The {\it horizontal skew} can be used to shift the symbol so that it fits horizontally inside the box.
+For example, the definition of \macroname\lightning{} is:
+\begincode
+\pdf@drawing@macro{lightning}       % The lightning symbol is drawn upright
+    {.86603 -.5 .5 .86603 0 0 cm    % and rotated 30 degrees
+    1 J 1 j .6 w
+    -3 10 m -3 4.133975 l 0 5.866025 l 0 0 l -1.125 1.5 l 0 0 l 1.125 1.5 l S}
+    {4.2pt}{10.5pt}{.5pt}{.9pt}
+/endcode
+\emacroexp
+
+\macroexp{\pdf@drawing@math@macro{<name>}{<pdf code>}{<width>}{<height>}{<depth>}{<skew>}<style scaling>} This creates a math
+mode symbol like \macroname\divs.
+The first few parameters are identical in use as \macroname\pdf@drawing@macro's, and {\it style scaling} is used to set the
+scaling for the symbol in different math styles.
+{\it style scaling} should be three groups: the first group is the scaling used in textstyle, the second in scriptstyle, and
+the third in scriptscriptstyle.
+Each of these scalings should consist of two components: the fractional scaling and the decimal scaling.
+So for example if we'd like to scale it by $0.6$ the scaling would be \icode {{6 /fslash 10}{0.6}}/eicode.
+This is necessary since \macroname\dimexpr{} doesn't play with decimals nicely, but \macroname\pdfliteral{} requires them.
+For example, the definition of \macroname\divs{} is:
+\begincode
+\pdf@drawing@math@macro{@divs}
+    {1.3 w 1 j
+    2.5 1 0 .1 re
+    2.5 5 0 .1 re
+    2.5 9 0 .1 re B}
+    {5.4pt}{10pt}{0pt}{.2pt}
+    {{1}{1}}{{7 /fslash 10}{.7}}{{11 /fslash 20}{.55}}
+\def\divs{\mathrel{\@divs}}     % Make divs a relation
+/endcode
+\emacroexp
+
+\macroexp{\putsym{<main symbol>}{<secondary symbol>}} This centers the {\it secondary symbol} over the {\it main symbol}, and
+can be used to create symbols like \macroname\aint.
+Note that doing this creates a symbol which acts like an Ord on the left side and whatever type of atom {\it main symbol} is
+on the right (glue-wise).
+So it may be necessary to add some math atom ``hackery'' around the \macroname\putsym{} in order to get the target glue.
+For example, the definition of \macroname\aint{} is:
+\begincode
+\def\aint{\mathop{}\mathclose{}\putsym\int-}
+/endcode
+The \icode \mathop{}\mathclose{}/eicode{} makes it act like an Op on the left (the \macroname\mathclose{} removes any glue
+added on the right of the \macroname\mathop).
+Usually the definition is simpler, but this is slightly more complicated since \macroname\int{} has specially placed limits.
+Another example, this time the definition of \macroname\bigdcup{} is:
+\begincode
+\def\bigdcup{\mathop{\putsym\bigcup\cdot}}
+/endcode
+\emacroexp
+
+\macroexp{\@skewedlim@op{<operator>}{<sup1>}{<sub1>}{<sup2>}{<sub2>}{<sup3>}{<sub3>}{<default limit>}}
+This creates a large math operator with skewed limits, like \macroname\int.
+{\it operator} should be a math operator, {\it sup1} and {\it sub1} are the skews of the superscript and subscript of the
+operator, respectively under \macroname\nolimits.
+Similarly {\it sup2} and {\it sub2} are the skews for \macroname\limits, and {\it sup3} and {\it sub3} are the
+skews for the default limit (if this is not followed by \macroname\limits{} or \macroname\nolimits) which is given by
+{\it default limit}.
+
+For example, \macroname\@oiNint{} is defined to be a macro which creates the shape of \macroname\oiNint{} (see below), and
+\macroname\oiNint{} is defined as
+\begincode
+\def\oiNint#1{\@skewedlim@op{\mathop{\@oiNint{#1}}}{-4}{6}{-10}{10}{-4}{6}\nolimits}
+/endcode
+\emacroexp
+
+\macroexp{\putexsym{<symbol>}<left cap><right cap>{<height displacement>}{<skew>}} This draws a double stroked drawing on top of
+{\it symbol} whose caps are {\it left cap} and {\it right cap} with a height displacement (the half the space between strokes) of
+{\it height displacement}.
+{\it skew} alters the space between the end of {\it symbol} and where the double stroked drawing is drawn.
+For example, \macroname\@oiNint, which gives the shape of \macroname\oiNint, is defined as
+\begincode
+\def\@oiNint#1{\putexsym{\iNint{#1}}\@BigLeftcirclecap\@BigRightcirclecap{2.5}{4}}
+/endcode
+\macroname\iNint{} is a macro
+\macrousage \iNint{<N>} /emacrousage
+which prints {\it N} integrals with a kern \macroname\iNint@kern@{} between each one.
+\emacroexp
+
+\unless\ifx\pdfxform\undefined
+\macroexp{\@wide@operator{<name>}<operator>{<first cut>}{<second cut>}} This creates an extendable operator of {\it operator}
+whose name is {\it name}, like \macroname\suum.
+{\it first cut} is a decimal value which is where on the width of {\it operator} to make the first slice, and similar for
+{\it second cut}.
+The extendable part of the new operator is the area between the two cuts.
+For example, the definition of \macroname\suum{} is:
+\begincode
+\@wide@operator{suum}\sum{.52}{.6}
+/endcode
+You can see where the slices are for a wide operator using the \macroname\@show@slices{} macro, for example
+\begincode
+\@show@slices{suum}
+/endcode
+gives:
+$$ \@show@slices{suum} $$
+These macros are not available for \xetex.
+\emacroexp
+\fi
+
+\subsection{The Dimensions}
+For fine-tuning of symbols, it may be useful to familiarize oneself with the various dimensions \pdfMsym{} utilizes for various
+purposes throught its symbol definitions.
+Dimensions are all defined as macros, and are all dimensionless.
+If a dimension is defined as $1$ then it corresponds to $1$ in $10$pt font.
+
+{\everycr{\noalign{\kern10pt}}\halign{\tt\vtop{\hsize=.175\hsize#}\hfil\tabskip=.05\hsize&\hfil\vtop{\hsize=.75\hsize#}\tabskip=0pt\cr
+\string\@font@scale & The amount of scaling relative to $10$pt, this is defined via \macroname\pdfmsymsetscalefactor.\cr
+\string\vecc@w & The height of the arrows, similarly there is \macroname\vecc@hw{} which must be equal to half of \macroname\vecc@w.\cr
+\string\vecc@skew & \pdfMsym{} leaves a space of \macroname\vecc@skew{} between the ends of material and the endpoints of
+the vector on top or below the material.\cr
+\string\vecc@X@s\par\string\vecc@X@sf & \macroname\vecc@X@s{} is the ratio of the scaling factor (as a decimal) of the
+{\tt X} math style ({\tt X} can be {\tt displaystyle}, {\tt textstyle}, etc.).
+Similarly \macroname\vecc@X@sf{} should be numerically equivalent to \macroname\vecc@X@s{} but written as a fraction.
+\pdfMsym{} scales (many, but not all, see \macroname\exsym@X@s{} and \macroname\exsym@X@sf) math macros according to these values.\cr
+\string\vecc@skip & The amount of space between material and the vector symbol above or below it.\cr
+\string\arrow@skip & The math kerning to be used around an arrow.
+\macroname\arrow@skip{} must be defined as glue, eg \icode \mkern1mu/eicode.\cr
+\string\arrow@len & The length of an arrow defined by \macroname\@arrow@def.
+\macroname\arrow@len{} is a unit, for example \pdfMsym{} defines it as {\tt 6}.
+This length does not include the lengths of the arrow caps.\cr
+\string\long@arrow@len & The length of a long arrow defined by \macroname\@arrow@def.\cr
+\string\Arrow@len & The length of a double stroked arrow defined by \macroname\@Arrow@def.\cr
+\string\long@Arrow@len & The length of a long double stroked arrow defined by \macroname\@Arrow@def.\cr
+\string\xarrow@buffer & The amount of extra arrow to add between the caps of an extendable arrow and when the above/below material begins.\cr
+\string\accent@skew & Analogous to \macroname\vecc@skew{} but for extendable accents.\cr
+\string\accent@raise & Analogous to \macroname\vecc@skip{} but for extendable accents.\cr
+\string\exsym@X@s\par\string\exsym@X@sf & Analogous to \macroname\vecc@X@s{} and \macroname\vecc@X@sf{} but used by \macroname\putexsym.\cr
+\string\iNint@kern@ & The amount of kerning to put between integral signs in \macroname\iNint.
+This must be given as glue, eg. \icode \mkern-10mu\mathchoice{\mkern-5mu}{}{}{}/eicode.\cr
+}}
+
+\end

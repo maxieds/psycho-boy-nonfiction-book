@@ -1,0 +1,587 @@
+% !TeX TS-program = lualatex
+\documentclass[english,a4paper]{article}
+\usepackage[no-math]{fontspec}
+\usepackage[libertine]{newtxmath}
+\usepackage{libertineRoman}
+\DeclareSymbolFont{operators}{\encodingdefault}{\familydefault}{m}{n}
+\usepackage[scaled=0.8]{GoMono}
+\usepackage{babel,xcolor,enumitem,tuple}
+\usepackage[pdfborder={0 0 0.5}]{hyperref}
+%\frenchsetup{og=",fg=",AutoSpaceFootnotes=false,AutoSpacePunctuation=true}
+\usepackage[bottom]{footmisc}
+\usepackage[margin=2cm]{geometry}
+\makeatletter
+\long\def\defactive#1#2{\catcode`#1=13 \begingroup\lccode`\~`#1 \lowercase{\endgroup\long\def~{#2}}}
+\newcommand\disable@lig[1]{\defactive#1{\leavevmode\kern\z@\string#1}}
+\def\code{\expandafter\code@i\string}
+\def\code@i#1{%
+	\begingroup
+	\par\nobreak\smallskip\parindent0pt
+	\leftskip.1\linewidth
+	\rightskip\leftskip
+	\defactive\^^I{\leavevmode\space\space\space\space}%
+	\defactive\<{\begingroup$\langle$\itshape}%
+	\defactive\>{$\rangle$\endgroup}%
+	\let\do\@makeother \dospecials
+	\ttfamily\small
+	\obeylines\obeyspaces
+	\def\code@ii##1#1{##1\par\smallbreak\endgroup}%
+	\code@ii
+}
+\long\def\grab@toks#1\relax{\gdef\right@content{#1}}
+
+\newcommand\exemple[1][60]{%
+	\par\nobreak\vskip2.5pt \noindent
+	\def\part@coeff{#1}%
+	\relax\leavevmode\null
+	\begingroup
+	\let\do\@makeother\dospecials
+	\defactive\ {\space}%
+	\defactive\%{\noexpand\color{gray}\char`\% }%
+	\defactive\^^M{\par\leavevmode\noexpand\color{black}}%
+	\defactive\^^I{\leavevmode\space\space\space\space}%
+	\@makeother:\disable@lig,\disable@lig-%
+	\exemple@@
+}
+
+\newcommand\exemple@@[1]{%
+	\def\@tempa##1#1{%
+		\xdef\left@content{##1}%
+		\endgroup
+		\begingroup
+			\fboxsep1pt \fboxrule 0.5pt
+			\fbox{%
+				\parbox[c]{\dimexpr0.\part@coeff\linewidth-\fboxsep-\fboxrule}{%
+					\vskip5pt
+					\ttfamily\footnotesize\left@content
+					\vskip5pt
+				}%
+				\parbox[c]{\dimexpr\linewidth-0.\part@coeff\linewidth-\fboxsep-\fboxrule}{%
+					\vskip5pt
+					\normalfont\footnotesize\noindent\newlinechar`\^^M \everyeof{\noexpand}%
+					\scantokens{##1}%
+					\vskip2.5pt
+				}%
+			}%
+			\vskip7.5pt\relax
+		\endgroup
+	}%
+	\@tempa
+}
+
+\begingroup
+\catcode`\<13 \catcode`\>13
+\gdef\verb{\relax\ifmmode\hbox\else\leavevmode\null\fi
+	\bgroup
+	\verb@eol@error \let\do\@makeother \dospecials
+	\verbatim@font\@noligs
+	\catcode`\<13 \catcode`\>13 \def<{\begingroup$\langle$\itshape}\def>{\/$\rangle$\endgroup}%
+	\@ifstar\@sverb\@verb}
+\endgroup
+%\def\longfrtpldate@i#1/#2/#3.{}
+%\edef\longfrtpldate{\tpldate}
+\makeatother
+\setlist[enumerate]{topsep=1pt minus 0.75pt, partopsep=0.75pt plus0.5pt minus0.5pt, itemsep=0.5pt minus0.25pt }
+\setlist  [itemize]{topsep=1pt minus 0.75pt, partopsep=0.75pt plus0.5pt minus0.5pt, itemsep=0.5pt minus0.25pt }
+\def\tpl{\textsf\tplname}
+\begin{document}
+\parskip=5ptplus0.5ptminus0.75pt\relax
+\parindent=0pt
+\thispagestyle{empty}
+\tplsetmode{dec:long}
+\begin{titlepage}
+	\renewcommand\thefootnote{\fnsymbol{footnote}}
+	\begingroup
+	\centering
+	\null\vskip.25\vsize
+	{\large\bfseries The package for \TeX{} and \LaTeX\par \Huge \tplname\par}
+	\bigbreak
+	v\tplversion
+	\smallbreak
+	\tpldate
+	\vskip1.5cm
+	{Christian \textsc{Tellechea}\footnote{\href{mailto:unbonpetit@netc.fr}{unbonpetit@netc.fr}}}
+	\par
+	\endgroup
+	\vskip2cm
+	\leftskip=.2\linewidth \rightskip=.2\linewidth \small
+	This extension provides common operations for tuples of numbers, in a expandable way, with a concise and easy-to-use "\verb|object.method|" syntax.
+\end{titlepage}
+
+\section{Preview}
+We consider the list of numbers (which we will now call a "tuple"):
+\code|12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4, 13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1|
+
+We can define an "object", which we name for example "\verb|nn|" with the instruction:
+\code|\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}|
+
+This tuple "\texttt{nn}" will be used throughout this documentation and recalled in comments in all the codes where it occurs.%
+\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}
+
+Here is its maximal value:
+\exemple/1) \tplexe{nn.max} \par
+2) \edef\foo{\tplexe{nn.max}}\meaning\foo/
+
+We can also calculate the median of the 5 smallest values, which supposes:
+\begin{enumerate}
+\item to sort the tuple (method \texttt{sorted});
+\item to retain only the values whith index 0 to 4 (method \texttt{filter});
+\item to find the median of the 5 numbers retained (method \texttt{med}).
+\end{enumerate}
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}
+1) \tplexe{nn.sorted.filter{idx<5}.med} \par
+2) \edef\foo{\tplexe{nn.sorted.filter{idx<5}.med}}\meaning\foo/
+
+Without \LaTeX{}, this package is loaded with
+\code|\input tuple.tex|
+and under \LaTeX{} with
+\code|\usepackage{tuple}|
+
+This package does not rely on any other except the \LaTeX3 module "\texttt{l3fp}", which is now part of the \LaTeX{} kernel, in particular to take advantage of its powerful macro \verb|\fpeval|.
+
+If we do not use \LaTeX{}, \tpl{} will load the file \texttt{expl3-generic.tex} in order to have the \texttt{l3fp} module.
+
+\section{Declaring a tuple object}
+The macro \verb|\newtuple{<name>}{<list of numbers>}| allows to construct a tuple "object" that is then accessed by its \verb|<name>|.
+
+The \verb|<name>| accepts all alphanumeric characters \texttt{[az][AZ][09]}, spaces and punctuation. Spaces preceding or following it are removed. A macro is also allowed\footnote{The macro will never be modified by the package \texttt{tuple}: internally, this macro is detokenized to build a more complex name of a macro.}.
+
+The \verb|<list of numbers>| is fully expanded and then detokenized before being used by the constructor of the tuple object. Empty elements are ignored.
+
+For the sake of simplicity or speed\footnote{The speed differences aren't huge, but they do exist, see page \pageref{benchmark}}, the user is given the choice of specifying the type of numbers that make up the tuple using the macro \verb|\tplsetmode| ;
+\begin{itemize}
+	\item \verb|\tplsetmode{int}| to request that all numbers be signed integers between $-2^{31}+1$ and $2^{31}-1$. Comparisons during sorting are made with \verb|\ifnum|, operations on numbers with \verb|\numexpr|.
+	\item \verb|\tplsetmode{dec short}| specifies “short” decimals, i.e. 8-digit intpart and 8-digit decpart. In this case, comparisons are made with \verb|\ifdim| and operations on numbers by a rudimentary calculation engine embedded within \verb|tuple|.
+	\item \verb|\tplsetmode{dec long}|, which is the default mode, specifies “long” decimals in the sense of \verb|l3fp|. In this mode, comparisons and operations on numbers are performed by \verb|l3fp|.
+\end{itemize}
+
+Whichever mode is selected, final calculations (standard deviation, mean, quartile, etc.) are performed by \verb|l3fp|.\medbreak
+
+It is possible to define an empty tuple (i.e. one that does not contain any numbers), but many methods will return an error if they are executed on an empty list.
+
+On the other hand, it's impossible to redefine an existing tuple (this requires the \texttt{store} method).
+
+\section{Methods}
+Here is the syntaxe to execute methods on a tuple:
+\code|\tplexe{<tuple name>.<method 1>.<method 2>...<method n>}|
+No spaces are allowed between the “\verb-.-” and the name of a method. It is therefore illegal to write “\verb*|. sorted|”.
+
+There are 3 types of datas for the \tpl{} package:
+\begin{enumerate}
+	\item numbers (and displayable datas);
+	\item "tuple" objects;
+	\item the "storage" type which characterizes non-expandable methods performing assignments.
+	\end{enumerate}
+
+All methods in this package take a tuple as input (which is the result of the previous methods) and return a result whose type determines which group the method belongs to:
+\begin{itemize}
+	\item group 1 "\texttt{tuple} $\longrightarrow$ \texttt{number}";
+	\item group 2 "\texttt{tuple} $\longrightarrow$ \texttt{tuple}". The methods in this group \emph{do not modify} the initial tuple\footnote{They cannot do so, otherwise they would not be expandable!}, they act on a temporary tuple that it is obviously possible to save with a method in the group below;
+	\item group 3 "\texttt{tuple} $\longrightarrow$ \texttt{storage}";
+\end{itemize}
+
+The macro \verb|\tplexe| and its argument are expandable, provided that the methods invoked are not in the group "\texttt{tuple} $\longrightarrow$ \texttt{storage}".
+
+If no method is specified, an expandable, implicit and generic method of the group "\texttt{tuple} $\longrightarrow$ \texttt{number}", is executed and returns the tuple.
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn}/
+
+\section{Methods of the group \texttt{tuple} $\longrightarrow$ \texttt{number}}
+\subsection{Methods \texttt{len}, \texttt{sum}, \texttt{min}, \texttt{max}, \texttt{mean}, \texttt{med} and \texttt{stdev}}
+All these expandable methods do not accept any argument and return respectively the number of elements, their sum, the minimum, the maximum, the mean, the median and the standard deviation.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) len =   \tplexe{nn.len}\par
+2) sum =   \tplexe{nn.sum}\par
+3) min =   \tplexe{nn.min}\par
+4) max =   \tplexe{nn.max}\par
+5) mean =  \tplexe{nn.mean}\par
+5) med =   \tplexe{nn.med}\par
+6) stdev = \tplexe{nn.stdev}/
+
+\subsection{Method \texttt{quantile}}
+This expandable method has the syntax
+\code|quantile{<p>}|
+where \verb|<p>| must be a number between 0 and 1. The method returns the quantile according to the argument \verb|<p>|. The method used is the average method\footnote{If $p$ is the argument of the method, we define $h=(n-1)p+1$ where $n$ is the length of the tuple.\par The method returns the number equal to $x_{\lfloor h\rfloor}+(h-\lfloor h\rfloor)(x_{\lfloor h\rfloor}+x_{\lceil h\rceil})$, where $x_k$ is the $k^{\hbox{\tiny th}}$ number of the sorted tuple.}; this is interpolation scheme “R7” described in this \href{https://en.wikipedia.org/wiki/Quantile}{article}.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.quantile{0.25}}\par
+2) \tplexe{nn.quantile{0.5}}\par
+2) \tplexe{nn.quantile{0.75}}\par/
+
+Note that \verb|quantile{0.5}| is equivalent to \verb|med|.
+\medbreak
+It's important to note that spaces before and after method arguments are ignored. It is therefore possible to write \verb*|.quantile {0.5} |.
+
+\subsection{Method \texttt{get}}
+This expandable method has the syntax
+\code|get{<index>}|
+
+The first index is 0 and the last is $n-1$ where $n$ is the number of elements in the tuple. Therefore, the argument of \texttt{get} must be between 0 and $n-1$. You can also use negative indexes, where $-1$ is the index of the last element, $-2$ that of the penultimate element and so on up to $-n$.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1st number  : \tplexe{nn.get{0}}\par
+13th number : \tplexe{nn.get{12}}\par
+last number : \tplexe{nn.get{\tplexe{nn.len}-1}}\par
+last number : \tplexe{nn.get{-1}}% better than above|
+
+The argument of \texttt{get} is evaluated before being used: it is therefore possible to put the expandable macro \verb|\tplexe| with a final method returning an integer.
+
+\subsection{Method \texttt{pos}}
+This expandable method has the syntax
+\code|pos{<number>}[<n>]|
+and returns the index of the \verb|<n>| occurrence of the \verb|<number>| in the tuple. If the tuple does not contain the \verb|<number>|, \verb|-1| is returned. If the optional argument is not present, \verb|<n>| is $-1$.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+index of 12.7  : \tplexe{nn.pos{12.7}}\par
+index of 2.9   : \tplexe{nn.pos{2.9}}\par
+index of 2.9[2]: \tplexe{nn.pos{2.9}[2]}\par
+index of 2.9[3]: \tplexe{nn.pos{2.9}[3]}\par
+index of 31.8  : \tplexe{nn.pos{31.8}}|
+
+\subsection{Method \texttt{show}}
+This expandable method does not accept any arguments and is intended to convert a tuple object into a displayable result. To do this:
+\begin{itemize}
+	\item for each element, the macro \verb|\tplformat|, requiring 2 mandatory arguments, is executed. The first argument passed is the index of the element and the 2nd{} argument is the element itself;
+	\item each result from the macro \verb|\tplformat| is separated from the next by the content of the macro \verb|\tplsep|.
+\end{itemize}
+
+By default, these two macros have the following code:
+\begin{verbatim}
+\def\tplformat#1#2{#2}% #1=current index #2=current item
+\def\tplsep{, }
+\end{verbatim}
+
+The default behavior is therefore exactly the same as the implicit method that is executed last, and in particular, the method is expandable.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.show}/
+
+These 2 macros can be reprogrammed to create more advanced formatting. Here we use the \verb|\tplfpcompare| macro, which is an alias of the \verb|\fp_compare:nNnTF| macro of the \texttt{l3fp} module, to compare an element with a given value. In the 2 examples given below, the method is no longer expandable due to the use of the \verb|\fbox| and \verb|\textcolor| macros.
+
+Boxing the first 10 elements:
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\def\tplformat#1#2{\ifnum#1<10 \fbox{#2}\else#2\fi}
+\tplexe{nn.show}/
+
+Below-average items highlighted in red:
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\edef\nnmean{\tplexe{nn.mean}}%
+\def\tplformat#1#2{\tplfpcompare{#2}<{\nnmean}
+	{\textcolor{red}{#2}}
+	{#2}%
+}%
+\def\tplsep{~; }%
+\tplexe{nn.show}/
+
+\section{Methods of the group \texttt{tuple} $\longrightarrow$ \texttt{tuple}}
+Each time a tuple is generated or modified, the \texttt{len}, \texttt{sum}, \texttt{min}, \texttt{max}, \texttt{mean}, \texttt{med}, \texttt{stdev} and \texttt{sorted} methods are updated.
+\subsection{Method \texttt{sorted}}
+This expandable method does not accept any arguments and returns a tuple object with its elements sorted in ascending order.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.sorted}|
+
+\subsection{Method \texttt{set}}
+The syntax of this expandable method is
+\code|set{<index1>:<number1>,<index2>:<number2>,...}|
+In the tuple resulting from the previous methods, replaces the number at \verb|<index1>| with \verb|<number1>| and so on if several assignments are specified in a comma-separated list.
+
+Each \verb|<index>| must be between 0 and $n-1$, where $n$ is the number of elements in the tuple passed as input to the method. Negative indexes from $-n$ to $-1$ are also permitted.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.set{1:10,5:50,-1:-666}}|
+
+\subsection{Method \texttt{add}}
+This expandable method, which adds a \verb|<insertion>| at one or more specified indexes, has the syntax
+\code|add{<index1>:<insertion1>,<index2>:<insertion2>,...}|
+
+It should be noted that in this syntax, a \verb|<insertion>| can be
+\begin{itemize}
+	\item a single number "\verb|add{<index>:<number>}|"
+	\item a csv list of numbers that \emph{must} be enclosed in braces "\verb|add{<index>:{n1,n2,n3...}}|"
+	\item a tuple accessed by \verb|\tplexe|: "\verb|add{<index>:{\tplexe{<tuple name>}}}|".
+\end{itemize}
+
+As for \verb|<index>|, they can be between $0$ and $n$, where $n$ is the number of elements in the tuple. Negative indexes between $-n-1$ and $-1$ are also permitted:
+\begin{itemize}
+	\item a \verb|<index>| equal to 0 or $-n-1$ places the \verb|<insertion>| at the beginning of the tuple passed as input;
+	\item a \verb|<index>| equal to $n$ or $-1$ places the \verb|<insertion>| at the end of the tuple;
+	\item the \verb|<index>| \emph{are not} updated after each \verb|<insertion>|, but only after the last one. It is therefore not equivalent to write “\verb|.add{1:100,2:200}|” and “\verb|.add{1:100}.add{2:200}|”. Indeed, 200 will be at index 3 in the first case, whereas it will be at index 2 in the second.
+\end{itemize}
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) add at first pos: \tplexe{nn.add{0:{666,667}}}\par
+2) add index 11    : \tplexe{nn.add{11:{666,667}}}\par
+3) add at last pos : \tplexe{nn.add{-1:{666,667}}}|
+
+\exemple|\newtuple{X}{10,20,30,40,50,60}%
+\newtuple{Y}{1,2,3,4}%
+1) \tplexe{X.add{0:{\tplexe{Y}}}}\par
+2) \tplexe{X.add{2:{\tplexe{Y}}}}\par
+3) \tplexe{X.add{-1:{\tplexe{Y}}}}\par
+4) \tplexe{X.add{1:100,2:200}}\par
+5) \tplexe{X.add{1:100}.add{2:200}}|
+
+\subsection{Method \texttt{op}}
+This expandable method, which performs an \verb|<operation>| on all elements of the tuple, has the syntax
+\code|op{<operation>}|
+
+The \verb|<operation>| is an expression not containing braces, evaluable by \verb|\fpeval| once all occurrences of "\texttt{val}" have been replaced by the value of each element, and all occurrences of "\texttt{idx}" by its index.
+
+\exemple|\newtuple{X}{10,20,30,40,50,60}%
+1) \tplexe{X.op{val+5}}\par
+2) \tplexe{X.op{val*val}}\par
+3) \tplexe{X.op{val+idx}}\par
+4) \tplexe{X.op{idx<4 ? val-1 : val+1 }}|
+
+\subsection{Method \texttt{filter}}
+Thi expandables method, which selects elements according to one or more criteria, has the syntax
+\code|filter{<test>}|
+and where \verb|<test>| is a boolean not containing braces, evaluable by \verb|\fpeval| once all occurrences of "\texttt{val}" have been replaced by the value of each element, and all occurrences of "\texttt{idx}" by its index.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.filter{val<10}}\par
+2) \tplexe{nn.filter{val>5 && val<10}}\par
+3) \tplexe{nn.filter{idx<3 || idx>13}}\par
+4) \tplexe{nn.filter{val!=6.3 && val!=2.9 && val!=4.1}}/
+
+\subsection{Method \texttt{comp}}
+This expandable method composes two tuples of the same length with an operation that the user specifies. Its syntax is
+\code|comp{<operation>}{<tuple name>}|
+where the tuple whose name is passed as the second argument \emph{must} have the same length as the tuple passed as input to the method.
+
+The \verb|<operation>| is an expression not containing braces, evaluable by \verb|\fpeval| once all occurrences of "\texttt{xa}" have been replaced by the value of each element of the input tuple, and all occurrences of "\texttt{xb}" by that of the tuple specified in the 2nd argument.
+
+Product of 2 tuples and their "\texttt{sumprod}":
+\exemple/\newtuple{A}{2,-4,3,7,-1}%
+\newtuple{B}{-9,0,4,6,-2}%
+product  \tplexe{A.comp{xa*xb}{B}}\par
+sumprod: \tplexe{A.comp{xa*xb}{B}.sum}/
+
+Calculation of the smallest distance to point A(2.5 ; -0.5) knowing the list of abscissas and the list of ordinates of a trajectory (here elliptical):
+\exemple/\newtuple{ListX}{4,2,0.5,1,3,6.5}%
+\newtuple{ListY}{2,1.5,0,-1.5,-2,0.5}%
+\tplexe{ListX.comp{sqrt((xa-2.5)**2+(xb+0.5)**2)}{ListY}.min}/
+
+\section{Methods in the group \texttt{tuple} $\longrightarrow$ \texttt{storage}}
+As these methods don't return a result because they perform an assignment, they are not expandable, and must be placed in the last position. If this is not the case, all methods following them will be ignored.
+
+\subsection{Method \texttt{split}}
+This method cuts the tuple passed as input to the method after the specified index. The syntax is
+\code|split{<index>}{<tuple1>}{<tuple2>}|
+The tuple passed as input to the method is split after the \verb|<index>|: the part before the split is assigned, via \verb||newtuple| to the tuple with name “\texttt{tuple1}” and the remaining part to the tuple with name “\texttt{tuple2}”. No check is made on the existence of the 2 tuples, so existing tuples can be silently replaced.
+
+The \verb|<index>| must lie between 0 and $n-2$ if positive, or between $-n$ and $-2$ if negative, $n$ being the number of elements in the tuple passed as input.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.split{5}{n1}{n2}}%
+tuple before: \tplexe{n1}\par
+tuple after : \tplexe{n2}/
+
+\subsection{Method \texttt{store}}
+This macro is used to store the result of the last method. If this result is a tuple, the syntax is
+\code|store{<tuple name>}|
+and if the result is a number or a displayable data from the \texttt{show} method:
+\code|store{<macro>}|
+
+No check is made on the existence of the tuple or macro. It is therefore possible to silently replace an existing tuple or macro.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.sorted.filter{val>11}.store{nn1}}%
+   \tplexe{nn1}\par
+2) \tplexe{nn1.len.store\nnlen}%
+   \meaning\nnlen\par
+3) \def\tplformat#1#2{\fbox{#2}}\def\tplsep{ }%
+   \tplexe{nn1.show.store\nnshow}%
+   \meaning\nnshow\par
+4) \edef\nndisp{\tplexe{nn1}}%
+   \meaning\nndisp% generic method
+|
+
+To store the result of the generic method, you have to use \verb|\edef| because \verb|\tplexe{<tuple>.store<macro>}| is incorrect since in this case, the \texttt{store} method applies to a tuple.
+
+\section{Tuple generation}
+To generate a tuple, we can use the expandable macro \verb|\gentuple| which is intended to be called in the 2nd argument of \verb|\newtuple|. Its syntax is
+\code/\gentuple{<initial values>},\genrule<generation rule>;\while||\until<condition>}/
+where:
+\begin{itemize}
+	\item the \verb|<initial values>| are optional. If present, they \emph{must} be followed by a comma. The macro \verb|\gentuple| determines their number $i$ by counting ($i$ must be at most equal to 9). These initial values will be copied at the beginning of the tuple and subsequently, are intended to be used in the \verb|<generation rule>| for recurrence purposes;
+	\item the \verb|<generation rule>| is an expression not containing braces, evaluable by \verb|\fpeval| once in the previous $i$ values, all occurrences of \verb|\1| have been replaced by the first value, \verb|\2| by the second value, etc. In addition, each occurrence of \verb|\i| is replaced by the value of the current index.
+	\item the \verb|<condition>| is a boolean not containing braces, evaluable by \verb|\fpeval| once all occurrences of "\texttt{val}" have been replaced by the value of the computed element, and all occurrences of "\verb|\i|" by its index. If the keyword after \verb|;| is \verb|\while|, the loop is of the type \verb|while<condition>...endwhile| whereas if this keyword is \verb|\until|, it is a \verb|repeat...until<condition>| loop.
+\end{itemize}
+
+Generating the first 10 even integers:
+\exemple|\gentuple{\genrule (\i+1)*2 ; \until \i=9 }\par
+or\par
+\gentuple{\genrule (\i+1)*2 ; \while \i<10 }|
+
+Generation of 15 random integers between 1 and 10:
+\exemple|\gentuple{\genrule randint(1,10) ; \until \i=14 }|
+
+Generate squares of integers up to 500:
+\exemple|\gentuple{\genrule\i*\i; \while val<500 }|
+
+Generation of the first 10 terms of the Fibonacci sequence:
+\exemple|\gentuple{1,1,\genrule\1+\2; \until \i=9 }|
+
+Generation of the first 10 terms of $u_0=1$ ; $u_1=1$ ; $u_2=-1$ and $u_{n}=u_{n-3}u_{n-1}-u^2_{n-2}$:
+\exemple|\gentuple{1,1,-1,\genrule\1*\3-\2*\2; \until \i=10}|
+
+Generation of the Syracuse sequence (aka the “$3n+1$ sequence”) of 15:
+\exemple|\gentuple{15,\genrule \1/2=trunc(\1/2) ? \1/2 : 3*\1+1 ; \until val=1}%
+\meaning\syr|
+
+Maximum altitude and length of the Syracuse sequence of 27:
+\exemple|\newtuple{syr27}
+ {\gentuple{27,\genrule \1/2=trunc(\1/2) ? \1/2 : 3*\1+1 ; \until val=1}}%
+length = \tplexe{syr27.len}\par
+max alt = \tplexe{syr27.max}|
+
+\section{Conclusion}
+\subsection{Motivation}
+Somewhat surprisingly, very little exists to manipulate and operate on lists of numbers\footnote{There is one package, \texttt{commalists-tools}, but it's clearly too limited. Like all its author's packages that flood CTAN, it simply aligns, linearly and without any real programmation, the high-level macros of the packages \texttt{tikz}, \texttt{listofitems}, \texttt{xstring}, \texttt{xint} and \texttt{simplekv}.}.
+
+The main challenge was to provide expandable macros and also an original syntax in the world of \TeX{} of the type \verb|<object>.<method 1>.<method 2>...<method n>|, where you can chain methods executed on an “object” which is a tuple of numbers. I don't know if any packages offer this kind of syntax, but it's actually quite intuitive. As I'm fairly unfamiliar with programming expandable macros, I almost gave up many times. But I've finally found a mouse-hole that makes it all work pretty much, except for the numerous bugs that are probably lurking everywhere.
+
+I'd like to thank anyone who finds one for pointing it out to me by e-mail, or even suggesting new features.
+
+\subsection{Execution speed}
+When you get into optimizing execution speed, especially for expandable macros, you don't get out! It's a pit of questions about macro arguments, about little ---~or big~--- tricks that save time, and a headache about how to juggle with delimited arguments and find them later!
+
+I hope I didn't fall into this trap, because I've barely entered it. In any case, \TeX{} is not made for massive calculations, since it is first and foremost a typesetting software. For calculations, powerful tools that beat \TeX{} hands down exist in abundance.
+
+In any case, "expandable macro" goes a bit against "execution speed". For information, I put below the compilation times, in seconds, of the creation of tuples containing $n$ random integers. It depends on the computer used, of course, but the orders of magnitude are quite revealing. We can clearly see that it is illusory to exceed a thousand numbers because the time to create a tuple then increases rapidly\footnote{Not to mention that, in addition to that,  the tuple is immediately recreated and recalculated after being modified by the methods \texttt{set}, \texttt{add}, \texttt{op}, \texttt{filter}, \texttt{split} and \texttt{comp}}. That said, who would use \TeX{} for calculations on so many numbers?
+
+This table illustrates the creation speeds of a tuple of random signed integers between $-1000$ and $1000$. As a reminder, creating a tuple involves sorting its elements (by quick sort), calculating the sum of the numbers and the sum of squares. The 3 modes can thus be compared for larger or smaller tuples.\label{benchmark}
+
+\begin{center}
+	\directlua{pdfelapsedtimer_basetime=0}
+	\protected\def\pdfresettimer{\directlua{pdfelapsedtimer_basetime = os.clock()}}
+	\protected\def\pdfelapsedtime{\numexpr\directlua{tex.print(math.floor((os.clock()-pdfelapsedtimer_basetime)*65536+0.5))}\relax}
+	\catcode`\_11
+	\def\doten#1{#1#1#1#1#1#1#1#1#1#1}
+	\def\falsenewtuple#1{}
+	\def\printtime{\fpeval{round((\the\pdfelapsedtime-\tare)/655360,3)} s}
+	\def\dotest#1{%
+		\tplsetmode{#1}%
+		\pdfresettimer%
+		\doten{\edef\test{\expandafter\tpl_newtuple_b\expandafter{\mytuple}}\let\mytest\empty}%
+		\printtime
+	}
+	\def\testnewtuple#1{% #1=nb éléments dans le tuple
+		\xdef\mytuple{\gentuple{\genrule randint(-1000,1000) ; \until \i==#1 }}%
+		\pdfresettimer
+		\doten{\edef\mytest{\expandafter\falsenewtuple\expandafter{\mytuple}}\let\mytest\empty}%
+		\xdef\tare{\the\pdfelapsedtime}%
+		#1%
+		&%
+		\dotest{int}
+		&%
+		\dotest{dec:short}
+		&%
+		\dotest{dec:long}
+	}
+	\def\gentab{%
+		\begin{center}
+		\begin{tabular}{|r|c|c|c|}\hline
+			Nb items&\texttt{int} & \texttt{dec:short} & \texttt{dec:long}\\\hline
+			\testnewtuple{25}  \\\hline
+			\testnewtuple{50}  \\\hline
+			\testnewtuple{100} \\\hline
+			\testnewtuple{200} \\\hline
+			\testnewtuple{400} \\\hline
+			\testnewtuple{800} \\\hline
+			\testnewtuple{1600}\\\hline
+		\end{tabular}
+		\end{center}
+	}
+	\catcode`\_8
+	\gentab
+\end{center}
+
+\subsection{Example: state population}
+The tuple \verb|\Wpop| contains the population of each state in the world, in millions of inhabitants\footnote{The data comes from \href{https://www.unfpa.org/data/world-population-dashboard}{https://www.unfpa.org/data/world-population-dashboard}} :
+\exemple/\newtuple\Wpop{%
+43.4, 2.8, 46.3, 37.8, 0.1, 46.1, 2.8, 0.1, 26.7, 9.0, 10.5, 0.4, 1.5,
+174.7, 0.3, 9.5, 11.7, 0.4, 14.1, 0.8, 12.6, 3.2, 2.7, 217.6, 0.5, 6.6,
+23.8, 13.6, 0.6, 17.1, 29.4, 39.1, 5.9, 18.8, 19.7, 1425.2, 7.5, 0.7,
+52.3, 0.9, 6.2, 5.2, 29.6, 4.0, 11.2, 0.2, 1.3, 10.5, 26.2, 105.6, 5.9,
+1.2, 0.1, 11.4, 18.4, 114.5, 6.4, 1.8, 3.8, 1.3, 1.2, 129.7, 0.9, 5.5,
+64.9, 0.3, 0.3, 2.5, 2.8, 3.7, 83.3, 34.8, 10.3, 0.1, 0.4, 0.2, 18.4,
+14.5, 2.2, 0.8, 11.9, 10.8, 10.0, 0.4, 1441.7, 279.8, 89.8, 46.5, 5.1,
+9.3, 58.7, 2.8, 122.6, 11.4, 19.8, 56.2, 0.1, 4.3, 6.8, 7.7, 1.8, 5.2,
+2.4, 5.5, 7.0, 2.7, 0.7, 31.1, 21.5, 34.7, 0.5, 24.0, 0.5, 0.4, 5.0,
+1.3 ,129.4, 0.1, 3.5, 0.6, 38.2, 34.9, 55.0, 2.6, 31.2, 17.7, 0.3, 5.3,
+7.1 ,28.2, 229.2, 2.1, 5.5, 4.7, 245.2, 4.5, 10.5, 6.9, 34.7, 119.1,
+40.2 ,10.2, 3.3, 2.7, 51.7, 3.3, 1.0, 19.6, 144.0, 14.4, 0.0, 0.2, 0.1,
+0.2 ,0.03, 0.2, 37.5, 18.2, 7.1, 0.1, 9.0, 6.1, 0.0, 5.7, 2.1, 0.8, 18.7,
+61.0 ,11.3, 47.5, 21.9, 5.5, 49.4, 0.6, 10.7, 8.9, 24.3, 10.3, 71.9, 1.4,
+9.3 ,0.1, 1.5, 12.6, 86.3, 6.6, 0.0, 0.0, 49.9, 37.9, 9.6, 68.0, 69.4,
+341.8 ,0.1, 3.4, 35.7, 0.3, 29.4, 99.5, 0.6, 35.2, 21.1, 17.0}
+Number of state: \tplexe{\Wpop.len}\par
+Mean: \tplexe{\Wpop.mean}\par
+Median: \tplexe{\Wpop.med}\par
+Standard deviation: \tplexe{\Wpop.stdev}\par
+Quintile \#1 : \tplexe{\Wpop.quantile{0.2}}\par
+Quintile \#4 : \tplexe{\Wpop.quantile{0.8}}/
+\newtuple\Wpop{%
+43.4, 2.8, 46.3, 37.8, 0.1, 46.1, 2.8, 0.1, 26.7, 9.0, 10.5, 0.4, 1.5,
+174.7, 0.3, 9.5, 11.7, 0.4, 14.1, 0.8, 12.6, 3.2, 2.7, 217.6, 0.5, 6.6,
+23.8, 13.6, 0.6, 17.1, 29.4, 39.1, 5.9, 18.8, 19.7, 1425.2, 7.5, 0.7,
+52.3, 0.9, 6.2, 5.2, 29.6, 4.0, 11.2, 0.2, 1.3, 10.5, 26.2, 105.6, 5.9,
+1.2, 0.1, 11.4, 18.4, 114.5, 6.4, 1.8, 3.8, 1.3, 1.2, 129.7, 0.9, 5.5,
+64.9, 0.3, 0.3, 2.5, 2.8, 3.7, 83.3, 34.8, 10.3, 0.1, 0.4, 0.2, 18.4,
+14.5, 2.2, 0.8, 11.9, 10.8, 10.0, 0.4, 1441.7, 279.8, 89.8, 46.5, 5.1,
+9.3, 58.7, 2.8, 122.6, 11.4, 19.8, 56.2, 0.1, 4.3, 6.8, 7.7, 1.8, 5.2,
+2.4, 5.5, 7.0, 2.7, 0.7, 31.1, 21.5, 34.7, 0.5, 24.0, 0.5, 0.4, 5.0,
+1.3 ,129.4, 0.1, 3.5, 0.6, 38.2, 34.9, 55.0, 2.6, 31.2, 17.7, 0.3, 5.3,
+7.1 ,28.2, 229.2, 2.1, 5.5, 4.7, 245.2, 4.5, 10.5, 6.9, 34.7, 119.1,
+40.2 ,10.2, 3.3, 2.7, 51.7, 3.3, 1.0, 19.6, 144.0, 14.4, 0.0, 0.2, 0.1,
+0.2 ,0.03, 0.2, 37.5, 18.2, 7.1, 0.1, 9.0, 6.1, 0.0, 5.7, 2.1, 0.8, 18.7,
+61.0 ,11.3, 47.5, 21.9, 5.5, 49.4, 0.6, 10.7, 8.9, 24.3, 10.3, 71.9, 1.4,
+9.3 ,0.1, 1.5, 12.6, 86.3, 6.6, 0.0, 0.0, 49.9, 37.9, 9.6, 68.0, 69.4,
+341.8 ,0.1, 3.4, 35.7, 0.3, 29.4, 99.5, 0.6, 35.2, 21.1, 17.0}
+
+We modify the tuple \verb|\Wpop|, retaining only “moderately” populated states. We arbitrarily consider their population between 10 and 100 millions:
+\exemple/\tplexe{\Wpop.filter{val>=10 && val<=100}.store\Wpop}%
+Number: \tplexe{\Wpop.len}\par
+Mean: \tplexe{\Wpop.mean}\par
+Median: \tplexe{\Wpop.med}\par
+Standard deviation: \tplexe{\Wpop.stdev}\par
+Quintile \#1 : \tplexe{\Wpop.quantile{0.2}}\par
+Quintile \#4 : \tplexe{\Wpop.quantile{0.8}}
+
+Distribution over 6 equal intervals:\par
+\begin{tabular}{lc}\\\hline
+	From 10 to 25 & \tplexe{\Wpop.filter{val<25}.len}\\
+	From 25 to 40 & \tplexe{\Wpop.filter{val>=25 && val<40}.len}\\
+	From 40 to 55 & \tplexe{\Wpop.filter{val>=40 && val<55}.len}\\
+	From 55 to 70 & \tplexe{\Wpop.filter{val>=55 && val<70}.len}\\
+	From 70 to 85 & \tplexe{\Wpop.filter{val>=70 && val<85}.len}\\
+	From 85 to 100& \tplexe{\Wpop.filter{val>=85}.len}\\\hline
+\end{tabular}/
+
+\subsection{TODO list}
+To be implemented more or less quickly:
+\begin{enumerate}
+	\item insertion sorting to sort almost-sorted tuples obtained using the \texttt{add}, \texttt{set}, \texttt{op} methods (risky as it depends on the operation!).
+	\item merge sorting to add one tuple to another;
+	\item other speed optimization?
+\end{enumerate}
+\end{document}

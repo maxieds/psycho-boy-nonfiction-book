@@ -1,0 +1,278 @@
+% Kale Ewasiuk (kalekje@gmail.com)
+% 2022-04-16
+% Copyright (C) 2021-2022 Kale Ewasiuk
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in
+% all copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+% ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+% TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+% PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT
+% SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+% ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+% ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+% OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+\documentclass[11pt,parskip=half]{scrartcl}
+\setlength{\parindent}{0ex}
+\newcommand{\llcmd}[1]{\leavevmode\llap{\texttt{\detokenize{#1}\ }}}
+\newcommand{\cmd}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\qcmd}[1]{``\cmd{#1}''}
+\RequirePackage{url}
+\RequirePackage{xcolor}
+\RequirePackage{showexpl}
+\lstset{explpreset={justification=\raggedright,pos=r,wide=true}}
+\setlength\ResultBoxRule{0mm}
+\lstset{
+	language=[LaTeX]TeX,
+	basicstyle=\ttfamily\small,
+	commentstyle=\ttfamily\small\color{gray},
+	frame=none,
+	numbers=left,
+	numberstyle=\ttfamily\small\color{gray},
+	prebreak=\raisebox{0ex}[0ex][0ex]{\color{gray}\ensuremath{\hookleftarrow}},
+	extendedchars=true,
+	breaklines=true,
+	tabsize=4,
+}
+\addtokomafont{title}{\raggedright}
+\addtokomafont{author}{\raggedright}
+\addtokomafont{date}{\raggedright}
+\author{Kale Ewasiuk (\url{kalekje@gmail.com})}
+\RequirePackage[yyyymmdd]{datetime}\renewcommand{\dateseparator}{--}
+\date{\today}
+
+
+\usepackage{autopuncitems}
+\setlist{nosep}
+
+\title{autopuncitems}
+
+
+\begin{document}
+\maketitle
+
+
+\section{Introduction}
+This package provides environments \cmd{AutoPuncItemize}, \cmd{AutoPuncItemizeO}, and \cmd{AutoPuncItemizeE} (beta)
+to automatically punctuate the items.
+By default, it adds the \cmd{autopunc (O|E)} options in the
+\cmd{enumitem} environments \cmd{itemize}, \cmd{enumerate}, and \cmd{description}, to wrap the contents in these enviroments.
+If you want to skip this (say if you were using the beamer class which
+may be interefered with by enum item), pass the \cmd{noenumitem} option to this package. You can still use the environments with beamer, though.
+It uses lua pattern matching to modify the environment's contents.
+
+
+
+\section{Some commands}
+\llcmd{\APomit}Used in an \cmd{\item} to signify that that item should not be automatically punctuated, and not be counted. Expands to nothing.\\
+\llcmd{\APpass}Used in an \cmd{\item} to signify that that item should not be automatically punctuated, and but still counted. Expands to nothing.\\
+
+\begin{addmargin}[0.8in]{0in}
+\llcmd{\setAPeach{}{}{}}Set the default, second last, and last punctuation point in that order.\\
+\llcmd{\setAPall{}}Set all punctuation points the same.\\
+\llcmd{\setAPdef{}}Set the default punctuation point. \cmd{;} by default.\\
+\llcmd{\setAPseclast{}}Set the second last punctuation point. \cmd{; and} by default.\\
+\llcmd{\setAPlast{}}Set the second last punctuation point. \cmd{.} by default.\\
+
+\llcmd{\enableAPautopassnest}Automatically put an \cmd{\APpass} on items that introduce a nested list. Default behaviour.\\
+\llcmd{\disableAPautopassnest}Do not automatically put an \cmd{\APpass} on items that introduce a nested list.\\
+
+\end{addmargin}
+
+\section{Variants}
+\llcmd{autopunc}Does not expand the contents of environment. Tutorial on next section shows this.\\
+\llcmd{autopuncO}Expands the contents of environment once. Useful if \cmd{\item}'s are in a command \\
+\llcmd{autopuncE}Fully expands the contents of environment first. This is in-progress and should not be used.\\
+
+
+\section{Tutorial}
+\subsection{Basic Use}
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+
+\subsection{Demonstrating Pass}
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three \APpass
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three \APpass
+    \item four  \APpass
+\end{itemize}
+\end{LTXexample}
+
+
+\subsection{Demonstrating Omit}
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three \APomit
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three \APomit
+    \item four  \APomit
+\end{itemize}
+\end{LTXexample}
+
+\subsection{Nested}
+You must use \cmd{autopunc} on each nested list if you want that sub-list to be automatically punctuated.
+Note that by default, the item introducing (before) a sub-list will not be automatically punctuated.
+
+\begin{LTXexample}
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three:
+    \begin{enumerate}[autopunc]
+        \item alpha:
+        \begin{description}[autopunc]
+            \item[hello] world
+        \end{description}
+        \item beta
+        \item delta
+    \end{enumerate}
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+
+\subsubsection{If you forget to use APpass}
+If you disable auto-pass nested lists, and don't use \cmd{\APpass}, here is what happens. Notice the extra ``; and'' below hello world and beta.
+\begin{LTXexample}
+\disableAPautopassnest
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three
+    \begin{enumerate}[autopunc]
+        \item alpha
+        \begin{description}[autopunc]
+            \item[hello] world
+        \end{description}
+        \item beta
+    \end{enumerate}
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+\begin{LTXexample}
+\enableAPautopassnest
+\begin{itemize}[autopunc]
+    \item one
+    \item two
+    \item three
+    \begin{enumerate}
+        \item alpha
+        \begin{description}[autopunc]
+            \item[hello] world
+        \end{description}
+        \item beta
+    \end{enumerate}
+    \item four
+\end{itemize}
+\end{LTXexample}
+
+\subsection{Expanding list contents}
+\begin{LTXexample}
+\def\listexample{
+    \item one
+    \item two
+    \item three
+    \item four
+}
+--will work fine (expand once)
+\begin{itemize}[autopuncO]
+    \listexample
+\end{itemize}
+
+--will throw error
+  (author to fix this)
+%\begin{itemize}[autopuncE]
+%    \listexample
+%\end{itemize}
+
+--does not give desired result
+  (no items found)
+\begin{itemize}[autopunc]
+    \listexample
+\end{itemize}
+
+\end{LTXexample}
+
+
+\subsection{Using the environment}
+
+The normal way to use the environment should be inside the first list, like so.
+
+\begin{LTXexample}
+\enableAPautopassnest % default settn
+\begin{itemize}
+\begin{AutoPuncItems}
+    \item one
+    \item two
+    \item three
+    \item four
+\end{AutoPuncItems}
+\end{itemize}
+\end{LTXexample}
+
+You may want to use the \cmd{AutoPuncItems} environment outside a list environment instead,
+say perhaps if you're using the \cmd{beamer}.
+Note that  nested lists are normally not punctuated, and since the first-level list is inside the environment, it's considered nested.
+If you would like to disable the prevention of auto-punctuating all nested lists, use the \cmd{\disableAPprotectnest}.
+Note that nested lists will cause an error to occur.
+
+\begin{LTXexample}
+\disableAPprotectnest
+\begin{AutoPuncItems}
+\begin{itemize}
+    \item one
+    \item two
+    \item three
+    \item four
+\end{itemize}
+\end{AutoPuncItems}
+\end{LTXexample}
+
+
+
+
+
+\end{document}
+

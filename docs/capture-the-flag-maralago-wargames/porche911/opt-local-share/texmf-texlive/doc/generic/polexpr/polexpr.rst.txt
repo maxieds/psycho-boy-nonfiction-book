@@ -1,0 +1,162 @@
+.. comment: -*- fill-column: 72; mode: rst -*-
+
+
+=========================
+ Introduction to polexpr
+=========================
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+
+   polexpr-ref
+   polexpr-changes
+
+
+.. only :: latex
+
+   Introduction to polexpr
+   -----------------------
+
+polexpr_ is a TeX and LaTeX macro package.
+
+To use it with Plain or formats other than LaTeX::
+
+  \input polexpr.sty
+
+To use it with LaTeX::
+
+  \usepackage{polexpr}
+
+polexpr_ loads xintexpr_ and extends its syntax with a polynomial type.
+
+Polynomials are defined via the :ref:`\\poldef <quick>` parser and
+can then be manipulated via TeX macros for various operations such
+as obtaining G.C.D.s, computing derivatives, or indefinite
+integrals... many of these functionalities are available directly
+via functions in the syntax recognized by the ``\poldef`` parser.
+
+Apart from the final step of internally creating some TeX macros
+associated with the polynomial name, this is all done completely
+expandably, and a polynomial expression can be fetched directly to
+``\xinteval`` for a completely expandable operation from start to
+finish.
+ 
+For polynomials fully declared via ``\poldef``, root localization
+implementing the `Sturm algorithm`_ is available via macros.
+Arbitrarily long decimal expansion of all real roots can be
+obtained, and all rational roots can be found exactly.
+
+The legacy documentation section which showed examples of root
+localization has been moved to the `polexpr-examples.pdf
+<polexpr-examples.pdf>`_ document, where both the TeX code and its
+output are displayed.
+
+To access this document (if the previous link for some reason does not
+work)::
+
+    texdoc polexpr-examples
+
+
+Usage via xintsession_
+----------------------
+
+The simplest manner to get a feeling for the package abilities regarding
+in particular root localization is to use it on the command line
+via the xintsession_ interface.  Here is an example::
+
+    $ rlwrap etex xintsession
+    [...xintsession welcome message...]
+    Starting in exact mode (floating point evaluations use 16 digits)
+    >>> &pol
+    pol mode (i.e. function definitions use \poldef)
+    >>> f(x) := x^7 - x^6 - 2x + 1;
+    f = x^7-x^6-2*x+1
+        --> &GenFloat(f) lets f become usable as function in fp mode
+        --> &ROOTS(f) (resp. &ROOTS(f,N)) finds all rational roots exactly and
+            all irrational roots with at least 10 (resp. N) fractional digits
+    >>> &ROOTS(f)
+    Solving for real roots of f and assigning them (please wait...)
+    (mult. 1) Rootf_1 = -1.0719678841...
+    (mult. 1) Rootf_2 = 0.4962386948...
+    (mult. 1) Rootf_3 = 1.3151140860...
+    Square-free irrational part: x^7-x^6-2*x+1
+        --> &REFINEROOTS(f,N) to extend real irr. roots to N fractional digits
+    >>> &REFINEROOTS(f,40)
+    Refining real roots of f to 40 digits (please wait...)
+    (mult. 1) Rootf_1 = -1.0719678841080266034109100331975342338141...
+    (mult. 1) Rootf_2 = 0.4962386948771497344730618510143671567979...
+    (mult. 1) Rootf_3 = 1.3151140860165192656960005018679846354234...
+
+The xintsession_ interface allows to define polynomial variables via its
+``&pol`` mode.  It also exposes :ref:`all polynomial functions added to the
+xintexpr syntax <polexpr08>` by ``polexpr``.  Further, as seen in the
+example above it also covers some of the ``polexpr`` capabilities
+currently implemented via user macros.  This is to be considered a work
+in progress, the above ``&ROOTS`` and ``&REFINEROOTS`` may be renamed
+into something else, and may have been so already since this
+documentation was written.
+
+Any input on the command line at the xintsession_ ``>>>`` prompt which
+starts with a backslash is executed as TeX macros, so all macros of
+``polexpr`` are in fact already available, including those typesetting
+material in background of the interactive session on command line.  The
+``&ROOTS`` and ``&REFINEROOTS`` direct their outputs to the
+terminal rather than to the TeX page as would the typesetting macros
+defined by ``polexpr`` itself.
+
+
+License is LPPL 1.3c
+--------------------
+
+This work is distributed under the conditions of the
+LaTeX Project Public License version 1.3c.
+
+See README.md for details.
+
+
+In memoriam: Jürgen Gilg (1966-2022)
+------------------------------------
+
+My first contact with Jürgen was in January 2018, and his *little
+question* about usage of xintexpr_ for differentiating polynomials
+proved the direct cause for the :ref:`creation of polexpr
+<firstrelease>`.  His regular comments and questions (often, jointly
+with Thomas Söll) largely contributed to motivate the author into
+investing time and effort into the somewhat strange occupation of
+developing such unusual TeX/LaTeX packages.  The topics of our
+discussions evolved over the years and were not limited to TeX, LaTeX,
+PSTricks or PostScript matters.
+
+I learned to discover and appreciate his unassuming and kind character.
+He was very conscientious in all his projects with others and was often
+overly generous in his appreciation of people's contributions.  On
+receiving the sad news of his unexpected and untimely death, I initially
+thought I had been knowing him for at least 10 years, but it is actually
+only a bit more than 4 years... I will sorely miss this friendship with
+a gentle soul from *over the Rhine*.
+
+I dedicate the work which has gone into polexpr_ to Jürgen's memory.
+
+
+.. _polexpr: https://www.ctan.org/pkg/polexpr
+
+.. _xinttools:
+.. _xintfrac:
+.. _xint: https://www.ctan.org/pkg/xint
+
+.. _xintexpr: https://www.ctan.org/pkg/xintexpr
+
+.. _xintsession: https://www.ctan.org/pkg/xintsession
+
+.. _Wilkinson polynomial: https://en.wikipedia.org/wiki/Wilkinson%27s_polynomial
+
+.. _Sturm algorithm:
+.. _Sturm Theorem: https://en.wikipedia.org/wiki/Sturm%27s_theorem
+
+.. _DocUtils: http://docutils.sourceforge.net/docs/index.html
+
+
+.. Local variables:
+.. sentence-end-double-space: t;
+.. End:

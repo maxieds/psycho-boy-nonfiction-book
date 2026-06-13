@@ -1,0 +1,61 @@
+\input TrIOsupport.tex
+%
+% First, macro for \input
+%
+\def\input{\TRIObegingroup \TrIOhandleglobaldefs \TrIOcountiocmd
+   \TrIOsetcatcodes \TrIOcount=\TRIOinputlineno \TRIOlet\TrIOnxt==%
+   \TRIOinput TrIOopen.tex }
+\def\TrIOcCkPxXmove#1\input{% transfer tokens closer to \input
+   \def\TrIOcCkPxXtransfer{#1}\input}
+%
+% Second, macros for \openin and \openout (\immediate is handled in TrIOnames.tex)
+%
+\def\openin{\TRIOthe\TrIOtropenin} \TrIOtropenin={\TrIOopenin}
+\def\TrIOopenin{\TRIObegingroup \TrIOhandleglobaldefs \TrIOcountiocmd
+   \TRIOxdef\TrIOnext{\TrIOcount=\TRIOthe\TRIOinputlineno}%
+   \TRIOafterassignment\TrIOOpenIn \TrIOcount=}
+\def\TrIOOpenIn{\TRIOafterassignment\TrIOOPENIN \TRIOglobal\TRIOlet\TrIOnxt=}
+\def\TrIOOPENIN{\TrIOnext \TrIOsetcatcodes \TRIOinput TrIOopen.tex }
+\let\openout=\openin
+%
+% Third, macros used in TrIOnames.tex
+%
+\def\TrIOenvinput{% set \TrIOleft and \TrIOright for \input
+   \TRIOlet\TrIOleft=\TrIOendgroup \TRIOlet\TrIOright=\TRIOrelax}
+\def\TrIOenvopen{%  set \TrIOleft and \TrIOright for \openin & \openout
+   \TRIOlet\TrIOleft=\TRIOrelax \TRIOlet\TrIOright=\TrIOendgroup}
+%
+\def\TrIOfFLouUexecute{% password-protected name
+   \TRIOifx=\TrIOnxt \TRIOgdef\TrIOnext{TrIO_}%
+   \TRIOelse \TRIOgdef\TrIOnext{TrIO_\TrIOnxt}%
+   \TRIOfi \TRIOafterassignment\TrIOfFLouUdoiocmd
+   \TRIOfont\TRIOunused=\TrIOnext}
+\def\TrIOfFLouUdoiocmd{% execute the I/O command
+   \TRIOlet\TrIOnext=\TRIOundefined \TrIOresumeafterassignment
+   % \TRIOunused is ``select font nullfont''
+   % \TrIOiocmd is undefined for \openin & \openout, \TRIOinput for \input
+   % \TrIOfile is undefined for \openin & \openout, file name for \input
+   \TRIOifx\TrIOright\TRIOrelax \TRIOexpandafter\TrIOleft
+      \TRIOexpandafter\TrIOiocmd\TRIOexpandafter\TrIOfile
+   \TRIOelse \TrIOiocmd\TrIOfile\TrIOright
+   \TRIOfi}
+%
+% Start
+%
+\TRIOinput TrIOprivate.tex
+\TRIOinput TrIOnames.tex
+\begingroup \newlinechar=`\^^J
+\errhelp{File I/O ( \input\openin\openout) is now under TrIO's control.^^JBe
+   alerted if a file is loaded without the proper TrIO message^^Jand
+   check that the file name without extension that raises^^Jthe font error matches
+   the file name of the TrIO message.}
+\ifx y\disablespecial % deactivate \special; write to log file
+   \TrIOmessage{<<< TrIO >>> \string\special: disabled, trace in \jobname.log}
+\else\ifx n\disablespecial % trace \special
+   \TrIOmessage{<<< TrIO >>> \string\special: primitive, trace in \jobname.log}
+\else
+   \TrIOmessage{<<< TrIO >>> \string\special: primitive}
+\fi\fi
+\let\threenosubdirs=\undefined \let\twonosubdirs=\undefined
+\let\disablespecial\undefined
+\errmessage{TrIO auto-mode activated. Type h to get instructions}\endgroup

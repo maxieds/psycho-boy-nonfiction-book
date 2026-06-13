@@ -1,0 +1,139 @@
+\setuppapersize[S6]
+\setuplayout[backspace=2cm, topspace=0.7cm, bottom=0.5cm, width=middle, height=fit]
+
+\setupinteraction[state=start,
+$if(title)$
+  title={$title$},
+$endif$
+n$if(subtitle)$
+  subtitle={$subtitle$},
+$endif$
+$if(author)$
+  author={$for(author)$$author$$sep$; $endfor$},
+$endif$
+$if(keywords)$
+  keyword={$for(keywords)$$keywords$$sep$; $endfor$},
+$endif$
+  style=,
+  color=blue,
+  contrastcolor=,
+  click=yes]
+\placebookmarks[chapter, section, subsection, subsubsection, subsubsubsection, subsubsubsubsection][chapter, section]
+
+\setupbodyfontenvironment[default][em=italic]
+\definefontfamily[mainface][rm][cochineal]
+\definefontfamily[mainface][ss][libertinussans]
+\definefontfamily[mainface][tt][nimbusmonops][features=none]
+\setupbodyfont[mainface,12pt]
+
+\setuptype[lines=no]
+
+\setuphead[chapter]            [style=\ssc\bf\setupinterlinespace,header=empty]
+\setuphead[section]            [style=\ssb\bf\setupinterlinespace]
+\setuphead[subsection]         [style=\ssa\bf\setupinterlinespace]
+\setuphead[subsubsection]      [style=\ss\bf]
+\setuphead[subsubsubsection]   [style=\ss]
+\setuphead[subsubsubsubsection][style=\ss\it]
+\setupheads[indentnext=no]
+
+\setuppagenumbering[location=] % Pour que le numéro de page n'apparaisse pas en haut au milieu
+\setupheader[text][leftstyle=\em]
+\setupheadertexts[section][pagenumber]
+\setupfootertexts$if(toc)$[{\inframed{\goto{Table of contents}[page(3)]}}]$endif$[{\inframed{\goto{Jump to previous page}[PreviousJump]}}]
+
+\setupbackend[
+format={pdf/a-1a:2005},
+profile={default_cmyk.icc,default_rgb.icc,default_gray.icc},
+intent=ISO coated v2 300\letterpercent\space (ECI)]
+
+\setupbackend[export=yes]
+\setupstructure[state=start,method=auto]
+
+\definefontfeature[default][default][script=latn, protrusion=quality, expansion=quality, itlc=yes, textitalics=yes, onum=yes, pnum=yes]
+\definefontfeature[smallcaps][script=latn, protrusion=quality, expansion=quality, smcp=yes, onum=yes, pnum=yes]
+\setupalign[hz,hanging]
+\setupitaliccorrection[global, always]
+
+\defineitemgroup[enumerate]
+\setupenumerate[each][fit][itemalign=left,distance=.5em,style={\feature[+][default:tnum]}]
+
+\setupindenting[yes, small]
+
+\setupwhitespace[small]
+
+\setupnotation[footnote][alternative=left, numbercommand=, stopper={.}]
+
+\setupitemize[autointro]  % prevent orphan list intro
+\definesymbol[emdash][—]
+\definesymbol[endash][–]
+\setupitemize[1][symbol=emdash, width=2.2em, indenting=-0.7em] % cochineal has no bullet
+\setupitemize[2][symbol=endash, width=1.3em, indenting=-0.3em]
+
+\setupdelimitedtext[blockquote][indenting=no]
+
+\definebreakpoints[lbreakwithouthyphen]
+\definebreakpoint[lbreakwithouthyphen][=][type=1]
+\definebreakpoint[lbreakwithouthyphen][-][type=1]
+\setbreakpoints[lbreakwithouthyphen]
+
+\definemakeup[titlepage][doubleside=no,align=middle,headerstate=empty]
+\definemakeup[licensepage][doubleside=no,top=\vfill,headerstate=empty]
+
+\setupcombinedlist[content, listoftables, listoffigures][criterium=all,
+  list={chapter,section,subsection, subsubsection},
+  alternative=c]
+\setuplist[chapter, section, subsection, subsubsection][color=no, numberstyle={\feature[-][f:oldstyle]}, pagestyle={\feature[-][f:oldstyle]}]
+\setuplist[chapter][width=1em, style=\bf\ss]
+\setuplist[section][margin=1em, width=2em]
+\setuplist[subsection][margin=3em, width=3em]
+\setuplist[subsubsection][margin=6em, width=4em]
+
+$if(highlighting-commands)$
+$highlighting-commands$
+$endif$
+
+\starttext
+
+\starttitlepagemakeup
+$if(title)$
+  {\tfd\setupinterlinespace $title$}
+$if(subtitle)$
+  \blank[force,1cm]
+  {\tfa\setupinterlinespace $subtitle$}
+$endif$
+$if(author)$
+  \blank[force,1cm]
+  {\tfa\setupinterlinespace $for(author)$$author$$sep$\crlf $endfor$}
+$endif$
+$if(date)$
+  \blank[force,1cm]
+  {\tfa\setupinterlinespace $date$}
+$endif$
+\stoptitlepagemakeup
+\pagebreak
+$endif$
+
+$if(license)$
+\startlicensepagemakeup
+\inframed[frame=off, width=0.66\textwidth, align=normal]{%
+  Copyright (C) 2022-2024 Bastien Dumont.
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.3
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+  A copy of the license should have been distributed with this file.
+  If not, see \hyphenatedurl{https://www.gnu.org/licenses/fdl-1.3.html}.%
+}
+\stoplicensepagemakeup
+\pagebreak
+$endif$
+
+$if(toc)$
+\completecontent
+$endif$
+\pagebreak
+
+
+$body$
+
+\stoptext
