@@ -1,0 +1,132 @@
+%% $Id: gentium-otf.sty 1058 2025-01-08 08:02:06Z herbert $
+%%
+%% This file is distributed under the terms of the LaTeX Project Public
+%% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+%% Either version 1.3 or, at your option, any later version.
+%%
+%
+\ProvidesPackage{gentium-otf}[%
+  2025/01/04 v. 0.01 (Herbert Voss) Supports gentium fonts for lualatex and xelatex.] 
+
+\RequirePackage{iftex,xkeyval,textcomp,fontspec}
+
+\def\@gentium@book{}
+\DeclareOptionX{book}{\def\@gentium@book{Book}}
+
+\newcommand*\gentiumRM@scale{1}  
+\DeclareOptionX{ScaleRM}{\renewcommand*{\gentiumRM@scale}{#1}}
+
+\newcommand*\gentium@math{}  
+\newcommand*\gentium@math@features{}  
+\DeclareOptionX{math}{\renewcommand*{\gentium@math}{#1}}
+\DeclareOptionX{mathFeatures}{\renewcommand*{\gentium@math@features}{#1}}
+
+\newcommand*\gentium@sans{}  
+\newcommand*\gentium@sans@features{}  
+\DeclareOptionX{sans}{\renewcommand*{\gentium@sans}{#1}}
+\DeclareOptionX{sansFeatures}{\renewcommand*{\gentium@sans@features}{#1}}
+
+\newcommand*\gentium@mono{}  
+\newcommand*\gentium@mono@features{}  
+\DeclareOptionX{mono}{\renewcommand*{\gentium@mono}{#1}}
+\DeclareOptionX{monoFeatures}{\renewcommand*{\gentium@mono@features}{#1}}
+
+\def\gentium@defaultfeatures{}
+\DeclareOptionX{defaultfeatures}{\def\gentium@defaultfeatures{#1}}
+
+\ProcessOptionsX\relax
+
+\ifxetex\XeTeXtracingfonts=1\fi
+\defaultfontfeatures[\rmfamily]{
+     Ligatures = TeX ,
+     SmallCapsFeatures={Letters=SmallCaps},%       \ifluatex,Renderer=Basic\fi}, 
+     \gentium@defaultfeatures
+}
+
+%------------------------   filenames start -------------------------
+%   1.       GentiumBookPlus-Bold.ttf  
+%   2. GentiumBookPlus-BoldItalic.ttf  
+%   3.     GentiumBookPlus-Italic.ttf  
+%   4.    GentiumBookPlus-Regular.ttf  
+%   5.           GentiumPlus-Bold.ttf  
+%   6.     GentiumPlus-BoldItalic.ttf  
+%   7.         GentiumPlus-Italic.ttf  
+%   8.        GentiumPlus-Regular.ttf  
+
+\edef\gentium@main@font{Gentium\@gentium@book Plus}% GentiumPlus  or GentiumBookPlus
+
+\if$\gentium@math$\else
+  \RequirePackage{unicode-math}
+  \expandafter\setmathfont\expandafter[\gentium@math@features]{\gentium@math}
+\fi
+
+\if$\gentium@sans$\else
+  \expandafter\setsansfont\expandafter[\gentium@sans@features]{\gentium@sans}
+\fi
+
+\if$\gentium@mono$\else
+  \expandafter\setmonofont\expandafter[\gentium@mono@features]{\gentium@mono}
+\fi
+
+\setmainfont{\gentium@main@font}[ 
+  Scale          = \gentiumRM@scale ,
+  UprightFont    = *-Regular,
+  ItalicFont     = *-Italic,
+  ItalicFeatures = { SmallCapsFont = *-Italic },
+  SlantedFont    = *-Regular,
+  SlantedFeatures= {FakeSlant=0.2},
+  BoldFont       = *-Bold,
+  BoldFeatures   = { SmallCapsFont = *-Bold },
+  BoldItalicFont = *-BoldItalic,
+  BoldItalicFeatures = { SmallCapsFont = *-BoldItalic },
+  BoldSlantedFont= *-Bold,
+  BoldSlantedFeatures= {FakeSlant=0.2, SmallCapsFont = *-bold },
+  SmallCapsFont  = *-Regular,
+%  SmallCapsFeatures={RawFeature=+smcp},
+  SmallCapsFeatures={Letters=SmallCaps}, 
+  Extension      = .ttf  
+]
+
+\def\Lctosc#1{{\addfontfeature{RawFeature=+c2sc}#1}}
+\def\LCtoSC{\@ifnextchar-\L@CtoSC\L@@CtoSC}
+\def\L@CtoSC-{\addfontfeature{RawFeature=-c2sc}}
+\def\L@@CtoSC#1{\addfontfeature{RawFeature=+c2sc}\ifx#1+\else#1\fi}
+
+\def\Lctosmcp#1{{\addfontfeature{RawFeature={+c2sc,+smcp}}#1}}
+\def\LCtoSMCP{\@ifnextchar-\L@CtoSMCP\L@@CtoSMCP}
+\def\L@CtoSMCP-{\addfontfeature{RawFeature={-c2sc,-smcp}}}
+\def\L@@CtoSMCP#1{\addfontfeature{RawFeature={+c2sc,+smcp}}\ifx#1+\else#1\fi}
+
+\def\Lliga#1{{\addfontfeature{RawFeature=+liga}#1}}
+\def\LLIGA{\@ifnextchar-\L@LIGA\L@@LIGA}
+\def\L@LIGA-{\addfontfeature{RawFeature=-liga}}
+\def\L@@LIGA#1{\addfontfeature{RawFeature=+liga}\ifx#1+\else#1\fi}
+
+\def\Lss#1#2#3{{\addfontfeature{RawFeature=+ss#1#2}#3}}
+\def\LSS#1#2{\addfontfeature{RawFeature=+ss#1#2}}
+
+\def\Lcv{\@ifnextchar[\Lcv@i{\Lcv@i[1]}}
+\def\Lcv@i[#1]#2#3#4{{\addfontfeature{RawFeature={+cv#2#3=#1}}#4}}
+\def\LCV#1#2{\@ifnextchar[\LCV@i{\LCV@i[1]}}
+\def\LCV[#1]#2#3{\addfontfeature{RawFeature={+cv#2#3=#1}}}
+
+\def\Llang#1{\addfontfeature{Script=Cyrillic,Language=Serbian}}
+
+\def\Lsup#1{{\addfontfeature{RawFeature=+sups}#1}}
+\def\LSUP{\@ifnextchar-\L@SUP\L@@SUP}
+\def\L@SUP-{\addfontfeature{RawFeature=-sups}}
+\def\L@@SUP#1{\addfontfeature{RawFeature=+sups}\ifx#1+\else#1\fi}
+
+\def\Lsub#1{{\addfontfeature{RawFeature=+subs}#1}}
+\def\LSUB{\@ifnextchar-\L@SUB\L@@SUB}
+\def\L@SUB-{\addfontfeature{RawFeature=-subs}}
+\def\L@@SUB#1{\addfontfeature{RawFeature=+subs}\ifx#1+\else#1\fi}
+
+\def\Lfrac#1{{\addfontfeature{RawFeature=+frac}#1}}
+\def\LFRAC{\@ifnextchar-\L@FRAC\L@@FRAC}
+\def\L@FRAC-{\addfontfeature{RawFeature=-frac}}
+\def\L@@FRAC#1{\addfontfeature{RawFeature=+frac}\ifx#1+\else#1\fi}
+
+
+\endinput
+

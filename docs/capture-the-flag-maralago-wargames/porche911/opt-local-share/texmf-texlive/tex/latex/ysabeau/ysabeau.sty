@@ -1,0 +1,300 @@
+\NeedsTeXFormat{LaTeX2e}
+\def\fileversion{1.5}
+\def\filedate{2024/11/06}
+\ProvidesPackage{ysabeau}[\filedate\space v\fileversion\space Ysabeau fonts for LaTeX (NMH).]
+
+% Large portions of code was stolen from Michael Sharpe (cochineal.sty). Credits for him.
+
+\DeclareEncodingSubset{TS1}{Ysabeau-*}{0}
+\DeclareEncodingSubset{LGR}{Ysabeau-*}{0}
+\RequirePackage{fontenc,textcomp}
+\RequirePackage{mweights}
+\RequirePackage{xstring,ifthen,scalefnt} % For \textfrac
+\RequirePackage{etoolbox} % For new commands
+
+\RequirePackage{xkeyval}
+\newcommand*{\Ysabeau@scale}{1}
+\DeclareOptionX{scale}{\renewcommand*{\Ysabeau@scale}{#1}}
+\DeclareOptionX{scaled}{\renewcommand*{\Ysabeau@scale}{#1}}
+
+% For \textfrac command and oldstyle figures in small caps block
+
+\def\Ysabeau@foresolidus{0em}
+\def\Ysabeau@aftsolidus{0em}
+\newif\if@Ysabeau@scosf
+
+\DeclareOptionX{lining}{\edef\Ysabeau@figurestyle{LF}}
+\DeclareOptionX{lf}{\edef\Ysabeau@figurestyle{LF}}
+\DeclareOptionX{LF}{\edef\Ysabeau@figurestyle{LF}}
+\DeclareOptionX{oldstyle}{\edef\Ysabeau@figurestyle{OsF}}
+\DeclareOptionX{osf}{\edef\Ysabeau@figurestyle{OsF}}
+\DeclareOptionX{OSF}{\edef\Ysabeau@figurestyle{OsF}}
+\DeclareOptionX{tabular}{\edef\Ysabeau@figurealign{T}}
+\DeclareOptionX{t}{\edef\Ysabeau@figurealign{T}}
+\DeclareOptionX{T}{\edef\Ysabeau@figurealign{T}}
+\DeclareOptionX{proportional}{\edef\Ysabeau@figurealign{}}
+\DeclareOptionX{p}{\edef\Ysabeau@figurealign{}}
+\DeclareOptionX{P}{\edef\Ysabeau@figurealign{}}
+\DeclareOptionX{scosf}{\@Ysabeau@scosftrue}
+\edef\Ysabeau@figurestyle{OsF}
+\edef\Ysabeau@figurealign{}
+
+\DeclareOptionX{mainfont}{
+    \renewcommand{\familydefault}{\sfdefault}
+}
+
+% For weights support. We need remap NFSS for more weights.
+
+% ub = black
+% eb = extrabold
+% b  = bold
+% sb = semibold
+% m  = regular and medium (a bit heavier than regular)
+% sl = light
+% l  = extralight
+% el = thin
+% ul = hairline
+
+\DeclareRobustCommand{\blackfont}{%
+  \fontseries{ub}\selectfont %
+}% black
+\DeclareRobustCommand{\extraboldfont}{%
+  \fontseries{eb}\selectfont %
+}% extrabold
+\DeclareRobustCommand{\boldfont}{%
+  \fontseries{b}\selectfont %
+}% extrabold
+\DeclareRobustCommand{\semiboldfont}{%
+  \fontseries{sb}\selectfont %
+}% semibold
+%\DeclareRobustCommand{\regularfont}{%
+%  \fontseries{m}\selectfont %
+%}% regular
+%\DeclareRobustCommand{\mediumfont}{% We can declare medium like \bfseries too.
+%  \fontseries{m}\selectfont %
+%}% medium
+\DeclareRobustCommand{\lightfont}{%
+  \fontseries{sl}\selectfont %
+}% light
+\DeclareRobustCommand{\extralightfont}{%
+  \fontseries{l}\selectfont %
+}% extralight
+\DeclareRobustCommand{\thinfont}{%
+  \fontseries{el}\selectfont %
+}% thin
+\DeclareRobustCommand{\hairlinefont}{%
+  \fontseries{ul}\selectfont %
+}% hairline
+\DeclareRobustCommand{\black}[1]{%
+  {\blackfont #1}%
+}% black
+\DeclareRobustCommand{\extrabold}[1]{%
+  {\extraboldfont #1}%
+}% extrabold
+\DeclareRobustCommand{\bold}[1]{%
+  {\boldfont #1}%
+}% bold
+\DeclareRobustCommand{\semibold}[1]{%
+  {\semiboldfont #1}%
+}% semibold
+\DeclareRobustCommand{\light}[1]{%
+  {\lightfont #1}%
+}% light
+\DeclareRobustCommand{\extralight}[1]{%
+  {\extralightfont #1}%
+}% extralight
+\DeclareRobustCommand{\thin}[1]{%
+  {\thinfont #1}%
+}% thin
+\DeclareRobustCommand{\hairline}[1]{%
+  {\hairlinefont #1}%
+}% hairline
+
+\DeclareOptionX{black}{\edef\bfseries@sf{black}}
+\DeclareOptionX{extrabold}{\edef\bfseries@sf{extrabold}}
+\DeclareOptionX{bold}{\edef\bfseries@sf{bold}}
+\DeclareOptionX{semibold}{\edef\bfseries@sf{semibold}}
+\DeclareOptionX{medium}{\edef\mdseries@sf{medium}}
+\DeclareOptionX{regular}{\edef\mdseries@sf{regular}}
+\DeclareOptionX{light}{\edef\mdseries@sf{light}}
+\DeclareOptionX{extralight}{\edef\mdseries@sf{extralight}}
+\DeclareOptionX{thin}{\edef\mdseries@sf{thin}}
+\DeclareOptionX{hairline}{\edef\mdseries@sf{hairline}}
+
+% For \textfrac command
+
+\DeclareOptionX{foresolidus}{\gdef\Ysabeau@foresolidus{#1}} 
+\DeclareOptionX{aftsolidus}{\gdef\Ysabeau@aftsolidus{#1}}
+
+\ProcessOptionsX\relax
+
+% For lining, tabular and oldstyle figures
+
+\DeclareRobustCommand{\lfstyle}{%
+  \@nomath\lfstyle\relax
+  \fontfamily{Ysabeau-LF}\selectfont %
+}% Lining Figures
+\DeclareRobustCommand{\tlfstyle}{%
+  \@nomath\tlfstyle\relax
+  \fontfamily{Ysabeau-TLF}\selectfont %
+}% Tabular Lining Figures
+\DeclareRobustCommand{\osfstyle}{%
+  \@nomath\osfstyle\relax
+  \fontfamily{Ysabeau-OsF}\selectfont %
+}% Oldstyle Figures
+\DeclareRobustCommand{\tosfstyle}{%
+  \@nomath\tosfstyle\relax
+  \fontfamily{Ysabeau-TOsF}\selectfont %
+}% Tabular Oldstyle Figures
+\DeclareRobustCommand{\textlf}[1]{%
+  {\lfstyle #1}%
+}% Lining Figures
+\DeclareRobustCommand{\texttlf}[1]{%
+  {\tlfstyle #1}%
+}% Tabular Lining Figures
+\DeclareRobustCommand{\textosf}[1]{%
+  {\osfstyle #1}%
+}% Olstyle Figures
+\DeclareRobustCommand{\texttosf}[1]{%
+  {\tosfstyle #1}%
+}% Tabular Oldstyle Figures
+\if@Ysabeau@scosf %
+\DeclareRobustCommand{\textsc}[1]{%
+{\fontfamily{Ysabeau-\Ysabeau@figurealign%
+OsF}\fontshape{sc}\selectfont #1}%
+}\fi% use OsF in small caps
+
+% Here we provides some aliases for figure commands
+
+\let\liningnums\lfstyle
+\let\tabularliningnums\tlfstyle
+\let\oldstylenums\osfstyle
+\let\tabularoldstylenums\tosfstyle
+
+\IfFileExists{fontaxes.sty}{
+    \RequirePackage{fontaxes}
+    \DeclareRobustCommand\swshape{\not@math@alphabet\swshape\relax
+        \fontprimaryshape\itdefault\fontsecondaryshape\swdefault\selectfont}
+    \fa@naming@exception{shape}{{n}{sw}}{nw}
+    \fa@naming@exception{shape}{{it}{sw}}{sw}
+
+    \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+    \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+    \def\supfigures{\@nomath\supfigures
+        \fontfigurestyle{superior}\selectfont}
+    \let\sufigures\supfigures
+    \DeclareTextFontCommand{\textsup}{\supfigures}
+    \let\textsu\textsup
+    \let\textsuperior\textsup
+    \let\supstyle\supfigures
+    \let\supscript\supfigures
+    \let\@oldtextsuperscript\textsuperscript
+    \def\textsuperscript{\@ifstar\@oldtextsuperscript\textsup}
+    \def\@makefnmark{%
+        \mbox{\footnotemarkfont\textsuperscript{\@thefnmark}}}
+    \@ifundefined{ftntm@font}%
+        {\let\footnotemarkfont\normalfont}%
+        {\let\footnotemarkfont\ftntm@font}        
+        
+    \fa@naming@exception{figures}{{inferior}{proportional}}{Inf}
+    \fa@naming@exception{figures}{{inferior}{tabular}}{Inf}
+    \def\inffigures{\@nomath\inffigures
+        \fontfigurestyle{inferior}\selectfont}
+    \let\infigures\inffigures
+    \DeclareTextFontCommand{\textinf}{\inffigures}
+    \let\textin\textinf
+    \let\textinferior\textinf
+    \let\infstyle\inffigures
+    \let\subscript\inffigures
+    \let\@oldtextsubscript\textsubscript
+    \def\textsubscript{\@ifstar\@oldtextsubscript\textinf}
+
+    \fa@naming@exception{figures}{{numerators}{proportional}}{Numr}
+    %\fa@naming@exception{figures}{{numerator}{proportional}}{Numr}
+    \fa@naming@exception{figures}{{numerators}{tabular}}{Numr}
+    %\fa@naming@exception{figures}{{numerator}{tabular}}{Numr}
+    \def\numfigures{\@nomath\numfigures
+        \fontfigurestyle{numerators}\selectfont}
+    \let\nufigures\numfigures
+    \DeclareTextFontCommand{\textnum}{\numfigures}    
+    \let\textnumerators\textnum
+    \let\numstyle\numfigures
+
+    \fa@naming@exception{figures}{{denominators}{proportional}}{Dnom}
+    %\fa@naming@exception{figures}{{denominator}{proportional}}{Dnom}
+    \fa@naming@exception{figures}{{denominators}{tabular}}{Dnom}
+    %\fa@naming@exception{figures}{{denominator}{tabular}}{Dnom}
+    \def\denfigures{\@nomath\denfigures
+        \fontfigurestyle{denominators}\selectfont}
+    \let\defigures\denfigures
+    \DeclareTextFontCommand{\textden}{\denfigures}
+    \let\textde\textden
+    \let\textdenominators\textden
+    \let\denstyle\denfigures
+
+}{}
+
+% For \textfrac command. We need test kernings.
+
+\newcommand{\textfrac}[3][]{% like \textfrac[1]{7}{8}
+  \mbox{%
+    \ifthenelse{\not\equal{#1}{}}%Test for integer portion [optional #1]
+      {\textlf{#1}\kern.05em}{}% We need define \textlf later         
+    \textnum{#2}% numerator. \textsu collide, then \textnum
+    \StrRight{#2}{1}[\@digit@]%
+    % look for  1, 2, 6, 7
+    \ifcase\@digit@% 0
+    \or\kern.03em% 1
+    \or\kern.02em% 2
+    \or%\kern-.01em% 3
+    \or%\kern-.01em% 4
+    \or%\kern.01em% 5
+    \or\kern.01em% 6
+    \or\kern-.08em% 7
+    \fi%
+    \kern\Ysabeau@foresolidus{\fontencoding{TS1}\selectfont\char"2F}%
+    \kern\Ysabeau@aftsolidus%
+    \StrLeft{#3}{1}[\@digit@]%
+    % look for 1, 4, 7
+    \ifcase\@digit@% 0
+    \or%\kern -.02em% 1
+    \or% 2
+    \or% 3
+    \or\kern -.03em% 4
+    \or% 5
+    \or% 6
+    \or\kern .02em% 7
+    \fi%
+    \textden{#3}%       denominator [#3]
+  }%
+}
+
+%   Here we implement the scale=MatchLowercase option.
+%   If this is given, we must compute the correct value of
+%   the "\Ysabeau@scale" parameter before loading the .fd files;
+%   but to determine that value we of course need the font's x-height.
+%   To avoid triggering the loading of .fd files,
+%   we use plain TeX's \font primitive to load the testfont.
+%   We then compute the ratio of the current x-height to our font's x-height;
+%   this is the "\Ysabeau@scale" we will pass to the .fd files.
+\ifthenelse{\equal{\Ysabeau@scale}{MatchLowercase}}
+    {   \newlength{\Ysabeau@currentx}
+        \settoheight{\Ysabeau@currentx}{x}
+        \newlength{\Ysabeau@xheight}
+        \settoheight{\Ysabeau@xheight}
+            {{\font\testfont=Ysabeau-Regular-osf-qx at \f@size pt\testfont x}}
+        \renewcommand*{\Ysabeau@scale}
+            {\strip@pt\dimexpr\number\numexpr\number\dimexpr\Ysabeau@currentx\relax*65536/\number\dimexpr\Ysabeau@xheight\relax\relax sp\relax}}
+    {}
+
+\renewcommand*
+    {\sfdefault}
+    {Ysabeau-\Ysabeau@figurealign\Ysabeau@figurestyle}
+
+% For fractions. textcomp provides \textonequarter, \textonehalf and textthreequarters too.
+
+\def\onequarter{{\fontencoding{TS1}\selectfont\char188}} % We need declare TS1 encoding subset at the begining
+\def\onehalf{{\fontencoding{TS1}\selectfont\char189}} % We need declare TS1 encoding subset at the begining
+\def\threequarters{{\fontencoding{TS1}\selectfont\char190}} % We need declare TS1 encoding subset at the begining
+
+\endinput

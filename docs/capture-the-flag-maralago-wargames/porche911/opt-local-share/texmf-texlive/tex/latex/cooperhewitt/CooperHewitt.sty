@@ -1,0 +1,121 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{CooperHewitt}
+    [2022/10/18 (Bob Tennent) Supports Cooper Hewitt fonts for all LaTeX engines.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+\newif\ifcphwt@otf 
+\ifxetex
+  \cphwt@otftrue
+\else\ifluatex
+  \cphwt@otftrue
+\else  % [pdf]LaTeX
+  \cphwt@otffalse
+\fi\fi
+
+\newif\ifcphwt@default \cphwt@defaultfalse
+\newif\ifcphwt@semibold \cphwt@semiboldfalse
+\newif\ifcphwt@medium  \cphwt@mediumfalse
+\newif\ifcphwt@heavy  \cphwt@heavyfalse
+\newif\ifcphwt@thin  \cphwt@thinfalse
+\newif\ifcphwt@light  \cphwt@lightfalse
+
+\newcommand*{\CpHwt@scale}{1}
+\DeclareOptionX{scale}{\renewcommand*{\CpHwt@scale}{#1}}
+\DeclareOptionX{scaled}{\renewcommand*{\CpHwt@scale}{#1}}
+
+\DeclareOptionX{default}{\cphwt@defaulttrue}
+\DeclareOptionX{sfdefault}{\cphwt@defaulttrue}
+\DeclareOptionX{type1}{\cphwt@otffalse}
+
+\DeclareOptionX{semibold}{\cphwt@semiboldtrue}
+\DeclareOptionX{heavy}{\cphwt@heavytrue}
+\DeclareOptionX{medium}{\cphwt@mediumtrue}
+\DeclareOptionX{thin}{\cphwt@thintrue}
+\DeclareOptionX{light}{\cphwt@lighttrue}
+
+\ProcessOptionsX\relax
+
+\ifcphwt@otf
+
+  \def\cphwt@boldstyle{Bold}
+  \ifcphwt@semibold\def\cphwt@boldstyle{SemiBold}\fi
+  \ifcphwt@heavy\def\cphwt@boldstyle{Heavy}\fi
+  \def\cphwt@regstyle{Book}
+  \ifcphwt@medium\def\cphwt@regstyle{Medium}\fi
+  \ifcphwt@thin\def\cphwt@regstyle{Thin}\fi
+  \ifcphwt@light\def\cphwt@regstyle{Light}\fi
+
+\else  % type1
+
+\IfFileExists{fontaxes.sty}{
+    \RequirePackage{fontaxes}
+    \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+    \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+    \def\supfigures{\@nomath\supfigures
+        \fontfigurestyle{superior}\selectfont}
+    \let\sufigures\supfigures
+    \let\textsu\textsup
+    \let\textsuperior\textsup
+
+}{}
+
+  \def\bfseries@sf{bold}
+  \ifcphwt@semibold\def\bfseries@sf{semibold}\fi
+  \ifcphwt@heavy\def\bfseries@sf{heavy}\fi
+  \def\mdseries@sf{book}
+  \ifcphwt@medium\def\mdseries@sf{medium}\fi
+  \ifcphwt@thin\def\mdseries@sf{thin}\fi
+  \ifcphwt@light\def\mdseries@sf{light}\fi
+\fi
+
+\ifcphwt@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+\fi
+
+\ifcphwt@otf
+
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Scale     = \CpHwt@scale ,
+        Extension = .otf }
+  \setsansfont
+      [ UprightFont    = *-\cphwt@regstyle ,
+        ItalicFont     = *-\cphwt@regstyle Italic ,
+        BoldFont       = *-\cphwt@boldstyle , 
+        BoldItalicFont = *-\cphwt@boldstyle Italic ]
+      {CooperHewitt}
+
+% grab current family in case of subsequent change:
+  \let\cphwtfamily\sfdefault  
+  \ifcphwt@default\renewcommand*\familydefault{\cphwtfamily}\fi
+
+  \newfontfamily\cooperhewitt
+      [ UprightFont    = *-\cphwt@regstyle ,
+        ItalicFont     = *-\cphwt@regstyle Italic ,
+        BoldFont       = *-\cphwt@boldstyle , 
+        BoldItalicFont = *-\cphwt@boldstyle Italic ]
+      {CooperHewitt}
+
+  \providecommand\sufigures{\addfontfeatures{VerticalPosition=Superior}}
+
+
+\else % type1
+
+  \def\cphwtfamily{CpHwt-TLF}
+  \newcommand*\cooperhewitt{\fontfamily{\cphwtfamily}\selectfont}
+  \def\sfdefault{\cphwtfamily}
+  \ifcphwt@default\edef\familydefault{\sfdefault}\edef\seriesdefault{\mdseries@sf}\fi
+
+\fi
+
+\DeclareTextFontCommand{\textsu}{\sufigures}
+
+\ifcphwt@otf
+% turn off defaults in case other fonts are selected:
+  \defaultfontfeatures{}
+\fi
+
+
+\endinput

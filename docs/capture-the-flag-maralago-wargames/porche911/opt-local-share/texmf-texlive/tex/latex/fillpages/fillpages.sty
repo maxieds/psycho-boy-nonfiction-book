@@ -1,0 +1,211 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                   %
+%      Made by Gabriel Ruprecht     %
+%                                   %
+% This work is published under the  %
+% LaTeX project public license 1.3  %
+%                                   %
+%       Package version 1.1.0       %
+%            2025-01-21             %
+%                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProvidesPackage{fillpages}[version 1.1.0]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Number definitions %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% How many pages were inserted in the last run
+% (at begin document) and how many pages are already
+% inserted in this run (after begin document). The
+% default value is overwritten with the content from
+% the aux file (if there had ever be a run).
+\newcount\GFM@FiPa@numberOfInsertedPages\relax
+\GFM@FiPa@numberOfInsertedPages=0\relax
+
+% To distribute the fill pages on evenly on all 
+% insertion points, they must be counted. Default
+% value must be 1 to avoid division by 0. It will
+% be overwritten by the aux file value.
+\newcount\GFM@FiPa@numberOfFillPagePositions\relax
+\GFM@FiPa@numberOfFillPagePositions=1\relax
+
+% Number of pages, if there weren't any fill pages.
+\newcount\GFM@FiPa@pageCountWithoutFillPages\relax
+\GFM@FiPa@pageCountWithoutFillPages=0\relax
+
+% Self-explaining. Will be calculated. It is a
+% float number, therefore realized as a length.
+\newdimen\GFM@FiPa@pagesPerFillPosition\relax
+\GFM@FiPa@pagesPerFillPosition=0pt\relax
+
+% The currentLimit defines, how many new fill pages
+% are inserted. If there were over all 3 and current
+% limit is 5, 2 fill pages will be inserted at the
+% current insertion point.
+\newdimen\GFM@FiPa@currentLimit\relax
+\GFM@FiPa@currentLimit=0pt\relax
+
+% The number, by which the page number must be
+% divisible.
+\newcount\GFM@FiPa@Divisor\relax
+\GFM@FiPa@Divisor=4\relax
+
+% An offset, if the numbers must be i.e. divisible
+% by 4 and have 2 extra pages.
+\newcount\GFM@FiPa@DivisibleOffset\relax
+\GFM@FiPa@DivisibleOffset=0\relax
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Set the number by which the  %%%
+%%% page count must be divisible %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\NewDocumentCommand\pagesDivisibleBy{m O{0}}{%
+\GFM@FiPa@Divisor=#1\relax%
+\ifnum\GFM@FiPa@Divisor<1\relax%
+    \PackageError{fillpages.sty}{line 69: Illegal number}{You can't divide a page count by zero. Replaced with 1.}%
+    \GFM@FiPa@Divisor=1\relax%
+\fi%
+\ifnum\GFM@FiPa@Divisor>50\relax%
+    \PackageWarning{fillpages.sty}{Strange number. You want your pages divisible by a number greater than 50}%
+\fi%
+\GFM@FiPa@DivisibleOffset=#2\relax%
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Defines fillpages                      %%%
+%%%                                        %%%
+%%% i.e. \setFillPage{1}{custom Text} lets %%%
+%%% appear "custom Text" on fillpage no. 1 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\long\def\setFillPage#1#2{%
+\expandafter\global\expandafter\def\csname GFM@FiPa@insertionFillPage#1\endcsname {%
+#2%
+}%\def\csname...
+}%\def\setFillPage
+
+\long\def\setDefaultFillPage#1{%
+\expandafter\global\expandafter\def\csname GFM@FiPa@defaultFillPage\endcsname {%
+#1%
+}%\def\csname...
+}%\def\setFillPage
+
+
+\setDefaultFillPage{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Do the calculations, after  %%%
+%%% the aux file had been read. %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\AtBeginDocument{
+% From aux-file: 
+% GFM@FiPa@numberOfFillPagePositions
+% GFM@FiPa@numberOfInsertedPages
+
+% Calculate pagesCountWithoutFillPages
+\GFM@FiPa@pageCountWithoutFillPages=\PreviousTotalPages\relax
+\advance\GFM@FiPa@pageCountWithoutFillPages by -\GFM@FiPa@numberOfInsertedPages\relax
+% Reset to 0 for the next counting round.
+\GFM@FiPa@numberOfInsertedPages=0\relax
+
+\GFM@FiPa@pagesPerFillPosition=\the\GFM@FiPa@pageCountWithoutFillPages pt\relax
+\advance\GFM@FiPa@pagesPerFillPosition by -\GFM@FiPa@DivisibleOffset pt\relax
+
+\ifdim\GFM@FiPa@pagesPerFillPosition>0 pt%
+\loop%
+\advance\GFM@FiPa@pagesPerFillPosition by -\GFM@FiPa@Divisor pt\relax%
+\ifdim\GFM@FiPa@pagesPerFillPosition>0 pt\repeat%
+%loop%
+\fi
+
+\multiply\GFM@FiPa@pagesPerFillPosition by -1\relax%
+
+\divide\GFM@FiPa@pagesPerFillPosition by \GFM@FiPa@numberOfFillPagePositions\relax%
+
+\GFM@FiPa@numberOfFillPagePositions=0\relax
+}%AtBeginDocument
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% This defines an insertion point   %%%
+%%% where the fill pages will appear. %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\insertFillPages{%
+% i++ for GFM@FiPa@numberOfFillPagePositions%
+\advance\GFM@FiPa@numberOfFillPagePositions by 1\relax%
+%
+% calculate the GFM@FiPa@currentLimit for insertion%
+\GFM@FiPa@currentLimit=\GFM@FiPa@pagesPerFillPosition\relax%
+\multiply\GFM@FiPa@currentLimit by \GFM@FiPa@numberOfFillPagePositions\relax%
+\advance\GFM@FiPa@currentLimit by -0.98pt\relax%
+%
+% insert pages%
+\ifdim\GFM@FiPa@numberOfInsertedPages pt<\GFM@FiPa@currentLimit%
+    \loop%
+        \advance\GFM@FiPa@numberOfInsertedPages by 1\relax%
+        \clearpage%
+        % choose the content of a predefined page. If it doesn't exist, csname expands to nothing.
+        %%%%%%%%%%%%%%
+        \expandafter\ifx%
+        \csname %
+            GFM@FiPa@insertionFillPage\the\GFM@FiPa@numberOfInsertedPages%
+        \endcsname%
+        \relax% -> if x=relax
+        \GFM@FiPa@defaultFillPage%
+        \else%ifx
+        %%%%%%%%%%%%%%
+        \csname % 
+        GFM@FiPa@insertionFillPage\the\GFM@FiPa@numberOfInsertedPages
+        \endcsname%
+        \fi%ifx
+        \mbox{}%
+        \clearpage%
+        \ifnum\GFM@FiPa@numberOfInsertedPages>1000\relax%
+            \PackageError{fillpages.sty}{line 156: More than 1000 fill pages produced.}{You tried to insert more than 1000 fill pages. This must be an infinite loop.}%
+            %\errmessage{Infinite loop detected}
+            \stop
+        \fi%
+    \ifdim\GFM@FiPa@numberOfInsertedPages pt<\GFM@FiPa@currentLimit\repeat%
+    %end loop%
+\fi%ifdim
+}%insertFillPages
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Do a calculation and write %%%
+%%% numbers to the aux file.   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\AtEndDocument{
+% Write to aux
+\ifnum\GFM@FiPa@numberOfFillPagePositions > 0\relax
+    \write\@auxout{%
+            \noexpand\global%
+            \noexpand\GFM@FiPa@numberOfFillPagePositions=%
+            \the\GFM@FiPa@numberOfFillPagePositions%
+            \noexpand\relax}
+\fi
+
+\write\@auxout{%
+        \noexpand\global%
+        \noexpand\GFM@FiPa@numberOfInsertedPages=%
+        \the\GFM@FiPa@numberOfInsertedPages%
+        \noexpand\relax}
+
+% Write to log:
+\wlog{Number of fill page positions: \the\GFM@FiPa@pagesPerFillPosition\relax}%
+\wlog{Number of inserted fill pages: \the\GFM@FiPa@numberOfInsertedPages\relax}%
+
+}%AtEndDocument
+

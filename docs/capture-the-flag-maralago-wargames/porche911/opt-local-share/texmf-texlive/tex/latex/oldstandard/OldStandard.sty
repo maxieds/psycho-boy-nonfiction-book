@@ -1,0 +1,152 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{OldStandard}
+    [2023/12/16 (Bob Tennent and autoinst)  Style file for OldStandard fonts.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+
+\newif\ifoldstandard@otf 
+\ifxetex
+  \oldstandard@otftrue
+\else\ifluatex
+  \oldstandard@otftrue
+\else  % [pdf]LaTeX
+  \oldstandard@otffalse
+\fi\fi  
+
+\newif\ifoldstandard@lining \oldstandard@liningfalse
+\newif\ifoldstandard@tabular \oldstandard@tabularfalse
+  
+\newcommand*{\OldStandard@scale}{1}
+\DeclareOptionX{scale}{\renewcommand*{\OldStandard@scale}{#1}}
+\DeclareOptionX{scaled}{\renewcommand*{\OldStandard@scale}{#1}}
+\DeclareOptionX{type1}{\oldstandard@otffalse}
+\DeclareOptionX{lining}{\oldstandard@liningtrue}
+\DeclareOptionX{lf}{\oldstandard@liningtrue}
+\DeclareOptionX{oldstyle}{\oldstandard@liningfalse}
+\DeclareOptionX{osf}{\oldstandard@liningfalse}
+\DeclareOptionX{tabular}{\oldstandard@tabulartrue}
+\DeclareOptionX{t}{\oldstandard@tabulartrue}
+\DeclareOptionX{proportional}{\oldstandard@tabularfalse}
+\DeclareOptionX{p}{\oldstandard@tabularfalse}
+
+\ExecuteOptionsX{proportional,oldstyle}
+
+\ProcessOptionsX\relax
+
+\ifoldstandard@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes}
+\fi
+
+\ifoldstandard@otf
+
+  \ifoldstandard@lining
+    \def\oldstandard@figurestyle{Lining}
+  \else
+    \def\oldstandard@figurestyle{OldStyle} 
+  \fi
+  \ifoldstandard@tabular
+    \def\oldstandard@figurealign{Monospaced} 
+  \else
+    \def\oldstandard@figurealign{Proportional} 
+  \fi
+
+\else % type1
+
+  \ifoldstandard@lining
+    \def\oldstandard@figurestyle{LF}
+  \else
+    \def\oldstandard@figurestyle{OsF}
+  \fi
+  \ifoldstandard@tabular
+    \def\oldstandard@figurealign{T}
+  \else
+    \def\oldstandard@figurealign{}
+  \fi
+
+\fi
+
+\ifoldstandard@otf
+
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Scale     = \OldStandard@scale ,
+        Extension = .otf }
+  \setmainfont
+      [ Numbers = {\oldstandard@figurealign,\oldstandard@figurestyle},
+        UprightFont    = *-Regular ,
+        ItalicFont     = *-Italic ,
+        BoldFont    = *-Bold ,
+        BoldItalicFont    = *-BoldItalic ,
+        SlantedFont         = *-Regular,
+        SlantedFeatures     = {FakeSlant=0.25},
+        BoldSlantedFont     = *-Bold,
+        BoldSlantedFeatures = {FakeSlant=0.25},
+      ]
+      {OldStandard}
+  \newfontfamily\oldstandard
+      [ Numbers = {\oldstandard@figurealign,\oldstandard@figurestyle},
+        UprightFont    = *-Regular ,
+        ItalicFont     = *-Italic ,
+        BoldFont    = *-Bold ,
+        BoldItalicFont    = *-BoldItalic ,
+        SlantedFont         = *-Regular,
+        SlantedFeatures     = {FakeSlant=0.25},
+        BoldSlantedFont     = *-Bold,
+        BoldSlantedFeatures = {FakeSlant=0.25} ,
+      ]
+      {OldStandard}
+
+  \providecommand\sufigures{\addfontfeatures{VerticalPosition=Superior}}  
+  \providecommand\infigures{\addfontfeatures{VerticalPosition=Inferior}}
+  \DeclareTextFontCommand{\tabularnums}{\addfontfeatures{Numbers=Tabular}}
+  \DeclareTextFontCommand{\proportionalnums}{\addfontfeatures{Numbers=Proportional}}
+  \DeclareTextFontCommand{\oldstylenums}{\addfontfeatures{Numbers=OldStyle}}
+  \DeclareTextFontCommand{\liningnums}{\addfontfeatures{Numbers=Lining}}
+
+
+
+\else % type1
+
+   \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+   \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+   \def\sufigures{\@nomath\sufigures\fontfigurestyle{superior}\selectfont}
+
+  \fa@naming@exception{figures}{{inferior}{proportional}}{Inf}
+  \fa@naming@exception{figures}{{inferior}{tabular}}{Inf}
+  \def\infigures{\@nomath\infigures\fontfigurestyle{inferior}\selectfont}
+
+  \def\oldstandard@family{OldStandard-\oldstandard@figurealign\oldstandard@figurestyle}
+  \renewcommand*\rmdefault{\oldstandard@family}
+  \newcommand*\oldstandard{\fontfamily{\oldstandard@family}\selectfont}
+
+  \DeclareTextFontCommand{\oldstylenums}{\fontfamily{OldStandard-\oldstandard@figurealign OsF}\selectfont}
+  \DeclareTextFontCommand{\liningnums}{\fontfamily{OldStandard-\oldstandard@figurealign LF}\selectfont}
+  \DeclareTextFontCommand{\tabularnums}{\fontfamily{OldStandard-T\oldstandard@figurestyle}\selectfont}
+  \DeclareTextFontCommand{\proportionalnums}{\fontfamily{OldStandard-\oldstandard@figurestyle}\selectfont}
+
+
+\fi
+
+\DeclareTextFontCommand{\textsu}{\sufigures}
+\DeclareTextFontCommand{\textinf}{\infigures}
+
+\ifoldstandard@lining
+  \def\oldstandardlgr@figurestyle{LF}
+\else
+  \def\oldstandardlgr@figurestyle{OsF}
+\fi
+\ifoldstandard@tabular
+  \def\oldstandardlgr@figurealign{T}
+\else
+  \def\oldstandardlgr@figurealign{}
+\fi
+\def\oldstandardlgr{\fontencoding{LGR}\fontfamily{OldStandard-\oldstandardlgr@figurealign\oldstandardlgr@figurestyle}\selectfont}
+
+
+\ifoldstandard@otf
+  \defaultfontfeatures{}
+\fi
+
+\endinput

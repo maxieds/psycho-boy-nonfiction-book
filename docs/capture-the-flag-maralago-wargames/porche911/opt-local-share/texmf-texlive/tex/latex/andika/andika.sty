@@ -1,0 +1,71 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{andika}
+    [2022/09/28 (Bob Tennent)  Supports Andika fonts for all LaTeX engines.]
+
+\RequirePackage{xkeyval,iftex}
+
+\newif\ifandika@otf 
+\ifxetex
+  \andika@otftrue
+\else\ifluatex
+  \andika@otftrue
+\else  % [pdf]LaTeX
+  \andika@otffalse
+\fi\fi
+
+\newif\ifandika@default \andika@defaultfalse
+
+\newcommand*{\Andika@scale}{1}
+\DeclareOptionX{scaled}{\renewcommand*{\Andika@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\Andika@scale}{#1}}
+
+\DeclareOptionX{default}{\andika@defaulttrue}
+\DeclareOptionX{sfdefault}{\andika@defaulttrue}
+\DeclareOptionX{type1}{\andika@otffalse}
+
+\ProcessOptionsX\relax
+
+\ifandika@otf
+
+\else % type1
+  \def\bfseries@sf{b}
+  \def\mdseries@sf{m}
+\fi
+
+\ifandika@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+\fi
+
+\ifandika@otf
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Scale     = \Andika@scale ,
+        Extension = .ttf }
+  \setsansfont
+      [ UprightFont    = *-Regular ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-Bold , 
+        BoldItalicFont = *-BoldItalic ]
+      {Andika}
+
+  % grab current family in case of subsequent change:
+  \let\andikafamily\sfdefault  
+  \ifandika@default\renewcommand*\familydefault{\andikafamily}\fi
+
+\else % type1
+
+  \def\andikafamily{andk-TLF}
+  \newcommand*\andika{\fontfamily{\andikafamily}\selectfont}
+  \def\sfdefault{\andikafamily}
+  \ifandika@default\edef\familydefault{\sfdefault}\edef\seriesdefault{\mdseries@sf}\fi
+
+\fi
+
+\ifandika@otf
+% turn off defaults in case other fonts are selected:
+  \defaultfontfeatures{}
+\fi
+
+\endinput

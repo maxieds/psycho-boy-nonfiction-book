@@ -1,0 +1,50 @@
+\NeedsTeXFormat{LaTeX2e}[2019-01-01]
+\def\fileversion{0.50}
+\def\filedate{2025-01-23}
+\ProvidesPackage{yfonts-otf}[\filedate\space\fileversion]
+\RequirePackage{iftex}[2019-10-24]
+\newif\ifYHf@oldumlaut
+\newif\ifYHf@gothvarlongs
+\DeclareOption{oldumlaut}{\YHf@oldumlauttrue}
+\DeclareOption{varumlaut}{\YHf@oldumlauttrue}
+\DeclareOption{gothvarlongs}{\YHf@gothvarlongstrue}
+\ProcessOptions
+\iftutex
+  \RequirePackage{fontspec}
+  \newopentypefeature{Style}{gothvarlongs}{+ss01}
+  \newopentypefeature{Style}{longs}{+ss11}
+  \ifYHf@gothvarlongs
+    \newfontfamily\gothfamily{ygoth.otf}%
+      [Ligatures=TeX, RawFeature=+ss01;+cv01;+rlig;+liga;+hlig]
+  \else
+    \newfontfamily\gothfamily{ygoth.otf}%
+      [Ligatures=TeX, RawFeature=+ss11;+rlig;+liga;+hlig]
+  \fi
+  \ifYHf@oldumlaut
+    \newfontfamily\swabfamily{yswab.otf}%
+      [Ligatures=TeX, Alternate=0,
+       RawFeature=+ss11;+rlig;+liga]
+    \newfontfamily\frakfamily{yfrak.otf}%
+       [Ligatures=TeX, Alternate=0,
+        RawFeature=+ss11;+rlig;+liga]
+  \else
+    \newfontfamily\swabfamily{yswab.otf}%
+      [Ligatures=TeX, RawFeature=+ss11;+rlig;+liga]
+    \newfontfamily\frakfamily{yfrak.otf}%
+      [Ligatures=TeX, RawFeature=+ss11;+rlig;+liga]
+  \fi
+  \DeclareTextFontCommand{\textgoth}{\gothfamily}
+  \DeclareTextFontCommand{\textswab}{\swabfamily}
+  \DeclareTextFontCommand{\textfrak}{\frakfamily}
+  \DeclareTextCommand{\Jvar}{TU}{\textfrak{\char"E940}}
+  \DeclareTextCommand{\etc}{TU}{\textfrak{\char"E941}}
+  \DeclareTextCommand{\longs}{TU}{\char"17F}
+  \DeclareTextCommand{\shorts}{TU}{s\char"200C}
+  \DeclareTextCommand{\ZWNJ}{TU}{\char"200C}
+  \DeclareTextCommand{\ZWS}{TU}{\char"200B}
+\else
+  \PackageWarning{yfonts-otf}%
+     {This package requires LuaTeX or XeTeX engines.
+      With other engines, consider using `yfonts.sty', reported}
+\fi
+\endinput

@@ -1,0 +1,258 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{noto}
+    [2022/09/11 (Bob Tennent)  Supports Noto fonts for all LaTeX engines.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+
+\newif\ifnoto@ttf 
+\ifxetex
+  \noto@ttftrue
+\else\ifluatex
+  \noto@ttftrue
+\else  % [pdf]LaTeX
+  \noto@ttffalse
+\fi\fi
+
+\newif\ifnoto@sfdefault \noto@sfdefaultfalse
+\newif\ifnoto@sf \noto@sftrue
+\newif\ifnoto@rm \noto@rmtrue
+\newif\ifnoto@tt \noto@tttrue
+
+
+\newcommand*{\NotoSans@scale}{1}
+\newcommand*{\NotoSansMono@scale}{1}
+\DeclareOptionX{scaled}{\renewcommand*{\NotoSans@scale}{#1}\renewcommand*{\NotoSansMono@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\NotoSans@scale}{#1}\renewcommand*{\NotoSansMono@scale}{#1}}
+
+
+\DeclareOptionX{sf}{\noto@sftrue\noto@rmfalse}
+\DeclareOptionX{rm}{\noto@rmtrue\noto@sffalse}
+\DeclareOptionX{nott}{\noto@ttfalse}
+
+\DeclareOptionX{sfdefault}{\noto@sfdefaulttrue}
+\DeclareOptionX{type1}{\noto@ttffalse}
+
+
+\newif\ifnoto@oldstyle \noto@oldstylefalse
+\newif\ifnoto@proportional \noto@proportionalfalse
+
+\DeclareOptionX{lining}{\noto@oldstylefalse}
+\DeclareOptionX{lf}{\noto@oldstylefalse}
+\DeclareOptionX{tabular}{\noto@proportionalfalse}
+\DeclareOptionX{tf}{\noto@proportionalfalse}
+\DeclareOptionX{proportional}{\noto@proportionaltrue}
+\DeclareOptionX{pf}{\noto@proportionaltrue}
+\DeclareOptionX{oldstyle}{\noto@oldstyletrue}
+\DeclareOptionX{osf}{\noto@oldstyletrue}
+
+\newif\ifnoto@thin \noto@thinfalse
+\newif\ifnoto@extralight \noto@extralightfalse
+\newif\ifnoto@light \noto@lightfalse
+\newif\ifnoto@medium \noto@mediumfalse
+\newif\ifnoto@semibold \noto@semiboldfalse
+\newif\ifnoto@extrabold \noto@extraboldfalse
+\newif\ifnoto@black \noto@blackfalse
+
+\DeclareOptionX{thin}{\noto@thintrue}
+\DeclareOptionX{extralight}{\noto@extralighttrue}
+\DeclareOptionX{light}{\noto@lighttrue}
+\DeclareOptionX{regular}{\noto@lightfalse\noto@thinfalse\noto@extralightfalse\noto@mediumfalse}
+\DeclareOptionX{medium}{\noto@mediumtrue}
+\DeclareOptionX{semibold}{\noto@semiboldtrue}
+\DeclareOptionX{extrabold}{\noto@extraboldtrue}
+\DeclareOptionX{black}{\noto@blacktrue}
+\DeclareOptionX{bold}{\noto@blackfalse\noto@semiboldfalse\noto@extraboldfalse}
+
+
+\ProcessOptionsX\relax
+
+\ifnoto@ttf
+  \def\noto@boldstyle{Bold}
+  \ifnoto@semibold\def\noto@boldstyle{SemiBold}\fi
+  \ifnoto@extrabold\def\noto@boldstyle{ExtraBold}\fi
+  \ifnoto@black\def\noto@boldstyle{Black}\fi
+  \def\noto@regstyle{Regular}
+  \ifnoto@thin\def\noto@regstyle{Thin}\fi
+  \ifnoto@extralight\def\noto@regstyle{ExtraLight}\fi
+  \ifnoto@light\def\noto@regstyle{Light}\fi
+  \ifnoto@medium\def\noto@regstyle{Medium}\fi
+
+\else % type1
+
+  \ifnoto@sf\def\bfseries@sf{b}\def\mdseries@sf{m}\fi
+  \ifnoto@rm\def\bfseries@rm{b}\def\mdseries@rm{m}\fi
+  \ifnoto@tt\def\bfseries@tt{b}\def\mdseries@tt{m}\fi
+  \ifnoto@semibold
+    \ifnoto@sf\def\bfseries@sf{sb}\fi
+    \ifnoto@rm\def\bfseries@rm{sb}\fi
+    \ifnoto@tt\def\bfseries@tt{sb}\fi
+  \fi
+  \ifnoto@extrabold
+    \ifnoto@sf\def\bfseries@sf{eb}\fi
+    \ifnoto@rm\def\bfseries@rm{eb}\fi
+    \ifnoto@tt\def\bfseries@tt{eb}\fi
+  \fi
+  \ifnoto@black
+    \ifnoto@sf\def\bfseries@sf{ub}\fi
+    \ifnoto@rm\def\bfseries@rm{ub}\fi
+    \ifnoto@tt\def\bfseries@tt{ub}\fi
+  \fi
+  \ifnoto@tt\def\mdseries@tt{m}\fi
+  \ifnoto@sf\def\mdseries@sf{m}\fi
+  \ifnoto@rm\def\mdseries@rm{m}\fi
+  \ifnoto@thin
+    \ifnoto@sf\def\mdseries@sf{ul}\fi
+    \ifnoto@rm\def\mdseries@rm{ul}\fi
+    \ifnoto@tt\def\mdseries@tt{ul}\fi
+  \fi
+  \ifnoto@extralight
+    \ifnoto@sf\def\mdseries@sf{el}\fi
+    \ifnoto@rm\def\mdseries@rm{el}\fi
+    \ifnoto@tt\def\mdseries@tt{el}\fi
+  \fi
+  \ifnoto@light
+    \ifnoto@sf\def\mdseries@sf{l}\fi
+    \ifnoto@rm\def\mdseries@rm{l}\fi
+    \ifnoto@tt\def\mdseries@tt{l}\fi
+  \fi
+  \ifnoto@medium
+    \ifnoto@sf\def\mdseries@sf{medium}\fi
+    \ifnoto@rm\def\mdseries@rm{medium}\fi
+    \ifnoto@tt\def\mdseries@tt{medium}\fi
+  \fi
+
+  \def\seriesdefault{\mdseries@rm}
+  
+\fi
+
+\ifnoto@ttf
+  
+  \def\noto@figurestyle{Lining}
+  \ifnoto@oldstyle\def\noto@figurestyle{OldStyle}\fi
+  \def\noto@figurealign{Monospaced}
+  \ifnoto@proportional\def\noto@figurealign{Proportional}\fi
+
+\else % type1
+
+  \def\noto@figurestyle{LF}
+  \ifnoto@oldstyle\def\noto@figurestyle{OsF}\fi
+  \def\noto@figurealign{T}
+  \ifnoto@proportional\def\noto@figurealign{}\fi
+
+\fi
+
+\ifnoto@ttf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+  \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+  \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+  \def\sufigures{\@nomath\sufigures
+      \fontfigurestyle{superior}\selectfont}
+\fi
+
+\ifnoto@ttf
+  \def\noto@regular{Regular}
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Extension = .ttf }
+  \ifnoto@sf
+    \setsansfont
+        [ Scale     = \NotoSans@scale ,
+          Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+          SmallCapsFeatures={Letters=SmallCaps} ,
+          UprightFont    = *-\noto@regstyle ,
+          ItalicFont     = *-\ifx\noto@regstyle\noto@regular Italic\else\noto@regstyle Italic\fi ,
+          BoldFont       = *-\noto@boldstyle , 
+          BoldItalicFont = *-\noto@boldstyle Italic ,
+        ]
+        {NotoSans}
+    \let\notosansfamily\sfdefault  
+  \fi
+  \ifnoto@rm
+    \setmainfont
+        [ Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+          SmallCapsFeatures={Letters=SmallCaps} ,
+          UprightFont    = *-\noto@regstyle ,
+          ItalicFont     = *-\ifx\noto@regstyle\noto@regular Italic\else\noto@regstyle Italic\fi ,
+          BoldFont       = *-\noto@boldstyle , 
+          BoldItalicFont = *-\noto@boldstyle Italic ,
+        ]
+        {NotoSerif}
+    \let\notoseriffamily\rmdefault  
+  \fi
+  \ifnoto@tt
+      \setmonofont 
+        [ Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+          Scale     = \NotoSansMono@scale ,
+          HyphenChar=None,
+          UprightFont    = *-\noto@regstyle ,
+          BoldFont       = *-\noto@boldstyle , 
+        ]
+        {NotoSansMono}
+    \let\notomonofamily\ttdefault  
+  \fi
+  \ifnoto@sfdefault\renewcommand*\familydefault{\notosansfamily}\fi
+  \newfontfamily\notosans
+          [ Scale     = \NotoSans@scale ,
+            Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+            SmallCapsFeatures={Letters=SmallCaps} ,
+            UprightFont    = *-\noto@regstyle ,
+            ItalicFont     = *-\ifx\noto@regstyle\noto@regular Italic\else\noto@regstyle Italic\fi ,
+            BoldFont       = *-\noto@boldstyle , 
+            BoldItalicFont = *-\noto@boldstyle Italic ,
+          ]
+          {NotoSans}
+  \newfontfamily\notoserif
+          [ Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+            SmallCapsFeatures={Letters=SmallCaps} ,
+            UprightFont    = *-\noto@regstyle ,
+            ItalicFont     = *-\ifx\noto@regstyle\noto@regular Italic\else\noto@regstyle Italic\fi ,
+            BoldFont       = *-\noto@boldstyle , 
+            BoldItalicFont = *-\noto@boldstyle Italic ,
+          ]
+          {NotoSerif}
+  \defaultfontfeatures{Extension=.ttf,HyphenChar=None}
+  \newfontfamily\notomono 
+          [ Numbers   = {\noto@figurealign, \noto@figurestyle} ,
+            Scale     = \NotoSansMono@scale ,
+            UprightFont    = *-\noto@regstyle ,
+            BoldFont       = *-\noto@boldstyle , 
+          ]
+          {NotoSansMono}
+  \providecommand\sufigures{\addfontfeatures{VerticalPosition=Superior}}
+
+\else % type1
+
+  \def\notosansfamily{NotoSans-\noto@figurealign\noto@figurestyle}
+  \def\notoseriffamily{NotoSerif-\noto@figurealign\noto@figurestyle}
+  \def\notomonofamily{NotoSansMono-\noto@figurealign\noto@figurestyle}
+  \newcommand*\notoserif{\fontfamily{\notoseriffamily}\selectfont}
+  \newcommand*\notosans{\fontfamily{\notosansfamily}\selectfont}
+  \newcommand*\notomono{\fontfamily{\notomonofamily}\selectfont}
+  \ifnoto@rm \def\rmdefault{\notoseriffamily} \fi
+  \ifnoto@sf \def\sfdefault{\notosansfamily} \fi 
+  \ifnoto@tt \def\ttdefault{\notomonofamily} \fi 
+  \ifnoto@sfdefault\edef\familydefault{\sfdefault}\fi
+\fi
+
+\DeclareTextFontCommand{\textsu}{\sufigures}
+
+% LGR
+
+\def\noto@figurestyle{LF}
+\ifnoto@oldstyle\def\noto@figurestyle{OsF}\fi
+\def\noto@figurealign{T}
+\ifnoto@proportional\def\noto@figurealign{}\fi
+
+\newcommand*\notoseriflgr{\fontencoding{LGR}\fontfamily{NotoSerif-\noto@figurealign\noto@figurestyle}\selectfont}
+\newcommand*\notosanslgr{\fontencoding{LGR}\fontfamily{NotoSans-\noto@figurealign\noto@figurestyle}\selectfont}
+\newcommand*\notomonolgr{\fontencoding{LGR}\fontfamily{NotoSansMono-\noto@figurealign\noto@figurestyle}\selectfont}
+
+
+\ifnoto@ttf
+  % turn off defaults in case other fonts are selected:
+  \defaultfontfeatures{}
+\fi
+
+\endinput

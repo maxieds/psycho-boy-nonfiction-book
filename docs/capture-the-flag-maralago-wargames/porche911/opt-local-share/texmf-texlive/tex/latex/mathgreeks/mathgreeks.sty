@@ -1,0 +1,719 @@
+%%
+%% This is file `mathgreeks.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mathgreeks.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2024 by Antoine Missier <antoine.missier@ac-toulouse.fr>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3 of this license
+%% or (at your option) any later version. The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3 or later is part of all distributions of LaTeX version
+%% 2005/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{mathgreeks}
+    [2024/05/07 v1.2 .dtx Math Greek letters]
+
+\RequirePackage{kvoptions}
+
+\DeclareStringOption{lgrmath}[fcm]
+\newif\ifmathgreeks@lgrmath
+\AddToKeyvalOption*{lgrmath}{\mathgreeks@lgrmathtrue}
+\DeclareStringOption{fontspec}[GFS Didot]
+\newif\ifmathgreeks@fontspec
+\AddToKeyvalOption*{fontspec}{\mathgreeks@fontspectrue}
+\newif\ifmathgreeks@unicodemath
+\define@key{mathgreeks}{unicode-math}[Latin Modern Math]{
+    \newcommand*{\mathgreeks@unicodemath}{#1}
+    \mathgreeks@unicodemathtrue}
+\DeclareStringOption{upgreek}[Symbol]
+\newif\ifmathgreeks@upgreek
+\AddToKeyvalOption*{upgreek}{\mathgreeks@upgreektrue
+    \mathgreeks@Greekuptrue\mathgreeks@greekuptrue}
+\DeclareStringOption{mathdesign}[Charter]
+\newif\ifmathgreeks@mathdesign
+\AddToKeyvalOption*{mathdesign}{\mathgreeks@mathdesigntrue}
+\DeclareBoolOption{fourier}% false by default
+\DeclareStringOption{kpfonts}[normal]
+\newif\ifmathgreeks@kpfonts
+\AddToKeyvalOption*{kpfonts}{\mathgreeks@kpfontstrue}
+\DeclareBoolOption{pxfonts}
+\DeclareBoolOption{txfonts}
+\DeclareBoolOption{libertinus}
+\DeclareBoolOption{concrete}
+\DeclareBoolOption{cmbright}
+
+\DeclareBoolOption{savegreeks}
+\DeclareBoolOption{otherfonts}
+\DeclareBoolOption{libsans}
+\DeclareBoolOption[true]{lowercase}
+\DeclareBoolOption[true]{uppercase}
+
+\DeclareBoolOption[true]{Greekup}
+\DeclareBoolOption{greekup}
+\DeclareBoolOption{upright}
+\AddToKeyvalOption*{upright}{\mathgreeks@Greekuptrue
+    \mathgreeks@greekuptrue}
+\DeclareBoolOption{ISO}
+\AddToKeyvalOption*{ISO}{\mathgreeks@Greekupfalse
+    \mathgreeks@greekupfalse}
+\DeclareBoolOption{TeX}
+\AddToKeyvalOption*{TeX}{\mathgreeks@Greekuptrue
+    \mathgreeks@greekupfalse}
+\DeclareStringOption{style}
+\AddToKeyvalOption*{style}{\setkeys{mathgreeks}{\mathgreeks@style}}
+
+\DeclareDefaultOption{\PackageError{mathgreeks}{%
+    Option key `\CurrentOptionKey' undefined}{}}
+\ProcessLocalKeyvalOptions* % \setkeys is done here
+
+\RequirePackage{etoolbox} % provides \AtEndPreamble
+
+\newif\ifkp@upRm % from kpgonts, bugs if after \ifmathgreeks@kpfonts
+\newif\iflibus@sansmath % from libertinust1math
+\newif\ifmathgreeks@Symbol % for codes definition
+\newif\ifmathgreeks@itgreek % for fonts without upright shape
+\newif\ifmathgreeks@font % if font option at package call
+\mathgreeks@fonttrue
+
+%%%%%%%%%%%%%%%% INITIAL SETTINGS %%%%%%%%%%%%%%%
+
+\ifmathgreeks@otherfonts
+    \DeclareFontEncoding{LGR}{}{}
+    \DeclareFontEncoding{FML}{}{}
+    \DeclareFontSubstitution{FML}{futm}{m}{it}
+    \ifmathgreeks@libsans \libus@sansmathtrue\fi % taken up at encoding time
+    \DeclareFontEncoding{LS1}{}{}
+    \DeclareFontSubstitution{LS1}{libertinust1math}{m}{n}
+
+    % from the upgreek package
+    \DeclareFontFamily{U}{eur}{\skewchar\font'177}
+    \DeclareFontShape{U}{eur}{m}{n}{%
+        <-6> eurm5 <6-8> eurm7 <8-> eurm10}{}
+    \DeclareFontShape{U}{eur}{b}{n}{%
+        <-6> eurb5 <6-8> eurb7 <8-> eurb10}{}
+    \DeclareFontFamily{U}{fsy}{}
+    \DeclareFontShape{U}{fsy}{m}{n}{<->s*[.9]psyr}{}
+
+\fi
+
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{lgrmath}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{fontspec}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{unicodemath}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{upgreek}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{mathdesign}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{fourier}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{kpfonts}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{pxfonts}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{txfonts}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{savegreeks}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{otherfonts}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{libsans}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{lowercase}
+\DisableKeyvalOption[action=warning,package=mathgreeks]{mathgreeks}{uppercase}
+
+\AtEndPreamble{\AtBeginDocument{
+    \@ifundefined{text}{\RequirePackage{amstext}}{}
+
+    \ifmathgreeks@lgrmath
+        \DeclareFontEncoding{LGR}{}{}
+        \DeclareSymbolFont{mgr@it}{LGR}{\mathgreeks@lgrmath}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{LGR}{\mathgreeks@lgrmath}{b}{it}
+        \DeclareSymbolFont{mgr@up}{LGR}{\mathgreeks@lgrmath}{m}{n}
+        \SetSymbolFont{mgr@up}{bold}{LGR}{\mathgreeks@lgrmath}{b}{n}
+
+    \else\ifmathgreeks@fontspec
+        \@ifpackageloaded{fontspec}{}{
+            \PackageError{mathgreeks}{`fontspec' or `unicodemath'
+                options need the fontspec package\MessageBreak
+                which must be run with LuaLaTeX or XeLaTeX}{}
+        }
+        \newfontfamily\MathGreeksFont{\mathgreeks@fontspec}%
+            [NFSSFamily=mgru]
+        \DeclareSymbolFont{mgr@it}{TU}{mgru}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{TU}{mgru}{b}{it}
+        \DeclareSymbolFont{mgr@up}{TU}{mgru}{m}{n}
+        \SetSymbolFont{mgr@it}{bold}{TU}{mgru}{b}{n}
+
+    \else\ifmathgreeks@unicodemath
+        \@ifpackageloaded{unicode-math}{}{
+            \PackageError{mathgreeks}{`unicodemath' option needs
+                the unicode-math package\MessageBreak
+                which must be run with LuaLaTeX or XeLaTeX}{}
+        }
+        \setmathfont{\mathgreeks@unicodemath}[range=it/{greek,Greek}]
+        \setmathfont{\mathgreeks@unicodemath}[range=up/{greek,Greek}]
+        \mathgreeks@fontspectrue % for \mgr@CodeGreeks
+        \let\mgr@UnicodeGreek\mgr@UnicodemathGreek
+
+    \else\ifmathgreeks@upgreek
+        \ifdefstring{\mathgreeks@upgreek}{Euler}{
+            \DeclareFontFamily{U}{eur}{\skewchar\font'177}
+            \DeclareFontShape{U}{eur}{m}{n}{%
+                <-6> eurm5 <6-8> eurm7 <8-> eurm10}{}
+            \DeclareFontShape{U}{eur}{b}{n}{%
+                <-6> eurb5 <6-8> eurb7 <8-> eurb10}{}
+            \DeclareSymbolFont{mgr@up}{U}{eur}{m}{n}
+            \SetSymbolFont{mgr@up}{bold}{U}{eur}{b}{n}
+        }{
+        \ifdefstring{\mathgreeks@upgreek}{Symbol}{
+            \DeclareSymbolFont{mgr@up}{U}{psy}{m}{n} % no bold face
+            \mathgreeks@Symboltrue
+        }{
+        \ifdefstring{\mathgreeks@upgreek}{Symbolsmallscale}{
+            \DeclareFontFamily{U}{fsy}{}
+            \DeclareFontShape{U}{fsy}{m}{n}{<->s*[.9]psyr}{}
+            \DeclareSymbolFont{mgr@up}{U}{fsy}{m}{n}
+            \mathgreeks@Symboltrue
+        }{
+        \PackageError{mathgreeks}{Invalid value
+            `\mathgreeks@upgreek' with `upgreek' key}{With `upgreek'
+            possible values are: Euler, Symbol, Symbolsmallscale.}
+        }}}
+
+    \else\ifmathgreeks@mathdesign
+        \ifdefstring{\mathgreeks@mathdesign}{Utopia}{
+            \DeclareSymbolFont{mgr@it}{OML}{mdput}{m}{it}
+            \SetSymbolFont{mgr@it}{bold}{OML}{mdput}{b}{it}
+            \DeclareSymbolFont{mgr@up}{OML}{mdput}{m}{n}
+            \SetSymbolFont{mgr@up}{bold}{OML}{mdput}{b}{n}
+        }{
+        \ifdefstring{\mathgreeks@mathdesign}{Garamond}{
+            \DeclareSymbolFont{mgr@it}{OML}{mdugm}{m}{it}
+            \SetSymbolFont{mgr@it}{bold}{OML}{mdugm}{b}{it}
+            \DeclareSymbolFont{mgr@up}{OML}{mdugm}{m}{n}
+            \SetSymbolFont{mgr@up}{bold}{OML}{mdugm}{b}{n}
+        }{
+        \ifdefstring{\mathgreeks@mathdesign}{Charter}{
+            \DeclareSymbolFont{mgr@it}{OML}{mdbch}{m}{it}
+            \SetSymbolFont{mgr@it}{bold}{OML}{mdbch}{b}{it}
+            \DeclareSymbolFont{mgr@up}{OML}{mdbch}{m}{n}
+            \SetSymbolFont{mgr@up}{bold}{OML}{mdbch}{b}{n}
+        }{
+        \PackageError{mathgreeks}{Invalid value
+            `\mathgreeks@mathdesign' with `mathdesign' key}{With
+            `mathdesign' possible values are:
+            Utopia, Garamond, Charter.}
+        }}}
+
+    \else\ifmathgreeks@fourier
+        \DeclareFontEncoding{FML}{}{}
+        \DeclareFontSubstitution{FML}{futm}{m}{it}
+        \DeclareSymbolFont{mgr@it}{FML}{futmi}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{FML}{futmi}{b}{it}
+        \DeclareSymbolFont{mgr@up}{FML}{futm}{m}{it}
+        \SetSymbolFont{mgr@up}{bold}{FML}{futm}{b}{it}
+
+    \else\ifmathgreeks@kpfonts
+        \ifdefstring{\mathgreeks@kpfonts}{normal}{
+            \DeclareSymbolFont{mgr@it}{OML}{jkp}{m}{it}
+            \SetSymbolFont{mgr@it}{bold}{OML}{jkp}{bx}{it}
+            \DeclareSymbolFont{mgr@up}{U}{jkpmia}{m}{it}
+            \SetSymbolFont{mgr@up}{bold}{U}{jkpmia}{bx}{it}
+        }{
+        \ifdefstring{\mathgreeks@kpfonts}{light}{
+            \DeclareSymbolFont{mgr@it}{OML}{jkpl}{m}{it}
+            \SetSymbolFont{mgr@it}{bold}{OML}{jkpl}{bx}{it}
+            \DeclareSymbolFont{mgr@up}{U}{jkplmia}{m}{it}
+            \SetSymbolFont{mgr@up}{bold}{U}{jkplmia}{bx}{it}
+        }{
+        \PackageError{mathgreeks}{Invalid value
+            `\mathgreeks@kpfonts' with `kpfonts' key}{With
+            `kpfonts' possible values are: normal, light.}
+        }}
+
+    \else\ifmathgreeks@pxfonts % no font option specified
+        \DeclareSymbolFont{mgr@it}{OML}{pxmi}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{OML}{pxmi}{bx}{it}
+        \DeclareSymbolFont{mgr@up}{U}{pxmia}{m}{it}
+        \SetSymbolFont{mgr@up}{bold}{U}{pxmia}{bx}{it}
+
+    \else\ifmathgreeks@txfonts
+        \DeclareSymbolFont{mgr@it}{OML}{txmi}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{OML}{txmi}{bx}{it}
+        \DeclareSymbolFont{mgr@up}{U}{txmia}{m}{it}
+        \SetSymbolFont{mgr@up}{bold}{U}{txmia}{bx}{it}
+
+    \else\ifmathgreeks@libertinus
+        \ifmathgreeks@libsans \libus@sansmathtrue\fi
+        \DeclareFontEncoding{LS1}{}{}
+        \DeclareFontSubstitution{LS1}{libertinust1math}{m}{n}
+        \DeclareSymbolFont{mgr@it}{LS1}{libertinust1math}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{LS1}{libertinust1math}{m}{it}
+        \DeclareSymbolFont{mgr@up}{LS1}{libertinust1math}{m}{n}
+        \SetSymbolFont{mgr@up}{bold}{LS1}{libertinust1math}{m}{n}
+
+    \else\ifmathgreeks@concrete
+        \DeclareSymbolFont{mgr@it}{OML}{ccm}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{OML}{ccm}{b}{it}
+        \mathgreeks@itgreektrue
+
+    \else\ifmathgreeks@cmbright
+        \DeclareSymbolFont{mgr@it}{OML}{cmbrm}{m}{it}
+        \SetSymbolFont{mgr@it}{bold}{OML}{cmbrm}{b}{it}
+        \mathgreeks@itgreektrue
+
+    \else
+        \PackageWarningNoLine{mathgreeks}{No font option specified}
+        \mathgreeks@fontfalse
+    \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+
+    \ifmathgreeks@savegreeks \SaveGreeks \fi
+
+    \ifmathgreeks@font
+      \ifmathgreeks@upgreek
+        \mathgreeks@Greekuptrue \mathgreeks@greekuptrue
+        \PackageWarningNoLine{mathgreeks}{Commands \string \italpha,
+            \string\itbeta... \MessageBreak
+            not available with the `upgreek' option}
+      \else
+        \mgr@CodeGreeks{it}
+      \fi
+      \ifmathgreeks@itgreek
+        \mathgreeks@Greekupfalse \mathgreeks@greekupfalse
+        \PackageWarningNoLine{mathgreeks}{Commands \string \upalpha,
+            \string\upbeta... \MessageBreak
+            not available with `concrete' or 'cmbright}
+      \else
+        \mgr@CodeGreeks{up}
+      \fi
+    \mgr@DefaultGreeks
+    \fi
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% MACROS %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\re@DeclareMathSymbol#1#2#3#4{% from kpfonts, pxfonts, txfonts
+    \let#1=\undefined
+    \DeclareMathSymbol{#1}{#2}{#3}{#4}}
+
+
+\newcommand{\mgr@CodeGreek}[3]{% #1 = it or up
+    \expandafter\re@DeclareMathSymbol\csname#1#2\endcsname%
+        {\mathalpha}{mgr@#1}{#3} % perhaps \mathord is better
+}
+
+\newcommand{\mgr@UnicodeGreek}[3]{%
+    \expandafter\Umathchardef\csname#1#2\endcsname="7 % mathalpha
+        \csname symmgr@#1\endcsname #3
+}
+
+\def\mgr@UnicodemathGreek#1#2#3{\unskip
+    \expandafter\DeclareRobustCommand\csname#1#2\endcsname
+        {\csname sym#1\endcsname{\symbol{#3}}}\ignorespaces
+}
+
+\newcommand{\mgr@CodeGreeks}[1]{% #1 = it or up
+    \ifmathgreeks@lgrmath % LGR encoding
+        \mgr@CodeGreek{#1}{Gamma}{71}
+        \mgr@CodeGreek{#1}{Delta}{68}
+        \mgr@CodeGreek{#1}{Theta}{74}
+        \mgr@CodeGreek{#1}{Lambda}{76}
+        \mgr@CodeGreek{#1}{Xi}{88}
+        \mgr@CodeGreek{#1}{Pi}{80}
+        \mgr@CodeGreek{#1}{Sigma}{83}
+        \mgr@CodeGreek{#1}{Upsilon}{85}
+        \mgr@CodeGreek{#1}{Phi}{70}
+        \mgr@CodeGreek{#1}{Psi}{89}
+        \mgr@CodeGreek{#1}{Omega}{87}
+        \mgr@CodeGreek{#1}{alpha}{97}
+        \mgr@CodeGreek{#1}{beta}{98}
+        \mgr@CodeGreek{#1}{gamma}{103}
+        \mgr@CodeGreek{#1}{delta}{100}
+        \mgr@CodeGreek{#1}{epsilon}{101}
+        \mgr@CodeGreek{#1}{zeta}{122}
+        \mgr@CodeGreek{#1}{eta}{104}
+        \mgr@CodeGreek{#1}{theta}{106}
+        \mgr@CodeGreek{#1}{iota}{105}
+        \mgr@CodeGreek{#1}{kappa}{107}
+        \mgr@CodeGreek{#1}{lambda}{108}
+        \mgr@CodeGreek{#1}{mu}{109}
+        \mgr@CodeGreek{#1}{nu}{110}
+        \mgr@CodeGreek{#1}{xi}{120}
+        \mgr@CodeGreek{#1}{pi}{112}
+        \mgr@CodeGreek{#1}{rho}{114}
+        \mgr@CodeGreek{#1}{sigma}{115}
+        \mgr@CodeGreek{#1}{tau}{116}
+        \mgr@CodeGreek{#1}{upsilon}{117}
+        \mgr@CodeGreek{#1}{phi}{102}
+        \mgr@CodeGreek{#1}{chi}{113}
+        \mgr@CodeGreek{#1}{psi}{121}
+        \mgr@CodeGreek{#1}{omega}{119}
+        \mgr@CodeGreek{#1}{varepsilon}{101} % = epsilon
+        \mgr@CodeGreek{#1}{vartheta}{106} % = theta
+        \mgr@CodeGreek{#1}{varpi}{112} % = pi
+        \mgr@CodeGreek{#1}{varrho}{114} % = rho
+        \mgr@CodeGreek{#1}{varsigma}{99}
+        \mgr@CodeGreek{#1}{varphi}{102} % = phi
+    \else\ifmathgreeks@fontspec % unicode encoding
+        \mgr@UnicodeGreek{#1}{Gamma}{"0393}
+        \mgr@UnicodeGreek{#1}{Delta}{"0394}
+        \mgr@UnicodeGreek{#1}{Theta}{"0398}
+        \mgr@UnicodeGreek{#1}{Lambda}{"039B}
+        \mgr@UnicodeGreek{#1}{Xi}{"039E}
+        \mgr@UnicodeGreek{#1}{Pi}{"03A0}
+        \mgr@UnicodeGreek{#1}{Sigma}{"03A3}
+        \mgr@UnicodeGreek{#1}{Upsilon}{"03A5}
+        \mgr@UnicodeGreek{#1}{Phi}{"03A6}
+        \mgr@UnicodeGreek{#1}{Psi}{"03A8}
+        \mgr@UnicodeGreek{#1}{Omega}{"03A9}
+        \mgr@UnicodeGreek{#1}{alpha}{"03B1}
+        \mgr@UnicodeGreek{#1}{beta}{"03B2}
+        \mgr@UnicodeGreek{#1}{gamma}{"03B3}
+        \mgr@UnicodeGreek{#1}{delta}{"03B4}
+        \mgr@UnicodeGreek{#1}{epsilon}{"03B5}
+        \mgr@UnicodeGreek{#1}{zeta}{"03B6}
+        \mgr@UnicodeGreek{#1}{eta}{"03B7}
+        \mgr@UnicodeGreek{#1}{theta}{"03B8}
+        \mgr@UnicodeGreek{#1}{iota}{"03B9}
+        \mgr@UnicodeGreek{#1}{kappa}{"03BA}
+        \mgr@UnicodeGreek{#1}{lambda}{"03BB}
+        \mgr@UnicodeGreek{#1}{mu}{"03BC}
+        \mgr@UnicodeGreek{#1}{nu}{"03BD}
+        \mgr@UnicodeGreek{#1}{xi}{"03BE} % not omicron
+        \mgr@UnicodeGreek{#1}{pi}{"03C0}
+        \mgr@UnicodeGreek{#1}{rho}{"03C1}
+        \mgr@UnicodeGreek{#1}{sigma}{"03C3}
+        \mgr@UnicodeGreek{#1}{tau}{"03C4}
+        \mgr@UnicodeGreek{#1}{upsilon}{"03C5}
+        \mgr@UnicodeGreek{#1}{phi}{"03C6}
+        \mgr@UnicodeGreek{#1}{chi}{"03C7}
+        \mgr@UnicodeGreek{#1}{psi}{"03C8}
+        \mgr@UnicodeGreek{#1}{omega}{"03C9}
+        \mgr@UnicodeGreek{#1}{varepsilon}{"03F5}
+        \mgr@UnicodeGreek{#1}{vartheta}{"03D1}
+        \mgr@UnicodeGreek{#1}{varpi}{"03D6}
+        \mgr@UnicodeGreek{#1}{varrho}{"03F1}
+        \mgr@UnicodeGreek{#1}{varsigma}{"03C2}
+        \mgr@UnicodeGreek{#1}{varphi}{"03D5}
+    \else\ifmathgreeks@Symbol % Symbol encoding
+        \mgr@CodeGreek{#1}{Gamma}{`G}
+        \mgr@CodeGreek{#1}{Delta}{`D}
+        \mgr@CodeGreek{#1}{Theta}{`Q}
+        \mgr@CodeGreek{#1}{Lambda}{`L}
+        \mgr@CodeGreek{#1}{Xi}{`X}
+        \mgr@CodeGreek{#1}{Pi}{`P}
+        \mgr@CodeGreek{#1}{Sigma}{`S}
+        \mgr@CodeGreek{#1}{Upsilon}{`U}
+        \mgr@CodeGreek{#1}{Phi}{`F}
+        \mgr@CodeGreek{#1}{Psi}{`Y}
+        \mgr@CodeGreek{#1}{Omega}{`W}
+        \mgr@CodeGreek{#1}{alpha}{`a}
+        \mgr@CodeGreek{#1}{beta}{`b}
+        \mgr@CodeGreek{#1}{gamma}{`g}
+        \mgr@CodeGreek{#1}{delta}{`d}
+        \mgr@CodeGreek{#1}{epsilon}{`e}
+        \mgr@CodeGreek{#1}{zeta}{`z}
+        \mgr@CodeGreek{#1}{eta}{`h}
+        \mgr@CodeGreek{#1}{theta}{`q}
+        \mgr@CodeGreek{#1}{iota}{`i}
+        \mgr@CodeGreek{#1}{kappa}{`k}
+        \mgr@CodeGreek{#1}{lambda}{`l}
+        \mgr@CodeGreek{#1}{mu}{`m}
+        \mgr@CodeGreek{#1}{nu}{`n}
+        \mgr@CodeGreek{#1}{xi}{`x}
+        \mgr@CodeGreek{#1}{pi}{`p}
+        \mgr@CodeGreek{#1}{rho}{`r}
+        \mgr@CodeGreek{#1}{sigma}{`s}
+        \mgr@CodeGreek{#1}{tau}{`t}
+        \mgr@CodeGreek{#1}{upsilon}{`u}
+        \mgr@CodeGreek{#1}{phi}{`f}
+        \mgr@CodeGreek{#1}{chi}{`c}
+        \mgr@CodeGreek{#1}{psi}{`y}
+        \mgr@CodeGreek{#1}{omega}{`w}
+        \mgr@CodeGreek{#1}{varepsilon}{`u} % = epsilon
+        \mgr@CodeGreek{#1}{vartheta}{`J}
+        \mgr@CodeGreek{#1}{varpi}{`v}
+        \mgr@CodeGreek{#1}{varrho}{`r} % = rho
+        \mgr@CodeGreek{#1}{varsigma}{`s} % = sigma
+        \mgr@CodeGreek{#1}{varphi}{`j}
+    \else % OML (or U) encoding
+        \mgr@CodeGreek{#1}{Gamma}{"00}
+        \mgr@CodeGreek{#1}{Delta}{"01}
+        \mgr@CodeGreek{#1}{Theta}{"02}
+        \mgr@CodeGreek{#1}{Lambda}{"03}
+        \mgr@CodeGreek{#1}{Xi}{"04}
+        \mgr@CodeGreek{#1}{Pi}{"05}
+        \mgr@CodeGreek{#1}{Sigma}{"06}
+        \mgr@CodeGreek{#1}{Upsilon}{"07}
+        \mgr@CodeGreek{#1}{Phi}{"08}
+        \mgr@CodeGreek{#1}{Psi}{"09}
+        \mgr@CodeGreek{#1}{Omega}{"0A}
+        \mgr@CodeGreek{#1}{alpha}{"0B}
+        \mgr@CodeGreek{#1}{beta}{"0C}
+        \mgr@CodeGreek{#1}{gamma}{"0D}
+        \mgr@CodeGreek{#1}{delta}{"0E}
+        \mgr@CodeGreek{#1}{epsilon}{"0F}
+        \mgr@CodeGreek{#1}{zeta}{"10}
+        \mgr@CodeGreek{#1}{eta}{"11}
+        \mgr@CodeGreek{#1}{theta}{"12}
+        \mgr@CodeGreek{#1}{iota}{"13}
+        \mgr@CodeGreek{#1}{kappa}{"14}
+        \mgr@CodeGreek{#1}{lambda}{"15}
+        \mgr@CodeGreek{#1}{mu}{"16}
+        \mgr@CodeGreek{#1}{nu}{"17}
+        \mgr@CodeGreek{#1}{xi}{"18}
+        \mgr@CodeGreek{#1}{pi}{"19}
+        \mgr@CodeGreek{#1}{rho}{"1A}
+        \mgr@CodeGreek{#1}{sigma}{"1B}
+        \mgr@CodeGreek{#1}{tau}{"1C}
+        \mgr@CodeGreek{#1}{upsilon}{"1D}
+        \mgr@CodeGreek{#1}{phi}{"1E}
+        \mgr@CodeGreek{#1}{chi}{"1F}
+        \mgr@CodeGreek{#1}{psi}{"20}
+        \mgr@CodeGreek{#1}{omega}{"21}
+        \mgr@CodeGreek{#1}{varepsilon}{"22}
+        \mgr@CodeGreek{#1}{vartheta}{"23}
+        \mgr@CodeGreek{#1}{varpi}{"24}
+        \mgr@CodeGreek{#1}{varrho}{"25}
+        \mgr@CodeGreek{#1}{varsigma}{"26}
+        \mgr@CodeGreek{#1}{varphi}{"27}
+        %\mgr@CodeGreek{#1}{varkappa}{"FE}
+    \fi\fi\fi
+}
+
+\newcommand\mgr@DefaultGreeks{%
+    \ifmathgreeks@uppercase
+      \ifmathgreeks@Greekup
+        \let\Gamma\upGamma
+        \let\Delta\upDelta
+        \let\Theta\upTheta
+        \let\Lambda\upLambda
+        \let\Xi\upXi
+        \let\Pi\upPi
+        \let\Sigma\upSigma
+        \let\Upsilon\upUpsilon
+        \let\Phi\upPhi
+        \let\Psi\upPsi
+        \let\Omega\upOmega
+      \else
+        \let\Gamma\itGamma
+        \let\Delta\itDelta
+        \let\Theta\itTheta
+        \let\Lambda\itLambda
+        \let\Xi\itXi
+        \let\Pi\itPi
+        \let\Sigma\itSigma
+        \let\Upsilon\itUpsilon
+        \let\Phi\itPhi
+        \let\Psi\itPsi
+        \let\Omega\itOmega
+    \fi\fi
+    \ifmathgreeks@lowercase
+      \ifmathgreeks@greekup
+        \let\alpha\upalpha
+        \let\beta\upbeta
+        \let\gamma\upgamma
+        \let\delta\updelta
+        \let\epsilon\upepsilon
+        \let\zeta\upzeta
+        \let\eta\upeta
+        \let\theta\uptheta
+        \let\iota\upiota
+        \let\kappa\upkappa
+        \let\lambda\uplambda
+        \let\mu\upmu
+        \let\nu\upnu
+        \let\xi\upxi
+        \let\pi\uppi
+        \let\rho\uprho
+        \let\sigma\upsigma
+        \let\tau\uptau
+        \let\upsilon\upupsilon
+        \let\phi\upphi
+        \let\chi\upchi
+        \let\psi\uppsi
+        \let\omega\upomega
+        \let\varepsilon\upvarepsilon
+        \let\vartheta\upvartheta
+        \let\varpi\upvarpi
+        \let\varrho\upvarrho
+        \let\varsigma\upvarsigma
+        \let\varphi\upvarphi
+      \else
+        \let\alpha\italpha
+        \let\beta\itbeta
+        \let\gamma\itgamma
+        \let\delta\itdelta
+        \let\epsilon\itepsilon
+        \let\zeta\itzeta
+        \let\eta\iteta
+        \let\theta\ittheta
+        \let\iota\itiota
+        \let\kappa\itkappa
+        \let\lambda\itlambda
+        \let\mu\itmu
+        \let\nu\itnu
+        \let\xi\itxi
+        \let\pi\itpi
+        \let\rho\itrho
+        \let\sigma\itsigma
+        \let\tau\ittau
+        \let\upsilon\itupsilon
+        \let\phi\itphi
+        \let\chi\itchi
+        \let\psi\itpsi
+        \let\omega\itomega
+        \let\varepsilon\itvarepsilon
+        \let\vartheta\itvartheta
+        \let\varpi\itvarpi
+        \let\varrho\itvarrho
+        \let\varsigma\itvarsigma
+        \let\varphi\itvarphi
+    \fi\fi
+}
+
+\providecommand\SaveGreeks{%
+    \let\backGamma\Gamma
+    \let\backDelta\Delta
+    \let\backTheta\Theta
+    \let\backLambda\Lambda
+    \let\backXi\Xi
+    \let\backPi\Pi
+    \let\backSigma\Sigma
+    \let\backUpsilon\Upsilon
+    \let\backPhi\Phi
+    \let\backPsi\Psi
+    \let\backOmega\Omega
+    \let\backalpha\alpha
+    \let\backbeta\beta
+    \let\backgamma\gamma
+    \let\backdelta\delta
+    \let\backepsilon\epsilon
+    \let\backzeta\zeta
+    \let\backeta\eta
+    \let\backtheta\theta
+    \let\backiota\iota
+    \let\backkappa\kappa
+    \let\backlambda\lambda
+    \let\backmu\mu
+    \let\backnu\nu
+    \let\backxi\xi
+    \let\backpi\pi
+    \let\backrho\rho
+    \let\backsigma\sigma
+    \let\backtau\tau
+    \let\backupsilon\upsilon
+    \let\backphi\phi
+    \let\backchi\chi
+    \let\backpsi\psi
+    \let\backomega\omega
+    \let\backvarepsilon\varepsilon
+    \let\backvartheta\vartheta
+    \let\backvarpi\varpi
+    \let\backvarrtho\varrho
+    \let\backvarsigma\varsigma
+    \let\backvarphi\varphi
+}
+
+%%%%%%%%%%%%%% Macros for changing font dynamically %%%%%%%%%%%%%
+
+\def\setmathgreeks#1{\setkeys{mathgreeks}{#1}\unskip
+    \ifmathgreeks@upgreek
+        \mathgreeks@Greekuptrue
+        \mathgreeks@greekuptrue
+        \PackageWarning{mathgreeks}{Style is set to `upright'
+            \MessageBreak with the `upgreek' option}
+    \fi
+    \mgr@DefaultGreeks\ignorespaces
+}
+
+\newif\ifmgrfont@unicodemath
+\define@key{mgrfont}{unicode-math}[Latin Modern Math]{%
+    \def\mgrfont@unicodemath{#1}\mgrfont@unicodemathtrue}
+\newif\ifmgrfont@fontspec
+\define@key{mgrfont}{fontspec}[GFS Didot]{%
+    \def\mgrfont@fontspec{#1}\mgrfont@fontspectrue}
+\define@key{mgrfont}{enc}{\def\mgrfont@enc{#1}}
+\define@key{mgrfont}{fam}{\def\mgrfont@fam{#1}}
+\newcommand*\mgrfont@series{m} % default value
+\define@key{mgrfont}{series}{\renewcommand*\mgrfont@series{#1}}
+\newcommand*\mgrfont@shape{it} % default value
+\define@key{mgrfont}{shape}{\renewcommand*\mgrfont@shape{#1}}
+
+\def\mathgreeksfont#1{%
+    \mgrfont@unicodemathfalse
+    \mgrfont@fontspecfalse
+    \renewcommand*\mgrfont@series{m}
+    \renewcommand*\mgrfont@shape{it}
+    \mathgreeks@lgrmathfalse
+    \mathgreeks@fontspecfalse
+    \mathgreeks@Symbolfalse
+    \mathgreeks@upgreekfalse
+    \setkeys{mgrfont}{#1}
+    \ifmgrfont@unicodemath
+        \setmathfont{\mgrfont@unicodemath}[range=it/{greek,Greek}]
+        \setmathfont{\mgrfont@unicodemath}[range=up/{greek,Greek}]
+        \let\mgr@UnicodeGreek\mgr@UnicodemathGreek
+        \mathgreeks@fontspectrue % for \mgr@CodeGreeks
+        \mgr@CodeGreeks{it}
+        \mgr@CodeGreeks{up}
+        \mgr@DefaultGreeks
+    \else\ifmgrfont@fontspec
+        \let\MathGreeksFont\relax
+        \newfontfamily\MathGreeksFont{\mgrfont@fontspec}
+        \let\mgr@UnicodeGreek\mgr@NewUnicodeGreek
+        \mathgreeks@fontspectrue
+        \mgr@CodeGreeks{it}
+        \mgr@CodeGreeks{up}
+        \mgr@DefaultGreeks
+    \else
+        \let\mgr@CodeGreek\mgr@NewCodeGreek
+        \ifdefstring{\mgrfont@enc}{LGR}{
+            \mathgreeks@lgrmathtrue
+        }{
+        \ifdefstring{\mgrfont@fam}{psy}{
+            \mathgreeks@Symboltrue
+        }{
+        \ifdefstring{\mgrfont@fam}{fsy}{
+            \mathgreeks@Symboltrue
+        }{
+        }}}
+        \mgr@CodeGreeks{}
+    \fi\fi
+}
+
+\def\mgr@NewCodeGreek#1#2#3{\unskip
+    \expandafter\DeclareRobustCommand\csname#1#2\endcsname
+        {\mathalpha{\text{\usefont{\mgrfont@enc}{\mgrfont@fam}
+            {\mgrfont@series}{\mgrfont@shape}\symbol{#3}}
+        }}\ignorespaces
+}
+
+\def\mgr@NewUnicodeGreek#1#2#3{\unskip % only with fontspec
+    \expandafter\DeclareRobustCommand\csname#1#2\endcsname
+        {\mathalpha{\text{\csname#1shape\endcsname%
+            \MathGreeksFont\symbol{#3}}
+        }}\ignorespaces
+}
+
+\providecommand\greektable{
+    $\begin{array}{c}
+      \begin{array}{*{23}{@{\;}c}@{\;}}
+        \alpha & \beta & \gamma & \delta & \epsilon & \zeta & \eta &
+        \theta & \iota & \kappa & \lambda & \mu & \nu & \xi & \pi &
+        \rho & \sigma & \tau & \upsilon & \phi & \chi & \psi & \omega
+      \end{array}
+    \\
+      \begin{array}{*{18}{@{\;}c}@{\;}}
+        \varepsilon & \vartheta & \varpi & \varrho & \varsigma & \varphi
+        & | &
+        \Gamma & \Delta & \Theta & \Lambda & \Xi & \Pi & \Sigma &
+        \Upsilon & \Phi & \Psi & \Omega
+      \end{array}
+    \end{array}$
+}
+
+\endinput
+%%
+%% End of file `mathgreeks.sty'.

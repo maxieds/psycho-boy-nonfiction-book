@@ -1,0 +1,190 @@
+%%
+%% This is file `scrhack-2023-07-07.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% scrhack-2023-07-07.dtx  (with options: `package,identify')
+%% scrhack-2023-07-07.dtx  (with options: `package,option')
+%% scrhack-2023-07-07.dtx  (with options: `package,body')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from scrhack-2023-07-07.sty.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file scrhack-2023-07-07.dtx scrhack-2023-07-07.dtx scrhack-2023-07-07.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%% using: package,identify
+\ProvidesPackage{scrhack}[%
+  2024-04-17 v3.42
+  legacy version of package scrhack%
+]
+%%% using: package,option
+\RequirePackage{scrkbase}[2022-11-11]
+\@ifpackagelater{scrkbase}{2023-07-14}{%
+  \PackageInfo{scrhack}{KOMA-Script >= 3.42 detected.\MessageBreak
+    In this case you should not use this legacy version of\MessageBreak
+    scrhack, but should be able to use the current version\MessageBreak
+    or even replace loading scrhack by loading really\MessageBreak
+    needed third-party patches, e.g., floatbytocbasic.\MessageBreak
+    But you are the boss ..}%
+}{%
+  \@ifpackagelater{scrkbase}{2022-11-11}{%
+    \PackageWarningNoLine{scrhack}{KOMA-Script < 3.42 detected.\MessageBreak
+      In this case the original scrhack of that version\MessageBreak
+      should also be installed and used instead of this\MessageBreak
+      legacy package}%
+  }{%
+    \PackageError{scrhack}{incompatible KOMA-Script < v3.39 detected}{%
+      This error is fatal!\MessageBreak
+      Loading of scrhack will be aborted!}%
+    \expandafter\let\csname ver@scrhack.sty\endcsname\undefined
+    \endinput
+  }%
+}
+\KOMA@ifkey{hyperref}{@scrhack@hyperref}%
+\KOMAExecuteOptions{hyperref=true}%
+\KOMA@ifkey{floatrow}{@scrhack@floatrow}
+\KOMAExecuteOptions{floatrow=true}
+\KOMA@ifkey{float}{@scrhack@float}%
+\KOMAExecuteOptions{float=true}%
+\KOMA@ifkey{listings}{@scrhack@listings}
+\KOMAExecuteOptions{listings=true}
+\RequirePackage{xpatch}%
+\KOMA@ifkey{nomencl}{@scrhack@nomencl}
+\KOMAExecuteOptions{nomencl=true}
+\KOMA@ifkey{setspace}{@scrhack@setspace}
+\KOMAExecuteOptions{setspace=true}
+\RequirePackage{xpatch}%
+\KOMA@ifkey{lscape}{@scrhack@lscape}%
+\KOMAExecuteOptions{lscape=true}%
+\KOMA@ifkey{standardsections}{@scrhack@standardsections}
+\KOMAExecuteOptions{standardsections=false}
+\KOMAProcessOptions\relax
+%%% using: package,body
+\newcommand{\scr@ifexpected}[2]{%
+  \begingroup
+    \let\@tempa#1
+    #2
+    \ifx\@tempa#1
+      \aftergroup\@firstoftwo
+    \else
+      \aftergroup\@secondoftwo
+    \fi
+  \endgroup
+}
+\newcommand*{\scr@hack@load}[2]{%
+  \expandafter\ifx\csname ver@#2.#1\endcsname\relax
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\ifx\csname ver@#2.hak\endcsname\relax
+      \expandafter\expandafter\expandafter\@firstoftwo
+    \else
+      \expandafter\expandafter\expandafter\@secondoftwo
+    \fi
+  \fi
+  {%
+    \PackageInfo{scrhack}{loading #2 hack}%
+    \edef\reserved@a{%
+      \noexpand\makeatletter\noexpand\input{#2.hak}%
+      \noexpand\catcode`\noexpand\@\the\catcode`\@\relax
+    }\reserved@a
+  }{%
+    \PackageInfo{scrhack}{ignorring #2 hack}%
+  }%
+}
+\BeforePackage{hyperref}{%
+  \scr@ifundefinedorrelax{hy@insteadofrefstepcounter}{}{%
+    \PackageInfo{scrhack}{hyperref hack deactivated because of\MessageBreak
+      detection of KOMA-Script class, that doesn't\MessageBreak
+      need that hack,}%
+    \KOMAExecuteOptions[scrhack.sty]{hyperref=false}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \if@scrhack@hyperref
+    \@ifpackagelater{hyperref}{2009/11/24}{%
+      \PackageInfo{scrhack}{hyperref hack deactivated because of\MessageBreak
+        detection of hyperref version, that doesn't\MessageBreak
+        need that hack,}%
+      \KOMAExecuteOptions[scrhack.sty]{hyperref=false}%
+    }{%
+      \AtEndOfPackage{%
+        \KOMA@key[scrhack.sty]{hyperref}[true]{%
+          \PackageWarning{scrhack}{option `hyperref=#1' ignored}%
+          \FamilyKeyStateProcessed
+        }%
+        \if@scrhack@hyperref\scr@hack@load\@pkgextension{hyperref}\fi
+      }%
+    }%
+  \fi
+}
+\AfterPackage*{floatrow}{%
+  \KOMAoptions{float=false}%
+  \PackageInfo{scrhack}{option `float' deactivated}%
+  \KOMA@key[scrhack.sty]{floatrow}{%
+    \PackageWarning{scrhack}{option `floatrow' ignored}%
+    \FamilyKeyStateProcessed
+  }%
+  \if@scrhack@floatrow\scr@hack@load\@pkgextension{floatrow}\fi
+}
+\AfterPackage*{float}{%
+  \KOMA@key[scrhack.sty]{float}{%
+    \PackageWarning{scrhack}{option `float' ignored}%
+    \FamilyKeyStateProcessed
+  }%
+  \if@scrhack@float\scr@hack@load\@pkgextension{float}\fi
+}
+\AfterPackage*{listings}{%
+  \@ifpackagelater{lstmisc}{2024/02/15}{%
+    \PackageInfo{scrhack}{listings hack deactivated because of\MessageBreak
+      detection of listings version, that doesn't\MessageBreak
+      need that hack,}%
+    \KOMAExecuteOptions[scrhack.sty]{listings=false}%
+  }{%
+    \if@scrhack@listings\scr@hack@load\@pkgextension{listings}\fi
+  }%
+  \KOMA@key[scrhack.sty]{listings}[true]{%
+    \PackageWarning{scrhack}{option `listings=#1' ignored}%
+    \FamilyKeyStateProcessed
+  }%
+}
+\AfterPackage*{nomencl}{%
+  \KOMA@key[scrhack.sty]{nomencl}{%
+    \PackageWarning{scrhack}{option `nomencl' ignored}%
+    \FamilyKeyStateProcessed
+  }%
+  \if@scrhack@nomencl\scr@hack@load\@pkgextension{nomencl}\fi
+}
+\AfterPackage*{setspace}{%
+  \KOMA@key[scrhack.sty]{setspace}{%
+    \PackageWarning{scrhack}{option `setspace' ignored}%
+    \FamilyKeyStateProcessed
+  }%
+  \if@scrhack@setspace\scr@hack@load\@pkgextension{setspace}\fi
+}
+\AfterPackage*{lscape}{%
+  \if@scrhack@lscape\scr@hack@load\@pkgextension{lscape}\else
+    \KOMA@key[scrhack.sty]{lscape}{%
+      \PackageWarning{scrhack}{option `lscape' ignored}%
+      \FamilyKeyStateProcessed
+    }%
+  \fi
+}
+\AtEndOfPackage{%
+  \if@scrhack@standardsections
+    \PackageInfo{scrhack}{loading standard classes sections hack}%
+    \input{standardsections.hak}%
+  \fi
+}
+\endinput
+%%
+%% End of file `scrhack-2023-07-07.sty'.

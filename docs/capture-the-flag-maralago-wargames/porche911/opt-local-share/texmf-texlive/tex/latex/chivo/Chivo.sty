@@ -1,0 +1,264 @@
+%%
+%% This is file `Chivo.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% Chivo.dtx  (with options: `package')
+%% 
+%% Copyright (C) 2016-2022 Arash Esbati <arash'at'gnu.org>
+%% 
+%% This work may be distributed and/or modified under the conditions
+%% of the LaTeX Project Public License (LPPL), either version 1.3c of
+%% this license or (at your option) any later version.  The latest
+%% version of this license is in the file:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+\NeedsTeXFormat{LaTeX2e}[2021/06/01]
+\ProvidesPackage{Chivo}
+  [2022/11/15 v2.2 Support for Chivo fonts (AE)]
+\RequirePackage{iftex}
+\newif\ifChivo@otf
+\iftutex                      % we are in XeTeX or LuaTeX
+  \Chivo@otftrue
+\else
+  \Chivo@otffalse
+\fi
+\ifChivo@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontaxes}
+\fi
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{%
+  family = Chivo  ,
+  prefix = Chivo@
+}
+\DeclareBoolOption{thin}
+\DeclareBoolOption{extralight}
+\DeclareBoolOption{light}
+\DeclareBoolOption{regular}
+\DeclareBoolOption{medium}
+\DeclareBoolOption{semibold}
+\DeclareBoolOption{bold}
+\DeclareBoolOption{extrabold}
+\DeclareBoolOption{black}
+\DeclareBoolOption{lining}
+\DeclareComplementaryOption{oldstyle}{lining}
+\DeclareBoolOption{tabular}
+\DeclareComplementaryOption{proportional}{tabular}
+\define@key{Chivo}{lf}[true]{%
+  \kvsetkeys{Chivo}{lining=#1}%
+}
+\define@key{Chivo}{osf}[true]{%
+  \kvsetkeys{Chivo}{oldstyle=#1}%
+}
+\define@key{Chivo}{tab}[true]{%
+  \kvsetkeys{Chivo}{tabular=#1}%
+}
+\define@key{Chivo}{prop}[true]{%
+  \kvsetkeys{Chivo}{proportional=#1}%
+}
+\ifChivo@otf
+  \newcommand*\Chivo@otf@scale{}
+  \define@key{Chivo}{scale}[1.0]{%
+    \def\Chivo@otf@scale{#1}%
+  }
+  \define@key{Chivo}{scaled}[1.0]{%
+    \def\Chivo@otf@scale{#1}%
+  }
+\else
+  \DeclareStringOption[1.0]{scale}
+  \define@key{Chivo}{scaled}[1.0]{%
+    \renewcommand*\Chivo@scale{#1}%
+  }
+\fi
+\DeclareBoolOption{familydefault}
+\DeclareVoidOption{opentype}{\Chivo@otftrue}
+\DeclareVoidOption{type1}{\Chivo@otffalse}
+\kvsetkeys{Chivo}{regular,bold,lining,proportional}
+\ProcessKeyvalOptions{Chivo}
+\newcommand*\Chivo@figurestyle{}
+\newcommand*\Chivo@figurealign{}
+\newcommand*\Chivo@otf@regular{}
+\newcommand*\Chivo@otf@italic{}
+\newcommand*\Chivo@otf@bold{}
+\newcommand*\Chivo@otf@bolditalic{}
+\ifChivo@regular
+  \ifChivo@otf
+    \def\Chivo@otf@regular{Regular}
+    \def\Chivo@otf@italic{Italic}
+  \else
+    \DeclareFontSeriesDefault[sf]{md}{m}
+  \fi
+\fi
+\ifChivo@medium
+  \ifChivo@otf
+    \def\Chivo@otf@regular{Medium}
+    \def\Chivo@otf@italic{MediumItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{md}{medium}
+  \fi
+\fi
+\ifChivo@light
+  \ifChivo@otf
+    \def\Chivo@otf@regular{Light}
+    \def\Chivo@otf@italic{LightItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{md}{l}
+  \fi
+\fi
+\ifChivo@extralight
+  \ifChivo@otf
+    \def\Chivo@otf@regular{ExtraLight}
+    \def\Chivo@otf@italic{ExtraLightItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{md}{el}
+  \fi
+\fi
+\ifChivo@thin
+  \ifChivo@otf
+    \def\Chivo@otf@regular{Thin}
+    \def\Chivo@otf@italic{ThinItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{md}{ul}
+  \fi
+\fi
+\ifChivo@bold
+  \ifChivo@otf
+    \def\Chivo@otf@bold{Bold}
+    \def\Chivo@otf@bolditalic{BoldItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{bf}{b}
+  \fi
+\fi
+\ifChivo@semibold
+  \ifChivo@otf
+    \def\Chivo@otf@bold{SemiBold}
+    \def\Chivo@otf@bolditalic{SemiBoldItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{bf}{sb}
+  \fi
+\fi
+\ifChivo@extrabold
+  \ifChivo@otf
+    \def\Chivo@otf@bold{ExtraBold}
+    \def\Chivo@otf@bolditalic{ExtraBoldItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{bf}{eb}
+  \fi
+\fi
+\ifChivo@black
+  \ifChivo@otf
+    \def\Chivo@otf@bold{Black}
+    \def\Chivo@otf@bolditalic{BlackItalic}
+  \else
+    \DeclareFontSeriesDefault[sf]{bf}{ub}
+  \fi
+\fi
+\ifChivo@lining
+  \ifChivo@otf
+    \def\Chivo@figurestyle{Lining}
+  \else
+    \def\Chivo@figurestyle{LF}
+  \fi
+\else
+  \ifChivo@otf
+    \def\Chivo@figurestyle{OldStyle}
+  \else
+    \def\Chivo@figurestyle{OsF}
+  \fi
+\fi
+\ifChivo@tabular
+  \ifChivo@otf
+    \def\Chivo@figurealign{Monospaced}
+  \else
+    \def\Chivo@figurealign{T}
+  \fi
+\else
+  \ifChivo@otf
+    \def\Chivo@figurealign{Proportional}
+  \else
+    \def\Chivo@figurealign{}
+  \fi
+\fi
+\ifChivo@otf \else
+  \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+  \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+  \def\sufigures{\@nomath\sufigures
+    \fontfigurestyle{superior}\selectfont}
+  \DeclareTextFontCommand{\textsuperior}{\sufigures}
+
+  \fa@naming@exception{figures}{{inferior}{proportional}}{Inf}
+  \fa@naming@exception{figures}{{inferior}{tabular}}{Inf}
+  \def\infigures{\@nomath\infigures
+    \fontfigurestyle{inferior}\selectfont}
+  \DeclareTextFontCommand{\textinferior}{\infigures}
+
+  \fa@naming@exception{figures}{{numerators}{proportional}}{Numr}
+  \fa@naming@exception{figures}{{numerators}{tabular}}{Numr}
+  \def\nufigures{\@nomath\nufigures
+    \fontfigurestyle{numerators}\selectfont}
+  \DeclareTextFontCommand{\textnumerator}{\nufigures}
+
+  \fa@naming@exception{figures}{{denominators}{proportional}}{Dnom}
+  \fa@naming@exception{figures}{{denominators}{tabular}}{Dnom}
+  \def\defigures{\@nomath\defigures
+    \fontfigurestyle{denominators}\selectfont}
+  \DeclareTextFontCommand{\textdenominator}{\defigures}
+\fi
+\ifChivo@otf
+  \defaultfontfeatures[Chivo]{%
+    Extension      = .otf                         ,
+    Ligatures      = {TeX,Common}                 ,
+    Scale          = \Chivo@otf@scale             ,
+    UprightFont    = *-\Chivo@otf@regular         ,
+    ItalicFont     = *-\Chivo@otf@italic          ,
+    BoldFont       = *-\Chivo@otf@bold            ,
+    BoldItalicFont = *-\Chivo@otf@bolditalic      ,
+    FontFace       = {ul}{n}{*-Thin}              ,
+    FontFace       = {ul}{it}{*-ThinItalic}       ,
+    FontFace       = {el}{n}{*-ExtraLight}        ,
+    FontFace       = {el}{it}{*-ExtraLightItalic} ,
+    FontFace       = {l}{n}{*-Light}              ,
+    FontFace       = {l}{it}{*-LightItalic}       ,
+    FontFace       = {m}{n}{*-Regular}            ,
+    FontFace       = {m}{it}{*-Italic}            ,
+    FontFace       = {medium}{n}{*-Medium}        ,
+    FontFace       = {medium}{it}{*-MediumItalic} ,
+    FontFace       = {sb}{n}{*-SemiBold}          ,
+    FontFace       = {sb}{it}{*-SemiBoldItalic}   ,
+    FontFace       = {b}{n}{*-Bold}               ,
+    FontFace       = {b}{it}{*-BoldItalic}        ,
+    FontFace       = {eb}{n}{*-ExtraBold}         ,
+    FontFace       = {eb}{it}{*-ExtraBoldItalic}  ,
+    FontFace       = {ub}{n}{*-Black}             ,
+    FontFace       = {ub}{it}{*-BlackItalic}      ,
+    Numbers        = {\Chivo@figurestyle,\Chivo@figurealign}
+  }
+\fi
+\ifChivo@otf
+  \AtBeginDocument{%
+    \setsansfont{Chivo}%
+  }
+\else
+  \renewcommand*\sfdefault{%
+    Chivo-\Chivo@figurealign\Chivo@figurestyle
+  }
+\fi
+\ifChivo@familydefault
+  \ifChivo@otf
+    \AtBeginDocument{%
+      \setmainfont{Chivo}%
+    }
+  \else
+    \renewcommand*\familydefault{\sfdefault}
+  \fi
+\fi
+\ifChivo@otf \else
+  \DeclareEncodingSubset{TS1}{Chivo-*}{4}
+\fi
+\endinput
+%%
+%% End of file `Chivo.sty'.

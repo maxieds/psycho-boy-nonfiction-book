@@ -1,0 +1,76 @@
+\NeedsTeXFormat{LaTeX2e}
+\def\fileversion{1.031}
+\def\filedate{2024/06/03}
+\ProvidesPackage{notomath}
+    [\filedate\space v\fileversion.\space (Michael Sharpe)  Supports Noto text and math fonts for LaTeX usage.]
+
+\RequirePackage{fontenc,fontaxes,mweights}
+\RequirePackage{xkeyval,textcomp}
+%\PassOptionsToPackage{proportional,pf,oldstyle,osf,type1}{noto-serif}
+%\PassOptionsToPackage{proportional,pf,oldstyle,osf,type1,sfdefault}{noto-sans}
+%\PassOptionsToPackage{}{newtxmath}
+%\PassOptionsToPackage{varbb,vvarbb,upint,noamssymbols,slantedGreek,frenchmath,nosymbolsc,subscriptcorrection,timesmathacc,uprightscript,smallerops,useBImacros,noOT1}{newtxmath}
+% This seems to pass options that were not specified
+% Have to handle less efficiently by parsing args 
+
+\newcommand*{\NotoMath@scale}{1}
+\newcommand*{\NotoText@scale}{1}
+\newif\ifnoto@sfdefault \noto@sfdefaultfalse
+%\newif\ifnoto@pf \noto@pffalse
+%\newif\ifnoto@osf \noto@osffalse
+%\newcommand*{\NotoSerifMono@scale}{1}
+\newcommand{\noto@MO}[1]{\PassOptionsToPackage{#1}{newtxmath}}% pass math option
+\newcommand{\noto@TO}[1]{\PassOptionsToPackage{#1}{noto-serif}\PassOptionsToPackage{#1}{noto-sans}
+}% pass text option to each possible text font
+\newcommand{\noto@TTO}[1]{\PassOptionsToPackage{#1}{noto-mono}}
+\noto@TTO{type1}
+\DeclareOptionX{scaled}{\renewcommand*{\NotoMath@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\NotoMath@scale}{#1}}
+
+\newif\ifnotomath@mono \notomath@monofalse
+
+\DeclareOptionX{sfdefault}{\noto@sfdefaulttrue}
+\DeclareOptionX{proportional}{\noto@TO{pf}}
+\DeclareOptionX{pf}{\noto@TO{pf}}
+\DeclareOptionX{oldstyle}{\noto@TO{osf}}
+\DeclareOptionX{osf}{\noto@TO{osf}}
+\DeclareOptionX{mono}{\notomath@monotrue}
+\DeclareOptionX{varbb}{\noto@MO{varbb}}
+\DeclareOptionX{vvarbb}{\noto@MO{vvarbb}}
+\DeclareOptionX{upint}{\noto@MO{upint}}
+\DeclareOptionX{noamssymbols}{\noto@MO{noamssymbols}}
+\DeclareOptionX{slantedGreek}{\noto@MO{slantedGreek}}
+\DeclareOptionX{frenchmath}{\noto@MO{frenchmath}}
+\DeclareOptionX{nosymbolsc}{\noto@MO{nosymbolsc}}
+\DeclareOptionX{subscriptcorrection}{\noto@MO{subscriptcorrection}}
+\DeclareOptionX{timesmathacc}{\noto@MO{timesmathacc}}
+\DeclareOptionX{uprightscript}{\noto@MO{uprightscript}}
+\DeclareOptionX{smallerops}{\noto@MO{smallerops}}
+\DeclareOptionX{useBImacros}{\noto@MO{useBImacros}}
+\DeclareOptionX{noOT1}{\noto@MO{noOT1}}
+
+\ProcessOptionsX\relax
+
+\ifnoto@sfdefault\noto@MO{notosans}\else\noto@MO{noto}\fi
+%\edef\noto@mopt{scale=\NotoMath@scale,\noto@mopt}
+\newdimen\notomath@dima
+% use the scale for math to set noto text scale factors
+\notomath@dima=\NotoMath@scale\p@
+\notomath@dima=.9\notomath@dima
+\edef\NotoText@scale{\strip@pt\notomath@dima}
+
+\noto@TO{scale=\NotoText@scale}
+\noto@TTO{scale=\NotoText@scale}
+\noto@MO{scale=\NotoMath@scale}
+
+\ifnotomath@mono\usepackage{noto-mono}\fi
+\usepackage{noto-serif}
+\ifnoto@sfdefault\noto@TO{sfdefault}\fi
+\usepackage{noto-sans}
+\usepackage{newtxmath}
+\def\seriesdefault{\mdseries@rm}
+\def\mdseries@rm{m}
+\def\bfseries@rm{b}
+
+\endinput
+
