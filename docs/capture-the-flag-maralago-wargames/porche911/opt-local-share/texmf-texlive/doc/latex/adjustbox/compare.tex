@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[margin=1cm,paperwidth=20cm,paperheight=100cm]{geometry}
+\usepackage[]{xcolor}
+\usepackage[export]{adjustbox}
+\fboxsep=0pt
+\parskip=1cm
+
+\usepackage[tightpage]{preview}
+
+\usepackage{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\newdimen\unit
+\tikzset{unit/.code={\unit=\dimexpr#1\relax}}
+\tikzset{xy/.style={x={#1},y={#1},unit={#1},font={\sffamily\fontsize{.2\unit}{.24\unit}\selectfont},line width=.01\unit}}
+
+\def\showdiff#1{%
+    {%
+    \diff=\dimexpr#10-#11\relax
+    \pgfmathsetlength\absdiff{abs(\diff)}%
+    \ifdim\diff=0pt%
+        \textcolor{green}{PASSED}%
+    \else
+        \ifdim\absdiff<\Epsilon
+            \pgfmathtruncatemacro\FCOLOR{100*(\Epsilon-abs(\absdiff))/\Epsilon}%
+            \textcolor{green!\FCOLOR!yellow}{OK: \the\diff}%
+        \else
+            \textcolor{red}{FAILED: \the\diff}%
+        \fi
+    \fi
+    \quad
+    \ifdim#11=0pt
+        \diff=#10
+    \else
+        \pgfmathsetlength\diff{(#10/#11) - 1pt}
+    \fi
+    \ifdim\diff<0pt
+        \absdiff=-\diff
+    \else
+        \absdiff=\diff
+    \fi
+    \ifdim\diff=0pt%
+        \textcolor{green}{PASSED}%
+    \else
+        \ifdim\absdiff<\dEpsilon
+            \pgfmathtruncatemacro\FCOLOR{100*(\dEpsilon-abs(\absdiff))/\dEpsilon}%
+            \textcolor{green!\FCOLOR!yellow}{OK: \the\diff}%
+        \else
+            \textcolor{red}{FAILED: \the\diff}%
+        \fi
+    \fi
+    }%
+}
+
+\newlength\diff
+\newlength\absdiff
+\newlength\Epsilon
+\newlength\dEpsilon
+\Epsilon=0.05pt
+\dEpsilon=0.001pt
+\def\test#1#2{%
+    \begin{preview}%
+    \sbox0{\includegraphics[#1]{#2}}%
+    \sbox1{\adjustbox{#1}{\input{#2}\unskip}}%
+    \begin{tabular}{ll@{}l}
+    \usebox0 & \usebox1 & .\\
+    \the\ht0 & \the\ht1 & \showdiff\ht \\
+    \the\dp0 & \the\dp1 & \showdiff\dp \\
+    \the\wd0 & \the\wd1 & \showdiff\wd \\
+    \end{tabular}%
+    \end{preview}%
+}
+
+\begin{document}
+\ttfamily
+
+\test{}{gridbp}
+
+\test{}{gridpt}
+
+\test{clip,trim=10bp 20bp 0 0,width=177bp,frame=1pt 1pt}{gridbp}
+
+\test{clip,trim=10pt 20pt 0 0,width=177pt,frame=1pt 1pt}{gridpt}
+
+\test{angle=45,clip,trim=10bp 0 0 0,width=177bp,totalheight=5cm,frame}{gridbp}
+
+\test{clip,trim=10pt 0 0 0,angle=90,trim=5pt 0 0 0}{gridbp}
+
+\test{angle=180,totalheight=5cm}{gridbp}
+
+\test{width=3cm,angle=0,totalheight=5cm}{gridbp}
+
+\test{width=3cm,totalheight=5cm,angle=180}{gridbp}
+
+\test{width=3cm,totalheight=5cm}{gridbp}
+
+\test{margin=.5cm .5cm .5cm .5cm,frame}{gridbp}
+\end{document}
+
+\test{width=2cm,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame,angle=5,
+margin=.1cm .1cm .1cm .1cm,frame
+}{gridbp}
+
+\test{width=2cm,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+margin=1pt 1pt 1pt 1pt,frame,angle=1,
+}{gridbp}
+
+\end{document}
+
+\adjustbox{width=2cm,trim={.5\WIDTH} 0 0 0,frame}{Ag}

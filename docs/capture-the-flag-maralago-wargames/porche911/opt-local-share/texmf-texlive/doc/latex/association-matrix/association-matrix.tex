@@ -1,0 +1,361 @@
+%% association-matrix.sty
+%% Copyright 2020 Whisperity
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Whisperity.
+%
+% This work consists of the files association-matrix.sty
+% and association-matrix.tex.
+%
+\documentclass{article}
+\usepackage{association-matrix} % Own package! :3
+
+\usepackage{etoolbox}
+\usepackage{hyperref}
+    \hypersetup{
+        pdftitle={The 'association-matrix' Package},    % title
+        pdfauthor={Whisperity},     % author
+        pdfsubject={An easy and clear assocation matrix generator},   % subject of the document
+        pdfnewwindow=true,      % links in new window
+        hidelinks,              % disable link borders
+        %colorlinks=false,       % false: boxed links; true: colored links
+    }
+\usepackage{cleveref}  % *MUST* be loaded *after* HyperRef.
+\usepackage{minted}
+    \usemintedstyle{borland}
+    \setminted{autogobble}
+\usepackage{xcolor}
+
+\newrobustcmd{\release}[3]{%
+    \subsection{\emph{#1}: \texttt{#2} - #3}\label{release:#2}%
+}
+
+\newrobustcmd{\command}[3]{%
+    \paragraph{\textsf{#1}} \textbf{\color{blue} \texttt{#2}}\label{command:#1}%
+
+    #3
+}
+
+% Turn off the execution of \amxgenerate.
+% This is used internally in the document to prevent code examples from firing the matrix when loaded.
+\newrobustcmd{\amxDisable}{%
+    \let\theOldAMX\amxgenerate%
+    \def\amxgenerate{}%
+}
+\newrobustcmd{\amxEnable}{%
+    \let\amxgenerate\theOldAMX
+}
+
+% Escaped special characters for \texttt and the \write calls.
+% (via http://tex.stackexchange.com/a/223089)
+\def\atchar#1{}
+\edef\atchar{\expandafter\atchar\string\@}
+\def\bslchar#1{}
+\edef\bslchar{\expandafter\bslchar\string\\}
+\def\spchar#1{}
+\edef\spchar{\expandafter\spchar\string\ }
+\def\lbchar#1{}
+\edef\lbchar{\expandafter\lbchar\string\{}
+\def\rbchar#1{}
+\edef\rbchar{\expandafter\rbchar\string\}}
+\def\hschar#1{}
+\edef\hschar{\expandafter\hschar\string\#}
+
+\newwrite\tempfile
+
+\begin{document}
+
+\vspace*{0in}
+\begin{center}
+    \LARGE The \textsf{association-matrix} Package \\
+    \small \rule{0in}{1em} An easy and clear association matrix generator \\
+    \large \rule{0in}{2em} Whisperity \\
+    % \\
+    \rule{0em}{2em}\amxDate \\
+    Version \amxVersion
+\end{center}
+
+\tableofcontents
+
+
+\section{Introduction}\label{intro}
+The \textsf{association-matrix} package allows the convenient creation of association matrices.
+The package aims to automate the generation, without the user having to manually write the table's code and have to deal with the inefficiency of copy-pasting information.
+The package's interface is simple, the user needs to define the table's contents (\Cref{define}) and then can generate the table (\Cref{tablegen}).
+
+Note that it is important to have \emph{every} necessary row entries and column headings defined \textbf{before} the first call to a table generation, otherwise, only a partial table will be generated.
+
+\subsection{Association matrix}\label{association-mx}
+At the author's University, it is customary for Ph.D.\ students to write their doctoral dissertation organised into individual \emph{theses} (corresponding to chapters), and to provide a breakdown on which of their publications are ``proof'' behind the thesis (chapter).
+Originally, the package \textsc{theses-vs-publications} had been devised, but then we turned it to a more generic solution.
+
+Commonly, the dissertation's \emph{``Introduction''} and \emph{``Summary''} chapters will provide the full table.
+In addition, at the end of each individual thesis chapters will provide a table with the current thesis's row in the table \emph{highlighted}.
+
+An example usage and association matrix is provided in \Cref{example}.
+
+\subsection{Licence}
+Copyright \textcopyright\ 2020 Whisperity.
+Permission is granted to copy, distribute and\slash or modify this software under the terms of the \emph{\LaTeX{} Project Public License}, version \emph{1.3c} or newer.\footnote{%
+    \url{http://www.latex-project.org/lppl}%
+}
+
+\subsection{Example}\label{example}
+The definitions (\Cref{define}) should be done early in the document, but at least before the first table render (\Cref{tablegen}) call.
+
+\immediate\openout\tempfile=assoc-mx-example.aux
+    \immediate\write\tempfile{\bslchar amxrow{association-matrix}{Association Matrices}}
+    \immediate\write\tempfile{\bslchar amxrow{latex}{\bslchar LaTeX}}
+    \immediate\write\tempfile{}
+    \makeatletter
+       \immediate\write\tempfile{\@percentchar\spchar Using the bibliography at the end of document!}
+    \makeatother
+    \immediate\write\tempfile{\bslchar amxcol{amxdoc}{\bslchar cite{associationmatrix}}}
+    \immediate\write\tempfile{\bslchar amxcol{latexdoc}{\bslchar cite{latex}}}
+    \immediate\write\tempfile{\bslchar amxcol{etoolboxdoc}{\bslchar cite{etoolbox}}}
+    \immediate\write\tempfile{}
+    \immediate\write\tempfile{\bslchar amxassociate{amxdoc}{association-matrix}}
+    \immediate\write\tempfile{\bslchar amxassociate{etoolboxdoc}{association-matrix}}
+    \immediate\write\tempfile{\bslchar amxassociate{latexdoc}{latex}}
+    \immediate\write\tempfile{\bslchar amxassociate{etoolboxdoc}{latex}}
+    \immediate\write\tempfile{}
+    \immediate\write\tempfile{\detokenize{\amxgenerate}}
+\immediate\closeout\tempfile
+
+\amxDisable
+\input{assoc-mx-example.aux}
+\amxEnable
+\begin{figure}[H]
+    \centering
+    \inputminted{latex}{assoc-mx-example.aux}
+    \amxgenerate
+\end{figure}
+
+\clearpage
+\section{Commands}\label{commands}
+\subsection{Registering entries}\label{define}
+
+\command{amxrow}{\bslchar amxrow\lbchar <key>\rbchar\lbchar <text>\rbchar}{%
+Registers the row entry named \texttt{<key>} with the given \texttt{<text>}.
+The \emph{title} of the entry is printed in the first cell of the row, \textbf{in the order of} \texttt{\bslchar amxrow} calls.
+}
+
+\command{amxcol}{\bslchar amxcol\lbchar <key>\rbchar\lbchar <text>\rbchar}{%
+Registers the column named \texttt{<key>} with the given \texttt{<text>}.
+The contents of \emph{body} is printed as the column headings of the table, \textbf{in the order of} \texttt{\bslchar amxcol} calls.
+}
+
+\command{amxassociate}{\bslchar amxassociate\lbchar <col-key>\rbchar\lbchar <row-key>\rbchar}{%
+Registers the association between \texttt{<col-key>} and \texttt{<row-key>}.
+The cells at the intersection of the row and the column will have a \textbullet{}, indicating the relevancy.
+}
+
+\subsection{Queries}\label{query}
+
+\command{amxrows}{\bslchar amxrows}{%
+    Returns the number of rows defined.
+}
+
+\command{amxcols}{\bslchar amxcols}{%
+    Returns the number of columns defined.
+}
+
+\command{amxrowtext}{\bslchar amxrowtext\lbchar <key>\rbchar}{%
+    Returns the registered \emph{text} for the \textbf{row} registered with \texttt{<key>}.
+}
+
+\command{amxcoltext}{\bslchar amxcoltext\lbchar <key>\rbchar}{%
+        Returns the registered \emph{text} for the \textbf{column} registered with \texttt{<key>}.
+}
+
+\subsection{Table generator: \texttt{amxgenerate}}\label{tablegen}
+
+\command{amxgenerate}{\bslchar amxgenerate[<row>]}{%
+    Generates the full table incorporating the previously registered data.
+    Internally, a \texttt{tabular} environment is created with the table's data generated by the package.
+    It is the user's responsibility to wrap this into a floating \texttt{table}, if they so wish.
+
+    If \texttt{[<row>]} is given a row's \emph{key}, the row for that key will be \textbf{highlighted}.
+    Highlighting is done by typesetting the row's \emph{text} in \textbf{bold face}, and changing every \textbullet{} in the \emph{other} rows to \textopenbullet{}.
+
+    \begin{figure}[H]
+        \centering
+        \amxgenerate[latex]
+    \end{figure}
+}
+
+
+% Let's use an example of 2×2 matrix for the customisations.
+\newcommand{\docExampleResetTableTwoByTwo}{%
+    \amxReset%
+    \amxrow{sample}{Sample}%
+    \amxrow{simple}{Simple}%
+    \amxcol{x}{x}%
+    \amxcol{y}{y}%
+    \amxassociate{x}{sample}%
+    \amxassociate{y}{simple}%
+}
+\newcommand{\loadAndRenderResettingExample}[2][0]{%
+    \begin{figure}[H]
+        \centering
+        \inputminted{latex}{#2}
+
+        \docExampleResetTableTwoByTwo
+        \input{#2}
+        \amxgenerate[#1]
+    \end{figure}%
+}
+
+\subsection{Customisation}\label{customise}
+All aspects on how the individual elements in the table are rendered can be customised by setting \emph{renderer} control sequences.
+
+\makeatletter
+    \def\defaultTopCorner{\amx@Renderer@Default@TopCorner}
+\makeatother
+\command{amxsetTopCorner}{\bslchar amxsetTopCorner\lbchar <new-heading>\rbchar}{%
+    Sets the rendered table's top left cell value (by default, ``\emph{\defaultTopCorner}'') to the given \texttt{<new-heading>} value.
+
+    \immediate\openout\tempfile=settopcorner-example.aux
+        \immediate\write\tempfile{\bslchar amxsetTopCorner{Correlations}}
+    \immediate\closeout\tempfile
+    \loadAndRenderResettingExample{settopcorner-example.aux}
+}
+
+\command{amxsetColumnHeading}{\bslchar amxsetColumnHeading\lbchar<render-command>\rbchar}{%
+    Sets the rendered table's top row's cells to be rendered via passing the column heading's text (see \Cref{query}) to the given \texttt{<render-command>}.
+    This command must be a command that takes \textbf{1} argument, defined by the user earlier.
+
+    \immediate\openout\tempfile=setcolheading-example.aux
+        \immediate\write\tempfile{\bslchar newcommand{\bslchar ttColHead}[1]{\bslchar texttt{\hschar1}}}
+        \immediate\write\tempfile{\bslchar amxsetColumnHeading{\bslchar ttColHead}}
+    \immediate\closeout\tempfile
+    \loadAndRenderResettingExample{setcolheading-example.aux}
+}
+
+\command{amxsetRowFormat}{\bslchar amxsetRowFormat(Highlighted)\lbchar<render-command>\rbchar}{%
+    Sets the rendered table's left cells' to be rendered via passing the row's index and text (see \Cref{query}) to the given \texttt{<render-command>}.
+    This command must be a command that takes \textbf{2} arguments, defined by the user earlier.
+    The \texttt{Highlighted} version sets the renderer for the highlighted row, if highlighted rendering (see \Cref{tablegen}) is done.
+
+    \immediate\openout\tempfile=setrowformat-example.aux
+        \immediate\write\tempfile{\bslchar newcommand{\bslchar parenRow}[2]{(\hschar1) \bslchar emph{\hschar2}}}
+        \immediate\write\tempfile{\bslchar newcommand{\bslchar parenRowBl}[2]{!\hschar1! \bslchar texttt{\hschar2}}}
+        \immediate\write\tempfile{\bslchar amxsetRowFormat{\bslchar parenRow}}
+        \immediate\write\tempfile{\bslchar amxsetRowFormatHighlighted{\bslchar parenRowBl}}
+    \immediate\closeout\tempfile
+    \loadAndRenderResettingExample[simple]{setrowformat-example.aux}
+}
+
+\clearpage
+\makeatletter
+    \def\defaultIndicator{\amx@Renderer@Default@Indicator}
+\makeatother
+\command{amxsetIndicator}{\bslchar amxsetIndicator\lbchar<indicator>\rbchar}{%
+    Sets the indicators of association in the matrix in \emph{non-highlighting} mode to the result of the \texttt{<indicator>}.
+    The default indicator is: \defaultIndicator{}.
+
+    \immediate\openout\tempfile=setindicator-example.aux
+        \immediate\write\tempfile{\bslchar amxsetIndicator{a}}
+    \immediate\closeout\tempfile
+    \loadAndRenderResettingExample{setindicator-example.aux}
+}
+
+\makeatletter
+    \def\defaultIndicatorHC{\amx@Renderer@Default@Indicator@Highlighted@Current}
+    \def\defaultIndicatorHO{\amx@Renderer@Default@Indicator@Highlighted@Other}
+\makeatother
+\command{amxsetIndicatorHighlighted}{\linebreak\bslchar amxsetIndicatorHighlighted\lbchar<hl-indicator>\rbchar\lbchar<ot-indicator>\rbchar}{%
+    Sets the indicators of association in the matrix in \emph{highlighting} mode to the result of the \texttt{<hl-indicator>} for the \textbf{highlighted row} and \texttt{<ot-indicator>} for every other row.
+    The default indicators are: \defaultIndicatorHC{} and \defaultIndicatorHO{}, respectively.
+
+    \immediate\openout\tempfile=setindicator-hl-example.aux
+        \immediate\write\tempfile{\bslchar amxsetIndicatorHighlighted{c}{o}}
+    \immediate\closeout\tempfile
+    \loadAndRenderResettingExample[simple]{setindicator-hl-example.aux}
+}
+
+\subsection{Multiple distinct tables: \texttt{amxReset}}
+
+\command{amxReset}{\bslchar amxReset}{%
+    Clears \textbf{all} internal data structures and customisations for the package, allowing the user to later typeset a different, independent matrix.
+    The previously defined entries are lost, and in case the ``previous'' matrix is needed, it must be set up again with a sequence of definition commands (see \Cref{define}).
+
+    For example, putting the code in \Cref{example} and the one below into the same source file will create the smaller matrix at the second invocation of \texttt{\bslchar amxgenerate}.
+
+    \immediate\openout\tempfile=reset-example.aux
+        \immediate\write\tempfile{\bslchar amxReset}
+        \immediate\write\tempfile{\bslchar amxrow{sample}{Sample}}
+        \immediate\write\tempfile{\bslchar amxcol{x}{x}}
+        \immediate\write\tempfile{\bslchar amxassociate{x}{sample}}
+        \immediate\write\tempfile{\detokenize{\amxgenerate}}
+    \immediate\closeout\tempfile
+
+    \amxDisable
+    \input{reset-example.aux}
+    \amxEnable
+
+    \begin{figure}[H]
+        \centering
+        \inputminted{latex}{reset-example.aux}
+        \amxgenerate
+    \end{figure}
+}
+
+\clearpage
+\section{Interaction \& compatibility with other packages}\label{compatibility}
+There are several packages that interact with commands in a way that interferes with the behaviour of \texttt{association-matrix}.
+When using such packages, \texttt{association-matrix} \textbf{must be loaded after} them.
+During the initialisation of \texttt{association-matrix}, compatibility is ensured by rewiring some of the logic.
+
+\begin{enumerate}
+    \item\label{compatibility:array} \texttt{array}:
+        Replaced the \texttt{tabular} environment's logic (used by \hyperref[command:amxgenerate]{\mintinline{latex}{\amxgenerate}}) by eagerly attempting to consume the number of columns to create, which was previously created by a macro locally.
+        The issue was fixed in \hyperref[release:v1.1]{release 1.1} by making sure that in presence of the \texttt{array} package, our package does the right thing.
+\end{enumerate}
+
+\section{Development}
+The development of \textsf{association-matrix} is done on GitHub: \url{http://github.com/whisperity/association-matrix}.
+Please report issues and submit patches here.
+
+Note that this document acts as a \textbf{test file} to the package, not only a user-facing documentation.
+Any new command or change should be supplemented with appropriate documentation, and the check of the rendered examples.
+If there is a discrepancy or regression in the looks of \emph{this document} that is not explained by the changes, it should be investigated!
+
+\section{Changelog}\label{changelog}
+\release{2022/10/29}{v1.1}{Compatibility with \texttt{array}}
+\begin{itemize}
+    \item Fixed error message ``\texttt{Illegal pream-token: \`{}c' used}'' emitted by the \texttt{array} package by injecting a compatibility shim.
+        (See \cref{compatibility:array} in \Cref{compatibility}.)
+\end{itemize}
+
+\release{2020/10/25}{v1.0}{Initial release}
+\begin{itemize}
+    \item Basic functionality of defining entries, rendering tables, and customising the renderers are implemented.
+\end{itemize}
+
+\begin{thebibliography}{3}
+\bibitem{associationmatrix}
+Whisperity. \textit{The \textsf{association-matrix} Package -- An easy and clear association matrix generator}.
+Online, \url{http://ctan.org/pkg/association-matrix} (accessed 2020/10/25), 2020.
+
+\bibitem{latex}
+Leslie B.\ Lamport, Donald E.\ Knuth et al.
+\textit{\LaTeX{} -- A document preparation system}.
+Online, \url{http://latex-project.org/} (accessed 2020/10/25), 1984.
+
+\bibitem{etoolbox}
+Philipp Lehman, Joseph Wright.
+\textit{The \textsf{etoolbox} Package -- An e-\TeX{} Toolbox for Class and Package Authors}
+Online, \url{http://ctan.org/pkg/etoolbox} (accessed 2020/10/25), 2007.
+\end{thebibliography}
+
+\end{document}

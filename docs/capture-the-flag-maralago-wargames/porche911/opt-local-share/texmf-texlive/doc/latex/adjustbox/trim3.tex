@@ -1,0 +1,59 @@
+
+\def\text{\sffamily\scalebox{10}{Xy}}
+\sbox\mybox{\sffamily\color{black!25}\scalebox{10}{Xy}}
+\def\HEIGHT{\ht\mybox}
+\def\WIDTH{\wd\mybox}
+\def\DEPTH{\dp\mybox}
+\def\LLX{.15\WIDTH}
+\def\LLY{.4\DEPTH}
+\def\URX{.15\WIDTH}
+\def\URY{(\HEIGHT+.25\DEPTH)}
+\begin{tikzpicture}[font=\sffamily,>=latex]
+   \draw [gray,thin]
+        (0,0)       -- +(-3.5ex,0)
+        (0,\HEIGHT) -- +(-3.5ex,0)
+        (0,-\DEPTH) -- +(-3.5ex,0)
+        (\WIDTH,\HEIGHT) -- +(3.5ex,0)
+        (\WIDTH,-\DEPTH) -- +(3.5ex,0)
+        (0,-\DEPTH)      -- +(0,-3.5ex)
+        (\WIDTH,-\DEPTH) -- +(0,-3.5ex)
+   ;
+   \node [inner sep=0pt,anchor=base west] {\usebox\mybox};
+   \draw (0,0) -- (\WIDTH,0);% node [above,midway] {baseline};
+   \draw [->] (-2.5ex,0) -- +(0,-\DEPTH)  node [midway,left] {depth};
+   \draw [->] (-2.5ex,0) -- +(0, \HEIGHT) node [midway,left] {height};
+   \draw [<->] (\WIDTH,-\DEPTH) ++(2.5ex,0) -- +(0,\DEPTH+\HEIGHT) node [midway,right] {totalheight};
+   \draw [<->] (0,-\DEPTH) ++(0,-2.5ex) -- +(\WIDTH,0) node [midway,below] {width};
+   \fill (-2.5ex,0) circle (.5pt);
+   \begin{scope}[blue] %,every node/.append style={inner sep=2pt}]
+    \begin{scope}
+        \clip ([shift={(\LLX,\LLY)}]0,-\DEPTH) rectangle ([shift={(-\URX,-\URY)}]\WIDTH,\HEIGHT);
+        \node [inner sep=0pt,anchor=base west,color=blue!50!white] {\text};
+    \end{scope}
+    \draw ([shift={(\LLX,\LLY)}]0,-\DEPTH) rectangle ([shift={(-\URX,-\URY)}]\WIDTH,\HEIGHT);
+    \draw [->] (\LLX,-\DEPTH)   -- ++(0,\LLY) node [right,midway] {\scriptsize lly};
+    \draw [->] (0,-\DEPTH+\LLY) -- ++(\LLX,0) node [above,midway] {\scriptsize llx};
+    \draw (\LLX,-\DEPTH+\LLY) -- ([shift={(-\URX,0)}]\WIDTH,-\DEPTH+\LLY);
+    \draw [->] (\LLX+.2\WIDTH,{\HEIGHT-\URY}) -- (\LLX+.2\WIDTH,0) node [pos=0.4,below right] {\scriptsize moves up};
+    \path [fill=white,draw] (\LLX,{\HEIGHT-\URY}) circle (1pt);
+    \draw [->]
+        ([shift={(-\URX,0)}]\WIDTH,\HEIGHT) --
+        ([shift={(-\URX,-\URY)}]\WIDTH,\HEIGHT)
+        node [left,midway] {\scriptsize ury}
+    ;
+    \draw [->]
+        ([shift={(0,-\URY)}]\WIDTH,\HEIGHT) --
+        ([shift={(-\URX,-\URY)}]\WIDTH,\HEIGHT)
+        node [below,midway] {\scriptsize urx}
+    ;
+   \end{scope}
+   \draw [thick] (0,-\DEPTH) rectangle (\WIDTH,\HEIGHT);
+   \path [fill=white,draw=black] (0,0) circle (1pt);
+   \path let
+        \p1 = (current bounding box.south west),
+        \p2 = (current bounding box.north east),
+        \p3 = (0,-\DEPTH),
+        \p4 = (\WIDTH,\HEIGHT)
+   in
+        (\x3-\x2+\x4,\y3) rectangle (\x4+\x3-\x1,\y4);
+\end{tikzpicture}
