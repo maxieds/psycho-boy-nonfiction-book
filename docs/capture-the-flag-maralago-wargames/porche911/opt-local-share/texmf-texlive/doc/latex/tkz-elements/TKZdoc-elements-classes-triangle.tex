@@ -1,0 +1,3257 @@
+\newpage
+\section{Class \Iclass{triangle}} % (fold)
+\label{sec:class_triangle}
+
+\subsection{Attributes of a triangle} % (fold)
+\label{sub:attributes_of_a_triangle}
+The triangle object is created using the \Imeth{triangle}{new} method, for example with
+\begin{mybox}
+   Creation  | T.ABC = triangle : new ( z.A , z.B , z.C ) |
+\end{mybox}
+(Refer to examples:  \ref{sub:alternate}; \ref{sub:apollonius_circle}; \ref{sub:excircles} ). Multiple attributes are then created.
+
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Triangle attributes.}\label{triangle:att}
+\begin{tabular}{ll}
+\toprule
+\textbf{Attributes}     & \textbf{Application}\\
+\Iattr{triangle}{pa} &T.ABC.pa \\
+\Iattr{triangle}{pb} &T.ABC.pb \\
+\Iattr{triangle}{pc} &T.ABC.pc \\
+\Iattr{triangle}{type} & 'triangle' \\
+\Iattr{triangle}{circumcenter} & T.ABC.circumcenter; [\ref{ssub:example_triangle_attributes}
+]\\
+\Iattr{triangle}{centroid} &T.ABC.centroid\\
+\Iattr{triangle}{incenter} &T.ABC.incenter\\
+\Iattr{triangle}{orthocenter}  &T.ABC.orthocenter\\
+\Iattr{triangle}{eulercenter} &T.ABC.eulercenter  \\
+\Iattr{triangle}{spiekercenter} &T.ABC.spiekercenter; [\ref{ssub:example_apollonius_circle}]  \\
+\Iattr{triangle}{a}& It's the length of the side opposite the first vertex  \\
+\Iattr{triangle}{b}& It's the length of the side opposite the second verte\\
+\Iattr{triangle}{c}& It's the length of the side opposite the third vertex \\
+\Iattr{triangle}{alpha}& Vertex angle of the first vertex\\
+\Iattr{triangle}{beta}& Vertex angle of the second vertex\\
+\Iattr{triangle}{gamma}& Vertex angle of the third vertex\\
+\Iattr{triangle}{ab}& Line defined by the first two points of the triangle\\
+\Iattr{triangle}{bc}& Line defined by the last two points \\
+\Iattr{triangle}{ca}&  Line defined by the last and the first points of the triangle\\
+\Iattr{triangle}{semiperimeter}& semiperimeter of the triangle \\
+\Iattr{triangle}{area}& area of the triangle \\
+\Iattr{triangle}{inradius}& radius of the incircle\\
+\Iattr{triangle}{circumradius}& radius of the circumcircle \\
+\bottomrule %
+\end{tabular}
+\egroup
+
+\subsection{Triangle attributes: angles} % (fold)
+\label{sub:triangle_attributes_angles}
+
+\begin{minipage}{.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new(0,0)
+  z.B       = point: new(5,0)
+  z.C       = point: new(2,3)
+  T.ABC     = triangle: new (z.A,z.B,z.C)
+}
+\def\wangle#1{\tkzDN[2]{%
+  \tkzUseLua{math.deg(T.ABC.#1)}}}
+\begin{tikzpicture}
+\tkzGetNodes
+  \tkzDrawPolygons(A,B,C)
+  \tkzLabelAngle(B,A,C){$\wangle{alpha}^\circ$}
+  \tkzLabelAngle(C,B,A){$\wangle{beta}^\circ$}
+  \tkzLabelAngle(A,C,B){$\wangle{gamma}^\circ$}
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.4\textwidth}
+\directlua{%
+init_elements()
+   z.A       = point: new(0,0)
+   z.B       = point: new(5,0)
+   z.C       = point: new(2,3)
+   T.ABC     = triangle: new (z.A,z.B,z.C)
+}
+\def\wangle#1{\tkzDN[2]{\tkzUseLua{math.deg(T.ABC.#1)}}}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawPolygons(A,B,C)
+\tkzLabelAngle(B,A,C){$\wangle{alpha}^\circ$}
+\tkzLabelAngle(C,B,A){$\wangle{beta}^\circ$}
+\tkzLabelAngle(A,C,B){$\wangle{gamma}^\circ$}
+\end{tikzpicture}
+\end{minipage}
+% subsection triangle_attributes_angles (end)
+
+\subsubsection{Example: triangle attributes} % (fold)
+\label{ssub:example_triangle_attributes}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A   = point: new (0 , 0)
+   z.B   = point: new (4 , 0)
+   z.C   = point: new (0 , 3)
+   T.ABC = triangle : new (z.A,z.B,z.C)
+   z.O   = T.ABC.circumcenter
+   z.I   = T.ABC.incenter
+   z.H   = T.ABC.orthocenter
+   z.G   = T.ABC.centroid
+   a     = T.ABC.a
+   b     = T.ABC.b
+   c     = T.ABC.c
+   alpha = T.ABC.alpha
+   beta  = T.ABC.beta
+   gamma = T.ABC.gamma
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawPoints(A,B,C,O,G,I,H)
+   \tkzLabelPoints[below](A,B,O,G,I)
+   \tkzLabelPoints[above right](H,C)
+   \tkzDrawCircles(O,A)
+   \tkzLabelSegment[sloped](A,B){\tkzUseLua{c}}
+   \tkzLabelSegment[sloped,above](B,C){\tkzUseLua{a}}
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+   z.A   = point: new (0 , 0)
+   z.B   = point: new (4 , 0)
+   z.C   = point: new (1 , 3)
+   T.ABC = triangle : new (z.A,z.B,z.C)
+   z.O   = T.ABC.circumcenter
+   z.I   = T.ABC.incenter
+   z.H   = T.ABC.orthocenter
+   z.G   = T.ABC.centroid
+   a     = T.ABC.a
+   b     = T.ABC.b
+   c     = T.ABC.c
+   alpha = T.ABC.alpha
+   beta  = T.ABC.beta
+   gamma = T.ABC.gamma
+}  
+
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C)
+     \tkzDrawPoints(A,B,C,O,G,I,H)
+     \tkzDrawCircles(O,A)
+     \tkzLabelPoints[below](A,B,O,G,I)
+     \tkzLabelPoints[above right](H)
+     \tkzLabelPoints[above](C)
+     \tkzLabelSegment[sloped](A,B){\tkzUseLua{c}}
+     \tkzLabelSegment[sloped,above](B,C){\tkzUseLua{a}}
+  \end{tikzpicture}
+\end{center}
+
+
+\end{minipage}
+
+% subsubsection example_triangle_attributes (end)
+
+% subsection attributes_of_a_triangle (end)
+
+\subsection{Methods of the class triangle} % (fold)
+\label{sub:methods_of_the_class_triangle}
+
+\bgroup
+\catcode`_=12
+\small
+\begin{minipage}{\textwidth}
+\captionof{table}{triangle methods.}\label{triangle:met}
+\begin{tabular}{lll}
+\toprule
+\textbf{Methods} & \textbf{Comments}  &    \\
+\midrule
+\Imeth{triangle}{new} (a, b ,c) & |T.ABC = triangle : new (z.A,z.B,z.C)|& [\ref{sub:triangle_attributes_angles}] \footnote{|T| or |T.name| with what you want for name, is possible.}  \\
+\midrule 
+\textbf{Booleans}&&\\
+\midrule
+\Imeth{triangle}{in\_out (pt)}  & Boolean. Test if |pt| is inside the triangle\\
+\Imeth{triangle}{check\_equilateral ()} & Boolean. Test if the triangle is equilateral\\
+\Imeth{triangle}{check\_acutangle ()} & Boolean. Test if the triangle is acutangle\\
+\midrule
+ \textbf{Reals} &&\\
+ \midrule 
+ \Imeth{triangle}{area ()} & $ \mathcal{A}$| = T.ABC: area ()| better T.ABC.area\\
+ \Imeth{triangle}{barycentric\_coordinates(pt)}& Triples of numbers ( masses placed at the vertices)\\
+ \midrule
+ \textbf{Points} &&\\
+\midrule 
+\Imeth{triangle}{lemoine\_point ()} &  |T.ABC : lemoine_point ()| intersection of the symmedians & [\ref{ssub:method_imeth_line_isosceles}]\\
+
+\Imeth{triangle}{symmedian\_point()}  & Lemoine point  or the Grebe point& [\ref{ssub:method_imeth_triangle_symmedial}] \\
+
+\Imeth{triangle}{lemoine\_point()}  & symmedian point  or the Grebe point& [\ref{ssub:method_imeth_triangle_symmedial}] \\
+
+\Imeth{triangle}{bevan\_point ()}  &  Circumcenter of the excentral triangle& [\ref{ssub:methods_imeth_triangle_bevan_circle_and_imeth_triangle_bevan_point}
+]\\
+
+\Imeth{triangle}{mittenpunkt\_point()}  &  Symmedian point of the excentral triangle& [\ref{ssub:method_imeth_triangle_mittenpunkt}]\\
+
+\Imeth{triangle}{gergonne\_point()}  & Intersection of the three cevians that lead to the contact points& [\ref{ssub:gergonne_point}]\\
+
+\Imeth{triangle}{nagel\_point()} & Intersection of the three cevians that lead to the extouch points& [\ref{ssub:method_imeth_triangle_nagel__point}]\\
+
+\Imeth{triangle}{feuerbach\_point()} & The point at which the incircle and euler circle are tangent.& [\ref{ssub:method_imeth_triangle_feuerbach}]\\
+
+\Imeth{triangle}{spieker\_center()} &  Incenter of the medial triangle& [\ref{sub:apollonius_circle_v1_with_inversion}]\\
+
+\Imeth{triangle}{barycentric (ka,kb,kc)} & |T.ABC: barycentric (2,1,1)| & Remark \footnote{The function \code{barycenter} is used to obtain the barycentre for any number of points }\\
+
+\Imeth{triangle}{base (u,v)  }  &  |z.D = T.ABC: base(1,1)|  ABDC is a parallelogram& [\ref{ssub:method_imeth_triangle_base}] \\
+\Imeth{triangle}{trilinear (u,v,w)  }  &  |z.D = T.ABC: trilinear(1,1,1)| ABDC parallelogram& [\ref{ssub:method_imeth_triangle_trilinear}] \\
+
+\Imeth{triangle}{projection (p)} & Projection of a point on the sides &[\ref{sub:euler_relation}; \ref{ssub:method_imeth_triangle_projection}]\\
+
+\Imeth{triangle}{euler\_points()} & Euler points of euler circle  & [\ref{ssub:method_imeth_triangle_euler__points}] \\
+
+\Imeth{triangle}{nine\_points()} & 9 Points of the euler circle & [\ref{ssub:method_imeth_triangle_nine__points}] \\
+
+\Imeth{triangle}{taylor\_points()}&Points on the Taylor circle & Refer to [\ref{ssub:method_imeth_triangle_taylor__circle}] \\
+
+\Imeth{triangle}{parallelogram()}& |z.D = T.ABC:parallelogram()| ABCD parallelogram& [\ref{sub:director_circle}]\\
+
+\Imeth{triangle}{kimberling (n)} & |z.X = T.ABC : kimberling (115)| & Refer to [\ref{ssub:method_imeth_triangle_kimberling}]\\
+
+\Imeth{triangle}{isogonal (p)} & & Refer to  [\ref{ssub:method_imeth_triangle_isogonal}]\\
+\midrule
+ \textbf{Lines} &&\\
+\midrule 
+\Imeth{triangle}{altitude (n) }  & |L.AHa = T.ABC : altitude () | n empty or 0  line from $A$  
+\footnote{|z.Ha = L.AHa.pb| recovers the common point of the opposite side and altitude. The method |orthic| is usefull. If you don't need to use the triangle object several times, you can obtain a bisector or a altitude with the function |altitude (z.A,z.B,z.C)| ; [ \ref{misc}]}& [\ref{ssub:method_imeth_triangle_altitude} ]\\
+
+\Imeth{triangle}{bisector (n) }  & |L.Bb = T.ABC : bisector (1) |  n = 1   line from $B$     \footnote{|_,z.b = get_points(L.Bb)| recovers the common point of the opposite side and bisector. If you don't need to use the triangle object several times, you can obtain a bisector  with the function |bisector (z.A,z.B,z.C)|  [\ref{misc}]}& [\ref{ssub:method_imeth_triangle_bisector}]\\
+
+\Imeth{triangle}{bisector\_ext(n) }   &   n=2  line from the third vertex.& [\ref{ssub:harmonic_division_and_bisector}]\\
+
+\Imeth{triangle}{symmedian\_line (n)}  & Cevian with respect to Lemoine point.& [\ref{ssub:method_imeth_triangle_symmedial} ; \ref{ssub:method_imeth_line_isosceles}]\\
+
+\Imeth{triangle}{euler\_line () } & the line through $N$ ,$G$, $H$ and $O$ if the triangle is not equilateral
+\footnote{N center of nine points circle, G centroid, H orthocenter , O circum center } & [\ref{sub:hexagram}]\\
+
+\Imeth{triangle}{antiparallel(pt,n)} & n=0 antiparallel through pt to $(BC)$, n=1 to $(AC)$ etc.& [\ref{sub:antiparallel_through_lemoine_point}]\\
+
+\Imeth{triangle}{steiner\_line(pt)} & &[\ref{ssub:method_imeth_triangle_steiner__line}
+] \\
+
+\Imeth{triangle}{simson\_line(pt)} & &[\ref{ssub:method_imeth_triangle_simson__line}; \ref{ssub:kiepert_hyperbola}
+] \\
+
+\Imeth{triangle}{lemoine\_axis()} & &[\ref{ssub:method_imeth_triangle_lemoine__line}
+] \\
+
+\Imeth{triangle}{brocard\_axis()} & &[\ref{ssub:method_imeth_triangle_brocard__axis}] \\
+
+\Imeth{triangle}{fermat\_axis()} & & \\
+\midrule 
+
+\bottomrule
+\end{tabular}
+\end{minipage}
+\egroup
+
+\newpage
+\bgroup
+\catcode`_=12
+\small
+\begin{minipage}{\textwidth}
+\begin{center}
+%\caption{Methods of the class triangle (follow-up) }
+\begin{tabular}{lll}
+\toprule
+\textbf{Methods} & \textbf{Comments}  &   \\
+\midrule 
+ \textbf{Circles} & &\\
+\midrule 
+\Imeth{triangle}{euler\_circle ()} & C.|NP = T.ABC : euler_circle ()| \tkzar $N$ euler point 
+ \footnote{ The midpoint of each side of the triangle, the foot of each altitude, the midpoint of the line segment from each vertex of the triangle to the orthocenter.}  & [\ref{ssub:method_imeth_triangle_euler_circle}]\\
+ 
+\Imeth{triangle}{circum\_circle ()}  & |C.OA = T.ABC : circum ()| Triangle's circumscribed circle & [\ref{ssub:method_imeth_triangle_circum_circle}] \\
+
+\Imeth{triangle}{in\_circle ()}   &   Inscribed circle of  the triangle& 
+[\ref{ssub:method_imeth_triangle_in_circle}]\\
+
+\Imeth{triangle}{ex\_circle (n)}  &  External circle tangent to  a side of the triangle ; n swap & [\ref{ssub:method_imeth_triangle_ex__circle}]\\
+
+\Imeth{triangle}{first\_lemoine\_circle ()}  &  & [\ref{sub:first_and_second_lemoine_circles}
+] \\
+ 
+\Imeth{triangle}{second\_lemoine\_circle ()} & &  \ref{sub:antiparallel_through_lemoine_point}] \\
+
+\Imeth{triangle}{spieker\_circle ()} & The incircle of the medial triangle& [\ref{ssub:method_imeth_triangle_spieker__circle}]\\
+
+\Imeth{triangle}{bevan\_circle ()} & Circumscribed circle of a excentral triangle & [\ref{ssub:methods_imeth_triangle_bevan_circle_and_imeth_triangle_bevan_point}]\\
+
+\Imeth{triangle}{cevian\_circle ()} & Circumscribed circle of a Cevian triangle  & [\ref{ssub:method_imeth_triangle_cevian}]\\
+
+\Imeth{triangle}{symmedial\_circle ()} & Circumscribed circle of a symmedial triangle  & [\ref{ssub:method_imeth_triangle_symmedial}]\\
+
+\Imeth{triangle}{pedal\_circle ()} & Circumscribed circle of the podar triangle & [\ref{ssub:method_imeth_triangle_pedal}]\\
+
+\Imeth{triangle}{conway\_circle ()} & Circumscribed circle of Conway points  & [\ref{ssub:method_imeth_triangle_conway}]\\
+
+\Imeth{triangle}{taylor\_circle ()} & Circumscribed circle of Conway points  & [\ref{ssub:method_imeth_triangle_taylor__circle}]\\
+
+\Imeth{triangle}{kenmotu\_circle ()} &   & [\ref{ssub:methods_imeth_triangle_kenmotu_circle}]\\
+
+\Imeth{triangle}{c\_ll\_p (pt)}  & circle tgt to two side through pt [\ref{ssub:tr_method_c__ll__p}]\\
+\midrule 
+ \textbf{Triangles} &\\
+\midrule 
+\Imeth{triangle}{orthic ()}  &  |T = T.ABC : orthic ()|  joining the feet of the altitudes & [\ref{ssub:method_imeth_triangle_altitude}]   \\
+
+\Imeth{triangle}{medial ()}  &  |T = T.ABC : medial ()| with vertices at the midpoints; [\ref{ssub:method_imeth_triangle_medial} & \ref{sub:nine_points} ; \ref{ssub:method_imeth_triangle_symmedial}]\\
+
+\Imeth{triangle}{incentral ()}&   Cevian triangle of the triangle with respect to its incenter.  &[\ref{ssub:method_incentral}] \\
+
+\Imeth{triangle}{excentral ()}  &  With vertices corresponding to the excenters.  &[\ref{ssub:method_imeth_triangle_feuerbach} ]  \\
+
+\Imeth{triangle}{extouch ()}  & Withthe points of tangency with the excircles.   &[\ref{sub:excircles} ] \\
+
+\Imeth{triangle}{intouch () } &  Contact triangle formed by the points of tangency of the incircle &[\ref{ssub:gergonne_point}]\\
+
+\Imeth{triangle}{contact () } &  contact = intouch ; [
+\ref{ssub:gergonne_point}] \\
+
+\Imeth{triangle}{tangential ()} & With the lines tangent to the circumcircle at the vertices; &[\ref{ssub:method_imeth_triangle_tangential}]\\
+
+\Imeth{triangle}{feuerbach ()} & With the points of tangency of the euler circle with the excircles& [\ref{ssub:method_imeth_triangle_feuerbach}]\\
+
+\Imeth{triangle}{anti () }&  Anticomplementary Triangle The given triangle is its medial triangle.\footnote{You can use \tkzname{similar} instead of \tkzname{anti}.} & [\ref{ssub:method_imeth_triangle_anti}]  \\
+
+\Imeth{triangle}{cevian (pt)} & With the endpoints of the three cevians with respect to |pt|& [\ref{ssub:method_imeth_triangle_cevian}] \\
+
+\Imeth{triangle}{pedal (pt)} & With projections onto the sides of  |pt|  &[\ref{ssub:method_imeth_triangle_pedal}]\\
+
+\Imeth{triangle}{symmedial ()} & With the intersection points of the symmedians ; &[\ref{ssub:method_imeth_triangle_symmedial}] \\
+
+\Imeth{triangle}{euler ()} &  With the euler points & [\ref{ssub:method_imeth_triangle_euler__points}] \\
+
+\Imeth{triangle}{similar ()} &  With straight lines parallel to the sides &[\ref{ssub:method_imeth_triangle_similar}] \\
+\midrule 
+ \textbf{Ellipses} &\\
+\Imeth{triangle}{steiner\_inellipse ()}   & [ex. \ref{ssub:steiner_inellipse_and_circumellipse}] \\ 
+
+\Imeth{triangle}{steiner\_circumellipse ()}   & [ex. \ref{ssub:steiner_inellipse_and_circumellipse}] \\ 
+
+\Imeth{triangle}{euler\_ellipse ()}   &  [ex. (\ref{ssub:euler_ellipse}]\\ 
+\bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}
+\egroup
+% subsubsection methods_of_the_class_triangle (end)
+
+\subsubsection{Method \Imeth{triangle}{gergonne\_point}} % (fold)
+\label{ssub:gergonne_point}
+
+In this example, some usefull methods are applied like \Imeth{triangle}{intouch} or \Imeth{triangle}{contact}.
+The points of contact of the inscribed circle (incircle) with the triangle in question are obtained.
+
+\begin{minipage}[t]{.5\textwidth}\vspace{0pt}%
+\begin{Verbatim}
+\directlua{%
+init_elements()
+z.a  = point: new(1,0)
+z.b  = point: new(6,2)
+z.c  = point: new(2,5)
+T    = triangle : new (z.a,z.b,z.c)
+z.g  = T : gergonne_point ()
+z.i  = T.incenter
+z.ta,z.tb,z.tc = get_points (T :  intouch ())
+}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygons(a,b,c)
+  \tkzDrawSegments (a,ta b,tb c,tc)
+  \tkzDrawCircle(i,ta)
+  \tkzDrawPoints(a,b,c,g,ta,tb,tc)
+  \tkzLabelPoints(a,b,tc)
+  \tkzLabelPoints[above](c,ta)
+  \tkzLabelPoints[above left](tb)
+  \end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}[t]{.5\textwidth}\vspace{0pt}%
+\directlua{%
+init_elements()
+z.a  = point: new(1,0)
+z.b  = point: new(6,2)
+z.c  = point: new(2,5)
+T    = triangle : new (z.a,z.b,z.c)
+z.g  = T : gergonne_point ()
+z.i  = T.incenter
+z.ta,z.tb,z.tc = get_points (T :  intouch ())
+}
+
+
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygons(a,b,c)
+  \tkzDrawSegments (a,ta b,tb c,tc)
+  \tkzDrawCircle(i,ta)
+  \tkzDrawPoints(a,b,c,g,ta,tb,tc)
+  \tkzLabelPoints(a,b,tc)
+  \tkzLabelPoints[above](c,ta)
+  \tkzLabelPoints[above left](tb)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection gergonne_point (end)
+
+\subsubsection{Method \Imeth{triangle}{Nagel\_point}} % (fold)
+\label{ssub:method_imeth_triangle_nagel__point}
+
+Let $E_a$ be the point at which the $J_a$-excircle meets the side $(BC)$ of a triangle $ABC$, and define $E_b$ and $E_c$ similarly. Then the lines $A,E_a$, $B,E_b$ and $C,E_c$ concur in the Nagel point  $Na$.
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A           = point :   new (0,0)
+  z.B           = point :   new (3.6,0)
+  z.C           = point :   new (2.8,4)
+  T.ABC         = triangle: new (z.A,z.B,z.C)
+  z.Na          = T.ABC : nagel_point ()
+  z.J_a,z.J_b,
+  z.J_c         = get_points (T.ABC : excentral ())
+  z.E_a,z.E_b,
+  z.E_c         = get_points (T.ABC : extouch ())
+}
+\begin{tikzpicture}[scale= .7]
+  \tkzGetNodes
+  \tkzDrawPoints(A,B,C)
+  \tkzDrawPoints[red,size=2](J_a,J_b,J_c)
+  \tkzClipBB
+  \tkzDrawLines[add=1.75 and 1.75,teal](A,B A,C B,C)
+  \tkzDrawCircles(J_a,E_a J_b,E_b J_c,E_c)
+  \tkzDrawSegments[dashed,gray](J_a,E_a J_b,E_b J_c,E_c)
+  \tkzDrawSegments[orange](A,E_a B,E_b C,E_c)
+  \tkzDrawPoints[red,size=2](Na,E_a,E_b,E_c)
+  \tkzLabelPoints(A,B,Na)
+  \tkzLabelPoints(E_c,J_a,J_b,J_c)
+  \tkzLabelPoints[above](E_a,E_b,C)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A           = point :   new (0,0)
+  z.B           = point :   new (3.6,0)
+  z.C           = point :   new (2.8,4)
+  T.ABC         = triangle: new (z.A,z.B,z.C)
+  z.Na           = T.ABC : nagel_point ()
+  z.J_a,z.J_b,
+  z.J_c = get_points (T.ABC : excentral ())
+  z.E_a,z.E_b,
+  z.E_c = get_points (T.ABC : extouch ())
+}
+
+\begin{center}
+\begin{tikzpicture}[scale = .7]
+  \tkzGetNodes
+  \tkzDrawPoints(A,B,C)
+  \tkzDrawPoints[red,size=2](J_a,J_b,J_c)
+  \tkzClipBB
+  \tkzDrawLines[add=1.75 and 1.75,teal](A,B A,C B,C)
+  \tkzDrawCircles(J_a,E_a J_b,E_b J_c,E_c)
+  \tkzDrawSegments[dashed,gray](J_a,E_a J_b,E_b J_c,E_c)
+  \tkzDrawSegments[orange](A,E_a B,E_b C,E_c)
+  \tkzDrawPoints[red,size=2](Na,E_a,E_b,E_c)
+  \tkzLabelPoints(A,B,Na)
+  \tkzLabelPoints(E_c,J_a,J_b,J_c)
+  \tkzLabelPoints[above](E_a,E_b,C)
+\end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection method_imeth_triangle_nagel__point (end)
+
+
+\subsubsection{Method \Imeth{triangle}{mittenpunkt}} % (fold)
+\label{ssub:method_imeth_triangle_mittenpunkt}
+
+The Mittenpunkt is the symmedian point of the excentral triangle. The mittenpunkt (also called the middlespoint) of a triangle  is the symmedian point of the excentral triangle, i.e., the point of concurrence of the lines from the excenters  through the corresponding triangle side midpoints.
+[ \href{https://mathworld.wolfram.com/Mittenpunkt.html}{Weisstein, Eric W. "Mittenpunkt." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt} 
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A   = point : new ( 0  , 0  )
+  z.B   = point : new ( 6  , 0  )
+  z.C   = point : new ( 4  , 6  )
+  T     = triangle : new (z.A,z.B,z.C)
+  z.Ma,
+  z.Mb,
+  z.Mc  = get_points (T : medial ())
+  z.Ia,z.Ib,z.Ic = get_points(T : excentral ())
+  z.Mi  = T : mittenpunkt_point ()
+  T.int = T : extouch ()
+  z.Ta,z.Tb,z.Tc = get_points(T.int)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A   = point : new ( 0  , 0  )
+  z.B   = point : new ( 6  , 0  )
+  z.C   = point : new ( 4  , 6  )
+  T     = triangle : new (z.A,z.B,z.C)
+  z.Ma,
+  z.Mb,
+  z.Mc = get_points (T : medial ())
+  z.Ia,z.Ib,z.Ic = get_points(T : excentral ())
+  z.Mi            = T : mittenpunkt_point ()
+  T.int     = T : extouch ()
+  z.Ta,z.Tb,z.Tc = get_points(T.int)
+}
+\begin{center}
+  \begin{tikzpicture}[scale=.5]
+    \tkzGetNodes
+   \tkzDrawPolygons[](A,B,C Ma,Mb,Mc)
+   \tkzDrawPoints(Ma,Mb,Mc,Ia,Ib,Ic)
+    \tkzDrawPoints[red](Ta,Tb,Tc)
+    \tkzLabelPoints[below](Ib)
+    \tkzLabelPoints[above left](Ia,Ic)
+    \tkzClipBB
+    \tkzDrawLines[add=0 and 1](Ia,Ma Ib,Mb Ic,Mc)
+    \tkzDrawLines[add=1 and 1](A,B A,C B,C)
+    \tkzDrawCircles[red](Ia,Ta Ib,Tb Ic,Tc)
+    \tkzDrawPoints(B,C,A,Mi) %
+    \tkzLabelPoints(B,A)
+    \tkzLabelPoints[above](C,Mi)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\begin{tikzpicture}[scale=.5]
+  \tkzGetNodes
+  \tkzDrawPolygons[](A,B,C Ma,Mb,Mc)
+  \tkzDrawPoints(Ma,Mb,Mc,Ia,Ib,Ic)
+  \tkzDrawPoints[red](Ta,Tb,Tc)
+  \tkzLabelPoints[below](Ib)
+  \tkzLabelPoints[above left](Ia,Ic)
+  \tkzClipBB
+  \tkzDrawLines[add=0 and 1](Ia,Ma Ib,Mb Ic,Mc)
+  \tkzDrawLines[add=1 and 1](A,B A,C B,C)
+  \tkzDrawCircles[red](Ia,Ta Ib,Tb Ic,Tc)
+  \tkzDrawPoints(B,C,A,Mi) 
+  \tkzLabelPoints(B,A)
+  \tkzLabelPoints[above](C,Mi)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_mittenpunkt (end)
+
+\subsubsection{Method \Imeth{triangle}{projection}} % (fold)
+\label{ssub:method_imeth_triangle_projection}
+
+This involves obtaining the projections of a point onto the sides of a triangle. In the following example, we are going to find the projections of a centre of an exinscribed circle.
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+z.A    = point: new (0 , 0)
+z.B    = point: new (5 , 0)
+z.C    = point: new (-.4 , 4)
+T.ABC  = triangle: new (z.A,z.B,z.C)
+z.J,_  = get_points(T.ABC: ex_circle (2))
+z.X ,
+z.Y,
+z.Z    = T.ABC : projection (z.J)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+z.A    = point: new (0 , 0)
+z.B    = point: new (5 , 0)
+z.C    = point: new (-.4 , 4)
+T.ABC  = triangle: new (z.A,z.B,z.C)
+z.J,_  = get_points(T.ABC: ex_circle (2))
+z.X ,
+z.Y,
+z.Z    = T.ABC : projection (z.J)
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawArc(J,X)(Y)
+  \tkzDrawSegments[blue](J,X J,Y J,Z C,Y C,X)
+  \tkzDrawPoints(A,B,C,J,X,Y,Z)
+  \tkzLabelPoints(J,X,Y)
+  \tkzLabelPoints[above](C,B,Z)
+  \tkzLabelPoints[left](A)
+  \tkzMarkRightAngles[fill=gray!20,opacity=.4](A,Z,J A,Y,J J,X,B)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawArc(J,X)(Y)
+  \tkzDrawSegments[blue](J,X J,Y J,Z C,Y C,X)
+  \tkzDrawPoints(A,B,C,J,X,Y,Z)
+  \tkzLabelPoints(J,X,Y)
+  \tkzLabelPoints[above](C,B,Z)
+  \tkzLabelPoints[left](A)
+  \tkzMarkRightAngles[fill=gray!20,opacity=.4](A,Z,J A,Y,J J,X,B)
+  \end{tikzpicture}
+\end{center}
+\end{Verbatim}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_projection (end)
+
+\subsubsection{Method \Imeth{triangle}{kimberling}} % (fold)
+\label{ssub:method_imeth_triangle_kimberling}
+
+C. Kimberling has extensively tabulated and enumerated the properties of triangle centers (Kimberling 1994, 1998, and online), denoting the nth center in his numbering scheme by $X_n$. 101 (plus 13 additional) centers appeared in Kimberling (1994), 360 in Kimberling (1998), and the remainder appear in a list maintained online by Kimberling at [\href{http://faculty.evansville.edu/ck6/encyclopedia/ETC.html}]. In his honor, these centers are called Kimberling centers in this work. Kimberling's compilation contains 3053 centers as of December 2004. A subset of these is illustrated above.
+
+[\href{https://mathworld.wolfram.com/KimberlingCenter.html}{Weisstein, Eric W. "Kimberling Center." From MathWorld--A Wolfram Web Resource.}]
+
+Only a few centers can be used with this method; here is the current list: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 19, 20, 110, 115.
+
+Here's an example:
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{
+ init_elements()
+ z.B        = point: new (0,0)
+ z.C        = point: new (4,0)
+ z.A        = point : new (1,3.2) 
+ T          = triangle: new(z.A,z.B,z.C)
+ z.H        = T : kimberling (4)
+ z.O        = T : kimberling (3)
+ L.euler    = line : new (z.O,z.H)
+ z.F        = T : kimberling (110)
+ kiepert    = conic : new (z.F,L.euler,1)
+ curve      = kiepert : points (-4,4,50)
+ z.ea,z.eb  = get_points(L.euler) }
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines[cyan,add= .5 and .5](A,C A,B A,C)
+  \tkzDrawPolygon[cyan](A,B,C)
+  \tkzDrawCoordinates[smooth,red](curve)
+  \tkzDrawLines[red,add= .5 and .5](ea,eb)
+  \tkzDrawPoints(A,B,C,F,O,H)
+  \tkzLabelPoints(A,B,C,F,O,H)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \directlua{
+   init_elements()
+   z.B        = point: new (0,0)
+   z.C        = point: new (4,0)
+   z.A        = point : new (1,3.2) 
+   T          = triangle: new(z.A,z.B,z.C)
+   z.H        = T : kimberling (4)
+   z.O        = T : kimberling (3)
+   L.euler    = line : new (z.O,z.H)
+   z.F        = T : kimberling (110)
+   kiepert    = conic : new (z.F,L.euler,1)
+   curve      = kiepert : points (-4,4,50)
+   z.ea,z.eb  = get_points(L.euler) }
+  \begin{center}
+    \begin{tikzpicture}
+      \tkzGetNodes
+      \tkzDrawLines[cyan,add= .5 and .5](A,C A,B A,C)
+      \tkzDrawPolygon[cyan](A,B,C)
+      \tkzDrawCoordinates[smooth,red](curve)
+      \tkzDrawLines[red,add= .5 and .5](ea,eb)
+      \tkzDrawPoints(A,B,C,F,O,H)
+      \tkzLabelPoints(A,B,C,F,O,H)
+    \end{tikzpicture}
+  \end{center}
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_kimberling (end)
+\subsubsection{Method \Imeth{triangle}{trilinear}} % (fold)
+\label{ssub:method_imeth_triangle_trilinear}
+
+Given a reference triangle $ABC$, the trilinear coordinates of a point $P$ with respect to $ABC$ are an ordered triple of numbers, each of which is proportional to the directed distance from $P$ to one of the side lines. Trilinear coordinates are denoted alpha:beta:gamma or (alpha,beta,gamma) and also are known as homogeneous coordinates or "trilinears." Trilinear coordinates were introduced by Plücker in 1835.
+[\href{https://mathworld.wolfram.com/TrilinearCoordinates.html}{Weisstein, Eric W. "Trilinear Coordinates." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+z.A = point : new ( 0  , 0  )
+z.B = point : new ( 4  , 0  )
+z.C = point : new ( 4 , 3 )
+T.ABC = triangle : new ( z.A , z.B , z.C )
+a = T.ABC.a
+b = T.ABC.b
+c = T.ABC.c
+z.Gp = T.ABC : trilinear (b*c,a*c,a*b)
+z.G = T.ABC : barycentric (1,1,1)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawPolygon(A,B,C)
+\tkzDrawPoints(A,B,C,G',G)
+\tkzLabelPoints(A,B,G')
+\tkzLabelPoints[above](C,G)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+z.A = point : new ( 0  , 0  )
+z.B = point : new ( 4  , 0  )
+z.C = point : new ( 4 , 3 )
+T.ABC = triangle : new ( z.A , z.B , z.C )
+a = T.ABC.a
+b = T.ABC.b
+c = T.ABC.c
+z.Gp = T.ABC : trilinear (b*c,a*c,a*b)
+z.G = T.ABC : barycentric (1,1,1)
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawPoints(A,B,C,G',G)
+  \tkzLabelPoints(A,B,G')
+  \tkzLabelPoints[above](C,G)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection method_imeth_triangle_trilinear (end)
+
+\subsubsection{Method \Imeth{triangle}{barycentric\_coordinates}} % (fold)
+\label{ssub:method_imeth_triangle_barycentric__coordinates}
+
+This method produces a triplet of coordinates which are the barycentric coordinates of a point as a function of the three points of a given triangle.
+
+\vspace{6pt}
+
+\begin{minipage}{.5\textwidth}
+  \begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (1,1)
+  z.B       = point: new (8,0)
+  z.C       = point: new (2,5)
+  T         = triangle: new(z.A,z.B,z.C)
+  z.G       = T.centroid  
+  ca,cb,cc  = T : barycentric_coordinates  (z.G) 
+}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygons(A,B,C)
+  \tkzDrawPoints(A,B,C,G)
+  \tkzLabelPoints(A,B,C,G)
+  \tkzLabelPoint(G){\pmpn{\tkzUseLua{ca}}:\pmpn{\tkzUseLua{cb}}:\pmpn{\tkzUseLua{cc}}}
+\end{tikzpicture}
+  \end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+  init_elements()
+  z.A           = point: new (1,1)
+  z.B           = point: new (8,0)
+  z.C           = point: new (2,5)
+  T            = triangle: new(z.A,z.B,z.C)
+  z.G = T.centroid 
+  ca,cb,cc      =   T : barycentric_coordinates  (z.G) 
+}
+\begin{center}
+\begin{tikzpicture}[scale = .75]
+         \tkzGetNodes
+         \tkzDrawPolygons(A,B,C)
+         \tkzDrawPoints(A,B,C,G)
+         \tkzLabelPoints(A,B)
+         \tkzLabelPoints[above](C) \tkzLabelPoint(G){\pmpn{\tkzUseLua{ca}}:\pmpn{\tkzUseLua{cb}}:\pmpn{\tkzUseLua{cc}}}
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_barycentric__coordinates (end)
+
+\subsubsection{Method \Imeth{triangle}{base}} % (fold)
+\label{ssub:method_imeth_triangle_base}
+
+In the next example, the point $D$ is defined by $\overrightarrow{AD} = 1\cdot \overrightarrow{AB}+1\cdot \overrightarrow{AC}$.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.A           = point: new (1,1)
+ z.B           = point: new (8,0)
+ z.C           = point: new (0,5)
+ z.X           = point: new (2,2)
+ T             = triangle: new(z.A,z.B,z.C)   
+ z.D           = T : base (1,1)
+ z.E           = T : base (.5,1)
+}
+\begin{tikzpicture}[scale = .75]
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,D,C A,B,E,C)
+     \tkzDrawPoints(A,B,C,D,E)
+     \tkzLabelPoints(A,B)
+     \tkzLabelPoints[above](C,D,E)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+    init_elements()
+    z.A           = point: new (1,1)
+    z.B           = point: new (8,0)
+    z.C           = point: new (0,5)
+    z.X           = point: new (2,2)
+    T             = triangle: new(z.A,z.B,z.C)   
+    z.D           = T : base (1,1)
+    z.E           = T : base (.5,1)
+}
+\begin{center}
+\begin{tikzpicture}[scale=.75]
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,D,C A,B,E,C)
+     \tkzDrawPoints(A,B,C,D,E)
+     \tkzLabelPoints(A,B)
+     \tkzLabelPoints[above](C,D,E)
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_base (end)
+
+
+\subsubsection{Method \Imeth{triangle}{euler\_points}} % (fold)
+\label{ssub:method_imeth_triangle_euler__points}
+
+The points $a$, $b$ and $c$ are the Euler points. They are the midpoints of the segments $AH$, $BH$ and $CH$. 
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+  init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.N       = T.eulercenter
+  z.a,
+  z.b,
+  z.c       = get_points (T : euler ())
+  z.H       = T.orthocenter
+  T.orthic  = T: orthic()
+  z.Ha,
+  z.Hb,
+  z.Hc      = get_points (T.orthic)
+}
+\begin{tikzpicture}[scale     = 1.25]
+   \tkzGetNodes
+   \tkzDrawPolygons[red](A,B,C)
+   \tkzDrawPolygons[cyan](a,b,c)
+   \tkzDrawCircle[purple](N,a)
+   \tkzDrawPoints(a,b,B,C,A,c,H)
+   \tkzDrawSegments[red](C,Hc B,Hb A,Ha)
+   \tkzLabelPoints(A,B,a,b,H)
+   \tkzLabelPoints[above](c,C)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \directlua{%
+    init_elements()
+    z.A       = point: new (0,0)
+    z.B       = point: new (5,0)
+    z.C       = point: new (1,4)
+      T       = triangle: new(z.A,z.B,z.C)
+    z.N       = T.eulercenter
+    z.a,
+    z.b,
+    z.c       = get_points (T : euler ())
+    z.H       = T.orthocenter
+    T.orthic  = T: orthic()
+    z.Ha,
+    z.Hb,
+    z.Hc      = get_points (T.orthic)
+}
+
+\begin{center}
+    \begin{tikzpicture}[scale = 1.25]
+     \tkzGetNodes
+     \tkzDrawPolygons[red](A,B,C)
+     \tkzDrawPolygons[cyan](a,b,c)
+     \tkzDrawCircle[purple](N,a)
+     \tkzDrawPoints(a,b,B,C,A,c,H)
+     \tkzDrawSegments[red](C,Hc B,Hb A,Ha)
+     \tkzLabelPoints(A,B,a,b,H)
+     \tkzLabelPoints[above](c,C)
+    \end{tikzpicture}
+\end{center}
+\end{minipage}
+% subsubsection method_imeth_triangle_euler__points (end)
+
+\subsubsection{Method \Imeth{triangle}{nine\_points}} % (fold)
+\label{ssub:method_imeth_triangle_nine__points}
+
+This method gives the nine main points belonging to the Euler circle: in order, first the midpoints of the sides of the triangle, then the feet of the altitudes and finally the three Euler points. Refer to the last example.
+In the next example, we look for the centre of gravity in two different ways: the first uses the \code{trilinear} method, the second the \code{barycentric} method.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.N       = T.eulercenter
+  z.e1,
+  z.e2,
+  z.e3,
+  z.e4,
+  z.e5,
+  z.e6,
+  z.e7,
+  z.e8,
+  z.e9      = T : nine_points ()
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.N       = T.eulercenter
+  z.e1,
+  z.e2,
+  z.e3,
+  z.e4,
+  z.e5,
+  z.e6,
+  z.e7,
+  z.e8,
+  z.e9      = T : nine_points ()
+}
+\begin{center}
+  \begin{tikzpicture}[ scale = 1.5]
+   \tkzGetNodes
+   \tkzDrawPolygons[red](A,B,C)
+   \tkzDrawCircle[purple](N,e1)
+   \tkzDrawPoints(e1,e2,e3,e4,e5,e6,e7,e8,e9)
+    \tkzLabelPoints(e1,e2,e3,e4,e5,e6,e7,e8,e9)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\begin{tikzpicture}[ scale = 1.5]
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C)
+ \tkzDrawCircle[purple](N,e1)
+ \tkzDrawPoints(e1,e2,e3,e4,e5,e6,e7,e8,e9)
+  \tkzLabelPoints(e1,e2,e3,e4,e5,e6,e7,e8,e9)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_nine__points (end)
+
+\subsubsection{Method \Imeth{triangle}{altitude}} % (fold)
+\label{ssub:method_imeth_triangle_altitude}
+
+There are several methods to obtain one or more altitudes of a triangle. One possible method is the \Imeth{triangle}{orthic} method. This method allows for defining the \code{orthic} triangle whose vertices are the feet of the altitudes from each vertex. If only one altitude is needed, one can use the \code{altitude(n)} method. The numeric value $n$ can be $0$, $1$, or $2$. By default, if it is absent, it is considered to be $0$. Considering the triangle $ABC$, $n=0$ means no cyclic permutation of the vertices, and the altitude will be from the first point, here $A$. If $n=1$, the point trio $BCA$ is considered, and the altitude will be from $B$. For $n=2$, the altitude will be from $C$.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (2,4)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.H       = T.orthocenter
+  L.HA  = T : altitude ()
+  L.HC = T :altitude (2)
+  z.Hc = L.HC.pb
+  z.Ha = L.HA.pb
+  z.a,z.b,z.c = get_points (T : orthic ())
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygon(A,B,C)
+ \tkzDrawPolygon[red](a,b,c)
+ \tkzDrawPoints(A,B,C,H)
+ \tkzDrawSegments[red](C,Hc A,Ha)
+ \tkzLabelPoints(A,B,H)
+ \tkzLabelPoints[font=\small](Hc)
+ \tkzLabelPoints[font=\small,above](Ha,C)
+ \tkzMarkRightAngles[fill = gray!30,opacity=.4](B,Hc,C A,Ha,C)
+ \end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (2,4)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.H       = T.orthocenter
+  L.HA      = T : altitude ()
+  L.HC      = T : altitude (2)
+  z.Hc      = L.HC.pb
+  z.Ha      = L.HA.pb
+  z.a,z.b,z.c = get_points (T : orthic ())
+}
+\begin{center}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawPolygon[red](a,b,c)
+   \tkzDrawPoints(A,B,C,H)
+   \tkzDrawSegments[red](C,Hc A,Ha)
+   \tkzLabelPoints(A,B,H)
+   \tkzLabelPoints[font=\small](Hc)
+   \tkzLabelPoints[font=\small,above](Ha,C)
+   \tkzMarkRightAngles[fill = gray!30,opacity=.4](B,Hc,C A,Ha,C)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection method_imeth_triangle_altitude (end)
+
+\subsubsection{Method \Imeth{triangle}{bisector}} % (fold)
+\label{ssub:method_imeth_triangle_bisector}
+
+There are several methods to obtain one or more bisectors of a triangle. One possible method is the \Imeth{triangle}{incentral} method. This method allows for defining the \code{incentral} triangle whose vertices are the feet of the bisectors from each vertex. If only one bisector is needed, one can use the \code{bisector(n)} method. The numeric value $n$ can be $0$, $1$, or $2$. By default, if it is absent, it is considered to be $0$. Considering the triangle $ABC$, $n=0$ means no cyclic permutation of the vertices, and the bisector will be from the first point, here $A$. If $n=1$, the point trio $BCA$ is considered, and the bisector will be from $B$. For $n=2$, the bisector will be from $C$.
+
+\vspace{6pt}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A    = point : new (0 , 0)
+   z.B    = point : new (3 , 2)
+   z.C    = point : new (2 , 5)
+   T.ABC  = triangle : new ( z.A , z.B , z.C )
+   L.AE   = T.ABC : bisector ()
+   z.E    = L.AE.pb
+   z.F    = T.ABC : bisector (1).pb
+   z.a,z.b,z.c = get_points (T.ABC : incentral ())
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygon(A,B,C)
+ \tkzDrawPolygon[red](a,b,c)
+ \tkzDrawLines(A,B A,C A,E B,F)
+ \tkzDrawPoints(A,B,C,a,b,c)
+ \tkzLabelPoints(A,B,c)
+ \tkzLabelPoints[above](C,b,a)
+ \tkzMarkAngles[mark=|](B,A,a a,A,C)
+ \tkzMarkAngles[mark=||](C,B,b b,B,A)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+   z.A    = point : new (0 , 0)
+   z.B    = point : new (3 , 2)
+   z.C    = point : new (2 , 5)
+   T.ABC  = triangle : new ( z.A , z.B , z.C )
+   L.AE   = T.ABC : bisector ()
+   z.E    = L.AE.pb
+   z.F    = T.ABC : bisector (1).pb
+   z.a,z.b,z.c = get_points (T.ABC : incentral ())
+}
+\begin{center}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawPolygon[red](a,b,c)
+   \tkzDrawLines(A,B A,C A,E B,F)
+   \tkzDrawPoints(A,B,C,a,b,c)
+   \tkzLabelPoints(A,B,c)
+   \tkzLabelPoints[above](C,b,a)
+   \tkzMarkAngles[cyan,mark=|,size=.75](B,A,a a,A,C)
+   \tkzMarkAngles[mark=||,size=.5](C,B,b b,B,A)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection method_imeth_triangle_bisector (end)
+
+%%%%%% Circles %%%%%%
+
+\subsubsection{Method \Imeth{triangle}{euler\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_euler_circle}
+
+The nine-point circle, also called Euler's circle or the Feuerbach circle, is the circle that passes through the perpendicular feet $H_A,  H_B, and H_C$ dropped from the vertices of any reference triangle DeltaABC on the sides opposite them. Euler showed in 1765 that it also passes through the midpoints$ M_A, M_B, M_C$ of the sides of DeltaABC. By Feuerbach's theorem, the nine-point circle also passes through the midpoints $E_A, E_B, and E_C$ of the segments that join the vertices and the orthocenter $H$. These points are commonly referred to as the Euler points.
+\href{https://mathworld.wolfram.com/Nine-PointCircle.html}{Weisstein, Eric W. "Nine-Point Circle." From MathWorld--A Wolfram Web Resource.}
+
+\vspace{6pt}
+There are several ways of obtaining the Euler circle. The first would be to use an attribute of the triangle to determine the centre. This centre is defined by |z.N = T.eulercenter|. Next, the circle passes through the midpoint of one of the sides. IF this circle is useful later on, it is best to define it using the \code{euler\_circle} method.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+  init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+  T         = triangle: new(z.A,z.B,z.C)
+  C.euler   = T : euler_circle ()
+  z.N,z.K   = get_points (C.euler)
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C)
+ \tkzDrawCircle(N,K)
+ \tkzDrawPoints(A,B,C,N,K)
+ \tkzLabelPoints(A,B,N)
+ \tkzLabelPoints[above](C,K)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+  init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+  T         = triangle: new(z.A,z.B,z.C)
+  C.euler   = T : euler_circle ()
+  z.N,z.K   = get_points (C.euler)
+}
+\begin{center}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygons[red](A,B,C)
+   \tkzDrawCircle(N,K)
+   \tkzDrawPoints(A,B,C,N,K)
+   \tkzLabelPoints(A,B,N)
+   \tkzLabelPoints[above](C,K)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection method_imeth_triangle_euler_circle (end)
+
+\subsubsection{Method \Imeth{triangle}{circum\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_circum_circle}
+
+To obtain the circumscribed circle, simply use the \code{T.circumcenter} attribute, but if it is necessary to determine the circle then the method is \code{circum\_circle}.
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+  T         = triangle: new(z.A,z.B,z.C)
+  C.circum  = T : circum_circle ()
+  z.O,z.K   = get_points (C.circum)
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C)
+ \tkzDrawCircle(O,K)
+ \tkzDrawPoints(A,B,C,O,K)
+ \tkzLabelPoints(A,B,O)
+ \tkzLabelPoints[above](C,K)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,4)
+  T         = triangle: new(z.A,z.B,z.C)
+  C.circum   = T : circum_circle ()
+  z.O,z.K   = get_points (C.circum)
+}
+
+\begin{center}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C)
+ \tkzDrawCircle(O,K)
+ \tkzDrawPoints(A,B,C,O,K)
+ \tkzLabelPoints(A,B,O)
+ \tkzLabelPoints[above](C,K)
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_circum_circle (end)
+
+\subsubsection{Method \Imeth{triangle}{in\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_in_circle}
+
+An incircle is an inscribed circle of a polygon, i.e., a circle that is tangent to each of the polygon's sides. The center $I$ of the incircle is called the incenter, and the radius $r$ of the circle is called the inradius.
+
+The incenter is the point of concurrence of the triangle's angle bisectors. In addition, the points $M_A, M_B, and M_C$ of intersection of the incircle with the sides of $ABC$ are the polygon vertices of the pedal triangle [\ref{ssub:method_imeth_triangle_pedal}] taking the incenter as the pedal point (c.f. tangential triangle [\ref{ssub:method_imeth_triangle_medial}]). This triangle is called the contact triangle.
+
+[\href{https://mathworld.wolfram.com/Incircle.html}{Weisstein, Eric W. "Incircle." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt}
+
+\directlua{%
+ init_elements()
+ z.A    = point : new (0 , 0)
+ z.B    = point : new (5 , 0)
+ z.C    = point : new (1 , 3)
+ T.ABC  = triangle : new ( z.A , z.B , z.C )
+ z.E    = T.ABC : bisector ().pb
+ z.F    = T.ABC : bisector (1).pb
+ z.G    = T.ABC : bisector (2).pb
+ C.IH     = T.ABC : in_circle ()
+ z.I,z.H  = get_points (C.IH)
+}
+\begin{center}
+  \begin{tikzpicture}
+    [scale = 2, 
+    new/.style ={ color = orange },
+    one/.style = { new,/tkzmkangle/size=.5 },
+    two/.style = { new,/tkzmkangle/size=.6 },
+    l/.style   = { /tkzmkangle/arc=l },
+    ll/.style  = { /tkzmkangle/arc=ll },
+    lll/.style = { /tkzmkangle/arc=lll }]
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawSegments[new](A,E B,F C,G)
+     \tkzDrawSegments[dashed,add=0 and .5](I,H)
+     \tkzDrawPoints(A,B,C,E,F,G,I)
+     \tkzDrawCircle(I,H)
+     \tkzDrawPoints(I,A,B,C,H)
+  \begin{scope}[one]
+    \tkzMarkAngles[l](B,A,E)
+    \tkzMarkAngles[ll](C,B,F)
+    \tkzMarkAngles[lll](A,C,G)
+  \end{scope}
+  \begin{scope}[two]
+    \tkzMarkAngles[l](E,A,C)
+    \tkzMarkAngles[ll](F,B,A)
+    \tkzMarkAngles[lll](G,C,B)
+  \end{scope}
+  \tkzLabelPoints(A,B,I)
+  \tkzLabelPoints[above](C,H)
+  \end{tikzpicture}
+\end{center}
+
+
+
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A    = point : new (0 , 0)
+  z.B    = point : new (5 , 0)
+  z.C    = point : new (1 , 3)
+  T.ABC  = triangle : new(z.A,z.B,z.C)
+  z.E    = T.ABC : bisector ().pb
+  z.F    = T.ABC : bisector (1).pb
+  z.G    = T.ABC : bisector (2).pb
+  C.IH     = T.ABC : in_circle ()
+  z.I,z.H  = get_points (C.IH)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\begin{tikzpicture}%
+  [ new/.style ={color = orange },
+    one/.style = { new,/tkzmkangle/size=.5 },
+    two/.style = { new,/tkzmkangle/size=.6 },
+    l/.style   = { /tkzmkangle/arc=l },
+    ll/.style  = { /tkzmkangle/arc=ll },
+    lll/.style = { /tkzmkangle/arc=lll }]
+\tkzGetNodes
+\tkzDrawPolygon(A,B,C)
+\tkzDrawSegments[new](A,E B,F C,G)
+\tkzDrawSegments[dashed,add=0 and .5](I,H)
+\tkzDrawPoints(A,B,C,E,F,G,I)
+\tkzDrawCircle(I,H)
+\tkzDrawPoints(I,A,B,C,H)
+\begin{scope}[one]
+  \tkzMarkAngles[l](B,A,E)
+  \tkzMarkAngles[ll](C,B,F)
+  \tkzMarkAngles[lll](A,C,G)
+\end{scope}
+\begin{scope}[two]
+  \tkzMarkAngles[l](E,A,C)
+  \tkzMarkAngles[ll](F,B,A)
+  \tkzMarkAngles[lll](G,C,B)
+\end{scope}
+\tkzLabelPoints(A,B,I)
+\tkzLabelPoints[above](C,H)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_in_circle (end)
+
+\subsubsection{Method \Imeth{triangle}{ex\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_ex__circle}
+
+Given a triangle, extend two sides in the direction opposite their common vertex. The circle tangent to these two lines and to the other side of the triangle is called an excircle, or sometimes an escribed circle. The center  of the excircle is called the excenter and lies on the external angle bisector of the opposite angle.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+z.A    = point: new (0 , 0)
+z.B    = point: new (5 , 0)
+z.C    = point: new (-.4 , 4)
+T.ABC  = triangle: new (z.A,z.B,z.C)
+z.I,_  = get_points(T.ABC: ex_circle ())
+z.J,_  = get_points(T.ABC: ex_circle (1))
+z.K,_  = get_points(T.ABC: ex_circle (2))
+z.Xk ,
+z.Yk,
+z.Zk    = T.ABC : projection (z.K)
+z.Xi ,
+z.Yi,
+z.Zi    = T.ABC : projection (z.I)
+z.Xj ,
+z.Yj,
+z.Zj    = T.ABC : projection (z.J)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+z.A    = point: new (0 , 0)
+z.B    = point: new (5 , 0)
+z.C    = point: new (-.4 , 4)
+T.ABC  = triangle: new (z.A,z.B,z.C)
+z.I,_  = get_points(T.ABC: ex_circle ())
+z.J,_  = get_points(T.ABC: ex_circle (1))
+z.K,_  = get_points(T.ABC: ex_circle (2))
+z.Xk ,
+z.Yk,
+z.Zk    = T.ABC : projection (z.K)
+z.Xi ,
+z.Yi,
+z.Zi    = T.ABC : projection (z.I)
+z.Xj ,
+z.Yj,
+z.Zj    = T.ABC : projection (z.J)
+}
+\begin{center}
+  \begin{tikzpicture}[scale = .5]
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawArc(K,Xk)(Yk)
+  \tkzDrawArc(I,Yi)(Zi)
+  \tkzDrawArc(J,Zj)(Yj)
+  \tkzDrawSegments[blue](K,Xk K,Yk K,Zk C,Yk C,Xk I,Xi J,Yj)
+  \tkzDrawPoints(A,B,C,I,J,K,Xk,Yk,Zk,Xi,Yj)
+  \tkzLabelPoints(K,Xk,Yk)
+  \tkzLabelPoints[above](C,B,Zk,I,J)
+  \tkzLabelPoints[left](A)
+  \tkzMarkRightAngles[fill=gray!20,opacity=.4](A,Zk,K A,Yk,K K,Xk,B)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+  \begin{tikzpicture}[scale = .5]
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawArc(K,Xk)(Yk)
+  \tkzDrawArc(I,Yi)(Zi)
+  \tkzDrawArc(J,Zj)(Yj)
+  \tkzDrawSegments[blue](K,Xk K,Yk K,Zk C,Yk C,Xk I,Xi J,Yj)
+  \tkzDrawPoints(A,B,C,I,J,K,Xk,Yk,Zk,Xi,Yj)
+  \tkzLabelPoints(K,Xk,Yk)
+  \tkzLabelPoints[above](C,B,Zk,I,J)
+  \tkzLabelPoints[left](A)
+  \tkzMarkRightAngles[fill=gray!20,opacity=.4](A,Zk,K A,Yk,K K,Xk,B)
+  \end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_ex__circle (end)
+
+\subsubsection{Method \Imeth{triangle}{spieker\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_spieker__circle}
+
+In geometry, the incircle of the medial triangle of a triangle is the Spieker circle. Its center is  the Spieker center.
+
+\begin{minipage}{.5\textwidth}
+\directlua{%
+   init_elements()
+   z.A      = point:  new (1,1)
+   z.B      = point:  new (5,1)
+   z.C      = point:  new (2.2,4)
+   T        = triangle: new (z.A,z.B,z.C) 
+   C.first_lemoine = T:spieker_circle()
+   z.S,z.w  = get_points( C.first_lemoine )
+   z.Ma,z.Mb,z.Mc = get_points(T : medial ())
+   z.N           = T : nagel_point ()
+   z.Qa = midpoint(z.A,z.N)
+   z.Qb = midpoint(z.B,z.N)
+   z.Qc = midpoint(z.C,z.N)
+}
+\begin{center}
+  \begin{tikzpicture}[ scale = 1.5]
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,C Qa,Qb,Qc)
+     \tkzDrawPolygons[red](Ma,Mb,Mc)
+     \tkzDrawCircles[red](S,w)
+     \tkzDrawSegments[dashed](N,A N,B N,C)
+     \tkzDrawPoints(A,B,C,S,w,Ma,Mb,Mc,Qa,Qb,Qc,N)
+     \tkzLabelPoints(A,B,S,w,Mc,N)
+     \tkzLabelPoints[above](C,Ma,Mb,Qa,Qb,Qc)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+   init_elements()
+   z.A      = point:  new (1,1)
+   z.B      = point:  new (5,1)
+   z.C      = point:  new (2.2,4)
+   T        = triangle: new (z.A,z.B,z.C) 
+   C.first_lemoine = T:spieker_circle()
+   z.S,z.w  = get_points( C.first_lemoine )
+   z.Ma,z.Mb,z.Mc = get_points(T : medial ())
+   z.N           = T : nagel_point ()
+   z.Qa = midpoint(z.A,z.N)
+   z.Qb = midpoint(z.B,z.N)
+   z.Qc = midpoint(z.C,z.N)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygons(A,B,C Qa,Qb,Qc)
+   \tkzDrawPolygons[red](Ma,Mb,Mc)
+   \tkzDrawCircles[red](S,w)
+   \tkzDrawSegments[dashed](N,A N,B N,C)
+   \tkzDrawPoints(A,B,C,S,w,Ma,Mb,Mc,Qa,Qb,Qc,N)
+   \tkzLabelPoints(A,B,S,w,Mc,N)
+   \tkzLabelPoints[above](C,Ma,Mb,Qa,Qb,Qc)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_spieker__circle (end)
+
+\subsubsection{Methods \Imeth{triangle}{cevian} and \Imeth{triangle}{cevian\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_cevian}
+
+A Cevian is a line segment which joins a vertex of a triangle with a point on the opposite side (or its extension). The condition for three general Cevians from the three vertices of a triangle to concur is known as Ceva's theorem.
+
+Picking a Cevian point $P$ in the interior of a triangle $ABC$ and drawing Cevians from each vertex through $P$ to the opposite side produces a set of three intersecting Cevians $APa$, $BPb$, and $CPc$ with respect to that point. The triangle $PaPbPc$ is known as the Cevian triangle of $ABC$ with respect to $P$, and the circumcircle of $PaPbPc$ is similarly known as the Cevian circle. [\href{https://mathworld.wolfram.com/CevianTriangle.html}{Weisstein, Eric W. "Cevian Triangle." From MathWorld--A Wolfram Web Resource.}]
+
+
+\vspace{6pt}
+
+\directlua{%
+init_elements()
+ z.A            = point: new (0,0)
+ z.B            = point: new (4,0)
+ z.C            = point: new (1.8,3)
+ T.ABC          = triangle: new(z.A,z.B,z.C)
+ z.Q            = point : new (1,-0.4) 
+ z.P            = point : new (2,1) 
+ T.cevian       = T.ABC : cevian (z.Q)
+ z.Qa,z.Qb,z.Qc = get_points (T.cevian)
+ T.cevian       = T.ABC : cevian (z.P)
+ z.Pa,z.Pb,z.Pc = get_points (T.cevian)
+ C.cev          = T.ABC : cevian_circle (z.P)
+ z.w            = C.cev.center
+}
+\begin{center}
+  \begin{tikzpicture}[scale = 1.25]
+  \tkzGetNodes
+  \tkzDrawPolygons[cyan](A,B,C)
+  \tkzDrawSegments[cyan](A,Qb B,Qa)
+  \tkzDrawSegments[red](A,Qa B,Qb C,Q)
+  \tkzDrawSegments[blue](A,Pa B,Pb C,Pc)
+  \tkzDrawCircles(w,Pa)
+  \tkzDrawPoints(A,B,C,Qa,Qb,Qc,P,Q,Pa,Pb,Pc)
+  \tkzLabelPoints(A,B,P,Q,Pc)
+  \tkzLabelPoints[above](C,Qc)
+  \tkzLabelPoints[left](Qb,Pb)
+  \tkzLabelPoints[right](Qa,Pa)
+  \end{tikzpicture}
+\end{center}
+
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+ z.A            = point: new (0,0)
+ z.B            = point: new (4,0)
+ z.C            = point: new (1.8,3)
+ T.ABC          = triangle: new(z.A,z.B,z.C)
+ z.Q            = point : new (1,-0.4) 
+ z.P            = point : new (2,1) 
+ T.cevian       = T.ABC : cevian (z.Q)
+ z.Qa,z.Qb,z.Qc = get_points (T.cevian)
+ T.cevian       = T.ABC : cevian (z.P)
+ z.Pa,z.Pb,z.Pc = get_points (T.cevian)
+ C.cev          = T.ABC : cevian_circle (z.P)
+ z.w            = C.cev.center
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawPolygons[cyan](A,B,C)
+\tkzDrawSegments[cyan](A,Qb B,Qa)
+\tkzDrawSegments[red](A,Qa B,Qb C,Q)
+\tkzDrawSegments[blue](A,Pa B,Pb C,Pc)
+\tkzDrawCircles(w,Pa)
+\tkzDrawPoints(A,B,C,Qa,Qb,Qc,P,Q,Pa,Pb,Pc)
+\tkzLabelPoints(A,B,P,Q,Pc)
+\tkzLabelPoints[above](C,Qc)
+\tkzLabelPoints[left](Qb,Pb)
+\tkzLabelPoints[right](Qa,Pa)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_cevian (end)
+
+
+\subsubsection{Methods \Imeth{triangle}{pedal} and \Imeth{triangle}{pedal\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_pedal}
+
+Given a point $P$, the pedal triangle of $P$ is the triangle whose polygon vertices are the feet of the perpendiculars from $P$ to the side lines. 
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+  init_elements()
+  z.A    = point: new(0,0)
+  z.B    = point: new(5,0)
+  z.C    = point: new(1.5,3)
+  z.O    = point: new (2,1)
+  T.ABC  = triangle: new (z.A,z.B,z.C)
+  T.pedal = T.ABC : pedal (z.O)
+  z.E,z.F,z.G = get_points(T.pedal)
+  C.pedal = T.ABC : pedal_circle (z.O)
+  z.w = C.pedal.center
+  z.T = C.pedal.through
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawPolygon(A,B,C)
+\tkzDrawPolygon[red](E,F,G)
+\tkzDrawCircle(w,T)
+\tkzDrawPoints(A,B,C,E,F,G,O)
+\tkzLabelPoints(A,B,G)
+\tkzLabelPoints[above](C,E,F) 
+\tkzDrawSegments(O,E O,F O,G)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \directlua{%
+init_elements()
+    z.A    = point: new(0,0)
+    z.B    = point: new(5,0)
+    z.C    = point: new(1.5,3)
+    z.O    = point: new (2,1)
+    T.ABC  = triangle: new (z.A,z.B,z.C)
+    T.pedal = T.ABC : pedal (z.O)
+    z.E,z.F,z.G = get_points(T.pedal)
+    C.pedal = T.ABC : pedal_circle (z.O)
+    z.w = C.pedal.center
+    z.T = C.pedal.through
+  }
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawPolygon[red](E,F,G)
+    \tkzDrawCircle(w,T)
+    \tkzDrawPoints(A,B,C,E,F,G,O)
+    \tkzLabelPoints(A,B,G)
+    \tkzLabelPoints[above](C,E,F) 
+    \tkzDrawSegments(O,E O,F O,G)
+    \end{tikzpicture}
+  \end{center}
+
+\end{minipage}
+% subsubsection method_imeth_triangle_pedal (end)
+
+\subsubsection{Methods \Imeth{triangle}{conway\_points} and \Imeth{triangle}{conway\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_conway}
+
+In plane geometry, Conway's circle theorem states that when the sides meeting at each vertex of a triangle are extended by the length of the opposite side, the six endpoints of the three resulting line segments lie on a circle whose centre is the centre of incidence of the triangle.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+  \begin{Verbatim}
+  \directlua{%
+init_elements()
+    z.A      = point:new (0,0)
+    z.C      = point:new (5,0)
+    z.B      = point:new (1,3)
+    T.ABC    = triangle : new (z.A,z.B,z.C)
+    C.conway = T.ABC : conway_circle ()
+    z.w,z.t  = get_points(C.conway)
+    z.t1,z.t2,z.t3,z.t4,
+    z.t5,z.t6= T.ABC : conway_points ()
+  }
+  \hspace*{5cm}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C)
+     \tkzDrawCircles(w,t)
+     \tkzDrawPoints(t1,t2,t3,t4,t5,t6)
+     \tkzLabelPoints(t1,t2,t3,t4,t5,t6)
+     \tkzDrawSegments[dashed](t1,A t2,A t3,B)
+     \tkzDrawSegments[dashed](t4,B t5,C t6,C)
+     \tkzMarkSegments(B,C t1,A t2,A)
+     \tkzMarkSegments[mark=||](A,C t3,B t4,B)
+     \tkzMarkSegments[mark=|||](A,B t5,C t6,C)
+  \end{tikzpicture}
+  \end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+ init_elements()
+ z.A      = point:new (0,0)
+ z.C      = point:new (5,0)
+ z.B      = point:new (1,3)
+ T.ABC    = triangle : new (z.A,z.B,z.C)
+ C.conway = T.ABC : conway_circle ()
+ z.w,z.t  = get_points(C.conway)
+ z.t1,z.t2,z.t3,
+ z.t4,z.t5,z.t6= T.ABC : conway_points ()
+}
+  \begin{tikzpicture}[ scale = .5]
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C)
+     \tkzDrawCircles(w,t)
+     \tkzDrawPoints(t1,t2,t3,t4,t5,t6)
+     \tkzLabelPoints(t1,t2,t3,t4,t5,t6)
+     \tkzDrawSegments[dashed](t1,A t2,A t3,B t4,B t5,C t6,C)
+     \tkzMarkSegments(B,C t1,A t2,A)
+     \tkzMarkSegments[mark=||](A,C t3,B t4,B)
+     \tkzMarkSegments[mark=|||](A,B t5,C t6,C)
+  \end{tikzpicture}
+\end{minipage}
+
+% subsubsection methode_imeth_triangle_conway (end)
+
+
+\subsubsection{Methods \Imeth{triangle}{bevan\_circle} and \Imeth{triangle}{bevan\_point} } % (fold)
+\label{ssub:methods_imeth_triangle_bevan_circle_and_imeth_triangle_bevan_point}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+  init_elements()
+  z.A           = point: new (1,1)
+  z.B           = point: new (6,0)
+  z.C           = point: new (2,4)
+  T             = triangle: new(z.A,z.B,z.C)
+  C.bevan       = T : bevan_circle ()
+  z.c,z.t       = get_points (C.bevan)
+% or z.c      = T : bevan_point ()
+}
+\begin{tikzpicture}[scale =.5]
+    \tkzGetNodes
+    \tkzDrawPolygons(A,B,C)
+    \tkzDrawCircle(c,t)
+    \tkzDrawPoints(A,B,C,c,t)
+    \tkzLabelPoints(A,B,c,t)
+    \tkzLabelPoints[above](C)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+    init_elements()
+    z.A           = point: new (1,1)
+    z.B           = point: new (6,0)
+    z.C           = point: new (2,4)
+    T             = triangle: new(z.A,z.B,z.C)
+    C.bevan       = T : bevan_circle ()
+    z.c,z.t       = get_points (C.bevan)
+}
+\begin{center}
+  \begin{tikzpicture}[scale =.5]
+      \tkzGetNodes
+      \tkzDrawPolygons(A,B,C)
+      \tkzDrawCircle(c,t)
+      \tkzDrawPoints(A,B,C,c,t)
+      \tkzLabelPoints(A,B,c,t)
+      \tkzLabelPoints[above](C)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection methods_imeth_triangle_bevan_circle_and_imeth_triangle_bevan_point (end)
+
+%%%%%% Triangles %%%%%
+
+\subsubsection{Method \Imeth{triangle}{feuerbach} and method \Imeth{triangle}{feuerbach\_point()}} % (fold)
+\label{ssub:method_imeth_triangle_feuerbach}
+
+The Feuerbach triangle is the triangle formed by the three points of tangency of the nine-point circle with the excircles. (The fact that the excircles touch the nine-point circle is known as Feuerbach's theorem.)
+Refer to \href{https://mathworld.wolfram.com/FeuerbachTriangle.html}{Weisstein, Eric W. "Feuerbach Triangle." From MathWorld--A Wolfram Web Resource.}.
+
+The exinscribed circles of a triangle are tangent to the circle of the nine points of a triangle at points which form the \code{Feuerbach} triangle ($FaFbFc$). The inscribed circle and the circle of nine points are tangent at a point called the Feurerbach point $F$.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+  \begin{Verbatim}
+\directlua{%
+init_elements()
+ z.A               = point: new (0,0)
+ z.B               = point: new (6,0)
+ z.C               = point: new (0.8,4)
+ T.ABC             = triangle : new ( z.A,z.B,z.C )
+ z.N               = T.ABC.eulercenter
+ z.Fa,z.Fb,z.Fc    = get_points ( T.ABC : feuerbach () )
+ z.F               =  T.ABC : feuerbach_point ()
+ z.Ja,z.Jb,z.Jc    = get_points ( T.ABC : excentral () )
+ z.I = T.ABC.incenter
+ z.Ia,z.Ib,z.Ic = get_points (T.ABC :  intouch ())
+}
+\begin{tikzpicture}[ scale = .8]
+\tkzGetNodes
+\tkzDrawPoints(Ja,Jb,Jc)
+\tkzClipBB
+\tkzFillCircles[green!30,,opacity=.5](N,Fa)
+\tkzFillCircles[lightgray,,opacity=.5](I,F)
+\tkzDrawLines[add=3 and 3](A,B A,C B,C)
+\tkzDrawCircles(Ja,Fa Jb,Fb Jc,Fc N,Fa N,F I,F)
+\tkzDrawPoints(A,B,C,F,Fa,Fb,Fc,N,I,Ia,Ib,Ic)
+\tkzLabelPoints(N,A,B,Ia,Ib,Ic)
+\tkzLabelPoints[above](Fa,Fb,Fc,F,I,C)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+
+\directlua{%
+ init_elements()
+ z.A               = point: new (0,0)
+ z.B               = point: new (6,0)
+ z.C               = point: new (0.8,4)
+ T.ABC             = triangle : new ( z.A,z.B,z.C )
+ z.N               = T.ABC.eulercenter
+ z.Fa,z.Fb,z.Fc    = get_points ( T.ABC : feuerbach () )
+ z.F               =  T.ABC : feuerbach_point ()
+ z.Ja,z.Jb,z.Jc    = get_points ( T.ABC : excentral () )
+ z.I               = T.ABC.incenter
+ z.Ia,z.Ib,z.Ic    = get_points (T.ABC :  intouch ())
+}
+\begin{center}
+  \begin{tikzpicture}[scale = .7]
+  \tkzGetNodes
+  \tkzDrawPoints(Ja,Jb,Jc)
+  \tkzClipBB
+  \tkzFillCircles[green!30,,opacity=.5](N,Fa)
+  \tkzFillCircles[lightgray,,opacity=.5](I,F)
+  \tkzDrawLines[add=3 and 3](A,B A,C B,C)
+  \tkzDrawCircles(Ja,Fa Jb,Fb Jc,Fc N,Fa N,F I,F)
+  \tkzDrawPoints(A,B,C,F,Fa,Fb,Fc,N,I,Ia,Ib,Ic)
+  \tkzLabelPoints(N,A,B,Ia,Ib,Ic)
+  \tkzLabelPoints[above](Fa,Fb,Fc,F,I,C)
+  \end{tikzpicture}
+\end{center}
+
+%subsubsection method_imeth_triangle_feuerbach (end)
+
+
+\subsubsection{Method \Imeth{triangle}{similar}} % (fold)
+\label{ssub:method_imeth_triangle_similar}
+
+The \code{similar} method creates a new triangle whose sides are parallel to the sides of the original triangle and pass through its vertices.
+
+\begin{minipage}{.5\textwidth}
+  \begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.A            = point: new (0 , 0)
+ z.B            = point: new (6 , 0)
+ z.C            = point: new (1.5 , 3.5)
+ T.ABC          = triangle: new (z.A,z.B,z.C)
+ z.X,z.Y,z.Z    = get_points ( T.ABC : similar ())
+ z.H_a,z.H_b,
+ z.H_c          = get_points (T.ABC : orthic ())
+}
+  \begin{tikzpicture}[ scale =.5]
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,C  X,Y,Z)
+     \tkzDrawLines(A,H_a B,H_b C,H_c)
+     \tkzDrawPoints(A,B,C,X,Y,Z)
+     \tkzLabelPoints(A,B,Z)
+     \tkzLabelPoints[above](X,Y,C)
+   \end{tikzpicture}
+   \end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+   init_elements()
+   z.A            = point: new (0 , 0)
+   z.B            = point: new (6 , 0)
+   z.C            = point: new (1.5 , 3.5)
+   T.ABC          = triangle: new (z.A,z.B,z.C)
+   z.X,z.Y,z.Z    = get_points ( T.ABC : similar ())
+   z.H_a,z.H_b,
+   z.H_c          = get_points (T.ABC : orthic ())
+  }
+  \begin{center}
+    \begin{tikzpicture}[ scale =.5]
+       \tkzGetNodes
+       \tkzDrawPolygons(A,B,C  X,Y,Z)
+       \tkzDrawLines(A,H_a B,H_b C,H_c)
+       \tkzDrawPoints(A,B,C,X,Y,Z)
+       \tkzLabelPoints(A,B,Z)
+       \tkzLabelPoints[above](X,Y,C)
+     \end{tikzpicture}
+  \end{center}
+
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_similar (end)
+
+\subsubsection{Method \Imeth{triangle}{medial}} % (fold)
+\label{ssub:method_imeth_triangle_medial}
+
+The triangle $MaMbMc$ formed by joining the midpoints of the sides of a triangle $ABC$. The medial triangle is sometimes also called the auxiliary triangle (Dixon 1991).
+[\href{https://mathworld.wolfram.com/MedialTriangle.html}{Weisstein, Eric W. "Medial Triangle." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.A           = point: new (0,1)
+ z.B           = point: new (6,0)
+ z.C           = point: new (2,4)
+ T             = triangle: new(z.A,z.B,z.C)
+ T.med         = T : medial ()
+ z.Ma,z.Mb,z.Mc= get_points (T.med)
+ z.G           = T.centroid
+ z.O           = T.circumcenter
+}
+\begin{tikzpicture}[scale = 1.25]
+\tkzGetNodes
+\tkzDrawPolygons(A,B,C)
+\tkzDrawPolygons[red](Ma,Mb,Mc)
+\tkzDrawSegments(A,Ma B,Mb C,Mc)
+ \tkzDrawSegments[dashed,cyan](O,Ma O,Mb O,Mc)
+\tkzDrawPoints(A,B,C,Ma,Mb,Mc,O,G)
+\tkzLabelPoints(A,B,Mc,O)
+\tkzLabelPoints[above](C)
+\tkzLabelPoints[left](Mb)
+\tkzLabelPoints[right](Ma,G)
+\tkzMarkRightAngles[fill=cyan!20,
+             opacity=.4](O,Ma,B O,Mb,A O,Mc,A)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+    init_elements()
+    z.A           = point: new (0,1)
+    z.B           = point: new (6,0)
+    z.C           = point: new (2,4)
+    T             = triangle: new(z.A,z.B,z.C)
+    T.med         = T : medial ()
+    z.Ma,z.Mb,z.Mc= get_points (T.med)
+    z.G           = T.centroid
+    z.O           = T.circumcenter
+}
+\begin{center}
+  \begin{tikzpicture}[scale = 1.25]
+  \tkzGetNodes
+  \tkzDrawPolygons(A,B,C)
+  \tkzDrawPolygons[red](Ma,Mb,Mc)
+  \tkzDrawSegments(A,Ma B,Mb C,Mc)
+   \tkzDrawSegments[dashed,cyan](O,Ma O,Mb O,Mc)
+  \tkzDrawPoints(A,B,C,Ma,Mb,Mc,O,G)
+  \tkzLabelPoints(A,B,Mc,O)
+  \tkzLabelPoints[above](C)
+  \tkzLabelPoints[left](Mb)
+  \tkzLabelPoints[right](Ma,G)
+  \tkzMarkRightAngles[fill=cyan!20,
+               opacity=.4](O,Ma,B O,Mb,A O,Mc,A)
+  \end{tikzpicture}
+  \end{center}
+\end{minipage}
+
+
+% subsubsection method_imeth_triangle_medial (end)
+
+\subsubsection{Method \Imeth{triangle}{incentral} } % (fold)
+\label{ssub:method_incentral}
+
+The incentral triangle $IaIbIc$ is the Cevian triangle of a triangle $ABC$ with respect to its incenter $I$. It is therefore also the triangle whose vertices are determined by the intersections of the reference triangle's angle bisectors with the respective opposite sides.
+[ \href{https://mathworld.wolfram.com/IncentralTriangle.html}{Weisstein, Eric W. "Incentral Triangle." From MathWorld--A Wolfram Web Resource.}
+]
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+ z.A        = point: new (0 , 0)
+ z.B        = point: new (6 , 0)
+ z.C        = point: new (1 , 4)
+ T.ABC      = triangle: new (z.A,z.B,z.C)
+ z.I        = T.ABC.incenter
+ z.Ia,z.Ib,
+ z.Ic       = get_points (T.ABC : incentral ())
+ z.Ta,z.Tb,
+ z.Tc       = get_points (T.ABC :  intouch ())
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawPolygon[dashed,red](Ia,Ib,Ic)
+   \tkzDrawSegments[dashed,red](A,Ia B,Ib C,Ic)
+   \tkzDrawCircle(I,Ta)
+   \tkzDrawPoints(A,B,C,Ia,Ib,Ic,I,Ta,Tb,Tc)
+   \tkzLabelPoints(A,B,Ic,I,Tc)
+   \tkzLabelPoints[above](Ia,Ta,C)
+   \tkzLabelPoints[above left](Ib,Tb)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+   init_elements()
+   z.A        = point: new (0 , 0)
+   z.B        = point: new (6 , 0)
+   z.C        = point: new (1 , 4)
+   T.ABC      = triangle: new (z.A,z.B,z.C)
+   z.I        = T.ABC.incenter
+   z.Ia,z.Ib,
+   z.Ic       = get_points (T.ABC : incentral ())
+   z.Ta,z.Tb,
+   z.Tc       = get_points (T.ABC :  intouch ())
+  }
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C)
+     \tkzDrawPolygon[dashed,red](Ia,Ib,Ic)
+     \tkzDrawSegments[dashed,red](A,Ia B,Ib C,Ic)
+     \tkzDrawCircle(I,Ta)
+     \tkzDrawPoints(A,B,C,Ia,Ib,Ic,I,Ta,Tb,Tc)
+     \tkzLabelPoints(A,B,Ic,I,Tc)
+     \tkzLabelPoints[above](Ia,Ta,C)
+     \tkzLabelPoints[above left](Ib,Tb)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection method_incentral (end)
+
+
+\subsubsection{Method \Imeth{triangle}{tangential}} % (fold)
+\label{ssub:method_imeth_triangle_tangential}
+
+The tangential triangle is the triangle $TaTbTc$ formed by the lines tangent to the circumcircle of a given triangle DeltaABC at its vertices. It is therefore antipedal triangle of $ABC$ with respect to the circumcenter $O$. It is also anticevian triangle of $ABC$ with the symmedian point $K$ as the anticevian point (Kimberling 1998, p. 156). Furthermore, the symmedian point $K$ of $ABC$ is the Gergonne point of $TaTbTc$.
+
+The sides of an orthic triangle are parallel to the tangents to the circumcircle at the vertices (Johnson 1929, p. 172). This is equivalent to the statement that each line from a triangle's circumcenter to a vertex is always perpendicular to the corresponding side of the orthic triangle (Honsberger 1995, p. 22), and to the fact that the orthic and tangential triangles are homothetic.
+[ \href{https://mathworld.wolfram.com/TangentialTriangle.html}{Weisstein, Eric W. "Tangential Triangle." From MathWorld--A Wolfram Web Resource.}]
+
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,3)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.H       = T.orthocenter
+  z.O       = T.circumcenter
+  z.L       = T : symmedian_point ()
+  T.orthic  = T: orthic()
+  z.Ha,
+  z.Hb,
+  z.Hc      = get_points (T.orthic)
+  z.Ta,
+  z.Tb,
+  z.Tc       = get_points (T : tangential ())
+}
+
+  \begin{center}
+\begin{tikzpicture}[scale  = .75,rotate=-80]
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C Ta,Tb,Tc)
+ \tkzDrawCircle(O,A)
+ \tkzDrawPoints(A,B,C,O,H,Ta,Tb,Tc,L)
+ \tkzDrawSegments[red](C,Hc B,Hb A,Ha)
+ \tkzDrawSegments[green](C,Tc B,Tb A,Ta)
+ \tkzDrawPolygon[blue](Ha,Hb,Hc)
+ \tkzLabelPoints(A,B,O,Tc)
+ \tkzLabelPoints[above](C,Tb,Ta)
+ \tkzLabelPoints[font=\small](Hc)
+ \tkzLabelPoints[font=\small,above](Ha,Hb)
+ \tkzMarkRightAngles(A,Ha,C B,Hb,A C,Hc,B)
+\end{tikzpicture}
+  \end{center}
+\vspace{6pt}
+
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (1,3)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.H       = T.orthocenter
+  z.O       = T.circumcenter
+  z.L       = T : symmedian_point ()
+  T.orthic  = T: orthic()
+  z.Ha,
+  z.Hb,
+  z.Hc      = get_points (T.orthic)
+  z.Ta,
+  z.Tb,
+  z.Tc       = get_points (T : tangential ())
+}
+\begin{tikzpicture}[scale= .75]
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C Ta,Tb,Tc)
+ \tkzDrawCircle(O,A)
+ \tkzDrawPoints(A,B,C,O,H,Ta,Tb,Tc,L)
+ \tkzDrawSegments[red](C,Hc B,Hb A,Ha)
+ \tkzDrawSegments[green](C,Tc B,Tb A,Ta)
+ \tkzDrawPolygon[blue](Ha,Hb,Hc)
+ \tkzLabelPoints(A,B,O,Tc)
+ \tkzLabelPoints[above](C,Tb,Ta)
+ \tkzLabelPoints[font=\small](Hc)
+ \tkzLabelPoints[font=\small,above](Ha,Hb)
+ \tkzMarkRightAngles(A,Ha,C B,Hb,A C,Hc,B)
+\end{tikzpicture}
+\end{Verbatim}
+
+
+% subsubsection method_imeth_triangle_tangential (end)
+
+
+\subsubsection{Method \Imeth{triangle}{symmedial}} % (fold)
+\label{ssub:method_imeth_triangle_symmedial}
+
+The symmedial triangle $LaLbLc$  is the triangle whose vertices are the intersection points of the symmedians with the reference triangle $ABC$.
+
+The symmedial circle is the circumcircle of the symmedial triangle.
+
+The following example groups several concepts around the symmedian. As a reminder, a symmedian of a triangle is the reflection of the median with respect to the angle bisector.
+
+The points of contact of the symmedians with the sides of the triangle are obtained using the \code{symmedian} method.
+The intersection of the symmedians is the point known as the \code{Lemoine} or \code{Symmedian} point.
+You can use the triangle methods \code{lemoine\_point} or \code{symmedian\_point}. If you only need one of the lines, you can use the method \code{symmedian\_line(n)}. \(n=0\) corresponds to the line coming from the first vertex of the triangle, \(n=1\) to the second, and so on.
+
+In the next example, $L$ is the \code{Lemoine point} or the \code{Symmedian point}. $LaLbLc$ is the symmedian triangle.[\href{https://mathworld.wolfram.com/SymmedianPoint.html}{Weisstein, Eric W. "Symmedian Point." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.A            = point :   new (0,0)
+ z.B            = point :   new (7,0)
+ z.C            = point :   new (2,3)
+ T.ABC          = triangle : new (z.A,z.B,z.C)
+ z.L            = T.ABC : lemoine_point ()
+ T.SY           = T.ABC : symmedian ()
+ T.med          = T.ABC : medial ()
+ z.Ka,z.Kb,z.Kc = get_points (T.SY)
+ z.Ma,z.Mb,z.Mc = get_points (T.med)
+ L.Kb           = T.ABC : symmedian_line (1)
+_,z.Kb          = get_points(L.Kb)
+z.G             = T.ABC.centroid
+z.Ia,z.Ib,z.Ic  = get_points ( T.ABC : incentral ())
+%          z.T = T.ABC : trilinear (0,1,1)
+z.I             = T.ABC.incenter
+}
+\begin{tikzpicture}[ scale = 2]
+\tkzGetNodes
+\tkzDrawPolygons(A,B,C)
+\tkzDrawPoints(A,B,C,L,Ka,Kb,Kc,G,Ma,Mb,Mc,Ia,Ib,Ic,I)
+\tkzDrawSegments[cyan](A,Ka B,Kb C,Kc)
+\tkzDrawSegments[green](A,Ma B,Mb C,Mc)
+\tkzDrawSegments[dashed,red](A,Ia B,Ib C,Ic)
+\tkzLabelPoints[above](C,Ka,Ia,Ma)
+\tkzLabelPoints[above left](Kb,Ib,Mb)
+\tkzLabelPoints(A,B,L,Kc,I,Ic,Mc,G)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+
+
+\directlua{%
+init_elements()
+   z.A            = point :   new (0,0)
+   z.B            = point :   new (7,0)
+   z.C            = point :   new (2,3)
+   T.ABC          = triangle : new (z.A,z.B,z.C)
+   z.L            = T.ABC : lemoine_point ()
+   T.SY           = T.ABC : symmedian ()
+   T.med          = T.ABC : medial ()
+   z.Ka,z.Kb,z.Kc = get_points (T.SY)
+   z.Ma,z.Mb,z.Mc = get_points (T.med)
+   L.Kb           = T.ABC : symmedian_line (1)
+  _,z.Kb          = get_points(L.Kb)
+  z.G             = T.ABC.centroid
+  z.Ia,z.Ib,z.Ic  = get_points ( T.ABC : incentral ())
+  z.I             = T.ABC.incenter
+}
+\begin{center}
+  \begin{tikzpicture}[scale =1.75]
+  \tkzGetNodes
+  \tkzDrawPolygons(A,B,C)
+  \tkzDrawPoints(A,B,C,L,Ka,Kb,Kc,G,Ma,Mb,Mc,Ia,Ib,Ic,I)
+  \tkzDrawSegments[cyan](A,Ka B,Kb C,Kc)
+  \tkzDrawSegments[green](A,Ma B,Mb C,Mc)
+  \tkzDrawSegments[dashed,red](A,Ia B,Ib C,Ic)
+  \tkzLabelPoints[above](C,Ka,Ia,Ma)
+  \tkzLabelPoints[above left](Kb,Ib,Mb)
+  \tkzLabelPoints(A,B,L,Kc,I,Ic,Mc,G)
+  \end{tikzpicture}
+\end{center}
+
+
+
+% subsubsection method_imeth_triangle_symmedial (end)
+
+\subsubsection{Method \Imeth{triangle}{anti}} % (fold)
+\label{ssub:method_imeth_triangle_anti}
+
+The anticomplementary triangle is the triangle $TaTbTc$ which has a given triangle $ABC$ as its medial triangle. It is therefore the anticevian triangle with respect to the triangle centroid G (Kimberling 1998, p. 156). [\href{https://mathworld.wolfram.com/AnticomplementaryTriangle.html}{Weisstein, Eric W. "Anticomplementary Triangle." From MathWorld--A Wolfram Web Resource.}]
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (2,4)
+  T         = triangle: new(z.A,z.B,z.C)  
+  T.similar = T: anti()
+  z.Ta,
+  z.Tb,
+  z.Tc      = get_points (T.similar) 
+}
+\begin{tikzpicture}[scale = .6]
+ \tkzGetNodes
+ \tkzDrawPolygons[red](A,B,C)
+ \tkzDrawPolygon[blue](Ta,Tb,Tc)
+ \tkzDrawPoints(A,B,C,Ta,Tb,Tc)
+ \tkzLabelPoints(A,B,Tc)
+ \tkzLabelPoints[above](Ta,Tb,C)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+  z.A       = point: new (0,0)
+  z.B       = point: new (5,0)
+  z.C       = point: new (2,4)
+  T       = triangle: new(z.A,z.B,z.C)  
+  T.similar  = T: anti()
+  z.Ta,
+  z.Tb,
+  z.Tc      = get_points (T.similar) 
+}
+\begin{center}
+  \begin{tikzpicture}[scale  = .6]
+   \tkzGetNodes
+   \tkzDrawPolygons[red](A,B,C)
+   \tkzDrawPolygon[blue](Ta,Tb,Tc)
+   \tkzDrawPoints(A,B,C,Ta,Tb,Tc)
+   \tkzLabelPoints(A,B,Tc)
+   \tkzLabelPoints[above](Ta,Tb,C)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection method_imeth_triangle_anti (end)
+
+
+\subsubsection{Methods \Imeth{triangle}{euler\_line} and \Imeth{triangle}{orthic\_axis}} % (fold)
+\label{ssub:euler_line}
+
+Let $ha$, $hb$ and $hc$ be the vertices of the orthic triangle of a triangle $ABC$. Then each side of each triangle meets the three sides of the other triangle, and the points of intersection lie on a line $QcQb$ called the orthic axis of $ABC$. It is perpendicular to the Euler line. The \code{orthic\_axis} method returns a straight line, i.e. only two points. To obtain the third point, use the \Imeth{triangle}{orthic\_axis\_points} method.
+
+The line on which the orthocenter $H$, triangle centroid $G$, circumcenter $O$, nine-point center $N$, and a number of other important triangle centers lie.
+[ \href{https://mathworld.wolfram.com/EulerLine.html}{Weisstein, Eric W. "Euler Line." From MathWorld--A Wolfram Web Resource.}]
+
+\begin{Verbatim}
+\directlua{
+  init_elements()
+  z.B       = point: new (0,0)
+  z.C       = point: new (5,0)
+  z.A       = point: new (.6,3)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.N       = T.eulercenter
+  z.H       = T.orthocenter
+  z.O       = T.circumcenter
+  z.G       = T.centroid
+  z.ha,z.hb,z.hc  = get_points (T : orthic ())
+  L.orthic  = T : orthic_axis ()
+  z.Qa,z.Qb,z.Qc  = T : orthic_axis_points ()
+  L.euler   = T : euler_line ()
+  z.ea,z.eb = get_points (L.euler)
+  z.K       = L.orthic : projection (z.N)
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawPolygons[cyan](A,B,C)
+ \tkzDrawLines[red](Qc,Qb)
+ \tkzDrawSegments(A,Qc B,Qa A,ha B,hb C,hc C,Qb)
+ \tkzDrawSegments[dashed](hb,Qc hb,Qa ha,Qb)
+ \tkzDrawLines[blue, add = .5 and .5](ea,eb)
+ \tkzDrawPoints(A,B,C,ha,hb,hc)
+ \tkzDrawPoints(N,H,O,G,Qa,Qb,Qc)
+ \tkzLabelPoints(N,H,O,G)
+ \tkzLabelPoints(B,C,ha)
+ \tkzLabelPoints[above right](A,hb)
+ \tkzLabelPoints[left](hc,Qa,Qb,Qc)
+ \tkzMarkRightAngle(N,K,Qb)
+ \tkzLabelSegment[sloped,blue,pos=1.4,above](ea,eb){\small\texttt{euler\_line}}
+\tkzLabelSegment[sloped,red,pos=.8](Qc,Qb){\small\texttt{orthic\_axis}}
+\end{tikzpicture}
+\end{Verbatim}
+
+\directlua{
+  z.B       = point: new (0,0)
+  z.C       = point: new (5,0)
+  z.A       = point: new (.6,3)
+    T       = triangle: new(z.A,z.B,z.C)
+  z.N       = T.eulercenter
+  z.H       = T.orthocenter
+  z.O       = T.circumcenter
+  z.G       = T.centroid
+  z.ha,z.hb,z.hc  = get_points (T : orthic ())
+  L.orthic  = T : orthic_axis ()
+  z.Qa,z.Qb,z.Qc  = T : orthic_axis_points ()
+  L.euler   = T : euler_line ()
+  z.ea,z.eb = get_points (L.euler)
+  z.K       = L.orthic : projection (z.N)
+}
+\begin{center}
+  \begin{tikzpicture}[scale=1.25]
+   \tkzGetNodes
+   \tkzDrawPolygons[cyan](A,B,C)
+   \tkzDrawLines[red](Qc,Qb)
+   \tkzDrawSegments(A,Qc B,Qa A,ha B,hb C,hc C,Qb)
+   \tkzDrawSegments[dashed](hb,Qc hb,Qa ha,Qb)
+   \tkzDrawLines[blue, add = .5 and .5](ea,eb)
+   \tkzDrawPoints(A,B,C,ha,hb,hc)
+   \tkzDrawPoints(N,H,O,G,Qa,Qb,Qc)
+   \tkzLabelPoints(N,H,O,G)
+   \tkzLabelPoints(B,C,ha)
+   \tkzLabelPoints[above right](A,hb)
+   \tkzLabelPoints[left](hc,Qa,Qb,Qc)
+   \tkzMarkRightAngle(N,K,Qb)
+   \tkzLabelSegment[sloped,blue,pos=1.4,above](ea,eb){\small\texttt{euler\_line}}
+  \tkzLabelSegment[sloped,red,pos=.8](Qc,Qb){\small\texttt{orthic\_axis}}
+  \end{tikzpicture}
+\end{center}
+
+
+
+% subsubsection euler_line (end)
+
+\subsubsection{Euler ellipse} % (fold)
+\label{ssub:euler_ellipse}
+The Euler ellipse is a conic, tangent to the three sides of a triangle, with the orthocentre and the centre of the circumscribed circle as foci.
+Example of obtaining the Euler circle as well as the Euler ellipse.
+
+\vspace{6pt}
+\directlua{%
+ init_elements()
+ z.A      = point: new (2,3.8)
+ z.B      = point: new (0 ,0)
+ z.C      = point: new (6.2 ,0)
+ L.AB     = line : new ( z.A , z.B )
+ T.ABC    = triangle: new (z.A,z.B,z.C)
+ z.K      = midpoint (z.B,z.C)
+ EL.euler = T.ABC : euler_ellipse ()
+ curve    = EL.euler : points (0,1,50) 
+ z.N      = T.ABC.eulercenter
+ C.euler  = circle : new (z.N,z.K)
+ z.O      = T.ABC.circumcenter
+ z.G      = T.ABC.centroid
+ z.H      = T.ABC.orthocenter
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawCircle(N,K)
+  \tkzDrawCoordinates[smooth,cyan](curve)
+  \tkzDrawLine(O,H)
+  \tkzDrawPoints(A,B,C,N,O,H,G)
+  \tkzLabelPoints[below left](B,C,N,O,H,G)
+  \tkzLabelPoints[above](A)
+  \end{tikzpicture}
+\end{center}
+
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.A      = point: new (2,3.8)
+ z.B      = point: new (0 ,0)
+ z.C      = point: new (6.2 ,0)
+ L.AB     = line : new ( z.A , z.B )
+ T.ABC    = triangle: new (z.A,z.B,z.C)
+ z.K      = midpoint (z.B,z.C)
+ EL.euler = T.ABC : euler_ellipse ()
+ curve    = EL.euler : points (0,1,50) 
+ z.N      = T.ABC.eulercenter
+ C.euler  = circle : new (z.N,z.K)
+ z.O      = T.ABC.circumcenter
+ z.G      = T.ABC.centroid
+ z.H      = T.ABC.orthocenter
+}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawCircle(N,K)
+  \tkzDrawCoordinates[smooth,cyan](curve)
+  \tkzDrawLine(O,H)
+  \tkzDrawPoints(A,B,C,N,O,H,G)
+  \tkzLabelPoints[below left](B,C,N,O,H,G)
+  \tkzLabelPoints[above](A)
+  \end{tikzpicture}
+\end{Verbatim}
+
+% subsubsection euler_ellipse (end)
+
+\subsubsection{Steiner inellipse and circumellipse} % (fold)
+\label{ssub:steiner_inellipse_and_circumellipse}
+In this example, the inner and outer Steiner ellipses, referred to as the "inellipse" and "circumellipse" [\href{https://mathworld.wolfram.com/SteinerInellipse.html}{Weisstein, Eric W. "Steiner Inellipse." From MathWorld--A Wolfram Web Resource.} and  \href{https://mathworld.wolfram.com/SteinerCircumellipse.html}{Weisstein, Eric W. "Steiner Circumellipse." From MathWorld--A Wolfram Web Resource.}], respectively, along with the orthoptic circle, are depicted.. The triangle must be acutangle.
+
+\vspace{6pt}
+\directlua{
+ z.A      = point: new (1 , 4)
+ z.B      = point: new (11 , 1)
+ z.C      = point: new (5 , 12) 
+ T.ABC    = triangle: new(z.A,z.B,z.C)
+ EL_a     = T.ABC: steiner_inellipse ()
+ curve_a  = EL_a : points (0,1,100)
+ z.G      = EL_a.center
+ ang      = math.deg(EL_a.slope)
+ z.F      = EL_a.Fa
+ z.E      = EL_a.Fb
+ C        = EL_a: orthoptic ()
+ z.w      = C.center
+ z.o      = C.through
+ EL_b     = T.ABC : steiner_circumellipse ()
+ curve_b  = EL_b : points (0,1,100)
+ z.M      = C : point (0)
+ L.T1,
+ L.T2     = EL_a : tangent_from (z.M)
+ z.T1     = L.T1.pb
+ z.T2     = L.T2.pb
+}
+\begin{center}
+  \begin{tikzpicture}[scale =.5]
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawCircles[black!50!green](w,o)
+   \tkzDrawCoordinates[smooth,red](curve_a)
+   \tkzDrawCoordinates[smooth,cyan](curve_b)
+   \tkzDrawLines(F,E M,T1 M,T2)
+   \tkzDrawPoints(A,B,C,F,E,G,M,T1,T2)
+   \tkzLabelPoints[above](C)
+   \tkzLabelPoints[right](B)
+   \tkzLabelPoints[below left](A,F,E,G,T1,T2,M)
+  \end{tikzpicture}
+\end{center}
+
+\vspace{6pt}
+\begin{Verbatim}
+\directlua{
+ z.A      = point: new (1 , 4)
+ z.B      = point: new (11 , 1)
+ z.C      = point: new (5 , 12) 
+ T.ABC    = triangle: new(z.A,z.B,z.C)
+ EL_a     = T.ABC: steiner_inellipse ()
+ curve_a  = EL_a : points (0,1,100)
+ z.G      = EL_a.center
+ ang      = math.deg(EL_a.slope)
+ z.F      = EL_a.Fa
+ z.E      = EL_a.Fb
+ C        = EL_a: orthoptic ()
+ z.w      = C.center
+ z.o      = C.through
+ EL_b     = T.ABC : steiner_circumellipse ()
+ curve_b  = EL_b : points (0,1,100)
+ z.M      = C : point (0)
+ L.T1,
+ L.T2     = EL_a : tangent_from (z.M)
+ z.T1     = L.T1.pb
+ z.T2     = L.T2.pb
+}
+\begin{tikzpicture}[scale =.5]
+ \tkzGetNodes
+ \tkzDrawPolygon(A,B,C)
+ \tkzDrawCircles[black!50!green](w,o)
+ \tkzDrawCoordinates[smooth,red](curve_a)
+ \tkzDrawCoordinates[smooth,cyan](curve_b)
+ \tkzDrawLines(F,E M,T1 M,T2)
+ \tkzDrawPoints(A,B,C,F,E,G,M,T1,T2)
+ \tkzLabelPoints[above](C)
+ \tkzLabelPoints[right](B)
+ \tkzLabelPoints[below left](A,F,E,G,T1,T2,M)
+\end{tikzpicture}
+
+\end{Verbatim}
+
+
+
+\begin{Verbatim}
+\begin{tikzpicture}[scale =.5]
+ \tkzGetNodes
+ \tkzDrawPolygon(A,B,C)
+ \tkzDrawCircles[black!50!green](w,o)
+ \tkzDrawCoordinates[smooth,red](curve_a)
+ \tkzDrawCoordinates[smooth,cyan](curve_b)
+ \tkzDrawLines(F,E M,T1 M,T2)
+ \tkzDrawPoints(A,B,C,F,E,G,M,T1,T2)
+ \tkzLabelPoints[above](C)
+ \tkzLabelPoints[right](B)
+ \tkzLabelPoints[below left](A,F,E,G,T1,T2,M)
+\end{tikzpicture}
+\end{Verbatim}
+% subsubsection steiner_inellipse_and_circumellipse (end)
+
+
+\subsubsection{Harmonic division and bisector} % (fold)
+\label{ssub:harmonic_division_and_bisector}
+
+Let four points $A$, $C$, $B$ and $D$, in this order, lying on the straight line $(d)$ and $M$ un point pris hors de $(d)$. Then, if two of the following three propositions are true, then the third is also true:
+   \begin{enumerate}
+   \item  The division (A,B;C,D) is harmonic. ($CA/CB = DA/DB$)
+   \item  $(MC)$ is the internal angle bisector of $\widehat{AMB}$.
+   \item  $(MD) \perp (MC)$.
+   \end{enumerate}
+  
+  \vspace{6pt}
+\begin{minipage}{.4\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A      = point: new (0 , 0)
+   z.B      = point: new (6 , 0)
+   z.M      = point: new (5 , 4)
+   T.AMB    = triangle : new (z.A,z.M,z.B)
+   L.AB     = T.AMB.ca
+   L.bis    = T.AMB : bisector (1)
+   z.C      = L.bis.pb
+   L.bisext = T.AMB : bisector_ext (1)
+   z.D      = intersection (L.bisext,L.AB)
+   L.CD     = line: new (z.C,z.D)
+   z.O      = L.CD.mid
+   L.AM     = line: new (z.A,z.M)
+   L.LL     = L.AM : ll_from (z.B)
+   L.MC     = line: new (z.M,z.C)
+   L.MD     = line: new (z.M,z.D)
+   z.E      = intersection (L.LL,L.MC)
+   z.F      = intersection (L.LL,L.MD)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.6\textwidth}
+\directlua{%
+init_elements()
+   z.A  = point: new (0 , 0)
+   z.B  = point: new (6 , 0)
+   z.M  = point: new (5 , 4)
+   T.AMB    = triangle : new (z.A,z.M,z.B)
+   L.AB = T.AMB.ca
+   L.bis    = T.AMB : bisector (1)
+   z.C  = L.bis.pb
+   L.bisext = T.AMB : bisector_ext (1)
+   z.D  = intersection (L.bisext,L.AB)
+   L.CD = line: new (z.C,z.D)
+   z.O  = L.CD.mid
+   L.AM = line: new (z.A,z.M)
+   L.LL = L.AM : ll_from (z.B)
+   L.MC = line: new (z.M,z.C)
+   L.MD = line: new (z.M,z.D)
+   z.E  = intersection (L.LL,L.MC)
+   z.F  = intersection (L.LL,L.MD)
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale =.4]
+    \tkzGetNodes
+    \tkzDrawPolygon(A,B,M)
+    \tkzDrawCircle[purple](O,C)
+    \tkzDrawSegments[purple](M,E M,D E,F)
+    \tkzDrawSegments(D,B)
+    \tkzDrawPoints(A,B,M,C,D,E,F)
+    \tkzLabelPoints[below right](A,B,C,D,E)
+    \tkzLabelPoints[above](M,F)
+    \tkzMarkRightAngle[opacity=.4,fill=gray!20](C,M,D)
+    \tkzMarkAngles[mark=||,size=.5](A,M,E E,M,B B,E,M)
+    \tkzMarkAngles[mark=|,size=.5](B,M,F M,F,B)
+    \tkzMarkSegments(B,E B,M B,F)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+\begin{Verbatim}
+\begin{tikzpicture}[scale =.4]
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,M)
+   \tkzDrawCircle[purple](O,C)
+   \tkzDrawSegments[purple](M,E M,D E,F)
+   \tkzDrawSegments(D,B)
+   \tkzDrawPoints(A,B,M,C,D,E,F)
+   \tkzLabelPoints[below right](A,B,C,D,E)
+   \tkzLabelPoints[above](M,F)
+   \tkzMarkRightAngle[opacity=.4,fill=gray!20](C,M,D)
+   \tkzMarkAngles[mark=||,size=.5](A,M,E E,M,B B,E,M)
+   \tkzMarkAngles[mark=|,size=.5](B,M,F M,F,B)
+   \tkzMarkSegments(B,E B,M B,F)
+\end{tikzpicture}
+\end{Verbatim}
+% subsubsection harmonic_division_and_bisector (end)
+
+\subsubsection{Method \Imeth{triangle}{c\_ll\_p}} % (fold)
+\label{ssub:tr_method_c__ll__p}
+
+See [\ref{ssub:method_c__ll__p}] for special cases. Please note that the arguments are not the same as for the \code{line} class.
+
+We are looking for a circle tangent to two straight lines passing through a point
+
+\vspace{6pt}
+\directlua{
+init_elements()
+  z.A   = point : new ( 0  , 0  )
+  z.B   = point : new ( 8  , 0  )
+  L.AB  = line : new ( z.A,z.B )
+  z.C   = point : new ( 6 ,  4  )
+  L.AC  = line : new ( z.A,z.C )
+  T     = triangle : new (z.A,z.B,z.C)
+  z.P   = point : new ( 3 ,  1  )
+  C1,C2 = T : c_ll_p (z.P)
+  z.O1  = C1.center
+  z.T1  = C1.through
+  z.O2  = C2.center
+  z.T2  = C2.through
+}
+  \begin{center}
+\begin{tikzpicture}[scale =1]
+\tkzGetNodes
+ \tkzDrawPolygon[thick](A,B,C)
+ \tkzDrawCircles[red](O1,T1 O2,T2)
+ \tkzDrawPoints(A,B,C,P)
+ \tkzLabelPoints(A,B,C,P)
+\end{tikzpicture}
+  \end{center}
+  
+  
+\begin{Verbatim}
+\directlua{
+init_elements()
+  z.A   = point : new ( 0  , 0  )
+  z.B   = point : new ( 8  , 0  )
+  L.AB  = line : new ( z.A,z.B )
+  z.C   = point : new ( 6 ,  4  )
+  L.AC  = line : new ( z.A,z.C )
+  T     = triangle : new (z.A,z.B,z.C)
+  z.P   = point : new ( 3 ,  1  )
+  C1,C2 = T : c_ll_p (z.P)
+  z.O1  = C1.center
+  z.T1  = C1.through
+  z.O2  = C2.center
+  z.T2  = C2.through
+}
+\begin{tikzpicture}
+\tkzGetNodes
+ \tkzDrawLines[thick](A,B A,C B,C)
+ \tkzDrawCircles[red](O1,T1 O2,T2)
+ \tkzDrawPoints(A,B,C,P)
+ \tkzLabelPoints(A,B,C,P)
+\end{tikzpicture}
+  \end{Verbatim}
+
+
+
+
+
+% subsubsection method_c__ll__p (end)
+
+\subsubsection{Method \Imeth{triangle}{steiner\_line}} % (fold)
+\label{ssub:method_imeth_triangle_steiner__line}
+
+Let $ABC$ be a triangle with orthocenter $H$. $M$ is a point on the circumcircle  of the triangle $ABC$. 
+
+Let $H_A, H_B,$ and $H_C$ be the reflections of  $M$ in three lines  $BC$, $AC$ and $AB$ respectively.
+
+$P_A, P_B, P_C,$ and $H$ are collinear. The line is known as the Steiner line of point $M$ with respect to the triangle $ABC$.
+
+Whatever the point $M$, the Steiner line associated with $M$ passes through the orthocenter $H$ of triangle $ABC$.
+
+$M$ lies on the circumscribed circle of the triangle if and only if $P$, $Q$ and $R$ are aligned.
+
+\begin{Verbatim}
+  \directlua{
+   z.B            = point: new (0,0)
+   z.C            = point: new (4,0)
+   z.A            = point : new (1,4) 
+   T.ABC          = triangle: new(z.A,z.B,z.C)
+   C.ABC          = T.ABC : circum_circle ()
+   z.O            = T.ABC.circumcenter
+   z.H            = T.ABC.orthocenter
+   z.M            = C.ABC : point (.65)
+   z.H_P          = T.ABC.ab : reflection (z.M)
+   z.H_Q          = T.ABC.bc : reflection (z.M)
+   z.H_R          = T.ABC.ca : reflection (z.M)
+   L.steiner      = T.ABC :    steiner_line (z.M)
+   z.P            = T.ABC.ab : projection (z.M)
+   z.Q            = T.ABC.bc : projection (z.M)
+   z.R            = T.ABC.ca : projection (z.M)
+  }
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines[cyan,add= .5 and .5](A,C A,B B,C)
+  \tkzDrawLines[red,thick](H_P,H_Q)
+  \tkzDrawCircles(O,A)
+  \tkzDrawPoints(A,B,C,M,H_P,H_Q,H_R,O,H,P,Q,R)
+  \tkzLabelPoints(B,C,H_P,H_Q,H_R,R)
+  \tkzLabelPoints[above](O,H)
+  \tkzLabelPoints[above right](P,Q,A,M)
+  \tkzDrawSegments(M,H_P M,H_Q M,H_R)
+  \tkzMarkRightAngles(B,P,M M,R,A M,Q,B)
+  \end{tikzpicture}
+\end{Verbatim}
+
+
+\directlua{
+ z.B            = point: new (0,0)
+ z.C            = point: new (4,0)
+ z.A            = point : new (1,4) 
+ T.ABC          = triangle: new(z.A,z.B,z.C)
+ C.ABC          = T.ABC : circum_circle ()
+ z.O            = T.ABC.circumcenter
+ z.H            = T.ABC.orthocenter
+ z.M            = C.ABC : point (.65)
+ z.H_P          = T.ABC.ab : reflection (z.M)
+ z.H_Q          = T.ABC.bc : reflection (z.M)
+ z.H_R          = T.ABC.ca : reflection (z.M)
+ L.steiner      = T.ABC :    steiner_line (z.M)
+ z.P            = T.ABC.ab : projection (z.M)
+ z.Q            = T.ABC.bc : projection (z.M)
+ z.R            = T.ABC.ca : projection (z.M)
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines[cyan,add= .5 and .5](A,C A,B B,C)
+  \tkzDrawLines[red,thick](H_P,H_Q)
+  \tkzDrawCircles(O,A)
+  \tkzDrawPoints(A,B,C,M,H_P,H_Q,H_R,O,H,P,Q,R)
+  \tkzLabelPoints(B,C,H_P,H_Q,H_R,R)
+  \tkzLabelPoints[above](O,H)
+  \tkzLabelPoints[above right](P,Q,A,M)
+  \tkzDrawSegments(M,H_P M,H_Q M,H_R)
+  \tkzMarkRightAngles(B,P,M M,R,A M,Q,B)
+  \end{tikzpicture}
+\end{center}
+
+
+% subsubsection method_imeth_triangle_steiner__line (end)
+
+\subsubsection{Method \Imeth{triangle}{simson\_line}} % (fold)
+\label{ssub:method_imeth_triangle_simson__line}
+
+The Simson line is the line containing the feet $P$, $Q$, and $R$ of the perpendiculars from an arbitrary point $M$ on the circumcircle of a triangle to the sides or their extensions of the triangle.
+
+
+[\href{https://mathworld.wolfram.com/SimsonLine.html}{Jackson, Frank and Weisstein, Eric W. "Simson Line." From MathWorld--A Wolfram Web Resource.}]
+
+
+\begin{Verbatim}
+  \directlua{
+   z.B            = point: new (0,0)
+   z.C            = point: new (4,0)
+   z.A            = point : new (1,4) 
+   T.ABC          = triangle: new(z.A,z.B,z.C)
+   C.ABC          = T.ABC : circum_circle ()
+   z.O            = T.ABC.circumcenter
+   z.H            = T.ABC.orthocenter
+   z.M            = C.ABC : point (.65)
+   z.H_P          = T.ABC.ab : reflection (z.M)
+   z.H_Q          = T.ABC.bc : reflection (z.M)
+   z.H_R          = T.ABC.ca : reflection (z.M)
+   L.steiner      = T.ABC :    steiner_line (z.M)
+   z.P            = T.ABC.ab : projection (z.M)
+   z.Q            = T.ABC.bc : projection (z.M)
+   z.R            = T.ABC.ca : projection (z.M)
+   L.simson       = T.ABC :    simson_line (z.M)
+   z.sa,z.sb      = get_points(L.simson)
+  }
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines[cyan,add= .5 and .5](A,C A,B B,C)
+  \tkzDrawLines[red,thick](H_P,H_Q)
+  \tkzDrawLines[blue,thick](sa,sb)
+  \tkzDrawCircles(O,A)
+  \tkzDrawPoints(A,B,C,M,H_P,H_Q,H_R,O,H,P,Q,R)
+  \tkzLabelPoints(B,C,H_P,H_Q,H_R,R)
+  \tkzLabelPoints[above](O,H)
+  \tkzLabelPoints[above right](P,Q,A,M)
+  \tkzDrawSegments(M,H_P M,H_Q M,H_R)
+  \tkzMarkRightAngles(B,P,M M,R,A M,Q,B)
+  \end{tikzpicture}
+\end{Verbatim}
+
+
+  \directlua{
+   z.B            = point: new (0,0)
+   z.C            = point: new (4,0)
+   z.A            = point : new (1,4) 
+   T.ABC          = triangle: new(z.A,z.B,z.C)
+   C.ABC          = T.ABC : circum_circle ()
+   z.O            = T.ABC.circumcenter
+   z.H            = T.ABC.orthocenter
+   z.M            = C.ABC : point (.65)
+   z.H_P          = T.ABC.ab : reflection (z.M)
+   z.H_Q          = T.ABC.bc : reflection (z.M)
+   z.H_R          = T.ABC.ca : reflection (z.M)
+   L.steiner      = T.ABC :    steiner_line (z.M)
+   z.P            = T.ABC.ab : projection (z.M)
+   z.Q            = T.ABC.bc : projection (z.M)
+   z.R            = T.ABC.ca : projection (z.M)
+   L.simson       = T.ABC :    simson_line (z.M)
+   z.sa,z.sb      = get_points(L.simson)
+  }
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawLines[cyan,add= .5 and .5](A,C A,B B,C)
+    \tkzDrawLines[red,thick](H_P,H_Q)
+    \tkzDrawLines[blue,thick](sa,sb)
+    \tkzDrawCircles(O,A)
+    \tkzDrawPoints(A,B,C,M,H_P,H_Q,H_R,O,H,P,Q,R)
+    \tkzLabelPoints(B,C,H_P,H_Q,H_R,R)
+    \tkzLabelPoints[above](O,H)
+    \tkzLabelPoints[above right](P,Q,A,M)
+    \tkzDrawSegments(M,H_P M,H_Q M,H_R)
+    \tkzMarkRightAngles(B,P,M M,R,A M,Q,B)
+    \end{tikzpicture}
+  \end{center}
+
+
+
+% subsubsection method_imeth_triangle_simson__line (end)
+
+\subsubsection{Method \Imeth{triangle}{lemoine\_axis}} % (fold)
+\label{ssub:method_imeth_triangle_lemoine__line}
+
+Tangents to the circumcircle at the vertex are antiparallel to the opposite side. When extended,
+the intersections of the tangents and the opposite sides intersect in collinear points. This line
+is called the Lemoine Axis.
+
+The Lemoine axis of the triangle is the polar of the Lemoine point with respect to the circumscribed circle of the triangle. On this line also lie the three centers of the Apollonius circles, corresponding to the triplets (A, B, CA/CB), (B, C, AB/AC), (C, A, BC/BA).
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+  \directlua{
+    z.A   = point: new (0,0)
+    z.B   = point: new (5,1)
+    z.C   = point: new (1,2)
+      T   = triangle: new(z.A,z.B,z.C)
+    z.L   = T : lemoine_point ()
+    z.O   = T.circumcenter
+    L.L   = T : lemoine_axis ()
+    z.la,
+    z.lb  = get_points (L.L)
+    L.B   = T : brocard_axis ()
+    z.ba,
+    z.bb  = get_points (L.B)}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygons[cyan](A,B,C)
+   \tkzDrawLines[purple,add = 1 and 1](la,lb)
+   \tkzDrawLines[red,add = 1 and 1](ba,bb)
+   \tkzDrawCircle(O,A)
+   \tkzDrawPoints(A,B,L,O,la,lb)
+   \tkzLabelPoints(A,B,L,O)
+   \tkzLabelPoints[above](C)
+   \tkzLabelLine[sloped,above,purple](la,lb){Lemoine\_axis}
+   \tkzLabelLine[sloped,above,red](ba,bb){Brocard\_line}
+  \end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \directlua{
+    z.A   = point: new (0,0)
+    z.B   = point: new (5,1)
+    z.C   = point: new (1,2)
+      T   = triangle: new(z.A,z.B,z.C)
+    z.L   = T : lemoine_point ()
+    z.O   = T.circumcenter
+    L.L   = T : lemoine_axis ()
+    z.la,
+    z.lb  = get_points (L.L)
+    L.B   = T : brocard_axis ()
+    z.ba,
+    z.bb  = get_points (L.B)}
+  \begin{center}
+    \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygons[cyan](A,B,C)
+     \tkzDrawLines[purple,add = 1 and 1](la,lb)
+     \tkzDrawLines[red,add = 1 and 1](ba,bb)
+     \tkzDrawCircle(O,A)
+     \tkzDrawPoints(A,B,L,O,la,lb)
+     \tkzLabelPoints(A,B,L,O)
+     \tkzLabelPoints[above](C)
+     \tkzLabelLine[sloped,above,purple](la,lb){Lemoine\_axis}
+     \tkzLabelLine[sloped,above,red](ba,bb){Brocard\_line}
+    \end{tikzpicture}
+  \end{center}
+\end{minipage}
+
+% subsubsection method_imeth_triangle_lemoine__line (end)
+
+\subsubsection{Method \Imeth{triangle}{brocard\_axis}} % (fold)
+\label{ssub:method_imeth_triangle_brocard__axis}
+
+
+The Brocard axis is the line KO passing through the symmedian point K and circumcenter O of a triangle, where the segment  OK is the Brocard diameter (Kimberling 1998, p. 150). The Brocard axis is perpendicular to the Lemoine axis and is the isogonal conjugate of the Kiepert hyperbola.
+[\href{https://mathworld.wolfram.com/BrocardAxis.html}{Weisstein, Eric W. "Brocard Axis." From MathWorld--A Wolfram Web Resource.}]
+
+Refer to [\ref{ssub:method_imeth_triangle_lemoine__line}]
+% subsubsection method_imeth_triangle_brocard__axis (end)
+
+\subsubsection{Method \Imeth{triangle}{fermat\_axis}} % (fold)
+\label{ssub:method_imeth_triangle_fermat__axis}
+
+The Fermat axis is the  line connecting the first and second Fermat points.
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+  \directlua{
+   z.A       = point :   new (1,2)
+   z.B       = point :   new (5,1)
+   z.C       = point :   new (2.5,3)
+   T.ABC     = triangle : new (z.A,z.B,z.C)
+   z.F1      = T.ABC : first_fermat_point ()
+   z.F2      = T.ABC : second_fermat_point ()
+   L.F       = T.ABC : fermat_axis ()
+   z.a, z.b  = get_points(L.F)
+   z.L       = T.ABC : lemoine_point ()}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawLine(a,b)
+   \tkzDrawPoints(A,B,C)
+   \tkzDrawPoints(F1,F2,L)
+   \tkzLabelPoints[right](B,F1,F2,L)
+   \tkzLabelPoints[above](C)
+   \tkzLabelPoints(A)
+  \end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \directlua{
+     z.A       = point :   new (1,2)
+     z.B       = point :   new (5,1)
+     z.C       = point :   new (2.5,3)
+     T.ABC     = triangle : new (z.A,z.B,z.C)
+     z.F1      = T.ABC : first_fermat_point ()
+     z.F2      = T.ABC : second_fermat_point ()
+     L.F       = T.ABC : fermat_axis ()
+     z.a, z.b  = get_points(L.F)
+     z.L       = T.ABC : lemoine_point ()}
+    \begin{center}
+      \begin{tikzpicture}[scale =1.5]
+       \tkzGetNodes
+       \tkzDrawPolygon(A,B,C)
+       \tkzDrawLine(a,b)
+       \tkzDrawPoints(A,B,C)
+       \tkzDrawPoints(F1,F2,L)
+       \tkzLabelPoints[right](B,F1,F2,L)
+       \tkzLabelPoints[above](C)
+       \tkzLabelPoints(A)
+      \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+% subsubsection method_imeth_triangle_fermat__axis (end)
+
+\subsubsection{Method \Imeth{triangle}{taylor\_circle}} % (fold)
+\label{ssub:method_imeth_triangle_taylor__circle}
+
+The six projections of the feet of the heights of a triangle onto the adjacent sides are cocylic.
+
+\directlua{
+  init_elements()
+  z.A           = point :   new (0,0)
+  z.B           = point :   new (6,0)
+  z.C           = point :   new (2.8,4)
+  T.ABC         = triangle: new (z.A,z.B,z.C)
+  T.DEF         = T.ABC : orthic ()
+  z.D,z.E,z.F   = get_points (T.DEF)
+  z.D_1,
+  z.D_2,
+  z.E_1,
+  z.E_2,
+  z.F_1,
+  z.F_2         = T.ABC :taylor_points ()
+  C.taylor      = T.ABC :taylor_circle ()
+  z.w,z.t = get_points (C.taylor )
+}
+  \begin{center}
+\begin{tikzpicture}[scale = 1.25]
+  \tkzGetNodes
+  \tkzDrawPolygons(A,B,C D,E,F)
+  \tkzDrawPoints(A,B,...,F,D_1,D_2,E_1,E_2,F_1,F_2)
+  \tkzLabelPoints(A,B,F,E_1,D_2)
+  \tkzLabelPoints[above left](F_2,E,C,D_1)
+  \tkzLabelPoints[above right](E_2,D,F_1)
+  \tkzDrawSegments[orange](D,D_1 D,D_2)
+  \tkzDrawSegments[purple](E,E_1 E,E_2)
+  \tkzDrawSegments[red](F,F_1 F,F_2)
+  \tkzDrawCircles[blue](w,t)
+\end{tikzpicture}
+  \end{center}
+  
+  
+\begin{Verbatim}
+\directlua{
+  init_elements()
+  z.A           = point :   new (0,0)
+  z.B           = point :   new (6,0)
+  z.C           = point :   new (2.8,4)
+  T.ABC         = triangle: new (z.A,z.B,z.C)
+  T.DEF         = T.ABC : orthic ()
+  z.D,z.E,z.F   = get_points (T.DEF)
+  z.D_1,
+  z.D_2,
+  z.E_1,
+  z.E_2,
+  z.F_1,
+  z.F_2         = T.ABC :taylor_points ()
+  C.taylor      = T.ABC :taylor_circle ()
+  z.w,z.t       = get_points (C.taylor )
+}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPolygons(A,B,C D,E,F)
+  \tkzDrawPoints(A,B,...,F,D_1,D_2,E_1,E_2,F_1,F_2)
+  \tkzLabelPoints(A,B,F,E_1,D_2)
+  \tkzLabelPoints[above left](F_2,E,C,D_1)
+  \tkzLabelPoints[above right](E_2,D,F_1)
+  \tkzDrawSegments[orange](D,D_1 D,D_2)
+  \tkzDrawSegments[purple](E,E_1 E,E_2)
+  \tkzDrawSegments[red](F,F_1 F,F_2)
+  \tkzDrawCircles[blue](w,t)
+\end{tikzpicture}
+\end{Verbatim}
+
+
+% subsubsection method_imeth_triangle_taylor__circle (end)
+
+\subsubsection{Method \Imeth{triangle}{isogonal}} % (fold)
+\label{ssub:method_imeth_triangle_isogonal}
+
+The isogonal conjugate $y$ of a point $x$ in the plane of the triangle $ABC$ is constructed by reflecting the lines Ax,  Bx, and Cx about the angle bisectors at A, B, and C. The three reflected lines then concur at the isogonal conjugate $y$.
+
+The isogonal conjugate can be obtained in another way. It is the center of the circle passing through the three points obtained by reflection of the $x$ point with respect to the triangle's three sides.
+This is the method I used.
+
+To verify that my method is correct, I obtained the circumcenter as the isogonal conjugate of the orthocenter.
+
+A point $M$ being chosen on the circumcircle, the isogonal conjugates of the points on the tangent to the circle at $M$ trace a parabola passing through the vertices of the triangle. One difficulty is the chaotic order in which these conjugates move along the parabola. The intersection points of the sides with the tangent are the conjugates of the triangle's vertices. Points near $M$ move toward infinity.
+
+\begin{Verbatim}
+  \directlua{
+     z.a   = point: new (0 , 0)
+     z.b   = point: new (4 , 0)
+     z.c   = point: new (1 , 4)
+     T.abc = triangle : new (z.a,z.b,z.c)
+     z.H   = T.abc.orthocenter
+     z.O   = T.abc : isogonal (z.H)
+     z.I   = T.abc.incenter
+     C     = circle : new (z.O,z.a)
+     z.M   = C : point (0.45)
+     Ta    = C :tangent_at (z.M)
+     z.u   = Ta.pb
+     z.v   = Ta.pa 
+     z.x   = intersection (Ta,T.abc.ca)
+     z.y   = T.abc : isogonal (z.x)
+     points = {}
+     for t = 1.5, 50, 1/10 do
+       local x = Ta : point (t)
+       local y = T.abc : isogonal (x)
+       table.insert (points, "("..checknumber(y.re)..","..checknumber(y.im)..")")    
+     end
+     for t = -55, 0.2, 1/10 do
+       local x = Ta : point (t)
+       local y = T.abc : isogonal (x)
+       table.insert (points, "("..checknumber(y.re)..","..checknumber(y.im)..")")    
+     end
+  }
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(a,b,c)
+     \tkzDrawCoordinates[smooth,red,thick](points)
+     \tkzDrawLines[add =.25 and .25](x,v a,b b,c a,x)
+     \tkzDrawPoints(a,b,c,H,M,x,y,H,O)
+     \tkzLabelPoints(a,b,M,H,O)
+     \tkzLabelPoints[above](c,x,y)
+     \tkzDrawCircles(O,a)
+  \end{tikzpicture}
+\end{Verbatim}
+
+
+\directlua{
+   z.a   = point: new (0 , 0)
+   z.b   = point: new (4 , 0)
+   z.c   = point: new (1 , 4)
+   T.abc = triangle : new (z.a,z.b,z.c)
+   z.H   = T.abc.orthocenter
+   z.O   = T.abc : isogonal (z.H)
+   z.I   = T.abc.incenter
+   C     = circle : new (z.O,z.a)
+   z.M   = C : point (0.45)
+   Ta    = C :tangent_at (z.M)
+   z.u   = Ta.pb
+   z.v   = Ta.pa 
+   z.x   = intersection (Ta,T.abc.ca)
+   z.y   = T.abc : isogonal (z.x)
+   points = {}
+   for t = 1.5, 50, 1/10 do
+     local x = Ta : point (t)
+     local y = T.abc : isogonal (x)
+     table.insert (points, "("..checknumber(y.re)..","..checknumber(y.im)..")")    
+   end
+   for t = -55, 0.2, 1/10 do
+     local x = Ta : point (t)
+     local y = T.abc : isogonal (x)
+     table.insert (points, "("..checknumber(y.re)..","..checknumber(y.im)..")")    
+   end
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(a,b,c)
+   \tkzDrawCoordinates[smooth,red,thick](points)
+   \tkzDrawLines[add =.25 and .25](x,v a,b b,c a,x)
+   \tkzDrawPoints(a,b,c,H,M,x,y,H,O)
+   \tkzLabelPoints(a,b,M,H,O)
+   \tkzLabelPoints[above](c,x,y)
+   \tkzDrawCircles(O,a)
+\end{tikzpicture}
+
+% subsubsection method_imeth_triangle_isogonal (end)
+
+\subsubsection{Methods \Imeth{triangle}{kenmotu\_circle()} and\Imeth{triangle}{kenmotu\_point()} } % (fold)
+\label{ssub:methods_imeth_triangle_kenmotu_circle}
+
+\begin{SVerbatim}
+z.A = point:new(1.6, 4.5)
+z.B = point:new(0, 0)
+z.C = point:new(5, 0)
+T.ABC = triangle:new(z.A,z.B,z.C)
+local ken_circle = T.ABC:kenmotu_circle()
+z.K = ken_circle.center
+z.T = ken_circle.through
+
+local sides = {T.ABC.ab, T.ABC.bc, T.ABC.ca}
+local intersection_points = {}
+for i = 1, 3 do
+  local p1, p2 = intersection(sides[i], ken_circle)
+  intersection_points[2*i-1] = p1
+  intersection_points[2*i] = p2
+end
+
+local squares = {}
+local circumcenters = {}
+local triangles = {}
+
+for i = 0, 2 do
+  squares[i+1] = T.ABC:square_inscribed(i)
+  local _,_,c,d = get_points(squares[i+1])
+  local points = {z.A, z.B, z.C}
+  triangles[i+1] = triangle:new(points[i+1], c, d)
+  circumcenters[i+1] = triangles[i+1].circumcenter
+end
+
+local circles = {}
+for i = 1, 3 do
+  local points = {z.A, z.B, z.C}
+  circles[i] = circle:new(circumcenters[i], points[i])
+end
+
+local intersections = {}
+intersections[1] = intersection(circles[1], circles[2])
+intersections[2] = intersection(circles[2], circles[3])
+intersections[3] = intersection(circles[1], circles[3])
+
+local p7 = intersection_points[1] + intersection_points[6] - z.K
+local p8 = intersection_points[2] + intersection_points[3] - z.K
+local p9 = intersection_points[4] + intersection_points[5] - z.K
+
+z.p1 = intersection_points[1]
+z.p2 = intersection_points[2]
+z.p3 = intersection_points[3]
+z.p4 = intersection_points[4]
+z.p5 = intersection_points[5]
+z.p6 = intersection_points[6]
+z.p7 = p7
+z.p8 = p8
+z.p9 = p9
+}
+
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawCircles(K,T)
+\tkzFillPolygon[opacity=.4,red!40](K,p1,p7,p6)
+\tkzFillPolygon[opacity=.4,blue!40](K,p2,p8,p3)
+\tkzFillPolygon[opacity=.4,orange!40](K,p4,p9,p5)
+\tkzDrawPolygons(A,B,C K,p1,p7,p6 K,p2,p8,p3 K,p4,p9,p5)
+\tkzDrawPoints(K)
+\tkzLabelPoints(B,C)
+\tkzDrawPoints(p1,p2,p3,p4,p5,p6,p7,p8,p9)
+\tkzLabelPoints[above](A,K)
+\end{tikzpicture}
+\end{SVerbatim}
+
+\directlua{%
+z.A = point:new(1.6, 4.5)
+z.B = point:new(0, 0)
+z.C = point:new(5, 0)
+T.ABC = triangle:new(z.A,z.B,z.C)
+local ken_circle = T.ABC:kenmotu_circle()
+z.K = ken_circle.center
+z.T = ken_circle.through
+
+local sides = {T.ABC.ab, T.ABC.bc, T.ABC.ca}
+local intersection_points = {}
+for i = 1, 3 do
+  local p1, p2 = intersection(sides[i], ken_circle)
+  intersection_points[2*i-1] = p1
+  intersection_points[2*i] = p2
+end
+
+local squares = {}
+local circumcenters = {}
+local triangles = {}
+
+for i = 0, 2 do
+  squares[i+1] = T.ABC:square_inscribed(i)
+  local _,_,c,d = get_points(squares[i+1])
+  local points = {z.A, z.B, z.C}
+  triangles[i+1] = triangle:new(points[i+1], c, d)
+  circumcenters[i+1] = triangles[i+1].circumcenter
+end
+
+local circles = {}
+for i = 1, 3 do
+  local points = {z.A, z.B, z.C}
+  circles[i] = circle:new(circumcenters[i], points[i])
+end
+
+local intersections = {}
+intersections[1] = intersection(circles[1], circles[2])
+intersections[2] = intersection(circles[2], circles[3])
+intersections[3] = intersection(circles[1], circles[3])
+
+local p7 = intersection_points[1] + intersection_points[6] - z.K
+local p8 = intersection_points[2] + intersection_points[3] - z.K
+local p9 = intersection_points[4] + intersection_points[5] - z.K
+
+z.p1 = intersection_points[1]
+z.p2 = intersection_points[2]
+z.p3 = intersection_points[3]
+z.p4 = intersection_points[4]
+z.p5 = intersection_points[5]
+z.p6 = intersection_points[6]
+z.p7 = p7
+z.p8 = p8
+z.p9 = p9
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale = 1.25]
+  \tkzGetNodes
+  \tkzDrawCircles(K,T)
+  \tkzFillPolygon[opacity=.4,red!40](K,p1,p7,p6)
+  \tkzFillPolygon[opacity=.4,blue!40](K,p2,p8,p3)
+  \tkzFillPolygon[opacity=.4,orange!40](K,p4,p9,p5)
+  \tkzDrawPolygons(A,B,C K,p1,p7,p6 K,p2,p8,p3 K,p4,p9,p5)
+  \tkzDrawPoints(K)
+  \tkzLabelPoints(B,C)
+  \tkzDrawPoints(p1,p2,p3,p4,p5,p6,p7,p8,p9)
+  \tkzLabelPoints[above](A,K)
+  \end{tikzpicture}
+\end{center}
+
+
+% subsubsection methods_imeth_triangle_kenmotu_circle (end)
+% % subsection methods_of_the_class_triangle (end)
+% % section class_triangle (end)
+\endinput

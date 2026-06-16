@@ -1,0 +1,242 @@
+\begin{tikzpicture}
+  \renewcommand*\sfdefault{txss}
+  \sffamily
+  \sisetup{
+    detect-all=true,
+    group-separator={,},
+    group-minimum-digits=4,
+  }
+  % storage of labels
+  \newcommand\LabSet[2]{% node name, label
+    \expandafter\edef\csname#1@Lab\endcsname{#2}}
+  \newcommand\Lab[1]{% node name
+    \csname#1@Lab\endcsname}
+  % storage of quantities
+  \newcommand\QtySet[2]{% node name, quantity
+    \expandafter\edef\csname#1@Qty\endcsname{\fpeval{#2}}}
+  \newcommand\Qty[1]{% node name
+    \csname#1@Qty\endcsname}
+  % all nodes with their name, label and quantity
+  \sankeyset{
+    def data/.code args={#1/#2/#3}{% node name/label/values
+      \LabSet{#1}{#2}
+      \QtySet{#1}{#3}
+      \typeout{#1: \Qty{#1}€ (\Lab{#1})}
+    },
+    def data/.list={
+      {Pf/Processing\\fees/71713},
+      {Sog/Sales of\\good/4547},
+      {Sf/Settlement\\fees/842075},
+      {Os/Other\\services/37532},
+      {R/Revenues/\Qty{Pf}+\Qty{Sog}+\Qty{Sf}+\Qty{Os}},
+      {Coi/Cost of Inventory/5151},
+      {Ciffi/Cost insecure from financial institutions/758234},
+      {Nr/Net revenue/\Qty{R}-\Qty{Coi}-\Qty{Ciffi}},
+      {Aadotaifa/Amortization and\\depreciation of tangible and\\
+        intangible fixed assets/4688},
+      {Ssapc/Social securities and\\pension costs/7860},
+      {Was/Wages and salaries/35627},
+      {Ooe/Other operating expenses/37346},
+      {Nr2/-/\Qty{Nr}-\Qty{Aadotaifa}-\Qty{Ssapc}-\Qty{Was}-\Qty{Ooe}},
+      {Oi/Other income/47},
+      {Ibiiieait/Income before interest income,\\interest expense and
+        income taxes/\Qty{Nr2}+\Qty{Oi}},
+      {Fe/Finance expense/561},
+      {Ofr/Other financial results/2533},
+      {Ibiiieait2/-/\Qty{Ibiiieait}-\Qty{Fe}-\Qty{Ofr}},
+      {Fi/Finance income/204},
+      {Ibit/Income before income taxes/\Qty{Ibiiieait2}+\Qty{Fi}},
+      {It/Income taxes/21134},
+      {Niftp/Net income for the period/\Qty{Ibit}-\Qty{It}},
+      {Octa/Other currency\\translation adjustments/785},
+      {Tci/Total comprehensive income/\Qty{Niftp}+\Qty{Octa}}
+    },
+  }
+
+  \definecolor{mygreen}{RGB}{9,192,82}
+  \tikzset{
+    cost node/.style={
+      overlay,
+      align=flush center,
+      node font=\footnotesize\sffamily\bfseries,
+      inner sep=0,
+      node contents={%
+        {\mdseries€\,\num{\Qty{#1}}}\\
+        \Lab{#1}\vphantom{g}%
+      },
+    },
+    white hash/.style={
+      draw=none,fill=none,
+      pattern={Lines[angle=60,line width=2pt,distance=4pt]},
+      pattern color=white,
+    },
+    line sep/.style={draw=white,line width=1pt},
+    left label/.style={left=#1,align=flush right,anchor=north east},
+    right label/.style={right=#1,align=flush left},
+    right label hashed/.style={
+      right=1mm of $(#1.left)!.5!(#1-old.left)$,align=flush left,
+    },
+    left label hashed/.style={
+      left=1mm of $(#1.right)!.5!(#1-old.right)$,align=flush right,
+    },
+  }
+
+  \newcommand\turnandstop[1]{
+    \sankeyturn[green to greenwhite]{#1}{-90}
+    \sankeynode{as=#1,name=#1-e,at={#1 -| Coi}}
+    \sankeyoutin[greenwhite to white]{#1}{#1-e}
+    \node[cost node=#1,left label={1mm of #1-e.right}];
+  }
+
+  \begin{sankeydiagram}%[debug]
+    \sankeyset{
+      ratio=28em/1000000,
+      minimum radius=2cm,
+      start style=none,
+      every node/.style={angle=-90},
+      % default fill and draw styles
+      fill/.style={
+        line width=0pt,
+        fill=mygreen,
+      },
+      draw/.style={draw=none},
+      % specific fill and draw styles
+      green to greenwhite/.style={
+        fill/.style={
+          line width=0pt,
+          right color=mygreen,
+          left color=mygreen!20!white,
+        }
+      },
+      greenwhite to white/.style={
+        fill/.style={
+          line width=0pt,
+          right color=mygreen!20!white,
+          left color=mygreen!5!white,
+        }
+      },
+      dashed/.style={draw/.style={draw=mygreen,dashed}},
+    }
+
+    \coordinate (top) at (0,2em);
+
+    \sankeynodestart{name=Pf,quantity=\Qty{Pf}}
+    \node[cost node=Pf,above=.5em of Pf.center];
+
+    \sankeynodestart{name=Sog,quantity=\Qty{Sog},
+      at={[xshift=4em]Pf.left},anchor=right}
+    \node[cost node=Sog,above=.5em of Sog.center];
+
+    \sankeynodestart{name=Sf,quantity=\Qty{Sf},
+      at={[xshift=2em]Sog.left},anchor=right}
+    \node[cost node=Sf,above=.5em of Sf.center];
+
+    \sankeynodestart{name=Os,quantity=\Qty{Os},
+      at={[xshift=2em]Sf.left},anchor=right}
+    \node[cost node=Os,above=.5em of Os.center];
+
+    \sankeynode{
+      name=R,quantity=\Qty{R},at={[yshift=-10em]Sf.center},
+      forked={\Qty{Os}/Os-a,\Qty{Sf}/Sf-a,\Qty{Sog}/Sog-a,\Qty{Pf}/Pf-a},
+    }
+
+    \foreach \nodename in {Pf,Sog,Sf,Os}{
+      \sankeyoutin[fill/.style={top color=white,bottom color=mygreen}]
+      {\nodename}{\nodename-a}
+    }
+
+    \sankeyadvance{R}{1em}
+    \node[cost node=R,right label hashed=R];
+
+    \sankeyfork{R}{\Qty{Ciffi}/Ciffi,\Qty{Nr}/Nr,\Qty{Coi}/Coi}
+
+    \sankeyturnleft[minimum radius=1.cm]{Ciffi}{90}
+    \node[cost node=Ciffi,at={([shift={(1mm,0)}]Ciffi.center)},rotate=-90,
+    anchor=south,align=flush left,node font=\scriptsize\sffamily\bfseries];
+
+    \sankeyturnright[green to greenwhite]{Coi}{90}
+    \sankeyadvance[greenwhite to white]{Coi}{1em}
+    \node[cost node=Coi,left={1mm of [yshift=.75ex]Coi.left},
+    align=flush right,anchor=north east,overlay];
+
+    \sankeyadvance{Nr}{9em}
+    \sankeyadvance{Nr}{1em}
+    \node[cost node=Nr,left label hashed=Nr,
+    node font=\large\sffamily\bfseries];
+
+    \sankeyfork{Nr}{\Qty{Nr2}/Nr2,\Qty{Ooe}/Ooe,
+      \Qty{Was}/Was,\Qty{Ssapc}/Ssapc,\Qty{Aadotaifa}/Aadotaifa}
+
+    \turnandstop{Aadotaifa}
+
+    \sankeyadvance{Ssapc}{5em}
+    \turnandstop{Ssapc}
+
+    \sankeyadvance{Was}{9em}
+    \turnandstop{Was}
+
+    \sankeyadvance{Ooe}{12em}
+    \turnandstop{Ooe}
+
+    \sankeyadvance{Nr2}{15em}
+    \sankeynode{name=Ibiiieait,quantity=\Qty{Ibiiieait},
+      anchor=right,at={Nr2.right},
+      forked={\Qty{Oi}/Oi,\Qty{Nr2}/Nr2-e}}
+
+    \sankeyturnleftbackward[minimum radius=1cm,dashed]{Oi}{90}
+    \node[cost node=Oi,right label=1mm of Oi.left];
+
+    \sankeyadvance{Ibiiieait}{1em}
+    \node[cost node=Ibiiieait,right label hashed=Ibiiieait];
+
+    \sankeyfork{Ibiiieait}
+    {\Qty{Ibiiieait2}/Ibiiieait2,\Qty{Ofr}/Ofr,\Qty{Fe}/Fe}
+
+    \turnandstop{Fe}
+
+    \sankeyadvance{Ofr}{3em}
+    \turnandstop{Ofr}
+
+    \sankeyadvance{Ibiiieait2}{6em}
+    \sankeynode{name=Ibit,quantity={\Qty{Ibiiieait2}+\Qty{Fi}},
+      anchor=right,at={Ibiiieait2.right},
+      forked={\Qty{Fi}/Fi,\Qty{Ibiiieait2}/Ibiiieait2-e}}
+
+    \sankeyturnleftbackward[minimum radius=1cm,dashed]{Fi}{90}
+    \node[cost node=Fi,right label=1mm of Fi.left];
+
+    \sankeyadvance{Ibit}{1em}
+    \node[cost node=Ibit,right label hashed=Ibit];
+
+    \sankeyfork{Ibit}{\Qty{Niftp}/Niftp,\Qty{It}/It}
+
+    \turnandstop{It}
+
+    \sankeyadvance{Niftp}{6em}
+
+    \sankeyadvance{Niftp}{1em}
+    \node[cost node=Niftp,right label hashed=Niftp];
+
+    \sankeynode{name=Tci,quantity=\Qty{Niftp}+\Qty{Octa},
+      anchor=right,at={[yshift=-6em]Niftp.right},
+      forked={\Qty{Octa}/Octa,\Qty{Niftp}/Niftp-e}}
+    \sankeyoutin{Niftp}{Niftp-e}
+
+    \sankeyturnleftbackward[minimum radius=1cm]{Octa}{90}
+    \node[cost node=Octa,right label=1mm of Octa.left];
+
+    \sankeyadvance{Tci}{1em}
+    \node[cost node=Tci,right label hashed=Tci];
+
+    \newcommand\hashband[1]{
+      \draw[line sep] (#1-old.right) -- (#1-old.left);
+      \draw[line sep] (#1.right) -- (#1.left);
+      \path[white hash] (#1-old.right) rectangle (#1.left);
+    }
+
+    \foreach \nodename in {R,Nr,Nr,Ibiiieait,Ibit,Niftp,Tci}{
+      \hashband{\nodename}
+    }
+
+  \end{sankeydiagram}
+\end{tikzpicture}

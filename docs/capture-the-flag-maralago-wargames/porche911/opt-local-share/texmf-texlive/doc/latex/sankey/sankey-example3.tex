@@ -1,0 +1,142 @@
+\begin{tikzpicture}
+  \begin{sankeydiagram}%[debug]
+    \sffamily
+    \sankeyset{
+      ratio=1cm/10,
+      outin steps=2,
+      draw/.style={draw=none,line width=0pt},
+      color/.style={fill/.style={fill=#1,fill opacity=.75}},
+      shade/.style 2 args={fill/.style={left color=#1,
+          right color=#2,fill opacity=.5}},
+      % colors
+      @define HTML color/.code args={#1/#2}{\definecolor{#1}{HTML}{#2}},
+      @define HTML color/.list={
+        cyan/a6cee3,lime/b2df8a,red/fb9a99,orange/fdbf6f,
+        violet/cab2d6,yellow/ffff99,blue/1f78b4,green/33a02c
+      },
+      % colors of countries
+      @let country color/.code args={#1/#2}{\colorlet{#1}[rgb]{#2}},
+      @let country color/.list={
+        CA/red,US/orange,MX/orange,BR/cyan,FR/lime,GB/red,
+        SP/lime,PT/cyan,ML/blue,SN/violet,MA/yellow,
+        AO/violet,ZA/yellow,IN/green,JP/green,CN/blue
+      },
+    }
+    \def\vdist{5mm}
+    \def\hwidth{.5em}
+    \def\hdist{4.1cm}
+
+    \sankeynode{name=CA,quantity=7}
+    \sankeynode{name=US,quantity=8,at={[yshift=\vdist]CA.left},anchor=right}
+    \sankeynode{name=MX,quantity=8,at={[yshift=\vdist]US.left},anchor=right}
+    \sankeynode{name=BR,quantity=8,at={[yshift=\vdist]MX.left},anchor=right}
+
+    \foreach \country in {CA,US,MX,BR}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{CA}{1/CA-to-PT,1/CA-to-GB,5/CA-to-FR}
+    \sankeyfork{US}{1/US-to-PT,1/US-to-SP,5/US-to-GB,1/US-to-FR}
+    \sankeyfork{MX}{1/MX-to-PT,5/MX-to-SP,1/MX-to-GB,1/MX-to-FR}
+    \sankeyfork{BR}{5/BR-to-PT,1/BR-to-SP,1/BR-to-GB,1/BR-to-FR}
+
+    \sankeynode{name=FR,quantity=11,
+      at={[xshift=\hdist]CA.right},anchor=right}
+    \sankeynode{name=GB,quantity=11,
+      at={[yshift=\vdist]FR.left},anchor=right}
+    \sankeynode{name=SP,quantity=7,
+      at={[yshift=\vdist]GB.left},anchor=right}
+    \sankeynode{name=PT,quantity=8,
+      at={[yshift=\vdist]SP.left},anchor=right}
+
+    \sankeyfork{FR}
+    {1/FR-from-BR,1/FR-from-MX,1/FR-from-US,5/FR-from-CA,3/FR-from-00}
+    \sankeyfork{GB}
+    {1/GB-from-BR,1/GB-from-MX,5/GB-from-US,1/GB-from-CA,3/GB-from-00}
+    \sankeyfork{SP}{1/SP-from-BR,5/SP-from-MX,1/SP-from-US}
+    \sankeyfork{PT}{5/PT-from-BR,1/PT-from-MX,1/PT-from-US,1/PT-from-CA}
+
+    \foreach \country in {FR,GB,SP,PT}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{FR}{1/FR-to-ZA,1/FR-to-AO,3/FR-to-MA,3/FR-to-SN,3/FR-to-ML}
+    \sankeyfork{GB}{7/GB-to-ZA,1/GB-to-AO,2/GB-to-MA,1/GB-to-SN}
+    \sankeyfork{SP}{1/SP-to-ZA,3/SP-to-MA,1/SP-to-SN,2/SP-to-00}
+    \sankeyfork{PT}{3/PT-to-ZA,2/PT-to-AO,1/PT-to-MA,1/PT-to-SN,1/PT-to-00}
+
+    \sankeynode{name=ML,quantity=9,
+      at={[xshift=\hdist]FR.right},anchor=right}
+    \sankeynode{name=SN,quantity=9,
+      at={[yshift=\vdist]ML.left},anchor=right}
+    \sankeynode{name=MA,quantity=9,
+      at={[yshift=\vdist]SN.left},anchor=right}
+    \sankeynode{name=AO,quantity=9,
+      at={[yshift=\vdist]MA.left},anchor=right}
+    \sankeynode{name=ZA,quantity=12,
+      at={[yshift=\vdist]AO.left},anchor=right}
+
+    \sankeyfork{ML}{3/ML-from-FR,6/Mail-from-00}
+    \sankeyfork{SN}
+    {1/SN-from-PT,1/SN-from-SP,1/SN-from-GB,3/SN-from-FR,3/SN-from-00}
+    \sankeyfork{MA}{1/MA-from-PT,3/MA-from-SP,2/MA-from-GB,3/MA-from-FR}
+    \sankeyfork{AO}{2/AO-from-PT,1/AO-from-GB,1/AO-from-FR,5/AO-from-00}
+    \sankeyfork{ZA}{3/ZA-from-PT,1/ZA-from-SP,7/ZA-from-GB,1/ZA-from-FR}
+
+    \foreach \country in {ML,SN,MA,AO,ZA}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{ML}{5/ML-to-CN,3/ML-to-JP,1/ML-to-IN}
+    \sankeyfork{SN}{5/SN-to-CN,3/SN-to-JP,1/SN-to-IN}
+    \sankeyfork{MA}{5/MA-to-CN,3/MA-to-JP,1/MA-to-IN}
+    \sankeyfork{AO}{5/AO-to-CN,3/AO-to-JP,1/AO-to-IN}
+    \sankeyfork{ZA}{5/ZA-to-CN,3/ZA-to-JP,1/ZA-to-IN,3/ZA-to-00}
+
+    \sankeynode{name=IN,quantity=5,
+      at={[xshift=\hdist]ML.right},anchor=right}
+    \sankeynode{name=JP,quantity=15,
+      at={[yshift=\vdist]IN.left},anchor=right}
+    \sankeynode{name=CN,quantity=25,
+      at={[yshift=\vdist]JP.left},anchor=right}
+
+    \sankeyfork{IN}
+    {1/IN-from-ZA,1/IN-from-AO,1/IN-from-MA,1/IN-from-SN,1/IN-from-ML}
+    \sankeyfork{JP}
+    {3/JP-from-ZA,3/JP-from-AO,3/JP-from-MA,3/JP-from-SN,3/JP-from-ML}
+    \sankeyfork{CN}
+    {5/CN-from-ZA,5/CN-from-AO,5/CN-from-MA,5/CN-from-SN,5/CN-from-ML}
+
+    \foreach \country in {IN,JP,CN}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \foreach \startcountry/\countries in {
+      CA/{PT,GB,FR},    US/{PT,SP,GB,FR},    MX/{PT,SP,GB,FR},
+      BR/{PT,SP,GB,FR}, FR/{ML,SN,MA,AO,ZA}, GB/{SN,MA,AO,ZA},
+      SP/{SN,MA,ZA},    PT/{SN,MA,AO,ZA},    ML/{IN,JP,CN},
+      SN/{IN,JP,CN},    MA/{IN,JP,CN},       AO/{IN,JP,CN},
+      ZA/{IN,JP,CN}}
+    {
+      \foreach \endcountry in \countries {
+        \sankeyoutin[shade={\startcountry}{\endcountry}]
+        {\startcountry-to-\endcountry}{\endcountry-from-\startcountry}
+      }
+    }
+
+    \foreach \country/\countryname in {CA/Canada, US/USA, MX/Mexico,
+      BR/Brazil, FR/France, GB/England, SP/Spain, PT/Portugal}
+    {
+      \node[anchor=west,inner sep=.1em,font=\small]
+      at (\country) {\countryname\vphantom{Ag}};
+    }
+
+    \foreach \country/\countryname in {
+      ML/Mali, SN/Senegal, MA/Morocco, AO/Angola,
+      ZA/South Africa, IN/India, JP/Japan, CN/China}
+    {
+      \node[anchor=east,inner sep=.1em,font=\small]
+      at (\country-old) {\countryname\vphantom{Ag}};
+    }
+  \end{sankeydiagram}
+\end{tikzpicture}

@@ -1,0 +1,97 @@
+\section{Work organization} % (fold)
+\label{sec:work_organization}
+
+Here's a sample organization. 
+
+The line |% !TEX TS-program = lualatex| ensures that you compile with Lua\LATEX{}. The \code{standalone} class is useful, as all you need to do here is create a figure.
+
+You can load \tkzname{tkz-euclide} in three different ways. The simplest is |\usepackage[mini]{tkz-euclide}| and you have full access to the package. You also have the option to use the \ItkzPopt{tkz-euclide}{lua} option. This will allow you, if you want to perform calculations outside of \tkzname{\tkznameofpack}, to obtain them using \code{lua}. Finally, the recommended method is to use the \ItkzPopt{tkz-euclide}{mini} option. This allows you to load only the modules necessary for drawing. You can still optionally draw using \TIKZ.
+
+The package \pkg{ifthen} is useful if you need to use some Boolean.
+
+While it's possible  to leave the Lua code in the  macro |directlua|, externalizing this code has its advantages. 
+
+The first advantage is that, if you use a good editor, you have a better presentation of the code. Styles differ between \code{Lua} and \LATEX{}, making the code clearer. This is how I proceeded, then reintegrated the code into the main code.
+
+Another advantage is that you don't have to incorrectly comment the code. For Lua code, you comment lines with |--| (double minus sign), whereas for \LATEX{}, you comment with |%|.
+
+A third advantage is that the code can be reused.
+
+
+\begin{minipage}{.5\textwidth}
+\begin{SVerbatim}
+% !TEX TS-program = lualatex
+% Created by Alain Matthes on 2024-01-09.
+\documentclass[margin = 12pt]{standalone} 
+\usepackage[mini]{tkz-euclide}
+\usepackage{tkz-elements,ifthen}
+
+\begin{document}  
+\directlua{
+ init_elements()
+ dofile ("sangaku.lua")
+}
+\begin{tikzpicture}[scale = 1.25]
+   \tkzGetNodes
+   \tkzDrawCircle(I,F)
+   \tkzFillPolygon[color = purple](A,C,D)%
+   \tkzFillPolygon[color = blue!50!black](A,B,C)%
+   \tkzFillCircle[color = orange](I,F)%
+\end{tikzpicture}
+\end{document}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{
+ init_elements()
+ dofile ("sangaku.lua")
+}
+
+\begin{center}
+  \begin{tikzpicture}[ scale = .75]
+     \tkzGetNodes
+     \tkzDrawCircle(I,F)
+     \tkzFillPolygon[color = purple](A,C,D)%
+     \tkzFillPolygon[color = blue!50!black](A,B,C)%
+     \tkzFillCircle[color = orange](I,F)%
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+\vspace{12pt}
+And here is the code for the \code{Lua} part: the file |ex_sangaku.lua|
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{mybox}
+\begin{SVerbatim}
+ z.A = point:new(0, 0)
+ z.B = point:new(8, 0)
+ L.AB = line:new(z.A, z.B)
+ S = L.AB:square()
+ _, _, z.C, z.D = get_points(S)
+ z.F = S.ac:projection(z.B)
+ L.BF = line:new(z.B, z.F)
+ T.ABC = triangle:new(z.A, z.B, z.C)
+ L.bi = T.ABC:bisector(2)
+ z.c = L.bi.pb
+ L.Cc = line:new(z.C, z.c)
+ z.I = intersection(L.Cc, L.BF)
+\end{SVerbatim}
+\end{mybox}
+\end{minipage}
+
+\subsection{Scale problem} % (fold)
+\label{sub:scale_problem}
+
+With the next version, I had previously suggested that it was preferable to perform scaling in the \code{Lua} part. However, from now on, the opposite will be true. Since all calculations are carried out in Lua, scaling with \TIKZ{} is not a problem after all. Moreover, the recent addition of functions for conics has caused several difficulties due to the handling of numerous distances (i.e., real numbers). This led me to review some functions, and I fixed a few bugs related to the use of scaling in the Lua part.
+From now on, scaling should be reserved for the \TIKZ{} part.
+
+The following documentation uses only scaling in the \tkzNameEnv{tikzpicture}.
+\subsection{Code presentation} % (fold)
+\label{sub:code_presentation}
+
+The key point is that, unlike \LATEX{} or \TEX{}, you can insert spaces absolutely anywhere. 
+% subsection code_presentation (end)
+% subsection scale_problem (end)
+% section work_organization (end)

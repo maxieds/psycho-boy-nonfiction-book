@@ -1,0 +1,553 @@
+=begin man
+
+.\" Turn off justification.
+.na
+
+=end man
+
+=head1 NAME
+
+typog-grep - specialized grep for typog-inspect elements in LaTeX log files
+
+=head1 SYNOPSIS
+
+=over
+
+=item B<typog-grep> -a|--all|--any [I<OPTION>...] F<LOG-FILE>...
+
+=item B<typog-grep> [I<OPTION>...] I<REGEXP> F<LOG-FILE>...
+
+=back
+
+The first form, ``discovery mode'', shows all I<ID>s of
+
+=begin text
+
+<typog-inspect id="ID" ...>
+
+=end text
+
+=begin man
+
+.RS
+.EX
+<typog-inspect id="\fI\,ID\/\fP" ...>
+.EE
+.RE
+
+=end man
+
+=begin texinfo
+
+@example
+<typog-inspect id="@var{ID}" ...>
+@end example
+@noindent
+
+=end texinfo
+
+Z<>
+elements in F<LOG-FILE>.
+
+The second form shows the contents, I<LOG-DATA>, of the elements
+
+=begin text
+
+<typog-inspect id="ID" ...>
+LOG-DATA
+</typog-inspect>
+
+=end text
+
+=begin man
+
+.RS
+.EX
+<typog-inspect id="\fI\,ID\/\fP" ...>
+\fILOG-DATA\fP
+</typog-inspect>
+.EE
+.RE
+
+=end man
+
+=begin texinfo
+
+@example
+<typog-inspect id="@var{ID}" ...>
+@var{LOG-DATA}
+</typog-inspect>
+@end example
+@noindent
+
+=end texinfo
+
+Z<>
+whose I<ID>s match I<REGEXP> in F<LOG-FILE>.
+
+If no F<LOG-FILE> is given read from F<stdin>.
+The S<filename C<->> is synonymous to F<stdin>.
+
+=head1 DESCRIPTION
+
+B<typog-grep> is a tailored post-processor for LaTeX S<F<log> files>
+and the C<typoginspect> environment as provided by the S<LaTeX package typog>.
+It shares more with the venerable
+L<B<sgrep>|https://www.cs.helsinki.fi/u/jjaakkol/sgrep.html>
+than with S<POSIX L<B<grep>|https://pubs.opengroup.org/onlinepubs/9699919799/utilities/grep.html>>.
+
+In the LaTeX source file the user brackets her text or code
+in a C<typoginspect> environment:
+
+=begin text
+
+\begin{typoginspect}{ID}
+  TEXT-OR-CODE-TO-INVESTIGATE
+\end{typoginspect}
+
+=end text
+
+=begin man
+
+.RS
+.EX
+\ebegin{typoginspect}{\fI\,ID\/\fP}
+\fITEXT-OR-CODE-TO-INVESTIGATE\fP
+\eend{typoginspect}
+.EE
+.RE
+
+=end man
+
+=begin texinfo
+
+@example
+@backslashchar{}begin@lbracechar{}typoginspect@rbracechar{}@lbracechar{}@var{ID}@rbracechar{}
+@var{TEXT-OR-CODE-TO-INVESTIGATE}
+@backslashchar{}end@lbracechar{}typoginspect@rbracechar{}
+@end example
+@noindent
+
+=end texinfo
+
+Z<>
+where I<ID> is used to identify one or more bracketed snippets.
+I<ID> does not have to be unique.
+The I<REGEXP> mechanism makes it easy to select groups of related I<ID>s
+if they are named accordingly.
+
+In F<LOG-FILE> the result of the environment shows up,
+packed with tracing information, as
+
+=begin text
+
+<typog-inspect id="ID" job="JOB-NAME" line="LINE-NUMBER" page="PAGE-NUMBER">
+  LOG-DATA
+</typog-inspect>
+
+=end text
+
+=begin man
+
+.RS
+.EX
+<typog-inspect id="\fI\,ID\/\fP" job="\fI\,JOB-NAME\/\fP" line="\fI\,LINE-NUMBER\/\fP" page="\fI\,PAGE-NUMBER\/\fP">
+\fILOG-DATA\fP
+</typog-inspect>
+.EE
+.RE
+
+=end man
+
+=begin texinfo
+
+@example
+<typog-inspect id="@var{ID}" job="@var{JOB-NAME}" line="@var{LINE-NUMBER}" page="@var{PAGE-NUMBER}">
+@var{LOG-DATA}
+</typog-inspect>
+@end example
+@noindent
+
+=end texinfo
+
+Z<>
+where all the capital-letter sequences are meta-variables
+and in particular
+I<JOB-NAME> is the expansion of C<\jobname>,
+I<LINE-NUMBER> is the LaTeX source file line number
+of the beginning of the C<typoginspect> environment,
+and I<PAGE-NUMBER> is the page where
+the output of S<C<TEXT-OR-CODE-TO-INVESTIGATE>> occurs.
+
+B<typog-grep> reveals the contents of F<LOG-FILE>
+between C<E<lt>typog-inspect id="I<ID>" ...E<gt>>
+and C<E<lt>/typog-inspectE<gt>> excluding the XML-tags themselves.
+Access the I<JOB-NAME>, I<LINE-NUMBER>, and I<PAGE-NUMBER>
+with the commandline options
+B<--job-name>, B<--line-number>, and B<--page-number>, respectively.
+Use B<--id> to show the name of the IDs that matched I<REGEXP>.
+
+C<typoginspect> environments can be nested.
+B<typog-grep> respects the nesting,
+i.e., if the I<ID> of the nested environment does not match I<REGEXP>
+it will not be included in the program's output.
+
+=head1 OPTIONS
+
+The list of options is sorted by the names of the long options.
+
+=over 4
+
+=item B<-a>, B<--all>, B<--any>
+
+ID-discovery mode:
+Discover all C<typog-inspect> elements independent of any matching patterns
+and print their I<ID>s.
+The results are printed in their order of occurrence in the respective F<LOG-FILE>s.
+Pipe the output into B<sort> to get alphabetically ordered I<ID>s.
+
+Augment with options
+B<--job-name>, B<--line-number>, B<--log-line-number>, or S<B<--page-number>>
+for more information.
+
+=item B<--color>, B<colour> I<WHEN>
+
+Colorize specific log contents for the matching I<ID>s.
+The S<argument I<WHEN>> determines when to apply color:
+C<always>, C<never>, S<or C<auto>>.
+The setting C<auto> checks whether standard output has been redirected.
+This is the default.
+
+=item B<-C>, B<--config> I<KEY>=I<VALUE>[:I<KEY>=I<VALUE>[:...]]
+
+Set one or more configuration I<KEY> to I<VALUE> pairs.
+See section L</CONFIGURATION> for a description
+of all available configuration items.
+Use S<option B<--show-config>> to display the default configuration.
+
+=item B<--debug>
+
+Turn on debug output on F<stderr>.
+
+=item B<-E>, B<--encoding> I<ENCODING>
+
+Set the I<ENCODING> of F<LOG-FILE> for the translation to UTF-8.
+The default is unset.
+
+Use this option to get rid of pesky
+S<"E<lt>I<HEX-DIGITS>E<gt>" escapes> on UTF-8 terminals.
+See S<option B<--show-encodings>> for the known encodings and
+Encode::Supported for a summary of all encodings.
+See also S<section L</Some Common Encodings>>.
+
+Apply L<B<iconv>|https://pubs.opengroup.org/onlinepubs/9699919799/utilities/iconv.html>
+(POSIX) or L<B<recode>|https://github.com/rrthomas/recode/> (GNU) on F<LOG-FILE>
+before this tool to avoid having to use S<option B<--encoding>>.
+
+=item B<-h>, B<--help>
+
+Display brief help then exit.
+
+=item B<-i>, B<--[no-]id>
+
+Print the actual ID-name that matched I<REGEXP>.
+Control the appearance of the matching I<ID> with configuration S<item C<id-heading>>.
+
+=item B<-y>, B<--[no-]ignore-case>
+
+Match I<ID>s while ignoring case distinctions in patterns and data.
+
+=item B<-j>, B<--[no-]job-name>
+
+Print the C<\jobname> that B<latex> associated with the input file.
+
+=item B<-n>, B<--[no-]line-number>
+
+Print the line number where the S<C<typoginspect> environment>
+was encountered in the LaTeX source file.
+
+=item B<-N>, B<--[no-]log-line-number>
+
+Print the line number of the F<log>-file where the current line was encountered.
+
+=item B<-p>, B<--[no-]page-number>
+
+Print page number where the contents of the S<C<typoginspect> environment>
+starts in the typeset document.
+
+=item B<-P>, B<--[no-]pager>
+
+Redirect output from F<stdout> to the configured pager.
+
+=item B<--show-config>
+
+Show the default configuration and exit.
+
+=item B<--show-encodings>
+
+Show all known encodings and exit.
+
+=item B<-V>, B<--version>
+
+Show version information and exit.
+
+=item B<-w>, B<--[no-]word-regexp>
+
+Match only whole words.
+
+=back
+
+=head1 CONFIGURATION
+
+=over 4
+
+=item C<id-format>=I<FORMAT>
+
+Control the I<FORMAT> for printing matching ids in inline-mode,
+where I<FORMAT> is passed to Perl's C<printf>.
+S<Default: C<%s:>.>
+
+=item C<id-heading>=C<0>E<verbar>C<1>
+
+Choose between printing the matching I<ID>s with S<option B<--id>>:
+S<Inline (C<0>)> or heading before the matching data (C<1>).
+S<Default: C<0>.>
+
+=item C<id-heading-format>=I<FORMAT>
+
+Control the I<FORMAT> for printing matching I<ID>s in heading-mode,
+where I<FORMAT> is passed to Perl's C<printf>.
+S<Default: C<--E<gt> %s E<lt>-->.>
+
+=item C<id-indent>=I<INDENT>
+
+Indentation of nested typog-inspect tags.
+Only used in ``discovery mode'' (first form), i.e., if S<B<--all>> is active.
+S<Default: 8.>
+
+=item C<id-max-length>=I<MAXIMUM-LENGTH>
+
+Set the maximum length of a matching I<ID> for printing.
+It a matching I<ID> exceeds this length it will be truncated
+and the last three characters (short of I<MAXIMUM-LENGTH>) will be replaced by dots.
+S<Default: 40.>
+
+=item C<line-number-format>=I<FORMAT>
+
+Control the I<FORMAT> for printing TeX source line numbers,
+where I<FORMAT> is passed to Perl's C<printf>.
+S<Default: C<%5d>.>
+
+=item C<log-line-number-format>=I<FORMAT>
+
+Control the I<FORMAT> for printing log line numbers,
+where I<FORMAT> is passed to Perl's C<printf>.
+S<Default: C<%6d>.>
+
+=item C<page-number-format>=I<FORMAT>
+
+Control the I<FORMAT> for printing page numbers,
+where I<FORMAT> is passed to Perl's C<printf>.
+S<Default: C<[%3d]>.>
+
+=item C<pager>=I<PAGER>
+
+Name of pager application to pipe output into
+if run with S<option B<--pager>>.
+S<Default: C<less>>.
+
+=item C<pager-flags>=I<FLAGS>
+
+Pass I<FLAGS> to I<PAGER>.
+S<Default: C<--quit-if-one-screen>>.
+
+=item Color Configuration
+
+For the syntax of the color specifications consult
+the manual page of Term::ANSIColor(pm).
+
+=over 4
+
+=item C<file-header-color>
+
+Color of the filename header.
+
+=item C<fill-state-color>
+
+Color of the messages that report ``Underfull hbox'' or ``Overfull hbox''.
+
+=item C<first-vbox-color>
+
+Color of the first vbox on a page.
+
+=item C<font-spec-color>
+
+Color of font specifications.
+
+=item C<horizontal-break-candidate-color>
+
+Color of lines with horizontal-breakpoint S<candidates C<@>>.
+
+=item C<horizontal-breakpoint-color>
+
+Color of lines with horizontal S<breakpoints C<@@>>.
+
+=item C<id-color>
+
+Color of matching I<ID>s when printed inline.
+
+=item C<id-heading-color>
+
+Color of matching I<ID>s when printed in heading form.
+
+=item C<line-break-pass-color>
+
+Color of the lines showing which pass (e.g., C<@firstpass>)
+of the line-breaking algorithm is active.
+
+=item C<line-number-color>
+
+Color of TeX-source-file line numbers.
+
+=item C<log-line-number-color>
+
+Color of log-file line numbers.
+
+=item C<math-color>
+
+Color used for math expressions including their font specs.
+
+=item C<page-number-color>
+
+Color of page numbers of the final output.
+
+=item C<tightness-color>
+
+Color of lines with Tight/Loose hbox reports.
+
+=item C<vertical-breakpoint-color>
+
+Color of possible vertical breakpoints.
+
+=back
+
+=back
+
+=head2 Brief summary of colors and attributes
+
+=over 4
+
+=item Foreground Color
+
+C<black>, C<red>, C<green>, C<yellow>,
+C<blue>, C<magenta>, C<cyan>, C<white>,
+
+Prefix with C<bright_> for high-intensity or bold foreground.
+
+=item Foreground Grey
+
+C<grey0>, ..., C<grey23>
+
+=item Background Color
+
+C<on_black>, C<on_red>, C<on_green>, C<on_yellow>,
+S<C<on_blue>>, S<C<on_magenta>>, S<C<on_cyan>>, S<C<on_white>>
+
+Replace C<on_> with C<on_bright_> for high-intensity or bold background.
+
+=item Background Grey
+
+C<on_grey0>, ..., C<on_grey23>
+
+=item Text Attribute
+
+C<bold>, C<dark>, C<italic>, C<underline>, C<reverse>
+
+=back
+
+=head2 Some Common Encodings
+
+The following list shows some encodings
+that are suitable for S<option B<--encoding>>.
+
+=over 4
+
+=item Latin-1, Western European
+
+C<iso-8859-1>, C<cp850>, C<cp860>, C<cp1252>
+
+=item Latin-2, Central European
+
+C<iso-8859-2>, C<cp852>, C<cp1250>
+
+=item Latin-3, South European (Esperanto, Maltese)
+
+C<iso-8859-3>
+
+=item Latin-4, North European (Baltics)
+
+C<iso-8859-4>
+
+=item Cyrillics
+
+C<iso-8859-5>, C<cp855>, C<cp866> (Ukrainian), C<cp1251>
+
+=item Arabic
+
+C<iso-8859-6>, C<cp864>, C<cp1006> (Farsi), C<cp1256>
+
+=item Greek
+
+C<iso-8859-7>, C<cp737>, C<cp1253>
+
+=item Hebrew
+
+C<iso-8859-8>, C<cp862>, C<cp1255>
+
+=item Turkish
+
+C<iso-8859-9>, C<cp857>, C<cp1254>
+
+=item Nordic
+
+C<iso-8859-10>, C<cp865>, C<cp861> (Icelandic)
+
+=item Thai
+
+C<iso-8859-11>, C<cp874>
+
+=item Baltic
+
+C<iso-8859-13>, C<cp775>, C<cp1257>
+
+=item Celtic
+
+C<iso-8859-14>
+
+=item Latin-9 (sometimes called Latin0)
+
+C<iso-8859-15>
+
+=item Latin-10
+
+C<iso-8859-16>
+
+=back
+
+=head1 EXIT STATUS
+
+The exit status is 0 if at least one I<ID> matched I<REGEXP>,
+1 if no I<ID> matched I<REGEXP>, and 2 if an error occurred.
+
+=head1 CAVEATS
+
+The end tag C<< </typog-inspect> >> sometimes gets placed too early in the output and the trace
+I<seems> truncated.  However, LaTeX reliably logs the requested the trace information, but the
+write operations for trace data and the code which is used to print the S<end tag> are not
+synchronized.
+
+=head1 SEE ALSO
+
+B<grep>(1), B<printf>(3), B<Encode::Supported>(pm), B<Term::ANSIColor>(pm)
+
+=cut

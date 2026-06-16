@@ -1,0 +1,237 @@
+\documentclass{article}
+\usepackage{snaptodo}
+\usepackage[colorlinks, allcolors=red!50!black]{hyperref}
+\def\email#1{\href{mailto:#1}{\ttfamily #1}}
+\def\snaptodocommand{{\ttfamily\color{red!50!black}\string\snaptodo}}
+
+\begin{document}
+
+                                 \title
+        {Snaptodo---A todo that snaps to the closer side\thanks
+       {Repository \url{https://github.com/Symbol1/snaptodo}.} }
+
+                                \author
+                          {Hsin-Po Wang\thanks
+               {Email \email{a.simple.people@gmail.com}.
+               Website \url{https://www.symbol.codes}.}}
+
+                         \date{March 16, 2024}
+
+                               \maketitle
+
+\begin{abstract}
+    Snaptodo package is an alternative to todonote package,
+    from which it differs in the following ways:
+    (A)	Depending on where you call \snaptodocommand,
+        the note is put on the left or right margin,
+        whichever is closer.
+    (B)	The notes bump each other down so they never overlap;
+        the lines never overlap either;
+    (C)	Minimalistic, aesthetic, and customizable style.
+
+\end{abstract}
+
+\section{Installation}
+
+    Copy and paste
+    {\ttfamily\verb|snaptodo.sty|}
+    to your working directory.
+
+\section{Minimal Working Example}
+
+    \begin{verbatim}
+        \documentclass{article}
+        \usepackage{snaptodo}
+        \begin{document}
+            Your done
+            \snaptodo{Your todo}
+        \end{document}
+    \end{verbatim}
+
+\section{Showcase of Examples}
+
+    Using snaptodo is as simple as calling \snaptodocommand%
+    \snaptodo{Calling \snaptodocommand!}
+    and compile twice.%
+    \snaptodo{Compile twice!}
+    If the calling point%
+    \snaptodo{Calling point!}
+    is on the left of a page,%
+    \snaptodo{Left of a page!}
+    the todo note---after compiling twice of
+    course---will appear on the left margin.%
+    \snaptodo{On the left margin!}
+    And vice versa.%  
+    \snaptodo{Vice versa!}
+
+\section{Customization}
+
+    I defined
+    {\ttfamily\verb|\snaptodoset|}
+    that works like
+    {\ttfamily\verb|\tikzset|} and
+    {\ttfamily\verb|\pgfplotsset|}.
+    While you can access dedicated options by
+    {\ttfamily\verb|\snaptodoset{<some_option>}|},
+    you can also access the exact same options by
+    {\ttfamily\verb|\pgfkeys{/snaptodo/<some_option>}|}.
+    For local changes, you can put them here
+    {\ttfamily\verb|\snaptodo[<some_option>]{}|}.
+
+\subsection{Color}
+
+    The color of the broken line is
+    {\ttfamily\verb|snaptodo@chain|}.
+    The default color for that is
+    {\ttfamily\verb|yellow!50!black|}.
+    Saying
+    {\ttfamily\verb|\colorlet{snaptodo@chain}{green!50!white}|}
+    lets you to change this color globally.  On the other hand,
+    to change this color locally, you can do
+    {\ttfamily\verb|\snaptodo[call chain/.style=green!50!white]{}|}.%
+    \snaptodo[call chain/.style=green!50!white]{New broken line color}
+
+    The color of the note text is
+    {\ttfamily\verb|snaptodo@block|}.
+    The default color for that is
+    {\ttfamily\verb|red!50!black|}.
+    Saying
+    {\ttfamily\verb|\colorlet{snaptodo@block}{blue!50!white}|}
+    lets you change this color.  On the other hand,
+    for locally changing this color, you can do
+    {\ttfamily\verb|\snaptodo[margin block/.style=blue!50!white]{}|}.%
+    \snaptodo[margin block/.style=blue!50!white]{New note text color}
+
+\subsection{Line style}
+
+    In order to use a thicker or thinner broken line,
+    recall the standard Ti\emph kZ option
+    {\ttfamily\verb|[thick]|},
+    {\ttfamily\verb|[ultra thin]|},
+    or
+    {\ttfamily\verb|[line width=???]|}.
+    In our case, simply put that option in this style
+    \snaptodo[call chain/.style={line width=2pt}]{Thicker broken line}%
+    {\ttfamily\verb|\snaptodo[call chain/.style={line width=???}]{}|}.
+
+    In order to use a special dash pattern,
+    recall the standard Ti\emph kZ option
+    {\ttfamily\verb|[dotted]|},
+    {\ttfamily\verb|[dashed]|},
+    or
+    {\ttfamily\verb|[dash pattern=???]|}.
+    In our case, simply put that option in this style
+    \snaptodo[call chain/.style={dashed}]{Dashed broken line}%
+    {\ttfamily\verb|\snaptodo[call chain/.style={dash pattern=???}]{}|}.
+
+\subsection{Sep and width}
+
+    The gap between two note blocks is stored in
+    {\ttfamily\verb|/snaptodo/block sep|}.
+    The default length is
+    {\ttfamily\verb|\baselineskip|}.
+    Use
+    {\ttfamily\verb|\snaptodoset{block sep=0pt}|}
+    for global setting and use
+    {\ttfamily\verb|\snaptodo[block sep=0pt]{note}|}%
+    \snaptodo[block sep=0pt]{2 blocks close...}
+    \snaptodo[block sep=0pt]{...to each other}
+    for local setting this.
+    
+    The gap between two horizontal lines is stored in
+    {\ttfamily\verb|/snaptodo/chain sep|}.
+    The default length is
+    {\ttfamily\verb|0.5ex|}.
+    To change, use
+    {\ttfamily\verb|\snaptodoset{chain sep=0pt}|}
+    for global setting and
+    {\ttfamily\verb|\snaptodo[chain sep=0pt]{note}|}%
+    \snaptodo[chain sep=0pt]{2 chains close...}
+    \snaptodo[chain sep=0pt]{...to each other}
+    for local setting.
+
+    The width of the note block is
+    {\ttfamily\verb|\marginparwidth|}.
+    The width where the broken line has slope is
+    {\ttfamily\verb|\marginparsep|}.
+    These are the built-in dimensions.
+    (So modify them with care!)
+
+\subsection{Bias}
+
+    The tipping point between snapping to the left versus
+    to the right is the center of the page, by default.
+    You can change this by
+    {\ttfamily\verb|/snaptodo/chain bias=-99in|}.%
+    \snaptodo[chain bias=-99in]{Forced to the left}
+    That way, all todo notes are forcedly
+    snapped to the left hand side.  Or, by
+    \snaptodo[chain bias=99in]{Forced to the right}%
+    {\ttfamily\verb|/snaptodo/call bias=99in|},
+    all todo notes are forcedly snapped to the right hand side.
+
+\subsection{Rise}
+
+    If your document is really busy, e.g., like
+    {\ttfamily\verb|stress_testing.tex|},
+    try setting a positive
+    {\ttfamily\verb|/snaptodo/block rise|},%
+    \snaptodo[block rise=2em]{Rising}
+    \snaptodo[block rise=2em]{to leave}
+    \snaptodo[block rise=2em]{room.}
+    e.g.,
+    {\ttfamily\verb|\snaptodo[block rise=2em]{}|}.
+    That way, a note will rise by that amount
+    to leave more rooms for later notes.
+    (But if there will be overlay,
+    the notes automatically bump down.)
+
+
+\subsection{Alignment}
+
+    By
+    {\ttfamily\verb|/snaptodo/margin block/.style={align=???}|}
+    you can control the alignment of note text.
+    The default setting is
+    {\ttfamily\verb|align=flush \std@leftright|},
+    which flushes the text toward the page edges.
+    If
+    {\ttfamily\verb|align=flush \std@rightleft|}
+    is what you do,%
+    \makeatletter
+    \snaptodo[margin block/.style={align=flush \std@rightleft}]
+    {flush toward text body}
+    the text will be flushed toward the main text body.%
+    \snaptodo[margin block/.style={align=flush \std@rightleft}]
+    {flush toward text body}
+    Don't forget that you need
+    \makeatother
+    {\ttfamily\verb|\makeatletter|}
+    and
+    {\ttfamily\verb|\makeatother|}
+    to handel control sequences with the at character.
+
+\subsection{Font}
+
+    With
+    \snaptodo[margin block/.style={font=\tiny}]{tiny}
+    \snaptodo[margin block/.style={font=\scriptsize}]{scriptsize}
+    \snaptodo[margin block/.style={font=\footnotesize}]{footnotesize}
+    \snaptodo[margin block/.style={font=\small}]{small}
+    \snaptodo[margin block/.style={font=\normalsize}]{normalsize}
+    \snaptodo[margin block/.style={font=\large}]{large}
+    \snaptodo[margin block/.style={font=\Large}]{Large}
+    \snaptodo[margin block/.style={font=\LARGE}]{LARGE}
+    \snaptodo[margin block/.style={font=\huge}]{huge}
+    \snaptodo[margin block/.style={font=\Huge}]{Huge}
+    {\ttfamily\verb|/snpatodo/margin block/.style={font=...}|},
+    you can change font size.
+    This style also allows you to change font family.
+    \snaptodo[margin block/.style={font=\itshape}]{itshape}
+    \snaptodo[margin block/.style={font=\scshape}]{scshape}
+    \snaptodo[margin block/.style={font=\slshape}]{slshape}
+    \snaptodo[margin block/.style={font=\sffamily}]{sffamily}
+    \snaptodo[margin block/.style={font=\ttfamily}]{ttfamily}
+    \snaptodo[margin block/.style={font=\bfseries}]{bfseries}
+
+\end{document}

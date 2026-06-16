@@ -1,0 +1,690 @@
+% !TEX TS-program = lualatex
+% encoding : utf8 
+% Documentation of tkz-elements v3.34c
+% Copyright 2025  Alain Matthes
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+% http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+% This work has the LPPL maintenance status “maintained”.
+% The Current Maintainer of this work is Alain Matthes.
+\PassOptionsToPackage{unicode}{hyperref}
+
+\documentclass[DIV         = 14,
+               fontsize    = 10,
+               index       = totoc,
+               twoside,
+               cadre,
+               headings    = small
+               ]{tkz-doc}
+\gdef\tkznameofpack{tkz-elements}
+\gdef\tkzversionofpack{3.34c}
+\gdef\tkzdateofpack{\today}
+\gdef\tkznameofdoc{tkz-elements.pdf}
+\gdef\tkzversionofdoc{3.34c}
+\gdef\tkzdateofdoc{\today}
+\gdef\tkzauthorofpack{Alain Matthes}
+\gdef\tkzadressofauthor{}
+\gdef\tkznamecollection{AlterMundus}
+\gdef\tkzurlauthor{http://altermundus.fr}
+\gdef\tkzengine{lualatex}
+\gdef\tkzurlauthorcom{http://altermundus.fr}
+\nameoffile{\tkznameofpack}
+
+% -- Packages ---------------------------------------------------  
+\usepackage[dvipsnames,svgnames]{xcolor}
+\usepackage{calc}
+\usepackage{tkz-base}
+\usepackage[mini]{tkz-euclide}
+\usepackage{tkz-elements}
+\usepackage{tkzexample}
+\usepackage{pgfornament}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{shapes.multipart}
+\usepackage[colorlinks,pdfencoding=auto, psdextra]{hyperref}
+\hypersetup{
+      linkcolor=Gray,
+      citecolor=Green,
+      filecolor=Mulberry,
+      urlcolor=orange,
+      menucolor=Gray,
+      runcolor=Mulberry,
+      linkbordercolor=Gray,
+      citebordercolor=Green,
+      filebordercolor=Mulberry,
+      urlbordercolor=NavyBlue,
+      menubordercolor=Gray,
+      runbordercolor=Mulberry,
+      pdfsubject={Euclidean Geometry},
+      pdfauthor={\tkzauthorofpack},
+      pdftitle={\tkznameofpack},
+      pdfcreator={\tkzengine}
+}
+\usepackage{unicode-math} 
+\usepackage{fourier-otf}
+\setmathfont{Concrete-Math.otf}
+\let\rmfamily\ttfamily
+\usepackage{multicol,lscape,wrapfig}
+\usepackage[english]{babel}
+\usepackage[normalem]{ulem}
+\usepackage{multirow,multido,booktabs,cellspace}
+\usepackage{shortvrb,fancyvrb,bookmark,enumitem} 
+\usepackage{makeidx}
+\usepackage[most]{tcolorbox}
+\def\code{\texttt}
+\newtcolorbox{mybox}{
+enhanced,
+boxrule=0pt,frame hidden,
+borderline west={4pt}{0pt}{darkgray!50!white},
+colback=lightgray!10!white,
+sharp corners
+}
+%\usepackage{float}
+\makeindex 
+
+\makeatletter
+\renewenvironment{theindex}
+   {\section*{\indexname}\begin{multicols}{2}%
+    \@mkboth{\MakeUppercase\indexname}%
+  {\MakeUppercase\indexname}%
+    \thispagestyle{plain}\parindent\z@
+    \parskip\z@ \@plus .3\p@\relax
+    \columnseprule \z@
+    \columnsep 35\p@
+    \let\item\@idxitem}
+   {\end{multicols}}
+\makeatother
+\newcommand*{\tkzfname}[1]{\Amacro{#1}\textbf{\texttt{\textcolor{MidnightBlue}{%
+ #1}}}}
+ \newcommand*{\tkzmname}[1]{\Amacro{#1}\textbf{\texttt{\textcolor{MidnightBlue}{%
+#1}}}}
+ \newcommand*{\tkzaname}[1]{\Amacro{#1}\textbf{\texttt{\textcolor{MidnightBlue}{%
+#1}}}}  
+\def\langle{} \def\rangle{}
+\renewcommand*{\IargName}[2]{\texttt{#2}\index{#1_2@\texttt{#1: argument(s)}!\texttt{#2}}}
+\newcommand*{\Amacro}[1]{\index{#1_1@\texttt{#1}}}
+\renewcommand*{\IoptName}[2]{\texttt{#2}\index{#1_3@\texttt{#1: attribute(s)}!\texttt{#2}}}
+\newcommand*{\Iattr}[2]{\texttt{#2}\index{#1_3@\texttt{#1:  attribute}!\texttt{#2}}}
+\newcommand*{\Imeth}[2]{\texttt{#2}\index{#1_3@\texttt{#1:  method}!\texttt{#2}}}
+\newcommand*{\Immeth}[2]{\texttt{#2}\index{#1_3@\texttt{#1:  metamethod}!\_\_\texttt{#2}}}
+\newcommand*{\Igfct}[2]{\texttt{#2}\index{#1_3@\texttt{#1:  function}!\texttt{#2}}}
+\newcommand*{\Iclass}[1]{\texttt{#1}\index{Class !#1@\texttt{#1}}}
+\newcommand*{\Iengine}[1]{\texttt{#1}\index{Engine !#1@\texttt{#1}}}
+\newcommand*{\Iprimitive}[1]{\textbackslash\texttt{#1}\index{Lua\TeX\ primitive !#1@\texttt{\textbackslash#1}}}
+\newcommand*{\tkzNameObj}[1]{\tkzname{#1}\Iobj{#1}}
+\newcommand*{\Iobj}[1]{\index{Object_1@\texttt{Object}!\texttt{#1}}}
+\newcommand*{\tkzRBomb}{\textcolor{red}{\bomb}}
+\newcommand*{\IEmacro}[1]{\index{#1_1@\texttt{\textbackslash#1}}\texttt{#1}}
+\newcommand*{\tkzimpbf}[1]{\texttt{\textbf{#1}}}
+\newcommand*{\tkzEHand}{\textcolor{red}{\lefthand}}
+\newcommand*{\ItkzPopt}[2]{\texttt{#2}\index{#1_3@\texttt{#1: options}!\texttt{#2}}}
+%<---------------------------------------------------------------------------> 
+% settings styles
+
+\tkzSetUpColors[background=white,text=darkgray]  
+\tkzSetUpPoint[size=2,color=teal,fill=teal!10]
+\tkzSetUpLine[ultra thin,color=teal]
+\tkzSetUpCompass[color=orange,ultra thin,/tkzcompass/delta=10] 
+\tikzset{label style/.append style={below right,color=teal,font=\scriptsize}}
+\tikzset{new/.style={color=orange,ultra thin}} 
+\tikzset{step 1/.style={color=cyan,ultra thin}} 
+\tikzset{step 2/.style={color=purple,ultra thin}} 
+\def\tkzar{\hspace{1em}-->\hspace{1em}}
+
+\makeatletter\let\percentchar\@percentchar\makeatother
+\def\luaveclen#1#2{%
+\directlua{tex.print(string.format(
+'\percentchar.5f',math.sqrt((#1)*(#1)+(#2)*(#2))))
+}}
+% printnumber
+\newenvironment{SVerbatim}
+  {\small\Verbatim}
+  {\endVerbatim}
+  
+\let\pmpn\pgfmathprintnumber
+\AtBeginDocument{\MakeShortVerb{\|}} % link to shortvrb
+
+\begin{document} 
+  
+\parindent=0pt
+\tkzTitleFrame{tkz-elements \tkzversionofpack\\Euclidean Geometry}
+\clearpage
+
+
+\defoffile{
+ This document compiles some notes about  \tkzname{\tkznameofpack}, the initial version of a \code{Lua}  library designed to perform all the necessary calculations for defining objects in Euclidean geometry figures. Your document  must be compiled using Lua\LaTeX.\\ 
+ With \pkg{tkz-elements}, definitions and calculations are exclusively conducted using \pkg{Lua}. \\ 
+ The main programming approach provided is object-oriented, utilizing object classes such as point, line, triangle,  and conic.  Currently, after the calculations are completed, \pkg{tkz-euclide} is used for drawing purposes. (but you can also use \TIKZ)\\
+ I discovered Lua and object-oriented programming  while developing this package, so it's highly likely that I've made a few mistakes.   If you'd like to contribute to the development of this package or provide advice on how to proceed, please contact me via email.
+}
+
+\presentation
+
+\vspace*{1cm}
+
+\lefthand\ Acknowledgements : I received much valuable advices, remarks, corrections  from \\ \tkzimp{Nicolas Kisselhoff}, \tkzimp{David Carlisle}, \tkzimp{Roberto Giacomelli} and \tkzimp{Qrrbrbirlbel}.\\
+Special thanks to \tkzimp{Wolfgang Büchel} for his invaluable contribution in correcting the examples.
+
+\vspace*{12pt}
+\lefthand\ I would also like to extend my gratitude to \tkzimp{Eric Weisstein}, creator of 
+\href{http://mathworld.wolfram.com/about/author.html}{MathWorld}.
+
+\vspace*{12pt}
+\lefthand\ You can find some examples on my site and a french documentation:
+\href{http://altermundus.fr}{altermundus.fr}.
+
+\vfill
+Please report typos or any other comments to this documentation to: \href{mailto:al.ma@mac.com}{\textcolor{blue}{Alain Matthes}}.
+
+This file can be redistributed and/or modified under the terms of the \LaTeX{} 
+Project Public License Distributed from \href{http://www.ctan.org/}{CTAN}\  archives.
+
+\clearpage
+
+
+\tableofcontents
+
+\clearpage
+\newpage
+\input{TKZdoc-elements-news.tex}
+\input{TKZdoc-elements-structure.tex}
+\input{TKZdoc-elements-why.tex}
+\input{TKZdoc-elements-presentation.tex}
+\input{TKZdoc-elements-convention.tex}
+\input{TKZdoc-elements-organization.tex}
+\input{TKZdoc-elements-transfers.tex}
+\input{TKZdoc-elements-classes.tex}
+\input{TKZdoc-elements-classes-point.tex}
+\input{TKZdoc-elements-classes-line.tex}
+\input{TKZdoc-elements-classes-circle.tex}
+\input{TKZdoc-elements-classes-triangle.tex}
+\input{TKZdoc-elements-classes-conic.tex}
+\input{TKZdoc-elements-classes-occs.tex}
+\input{TKZdoc-elements-classes-quadrilateral.tex}
+\input{TKZdoc-elements-classes-square.tex}
+\input{TKZdoc-elements-classes-rectangle.tex}
+\input{TKZdoc-elements-classes-parallelogram.tex}
+\input{TKZdoc-elements-classes-regular.tex}
+\input{TKZdoc-elements-classes-vectors.tex}
+\input{TKZdoc-elements-classes-matrices.tex}
+\input{TKZdoc-elements-classes-misc.tex}
+\input{TKZdoc-elements-intersection.tex}
+\input{TKZdoc-elements-indepthstudy.tex}
+\input{TKZdoc-elements-theorems.tex}
+ \input{TKZdoc-elements-examples.tex}
+
+\clearpage\newpage
+\small\printindex
+
+\newpage
+\section{Cheat\_sheet} % (fold)
+\label{sec:cheat_sheet}
+
+% section cheat_sheet (end)
+|r| denotes a real number, |cx| complex number, |d| a positive real number, |n| an integer, |an| an angle, |b| a boolean, |s| a character string, |p| a point, |t| a table, |m| a matrix, |v| variable, |L| a straight line, |C| a circle, |T| a triangle, |E| an ellipse, |V| a vector,|Q| a quadrilateral, |P| a parallelogram, |R| a rectangle, |S| a square, |RP| a regular polygon, |M| a matrix, |O| an object (p, L,C,T), . . a list of points or an object, < > optional argument. 
+
+\begin{multicols}{3}
+\fbox{\textbf{point}}\\
+\textbf{Attributes} table(\ref{point:att})   \\
+|re                        -> r|   \\
+|im                        -> r|   \\
+|type                      -> s|   \\
+|argument                  -> r|   \\
+|modulus                   -> d|   \\
+\\
+\textbf{Functions} table(\ref{point:att})   \\
+|new                       -> p|   \\
+|polar                     -> p|   \\
+|polar_deg                 -> p|   \\
+\\
+\textbf{Methods} table(\ref{complex:meta})  \\
+|+ - * /     (p,p)         -> p|   \\
+|..          (p,p)         -> r|   \\
+|^           (p,p)         -> r|   \\
+|=                         -> b|   \\
+|tostring                  -> s|   \\
+\\
+\textbf{Methods} table(\ref{point:met})  table(\ref{complex:met})    \\
+|conj                      -> p|   \\
+|abs                       -> r|   \\
+|mod                       -> d|   \\
+|norm                      -> d|   \\
+|arg                       -> d|   \\
+|get                     -> r,r|   \\
+|sqrt                      -> p|   \\
+|north(d)                  -> p|   \\
+|south(d)                  -> p|   \\
+|east(d)                   -> p|   \\
+|west(d)                   -> p|   \\
+|normalize(p)              -> p|   \\
+|symmetry(...)             -> O|   \\
+|rotation(an , ...)        -> O|   \\
+|homothety(r , ...)        -> O|   \\
+|orthogonal(d)             -> p|   \\
+|at()                      -> p|   \\
+|print()                   -> s|   \\
+                                   \\
+\fbox{\textbf{line}}               \\
+\textbf{Attributes} table(\ref{line:att})  \\
+|pa,pb                     -> p|   \\
+|type                      -> s|   \\
+|mid                       -> p|   \\
+|north_pa                  -> p|   \\
+|north_pb                  -> p|   \\
+|south_pa                  -> p|   \\
+|south_pb                  -> p|   \\
+|east                      -> p|   \\
+|west                      -> p|   \\
+|slope                     -> r|   \\
+|length                    -> d|   \\
+|vec                       -> V|   \\
+\\
+\textbf{Methods} table(\ref{line:met})     \\
+|new(p,p)                  -> d|   \\
+|distance(p)               -> d|   \\
+|slope()                   -> r|   \\
+|in_out(p)                 -> b|   \\
+|in_out_segment(p)         -> b|   \\
+|is_parallel(l)            -> b|   \\
+|is_orthogonal(l)          -> b|   \\
+|is_equidistant(p)         -> b|   \\
+|barycenter(r,r)           -> p|   \\
+|point(t)                  -> p|   \\
+|midpoint()                -> p|   \\
+|harmonic_int(p)           -> p|   \\
+|harmonic_ext(p)           -> p|   \\
+|harmonic_both(d)          -> p|   \\
+|gold_ratio()              -> p|   \\
+|normalize()               -> p|   \\
+|normalize_inv()           -> p|   \\
+|_north_pa(d)              -> p|   \\
+|_north_pb(d)              -> p|   \\
+|_south_pa(d)              -> p|   \\
+|_south_pb(d)              -> p|   \\ 
+|_east(d)                  -> p|   \\
+|_west(d)                  -> p|   \\
+|report(r,p)               -> p|   \\
+|colinear_at(p,k)          -> p|   \\
+|affinity(p)               -> P|   \\
+|affinity(pts)           -> pts|   \\
+|projection(pts)         -> pts|   \\
+|projection_ll(pts)      -> pts|   \\
+|translation(...)          -> O|   \\
+|reflection(...)           -> O|   \\
+|ll_from( p )              -> L|   \\
+|ortho_from( p )           -> L|   \\
+|mediator()                -> L|   \\
+|swap_line()               -> L|   \\
+|circle()                  -> C|   \\
+|circle_swap()             -> C|   \\
+|diameter()                -> C|   \\
+|apollonius(r)             -> C|   \\
+|c_ll_p(p,p)               -> C|   \\
+|c_l_pp(p,p)               -> C|   \\
+|equilateral(<swap>)       -> T|   \\
+|isosceles(an,<swap>)      -> T|   \\
+|school()                  -> T|   \\
+|two_angles(an,an)         -> T|   \\
+|half()                    -> T|   \\
+|sss(r,r,r)                -> T|   \\
+|sas(r,an)                 -> T|   \\
+|ssa(r,an)                 -> T|   \\
+|gold(<swap>)              -> T|   \\
+|euclide(<swap>)           -> T|   \\
+|golden(<swap>)            -> T|   \\
+|divine()                  -> T|   \\
+|cheops()                  -> T|   \\
+|pythagoras()              -> T|   \\
+|sublime)                  -> T|   \\
+|egyptian()                -> T|   \\
+|square(<swap>)            -> T|   \\
+                                   \\
+\fbox{\textbf{triangle}}           \\
+\textbf{Attributes} table(\ref{triangle:att})  \\
+|pa,pb,pc                  -> p|  \\
+|circumcenter              -> p|  \\
+|centroid                  -> p|  \\
+|incenter                  -> p|  \\
+|eulercenter               -> p|  \\
+|orthocenter               -> p|  \\
+|spiekercenter             -> p|  \\
+|type                      -> s|  \\
+|a                         -> d|  \\
+|b                         -> d|  \\
+|c                         -> d|  \\
+|ab                        -> L|  \\
+|bc                        -> L|  \\
+|ca                        -> L|  \\
+|alpha                     -> r|  \\
+|beta                      -> r|  \\
+|area                      -> r|  \\
+|semiperimeter             -> r|  \\
+|inradius                  -> r|  \\
+|circumradius              -> r|  \\
+\\
+\textbf{Methods} table(\ref{triangle:met}) \\
+|new(p,p,p)                -> T|  \\
+|check_equilateral()       -> b|  \\
+|in_out(p)                 -> b|  \\
+|area()                    -> d|  \\
+|parallelogram()           -> p|  \\
+|trilinear(r,r,r)          -> p|  \\
+|barycentric(r,r,r)        -> p|  \\
+|bevan_point()             -> p|  \\
+|mittenpunkt_point()       -> p|  \\
+|gergonne_point()          -> p|  \\
+|nagel_point()             -> p|  \\
+|feuerbach_point()         -> p|  \\
+|lemoine_point()           -> p|  \\
+|symmedian_point()         -> p|  \\
+|spieker_center()          -> p|  \\
+|barycenter(r,r,r)         -> p|  \\
+|base(u,v)                 -> p|  \\
+|euler_points()            -> p|  \\
+|nine_points()             -> p|  \\
+|point(t)                  -> p|  \\
+|soddy_center()            -> p|  \\
+|isogonal(p)               -> p|   \\
+|conway_points()         -> pts|   \\
+|projection(p)         -> p,p,p|   \\
+|euler_line()              -> L|   \\
+|symmedian_line(n)         -> L|   \\
+|altitude(n)               -> L|   \\
+|bisector(n)               -> L|   \\
+|bisector_ext(n)           -> L|   \\
+|antiparallel(p,n)         -> L|   \\
+|brocard_axis()            -> L|   \\
+|simson_line(p)            -> L|   \\
+|steiner_line(p)           -> L|   \\
+|euler_line()              -> L|   \\
+|fermat_axis(p)            -> L|   \\
+|lemoine_axis()            -> L|   \\
+|euler_circle()            -> C|   \\
+|circum_circle()           -> C|   \\
+|in_circle()               -> C|   \\
+|ex_circle(n)              -> C|   \\
+|first_lemoine_circle()    -> C|   \\
+|second_lemoine_circle()   -> C|   \\
+|spieker_circle()          -> C|   \\
+|soddy_circle()            -> C|   \\
+|conway_circle()           -> C|   \\
+|pedal_circle()            -> C|   \\
+|cevian_circle()           -> C|   \\
+|c_ll_p(p)                 -> C|   \\
+|orthic()                  -> T|   \\
+|medial()                  -> T|   \\
+|incentral()               -> T|   \\
+|excentral()               -> T|   \\
+|intouch()                 -> T|   \\
+|contact()                 -> T|   \\
+|extouch()                 -> T|   \\
+|feuerbach()               -> T|   \\
+|anti()                    -> T|   \\
+|tangential()              -> T|   \\
+|cevian(p)                 -> T|   \\
+|symmedian()               -> T|   \\
+|euler()                   -> T|   \\
+|pedal(p)                  -> T|   \\
+|barycentric_coordinates(p)|       \\
+                      |-> r,r,r|   \\
+\\
+\fbox{\textbf{circle}}             \\
+\textbf{Attributes} table(\ref{circle:att}) \\
+|center                    -> p|  \\
+|through                   -> p|  \\
+|north                     -> p|  \\
+|south                     -> p|  \\
+|east                      -> p|  \\
+|west                      -> p|  \\
+|opp                       -> p|  \\
+|type                      -> s|   \\
+|radius                    -> d|   \\
+|ct                        -> L|   \\ 
+|perimeter                 -> r|   \\ 
+|area                      -> r|   \\ 
+\\
+\textbf{Functions} table(\ref{circle:func})  \\
+|new(p,p)                  -> C|   \\
+|through(p,p)            -> p,p|   \\
+|radius(p, r)              -> C|   \\
+\\
+\textbf{Methods} table(\ref{circle:met})  \\
+|new(p,p)                  -> C|   \\
+|diameter(p,p)             -> C|   \\ 
+|in_out(p)                 -> b|   \\ 
+|in_out_disk(p)            -> b|   \\ 
+|circles_position(C)       -> s|   \\ 
+|power(p)                  -> r|   \\ 
+|antipode(p)               -> p|   \\ 
+|midarc(p,p)               -> p|   \\ 
+|point(r)                  -> p|   \\ 
+|random_pt(lower, upper)   -> p|   \\ 
+|internal_similitude(C)    -> p|   \\ 
+|external_similitude(C)    -> p|   \\ 
+|radical_center(C,<C>)     -> p|   \\
+|taylor_points()         -> pts|   \\
+|tangent_at(p)             -> L|   \\ 
+|radical_axis(C)           -> L|   \\ 
+|polar(p)                  -> L|   \\ 
+|radical_circle(C,<C>)     -> C|   \\ 
+|orthogonal_from(p)        -> C|   \\ 
+|orthogonal_through(p,p)   -> C|   \\
+|c_lc_p(L,p,inside)        -> C|   \\
+|c_c_pp(a,b)(p,p)          -> C|   \\
+|c_cc_p(C,p)               -> C|   \\
+|midcircle(C)              -> C|   \\
+|taylor_circle()           -> C|   \\
+|external_tangent(C)     -> L,L|   \\
+|internal_tangent(C)     -> L,L|   \\
+|common_tangent(C)       -> L,L|   \\
+|tangent_from(p)         -> L,L|   \\
+|inversion(...)            -> O|   \\
+                                   \\
+\fbox{\textbf{conic}}              \\
+\textbf{Attributes} table(\ref{conic:att}) \\
+|center                    -> p|  \\
+|vertex                    -> p|  \\
+|covertex                  -> p|  \\
+|Fa                        -> p|  \\
+|Fb                        -> p|  \\
+|center                    -> p|  \\
+|K                         -> p|  \\
+|e                         -> r|  \\
+|a                         -> r|  \\
+|b                         -> r|  \\
+|c                         -> r|  \\
+|h                         -> r|  \\
+|p                         -> r|  \\
+|Rx                        -> d|  \\
+|Ry                        -> d|  \\
+|slope                     -> r|  \\
+|type                      -> s|  \\
+|subtype                   -> s|  \\
+|major_axis                -> L|  \\
+|minor_axis                -> L|  \\
+\\
+\textbf{Methods} table(\ref{conic:met}) \\
+|new(p,L,r)                -> E|   \\
+|points(r,r,n,< swap >)    -> E|   \\
+|point(r,< swap >)         -> E|   \\
+|in_out(p)                 -> b|   \\
+|tangent_at(p)             -> L|   \\
+|tangent_from(p)           -> L|   \\
+|asymptotes(r))            -> L|   \\
+|orthoptic()            -> L,Co|   \\
+|antipode(p)               -> p|    \\
+                                   \\                        
+\textbf{Functions}  \ref{sub:useful_tools}  \\
+|EL_points(p,p,p)      -> p,L,r|   \\
+|EL_bifocal(p,p,r or p)-> p,L,r|   \\
+|HY_bifocal(p,p,r or p)-> p,L,r|   \\
+|PA_dir(p,p,p)         -> p,L,r|   \\
+|PA_focus(L,p,p)       -> p,L,r|   \\
+                                   \\
+\fbox{\textbf{occs}}               \\
+\textbf{Attributes} table(\ref{occs:att}) \\
+|L,p                    -> occs|   \\
+|type                      -> s|   \\
+|origin                    -> p|   \\
+|y                         -> p|   \\
+|x                         -> p|   \\
+|abscissa                  -> L|   \\
+|ordinate                  -> L|   \\
+ \\
+ \textbf{Methods} table(\ref{rectangle:met}) \\
+|new(L,p)                  -> R|   \\ 
+|coordinates(p)          -> r,r|   \\
+                                   \\
+\fbox{\textbf{square} }            \\
+                            \\
+ \textbf{Attributes} table(\ref{square:att}) \\
+|pa,pb,pc,pd               -> p|   \\
+|type                      -> s|   \\
+|side                      -> d|   \\
+|center                    -> p|   \\
+|circumradius              -> d|   \\
+|inradius                  -> d|   \\
+|diagonal                  -> d|   \\
+|proj                      -> p|   \\
+|ab bc cd da               -> L|   \\
+|ac bd                     -> L|   \\
+ \textbf{Methods} table(\ref{square:met}) \\
+|new(p,p,p,p)              -> S|   \\ 
+|rotation(p,p)             -> S|   \\
+|side(p,p,<swap>)          -> S|   \\
+                                   \\
+\fbox{\textbf{rectangle}}          \\
+\textbf{Attributes} table(\ref{rectangle:att}) \\
+|pa,pb,pc,pd               -> p|  \\
+|type                      -> s|   \\
+|center                    -> p|  \\
+|circumradius              -> d|   \\
+|length                    -> r|   \\
+|width                     -> r|   \\
+|diagonal                  -> d|   \\
+|ab bc cd da               -> L|   \\
+|ac bd                     -> L|   \\
+ \textbf{Methods} table(\ref{rectangle:met}) \\
+|new(p,p,p,p)              -> R|   \\ 
+|angle(p,p,an)             -> R|   \\
+|gold(p,p,<swap>)          -> R|   \\
+|diagonal(p,p,<swap>)      -> R|   \\
+|side(p,p,r,<swap>)        -> R|   \\
+|get_lengths()           -> r,r|   \\
+                                  \\
+\fbox{\textbf{quadrilateral}}     \\
+ \textbf{Attributes} table(\ref{quadrilateral:att}) \\
+|pa,pb,pc,pd               -> p|  \\
+|ab bc cd da               -> L|  \\
+|ac bd                     -> L|  \\
+|type                      -> s|  \\
+|i                         -> p|  \\
+|g                         -> p|  \\
+|a b c d                   -> r|  \\
+ \textbf{Methods} table(\ref{quadrilateral:met}) \\
+|new(p,p,p,p)              -> Q|  \\ 
+|iscyclic()                -> b|  \\         
+                                  \\
+\fbox{\textbf{parallelogram}}     \\
+ \textbf{Attributes} table(\ref{parallelogram:att}) \\
+|pa,pb,pc,pd               -> p|  \\
+|ab bc cd da               -> L|  \\
+|ac bd                     -> L|  \\
+|type                      -> s|  \\
+|center                    -> p|   \\
+ \textbf{Methods} table(\ref{parallelogram:met}) \\
+|new(p,p,p,p)               ->P|     \\ 
+|fourth(p,p,p)              ->P|     \\
+                                   \\
+\fbox{\textbf{Regular\_polygon}}   \\
+ \textbf{Attributes} table(\ref{regular:att}) \\
+|center                    -> p|   \\
+|through                   -> p|  \\
+|circle                    -> C|  \\
+|type                      -> s|  \\
+|side                      -> d|   \\
+|circumradius              -> d|   \\
+|inradius                  -> d|   \\
+|proj                      -> p|   \\
+|nb                        -> i|   \\
+|angle                    -> an|  \\
+ \textbf{Methods} table(\ref{regular:met})  \\
+|new(p,p,n)               -> PR|  \\
+|incircle()                -> C|   \\
+|name(s)                   -> ?|   \\
+                                   \\
+\fbox{\textbf{vector}}             \\
+\textbf{Attributes} table(\ref{vector:att}) \\
+|type                      -> s|   \\
+|norm                      -> d|   \\
+|slope                     -> r|   \\
+|mtx                       -> M|   \\
+\textbf{Methods} table(\ref{vector:met})  \\
+|new(p,p)                  -> V|   \\
+|+ - *                     -> p|   \\
+|normalize(V)              -> V|   \\
+|orthogonal(d)             -> V|   \\
+|scale(r)                  -> V|   \\
+|at(p)                     -> V|   \\
+        \\
+\fbox{\textbf{matrix}}             \\
+\textbf{Attributes} table(\ref{matrix:att})   \\
+|set                       ->  t|  \\
+|rows                      ->  n|  \\
+|cols                      ->  n|  \\
+|type                      ->  s|  \\
+|det                       ->  r|  \\
+\textbf{Functions} table(\ref{matrix:met}) \\
+|new                       ->  m|  \\
+|square                    ->  m|  \\
+|htm                       ->  m|  \\
+|vector                    ->  m|  \\
+\\
+\textbf{Metamethods} table(\ref{matrix:meta}) \\
+|+ - *(m,m)                 -> m|   \\
+|^(m,n)                     -> m|   \\
+|=                          -> b|   \\
+|tostring                   -> s|   \\
+\\
+\textbf{Method} table(\ref{matrix:met})   \\
+|print                      -> s|   \\                    
+|get                     -> r/cx|   \\
+|inverse                    -> m|   \\    
+|adjugate                   -> m|   \\ 
+|transpose                  -> m|   \\   
+|is_diagonal                -> b|   \\   
+|is_orthogonal              -> b|   \\  
+|homogenization             -> m|   \\  
+|htm_apply                  -> m|   \\  
+                                    \\                       
+\fbox{\textbf{Misc.}}               \\
+ \textbf{Attributes} table(\ref{misc}) \\
+|scale(default =1)          -> r|   \\ 
+|tkzphi                     -> r|   \\
+|tkzinvphi                  -> r|   \\
+|tkzsqrtphi                 -> r|   \\
+|tkz_epsilon(default=1e-8)  -> r|   \\
+|length                     -> d|   \\
+|islinear(p,p,p)            -> b|   \\
+|isortho(p,p,p)             -> b|   \\
+|angle_normalize(an)       -> an|  \\
+|barycenter(...)            -> p|  \\
+|bisector(p,p,p)            -> L|   \\
+|bisector_ext(p,p,p)        -> L|   \\
+|altitude(p,p,p)            -> L|   \\
+|midpoint(p,p)              -> p|  \\
+|midpoints(...)   -> list of pts|  \\
+|equilateral(p,p)           -> T|   \\
+|format_number(r,n)         -> r|   \\
+|solve_quadratic(r,r,r)  -> cr,r|\\
+|\tkzUseLua{v}              -> s|   \\
+                                   \\
+\fbox{\textbf{Macros}}             \\
+|\tkzDN[n]{r}               -> r|   \\
+|\tkzDrawLuaEllipse(p,p,p)|   \\
+\end{multicols}
+\end{document}

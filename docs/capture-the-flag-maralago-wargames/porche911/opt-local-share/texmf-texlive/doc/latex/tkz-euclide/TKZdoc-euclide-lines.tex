@@ -1,0 +1,288 @@
+\section{Straight lines}
+
+It is of course essential to draw straight lines, but before this can be done, it is necessary to be able to define certain particular lines such as mediators, bisectors, parallels or even perpendiculars. The principle is to determine two points on the straight line. 
+
+\subsection{Definition of straight lines}
+
+\begin{NewMacroBox}{tkzDefLine}{\oarg{local options}\parg{pt1,pt2} or \parg{pt1,pt2,pt3}}%
+The argument is a list of two or three points. Depending on the case, the macro defines one or two points necessary to obtain the line sought. Either the macro \tkzcname{tkzGetPoint} or the macro \tkzcname{tkzGetPoints} must be used.
+I used the term "mediator" to designate the perpendicular bisector line at the middle of a line segment.
+
+\medskip
+\begin{tabular}{lll}%
+\toprule
+arguments           & example & explanation                         \\
+\midrule
+\TAline{\parg{pt1,pt2}}{[mediator]\parg{A,B}}{mediator of the segment $[A,B]$}
+\TAline{\parg{pt1,pt2,pt3}}{[bisector]\parg{A,B,C}} {bisector of $\widehat{ABC}$}
+\TAline{\parg{pt1,pt2,pt3}}{[altitude]\parg{A,B,C}} {altitude from $B$}
+\TAline{\parg{pt1}}{[tangent at=A]\parg{O}} {tangent at $A$ on the circle center $O$}
+\TAline{\parg{pt1,pt2}}{[tangent from=A]\parg{O,B}} {circle center $O$ through $B$}
+\end{tabular}
+
+\medskip
+\begin{tabular}{lll}%
+\toprule
+options             & default & definition                         \\ 
+\TOline{mediator}{}{perpendicular bisector of a line segment}  
+\TOline{perpendicular=through\dots}{mediator}{perpendicular to a line passing through a point} 
+\TOline{orthogonal=through\dots}{mediator}{see above }
+\TOline{parallel=through\dots}{mediator}{parallel to a line passing through a point}
+\TOline{bisector}{mediator}{bisector of an angle defined by three points}
+\TOline{bisector out}{mediator}{exterior angle bisector}
+\TOline{symmedian}{mediator}{symmedian from a vertex  }
+\TOline{altitude}{mediator}{altitude from avertex}
+\TOline{euler}{mediator}{euler line of a triangle   }
+\TOline{tangent at}{mediator}{tangent at a point of a circle  }
+\TOline{tangent from}{mediator}{tangent from an exterior point  }
+\TOline{K}{1}{coefficient for the perpendicular line}
+\TOline{normed}{false}{normalizes the created segment}
+\end{tabular}
+\end{NewMacroBox}  
+
+\subsubsection{With \tkzname{mediator}}  
+\begin{tkzexample}[latex=5 cm,small]
+\begin{tikzpicture}[rotate=25]
+ \tkzDefPoints{-2/0/A,1/2/B}
+ \tkzDefLine[mediator](A,B)          \tkzGetPoints{C}{D}
+ \tkzDefPointWith[linear,K=.75](C,D) \tkzGetPoint{D}
+ \tkzDefMidPoint(A,B)                \tkzGetPoint{I}
+ \tkzFillPolygon[color=teal!20](A,C,B,D)
+ \tkzDrawSegments(A,B C,D)
+ \tkzMarkRightAngle(B,I,C) 
+ \tkzDrawSegments(D,B D,A)
+ \tkzDrawSegments(C,B C,A)
+\end{tikzpicture}
+\end{tkzexample}  
+
+\subsubsection{An envelope with option \tkzname{mediator}}
+Based on a figure from O. Reboux with pst-eucl by D Rodriguez.
+
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=.75]
+   % necessary
+\tkzInit[xmin=-6,ymin=-4,xmax=6,ymax=6]
+\tkzClip
+\tkzSetUpLine[thin,color=magenta]
+\tkzDefPoint(0,0){O} 
+\tkzDefPoint(132:4){A}
+\tkzDefPoint(5,0){B}
+\foreach \ang in {5,10,...,360}{%
+ \tkzDefPoint(\ang:5){M}
+ \tkzDefLine[mediator](A,M)
+ \tkzGetPoints{x}{y}
+ \tkzDrawLine[add= 3 and 3](x,y)}
+\end{tikzpicture}
+\end{tkzexample}
+
+
+\subsubsection{A parabola with option \tkzname{mediator}}
+Based on a figure from O. Reboux with pst-eucl by D Rodriguez.
+It is not necessary to name the two points that define the mediator.
+
+\begin{tkzexample}[latex=8cm,small]
+\begin{tikzpicture}[scale=.6]
+\tkzInit[xmin=-6,ymin=-4,xmax=6,ymax=6] 
+\tkzClip
+\tkzSetUpLine[thin,color=teal]
+\tkzDefPoint(0,0){O} 
+\tkzDefPoint(132:5){A}
+\tkzDefPoint(4,0){B}
+\foreach \ang in {5,10,...,360}{%
+ \tkzDefPoint(\ang:4){M}
+ \tkzDefLine[mediator](A,M) 
+ \tkzGetPoints{x}{y}
+ \tkzDrawLine[add= 3 and 3](x,y)}
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{With options \tkzname{bisector} and \tkzname{normed}} 
+\begin{tkzexample}[latex=7 cm,small] 
+\begin{tikzpicture}[rotate=25,scale=.75]
+ \tkzDefPoints{0/0/C, 2/-3/A, 4/0/B}
+ \tkzDefLine[bisector,normed](B,A,C) \tkzGetPoint{a}
+ \tkzDrawLines[add= 0 and .5](A,B A,C)
+ \tkzShowLine[bisector,gap=4,size=2,color=red](B,A,C)
+ \tkzDrawLines[new,dashed,add= 0 and 3](A,a)
+\end{tikzpicture}
+\end{tkzexample} 
+
+\subsubsection{With option \tkzname{parallel=through}} % (fold)
+\label{ssub:parallel}
+Archimedes' Book of Lemmas proposition 1
+
+\begin{tkzexample}[latex=7cm,small]
+  \begin{tikzpicture}
+    \tkzDefPoints{0/0/O_1,0/1/O_2,0/3/A}
+    \tkzDefPoint(15:3){F}
+    \tkzDefPointBy[symmetry=center O_1](F) 
+    \tkzGetPoint{E}
+    \tkzDefLine[parallel=through O_2](E,F) 
+    \tkzGetPoint{x}   
+    \tkzInterLC(x,O_2)(O_2,A) \tkzGetPoints{D}{C} 
+    \tkzDrawCircles(O_1,A O_2,A)
+    \tkzDrawSegments[new](O_1,A E,F C,D)
+    \tkzDrawSegments[purple](A,E A,F)
+    \tkzDrawPoints(A,O_1,O_2,E,F,C,D)
+    \tkzLabelPoints(A,O_1,O_2,E,F,C,D)
+  \end{tikzpicture}
+\end{tkzexample}
+% subsubsection parallel (end)
+
+\subsubsection{With option \tkzname{orthogonal} and \tkzname{parallel}}    
+\begin{tkzexample}[latex=5 cm,small]
+\begin{tikzpicture}
+   \tkzDefPoints{-1.5/-0.25/A,1/-0.75/B,-0.7/1/C}
+   \tkzDrawLine(A,B)
+   \tkzLabelLine[pos=1.25,below left](A,B){$(d_1)$}
+   \tkzDrawPoints(A,B,C)
+   \tkzDefLine[orthogonal=through C](B,A) \tkzGetPoint{c}
+   \tkzDrawLine(C,c) 
+   \tkzLabelLine[pos=1.25,left](C,c){$(\delta)$}
+   \tkzInterLL(A,B)(C,c) \tkzGetPoint{I}
+   \tkzMarkRightAngle(C,I,B) 
+   \tkzDefLine[parallel=through C](A,B) \tkzGetPoint{c'}
+   \tkzDrawLine(C,c') 
+   \tkzLabelLine[pos=1.25,below left](C,c'){$(d_2)$}
+   \tkzMarkRightAngle(I,C,c')   
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{With option  \tkzname{altitude}} % (fold)
+\label{sub:altitude}
+\begin{tkzexample}[latex=7 cm,small]
+\begin{tikzpicture}
+\tkzDefPoints{0/0/A,6/0/B,0.8/4/C}	
+\tkzDefLine[altitude](A,B,C)     \tkzGetPoint{b}
+\tkzDefLine[altitude](B,C,A)     \tkzGetPoint{c}
+\tkzDefLine[altitude](B,A,C)     \tkzGetPoint{a}
+\tkzDrawPolygon(A,B,C)
+\tkzDrawPoints[blue](a,b,c)
+\tkzDrawSegments[blue](A,a B,b C,c)
+\tkzLabelPoints(A,B,c)
+\tkzLabelPoints[above](C,a)
+\tkzLabelPoints[above left](b)
+\end{tikzpicture}
+\end{tkzexample}
+
+% subsection altitude (end)
+
+
+\subsubsection{ With option \tkzname{euler}} % (fold)
+\label{sub:eulerline}
+\begin{tkzexample}[latex=7 cm,small]
+\begin{tikzpicture}[scale=.75]
+\tkzDefPoints{0/0/A,6/0/B,0.8/4/C}			 
+\tkzDefLine[euler](A,B,C)             
+\tkzGetPoints{h}{e}
+\tkzDefTriangleCenter[circum](A,B,C)  
+\tkzGetPoint{o}
+\tkzDrawPolygon[teal](A,B,C)
+\tkzDrawPoints[red](A,B,C,h,e,o)
+\tkzDrawLine[add= 2 and 2](h,e)
+\tkzLabelPoints(A,B,C,h,e,o)
+\tkzLabelPoints[above](C)
+\end{tikzpicture}
+\end{tkzexample}
+% subsection eulerline (end)
+
+\subsubsection{Tangent passing through a point on the circle \tkzname{tangent at}} 
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=.75]
+  \tkzDefPoint(0,0){O}
+  \tkzDefPoint(6,6){E}
+  \tkzDefRandPointOn[circle=center O radius 3]
+  \tkzGetPoint{A}
+  \tkzDrawSegment(O,A)
+  \tkzDrawCircle(O,A)
+  \tkzDefLine[tangent at=A](O)
+  \tkzGetPoint{h}
+  \tkzDrawLine[add = 4 and 3](A,h)
+  \tkzMarkRightAngle[fill=teal!30](O,A,h)
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Choice of contact point with tangents passing through an external point option \tkzname{tangent from}} 
+
+The tangent is not drawn. With option \tkzname{at}, a  point of the tangent is given by \tkzname{tkzPointResult}.  With option \tkzname{from} you get two points of the circle with \tkzname{tkzFirstPointResult} and \tkzname{tkzSecondPointResult}.  You can choose between these two points by comparing the angles formed with the outer point, the contact point and the center. The two possible angles have different directions. Angle counterclockwise refers to \tkzname{tkzFirstPointResult}.
+
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=1,rotate=-30]
+\tkzDefPoints{0/0/Q,0/2/A,6/-1/O}
+\tkzDefLine[tangent from = O](Q,A)  
+\tkzGetPoints{R}{S} 
+\tkzInterLC[near](O,Q)(Q,A)         
+\tkzGetPoints{M}{N}
+\tkzDrawCircle(Q,M)
+\tkzDrawSegments[new,add = 0 and .2](O,R O,S)
+\tkzDrawSegments[gray](N,O R,Q S,Q)
+\tkzDrawPoints(O,Q,R,S,M,N)
+\tkzMarkAngle[gray,-stealth,size=1](O,R,Q)
+\tkzFindAngle(O,R,Q)   \tkzGetAngle{an}
+\tkzLabelAngle(O,R,Q){%
+    $\pgfmathprintnumber{\an}^\circ$}
+\tkzMarkAngle[gray,-stealth,size=1](O,S,Q)
+\tkzFindAngle(O,S,Q)   \tkzGetAngle{an}
+\tkzLabelAngle(O,S,Q){%
+    $\pgfmathprintnumber{\an}^\circ$}
+\tkzLabelPoints(Q,O,M,N,R)
+\tkzLabelPoints[above,text=red](S)
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Example of tangents passing through an external point } 
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=.8] 
+\tkzDefPoints{0/0/c,1/0/d,3/0/a0}
+\def\tkzRadius{1}
+\tkzDrawCircle(c,d) 
+ \foreach \an in {0,10,...,350}{
+  \tkzDefPointBy[rotation=center c angle \an](a0)  
+  \tkzGetPoint{a}
+  \tkzDefLine[tangent from = a](c,d) 
+  \tkzGetPoints{e}{f}
+  \tkzDrawLines(a,f a,e)
+  \tkzDrawSegments(c,e c,f)}
+\end{tikzpicture} 
+\end{tkzexample}
+
+\subsubsection{Example of Andrew Mertz}
+
+\begin{tkzexample}[latex=6cm,small]
+ \begin{tikzpicture}[scale=.6] 
+ \tkzDefPoint(100:8){A}\tkzDefPoint(50:8){B}  
+ \tkzDefPoint(0,0){C} \tkzDefPoint(0,-4){R} 
+ \tkzDrawCircle(C,R)
+ \tkzDefLine[tangent from = A](C,R)  \tkzGetPoints{D}{E}
+\tkzDefLine[tangent from = B](C,R)  \tkzGetPoints{F}{G}
+ \tkzDrawSector[fill=teal!20,opacity=0.5](A,E)(D)
+ \tkzFillSector[color=teal,opacity=0.5](B,G)(F)
+ \end{tikzpicture}
+\end{tkzexample}
+\url{http://www.texample.net/tikz/examples/}  
+
+\subsubsection{Drawing a tangent option \tkzname{tangent from}}
+\begin{tkzexample}[latex=6cm,small]
+\begin{tikzpicture}[scale=.6] 
+ \tkzDefPoint(0,0){B} 
+ \tkzDefPoint(0,8){A} 
+ \tkzDefSquare(A,B)
+ \tkzGetPoints{C}{D}
+ \tkzDrawPolygon(A,B,C,D)
+ \tkzClipPolygon(A,B,C,D)
+ \tkzDefPoint(4,8){F}
+ \tkzDefPoint(4,0){E}
+ \tkzDefPoint(4,4){Q}
+ \tkzFillPolygon[color = green](A,B,C,D)
+ \tkzDrawCircle[fill = orange](B,A)
+ \tkzDrawCircle[fill = purple](E,B)  
+ \tkzDefLine[tangent from = B](F,A)
+ \tkzInterLL(F,tkzSecondPointResult)(C,D)
+ \tkzInterLL(A,tkzPointResult)(F,E) 
+ \tkzDrawCircle[fill = yellow](tkzPointResult,Q)  
+ \tkzDefPointBy[projection= onto B--A](tkzPointResult)
+ \tkzDrawCircle[fill = blue!50!black](tkzPointResult,A)
+\end{tikzpicture}
+\end{tkzexample}
+
+\endinput

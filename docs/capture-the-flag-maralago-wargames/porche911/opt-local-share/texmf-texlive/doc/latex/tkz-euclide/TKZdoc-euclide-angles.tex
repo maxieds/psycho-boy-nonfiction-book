@@ -1,0 +1,264 @@
+\section{Angles} 
+\subsection{Definition and usage with \tkzname{tkz-euclide}}
+In Euclidean geometry, an angle is the figure formed by two rays, called the sides of the angle, sharing a common endpoint, called the vertex of the angle.[Wikipedia]. A ray with \tkzname{tkz-euclide} is defined by two points also each angle is defined with three points like $\widehat{AOB}$. The vertex $O$ is the second point. Their order is important because it is assumed that the angle is specified in the direct order (counterclockwise). 
+In trigonometry and mathematics in general, plane angles are conventionally measured counterclockwise, starting with $0^\circ$  pointing directly to the right (or east), and $90^\circ$ pointing straight up (or north)[Wikipedia]. 
+Let us agree that an angle measured counterclockwise is positive.
+
+  \begin{center}
+    \begin{tikzpicture}[scale=.75]
+      \node {clockwise};
+      \tkzDefPoint(0,0){O} \tkzDefPoint(90:2){A}\tkzDefPoint(180:2){B}   
+      \tkzDrawArc[black,line width=2pt,arrows = {Stealth-}](O,B)(A)
+    \end{tikzpicture}
+    \begin{tikzpicture}[scale=.75]
+          \node {counterclockwise};
+      \tkzDefPoint(0,0){O} \tkzDefPoint(90:2){A}\tkzDefPoint(0:2){B}   
+      \tkzDrawArc[black,line width=2pt,arrows = {-Stealth}](O,A)(B)
+    \end{tikzpicture}  
+  \end{center}
+  
+ \tkzname{Angles} are involved in several macros like \tkzcname{tkzDefPoint},\tkzcname{tkzDefPointBy[rotation = \dots]}, \tkzcname{tkzDrawArc}
+ and the next one  \tkzcname{tkzGetAngle}. With the exception of the last one, all these macros accept negative angles.
+ 
+ \begin{figure}[!ht]
+ \centering
+ \begin{tabular}{|c|c|}
+ \hline
+ \tkzsubf{\begin{tikzpicture}
+ \tkzDefPoint(0,0){O}    \tkzDefPoint(0:2){A}
+ \tkzDefPointBy[rotation=center O angle 80](A)  \tkzGetPoint{B}
+ \tkzDrawSegments[-{Stealth}](O,A O,B)
+ \tkzMarkAngles[size=2,-Stealth,teal](A,O,B)
+ \tkzFindAngle(A,O,B)   \tkzGetAngle{an}
+ \tkzLabelAngle[pos=1,teal](A,O,B){$ \pgfmathprintnumber{\an}^\circ$}
+ \tkzLabelPoints(A)  \tkzLabelPoints[above](B)
+ \end{tikzpicture}}
+      {Rotation $80^\circ$ from $(O,A)$ to $(O,B)$\\ 
+    {\textbackslash}tkzDefPointBy[rotation=center O angle 80]}
+ &
+ \tkzsubf{\begin{tikzpicture}
+ \tkzDefPoint(0,0){O}    \tkzDefPoint(0:2){A}
+ \tkzDefPointBy[rotation=center O angle -80](A)  \tkzGetPoint{B}
+ \tkzDrawSegments[-{Stealth}](O,A O,B)
+ \tkzMarkAngles[size=2,Stealth-,red](B,O,A)
+ \tkzFindAngle(B,O,A)   \tkzGetAngle{an}
+ \tkzLabelAngle[pos=1,red](B,O,A){$-\pgfmathprintnumber{\an}^\circ$}
+\tkzLabelPoints[right](A)  \tkzLabelPoints[below](B)
+ \end{tikzpicture}}
+  {Rotation $-80^\circ$ from $(O,A)$ to $(O,B)$\\ 
+     {\textbackslash}tkzDefPointBy[rotation=center O angle -80]}
+ \\ \hline
+ \tkzsubf{\begin{tikzpicture}
+ \tkzDefPoint(0,0){O}    \tkzDefPoint(0:2){A}
+ \tkzDefPointBy[rotation=center O angle 80](A)  \tkzGetPoint{B}
+ \tkzDrawSegments[-{Stealth}](O,A O,B)
+ \tkzMarkAngles[size=1.5,-Stealth,teal](A,O,B)
+ \tkzFindAngle(A,O,B)   \tkzGetAngle{an}
+ \tkzLabelAngle[pos=1,teal](A,O,B){$ \pgfmathprintnumber{\an}^\circ$}
+\tkzLabelPoints(A)  \tkzLabelPoints[above](B)
+ \end{tikzpicture}}
+      { {\textbackslash}tkzFindAngle(A,O,B) gives $80$}
+ &
+ \tkzsubf{\begin{tikzpicture}
+ \tkzDefPoint(0,0){O}    \tkzDefPoint(0:2){A}
+ \tkzDefPointBy[rotation=center O angle -80](A)  \tkzGetPoint{B}
+ \tkzDrawSegments[-{Stealth}](O,A O,B)
+ \tkzMarkAngles[size=1,-Stealth,red](A,O,B)
+ \tkzFindAngle(A,O,B)   \tkzGetAngle{an}
+ \tkzLabelAngle[pos=.75,red](A,O,B){$\pgfmathprintnumber{\an}^\circ$}
+\tkzLabelPoints[right](A)  \tkzLabelPoints[below](B)
+ \end{tikzpicture}}
+  {{\textbackslash}tkzFindAngle(A,O,B) gives $\pgfmathprintnumber{\an}^\circ$}
+ \\\hline
+ \end{tabular}
+ \end{figure}
+
+As we can see, the $-80^\circ$ rotation defines a clockwise angle but the macro 
+\tkzcname{tkzFindAngle} recovers a counterclockwise angle.
+
+\subsection{Recovering an angle \tkzcname{tkzGetAngle}}
+\begin{NewMacroBox}{tkzGetAngle}{\parg{name of macro}}%
+Assigns the value in degree of an angle to a macro. The value is positive and between $0^\circ$ and $360^\circ$.  This macro retrieves \tkzcname{tkzAngleResult} and stores the result in a new macro.
+
+\medskip
+
+\begin{tabular}{lll}%
+\toprule
+arguments             & example & explanation             \\
+\midrule
+\TAline{name of macro} {\tkzcname{tkzGetAngle}\{ang\}}{\tkzcname{ang} contains the value of the angle.}
+\end{tabular}
+\end{NewMacroBox}
+
+This is an auxiliary macro that allows you to retrieve the result of the following macro \tkzcname{tkzFindAngle}.
+
+\subsection{Angle formed by three points}
+
+\begin{NewMacroBox}{tkzFindAngle}{\parg{pt1,pt2,pt3}}%
+The result is stored in a macro \tkzcname{tkzAngleResult}.
+
+\medskip
+
+\begin{tabular}{lll}%
+\toprule
+arguments     & example & explanation     \\
+\midrule
+\TAline{(pt1,pt2,pt3)} {\tkzcname{tkzFindAngle}(A,B,C)}{\tkzcname{tkzAngleResult} gives the angle ($\overrightarrow{BA},\overrightarrow{BC}$)}
+\bottomrule
+\end{tabular}
+
+\medskip
+The measure is always positive and between $0^\circ$  and $360^\circ$. With the usual conventions, a counterclockwise angle smaller than a straight angle has always a measure between $0^\circ$ and $180^\circ$, while a clockwise angle smaller than a straight angle will have a measurement greater than $180^\circ$. \tkzcname{tkzGetAngle} can retrieve the angle.
+\end{NewMacroBox}
+ 
+\subsubsection{Verification of angle measurement}
+    
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=.75]
+  \tkzDefPoint(-1,1){A}
+  \tkzDefPoint(5,2){B}
+  \tkzDefEquilateral(A,B)
+  \tkzGetPoint{C}
+  \tkzDrawPolygon(A,B,C)
+  \tkzFindAngle(B,A,C) \tkzGetAngle{angleBAC}
+  \edef\angleBAC{\fpeval{round(\angleBAC)}}
+  \tkzDrawPoints(A,B,C) 
+  \tkzLabelPoints(A,B)
+  \tkzLabelPoint[right](C){$C$}
+  \tkzLabelAngle(B,A,C){\angleBAC$^\circ$}
+  \tkzMarkAngle[size=1.5](B,A,C)
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Determination of the three angles of a triangle}
+
+\begin{tkzexample}[latex=6cm,small]
+\begin{tikzpicture}
+\tikzset{label angle style/.append style={pos=1.4}}
+\tkzDefPoints{0/0/a,5/3/b,3/6/c}
+\tkzDrawPolygon(a,b,c)
+\tkzFindAngle(c,b,a)\tkzGetAngle{angleCBA}
+\pgfmathparse{round(1+\angleCBA)}
+\let\angleCBA\pgfmathresult
+\tkzFindAngle(a,c,b)\tkzGetAngle{angleACB}
+\pgfmathparse{round(\angleACB)}
+\let\angleACB\pgfmathresult
+\tkzFindAngle(b,a,c)\tkzGetAngle{angleBAC}
+\pgfmathparse{round(\angleBAC)}
+\let\angleBAC\pgfmathresult
+\tkzMarkAngle(c,b,a)
+\tkzLabelAngle(c,b,a){\tiny $\angleCBA^\circ$}
+\tkzMarkAngle(a,c,b)
+\tkzLabelAngle(a,c,b){\tiny $\angleACB^\circ$}
+\tkzMarkAngle(b,a,c)
+\tkzLabelAngle(b,a,c){\tiny $\angleBAC^\circ$}
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Angle between two circles}
+We are looking for the angle formed by the tangents at a point of intersection
+
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=.4]
+\pgfkeys{/pgf/number format/.cd,%
+          fixed,precision=1}
+\tkzDefPoints{0/0/A,6/0/B,4/2/C}
+\tkzDrawCircles(A,C B,C)
+\tkzDefLine[tangent at=C](A) \tkzGetPoint{a}
+\tkzDefPointsBy[symmetry = center C](a){d}
+\tkzDefLine[tangent at=C](B) \tkzGetPoint{b}
+\tkzDrawLines[add=1 and 4](a,C  C,b)
+\tkzFillAngle[fill=teal,opacity=.2%
+                        ,size=2](b,C,d)
+\tkzFindAngle(b,C,d)\tkzGetAngle{bcd}
+\tkzLabelAngle[pos=1.25](b,C,d){%
+  \tiny $\pgfmathprintnumber{\bcd}^\circ$}
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsection{Angle formed by a straight line with the horizontal axis \tkzcname{tkzFindSlopeAngle}}
+Much more interesting than the last one. The result is between -180 degrees and +180 degrees.
+
+\begin{NewMacroBox}{tkzFindSlopeAngle}{\parg{A,B}}%
+Determines the slope of the straight line (AB). The result is stored in a macro \tkzcname{tkzAngleResult}.
+
+\medskip
+\begin{tabular}{lll}%
+\toprule
+arguments  & example & explanation     \\
+\midrule
+\TAline{(pt1,pt2)} {\tkzcname{tkzFindSlopeAngle}(A,B)}{}
+\bottomrule
+\end{tabular}
+
+\medskip
+\tkzcname{tkzGetAngle} can retrieve the result. If retrieval is not necessary, you can use \tkzcname{tkzAngleResult}.
+\end{NewMacroBox}
+
+\subsubsection{How to use  \tkzcname{tkzFindSlopeAngle}}
+
+ The point here is that $(AB)$ is the bisector of $\widehat{CAD}$, such that the $AD$ slope is zero. We recover the slope of $(AB)$ and then rotate twice.
+
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}
+ \tkzDefPoint(1,5){A} \tkzDefPoint(5,2){B}  
+ \tkzFindSlopeAngle(A,B)\tkzGetAngle{tkzang}
+ \tkzDefPointBy[rotation= center A angle \tkzang ](B)
+ \tkzGetPoint{C}
+ \tkzDefPointBy[rotation= center A angle -\tkzang ](B) 
+ \tkzGetPoint{D}
+ \tkzDrawSegment(A,B)
+ \tkzDrawSegments[new](A,C A,D)
+ \tkzDrawPoints(A,B,C,D)
+ \tkzCompass[length=1](A,C)
+ \tkzCompass[delta=10,brown](B,C)  
+ \tkzLabelPoints(B,C,D)  
+ \tkzLabelPoints[above left](A)
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Use of \tkzcname{tkzFindSlopeAngle} and \tkzcname{tkzGetAngle}}
+Here is another version of the construction of a mediator
+
+\begin{tkzexample}[latex=6cm,small]
+\begin{tikzpicture}
+ \tkzInit
+ \tkzDefPoint(0,0){A}        \tkzDefPoint(3,2){B}
+ \tkzDefLine[mediator](A,B)  \tkzGetPoints{I}{J}
+ \tkzCalcLength(A,B)         \tkzGetLength{dAB}
+ \tkzFindSlopeAngle(A,B)     \tkzGetAngle{tkzangle}
+ \begin{scope}[rotate=\tkzangle]
+   \tkzSetUpArc[color=gray,line width=0.2pt,%
+     /tkzcompass/delta=10]
+   \tkzDrawArc[R,arc](B,3/4*\dAB)(120,240)
+   \tkzDrawArc[R,arc](A,3/4*\dAB)(-45,60)
+   \tkzDrawLine(I,J)         \tkzDrawSegment(A,B)
+  \end{scope}
+  \tkzDrawPoints(A,B,I,J)    \tkzLabelPoints(A,B)
+   \tkzLabelPoints[right](I,J)
+\end{tikzpicture}
+\end{tkzexample}
+
+\subsubsection{Another use of \tkzcname{tkzFindSlopeAngle}}
+
+\begin{tkzexample}[latex=7cm,small]
+\begin{tikzpicture}[scale=1.5]
+  \tkzDefPoint(1,2){A}    \tkzDefPoint(3,4){B}
+  \tkzDefPoint(3,2){C}    \tkzDefPoint(3,1){D}
+  \tkzDrawSegments(A,B A,C A,D)
+  \tkzDrawPoints[color=red](A,B,C,D)  
+  \tkzLabelPoints(A,B,C,D)
+  \tkzFindSlopeAngle(A,B)\tkzGetAngle{SAB} 
+  \tkzFindSlopeAngle(A,C)\tkzGetAngle{SAC}
+  \tkzFindSlopeAngle(A,D)\tkzGetAngle{SAD}
+  \pgfkeys{/pgf/number format/.cd,fixed,precision=2}
+  \tkzText(1,5){The slope of (AB) is : 
+     $\pgfmathprintnumber{\SAB}^\circ$}     
+  \tkzText(1,4.5){The slope of (AC) is : 
+     $\pgfmathprintnumber{\SAC}^\circ$}    
+  \tkzText(1,4){The slope of (AD) is : 
+     $\pgfmathprintnumber{\SAD}^\circ$}
+\end{tikzpicture}
+\end{tkzexample}
+
+\endinput

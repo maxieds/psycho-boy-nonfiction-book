@@ -1,0 +1,952 @@
+% !TeX TS-program = lualatex
+% Documentation de l'extension "spreadtab", traduction chatgpt, deepL, chat mistral
+\documentclass[english,a4paper,10pt]{article}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage[table]{xcolor}
+
+\usepackage{%
+	amsmath,amssymb,array,
+	longtable,arydshln,tabularx,
+	xspace,fancyhdr,babel,
+	siunitx,enumitem,spreadtab
+}
+\setlist[1]{labelindent=2em}
+\setlist{
+	leftmargin=!,
+	itemsep=.6ex plus.3ex minus.3ex,
+	parsep=.2ex plus.1ex minus.1ex,
+	topsep=\glueexpr.7ex plus.3ex minus.3ex-\parskip\relax,
+	partopsep=0ex
+}
+
+\usepackage[no-math]{fontspec}
+\usepackage[libertine]{newtxmath}
+\usepackage{libertineRoman}
+\setmonofont[Scale=MatchLowercase]{DejaVu Sans Mono}
+
+\fancyhead[L]{}\fancyhead[C]{}\fancyhead[R]{\scriptsize\slshape \leftmark}
+\fancyfoot[l]{}\fancyfoot[c]{}\fancyfoot[r]{\thepage}
+\renewcommand\headrulewidth{0pt}
+
+\usepackage[bottom]{footmisc}
+\usepackage[protrusion=true,final,verbose=false,babel=true]{microtype}
+
+%-- environnement \exemple
+\makeatletter
+\newcommand\make@car@active[1]{%
+	\catcode`#1\active
+	\begingroup
+		\lccode`\~`#1\relax
+		\lowercase{\endgroup\def~}%
+}
+\newif\if@exstar
+\newcommand\exemple{%
+	\begingroup
+		\parskip\z@
+		\@makeother\;\@makeother\!\@makeother\?\@makeother\:% neutralise french
+		\@ifstar
+			{\@exstartrue\exemple@}
+			{\@exstarfalse\exemple@}%
+}
+
+\newcommand\exemple@[1][65]{%
+		\medbreak
+		\noindent
+		\begingroup
+			\let\do\@makeother\dospecials
+			\make@car@active\ {\space}%
+			\make@car@active\^^M{\par\leavevmode}%
+			\make@car@active\^^I{\space\space\space\space}%
+			\make@car@active\,{\leavevmode\kern\z@\string,}%
+			\make@car@active\-{\leavevmode\kern\z@\string-}%
+			\make@car@active\>{\leavevmode\kern\z@\string>}%
+			\make@car@active\<{\leavevmode\kern\z@\string<}%
+			\exemple@@{#1}%
+}
+
+\newcommand\exemple@@[2]{%
+			\def\@tempa##1#2{\exemple@@@{#1}{##1}}%
+			\@tempa
+}
+
+\newcommand\exemple@@@[2]{%
+			\xdef\the@code{#2}%
+		\endgroup
+		\vskip0.5ex
+		\fboxsep5pt
+		\fboxrule.4pt
+		\if@exstar
+			\fbox{%
+				\vtop{%
+					\hsize\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax
+					\hbox{%
+						\vtop{%
+							\hsize\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax
+							\parskip0pt
+							\ttfamily
+							\footnotesize
+							\the@code
+							}%
+						}
+					\kern5pt
+					\hrule
+					\kern5pt
+					\hbox{%
+						\vtop{%
+							\hsize\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax
+							\footnotesize
+							\newlinechar`\^^M
+							\everyeof{\noexpand}%
+							\centering
+							\scantokens{#2}%
+						}%
+					}
+				}%
+			}%
+		\else
+			\fbox{%
+				$
+				\vcenter{%
+					\hsize\dimexpr0.#1\linewidth-\fboxsep-\fboxrule\relax
+					\parskip0pt
+					\ttfamily
+					\footnotesize
+					\the@code
+				}%
+				\vcenter{%
+					\hsize\dimexpr\linewidth-0.#1\linewidth-\fboxsep-\fboxrule\relax
+					\footnotesize
+					\newlinechar`\^^M
+					\everyeof{\noexpand}%
+					\scantokens{#2}%
+				}$%
+			}%
+		\fi
+		\medbreak
+	\endgroup
+}
+
+%%%%%%%%%%% environnement OOcalc
+\newcount\cntlin
+\newcount\cntcol
+\newcommand*\tabfont{\sffamily\footnotesize}% police du tableau (helvetica ici)
+\newcommand*\tableheadformat{\bfseries}% police des en-têtes du tableau (en gras)
+\colorlet{tabheadcolor}{gray!40}% couleur de font des en-têtes du tableau
+\newtoks\t@b
+\long\def\ifremain@lines#1\\#2\@nil{%
+	\csname @\ifx\@empty#2\@empty second\else first\fi oftwo\endcsname}
+\long\def\subst@eol#1\\#2\@nil{\addtot@b{#1\\\cline{1-1}\hdashline}%
+	\ifremain@lines#2\\\@nil{\addtot@b&\subst@eol#2\@nil}{\addtot@b{#2\end{tabular}}}}
+\long\def\collect@body#1\end{\subst@eol#1\@nil\end}
+
+\newcommand\addtot@b[1]{\t@b\expandafter{\the\t@b#1}}
+\newcommand\edftot@b[1]{\edef\temp@{#1}\expandafter\addtot@b\expandafter{\temp@}}
+
+\newenvironment{OOocalc}[2][1.5cm]{% #1=largeur colonnes #2 = nombre de colonnes
+	\arrayrulewidth0.4pt \dashlinedash0.4pt \relax\dashlinegap3pt
+	\global\cntlin\m@ne\global\cntcol\z@
+	\tabfont
+	\tabcolsep0pt
+	\t@b{\begin{tabular}{%
+		|>{\cellcolor{tabheadcolor}%
+			\global\cntcol\z@\global\advance\cntlin\@ne
+			\centering\arraybackslash
+			\ifnum\cntlin>\z@\tableheadformat\number\cntlin\fi}
+		m{2em}|*{#2}{>{\centering\arraybackslash}m{#1}:}}%
+		\hline
+		\rowcolor{tabheadcolor}}%
+	\loop
+		\ifnum\cntcol<#2
+			\advance\cntcol\@ne
+			\addtot@b{&\multicolumn{1}{>\centering m{#1}|}}%
+			\edftot@b{{\noexpand\tableheadformat\@Alph\cntcol}}%
+	\repeat
+	\addtot@b{\\\hline&}%
+	\collect@body}{\the\t@b}
+
+\def\engdate{\expandafter\engdatei\STdate\@nil}
+\def\engdatei#1/#2/#3\@nil{\number#3\relax\space\ifcase #2 \or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi{} #1}
+
+\newif\ifchevrons \chevronstrue
+\long\def\centerverb#1{%
+	\def\centerverb@i##1#1{##1\smallbreak\egroup}%
+	\bgroup
+		\ttfamily\@noligs
+		\parindent3em
+		\par
+		\smallskip\nobreak
+		\parskip2pt
+		\let\do\@makeother \dospecials
+		\@vobeyspaces
+		\obeylines
+		\make@car@active\^^I{\leavevmode\space\space\space\space}%
+		\ifchevrons
+			\make@car@active\<{\begingroup$\langle$\itshape}%
+			\make@car@active\>{\/$\rangle$\endgroup}%
+		\fi
+		\centerverb@i
+}
+\begingroup
+	\catcode`\<13
+	\catcode`\>13
+	\gdef\Verb{%
+		\relax\ifmmode\hbox\else\leavevmode\null\fi
+		\bgroup
+			\verb@eol@error
+			\let\do\@makeother \dospecials
+			\verbatim@font\@noligs
+			\catcode`\<13
+			\catcode`\>13
+			\def<{\begingroup$\langle$\itshape}%
+			\def>{\/$\rangle$\endgroup}%
+			\@ifstar\@sverb\@verb
+	}
+\endgroup
+\makeatother
+
+\newcommand*\ST{\textsf{\STname}\xspace}
+\newcommand*\xfp{\texttt{l3fp}\xspace}
+\newcommand*\falseverb[1]{\texttt{\detokenize{#1}}}
+\newcommand*\NEW{\marginpar{\vspace{-1.5ex}\itshape\color{red}New v\STver}}
+\newcommand*\chevrons[1]{\textlangle\textit{#1}\textrangle}
+\newcommand*\STkey[1]{{\color{teal}\texttt{\detokenize{#1}}}}
+\newcommand*\STval[2][\itshape]{{\color{teal}\textlangle{\ttfamily#1#2}\textrangle}\if\relax\detokenize{#2}\relax\quad(empty)\fi}
+\newcommand*\STkv[2]{\STkey{#1}{\color{teal}${}={}$}\STval{#2}}
+\newcommand*\STmacro[1]{\texttt{#1}}
+
+\usepackage[bookmarks=true,bookmarksopen=true,colorlinks=true,hyperfootnotes=false,filecolor=black,linkcolor=blue,urlcolor=magenta,pdfauthor={Christian TELLECHEA},pdftitle={spreadtab},pdfsubject={Spreadtab provides spreadsheet features for LaTeX table environments},pdfkeywords={spreadtab},pdfcreator={LaTeX}]{hyperref}
+
+\begin{document}
+\parindent0pt 
+\pagestyle{fancy}
+\begin{titlepage}
+	\null\par\vfill
+	\begin{center}
+		\begin{minipage}{0.75\linewidth}
+			\begin{center}
+				\Huge\bfseries\ST\par\vspace{5pt}
+				\small v\STver\par\vspace{35pt}
+				\normalsize User's manual
+			\end{center}
+		\end{minipage}
+	\end{center}
+	\vspace{1cm}
+	\begin{center}
+		Christian {\sc Tellechea}\par\small
+		\href{mailto:unbonpetit@netc.fr}{\texttt{\textbf{unbonpetit@netc.fr}}}\par\vspace{5pt}
+		\engdate
+	\end{center}
+	\vfill
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+			\noindent\hrulefill\par
+			\hfill\textbf{\textit{Résumé}}\hfill{}\medskip\par\footnotesize
+				This package allows to use spreadsheet features in any "table" environment with \LaTeX{}.\par\smallskip
+				The main functionality is being able to write formulas in the cells of a table that refer to other cells, calculate the formulas contained in the cells and display the numerical results of these formulas in the table.\par
+			\hrulefill
+		\end{minipage}
+	\end{center}
+	\vfill{}
+\end{titlepage}
+
+\tableofcontents\newpage
+\parskip\medskipamount
+\section{Presentation}
+This manual\footnote{What you are reading is only a translation from French done by AIs (DeepL, ChatGPT, and Mistral Chat). I have barely reviewed it, so there may be errors or inconsistencies. For \emph{reliable} information, please refer to the French manual.} describes the \ST package. It lets you build spreadsheet-like tables. Table cells have coordinates (column and row) which can be used in formulas to calculate values in other cells. To load the package, write in the preamble
+\centerverb|\usepackage{spreadtab}|
+
+This package requires the \LaTeXe{} format after 2022/06/01 as well as the \href{https://ctan.org/pkg/xstring}{\texttt{xstring}} and \href{https://ctan.org/pkg/simplekv}{\texttt{simplekv}} packages.
+
+This package is intended to be compatible with all table environments, provided that column separators are "\verb=&=" and line breaks are "\verb=\\=". \ST acts completely independently of the table environment. This means that reading the table, processing and calculating formulas takes place before the table environment takes over and "sees" the body of the table.
+
+Therefore, \ST proceeds in 3 steps:
+\begin{itemize}
+	\item First, \ST reads the body of the array. If the macro \texttt{\bfseries\color{red}\string\STxp}\NEW{} is present one or more times, its argument is expanded to the maximum. The body of the table is then divided into rows and cells;
+	\item the formulas contained in the cells are then calculated, having first calculated the dependent cells;
+	\item the body of the table is finally reconstructed, having replaced each formula with the numerical value previously calculated, and the whole is given to the table environment specified by the user.
+\end{itemize}
+
+The syntax is:
+\centerverb/\begin{spreadtab}[<options>]{{<tabname>}{<colspec>}}
+    table with formulas and numbers
+\end{spreadtab}/
+
+where \Verb-<tabname>- represents the name of any array environment available with \LaTeX{} or with a package. You can replace \verb|\begin{spreadtab}...\end{spreadtab}| with \verb|\spreadtab...\endspreadtab|.
+
+The \Verb|<options>| must be in the form \STkv{key}{value}\NEW{} to apply only to the current array. To specify \Verb|<options>| valid for all future arrays, use
+\centerverb|\STset{<key>=<value>}|
+The list of \STkey{keys} and associated \STval{values} is available on page~\pageref{key/val}.
+
+Although the spreadsheet-like functionality of \LaTeX{} is appreciable, you should not lose sight of the fact that the 3 steps described above are time-consuming. As a result, compilation times are much longer than with a conventional table.
+
+\section{New in version 0.6}
+This version is likely to break usage compared to previous versions\NEW{} due to the removal of certain macros and a change in the optional argument. Therefore, it is important to pay attention to the following points, especially if compilation errors occur:
+
+\begin{enumerate}
+	\item \xfp is now the only possible calculation engine, and therefore, it is mandatory to use a version of \LaTeX{} released after the integration of \texttt{xfp} into the kernel on 2022/06/01;
+	\item support for the old calculation engine \href{http://mirrors.ctan.org/macros/latex/contrib/fp/documentation.pdf}{\texttt{fp}} is permanently discontinued;
+	\item when calling the package with \verb|\usepackage{spreadtab}|, no optional argument is now possible since there is only one calculation engine;
+	\item the environment now operates within a semi-simple group;
+	\item The \href{https://ctan.org/pkg/simplekv}{\texttt{simplekv}} package is loaded to use the \STkv{key}{value} system. All \ST settings are now done using the macro \verb|\STset{|\STkv{key}{value}\verb|}|;
+	\item the optional argument that follows \Verb|\begin{spreadtab}[<options>]| now contains \textbf{\color{red} exclusively} the keys/values to set the current table, and therefore:
+		\begin{itemize}
+			\item the macro \verb|\STsavecell| is removed and replaced by the key \STkey{save list} (see page~\pageref{save list})
+			\item the macros \verb|\STdebug| and \verb|\STdisplaytab| are removed and replaced by the key \STkey{debug} (see page~\pageref{debug})
+		\end{itemize}
+		This point will cause compilation errors if the optional argument contains the above macros as it did in previous versions.
+	\item if \verb|\STxp| appears one or more times within the table body, the maximum expansion of its argument is performed during the table reading;
+	\item the macro \verb|\STmakegtag| is removed; assignments through the macro-function \STmacro{tag} are always global due to point 4;
+	\item the macro-function \STmacro{tag} allows, if the key \STkv{tag to aux}{true}, to write assignments to the auxiliary file;
+	\item the key \STkey{aux save list} allows saving the content of user-selected cells into macros and writing assignments to the auxiliary file; 
+	\item belonging to older versions, the macros \verb|\STautoround|, \verb|\STsetdecimalsep|, \verb|\STeol|, \verb|\STsetdisplaymarks|, \verb|\STmessage|, \verb|\STnumericfieldmarker|, \verb|\STtranposechar|, and \verb|\STtextcell|, while still functioning (but no longer documented), will be removed in the next version;
+	\item the macro functions \STmacro{ifeq}, \STmacro{ifgt} and \STmacro{iflt} will be removed in the next version.
+\end{enumerate}
+
+\section{Common Features}
+\subsection{Calculation}
+A cell can now contain any calculation understood by \xfp: basic operations, trigonometry and inverses, exponentials and logarithms, comparisons, logical connectors\footnote{If you wish to use the logical connector "and" in \xfp, denoted by "\texttt{\string&\string&}", it is \emph{mandatory} to enclose this operator in braces within a table to prevent the \texttt{\string&} tokens from being interpreted as column separators. In a table cell, for example, to check if the content of the cell \texttt{a1} belongs to an interval, you would write: "\texttt{a1>1 \string{\string&\string&\string} a1<10}".}, factorials, random numbers, etc. See the documentation for \href{http://mirrors.ctan.org/macros/latex/required/l3kernel/interface3.pdf}{\texttt{interface3}}.
+
+As a result, the macro-functions \STmacro{rand}, \STmacro{rnd}, and \STmacro{fact} are still usable but are \emph{no longer} part of \ST: they are now directly understood by \xfp.
+
+\subsection{Line Breaks}
+By default, \ST considers a line to end with \verb-\\-, which is standard in tables. The optional argument \Verb-[<dimension>]- that follows is taken into account. This line-break marker can be modified using the key \STkey{tabline sep}\label{tabline sep}. For example, you can write:
+\centerverb|tabline sep = \tabularnewline|
+
+The line breaks that will be inserted into the final table will always be "\verb-\\-", even if the line break marker was modified when \ST \emph{reads} the table.
+
+Just after the line break, \ST recognizes most horizontal rules as well as their optional arguments: \verb|\hline|, \verb|\cline|, \verb|\hhline|, \verb|\noalign|, \verb|\toprule|, \verb|\midrule|, \verb|\bottomrule|, \verb|\cmidrule|, \verb|\addlinespace|, \verb|\morecmidrules|, and \verb|\specialrule|.
+
+For other cases, see page~\pageref{filets horizontaux} for further instructions.
+
+\subsection{Absolute References}
+In the table, cells are identified by their absolute references as follows:
+\begin{itemize}
+	\item the column is represented by a letter, either uppercase or lowercase, from \falseverb a to \falseverb z, where \falseverb a represents the first column on the left: we are thus initially limited to 26 columns, which should be sufficient for the vast majority of cases;
+	\item immediately following the letter, a strictly positive integer represents the row number, with row number 1 being the topmost row.
+\end{itemize}
+
+An absolute reference is thus written, for example: "\falseverb{b4}", "\falseverb{C1}", or "\falseverb{d13}". Visually, this can be illustrated by a table similar to a spreadsheet, here intentionally limited to 5 rows and 5 columns:
+\begin{center}
+\begin{OOocalc}[6em]{5}
+&&&&\\&&&&\\&&&&\\&&&&\\&&&&\\
+\end{OOocalc}
+\end{center}
+In this example, we calculate the sum of each row and column, and then the total sum:
+\exemple/\begin{spreadtab}{{tabular}{rr|r}}
+	22       & 54         & a1+b1 \\
+	43       & 65         & a2+b2 \\
+	49       & 37         & a3+b3 \\
+	\hline
+	a1+a2+a3 & b1+b2+b3   & a4+b4
+\end{spreadtab}/
+
+In this other example, we calculate a few lines of Pascal's triangle:
+\exemple/\begin{spreadtab}{{tabular}{ccccc}}
+	1  &       &       &       &    \\
+	a1 & a1    &       &       &    \\
+	a2 & a2+b2 & b2    &       &    \\
+	a3 & a3+b3 & b3+c3 & c3    &    \\
+	a2 & a4+b4 & b4+c4 & c4+d4 & d4
+\end{spreadtab}/
+
+\subsection{Relative references}
+To reference a cell, you can specify its position relative to the cell containing the formula. Thus, the "relative" coordinates of a cell are 2 relative numbers written according to this syntax: \Verb|[<x>,<y>]|, where \Verb|<x>| is the horizontal offset from the cell containing the formula and \Verb|<y>| is the vertical offset. Thus, \falseverb{[-2,3]} refers to the cell 2 columns before (left) and 3 rows after (lower) the cell containing the formula.
+
+Here again is the Pascal triangle seen above, but the references are relative and the "\verb-matrix-" environment of the \href{https://ctan.org/pkg/amsmath}{\texttt{amsmath}} package is used:
+\exemple/$
+\begin{spreadtab}{{matrix}{}}
+	1\\
+	[0,-1] & [-1,-1]\\
+	[0,-1] & [-1,-1]+[0,-1] & [-1,-1]\\
+	[0,-1] & [-1,-1]+[0,-1] & [-1,-1]+[0,-1] & [-1,-1]\\
+	[0,-1] & [-1,-1]+[0,-1] & [-1,-1]+[0,-1] & [-1,-1]+[0,-1] & [-1,-1]
+\end{spreadtab}
+$/
+
+A mixture of absolute and relative references can be used in the same formula.
+
+\subsection{Text cells}
+If you want to put text in a cell, simply place the "\falseverb @" character somewhere in the cell. In doing so, the cell is ignored by \ST and becomes an inert cell that cannot be referred to anywhere else in the table.
+
+The key \STkey{text mark}\label{text mark} is used to modify the text marker. For example
+\centerverb/\STset{text mark=`}/
+will cause a cell containing the character "\verb=`=" to be understood as a text cell. It's important to note, however, that the \STkey{text mark} key detokenizes its value, making the text marker made up of token(s) of catcode 12: to be recognized by \ST, these tokens must have this catcode 12 at the time the array is read.
+\exemple/\begin{spreadtab}{{tabular}{|r|ccc|}}\hline
+	@ values of $x$ & -5                   & -1 & 4 \\
+	@ $f(x)=2x$     & \STcopy>{2*[0,-1]}   &    &   \\\hline
+\end{spreadtab}\medbreak
+\STset{text mark=`}
+\begin{spreadtab}{{tabular}{|r|ccc|}}\hline
+	`values of $x$ & -5                   & -1 & 4 \\
+	`$f(x)=2x$     & \STcopy>{2*[0,-1]}   &    &   \\\hline
+\end{spreadtab}/
+
+If a cell is empty or made up entirely of spaces, then \ST will treat it as a text cell.
+
+\subsection{Mixed Cells}
+In reality, each cell consists of \emph{two} fields. On one side, the \chevrons{numeric field} contains the formula, and on the other side, the \chevrons{text field} will be ignored by the calculation engine and does not contribute to the calculations:
+\begin{itemize} 
+	\item In a cell, if nothing is specified, the entire cell is considered the \chevrons{numeric field}, and the \chevrons{text field} is empty;
+	\item If the cell contains "\falseverb{@}", then the entire cell is considered the \chevrons{text field}. The \chevrons{numeric field} is empty and inaccessible.
+	\item If the cell contains "\verb-:=-", then the argument in curly braces that follows is the \chevrons{numeric field}, and everything else is the \chevrons{text field}. The cell has this structure:
+		\centerverb|<text field>:={<numeric field>}<text field>|
+	With the key \STkey{numeric mark}\label{numeric mark}, you can change this marker to "\verb-\=-" with:
+		\centerverb|numeric mark={\=}|
+	In this case, the definition of \verb-\=- would have no importance and would not intervene in the process: for \ST, it is simply a marker for the start of the formula that is searched for and recognized without being expanded.
+\end{itemize}
+Once the \chevrons{numeric field} is calculated, only it and the marker "\verb-:=-" will be replaced by the calculated numeric value.
+
+It is worth noting that the \chevrons{numeric field} can be inside curly braces.
+
+To illustrate the idea, here is a very simple example:
+\exemple!\begin{spreadtab}{{tabular}{|c|c||c|}}\hline
+	val 1: :={50} & val 2: :={29} & mean: \textbf{:={(a1+b1)/2}}\\\hline
+\end{spreadtab}!
+
+Note also that "\verb-:={}-", which defines an empty formula, has the same effect as "\verb-@-" in a cell: the cell is understood as a text cell. However, "\verb-@-" and "\verb-:={}-" \emph{are not equivalent} because a text cell containing the latter can receive a formula by copying (see the next section), which is impossible with "\verb-@-".
+
+\subsection{Copying formulas}
+To avoid having to re-enter identical formulas in adjacent cells, \ST provides the \verb-\STcopy- instruction.
+
+This command is placed in a cell using the syntax \verb|\STcopy{>|\Verb|<x>,v<y>}{<formula>}|, where \Verb|<x>| and \Verb|<y>| are positive numbers representing horizontal and vertical offsets from the cell containing the instruction. The cell containing the command and the cell obtained by these offsets define a rectangular range of cells that will receive the \Verb-<formula>-\footnote{The copy can therefore only be made to cells that are to the right and below the cell where the command is located.}. The \verb-\STcopy- \emph{must not} be in a cell where a numeric field marker "\verb-:=-" is present.
+
+For each target cell, all references in the formula are incremented to account for the offset between the target cell and the source cell. The formula may also contain relative references, which, being relative, will not be modified.
+
+By preceding a coordinate reference with a "\verb-!-" character, this coordinate remains unchanged during the copy. The character "\verb-!-" can be changed with \STkv{freeze char}{character}\label{freeze char}. It is important to note that the \STval{character} is detokenized.
+
+In the syntax \verb|\STcopy{>|\Verb|<x>,v<y>}{<formula>}|, if the number \Verb|<x>| is omitted, the copy in the horizontal direction is made to the right up to the right edge of the table. If \Verb|<y>| is omitted, the copy in the vertical direction is made down to the bottom of the table.
+
+This allows generating the multiplication table from 1 to 10:
+\exemple*?\begin{spreadtab}{{tabular}{|c|*{10}{c}|}}
+	\hline
+	@$\times$        & 1                     & \STcopy{>}{b1+1}  & & & & & & & & \\\hline
+	1                & \STcopy{>,v}{!a2*b!1} &                   & & & & & & & & \\
+	\STcopy{v}{a2+1} &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\
+	                 &                       &                   & & & & & & & & \\\hline
+\end{spreadtab}?
+
+When copying a formula, if the target cell already contains a non-empty numeric field, this is not overwritten and the copy is not made.
+
+\section{Table formatting}
+\subsection{Codes executed before or after the table}
+The \STkv{pretab code}{code}\label{pretab code} and \STkv{posttab code}{code}\label{posttab code}\NEW{} keys define arbitrary codes executed just before and just after table display.
+\exemple!A simple
+\begin{spreadtab}[pretab code=\begingroup\color{red},
+                  posttab code=\endgroup]{{tabular}[t]{r}}
+	149\\
+	287\\\hline
+	a1+a2
+\end{spreadtab} addition.!
+
+\subsection{Decimal Separator}
+Since \xfp gives decimal results with the dot as the decimal separator, it is possible to change this decimal separator so that all results are returned as if they accounted for it.
+
+The key \STkv{dec sep}{char} allows changing the decimal separator to a comma, but this choice is not neutral in math mode. In fact, it is considered punctuation, which explains why it is followed by a space.
+
+To avoid this typographic error, you can:
+\begin{itemize}
+	\item define the decimal separator in curly braces with \verb|dec sep={{,}}|\label{dec sep}
+	\item execute the code \verb|\mathcode`,="013B\relax| before displaying the table
+\end{itemize}
+The most elegant solution is to use a configurable package specialized in number formatting, such as \href{http://mirrors.ctan.org/macros/latex/contrib/siunitx/siunitx.pdf}{\texttt{siunitx}}.
+
+\exemple[70]!\begin{spreadtab}[dec sep={,}]{{tabular}{|*3{>{$}r<{$}}|}}\hline
+	@x   & @y  & @\text{Mean}\\\hline
+	5    & -4  & (a2+b2)/2\\
+	-6.1 & -8  & (a3+b3)/2\\
+	9.85 & 3.7 & (a4+b4)/2\\\hline
+\end{spreadtab}\par\smallskip
+\begin{spreadtab}[dec sep={{,}}]{{tabular}{|*3{>{$}r<{$}}|}}\hline
+	@x   & @y  & @\text{Mean}\\\hline
+	5    & -4  & (a2+b2)/2\\
+	-6.1 & -8  & (a3+b3)/2\\
+	9.85 & 3.7 & (a4+b4)/2\\\hline
+\end{spreadtab}\par\smallskip
+\begin{spreadtab}[dec sep     ={,},
+                  pretab code ={\begingroup\mathcode`\,="013B\relax},
+                  posttab code={\endgroup}]{{tabular}{|*3{>{$}r<{$}}|}}\hline
+	@x   & @y  & @\text{Mean}\\\hline
+	5    & -4  & (a2+b2)/2\\
+	-6.1 & -8  & (a3+b3)/2\\
+	9.85 & 3.7 & (a4+b4)/2\\\hline
+\end{spreadtab}!
+
+\subsection{Automatic rounding}
+The \xfp engine gives up to 16 significant decimals. If you don't want such precision, you can automatically round off the result of each calculation with the \STkey{autoround}\label{autoround} key. Acting on this key implies a \emph{deliberate limitation} of the precision of internal calculations.
+\exemple*!\begin{spreadtab}{{tabular}{*4c}}       \hline
+	@$x$           & 3               & 17 & 751 \\\hline
+	@$1/x$         & \STcopy>{1/b1}  &    &     \\\hline
+	@$x\cdot(1/x)$ & \STcopy>{b2*b1} &    &     \\\hline
+\end{spreadtab}
+\bigbreak
+\begin{spreadtab}[autoround=6]{{tabular}{*4c}}    \hline
+	@$x$           & 3               & 17 & 751 \\\hline
+	@$1/x$         & \STcopy>{1/b1}  &    &     \\\hline
+	@$x\cdot(1/x)$ & \STcopy>{b2*b1} &    &     \\\hline
+\end{spreadtab}!
+
+To return to the default behavior and do no rounding, set an empty value:
+\centerverb|autoround={}|
+
+\subsection{Macro \texttt{\textbackslash STprintnum}}
+Each number processed by \ST is given to the \verb|\STprintnum| macro in the final array. By default, this macro does not modify any of its arguments, and its definition is as follows:
+\centerverb|\def\STprintnum#1{#1}|
+
+If you wish, you can modify using the \href{http://mirrors.ctan.org/macros/latex/contrib/siunitx/siunitx.pdf}{\texttt{siunitx}} package and its \verb|\num| macro:
+\exemple[60]!\def\STprintnum#1{\num[round-mode = places,
+                       round-precision = 6,
+                       drop-zero-decimal=true,
+                       output-decimal-marker = {,}]{#1}%
+}
+\begin{spreadtab}{{tabular}{*4c}}                 \hline
+	@$x$           & 3               & 17 & 751 \\\hline
+	@$1/x$         & \STcopy>{1/b1}  &    &     \\\hline
+	@$x\cdot(1/x)$ & \STcopy>{b1*b2} &    &     \\\hline
+\end{spreadtab}!
+In this case, no change is made to the accuracy of internal calculations.
+
+\subsection{Hide row or column}
+Sometimes, an entire row or column is used for intermediate calculations that don't need to be displayed in the final table. For this purpose, \verb=\SThiderow= and \verb=\SThidecol= control sequences are available which, when placed in a cell, hide the row or column in which the cell is located.
+\exemple*!\begin{spreadtab}{{tabular}{|r|ccc|}}                                   \hline
+	@ values of $x$        & -1         & 0\SThidecol & 2          & 3          \\\hline
+	@$f(x)=2x-1$           & 2*[0,-1]-1 & 2*[0,-1]-1  & 2*[0,-1]-1 & 2*[0,-1]-1 \\
+	@$g(x)=x-10$\SThiderow & [0,-2]-10  & [0,-2]-10   & [0,-2]-10  & [0,-2]-10  \\
+	@$h(x)=1-x$            & 1-[0,-3]   & 1-[0,-3]    & 1-[0,-3]   & 1-[0,-3]   \\\hline
+\end{spreadtab}!
+
+You can see how the row containing $g(x)$ and the column corresponding to the value 0 are hidden.
+
+Remember that masked rows and columns are \emph{invisible} for the user's chosen array environment, which explains why in the array preamble only 4 columns (\falseverb{|r|ccc|}) have been defined and not 5 as shown.
+
+\subsection{Export cell value}
+You may need to save the numerical value of a cell in a macro (the assignment is global) to display it in a text field\footnote{It's easier to use \texttt{<\kern0pt<} and \texttt{>\kern0pt>}, see next section.} or even outside the table. In this case, use the key \STkey{save list}\label{save list}:
+\centerverb|save list={<macroA> = <refA>, <macroB> = <refB>,...}|
+
+where each reference must be absolute.
+\exemple!\STset{ save list = { \resultC = c1 , \resultB = b1 }}
+\begin{spreadtab}{{tabular}{|c|c|c|c|c|}}\hline
+	10 & a1+10 & b1+10 & a1+b1+c1 & @cell c1: \resultC\\\hline
+\end{spreadtab}
+\par\medskip
+Here is cell c1: \resultC\ and b1: \resultB!
+
+When the key \STkey{aux save list}\label{aux save list} is used with the same syntax, everything happens as before, but the assignment is also written to the auxiliary file. In this way, the value of a cell can be transmitted between compilations, so that it can be referred to before the array is encountered.
+\exemple!Valeur of d1 is \cellD.\par
+\STset{ aux save list = { \cellD = d1 }}
+\begin{spreadtab}{{tabular}{|c|c|c|c|}}\hline
+	1 & a1+10 & b1+10 & a1+b1+c1\\\hline
+\end{spreadtab}!
+
+In both cases, the value of the \STkey{save cell} and \STkey{aux save cell} keys is reset to empty after the table following \verb|\STset| is displayed.
+
+It is also possible, using the macro function \STmacro{tag}, to export a value to the auxiliary file, see page~\pageref{tag}.
+
+\subsection{Display cell value}
+To simply display the value of a cell's numeric field in a text field, you can use the syntax \verb-<<-\Verb-<reference>-\verb->>- which will be replaced by the cell's numeric value \Verb-<reference>- where \Verb-<reference>- can be relative or absolute. If what's between \verb-<<- and \verb->>- is not a reference, then nothing is done. The \verb-<reference>- must not contain any spaces. If you write \verb-<< a1>>- then the space means that the reference is not recognized.
+\exemple!\begin{spreadtab}{{tabular}{|c|c||c|}}\hline
+	23 & 32 & Moy $= \frac{<<a1>>+<<b1>>}{2} = :={(a1+b1)/2}$\\\hline
+\end{spreadtab}!
+
+Reference delimiter characters are set to \verb-<<- and \verb->>- by default. They can be modified with the key \STkey{display marks}\label{display marks}. If you write \verb-display marks={|;|}-, you'll have to write \verb-|<reference>|-:
+\exemple!\begin{spreadtab}[display marks={|;|}]{{tabular}{|c|c||c|}}\hline
+	23 & 32 & Mean $= \frac{|a1|+|b1|}{2} = :={(a1+b1)/2}$\\\hline
+\end{spreadtab}!
+
+\subsection{Use \ttfamily\textbackslash multicolumn}
+The \ST package supports the \Verb=\multicolumn{<number>}{<type>}{<content>}= syntax, which merges \Verb-<number>- cells into a cell of the type and content specified in the arguments.
+
+By using \verb=\multicolumn=, \ST even maintains consistency in cell referencing. On this table where cells are merged, the table cells contain the absolute references seen by \ST:
+\begin{center}
+\ttfamily
+\begin{tabular}{|*7{c|}}\hline
+a1&b1&c1&d1&e1&f1&g1\\\hline
+a2&\multicolumn{2}{l|}{b2}&d2&e2&f2&g2\\\hline
+\multicolumn{3}{|l|}{a3}&d3&\multicolumn{2}{l|}{e3}&g3\\\hline
+\end{tabular}
+\end{center}
+So, whatever the number of cells merged, the next cell has a column number that takes into account the number of cells merged.
+
+On the last line, cells \falseverb{a3}, \falseverb{b3} and \falseverb{c3} are merged, and if cell \falseverb{a3 } contains a formula, cells \falseverb{b3} and \falseverb{c3} \emph{doesn't exist} for \ST: these cells can't be referred to anywhere.
+
+Here's an example where each number on the top line is the product of the 2 numbers below it:
+\exemple*/\newcolumntype{K}[1]{@{}>{\centering\arraybackslash}p{#1cm}@{}}
+\begin{spreadtab}{{tabular}{*6{K{0.5}}}}
+	\cline{2-5}
+	&\multicolumn{2}{|K{1}|}{:={a2*c2}} & \multicolumn{2}{K{1}|}{:={c2*e2}} &\\\hline
+	\multicolumn{2}{|K{1}}{:=8}&\multicolumn{2}{|K{1}}{:=7}&\multicolumn{2}{|K{1}|}{:=6}\\\hline
+\end{spreadtab}/
+Note that the numeric field marker "\falseverb{:=}" is required in every cell containing the command \verb-\multicolumn-. If this marker didn't exist, the entire cell - i.e. \Verb-\multicolumn{2}{|c|}{<formula>}- would be considered a formula.
+
+\section{Macro-functions}
+\subsection{Math macro-functions}
+\subsubsection{Sum cells}
+The \STmacro{sum} function is used to sum one or more cell ranges.
+
+Its syntax is \Verb=sum(<range 1>;<range 2>;...;<range n>)=, where a cell range is:
+\begin{itemize}
+	\item either an isolated cell such as "\falseverb{a1}" or "\falseverb{[2,1]}";
+	\item either a rectangular area delimited by the upper left and lower right cell in this way \Verb=<cell 1>:<cell 2>=.
+\end{itemize}
+
+In cell ranges, empty cells or cells containing only text are considered to contain the number 0. The same applies to cells masked by \verb-\multicolumn-.
+
+Relative and absolute references can be used together, as the user sees fit. Here's an example of summing Pascal's triangle coefficients:
+\exemple/\begin{spreadtab}{{tabular}{*5c}}
+	\multicolumn{5}{c}{sum=:={sum(a2:e6)}}\\
+	[0,1] & [-1,1]+[0,1] & [-1,1]+[0,1] & [-1,1]+[0,1] & [-1,1]\\
+	[0,1] & [-1,1]+[0,1] & [-1,1]+[0,1] & [-1,1]       &       \\
+	[0,1] & [-1,1]+[0,1] & [-1,1]       &              &       \\
+	[0,1] & [-1,1]       &              &              &       \\
+	1     &              &              &              &
+\end{spreadtab}/
+
+\subsubsection{Macro-function \ttfamily sumprod}
+The \STmacro{sumprod} function multiplies the corresponding elements of 2 or more ranges and then adds these products together.
+
+Its syntax is: \Verb|sumprod(<range 1>;<range 2>;...;<range n>)|. All rectangular ranges must have the same dimensions.
+
+Here's a simple example of calculating the average age of a group of children aged between 10 and 15:
+\exemple*!\begin{spreadtab}{{tabular}{r*6c}}
+	@Ages   & 10 & 11 & 12 & 13 & 14 & 15\\
+	@Number & 5  & 8  & 20 & 55 & 9  & 3 \\\hline
+	\multicolumn{7}{c}{Mean = :={sumprod(b1:g1;b2:g2)/sum(b2:g2)}}
+\end{spreadtab}!
+As with the \verb-sum- macro function, text cells, whether empty or merged by a \verb-\multicolumn-, are considered to contain the number 0.
+
+\subsubsection{GCD and LCM}
+The macro functions \STmacro{gcd} and \STmacro{lcm} calculate the Greatest Common Divisor (GCD) and the Least Common Multiple (LCMM) of numbers passed as arguments and separated by commas:
+\centerverb|gcd(<nombre1>,<nombre2>,...,<nombreN>)
+lcm(<nombre1>,<nombre2>,...,<nombreN>)|
+
+\exemple*!\begin{spreadtab}{{tabular}{|r|r|r||c|c|}}\hline
+	\multicolumn3{|c||}{@Numbers}& @GCD & @LCM \\\hline
+	24 & 18 & 12 & \STcopy{v}{gcd(a2,b2,c2)} & \STcopy{v}{lcm(a2,b2,c2)}\\
+	15 & 10 & 25 & & \\
+	16 & 12 & 15 & & \\\hline
+\end{spreadtab}!
+
+\subsubsection{Scientific Notation}
+The macro function \STmacro{scitodec} allows converting a number written in scientific notation to a decimal number. The syntax is \Verb-scitodec(<text>)-, where \Verb-<text>- is:
+\begin{enumerate}
+	\item a sequence of characters in the syntax \Verb-<mantissa>EE<exponent>-, where the \Verb-<mantissa>- is a decimal number and the \Verb-<exponent>- is an integer. The "E"s can be uppercase or lowercase;
+	\item a reference to the \emph{text} field of a cell, which must contain characters following the syntax described in the previous point.
+\end{enumerate}
+
+\exemple[60]!\begin{spreadtab}{{tabular}{|r|r|}}\hline
+	@Scientific notations    & @Decimal \\\hline
+	@4EE2                    & \STcopy{v}{scitodec([-1,0])}\\
+	@-3.1EE-3                & \\
+	@15ee5                   & \\
+	@-0.025ee7               & \\
+	@2.125EE0                & \\
+	@3.1575EE-4              & \\\hline
+\end{spreadtab}!
+
+The \xfp engine natively understands numbers written in scientific notation in the form \Verb|<a>e<b>| but using this syntax is \emph{impossible} to use with \ST because the number \verb|4e3|, which is 4000, would be understood by \ST as 4 followed by the content of the cell \verb|e3|.
+
+\subsubsection{Identity}
+The simplest macro function is \STmacro{id}, since \Verb=id(<number>)= returns the \Verb-<number>- enclosed in brackets. Mathematically, it's of little use, but with \ST, it lets you pass mathematical expressions to macros that don't admit them. For example, it can be used in the cell ranges of \STmacro{sum}.
+
+In the code below, the \STmacro{id} macro is used to determine the cell range to be added with \STmacro{sum}. In this example, the value of the numeric field in cell \falseverb{a2} is 8. Therefore, \verb=sum([0,-1]:[id(a2-1),-1])/a2= is equivalent to \verb=sum([0,-1]:[7,-1])/8=:
+\exemple*!\begin{spreadtab}{{tabular}{r*{10}c}}
+	@Int from 1 to 10       & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+	Mean of :={8} first int & sum([0,-1]:[id(a2-1),-1])/a2          \\
+\end{spreadtab}!
+
+\subsection{Comparison macro-functions}
+Three test macro-functions are available and will soon be removed since \xfp has the operator «\verb|?:|», see below.
+\centerverb|ifeq(<number1>,<number2>,<number3>,<number4>)
+ifgt(<number1>,<number2>,<number3>,<number4>)
+iflt(<number1>,<number2>,<number3>,<number4>)|
+
+The comparison is between \Verb|<number1>| and \Verb|<number2>|:
+\begin{itemize}
+	\item \STmacro{ifeq}: \Verb|<number1>| = \Verb|<number2>| ?
+	\item \STmacro{ifgt}: \Verb|<number1>| > \Verb|<number2>| ?
+	\item \STmacro{iflt}: \Verb|<number1>| < \Verb|<number2>| ?
+\end{itemize}
+If the test is true, \Verb|<number3>| is returned, otherwise it's \Verb|<number4>|.
+
+As an example, here are a few values of the function
+$f(x)=\begin{cases}
+10  &\text{si }x<1\\
+0   &\text{si }x=1\\
+-10 &\text{si }x>1
+\end{cases}
+$\smallskip
+
+\exemple!\begin{spreadtab}{{tabular}{|*2c|}}\hline
+	@$x$       & @$f(x)$               \\\hline
+	-0.5       & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\
+	[0,-1]+0.5 & iflt([-1,0],1,10,ifeq([-1,0],1,0,-10))\\\hline
+\end{spreadtab}!
+The \xfp engine and its ternary operator \Verb|<a>?<b>:<c>| make tests easier in evaluated expressions; if the test \Verb|<a>| is true, \Verb|<b>| is selected, otherwise \Verb|<c>| is used. Thus, the nesting of tests above is programmed as follows:
+
+\exemple!\begin{spreadtab}{{tabular}{|*2c|}}\hline
+	@$x$       & @$f(x)$               \\\hline
+	-0.5       & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\
+	[0,-1]+0.5 & [-1,0]<1 ? 10 : [-1,0]=1 ? 0 : -10\\\hline
+\end{spreadtab}!
+
+\subsection{Macro-functions manipulating dates}
+\subsubsection{Date to number with \ttfamily engshortdatetonum}\label{datetonum}
+The macro \verb-engshortdatetonum- converts a short date like 1789/7/14 to an integer which is the number of days passed since the 1st March of the year 0. It is important to note that this macro-function requires a \emph{textual} argument and not a number or the result of a mathematical calculation. Therefore, if the argument of this macro-function refers to a cell, that cell \emph{must} be a text cell, i.e. a cell containing `\verb-@-' or `\verb-:={}-'.
+\exemple!\begin{spreadtab}{{tabular}{cc}}
+	@1789/7/14              & engshortdatetonum(a1)\\
+	2001/1/1 :={}           & engshortdatetonum(a2)\\\hline
+\end{spreadtab}!
+
+Another macro-function provides the same feature but with a long date like `December 25, 2024'
+\exemple!\begin{spreadtab}{{tabular}{cc}}
+	@January 1, 2001   & englongdatetonum(a1)\\
+	@December 25, 2024 & englongdatetonum(a2)
+\end{spreadtab}!
+
+\subsubsection{From a number to a date}
+Several macro-functions translate a number into a date. All these macro-functions have in common that their result is \emph{text}. Therefore, the cells containing such results \emph{become cells containing text} and if the cell is composed of two fields, the numeric field becomes empty and `\verb-:={<formula>}-' is replaced by its result in the text field.
+
+These macro-functions are:
+\begin{itemize}
+	\item \verb-numtoengshortdate- translate a number into a short date like `1789/7/14';
+	\item \verb-numtoenglongdate- translate a number into a long date like `July 14, 1789';
+	\item \verb-numtoengmonth- given a number representing a date, it finds the name of the month;
+	\item \verb-numtoengday- same as above but it finds the name of the day.
+\end{itemize}
+Here is an example in which we consider 30 days before and 30 days after 2009/6/1. For each of these 2 dates, we calculate the short date, long date, month and day of the week
+\exemple!\begin{spreadtab}{{tabular}{cc}}                               \hline
+	\multicolumn{2}{|c|}{@2009/6/1}                          \\\hline\hline
+	30      & numtoengshortdate(engshortdatetonum(a1)+[-1,0])\\
+	30      & numtoenglongdate(engshortdatetonum(a1)+[-1,0]) \\
+	30      & numtoengmonth(engshortdatetonum(a1)+[-1,0])    \\
+	30      & numtoengday(engshortdatetonum(a1)+[-1,0])      \\\hline
+	-30     & numtoengshortdate(engshortdatetonum(a1)+[-1,0])\\
+	-30     & numtoenglongdate(engshortdatetonum(a1)+[-1,0]) \\
+	-30     & numtoengmonth(engshortdatetonum(a1)+[-1,0])    \\
+	-30     & numtoengday(engshortdatetonum(a1)+[-1,0])
+\end{spreadtab}!
+
+\subsection{Coordinate macro-functions}\label{tag}
+\subsubsection{\falseverb{tag}, \falseverb{cell}, \falseverb{value} and \texttt{\textbackslash STtag}}
+Rather than referring to a cell by its coordinates, which are difficult to remember and change if a row or column is inserted, it is sometimes much more practical to give a cell a name and refer to it later by that name.
+
+The macro function \STmacro{tag} has the syntax \Verb-tag(<name>)-. This causes the cell in which it is located to be named. It is not really a macro function like the others since it returns nothing when placed in a formula: it disappears without affecting the mathematical result. Thus, \Verb-tag(<name>)- can be written \emph{anywhere} in the numeric field of a cell. The \Verb-<name>- can be any alphanumeric string, but it is not recommended to use a letter and a number, which could be interpreted as a cell reference and therefore modified during a copy operation with \verb-\STcopy-. This macro function has an additional action: it globally stores the numeric value of the cell in which it is located via a \verb-\gdef-, so that it can be called later \emph{outside the table} using the expandable command \Verb-\STtag{<name>}-.
+
+Later in the table, instead of using the coordinates of the cell \Verb-<name>-, one can write \Verb-cell(<name>)-, which is a macro function that returns the coordinates of the previously named cell. For example, if \Verb-tag(<name>)- was written in cell \verb-B3-, then later writing \Verb|cell(<name>)| will cause this macro function to return \verb-B3-.
+
+Here is an example where we sum cells and give the name \verb-foo- to the first number and \verb-bar- to the last. It can be observed that \verb-tag(bar)- is between 1 and 9, and ultimately, since this macro function disappears, the numeric field of the cell will contain 19:
+\exemple!\begin{spreadtab}{{tabular}{r@{}r}}
+	   & 15tag(foo)              \\
+	@+ & 37                      \\
+	@+ & 13                      \\
+	@+ & 48                      \\
+	@+ & 1tag(bar)9              \\\cline{2-2}
+	   & sum(cell(foo):cell(bar))tag(baz)
+\end{spreadtab}
+
+foo=\STtag{foo}, bar=\STtag{bar}, baz=\STtag{baz}!
+
+To pass values between tables calculated by \ST, it is possible to tag the cell in the first table using the macro function \Verb|tag(<name>)|, and then in the second table, refer to the value \emph{via} the tag with \Verb|value(<name>)|.
+\exemple!\begin{spreadtab}{{tabular}{|c|c|c|}}\hline
+	100 & 75 & a1+b1tag(ab:sum)\\\hline
+\end{spreadtab}
+
+\begin{spreadtab}{{tabular}{|c|c|}}\hline
+	value(ab:sum) & 1.20*value(ab:sum)\\\hline
+\end{spreadtab}!
+
+If the key \STkey{tag to aux}\label{tag to aux} is \STval{true}, the assignments are also written to the auxiliary file, making them transferable from one compilation to another. It then becomes possible to place \Verb|\STtag{<name>}| before the table where \Verb|tag(<name>)| is specified.
+
+\subsubsection{\falseverb{row} and \falseverb{col}}
+Although at first sight less useful, \ST also provides the macro functions \Verb-row(<name>)- and \Verb-col(<name>)- that return the number of the row or column of the cell \Verb-tag(<name>)-. Here is an example of how to calculate the average of a number of values; the first and last values are tagged `first' and `last' and therefore, the number of values is \verb|row(last)-row(first)+1|:
+\exemple!mean =
+\begin{spreadtab}{{tabular}[b]{r}}
+	7tag(first)\\9\\15\\6\\20\\13\\11\\55tag(last)\\
+	\hline\hline
+	sum(cell(first):cell(last))/(row(last)-row(first)+1)
+\end{spreadtab}!
+
+\section{Particular care}
+\subsection{Defining new  commands with \ttfamily\textbackslash hline}\label{filets horizontaux}
+It may be useful to define a new command to produce, for example, a double horizontal line:
+\centerverb|\newcommand\dline{\hline\hline}|
+
+and then try to use it in a table as in this simple example that computes the Fibonnacci sequence in the second line::
+\begin{center}
+\newcommand\dline{\hline\hline}
+\def\xtracol{&&&&&&}
+\begin{spreadtab}{{tabular}{*9c}}
+	0     & 1 & \STcopy>{b1+1} \STxp\xtracol\\\dline
+	:={1} & 1 & \STcopy>{a2+b2}\STxp\xtracol
+\end{spreadtab}
+\end{center}
+But, if you write the following code, there is a problem when compiling:
+\chevronsfalse\centerverb!\newcommand\dline{\hline\hline}
+\def\xtracol{&&&&&&}
+\begin{spreadtab}{{tabular}{*9c}}
+	0     & 1 & \STcopy>{b1+1} \STxp\xtracol\\\dline
+	1     & 1 & \STcopy>{a2+b2}\STxp\xtracol
+\end{spreadtab}!\chevronstrue
+
+In the log file, you can read that \verb-\FPeval- fails and complains: \falseverb{! Improper alphabetic constant.}
+
+The reason is simple, \verb-\dline- in line 4 is not recognized by \ST as a horizontal rule and therefore, \emph{it is placed in the cell in the next line}. For \ST, the cell \falseverb{b1} contains:
+\centerverb!\dline 1!
+
+To compile without error, the cell \falseverb{a2} \emph{must} contain a numeric field marker:
+\exemple!\newcommand\dline{\hline\hline}
+\def\xtracol{&&&&&&}
+\begin{spreadtab}{{tabular}{*9c}}
+	0     & 1 & \STcopy>{b1+1} \STxp\xtracol\\\dline
+	:={1} & 1 & \STcopy>{a2+b2}\STxp\xtracol
+\end{spreadtab}!
+
+\subsection{The use of {\ttfamily\textbackslash multicolumn} and {\ttfamily\textbackslash SThidecol}}
+Firstly, in normal use, joint use of \verb|\multicolumn| and \verb-\SThiderow- should not happen, and most users should not encounter this situation and should not read this section.
+
+Here is the problem: first, a hidden column \emph{must not} contain a cell with the command \verb-\multicolumn-! But what happens if a hidden column hides cells merged with \verb-\multicolumn-?
+
+In general, there is no compilation error or error messages, but there are some subtleties about the references that are a bit turned upside down in the line after the \verb-\multicolumn- command\ldots
+
+Let's take an example, and let's say that, in the following table, we want to merge the cell \falseverb{b2} to \falseverb{h2} and we also want to hide the colomns \falseverb{c}, \falseverb{d} and \falseverb{f}, here in gray:
+\begin{center}
+\ttfamily
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ a1 & b1 & \cellcolor[gray]{0.6}c1 & \cellcolor[gray]{0.6}d1 & e1 & \cellcolor[gray]{0.6}f1 & g1 & h1 & i1 & j1\\\hline
+ a2 & \multicolumn1c{b2} & \multicolumn1{>{\cellcolor[gray]{0.6}}c}{} & \multicolumn1{>{\cellcolor[gray]{0.6}}c}{} & \multicolumn1c{} & \multicolumn1{>{\cellcolor[gray]{0.6}}c}{} & \multicolumn1{c}{} & \multicolumn1{c|}{} & i2 & j2\\\hline
+\end{tabular}
+\end{center}
+There are 4 visible merged cells, so we write \verb-\multicolumn{4}- because hidden columns are never taken into account when counting the number of \verb-\multicolumn-.
+
+Then we count 4 letters from \falseverb{b} (this letter included): we obtain the letter \falseverb{e}. In the range \falseverb{b-e}, let's count: 2 gray hidden columns are included (\falseverb c and \falseverb d) and 1 hidden column is not included (\falseverb f). These numbers are important to understand the following, also let's call them $x$ and $y$ in the general case.
+
+The rule is:
+\begin{itemize}
+	\item it is necessary to add $y$ signs \verb-&- after \verb-\multicolumn- (in the example above, it would be 1);
+	\item references to columns of cells after the \verb-\multicolumn- will be shifted $x$ to the beginning of the alphabet. For the example given, if we want to refer to the cell \falseverb{i2}, we should write \falseverb{g2} instead of \falseverb{i2}.
+\end{itemize}
+Here is an example with a similar structure to the previous ($x=2$ and $y=1$) with simple formulas: add 1 to the number above.
+\exemple*!\begin{spreadtab}{{tabular}{|*{7}{c|}}}\hline
+	1   & 2    & \SThidecol3 & \SThidecol4 & 5& \SThidecol6 & 7& 8& 9    & 10  \\\hline
+	a1+1& \multicolumn4{l|}{:={b1+1}}&                            & i1+1 & j1+1\\\hline
+	a2+1& b2+1 &             &             &  &             &  &  & g2+1 & h2+1\\\hline
+\end{spreadtab}!
+
+\subsection{Messages delivered by \ST}
+The package delivers error messages and aborts compilation in these cases:
+\begin{itemize}
+	\item a circular reference is found in a cell. In this case, the dependent cells are displayed;
+	\item a cell refers to an empty cell or a text cell when a non-empty numeric field is expected;
+	\item a cell refers to an undefined cell (outside the table);
+	\item a cell refers to a cell merged by a \verb-\multicolumn- command;
+	\item a relative reference has bad syntax.²
+\end{itemize}
+
+The package can deliver informative messages (in the log file), which it does by default. The key \STkey{messages}\label{messages}, depending on whether it is \falseverb{true} or \falseverb{false}, enables or disables the transmission of information messages.
+
+To understand the meaning of these messages, let's take a simple table:
+\exemple!\begin{spreadtab}{{tabular}{|cccc|c|}}\hline
+	b1+1 & c1+1 & d1+1 & 10 & a1+b1+c1+d1\\\hline
+\end{spreadtab}!
+
+Here are the messages deliverd by \ST:
+\centerverb!New spreadtab: \begin{tabular}{|cccc|c|}
+* reading tab: ok
+* computing formulas:
+     cell A1-B1-C1
+     cell B1
+     cell C1
+     cell D1
+     cell E1
+* building tab: ok
+End of spreadtab: \end{tabular}!
+
+Preceded by a star, we recognize the 3 steps necessary for \ST to complete its task: reading the table, calculation of the formulas and building the final table.
+
+For the second step, cells are evaluated from top to bottom, left to right: at line 4 in the code above, \ST says that it begins by trying to calculate the first cell \falseverb{A1}. After a dash, we see that for this, it must first compute the cell \falseverb{B1}, which itself requires that the cell \falseverb{C1} is calculated: the latter can be calculated since it depends only on \falseverb{D1} which is a cell containing the number 10.
+
+In the following (lines 5 to 8), there is only one cell per line which means that when \ST tries to evaluate the cell, either it contains a number or dependent cells are already calculated.
+
+\subsection{Debug}
+To ease the use \ST, a debug mode is available. It is activated when the key \STkey{debug}\label{debug} is not empty and contains at least one of the words \STval{formula}, \STval{text} or \STval{cellcode}, separated by commas. These words each cause a debugging table to be displayed:
+\begin{itemize}
+	\item \STval{formula}: displays all the numeric fields and the ends of lines;
+	\item \STval{text}: displays all the textual fields;
+	\item \STval{cellcode}  displays the internal code of the cells. Indeed, \ST assigns a code to every cell when it reads the table. Here are the possible values of this code:
+		\begin{enumerate}[label=\small\textbullet]
+			\item $-1$ if the cell is merged with \verb-\multicolumn-;
+			\item 0 if the cell is a text cell or is empty;
+			\item 1 if the numeric field of the cell contains a formula which will be computed later;
+			\item 2 if the numeric field of the cell contains a number.
+		\end{enumerate}
+\end{itemize}
+You can add the value \STval{show tab} to force the display of the resulting table, which is otherwise not displayed.
+
+Here's a table for which we display the 3 debugging tables and also the final table obtained:
+\exemple*!\STset{debug={text,formula,cellcode,show tab}}
+\begin{spreadtab}{{tabular}{|rr|r|}}\hline
+	@$x$              &@$y$                & @$x+y$\\\hline\hline
+	22                & 54                 & \STcopy{v3}{a2+b2} \\
+	43                & 65                 & \\
+	49                & 37                 & \\\hline
+	$Sx=:={a2+a3+a4}$ & $Sy=:={b2+b3+b4}$  & $Sx+Sy=:={}$\\\hline
+	\multicolumn2{|r|}{$Sy-Sx=:={b5-a5}$}  & @\multicolumn1c{}\\\cline{1-2}
+\end{spreadtab}!
+
+These 3 debugging tables can help you understand the inner workings of \ST. Table 2 shows that all cells with a numeric field have an internal code of 1 or 2 (see Table 3) and have an associated numeric field marker "\verb-:=-" (see Table 1). This marker represents the place where the result of the numeric field calculation will be inserted by substitution. Once the numerical fields have been calculated, the cells in the final table are reconstituted from the contents of the textual fields in Table 1, by simple substitution.
+
+In debugging tables, cells containing coordinates are only grayed out if the \href{https://ctan.org/pkg/colortbl}{\texttt{colortbl}} package has been loaded.
+
+\section{List of keys}\label{key/val}
+All settings concerning \ST are made from version 0.6 onwards by a system of \chevrons{keys}$=$chevrons{value} which can be found:
+\begin{enumerate}
+	\item in the \verb|\STset| argument, in which case the settings specified concern all future arrays;
+	\item in the optional argument of \verb|\begin{spreadtab}| or \verb|spreadtab|, in which case the settings specified concern only the current array.
+\end{enumerate}
+Here is the list of \chevrons{keys} and their default values:\renewcommand\arraystretch{1.33}%
+\begin{longtable}{rlcp{9cm}}\hline
+	\chevrons{key} & \chevrons{value} & see page & Details \\\hline\endhead\hline\endfoot
+	\STkey{tabline sep} & \STval[]{\string\\} & \pageref{tabline sep} &  separator between table rows \\
+	\STkey{text mark} & \STval[]{\string @} & \pageref{text mark} & the \chevrons{value} is detokenized: if it is present in a cell, \ST understands it as a text cell \\
+	\STkey{numeric mark} & \STval[]{:=} & \pageref{numeric mark} & the argument between braces that follows is the numeric field \\
+	\STkey{freeze char} & \STval[]{!} & \pageref{freeze char} & detokenized character which, if present in front of the letter or number of a reference, does not increment it when the formula is copied \\
+	\STkey{pretab code} & \STval[]{} & \pageref{pretab code} & code executed just before displaying the table\\
+	\STkey{posttab code} & \STval[]{} & \pageref{posttab code} & code executed just after displaying the table\\
+	\STkey{dec sep} & \STval[]{.} & \pageref{dec sep} & decimal separator for numbers after table calculation \\
+	\STkey{autoround} & \STval[]{} & \pageref{autoround} & An empty value is the normal behavior; otherwise, a positive \chevrons{integer} is expected and indicates the rank of the internal calculation rounding.\\
+	\STkey{save list} & \STval[]{} & \pageref{save list} & csv list of the form \chevrons{macro}$=$\chevrons{absolute reference}: each number contained in the referenced cells is stored (globally) in a macro. This key is reset to empty after each table. \\
+	\STkey{aux save list} &\STval[]{} & \pageref{aux save list} & same syntax and behavior as above, but assignments are also written to the auxiliary file. This key is reset to empty after each table.  \\
+	\STkey{display marks} & \STval[]{<\kern0pt<;>\kern0pt>} & \pageref{display marks} & markers around an absolute reference in a text field to display the number contained in the referenced cell \\
+	\STkey{tag to aux} & \STval{false} & \pageref{tag to aux} & when \STval{true}, assignments made by the macro function \STmacro{tag} are also written to the auxiliary file. \\
+	\STkey{messages} & \STval{false} & \pageref{messages} & allows \ST to send messages to the log file about what it's doing \\
+	\STkey{debug} & \STval[]{} & \pageref{debug} & must contain words from \STval{text}, \STval{formula} or \STval{cellcode} in csv format to display the corresponding debugging table. If the word \STval{show tab} is added, the table is also displayed. This key is reset to empty after each table.\\
+	\hline
+\end{longtable}
+To return to the default values, you can run the \verb|\STreset| macro at any time.
+\bigbreak
+
+\begin{center}
+	\Large\parskip0pt \offinterlineskip
+	*\kern0.33em *\par
+	 *
+\end{center}
+
+Please let me know by \href{mailto:unbonpetit@netc.fr}{\texttt{email}} any bugs, regressions or new features to implement that you think might be useful.
+\end{document}

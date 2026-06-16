@@ -1,0 +1,41 @@
+           --------------------------------------------------------
+           | tensor: a package for typesetting objects with       |
+           |         mixed upper, lower and preposed indices      |
+           |         (including nuclides)                         |
+           |                                                      |
+           |    Philip G. Ratcliffe - version 2.2 (2023/07/18)    |
+           --------------------------------------------------------
+
+* LaTeX tensor.ins to produce tensor.sty
+
+* Copy tensor.sty to one of your TeX input directories.
+
+* LaTeX tensor.dtx for usage instructions and documentation.
+
+This is a complete revision and extension of the original "tensor" package by
+Mike Piff; it defines commands for typesetting tensors with mixed upper and
+lower indices.  Correct pre-pending of indices is now possible while backwards
+compatibility is maintained.  A command to typeset nuclides is also defined.
+
+The use of tensors with mixed upper and lower indices, in which the relative
+horizontal positions and spacing are significant, is common in both physics and
+mathematics.  The commands defined in this package automatically maintain
+correct positioning.  Spaces in an index list may optionally be filled with
+dots or other suitable symbols.  Another usage addressed by this package is the
+pre-pending of indices.
+
+Two math-mode commands, \tensor and \indices, are defined (one of which,
+\tensor, remains backward compatible with the original definition by Mike
+Piff). A new text-mode command, \nuclide, to typeset nuclides is also defined.
+
+Change history:
+
+v2.2 corrected problem with the 'underscore' package, added vertical alignment 
+capability and independent mass/atomic-no. font control.
+
+v2.1 corrected problem with the 'color' package, added dotting capability, 
+added starred form of \indices, minor spacing and LaTeX code improvements.
+
+v2.0 first official release of extended version.
+
+v1.0 last official release of original version. 

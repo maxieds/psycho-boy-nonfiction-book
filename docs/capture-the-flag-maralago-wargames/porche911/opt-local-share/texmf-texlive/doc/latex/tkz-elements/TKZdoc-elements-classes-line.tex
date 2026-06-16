@@ -1,0 +1,1867 @@
+\newpage
+\section{Class \Iclass{line}} % (fold)
+\label{sec:class_line}
+
+\subsection{Attributes of a line} % (fold)
+\label{sub:attributes_of_a_line}
+
+Writing \code{L.AB = line:new(z.A,z.B)} creates an object of the class \tkzname{line} (the notation is arbitrary for the moment). Geometrically, it represents both the line passing through the points $A$ and $B$ as the segment $[AB]$. Thus, we can use the midpoint of \code{L.AB}, which is, of course, the midpoint of the segment $[AB]$. This medium is obtained with \code{L.AB.mid}. Note that \code{L.AB.pa = z.A} and \code{L.AB.pb = z.B}. Finally, if a line $L$ is the result of a method, you can obtain the points with \code{z.A, z.B = get\_points(L)} or with the previous remark.
+
+\begin{mybox}
+   \begin{SVerbatim}
+     Creation 
+     L.AB = line:new(z.A, z.B)
+   \end{SVerbatim}
+\end{mybox}
+
+
+The attributes are:
+
+\vspace{1em}
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Line attributes.}\label{line:att}
+\begin{tabular}{lll}
+\toprule
+\textbf{Attributes} & \textbf{Reference} & \\
+\Iattr{line}{pa}  & First point of the segment & |z.A = L.AB.pa| \\
+\Iattr{line}{pb}  & Second point of the segment & \\
+\Iattr{line}{type} & Type is 'line'    &  |L.AB.type = 'line'| \\  
+\Iattr{line}{mid} & Middle of the segment& |z.M = L.AB.mid|\\
+\Iattr{line}{slope} & Slope of the line & [\ref{ssub:example_class_line}] \\
+\Iattr{line}{length} &|l = L.AB.length|& [\ref{sub:transfer_from_lua_to_tex} ; \ref{ssub:example_class_line}] \\  
+\Iattr{line}{north\_pa}   & & [\ref{ssub:example_class_line}]  \\
+\Iattr{line}{north\_pb}   & & \\
+\Iattr{line}{south\_pa}   & & \\
+\Iattr{line}{south\_pb}   & & \\
+\Iattr{line}{east}        & & \\
+\Iattr{line}{west}        & & \\
+\Iattr{line}{vec}   & |V.AB = L.AB.vec|& defines $\overrightarrow{AB}$  [\ref{sec:class_vector}] \\
+\bottomrule
+\end{tabular}
+\egroup
+
+\subsubsection{Example: attributes of class line} % (fold)
+\label{ssub:example_class_line}
+
+\vspace{5pt}
+\directlua{%
+init_elements()
+z.a = point:new(1, 1)
+z.b = point:new(5, 4)
+L.ab = line:new(z.a, z.b)
+z.m = L.ab.mid
+z.w = L.ab.west
+z.e = L.ab.east
+z.r = L.ab.north_pa
+z.s = L.ab.south_pb
+sl = L.ab.slope
+len = L.ab.length
+}
+
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPoints(a,b,m,e,r,s,w)
+     \tkzLabelPoints(a,b)
+     \tkzLabelPoint(r){north\_pa}
+     \tkzLabelPoint(s){south\_pb}
+     \tkzLabelPoint[below](m){mid}
+     \tkzLabelPoint[right](w){west}
+     \tkzLabelPoint[left](e){east}
+     \tkzDrawLine(a,b)
+     \tkzLabelSegment[above = 1em,sloped](a,b){ab = \pmpn{\tkzUseLua{len}}}
+     \tkzLabelSegment[above=2em,sloped](a,b){slope of (ab) =  \pmpn{\tkzUseLua{sl}}}
+  \end{tikzpicture}
+\end{center}
+
+
+\begin{SVerbatim}
+\directlua{%
+init_elements()
+z.a = point:new(1, 1)
+z.b = point:new(5, 4)
+L.ab = line:new(z.a, z.b)
+z.m = L.ab.mid
+z.w = L.ab.west
+z.e = L.ab.east
+z.r = L.ab.north_pa
+z.s = L.ab.south_pb
+sl = L.ab.slope
+len = L.ab.length
+}
+
+\begin{tikzpicture}[scale = .75 ]
+   \tkzGetNodes
+   \tkzDrawPoints(a,b,m,e,r,s,w)
+   \tkzLabelPoints(a,b,e,r,s,w)
+   \tkzLabelPoints[above](m)
+   \tkzDrawLine(a,b)
+   \tkzLabelSegment[sloped](a,b){ab = \tkzUseLua{len}}
+   \tkzLabelSegment[above=12pt,sloped](a,b){slope of (ab) = \tkzUseLua{sl}}
+\end{tikzpicture}
+\end{SVerbatim}
+
+
+% subsubsection example_class_line (end)
+
+\subsubsection{Method \Imeth{line}{new} and line attributes}
+\label{ssub:example_line_attributes}
+
+The notation can be \code{L} or \code{L.AB} or \code{L.euler}. The notation is actually free.
+\code{L.AB} can also represent the segment. 
+
+With  \code{L.AB  = line:new(z.A,z.B)}, a line is defined.
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{%
+  init_elements()
+  z.A = point:new(1, 1)
+  z.B = point:new(3, 2)
+  L.AB = line:new(z.A, z.B)
+  z.C = L.AB.north_pa
+  z.D = L.AB.south_pa
+}
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawLines(A,B C,D)
+     \tkzDrawPoints(A,...,D)
+     \tkzLabelPoints(A,...,D)
+     \tkzMarkRightAngle(B,A,C)
+     \tkzMarkSegments(A,C A,B A,D)
+  \end{tikzpicture}
+\end{center}
+\end{tkzexample}
+
+% subsubsection example_line_attributes (end)
+% subsection attributes_of_a_line (end)
+
+\newpage
+\subsection{Methods of the class line} % (fold)
+\label{sub:methods_from_class_line}
+Here's the list of methods for the \tkzNameObj{line} object. The results can be real numbers, points, lines, circles or triangles. The triangles obtained are similar to the triangles defined below.
+
+\begin{minipage}{\textwidth}
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Methods of the class line.(part 1)}\label{line:methods1}
+\begin{tabular}{ll}
+\toprule
+
+\textbf{Methods} & \textbf{Reference}  \\
+\midrule 
+\Igfct{line}{new(pt, pt)} & [\ref{ssub:method_imeth_line_new_pt_pt}; \ref{sub:altshiller}] \\
+\midrule 
+
+\textbf{Real} &\\
+\midrule 
+\Imeth{line}{distance (pt)}  &  [\ref{ssub:method_imeth_line_distance}; \ref{ssub:example_distance_and_projection}] \\
+
+\textbf{Boolean} &\\
+\midrule 
+\Imeth{line}{in\_out (pt)}  & [\ref{ssub:method_in_out};\ref{ssub:in_out_for_a_line}] \\
+\Imeth{line}{in\_out\_segment(pt)} & [\ref{ssub:method_line_in_out_segment}] \\ 
+\Imeth{line}{is\_parallel(L)}  & [\ref{ssub:method_line_is_parallel}]  \\
+\Imeth{line}{is\_orthogonal(L)}  & [\ref{ssub:method_line_is_orthogonal}] \\
+\Imeth{line}{is\_equidistant(pt)}  & [\ref{ssub:method_line_is_equidistant}] \\
+\midrule 
+
+\textbf{Points} &\\
+\midrule 
+
+\Imeth{line}{gold\_ratio ()}  &  [\ref{sub:gold_ratio_with_segment} ; \ref{sub:the_figure_pappus_circle} ; \ref{sub:bankoff_circle} ]  \\
+
+\Imeth{line}{normalize ()}  &  [ \ref{ssub:normalize}]  \\
+
+\Imeth{line}{normalize\_inv()}  & \\
+
+\Imeth{line}{barycenter(r,r)}    &   [\ref{ssub:barycenter_with_a_line}] \\
+
+\Imeth{line}{point(r)}   &   [\ref{sub:ellipse} ; \ref{ssub:method_point}] \\
+
+\Imeth{line}{midpoint()}    &   \\
+
+\Imeth{line}{harmonic\_int(pt)}   &  [ \ref{sub:bankoff_circle}] \\
+
+\Imeth{line}{harmonic\_ext(pt)}  & [ \ref{sub:bankoff_circle}] \\
+
+\Imeth{line}{harmonic\_both(r)}  & [\ref{sub:harmonic_division_with_tkzphi}] \\
+
+\Imeth{line}{\_east(d)}   & \\
+
+\Imeth{line}{\_west(d)}    & \\
+
+\Imeth{line}{\_north\_pa(d)}  &  [\ref{ssub:new_line_from_a_defined_line}\\
+
+\Imeth{line}{\_south\_pa(d)}  &    \\
+
+\Imeth{line}{\_north\_pb(d)}  &    \\
+
+\Imeth{line}{\_south\_pb(d)}  &   [\ref{ssub:new_line_from_a_defined_line}\\
+
+\Imeth{line}{report(d,pt)}    &[\ref{ssub:method_report}]\\
+
+\Imeth{line}{colinear\_at(pt,k)}  & [ex. \ref{ssub:method_imeth_line_colinear__at}]\\
+\midrule 
+
+\textbf{Lines} &\\
+\midrule  
+
+\Imeth{line}{ll\_from(pt)}  & [\ref{ssub:new_line_from_a_defined_line}] \\
+
+\Imeth{line}{ortho\_from(pt)} & [\ref{ssub:newline_ortho_from}] \\
+ 
+ \Imeth{line}{mediator()} & Note \footnote{You can use |perpendicular_bisector| intead of \tkzname{mediator}.}; [\ref{ssub:method_imeth_line_mediator}]\\
+
+\Imeth{line}{swap\_line()}  & [\ref{ssub:method_imeth_line_swap__line} ; \ref{ssub:intersection_line_parabola_explained}] \\
+\midrule 
+\textbf{Triangles}&\\
+\midrule  
+\Imeth{line}{equilateral (<swap>)}    & Note \footnote{Triangles are defined in the direct sense of rotation, unless the "swap" option is present.}; [\ref{ssub:object_rotation}]  \\
+
+\Imeth{line}{isosceles (an<,swap>)}& [\ref{ssub:method_imeth_line_isosceles}]\\
+
+\Imeth{line}{isosceles\_a (an<,swap>)} & \\
+
+\Imeth{line}{isosceles\_s (an<,swap>)}& \\
+
+\Imeth{line}{two\_angles (an,an)} &Note \footnote{The given side is between the two angles} [\ref{ssub:triangle_with_two__angles}] \\
+
+\Imeth{line}{school ()}   & \\
+
+\Imeth{line}{half(<swap>)}  & \\
+
+\Imeth{line}{sss(r,r<,swap>)}  &  [\ref{ssub:triangle_with_three_given_sides}] \\
+
+\Imeth{line}{sas(r,an<,swap>)}  &  [\ref{ssub:triangle_with_three_given_sides}]  \\
+
+\Imeth{line}{ssa(r,an<,swap>)}  &  [\ref{ssub:triangle_with_three_given_sides}]\\
+
+
+\bottomrule
+\end{tabular}
+\egroup
+\end{minipage}
+
+
+\begin{minipage}{\textwidth}
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Methods of the class line.(part 2)}\label{line:methods2}
+\begin{tabular}{lll}
+\toprule
+\textbf{Methods} & \textbf{Comments} & \\
+\midrule
+\textbf{Squares}&\\
+\midrule  
+\Imeth{line}{square ()}  &  Note \footnote{ |_,_,z.C,z.D = get_points(S.AB)|}; [\ref{ssub:object_rotation}] \\
+\midrule 
+\textbf{Sacred triangles}&\\
+\midrule  
+\Imeth{line}{gold(<swap>)}     [\ref{line:met}] \\
+\Imeth{line}{euclide(<swap>)} & [\ref{line:met}] \\
+\Imeth{line}{golden(<swap>)}  &  [\ref{line:met}] \\
+\Imeth{line}{sublime(<swap>)}  & [\ref{line:met}] \\
+\Imeth{line}{divine(<swap>)}  &    [\ref{line:met}] \\  
+\Imeth{line}{golden\_gnomon(<swap>)}  &    [\ref{line:met}] \\  
+\Imeth{line}{egyptian(<swap>)} & [\ref{line:met}] \\
+\Imeth{line}{pythagoras(<swap>)} &  [\ref{line:met}] \\
+\Imeth{line}{isis(<swap>)} & [\ref{line:met}] \\
+\Imeth{line}{cheops(<swap>)}  &   [\ref{line:met}] \\
+\midrule 
+\textbf{Circles} &\\
+\midrule 
+\Imeth{line}{circle ()}  &  \\
+\Imeth{line}{apollonius (r)}  &  [\ref{ssub:apollonius_circle_ma_mb_k}] \\
+\Imeth{line}{c\_l\_pp (pt,pt)} &[\ref{ssub:c_l_pp}]  \\ 
+\Imeth{line}{c\_ll\_p (pt,pt)} & [\ref{ssub:method_c__ll__p}]  \\ 
+\midrule 
+\textbf{Transformations} &\\
+\midrule 
+\Imeth{line}{reflection (obj)}  &  [\ref{ssub:reflection_of_object}] \\
+\Imeth{line}{translation (obj)} & [\ref{ssub:example_translation}] \\
+
+\Imeth{line}{projection (obj)}  &  [\ref{ssub:example_projection_of_several_points}; \ref{ssub:example_combination_of_methods}; \ref{ssub:example_projection_of_several_points}; \ref{ssub:example_combination_of_methods}]\\
+
+\Imeth{line}{projection\_ll(L,pts)}  & [\ref{ssub:method_imeth_line_projection__ll}] \\
+
+\Imeth{line}{affinity\_ll(L,k,pts)}  &  [\ref{ssub:method_imeth_line_affinity}] \\
+\bottomrule
+\end{tabular}
+\egroup
+\end{minipage}
+
+\subsubsection{Method \Imeth{line}{new(pt,pt)}} % (fold)
+\label{ssub:method_imeth_line_new_pt_pt}
+
+It is preferable to use syntax such as \code{L.xx}.
+
+\begin{tkzexample}[latex=7cm]
+\directlua{
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(4, 3)
+  L.AB = line:new(z.A, z.B)
+}
+\begin{center}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLine(A,B)
+  \tkzDrawPoints(A,B)
+  \tkzLabelPoints(A,B)
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+% subsubsection method_imeth_line_new_pt_pt (end)
+
+\subsubsection{Method \Imeth{line}{distance(pt)}} %(fold)
+\label{ssub:method_imeth_line_distance}
+
+This method gives the distance from a point to a straight line.
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{
+  z.A = point:new(0, 0)
+  z.B = point:new(4, 3)
+  z.C = point:new(1, 5)
+  L.AB = line:new(z.A, z.B)
+  d = L.AB:distance(z.C)
+  l = L.AB.length
+  z.H = L.AB:projection(z.C)
+  }
+  \begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,H)
+  \tkzDrawPoints(A,B,C,H)
+  \tkzLabelPoints(A,B,C,H)
+  \tkzLabelSegment[above right=2em,draw](C,H){%
+    $CH = \tkzUseLua{d}$}
+  \tkzLabelSegment[below right=1em,draw](A,B){%
+    $AB = \tkzUseLua{l}$}
+  \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_imeth_line_distance(end)
+
+\subsubsection{Method \Imeth{line}{in\_out(pt)}} % (fold)
+\label{ssub:method_in_out}
+
+This method shows whether a point belongs to a straight line.
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{
+local  function calc_distance(L, p)
+    if L:in_out(p) then
+      return point.abs(p - L.pa) / L.length
+    else
+      return 0
+    end
+  end
+  z.A = point:new(0, 0)
+  z.B = point:new(2, 4)
+  z.X = point:new(3, 6)
+  z.Y = point:new(2, 0)
+  L.AB = line:new(z.A, z.B)
+  dx = calc_distance(L.AB, z.X)
+  dy = calc_distance(L.AB, z.Y)
+  }
+  \begin{center}
+    \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawLine(A,B)
+     \tkzDrawPoints(A,B,X,Y)
+     \tkzLabelPoints(A,B)
+     \tkzLabelPoint(X){X: \tkzUseLua{dx}}
+     \tkzLabelPoint(Y){Y: \tkzUseLua{dy}}
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+% subsubsection method_in_out (end)
+
+\subsubsection{Method \Imeth{line}{in\_out\_segment(pt)}} % (fold)
+\label{ssub:method_line_in_out_segment}
+
+Variant of the previous method; indicates whether a point is on or off a segment.
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{
+local  function inseg(L, p)
+    if L:in_out_segment(p) then
+      return "in"
+    else
+      return "out"
+    end
+  end
+  z.A = point:new(0, 0)
+  z.B = point:new(2, 4)
+  z.X = point:new(-1,-2)
+  z.Y = point:new(1, 2)
+  L.AB = line:new(z.A, z.B)
+  dx = inseg(L.AB, z.X)
+  dy = inseg(L.AB, z.Y)
+  }
+  \begin{center}
+    \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawLine(A,B)
+     \tkzDrawPoints(A,B,X,Y)
+     \tkzLabelPoints(A,B)
+     \tkzLabelPoint(X){X: \tkzUseLua{dx}}
+     \tkzLabelPoint(Y){Y: \tkzUseLua{dy}}
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_line_in__out__segment (end)
+
+\subsubsection{Method \Imeth{line}{is\_parallel(L)}} % (fold)
+\label{ssub:method_line_is_parallel}
+
+\vspace{6pt}
+\begin{tkzexample}[latex=8cm]
+\directlua{
+z.A = point:new(0, 0)
+z.B = point:new(4, 2)
+L.AB = line:new(z.A, z.B)
+z.C = point:new(1, 2)
+z.D = point:new(5, 4)
+L.CD = line:new(z.C, z.D)
+if L.AB:is_parallel (L.CD) 
+then tkztxt = "parallel"
+else tkztxt = "no parallel"
+end
+}
+\begin{center}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,D)
+  \tkzDrawPoints(A,B,C,D)
+  \tkzLabelPoints(A,B,C,D)
+  \tkzLabelSegment[sloped,pos=.2](C,D){%
+   $(CD)\ \tkzUseLua{tkztxt}\ (AB)$}
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+% subsubsection method_line_is_parallel (end)
+
+\subsubsection{Method \Imeth{line}{is\_orthogonal(L)}} % (fold)
+\label{ssub:method_line_is_orthogonal}
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=7cm]
+\directlua{
+z.A = point:new(0, 0)
+z.B = point:new(0, 4)
+L.AB = line:new(z.A, z.B)
+z.C = point:new(5, 4)
+L.BC = line:new(z.B, z.C)
+if L.AB:is_orthogonal(L.BC) then
+  tkztxt = "orthogonal"
+else
+  tkztxt = "no orthogonal"
+end
+}
+\begin{center}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B B,C A,C)
+  \tkzDrawPoints(A,B,C)
+  \tkzLabelPoints(A,B,C)
+  \tkzLabelSegment[sloped,pos=.2](B,C){%
+    $(BC)\ \tkzUseLua{tkztxt}\ (AB)$}
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+% subsubsection method_line_is_orthogonal (end)
+
+\subsubsection{Method \Imeth{line}{is\_equidistant(pt)}} % (fold)
+\label{ssub:method_line_is_equidistant}
+
+Is a point equidistant from the two points that define the line?
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{
+  z.A = point:new(0, 0)
+  z.B = point:new(0, 4)
+  z.C = point:new(4, 4)
+  L.AC = line:new(z.A, z.C)
+  if L.AC:is_equidistant(z.B) then
+    tex.print("equidistant")
+  else
+    tex.print("no equidistant")
+  end
+    }
+  \begin{center}
+      \begin{tikzpicture}
+      \tkzGetNodes
+      \tkzDrawLines(A,B B,C A,C)
+      \tkzDrawPoints(A,B,C)
+      \tkzLabelPoints(A,B,C)
+      \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_line_is_equidistant (end)
+
+\subsubsection{Method \Imeth{line}{report(r,<pt>)}} % (fold)
+\label{ssub:method_report}
+
+If the point is absent, the transfer is made from the first point that defines the line otherwise the new point is placed at a distance $r$ from the proposed point, parallel to the line. If $r<0$ then it will be in the opposite direction to the line (the line is considered to be oriented from \code{pa} to \code{pb}).
+
+\vspace{6pt}
+\begin{tkzexample}[latex=7cm]
+\directlua{%
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(4, 3)
+  L.AB = line:new(z.A, z.B)
+  z.M = point:new(0, 2)
+  z.N = L.AB:report(2.5, z.M)
+  z.O = L.AB:report(2.5)
+  z.P = L.AB:report(-L.AB.length/3,z.M)
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawSegments(A,B P,N)
+  \tkzDrawPoints(A,B,M,N,O,P)
+  \tkzLabelPoints(A,B,M,N,O,P)
+  \end{tikzpicture}
+\end{center}
+\end{tkzexample}
+
+
+
+% subsubsection method_report (end)
+
+\subsubsection{Method \Imeth{line}{two\_angles(an, an)} } % (fold)
+\label{ssub:triangle_with_two__angles}
+
+The angles are on either side of the given segment
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(4, 0)
+  L.AB = line:new(z.A, z.B)
+  T.ABC = L.AB:two_angles(math.pi / 6, math.pi / 2)
+  z.C = T.ABC.pc
+  }
+
+  \begin{center}
+    \begin{tikzpicture}
+       \tkzGetNodes
+       \tkzDrawPolygons(A,B,C)
+       \tkzDrawPoints(A,B,C)
+       \tkzLabelPoints(A,B)
+       \tkzLabelPoints[above](C)
+       \tkzMarkAngle[red](C,B,A)
+       \tkzMarkAngle[red](B,A,C)
+       \tkzLabelAngle[red,pos=1.3](C,B,A){$\pi/2$}
+       \tkzLabelAngle[red,pos=1.3](B,A,C){$\pi/6$}
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection triangle_with_two__angles (end)
+
+\subsubsection{Method \Imeth{line}{isosceles(an,<indirect>)}} % (fold)
+\label{ssub:method_imeth_line_isosceles}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+  z.a = point:new(1, 2)
+  z.b = point:new(5, 1)
+  L.ab = line:new(z.a, z.b)
+  T.abc = L.ab:isosceles(math.pi / 6, indirect)
+  z.c = T.abc.pc
+  z.L = T.abc:lemoine_point()
+  T.SY = T.abc:symmedian()
+  z.Ka, z.Kb, z.Kc = get_points(T.SY)
+  L.Kb = T.abc:symmedian_line(1)
+  _, z.Kb = get_points(L.Kb)
+  }
+  \begin{center}
+    \begin{tikzpicture}[scale= 1.5]
+    \tkzGetNodes
+    \tkzDrawPolygons(a,b,c Ka,Kb,Kc)
+    \tkzDrawPoints(a,b,c,L,Ka,Kb,Kc)
+    \tkzLabelPoints(c,L,Ka,Kb)
+    \tkzLabelPoints[above](a,b,Kc)
+    \tkzDrawSegments[cyan](a,Ka b,Kb c,Kc)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_imeth_line_isosceles (end)
+
+\subsubsection{Methods \Imeth{line}{sss(d,d)}, \Imeth{line}{sas(d,an)}, \Imeth{line}{ssa(d,an)}} % (fold)
+\label{ssub:triangle_with_three_given_sides}
+
+
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(5, 0)
+L.AB = line:new(z.A, z.B)
+T.ABC = L.AB:sss(3, 4)
+T.ABD = L.AB:sas(3, math.pi / 2)
+T.ABE = L.AB:ssa(7, math.pi / 2)
+z.C = T.ABC.pc
+z.D = T.ABD.pc
+z.E = T.ABE.pc
+}
+\begin{center}
+  \begin{tikzpicture}[gridded]
+    \tkzGetNodes
+    \tkzDrawPolygons(A,B,C A,B,D A,B,E)
+    \tkzDrawPoints(A,B,C,D,E)
+    \tkzLabelPoints(A,B)
+    \tkzLabelPoints[above](C,D,E)
+  \end{tikzpicture}
+\end{center}
+
+% subsubsection triangle_with_three_given_sides (end)
+
+\subsubsection{Triangle with side between side and angle} % (fold)
+\label{ssub:triangle_with_side_between_side_and_angle}
+
+\begin{minipage}{.5\textwidth}
+\begin{tkzexample}[code only]
+  \directlua{%
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(5, 0)
+  L.AB = line:new(z.A, z.B)
+  T.ABC = L.AB:ssa(3, math.pi / 6)
+  T.ABD = L.AB:ssa(3, math.pi / 6, swap)
+  z.C = T.ABC.pc
+  z.D = T.ABD.pc
+  }  
+  \begin{center}
+  \begin{tikzpicture}[gridded]
+   \tkzGetNodes
+   \tkzDrawPolygons(A,B,C A,B,D)
+   \tkzDrawPoints(A,B,C,D)
+   \tkzLabelPoints(A,B)
+   \tkzLabelPoints[above](C,D)
+   \tkzLabelAngle[teal](C,B,A){$\pi/6$}
+   \tkzLabelSegment[below left](A,C){$7$}
+   \tkzLabelSegment[below left](A,D){$7$}
+  \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+    \directlua{%
+    init_elements()
+    z.A = point:new(0, 0)
+    z.B = point:new(5, 0)
+    L.AB = line:new(z.A, z.B)
+    T.ABC = L.AB:ssa(3, math.pi / 6)
+    T.ABD = L.AB:ssa(3, math.pi / 6, swap)
+    z.C = T.ABC.pc
+    z.D = T.ABD.pc
+    }  
+    \begin{center}
+    \begin{tikzpicture}[gridded]
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,C A,B,D)
+     \tkzDrawPoints(A,B,C,D)
+     \tkzLabelPoints(A,B)
+     \tkzLabelPoints[above](C,D)
+     \tkzLabelAngle[teal](C,B,A){$\pi/6$}
+     \tkzLabelSegment[below left](A,C){$7$}
+     \tkzLabelSegment[below left](A,D){$7$}
+    \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+
+% subsubsection triangle_with_side_between_side_and_angle (end)
+
+\subsubsection{About sacred triangles} % (fold)
+\label{ssub:about_triangles}
+The side lengths are proportional to the lengths given in the table. They depend on the length of the initial segment.
+
+\captionof{table}{Sacred triangles.}\label{line:met}
+\begin{tabular}{ll}
+\toprule
+\textbf{Name} & \textbf{definition}  \\
+\midrule
+\Imeth{line}{gold(<swap>)}     & Right triangle with $a=\varphi$, $b=1$ and $c=\sqrt{\varphi}$\\
+\Imeth{line}{golden(<swap>)}   & Right triangle $b=\varphi$, $c=1$ ; half of gold rectangle   \\
+\Imeth{line}{divine()}    & Isosceles $a=\varphi$, $b=c=1$ and $\beta = \gamma=\pi/5$ \\
+\Imeth{line}{pythagoras()}  & $a=5$, $b=4$, $c=3$ and other names: isis or egyptian\\
+\Imeth{line}{sublime()}  & Isosceles $a=1$, $b=c=\varphi$  and $\beta =\gamma=2\pi/5$ ; other name: euclid\\
+\Imeth{line}{cheops()}  &  Isosceles $a=2$, $b=c=\varphi$  and height = $\sqrt{\varphi}$ \\
+\bottomrule
+\end{tabular}
+
+\begin{minipage}{.4\textwidth}
+\begin{SVerbatim}
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(4, 0)
+L.AB = line:new(z.A, z.B)
+T.ABC = L.AB:cheops()
+z.C = T.ABC.pc
+T.ABD = L.AB:gold()
+z.D = T.ABD.pc
+T.ABE = L.AB:euclide()
+z.E = T.ABE.pc
+T.ABF = L.AB:golden()
+z.F = T.ABF.pc
+T.ABG = L.AB:divine()
+z.G = T.ABG.pc
+T.ABH = L.AB:pythagoras()
+z.H = T.ABH.pc
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygons(A,B,C A,B,D A,B,E A,B,F A,B,G A,B,H)
+   \tkzDrawPoints(A,...,H)
+   \tkzLabelPoints(A,...,H)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{.6\textwidth}
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(4, 0)
+L.AB = line:new(z.A, z.B)
+T.ABC = L.AB:cheops()
+z.C = T.ABC.pc
+T.ABD = L.AB:gold()
+z.D = T.ABD.pc
+T.ABE = L.AB:euclide()
+z.E = T.ABE.pc
+T.ABF = L.AB:golden()
+z.F = T.ABF.pc
+T.ABG = L.AB:divine()
+z.G = T.ABG.pc
+T.ABH = L.AB:pythagoras()
+z.H = T.ABH.pc
+}
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygons(A,B,C A,B,D A,B,E A,B,F A,B,G A,B,H)
+     \tkzDrawPoints(A,...,H)
+     \tkzLabelPoints(A,...,H)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection about_triangles (end)
+
+\subsubsection{Method \Imeth{line}{point(r)} }% (fold)
+\label{ssub:method_point}
+This method is very useful. It allows you to place a point on the line under consideration.
+If |r = 0|  then the point is |pa|, if |r = 1| it's |pb|.
+
+If |r = .5| the point obtained is the midpoint of the segment. |r| can be negative or greater than 1.
+
+This method exists for all objects except quadrilaterals.
+
+\begin{tkzexample}[latex=8cm]
+  \directlua{%
+  init_elements()
+  z.A = point:new(-1,-1)
+  z.B = point:new(1,1)
+  L.AB = line:new(z.A, z.B)
+  z.I = L.AB: point (0.5)
+  z.J = L.AB: point (-0.5)
+  z.K = L.AB: point (2)
+  }
+  \begin{center}
+    \begin{tikzpicture}[gridded]
+    \tkzGetNodes
+       \tkzDrawLine(J,K)
+       \tkzDrawPoints(A,B,I,J,K)
+       \tkzLabelPoints(A,B,I,J,K)
+     \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_point (end)
+
+\subsubsection{Method \Imeth{line}{colinear\_at(pt,<r>)}} % (fold)
+\label{ssub:method_imeth_line_colinear__at}
+If the coefficient is missing then it defaults to $1$ and in the following example we obtain: $CE=AB$ and $(AB)\parallel (CE)$. For point $D$: $CD = .5AB$ and $(AB)\parallel (CD)$.
+
+\vspace{6pt}
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+    z.A = point:new(0, 0)
+    z.B = point:new(4, 0)
+    z.C = point:new(1, 3)
+    L.AB = line:new(z.A, z.B)
+    z.D = L.AB:colinear_at(z.C, .5)
+    z.E = L.AB:colinear_at(z.C)
+  }
+  \begin{center}
+    \begin{tikzpicture}
+      \tkzGetNodes
+      \tkzDrawSegments(A,B C,E)
+      \tkzDrawPoints(A,B,C,D,E)
+      \tkzLabelPoints(A,B,C,D,E)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection method_imeth_line_colinear__at (end)
+
+
+\subsubsection{Method \Imeth{line}{normalize()}} % (fold)
+\label{ssub:normalize}
+
+$ac = 1$ and $c\in [ab]$
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+  z.a = point:new(1, 1)
+  z.b = point:new(5, 4)
+  L.ab = line:new(z.a, z.b)
+  z.c = L.ab: normalize ()
+  }
+  \begin{center}
+    \begin{tikzpicture}[gridded]
+    \tkzGetNodes
+    \tkzDrawSegments(a,b)
+    \tkzDrawCircle(a,c)
+    \tkzDrawPoints(a,b,c)
+    \tkzLabelPoints(a,b,c)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection normalize (end)
+
+
+\subsubsection{Method \Imeth{line}{barycenter(r,r)}} % (fold)
+\label{ssub:barycenter_with_a_line}
+
+Barycenter of the points that define the line affected by the coefficients passed as arguments.
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+     z.A = point:new(0, -1)
+     z.B = point:new(4, 2)
+     L.AB = line:new(z.A, z.B)
+     z.G = L.AB: barycenter (1,2)
+  }
+  \begin{center}
+    \begin{tikzpicture}
+       \tkzGetNodes
+       \tkzDrawLine(A,B)
+       \tkzDrawPoints(A,B,G)
+       \tkzLabelPoints(A,B,G)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection barycenter_with_a_line (end)
+
+\subsubsection{Method \Imeth{line}{ll\_from(pt)}} % (fold)
+\label{ssub:new_line_from_a_defined_line}
+
+
+\directlua{%
+init_elements()
+z.A = point:new(1, 1)
+z.B = point:new(3, 2)
+L.AB = line:new(z.A, z.B)
+z.C = L.AB.north_pa
+z.D = L.AB.south_pa
+L.CD = line:new(z.C, z.D)
+_, z.E = get_points(L.CD:ll_from(z.B))
+% or  z.E= L2.pb with |L2 = L.CD: ll_from (z.B)|
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale = 1.25]
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,D B,E)
+  \tkzDrawPoints(A,...,E)
+  \tkzLabelPoints(A,...,E)
+  \tkzMarkRightAngle(B,A,C)
+  \tkzMarkSegments(A,C A,B A,D)
+  \end{tikzpicture}
+\end{center}
+
+ %  \caption{New line from defined line}
+% subsubsection new_line_from_a_defined_line (end)
+
+\subsubsection{Method \Imeth{line}{ortho\_from(pt)}} % (fold)
+\label{ssub:newline_ortho_from}
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+  z.A = point:new(1, 1)
+  z.B = point:new(3, 2)
+  L.AB = line:new(z.A, z.B)
+  z.C = point:new(1, 3)
+  L.CD = L.AB:ortho_from(z.C)
+  z.D = L.CD.pb
+  }
+  \begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawLines(A,B C,D)
+     \tkzDrawPoints(A,...,D)
+     \tkzLabelPoints(A,...,D)
+  \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection new_line_from_a_defined_line (end)
+
+\subsubsection{Method \Imeth{line}{mediator()}} % (fold)
+\label{ssub:method_imeth_line_mediator}
+
+In Mathworld, the mediator is the plane through the midpoint of a line segment and perpendicular to that segment, also called a mediating plane. The term "mediator" was introduced by J. Neuberg (Altshiller-Court 1979, p. 298). Here, I have adopted the French term and the mediator or
+the perpendicular bisector  of a line segment, is a line segment perpendicular to the segment and passing through the midpoint of this segment.
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{%
+  init_elements()
+  z.A = point:new(0,0)
+  z.B = point:new(5,0)
+  L.AB = line:new(z.A, z.B)
+  L.med = L.AB:mediator()
+  z.M = L.AB.mid
+  z.x, z.y = get_points(L.med)
+}
+\begin{center}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLine(A,B)
+\tkzDrawSegments(x,y)
+\tkzDrawPoints(A,B,M)
+\tkzLabelPoints(A,B)
+\tkzLabelPoints[below left](x,y,M)
+\tkzMarkSegments(A,M M,B)
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+% subsubsection method_imeth_line_mediator (end)
+
+\subsubsection{Method \Imeth{line}{swap\_line}} % (fold)
+\label{ssub:method_imeth_line_swap__line}
+
+Sometimes it's useful to swap the two points that define a straight line. This allows you to change the orientation. A more important example is shown here [\ref{ssub:intersection_line_parabola_explained}].
+
+\begin{minipage}{.5\textwidth}
+  \begin{tkzexample}[code only]
+  \directlua{
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(2, -1)
+  L.dir = line:new(z.A, z.B)
+  L.dir = L.dir:swap_line()
+  z.a = L.dir.pa
+  z.b = L.dir.pb
+  }
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawSegments[cyan,thick,->](a,b)
+    \tkzLabelPoints(A,B)
+    \end{tikzpicture}
+  \end{center}
+  \end{tkzexample}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(2, -1)
+L.dir = line:new(z.A, z.B)
+L.dir = L.dir:swap_line()
+z.a = L.dir.pa
+z.b = L.dir.pb
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawSegments[cyan,thick,->](a,b)
+  \tkzLabelPoints(A,B)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection method_imeth_line_swap__line (end)
+
+\subsubsection{Method \Imeth{line}{equilateral()}} % (fold)
+\label{ssub:method_imeth_line_equilateral}
+
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+   init_elements()
+   z.A = point:new(0,0)
+   z.B = point:new(5,0)
+   L.AB = line:new(z.A, z.B)
+   T.ABC = L.AB:equilateral ()
+   z.C = T.ABC.pc
+  }
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawLine(A,B)
+    \tkzDrawPolygon(A,B,C)
+    \tkzMarkSegments(A,B B,C C,A)
+    \tkzDrawPoints(A,B,C)
+    \tkzMarkAngles(B,A,C C,B,A A,C,B)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+% subsubsection method_imeth_line_equilateral (end)
+
+\subsubsection{Method \Imeth{line}{projection(obj)}} % (fold)
+\label{ssub:example_projection_of_several_points}
+\begin{minipage}{0.5\textwidth}
+\begin{SVerbatim}
+\directlua{%
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(2, 5)
+z.d = point:new(5, 2)
+L.ab = line:new(z.a, z.b)
+z.cp, z.dp = L.ab:projection(z.c, z.d)
+}
+ \begin{tikzpicture}[scale = .8]
+   \tkzGetNodes
+   \tkzDrawLines(a,b c,c' d,d')
+   \tkzDrawPoints(a,...,d,c',d')
+   \tkzLabelPoints(a,...,d,c',d')
+ \end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(2, 5)
+z.d = point:new(5, 2)
+L.ab = line:new(z.a, z.b)
+z.cp, z.dp = L.ab:projection(z.c, z.d)
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale  = .8]
+  \tkzGetNodes
+  \tkzDrawLines(a,b c,c' d,d')
+  \tkzDrawPoints(a,...,d,c',d')
+  \tkzLabelPoints(a,...,d,c',d')
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+% subsubsection example_projection_of_several_points (end)
+
+\subsubsection{Method \Imeth{line}{projection\_ll(L,obj)}} % (fold)
+\label{ssub:method_imeth_line_projection__ll}
+
+We've just seen (orthogonal) projection, but this time we're talking about projecting a point onto a line parallel to a line. At present, this transformation only applies to a point or a group of points, but it will be extended to objects.
+
+\vspace{6pt}
+\begin{minipage}{0.5\textwidth}
+\begin{SVerbatim}
+\directlua{
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(-1, 3)
+z.d = point:new(-2, -1)
+z.m = point:new(1, 2)
+z.n = point:new(3, 2)
+L.ab = line:new(z.a, z.b)
+L.cd = line:new(z.c, z.d)
+z.e, z.f = L.ab:projection_ll(L.cd, z.m, z.n)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLines(a,b c,d e,m f,n)
+\tkzDrawPoints(a,...,f,m,n)
+\tkzLabelPoints(a,...,f,m,n)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(-1, 3)
+z.d = point:new(-2, -1)
+z.m = point:new(1, 2)
+z.n = point:new(3, 2)
+L.ab = line:new(z.a, z.b)
+L.cd = line:new(z.c, z.d)
+z.e, z.f = L.ab:projection_ll(L.cd, z.m, z.n)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLines(a,b c,d e,m f,n)
+\tkzDrawPoints(a,...,f,m,n)
+\tkzLabelPoints(a,...,f,m,n)
+\end{tikzpicture}
+\end{minipage}
+
+% subsubsection method_imeth_line_projection__ll (end)
+
+\subsubsection{Method \Imeth{line}{affinity(L,obj)}} % (fold)
+\label{ssub:method_imeth_line_affinity}
+
+The introduction of parrallel projection to an axis allows us to define a new transformation: affinity.
+
+\vspace{6pt}
+\begin{minipage}{0.5\textwidth}
+\begin{SVerbatim}
+\directlua{
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(-1, 3)
+z.d = point:new(-2, -1)
+z.m = point:new(1,2)
+z.n = point:new(3,2)
+L.ab = line:new(z.a, z.b)
+L.cd = line:new(z.c, z.d) 
+z.e, z.f = L.ab:projection_ll(L.cd, z.m, z.n)
+z.g, z.h = L.ab: affinity(L.cd,2, z.m, z.n)
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawLines(a,b c,d e,m f,n)
+ \tkzDrawPoints(a,...,h,m,n)
+ \tkzLabelPoints(a,...,h,m,n)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{
+init_elements()
+z.a = point:new(0, 0)
+z.b = point:new(4, 1)
+z.c = point:new(-1, 3)
+z.d = point:new(-2, -1)
+z.m = point:new(1,2)
+z.n = point:new(3,2)
+L.ab = line:new(z.a, z.b)
+L.cd = line:new(z.c, z.d) 
+z.e, z.f = L.ab:projection_ll(L.cd, z.m, z.n)
+z.g, z.h = L.ab: affinity(L.cd,2, z.m, z.n)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLines(a,b c,d e,m f,n)
+\tkzDrawPoints(a,...,h,m,n)
+\tkzLabelPoints(a,...,h,m,n)
+\end{tikzpicture}
+\end{minipage}
+
+% subsubsection method_imeth_line_affinity (end)
+
+\subsubsection{Example: combination of methods} % (fold)
+\label{ssub:example_combination_of_methods}
+
+\begin{minipage}{0.6\textwidth}
+\begin{SVerbatim}
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.C = point:new(1, 5)
+T.ABC = triangle:new(z.A, z.B, z.C)
+L.AB = T.ABC.ab
+z.O = T.ABC.circumcenter
+C.OA = circle:new(z.O, z.A)
+z.H = L.AB:projection(z.O)
+L.ab = C.OA:tangent_at(z.A)
+z.a, z.b = L.ab.pa, L.ab.pb
+% or z.a,z.b  = get_points (L.ab)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawCircle(O,A)
+   \tkzDrawSegments[purple](O,A O,B O,H)
+   \tkzDrawArc[red](O,A)(B)
+   \tkzDrawArc[blue](O,B)(A)
+   \tkzDrawLine[add = 2 and 1](A,a)
+   \tkzFillAngles[teal!30,opacity=.4](A,C,B b,A,B A,O,H)
+   \tkzMarkAngles[mark=|](A,C,B b,A,B A,O,H H,O,B)
+   \tkzDrawPoints(A,B,C,H,O)
+   \tkzLabelPoints(B,H)
+   \tkzLabelPoints[above](O,C)
+   \tkzLabelPoints[left](A)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.C = point:new(1, 5)
+T.ABC = triangle:new(z.A, z.B, z.C)
+L.AB = T.ABC.ab
+z.O = T.ABC.circumcenter
+C.OA = circle:new(z.O, z.A)
+z.H = L.AB:projection(z.O)
+L.ab = C.OA:tangent_at(z.A)
+z.a, z.b = L.ab.pa, L.ab.pb
+% or z.a,z.b  = get_points (L.ab)
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale = .5]
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawCircle(O,A)
+  \tkzDrawSegments[purple](O,A O,B O,H)
+  \tkzDrawArc[red](O,A)(B)
+  \tkzDrawArc[blue](O,B)(A)
+  \tkzDrawLine[add = 2 and 1](A,a)
+  \tkzFillAngles[teal!30,opacity=.4,,size=.5](A,C,B b,A,B A,O,H)
+  \tkzMarkAngles[mark=|,size=.5](A,C,B b,A,B A,O,H H,O,B)
+  \tkzDrawPoints(A,B,C,H,O)
+  \tkzLabelPoints(B,H)
+  \tkzLabelPoints[above](O,C)
+  \tkzLabelPoints[left](A)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection example_combination_of_methods (end)
+
+\subsubsection{Method \Imeth{line}{translation(obj)}} % (fold)
+\label{ssub:example_translation}
+
+\begin{minipage}{0.6\textwidth}
+\begin{SVerbatim}
+\directlua{%
+ init_elements()
+ z.A  = point:new(0, 0)
+ z.B  = point:new(1, 2)
+ z.C  = point:new(-3, 2)
+ z.D  = point:new(0, 2)
+ L.AB = line:new(z.A, z.B)
+ z.E, z.F = L.AB:translation(z.C, z.D)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawPoints(A,...,F)
+\tkzLabelPoints(A,...,F)
+\tkzDrawSegments[->,red,> =latex](C,E D,F A,B)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+ init_elements()
+ z.A  = point:new(0, 0)
+ z.B  = point:new(1, 2)
+ z.C  = point:new(-3, 2)
+ z.D  = point:new(0, 2)
+ L.AB = line:new(z.A, z.B)
+ z.E, z.F = L.AB:translation(z.C, z.D)
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawPoints(A,...,F)
+  \tkzLabelPoints(A,...,F)
+  \tkzDrawSegments[->,red,> =latex](C,E D,F A,B)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% subsubsection example_translation (end)
+
+
+\subsubsection{Method \Imeth{line}{reflection(obj)}} % (fold)
+\label{ssub:reflection_of_object}
+
+\begin{minipage}{.5\textwidth}
+\begin{SVerbatim}
+\directlua{%
+ init_elements()
+ z.A = point:new(0, 0)
+ z.B = point:new(4, 1)
+ z.E = point:new(0, 2)
+ z.F = point:new(3, 3)
+ z.G = point:new(4, 2)
+ L.AB = line:new(z.A, z.B)
+ T.EFG = triangle:new(z.E, z.F, z.G)
+ T.new = L.AB:reflection (T.EFG)
+ z.Ep, z.Fp, z.Gp = get_points(T.new)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawLine(A,B)
+   \tkzDrawPolygon(E,F,G)
+   \tkzDrawPolygon[new](E',F',G')
+   \tkzDrawSegment[red,dashed](E,E')
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+ init_elements()
+ z.A = point:new(0, 0)
+ z.B = point:new(4, 1)
+ z.E = point:new(0, 2)
+ z.F = point:new(3, 3)
+ z.G = point:new(4, 2)
+ L.AB = line:new(z.A, z.B)
+ T.EFG = triangle:new(z.E, z.F, z.G)
+ T.new = L.AB:reflection (T.EFG)
+ z.Ep, z.Fp, z.Gp = get_points(T.new)
+}
+
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawLine(A,B)
+     \tkzDrawPolygon(E,F,G)
+     \tkzDrawPolygon[new](E',F',G')
+     \tkzDrawSegment[red,dashed](E,E')
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsubsection reflection_of_object (end)
+
+\subsubsection{Method \Imeth{line}{projection(obj)}} % (fold)
+\label{ssub:example_distance_and_projection}
+
+\begin{minipage}{0.5\textwidth}
+\begin{SVerbatim}
+\directlua{%
+ init_elements()
+ z.A = point:new(0, 0)
+ z.B = point:new(4, -2)
+ z.C = point:new(3, 3)
+ L.AB = line:new(z.A, z.B)
+ d = L.AB:distance (z.C)
+ z.H = L.AB:projection (z.C)
+}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,H)
+  \tkzDrawPoints(A,B,C,H)
+  \tkzLabelPoints(A,B,C,H)
+  \tkzLabelSegment[above left,
+  draw](C,H){$CH = \tkzUseLua{d}$}
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+   init_elements()
+   z.A = point:new(0, 0)
+   z.B = point:new(4, -2)
+   z.C = point:new(3, 3)
+   L.AB = line:new(z.A, z.B)
+   d = L.AB:distance (z.C)
+   z.H = L.AB:projection (z.C)
+}
+
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,H)
+  \tkzDrawPoints(A,B,C,H)
+  \tkzLabelPoints(A,B,C,H)
+  \tkzLabelSegment[above left,draw](C,H){$CH = \tkzUseLua{d}$}
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+% \caption{Method distance with line object}
+% subsubsection example_distance_and_projection (end)
+
+
+\subsubsection{Method \Imeth{line}{apollonius(d)} (Apollonius circle MA/MB = k)} % (fold)
+\label{ssub:apollonius_circle_ma_mb_k}
+
+\begin{SVerbatim}
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+L.AB = line:new(z.A, z.B)
+C.apo = L.AB:apollonius (2)
+z.O,z.C = get_points (C.apo)
+z.D = C.apo:antipode (z.C)
+z.P = C.apo:point (0.30)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzFillCircle[blue!20,opacity=.2](O,C)
+   \tkzDrawCircle[blue!50!black](O,C)
+   \tkzDrawPoints(A,B,O,C,D,P)
+   \tkzDrawSegments[orange](P,A P,B P,D B,D P,C)
+   \tkzDrawSegments[red](A,C)
+   \tkzDrawPoints(A,B)
+   \tkzLabelCircle[draw,fill=green!10,%
+      text width=3cm,text centered,left=24pt](O,D)(60)%
+     {$CA/CB=2$\\$PA/PB=2$\\$DA/DB=2$}
+   \tkzLabelPoints[below right](A,B,O,C,D)
+   \tkzLabelPoints[above](P)
+   \tkzMarkRightAngle[opacity=.3,fill=lightgray](D,P,C)
+   \tkzMarkAngles[mark=||](A,P,D D,P,B)
+\end{tikzpicture}
+\end{SVerbatim}
+
+\directlua{%
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+L.AB = line:new(z.A, z.B)
+C.apo = L.AB:apollonius (2)
+z.O,z.C = get_points (C.apo)
+z.D = C.apo:antipode (z.C)
+z.P = C.apo:point (0.30)
+}
+
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzFillCircle[blue!20,opacity=.2](O,C)
+  \tkzDrawCircle[blue!50!black](O,C)
+  \tkzDrawPoints(A,B,O,C,D,P)
+  \tkzDrawSegments[orange](P,A P,B P,D B,D P,C)
+  \tkzDrawSegments[red](A,C)
+  \tkzDrawPoints(A,B)
+  \tkzLabelCircle[draw,fill=green!10,%
+      text width=3cm,text centered,left=24pt](O,D)(60)%
+    {$CA/CB=2$\\$PA/PB=2$\\$DA/DB=2$}
+    \tkzLabelPoints[below right](A,B,O,C,D)
+    \tkzLabelPoints[above](P)
+  \tkzMarkRightAngle[opacity=.3,fill=lightgray](D,P,C)
+  \tkzMarkAngles[mark=||](A,P,D D,P,B)
+  \end{tikzpicture}
+\end{center}
+
+
+Remark: |\tkzUseLua{length(z.P,z.A)/length(z.P,z.B)}| = \tkzUseLua{length(z.P,z.A)/length(z.P,z.B)}
+% subsubsection apollonius_circle_ma_mb_k (end)
+
+\subsubsection{Method \Imeth{line}{c\_l\_pp}} % (fold)
+\label{ssub:c_l_pp}
+Circle tangent to a line passing through two points.
+
+First, consider the general case: a straight line $(AB)$ and two points, $M$ and $N$. We are tasked with finding the circle that is tangent to the line and passes through the two points.
+
+ We will focus on the straight line $(AB)$ and apply a specific method designed for such cases.
+The method takes into account the following special cases:
+
+\begin{itemize}
+  \item line $(MN)$ is perpendicular to the line $(AB)$;
+  \item line $(MN)$ is parallel to line $(AB)$;
+  \item these points are on either side of the line $(AB)$;
+  \item one of the points lies on the line $(AB)$.
+\end{itemize}
+
+\vspace{6pt}
+
+\begin{minipage}{0.6\textwidth}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(1, 1)
+z.N = point:new(2, 5)
+L.AB = line:new(z.A, z.B)
+C1,C2 = L.AB:c_l_pp(z.M, z.N)
+z.O1 = C1.center
+z.O2 = C2.center
+z.T1 = C1.through
+z.T2 = C2.through
+}
+\begin{center}
+  \begin{tikzpicture}[scale =.6]
+  \tkzGetNodes
+  \tkzDrawLines(A,B M,N)
+  \tkzDrawCircles(O1,T1 O2,T2)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \tkzDrawPoints(A,B,M,N,O1,T1,O2,T2)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{tkzexample}[code only]
+  \directlua{
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(8, 0)
+  z.M = point:new(1, 1)
+  z.N = point:new(2, 5)
+  L.AB = line:new(z.A, z.B)
+  C1,C2 = L.AB:c_l_pp(z.M, z.N)
+  z.O1 = C1.center
+  z.O2 = C2.center
+  z.T1 = C1.through
+  z.T2 = C2.through
+  }
+  \begin{tikzpicture}[scale = .75]
+  \tkzGetNodes
+  \tkzDrawLines(A,B M,N)
+  \tkzDrawCircles(O1,T1 O2,T2)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \tkzDrawPoints(A,B,M,N,O1,T1,O2,T2)
+  \end{tikzpicture}
+\end{tkzexample}
+\end{minipage}
+
+\vspace{6pt}
+Let's look at the impossible case: the points are on either side of the line. 
+
+The method returns \code{nil} and \code{nil}.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(1,  1)
+z.N = point:new(3, -5)
+L.AB = line:new(z.A, z.B)
+L.MN = line:new(z.M, z.N)
+z.I = intersection(L.AB, L.MN)
+C1,C2 = L.AB:c_l_pp(z.M, z.N)
+if C1 == nil
+then
+else
+   z.C = C1.center
+   z.Cp = C2.center
+   z.T = C1.through
+   z.Tp = C2.through
+end
+}
+\begin{center}
+  \begin{tikzpicture}[scale =.6]
+  \tkzGetNodes
+  \tkzDrawLines(A,B M,N)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \end{tikzpicture}
+\end{center}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\begin{tkzexample}[code only]
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(1,  1)
+z.N = point:new(3, -5)
+L.AB = line:new(z.A, z.B)
+L.MN = line:new(z.M, z.N)
+z.I = intersection(L.AB, L.MN)
+C1,C2 = L.AB:c_l_pp(z.M, z.N)
+if C1 == nil
+then
+else
+   z.C = C1.center
+   z.Cp = C2.center
+   z.T = C1.through
+   z.Tp = C2.through
+end
+}
+\begin{center}
+  \begin{tikzpicture}[scale =.6]
+  \tkzGetNodes
+  \tkzDrawLines(A,B M,N)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \end{tikzpicture}
+\end{center}
+\end{tkzexample}
+\end{minipage}
+
+\vspace{6pt}
+Let's look at the case where the line $(MN)$ is parallel to the initial line.
+
+
+\begin{minipage}{0.4\textwidth}
+\begin{SVerbatim}
+  \directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(0, 3)
+z.N = point:new(5, 3)
+L.AB = line:new(z.A, z.B)
+C1, C2 = L.AB:c_l_pp(z.M, z.N)
+z.O1 = C1.center
+z.O2 = C2.center
+z.T1 = C1.through
+z.T2 = C2.through
+}
+\begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawSegments(A,B M,N)
+  \tkzDrawCircles(O1,T1)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.6\textwidth}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(0, 3)
+z.N = point:new(5, 3)
+L.AB = line:new(z.A, z.B)
+C1, C2 = L.AB:c_l_pp(z.M, z.N)
+z.O1 = C1.center
+z.O2 = C2.center
+z.T1 = C1.through
+z.T2 = C2.through
+
+}
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawSegments(A,B M,N)
+  \tkzDrawCircles(O1,T1)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+
+\vspace{6pt}
+Where the line is perpendicular to the initial line.
+
+\vspace{6pt}
+\begin{minipage}{0.4\textwidth}
+\begin{SVerbatim}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(1, 1)
+z.N = point:new(1, 5)
+L.AB = line:new(z.A, z.B)
+C1, C2 = L.AB:c_l_pp(z.M, z.N)
+z.O1 = C1.center
+z.O2 = C2.center
+z.T1 = C1.through
+z.T2 = C2.through
+
+\end{SVerbatim}
+\end{minipage}
+\begin{minipage}{0.6\textwidth}
+\directlua{
+init_elements()
+z.A = point:new(0, 0)
+z.B = point:new(6, 0)
+z.M = point:new(1, 1)
+z.N = point:new(1, 5)
+L.AB = line:new(z.A, z.B)
+C1, C2 = L.AB:c_l_pp(z.M, z.N)
+z.O1 = C1.center
+z.O2 = C2.center
+z.T1 = C1.through
+z.T2 = C2.through
+
+}
+\begin{center}
+  \begin{tikzpicture}[scale = .75]
+  \tkzGetNodes
+  \tkzDrawLines(A,B M,N)
+  \tkzDrawCircles(O1,T1 O2,T2)
+  \tkzDrawPoints(A,B,M,N)
+  \tkzLabelPoints(A,B,M,N)
+  \tkzDrawPoints(A,B,M,N,O1,T1,O2,T2)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+The last special case is when one of the points is on the initial line. In this case, there's only one solution.
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=8cm]
+  \directlua{
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(5, 0)
+  z.M = point:new(1, 0)
+  z.N = point:new(3, 5)
+  L.AB = line:new(z.A, z.B)
+  L.MN = line:new(z.M, z.N)
+  z.I = intersection(L.AB, L.MN)
+  C1, C2 = L.AB:c_l_pp(z.M, z.N)
+  z.O1 = C1.center
+  z.O2 = C2.center
+  z.T1 = C1.through
+  z.T2 = C2.through
+  }
+  \begin{center}
+    \begin{tikzpicture}[scale =.8]
+    \tkzGetNodes
+    \tkzDrawLines(A,B M,N)
+    \tkzDrawCircles(O1,T1 O2,T2)
+    \tkzDrawPoints(A,B,M,N)
+    \tkzLabelPoints(A,B,M,N)
+    \tkzDrawPoints(A,B,M,N,O1,T1,O2,T2)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+
+% subsubsection c_l_pp (end)
+
+\subsubsection{Method \Imeth{line}{c\_ll\_p}} % (fold)
+\label{ssub:method_c__ll__p}
+
+Let's consider two straight lines $(AB)$ and $(AC)$ and a point $P$ not belonging to these lines.
+Is there a circle through $P$ tangent to these two lines?
+
+The following example shows that there are two solutions using the method linked to the line. A more natural method, linked to the $ABC$ triangle, can also be used.
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex =8cm]
+  \directlua{
+  init_elements()
+  z.A = point:new(0, 0)
+  z.B = point:new(6, 0)
+  L.AB = line:new(z.A, z.B)
+  z.C = point:new(6, 4)
+  L.AC = line:new(z.A, z.C)
+  T = triangle:new(z.A, z.B, z.C)
+  z.P = point:new(3, 1)
+  C1, C2 = L.AB:c_ll_p(z.C, z.P)
+  z.O1 = C1.center
+  z.T1 = C1.through
+  z.O2 = C2.center
+  z.T2 = C2.through
+
+  }
+  \begin{center}
+    \begin{tikzpicture}[ scale =.75]
+    \tkzGetNodes
+    \tkzDrawLines[thick](A,B A,C)
+     \tkzDrawCircles[red](O1,T1 O2,T2)
+     \tkzDrawPoints(A,B,C,P)
+     \tkzLabelPoints(A,B,C,P)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+
+
+\vspace{6pt}
+
+The first special case is where the point $P$ lies on the bisector of $A$.
+
+
+\begin{tkzexample}[latex =8cm]
+  \directlua{
+  init_elements()
+    z.A= point:new(0, 0)
+    z.B= point:new(6, 0)
+    L.AB  = line:new(z.A, z.B)
+    z.C= point:new(6, 4)
+    L.AC  = line:new(z.A, z.C)
+    T  = triangle:new(z.A, z.B, z.C)
+    L.bi  = bisector(z.A, z.B, z.C)
+    z.P= L.bi:point (0.4)
+    C1,C2 = L.AB:c_ll_p (z.C, z.P)
+    z.O1  = C1.center
+    z.T1  = C1.through
+    z.O2  = C2.center
+    z.T2  = C2.through
+  }
+  \begin{center}
+  \begin{tikzpicture}[scale =.75]
+   \tkzGetNodes
+   \tkzDrawLines(A,B A,C A,P)
+   \tkzDrawCircles(O1,T1 O2,T2)
+   \tkzDrawPoints(A,B,C,P)
+   \tkzLabelPoints(A,B,C,P)
+  \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+
+
+
+\vspace{6pt}
+A first special case is when the point $P$ lies on one of the lines
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=8cm]
+  \directlua{
+  init_elements()
+    z.A= point:new(0, 0)
+    z.B= point:new(6, 0)
+    L.AB  = line:new(z.A, z.B)
+    z.C= point:new(6,  4)
+    L.AC  = line:new(z.A, z.C)
+    T  = triangle:new(z.A, z.B, z.C)
+    z.P= point:new(3,  2)
+    L.bi  = bisector(z.A, z.B, z.C)
+    z.I= L.bi.pb
+    C1,C2 = L.AB:c_ll_p (z.C, z.P)
+    z.O1  = C1.center
+    z.T1  = C1.through
+    z.O2  = C2.center
+    z.T2  = C2.through
+  }
+  \begin{center}
+    \begin{tikzpicture}[scale = .75]
+    \tkzGetNodes
+    \tkzDrawLines(A,B A,C A,I)
+     \tkzDrawCircles(O1,T1 O2,T2)
+     \tkzDrawPoints(A,B,C,P,I)
+     \tkzLabelPoints(A,B,C,P,I)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+
+
+%subsubsection method_c__ll__p (end)
+% subsection methods_from_class_line (end)
+% section class_line (end)
+\endinput

@@ -1,0 +1,90 @@
+%%% Testing: textblock in horizontal mode
+%
+% In textpos up to 1.9.1, a textblock in horizontal mode, with the
+% [absolute] option, worked, in the sense of not failing, but produced
+% ugly spacing, because in generating a `\par` it messed up
+% inter-paragraph spacing.  This had the result that the text either
+% side of the textblock appeared as separate paragraphs with no space
+% between them.  The appearance in [relative] mode was OK, but with
+% the `\par` visible.  This isn't a _bug_, since the documentation
+% didn't say anything other than that a `\par` is inserted at this
+% point, but it's not pretty.
+
+\documentclass{article}
+
+\parindent=0pt
+\baselineskip=12pt
+
+\usepackage[absolute]{textpos}
+\usepackage{color}
+
+\definecolor{Blue}{rgb}{0.9,0.9,1.0}
+\definecolor{Red}{rgb}{1.0,0.5,0.5}
+\textblockcolour{Blue}
+
+% Make the textblock contents, and size, stand out
+\def\content#1{\noindent
+  \textcolor{Red}{\hbox to 1em{%
+      \vrule height 9pt depth 3pt width 2pt %12 pt total
+      \hss
+      \vrule width 2pt }\relax
+    #1}}
+
+\begin{document}
+
+\TPoptions{absolute=false}
+
+Line 1.  Line 1a.               % no descenders on this line
+% The sentence space between these should be the same as between these
+% and 1bis
+\begin{textblock}{5}(0,0)
+\content{Relative, hmode}
+\end{textblock}
+Line \smash{1bis, preceded by sentence space}. % \smash, to ensure line has zero depth
+
+Line 2 should be the usual baseline from 1.
+
+\vskip 1cm
+
+Line 3.
+
+\begin{textblock}{5}(0,0)
+\content{Relative, vmode}
+\end{textblock}
+
+Line 4.
+
+Line 5 should be separated from line 4 by the same baseline as 4 from~3.
+
+Line 6. Line 6a.
+\begin{textblock*}{10cm}(0mm,0mm)
+\content{Relative, hmode, star.}
+\end{textblock*}
+Line \smash{6bis, preceded by sentence space.}
+
+Line 7. With second sentence.
+
+\begin{textblock*}{10cm}(0mm,0mm)
+\content{Relative, vmode, star.}
+\end{textblock*}
+
+Line 8 should be separated from 7 by the usual baseline.
+
+\newpage
+\TPoptions{absolute=true}
+
+Line 9. Line 9a.
+\begin{textblock}{5}(0,0)
+\content{Absolute 1}
+\end{textblock}
+Line 9bis, preceded by sentence space.  % the smash doesn't matter in absolute mode
+
+Line 10.
+
+\begin{textblock*}{5cm}(0mm,10mm)
+\content{Absolute 2}
+\end{textblock*}
+
+Line 11 should be separated from 10 by the usual baseline.
+
+\end{document}
