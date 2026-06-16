@@ -1,0 +1,272 @@
+\documentclass{article}
+\usepackage{vcell,url,booktabs,multirow,tabularx,listings,ragged2e,color,colortbl}
+
+\lstloadlanguages{[LaTeX]TeX}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  backgroundcolor=\color[rgb]{0.82,0.82,0.82},
+  language=[LaTeX]TeX}
+
+
+\begin{document}
+\title{The package \texttt{vcell} : Vertical alignment for cells}
+\author{Xavier Dionne\thanks{The author wrote this package for its online table generator (\texttt{https://latex-tables.com}). You can contact him at info [at] latex-tables [dot] com.}}
+\date{April 30, 2021}
+\maketitle
+
+\section{Introduction}
+
+This package offers a serie of low-level macros to align vertically the content of a cell, whether it has a fixed height or a variable height.
+
+\section{Using \texttt{vcell}}
+
+The idea behind \texttt{vcell} is to measure the height of cells to calculate the height of the row and then to print the cells in another row. This second row will be printed over the first one\footnote{Which can be understand as ``cheating'' for some.}. This process is not automated.
+
+In a row where cells are vertically-aligned, all cells must be vertically-aligned. Each cells can have a different alignment however.
+
+The commands available are those :
+\begin{center}
+\noindent\begin{tabularx}{\textwidth}{rX}
+\verb|\savecellbox{<content>}|&Measure and save a cell that is vertically aligned. It will have to be printed in a second row.\\
+\verb|\vcell{<content>}|&Shortcut for \verb|\savecellbox|\\
+\verb|\printcelltop|&Print a top-aligned cell\\
+\verb|\printcellmiddle|&Print a middle-aligned cell\\
+\verb|\printcellbottom|&Print a bottom-aligned cell\\
+\verb|\resetcellcount|&Reset the measurement of cells. This will be done automatically once you print all saved cells\\
+\end{tabularx}
+\end{center}
+Once your cells are measured, the following lengths will be available :
+\begin{center}
+\noindent\begin{tabular}{rl}
+\verb|\rowht|&The height of the row\\
+\verb|\rowdp|&The depth of the row\\
+\verb|\rowheight|&The total height of the row\\
+\end{tabular}
+\end{center}
+
+\section{Basic example}
+
+The following table :
+
+
+\begin{center}
+\noindent\begin{tabular}{@{}c@{}lcr@{}}
+\toprule
+& Top cell & Middle cell & Bottom cell\\\midrule
+\vcell{\rule{0pt}{40pt}}&\savecellbox{Top}&\savecellbox{Middle}&\savecellbox{Bottom}\\[-\rowheight]
+\printcellmiddle&\printcelltop&\printcellmiddle&\printcellbottom\\\bottomrule
+\end{tabular}
+\end{center}
+
+
+
+can be created with the following code :
+
+\begin{lstlisting}[breaklines]
+\begin{tabular}{@{}c@{}lcr@{}}
+  \toprule
+    & Top cell
+    & Middle cell
+    & Bottom cell
+  \\ \midrule
+      \savecellbox{\rule{0pt}{40pt}}
+    & \savecellbox{Top}
+    & \savecellbox{Middle}
+    & \savecellbox{Bottom}
+  \\[-\rowheight]
+      \printcellmiddle
+    & \printcelltop
+    & \printcellmiddle
+    & \printcellbottom
+  \\ \bottomrule
+\end{tabular}
+\end{lstlisting}
+
+To ensure the height of the table, an invisible strut is used.  However, any content could be used instead, even content with variable height. You can see the alignment of the table with this figure :
+
+\begin{center}
+\noindent\begin{tabular}{@{}clcr@{}}
+\toprule
+& Top cell & Middle cell & Bottom cell\\\midrule
+\savecellbox{\rule{10pt}{40pt}}&\savecellbox{\rule{10pt}{20pt}}&\savecellbox{\rule{10pt}{20pt}}&\savecellbox{\rule{10pt}{20pt}}\\[-\rowheight]
+\printcellmiddle&\printcelltop&\printcellmiddle&\printcellbottom\\\bottomrule
+\end{tabular}
+\end{center}
+
+The commands works even if all the cells have the same height, as shown in the following table :
+
+\begin{center}
+\noindent\begin{tabular}{lcr@{}}
+\toprule
+Top cell & Middle cell & Bottom cell\\\midrule
+\savecellbox{Top}&\savecellbox{Middle}&\savecellbox{Bottom}\\[-\rowheight]
+\printcelltop&\printcellmiddle&\printcellbottom\\\bottomrule
+\end{tabular}
+\end{center}
+
+
+\section{Special cases}
+
+
+
+\subsection{Usage of \texttt{multicolumn}}
+
+Whenever you want to use the command \verb|\multicolumn| because you want to change the alignment of your cell or because you want your cell to span several column, you have to repeat the command in the second row.
+
+\begin{center}
+\noindent\begin{tabular}{@{}c@{}lcr@{}}
+\toprule
+& Top cell & Top cell & Bottom cell\\\midrule
+\savecellbox{\rule{0pt}{40pt}}&\multicolumn{2}{c}{\savecellbox{Top (2 cols)}}&\savecellbox{Bottom}\\[-\rowheight]
+\printcellmiddle&\multicolumn{2}{c}{\printcelltop}&\printcellbottom\\\bottomrule
+\end{tabular}
+\end{center}
+
+The previous table can be created with the following code :
+
+\begin{lstlisting}[breaklines]
+\begin{tabular}{@{}c@{}lcr@{}}
+\toprule
+    & Top cell
+    & Top cell
+    & Bottom cell
+  \\ \midrule
+      \savecellbox{\rule{0pt}{40pt}}
+    & \multicolumn{2}{c}{\savecellbox{Top (2 cols)}}
+    & \savecellbox{Bottom}
+  \\ [-\rowheight]
+      \printcellmiddle
+    & \multicolumn{2}{c}{\printcelltop}
+    & \printcellbottom
+  \\ \bottomrule
+\end{tabular}
+\end{lstlisting}
+
+\subsection{Paragraph columns}
+
+A frequent case is the use of paragraph columns (i.e. \verb|p|, \verb|m| or \verb|b| columns). The only rule is to use \verb|p| columns (or \verb|X| columns from the \texttt{tabularx} package) and avoid \verb|m| columns, otherwise it will mess with the alignment.
+
+\begin{center}
+\newdimen\rrowheight
+\noindent\begin{tabular}{@{}p{80pt}p{45pt}p{90pt}p{45pt}c@{}}
+\toprule
+Middle-p cell & Top-p cell & Bottom-p cell&Bottom-p cell & Middle cell\\\midrule
+\savecellbox{This is a paragraph that starts at the center and keeps continuing}&\savecellbox{Paragraph from top}&\savecellbox{This is the biggest paragraph. It is aligned from the bottom but you can't notice that.}&\savecellbox{Paragraph from bottom}&\savecellbox{Middle}\\\noalign{\global\setlength{\rrowheight}{\rowheight}\vspace{-\rowheight}}
+\printcellmiddle&\printcelltop&\printcellbottom&\printcellbottom&\printcellmiddle\\\bottomrule\noalign{\vspace{2pt}\verb|\rowheight=|\the\rrowheight}
+\end{tabular}
+\end{center}
+
+It can be produced by this code :
+
+\begin{lstlisting}[breaklines]
+\begin{tabular}{@{}p{80pt}p{45pt}p{90pt}p{45pt}c@{}}
+  \toprule
+       Middle-p cell
+     & Top-p cell 
+     & Bottom-p cell
+     & Bottom-p cell 
+     & Middle cell
+  \\ \midrule
+       \savecellbox{This is a paragraph that starts at the center and keeps continuing}
+     & \savecellbox{Paragraph from top}
+     & \savecellbox{This is the biggest paragraph. It is aligned from the bottom but you can't notice that.}
+     & \savecellbox{Paragraph from bottom}
+     & \savecellbox{Middle}
+   \\ [-\rowheight]
+       \printcellmiddle
+     & \printcelltop
+     & \printcellbottom
+     & \printcellbottom
+     & \printcellmiddle
+   \\ \bottomrule
+\end{tabular}
+\end{lstlisting}
+
+\subsection{Usage with \texttt{colortbl}}
+
+You can use coloured cells with \texttt{colortbl}. However, the color declaration must be repeated before \verb|\printcellmiddle|, \verb|\printcelltop| or \verb|\printcellbottom| commands.
+
+\begin{center}
+\noindent\begin{tabular}{|>{\columncolor{red}}p{60pt}|c|}
+\hline
+Middle-p cell & \cellcolor{yellow}Bottom cell\\\hline
+\savecellbox{This is a paragraph that starts at the center and keeps continuing}&\cellcolor{green}\savecellbox{Paragraph from bottom}\\[-\rowheight]
+\printcellmiddle&\cellcolor{green}\printcellbottom\\\hline
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[breaklines]
+\begin{tabular}{|>{\columncolor{red}}p{60pt}|c|}
+  \hline
+      Middle-p cell
+    & \cellcolor{yellow} Bottom cell
+  \\ \hline
+       \savecellbox{This is a paragraph that starts at the center and keeps continuing}
+     & \cellcolor{green}\savecellbox{Paragraph from bottom}
+   \\ [-\rowheight]
+       \printcellmiddle
+     & \cellcolor{green}\printcellbottom
+   \\ \hline
+\end{tabular}
+\end{lstlisting}
+
+\subsection{Usage with \texttt{multirow}}
+
+\texttt{vcell} does not support cells that spans several rows.  If you want to use \verb|\multirow| in the same row as vertically-aligned cells, just use \verb|multirow| as you would normally do and skip it in the second row. You don't have to adjust the first argument of \verb|multirow|. You might want to use the optional argument of \verb|multirow| to get the vertical alignment that you want.
+
+\begin{center}
+\noindent\begin{tabular}{|c|>{\centering}p{60pt}|c|}
+\hline
+Multirow cell & Middle-p cell & Bottom cell\\\hline
+\multirow{2}{*}[-3.5em]{Two rows}&\savecellbox{ This is a paragraph that starts at the center and keeps continuing}&\savecellbox{Paragraph from bottom}\\[-\rowheight]
+&\printcellmiddle&\printcellbottom\\\cline{2-3}
+&\savecellbox{This is another paragraph that starts at the center and keeps continuing}&\savecellbox{Second paragraph from bottom}\\[-\rowheight]
+&\printcellmiddle&\printcellbottom\\\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}[breaklines]
+\begin{tabular}{|c|>{\centering}p{60pt}|c|}
+  \hline
+      Multirow cell
+    & Middle-p cell
+    & Bottom cell
+  \\ \hline
+      \multirow{2}{*}[-3.5em]{Two rows}
+    & \savecellbox{This is a paragraph that starts at the center and keeps continuing}
+    & \savecellbox{Paragraph from bottom}
+  \\ [-\rowheight]
+    % We skip for the multirow
+    & \printcellmiddle
+    & \printcellbottom
+  \\ \cline{2-3}
+    & \savecellbox{This is another paragraph that starts at the center and keeps continuing}
+    & \savecellbox{Second paragraph from bottom}
+  \\ [-\rowheight]
+    % We skip for the multirow
+    & \printcellmiddle
+    & \printcellbottom
+  \\ \hline
+\end{tabular}
+\end{lstlisting}
+\section{Issues and limitations}
+
+This is a list of known issues and limitations from this package :
+
+\begin{itemize}
+\item Content generated by \verb|>{...}| or \verb|<{...}| in the preamble are not measured and may produce errors in some cases.
+\item \verb!m! columns will mess with vertical alignment.
+\item Glues such as \verb|\dotfill| or \verb|\hrulefill| are not supported in cells
+\item \verb|\verb| command is not supported in cells 
+\end{itemize}
+
+However, we took great care to ensure that the content of the cell is only evaluated once, that no driver-specific commands were used and that selection in PDFs was not broken.
+
+\section{Licence}
+
+The contents of this package are distributed under the \LaTeX{} Project
+Public License,
+version 1.3c or later.
+
+
+\end{document}
