@@ -1,0 +1,92 @@
+% https://tex.stackexchange.com/q/580636/
+\documentclass{article}
+\usepackage[use-files]{xsim}
+
+\usepackage[colorlinks,allcolors=blue]{hyperref}
+
+\DeclareExerciseProperty{hints}
+\newcounter{hint}
+\renewcommand\theHhint{\ExerciseID.\arabic{hint}}
+\newcounter{hints}
+\newcounter{step}
+
+\NewDocumentEnvironment{hint}{}{%
+  \stepcounter{hint}%
+  \XSIMsetfilebegin{%
+    \par
+    \refstepcounter{hint}\label{hint:\ExerciseID:\arabic{hint}}%
+    \noindent\textbf{Hint~\thehint\ to exercise \GetExerciseProperty{counter}}%
+    \hfill Back to exercise \ref{ex:\ExerciseID}\par
+    \noindent
+  }%
+  \XSIMsetfileend{\par\addvspace{\bigskipamount}}%
+  \XSIMfilewritestart{\jobname-hint-\ExerciseID-\arabic{hint}.tex}%
+}{%
+  \XSIMfilewritestop
+  \stepcounter{hints}%
+  \SetExpandedExerciseProperty{hints}{\arabic{hints}}%
+}
+
+\DeclareExerciseEnvironmentTemplate{hints}{%
+  \setcounter{hint}{0}%
+  \setcounter{hints}{0}%
+  \par\noindent
+  \textbf{\XSIMmixedcase{\GetExerciseName}\GetExerciseProperty{counter}:}\hfill
+  \IfExercisePropertySetT{hints}{%
+    \setcounter{step}{0}%
+    \def\hintcomma{\def\hintcomma{, }}%
+    Hint\ifnum\GetExerciseProperty{hints}=1\else s\fi:
+    \loop\unless\ifnum\value{step}=\GetExerciseProperty{hints}
+      \stepcounter{step}%
+      \hintcomma\ref{hint:\ExerciseID:\arabic{step}}%
+    \repeat
+    \par\noindent
+  }%
+}{\par\addvspace{\bigskipamount}}
+
+\xsimsetup{
+  exercise/within = section ,
+  exercise/begin-hook = \label{ex:\ExerciseID} ,
+  exercise/template = hints
+}
+
+\newcommand\printhints{%
+  \ForEachUsedExerciseByType{%
+    \setcounter{step}{0}%
+    \setcounter{hint}{0}%
+    \loop\unless\ifnum\value{step}=\GetExerciseProperty{hints}
+      \stepcounter{step}%
+      \input{\jobname-hint-\ExerciseID-\arabic{step}.tex}%
+    \repeat
+  }%
+}
+
+\begin{document}
+
+\section{Exercises}
+\begin{exercise}
+  Description of the exercise. Run the following command
+\begin{verbatim}
+print("Hello world")
+Verbatim &^%$&\content
+\end{verbatim}
+\begin{hint}
+  Run the example from the command line with the python command.
+\end{hint}
+\begin{hint}
+  The solution is 42.
+\end{hint}
+\end{exercise}
+
+\begin{exercise}
+  Another exercise
+\begin{hint}
+  The first ten million years were the worst. Some \verb+&$+.
+\end{hint}
+\end{exercise}
+
+
+\section{Hints}
+\printhints
+
+\end{document}

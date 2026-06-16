@@ -1,0 +1,123 @@
+% xkeymask package by Ramkumar Ramachandra.
+%%
+%% --------------------------------------------
+%% Copyright (C) 2022-2023 Ramkumar Ramachandra
+%% --------------------------------------------
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option)
+%% any later version. The latest version of this license
+%% can be found at:
+%%   https://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions
+%% of LaTeX version 2008/05/04 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%%
+%% This Current Maintainer is Ramkumar Ramachandra.
+%%
+%% This work consists of the file xkeymask.sty.
+%%
+%% The following files constitute the xkeymask bundle and
+%% must be distributed as a whole:
+%%   README, xkeymask.sty, xkeymask.tex, xkeymask.pdf.
+%%
+\documentclass[a4paper]{ltxdoc}
+\usepackage{minted, amsmath, framed}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[prefix=bonak]{xkeymask}
+
+\makeatletter
+\define@cmdkey[bonak]{frame}{D}{(#1)}
+\define@cmdkey[bonak]{layer}{D}{(#1)}
+\define@cmdkey[bonak]{layer}{d}{(#1)}
+\define@cmdkey[bonak]{painting}{D}{(#1)}
+\define@cmdkey[bonak]{painting}{E}{(#1)}
+\define@cmdkey[bonak]{painting}{d}{(#1)}
+\makeatother
+
+\newcommand{\prim}[6]{
+  \ensuremath{\mathsf{{#1}}_{#2}^{#3,#4,#5}}
+  \setkeys*[bonak]{#1}{#6}}
+
+\newcommand{\framep}[5]{\prim{frame}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\layer}[5]{\prim{layer}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\painting}[5]{\prim{painting}{#1}{#2}{#3}{#4}{#5}}
+
+\newcommand{\eqnarg}[3]{\ifinmask[bonak]{#1}[#2]{\{#2:#3\}}{(#2:#3)}}
+\begin{document}
+\title{The \texttt{xkeymask} package}
+\author{Ramkumar Ramachandra}
+\maketitle
+This package is an extension of the \texttt{xkeyval} package by Hendri Adriaens that offers macros for ``masking'' certain keys, so that they are not used in certain places. The package was originally written for the purposes of the \href{https://github.com/artagnon/bonak}{bonak} project, for hiding certain keys in certain places, and has been released for a wider audience. The idea is that one first imports the package with a desired ``prefix'' in the document preamble, and then creates masks use at certain points in the document. The mask can also be queried or cleared at some later point. The main user interface is provided by the |\appendmask|, |\clearmask|, and |\ifinmask| commands. The following example:
+
+\begin{minted}{latex}
+  \documentclass{article}
+  \usepackage{amsmath}
+  \usepackage[prefix=bonak]{xkeymask}
+
+  \makeatletter
+  \define@cmdkey[bonak]{frame}{D}{(#1)}
+  \define@cmdkey[bonak]{layer}{D}{(#1)}
+  \define@cmdkey[bonak]{layer}{d}{(#1)}
+  \define@cmdkey[bonak]{painting}{D}{(#1)}
+  \define@cmdkey[bonak]{painting}{E}{(#1)}
+  \define@cmdkey[bonak]{painting}{d}{(#1)}
+  \makeatother
+
+  \newcommand{\prim}[6]{
+    \ensuremath{\mathsf{{#1}}_{#2}^{#3,#4,#5}}
+    \setkeys*[bonak]{#1}{#6}}
+
+  \newcommand{\framep}[5]{\prim{frame}{#1}{#2}{#3}{#4}{#5}}
+  \newcommand{\layer}[5]{\prim{layer}{#1}{#2}{#3}{#4}{#5}}
+  \newcommand{\painting}[5]{\prim{painting}{#1}{#2}{#3}{#4}{#5}}
+
+  \newcommand{\eqnarg}[3]{\ifinmask[bonak]{#1}[#2]{\{#2:#3\}}{(#2:#3)}}
+
+  \begin{document}
+    With mask:
+    \appendmask[bonak]{layer}[D]
+    \appendmask[bonak]{painting}[D,E]
+    \appendmask[bonak]{cohfiller}[c]
+    \begin{align*}
+      \eqnarg{cohlayer}{d}{\framep{m}{n}{p}{q}{D=D}} \\
+      \eqnarg{cohlayer}{l}{\layer{m}{n}{p}{q}{D=D, d=d}} \\
+      \eqnarg{cohfiller}{c}{\painting{m}{n}{p}{q}{D=D, E=E, d=d}} \\
+    \end{align*}
+    Without mask:
+    \clearmask
+    \begin{align*}
+      \eqnarg{cohlayer}{d}{\framep{m}{n}{p}{q}{D=D}} \\
+      \eqnarg{cohlayer}{l}{\layer{m}{n}{p}{q}{D=D, d=d}} \\
+      \eqnarg{cohfiller}{c}{\painting{m}{n}{p}{q}{D=D, E=E, d=d}} \\
+    \end{align*}
+  \end{document}
+\end{minted}
+
+\newpage
+produces the following output:
+
+\begin{framed}
+  With mask:
+  \appendmask[bonak]{layer}[D]
+  \appendmask[bonak]{painting}[D,E]
+  \appendmask[bonak]{cohfiller}[c]
+  \begin{align*}
+    \eqnarg{cohlayer}{d}{\framep{m}{n}{p}{q}{D=D}} \\
+    \eqnarg{cohlayer}{l}{\layer{m}{n}{p}{q}{D=D, d=d}} \\
+    \eqnarg{cohfiller}{c}{\painting{m}{n}{p}{q}{D=D, E=E, d=d}} \\
+  \end{align*}
+  Without mask:
+  \clearmask
+  \begin{align*}
+    \eqnarg{cohlayer}{d}{\framep{m}{n}{p}{q}{D=D}} \\
+    \eqnarg{cohlayer}{l}{\layer{m}{n}{p}{q}{D=D, d=d}} \\
+    \eqnarg{cohfiller}{c}{\painting{m}{n}{p}{q}{D=D, E=E, d=d}} \\
+  \end{align*}
+\end{framed}
+
+\section*{Full source code listing}
+\inputminted{latex}{xkeymask.sty}
+\end{document}
