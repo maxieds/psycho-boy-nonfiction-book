@@ -1,0 +1,229 @@
+%% pig.dtx
+%% Copyright 2022 Jason Siefken
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Jason Siefken
+%
+% This work consists of the files jobname-suffix.sty and docs/jobname-suffix.tex
+\documentclass{l3doc}
+\usepackage{listings,xcolor}
+
+\lstdefinestyle{mystyle}{
+  language=[LaTeX]{TeX},
+  texcsstyle=*\color{blue},
+  commentstyle={\color{green!50!black}\itshape},
+  basicstyle=\ttfamily,
+  moretexcs={IfSuffixT,IfSuffixF,IfSuffixTF,OverrideSuffix,JobnameSuffix,solution}, % user command highlight
+  frame=single,
+}
+\lstset{style=mystyle}
+
+\title{%
+  \pkg{jobname-suffix}\\
+  Compile different content based on the file name%
+}
+
+\author{%
+  Jason Siefken%
+  \thanks{%
+	  Please file an issues/comments to \url{https://github.com/siefkenj/jobname-suffix/issues}
+  }
+}
+
+\date{Released \today}
+
+\NewDocumentCommand{\fileshow}{m}{%
+\par
+\noindent\begin{minipage}{\linewidth}
+	\noindent\texttt{\itshape #1:}
+	\vspace{-1cm}
+\end{minipage}
+}
+
+\begin{document}
+	\maketitle
+
+	\tableofcontents
+
+	\begin{abstract}
+		\pkg{jobname-suffix} allows one to compile a document differently depending
+		on the document's file name (internally called the \texttt{jobname} in \TeX).
+		This allows one to have one source file and multiple links to this source file (either
+		as symbolic links, or as different files referencing the original via an \cs{input}
+		command) that are each compile differently. For example, an exam might have an
+		\file{exam-student.tex} and an \file{exam-instructor.tex} which both reference the
+		same source code but where the instructor version includes solutions and the student
+		version does not.
+	\end{abstract}
+
+	\begin{documentation}
+
+	\section{Introduction}
+	\pkg{jobname-suffix} by default allows you to reference the part of a file name (technically the \cs{jobname})
+	that comes after the first ``\texttt{-}'' character and use that information to control what \LaTeX{} produces.
+
+	Consider the following example: you have three files \file{exam.tex}, \file{exam-student.tex}, and \file{exam-instructor.tex}.
+	The files \file{exam-student.tex} and \file{exam-instructor.tex} are either symbolic links to \file{exam.tex} (if your operating
+	system supports symbolic links) or use \cs{input}\Arg{exam.tex file path} to include the contents of \file{exam.tex}.
+
+	\fileshow{exam-student.tex \textnormal{and} exam-instructor.tex}
+	\begin{lstlisting}
+\input{exam.tex}
+	\end{lstlisting}
+
+	\fileshow{exam.tex}
+	\begin{lstlisting}
+\documentclass{article}
+\usepackage{jobname-suffix}
+
+\newcommand{\solution}[1]{#1}
+\IfSuffixT[instructor]{
+	% Instructors get solutions emboldened
+	\renewcommand{\solution}[1]{\textbf{#1}}
+}
+\IfSuffixT[student]{
+	% Students don't see solutions at all
+	\renewcommand{\solution}[1]{}
+}
+
+\begin{document}
+	\begin{enumerate}
+		\item First question
+		\solution{First answer}
+		
+		\item Second question
+		\solution{Second answer}
+	\end{enumerate}
+\end{document}
+	\end{lstlisting}
+
+	\noindent Then, compiling via
+
+	\noindent\texttt{> lualatex exam-instructor.tex}
+
+	\noindent\texttt{> lualatex exam-student.tex}
+
+	\noindent will produce two pdfs: one with solutions and one without.
+
+	\section{Usage}
+	\subsection{Variables}
+
+	\begin{variable}{\JobnameSuffix}
+		The computed suffix of the filename (\cs{jobname}). This is normally the part of the file name after the first ``\texttt{-}''
+		character and before the file extension. For example, 
+		\file{file-a.tex} has a \cs{JobnameSuffix} of ``\texttt{a}'',
+		\file{file-a-b.tex} has a \cs{JobnameSuffix} of ``\texttt{a-b}'',
+		and \file{file.tex} has a \cs{JobnameSuffix} of consisting of the empty string.
+	\end{variable}
+
+	\subsection{Commands}
+	\begin{function}{\IfSuffixTF, \IfSuffixT, \IfSuffixF}
+		\begin{syntax}
+			\cs{IfSuffixTF}\oarg{suffixes}\marg{true condition}\marg{false condition}
+			\cs{IfSuffixT}\oarg{suffixes}\marg{true condition}
+			\cs{IfSuffixF}\oarg{suffixes}\marg{false condition}
+		\end{syntax}
+		The argument \meta{suffixes} is a comma-separated list of all suffixes you wish to test against.
+	\end{function}
+
+	\begin{function}{\OverrideSuffix}
+		\begin{syntax}
+			\cs{OverrideSuffix}\marg{suffix}
+		\end{syntax}
+		Override \cs{JobnameSuffix} to be the suffix specified by \meta{suffix} instead.
+	\end{function}
+
+	\subsection{Environments}
+
+	\DescribeEnv{IfSuffix}
+	The \env{IfSuffix} environment accepts an optional argument \oarg{suffixes} and will display its contents (unmodified)
+	if \cs{JobnameSuffix} is among the comma-separated list \meta{suffixes}. Unfortunately this environment cannot contain
+	\env{verbatim} contents.
+
+	\section{Compiling}
+
+	\pkg{jobname-suffix} works by reading the \cs{jobname} macro that is part of standard \TeX. By default, this is
+	set to the file name without the file extension. You can affect the jobname in one of two ways:
+	\begin{enumerate}
+		\item The name of your file.
+		\item By supplying the \texttt{-jobname} option during compilation. For example, the following two
+			commands would both result in compiling with a \cs{jobname} of \texttt{exam-student}.
+
+		\noindent\texttt{> lualatex -jobname exam-instructor exam.tex}
+		
+		\noindent\texttt{> lualatex exam-instructor.tex}
+	\end{enumerate}
+	
+	\section{Tips}
+
+	\begin{itemize}
+	\item
+	For performance reasons, it is best to \cs{IfSuffixTF} to define/redefine commands in your document preamble
+	rather than to use them in your document body/macro bodies. For example, do
+
+\begin{lstlisting}
+\documentclass{article}
+\usepackage{jobname-suffix}
+
+\newcommand{\solution}[1]{#1}
+\IfSuffixT[instructor]{
+	% Instructors get solutions emboldened
+	\renewcommand{\solution}[1]{\textbf{#1}}
+}
+
+\begin{document}
+	\solution{Some Text}
+\end{document}
+\end{lstlisting}
+
+instead of 
+
+\begin{lstlisting}
+\documentclass{article}
+\usepackage{jobname-suffix}
+
+\newcommand{\solution}[1]{%
+	\IfSuffixTF[instructor]{%
+		% Instructors get solutions emboldened
+		\textbf{#1}%
+	}{%
+		#1%
+	}
+}
+
+\begin{document}
+	\solution{Some Text}
+\end{document}
+\end{lstlisting}
+
+	\item
+	To match the case when you have ``no suffix'' (i.e., when the suffix is the empty string because ``\texttt{-}'' did not appear in
+	the filename), use \cs{IfSuffix[]} with an empty argument list\footnote{
+	If you omit the optional argument, \cs{IfSuffixT} will never be true (not even if \cs{JobnameSuffix} is the empty string).
+	}.
+	\end{itemize}
+
+
+	\section{Installation}
+
+	For manual installation, the package is available from
+	\href{http://ctan.org/pkg/jobname-suffix}{{CTAN}}.
+
+	The package requires \LaTeX3 support as provided in the \pkg{l3kernel} and
+	\pkg{l3packages} bundles. Both of these are included in \TeX{} Live and
+	MiK\TeX{}, or are again available in ready-to-install form from {CTAN}.
+
+	\end{documentation}
+
+
+	\PrintIndex
+\end{document}
