@@ -1,0 +1,509 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{membranecomputing-dev/membranecomputing}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{longtable}
+
+\title{Package \texttt{membranecomputing} (v0.2.1)}
+\author{David Orellana-Martín \\ \texttt{\href{mailto:dorellana@us.es}{dorellana@us.es}}}
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+
+Membrane computing is a framework where different models of
+computations, called membrane systems or P systems arise from. The
+notation of these models is very variate since the number of
+researchers in the area is very high, and also their background is
+different, and therefore the notation can slightly change. The idea of
+this package is to cover all the possible variants in the area and
+their respective rules. Concerning the rules, the objective is
+twofold: On the one hand, to use commands to transcript a rule in a
+paper format; On the other hand, since P-Lingua is the \textit{de
+  facto} standard language for simulating P systems, there is a
+possibility to print the rules in the P-Lingua language, ready to be
+copied and pasted into a \texttt{.pli} file.
+
+\section{Package options}
+\label{sec:package-options}
+
+The \texttt{membranecomputing} package offers the option
+\texttt{blackboard}. The differences of this option can be found in
+Subsection~\ref{sec:font-option}.
+
+\subsection{Font option}
+\label{sec:font-option}
+
+Notation of P systems can change depending on the model. But even with
+the same model, some differences can be found between different
+papers. For instance, while some researchers use the symbol $\Gamma$
+to denote the working alphabet, other use the letter $O$. Other
+example is the use of the letters $\mathcal{M}_{i}$ or $w_{i}$ for
+describing the initial multisets of the regions. For this purpose,
+this option has been implemented.
+
+\begin{itemize}
+\item \texttt{traditional} (\textit{Default}) This typesets the
+  symbols like
+  $\Gamma, \Sigma, \mathcal{M}_{i}, \mathcal{R}_{i},
+  \rho_{i}$~\footnote{For SNP systems, the singleton $\{a\}$, is still
+    called $O$ in this mode.}.
+\item \texttt{blackboard} This typesets the symbols like
+  $O, E, w_{i}, R_{i}, p_{i}$.
+\end{itemize}
+
+The rest of the symbols are defined without taking into account this option.
+
+\section{Using the package}
+\label{sec:using-package}
+
+In this section I will try to explain all the different uses of this
+package, from basic use to creation of new templates.
+
+\subsection{Basic notations}
+\label{sec:basic-notations}
+
+This is a list of some notations that can be used for defining initial
+multisets, sets of rules, and so on.
+
+\vspace{1mm}
+
+$
+\begin{array}{lll}
+  \mbox{Working alphabet} & \verb=\wa= & \wa \\
+  \mbox{Input alphabet} & \verb=\ia= & \ia \\
+  \mbox{Labels set} & \verb=\ls= & \ls \\
+  \mbox{Membrane structure} & \verb=\ms= & \ms \\
+  \mbox{Initial multiset} & \verb=\im{i}= & \im{i} \\
+  \mbox{Rule set} & \verb=\rs{i}= & \rs{i} \\
+  \mbox{Probabilities set} & \verb=\ps{i}= & \ps{i} \\
+  \mbox{vE} & \verb=\vE= & \vE \\
+  \mbox{Neuron} & \verb=\neuron{i}= & \neuron{i} \\
+  \mbox{Compartment} & \verb=\compartment{i}= & \compartment{i} \\
+  \mbox{Agent} & \verb=\agent{i}= & \agent{i} \\
+  \mbox{Degree} & \verb=\degree= & \degree \\
+  \mbox{Synapses} & \verb=\syn= & \syn \\
+  \mbox{Input region} & \verb=\iin= & \iin \\
+  \mbox{Output region} & \verb=\iout= & \iout \\
+  \mbox{Object yes} & \verb=\yes= & \yes \\
+  \mbox{Object no} & \verb=\no= & \no \\
+\end{array}
+$
+
+\subsection{Languages and computability theory}
+\label{sec:lang-comp-theory}
+
+$
+\begin{array}{lll}
+  \mbox{Regular language} & \verb=\REG= & \REG \\
+  \mbox{Linear language} & \verb=\LIN= & \LIN \\
+  \mbox{Context-free language} & \verb=\CF= & \CF \\
+  \mbox{Context-sensitive language} & \verb=\CS= & \CS \\
+  \mbox{Recursively enumerable language} & \verb=\RE= & \RE \\
+\end{array}
+$
+
+To define a new set of languages, it is enough to make a new command
+as follows:
+
+\begin{verbatim}
+\newcommand{\L}{\compSet{L}}
+\end{verbatim}
+
+This results in: $\compSet{L}$.
+
+\subsection{Families of membrane systems}
+\label{sec:famil-membr-syst}
+
+Since the number of ``ingredients'' of the different variants of P
+systems is sometimes high, then some notations can be used to short
+them whenever they must be used. For instance, polarizationless P
+systems with active membranes when dissolution rules and division
+rules only for elementary membranes are allowed is usually denoted as
+$\AMO{-d, +ne}$. To denote this, it is enough to write
+\verb=\AM0{d, +ne}=. In this package, some examples of different
+families of P systems are defined.
+
+$
+\begin{array}{lll}
+  \mbox{Ps with am} & \verb=\AM[\alpha]{\beta}= & \AM[\alpha]{\beta} \\
+  \mbox{Polarizationless Ps with am} & \verb=\AMO{\alpha}= & \AMO{\alpha} \\
+  \mbox{Tissue Ps with s/a rules} & \verb=\TC[\alpha]{\beta}= & \TC[\alpha]{\beta} \\
+  \mbox{Tissue Ps with s/a and division rules} & \verb=\TDC{\alpha}= & \TDC{\alpha} \\
+  \mbox{Tissue Ps with s/a and separation rules} & \verb=\TSC{\alpha}= & \TSC{\alpha} \\
+  \mbox{Ps with s/a rules} & \verb=\CC[\alpha]{\beta}= & \CC[\alpha]{\beta} \\
+  \mbox{Ps with s/a and division rules} & \verb=\CDC{\alpha}= & \CDC{\alpha} \\
+  \mbox{Ps with s/a and separation rules} & \verb=\CSC{\alpha}= & \CSC{\alpha} \\
+  \mbox{Tissue Ps with evol. comm. rules} & \verb=\TEC[\alpha]{\beta}= & \TEC[\alpha]{\beta} \\
+  \mbox{Tissue Ps with evol. comm. and division rules} & \verb=\TDEC{\alpha}= & \TDEC{\alpha} \\
+  \mbox{Tissue Ps with evol. comm. and separation rules} & \verb=\TSEC{\alpha}= & \TSEC{\alpha} \\
+  \mbox{Ps with evol. comm. rules} & \verb=\CEC[\alpha]{\beta}= & \CEC[\alpha]{\beta} \\
+  \mbox{Ps with evol. comm. and division rules} & \verb=\CDEC{\alpha}= & \CDEC{\alpha} \\
+  \mbox{Ps with evol. comm. and separation rules} & \verb=\CSEC{\alpha}= & \CSEC{\alpha}
+\end{array}
+$
+
+There are some command conflicts with the \texttt{complexity}
+package~\footnote{\url{https://ctan.org/pkg/complexity}}. If you need
+both packages, please load first the \texttt{complexity} package first
+and later \texttt{membranecomputing} package. If you do this, some of
+the commands defined in this section change, and
+$\verb=\AM=, \verb=\TC=, \verb=\REG=, \verb=\LIN=, \verb=\RE=$ become
+$\verb=\mcAM=, \verb=\mcTC=, \verb=\mcREG=, \verb=\mcLIN=,
+\verb=\mcRE=$, respectively.
+
+To define a new notation for a family of membrane systems, it is
+enough to make a new command as follows:
+
+\begin{verbatim}
+\newcommand{\MS}[3]{\Pfamily{MS}{#1}{#2}{#3}}
+\end{verbatim}
+
+This results in: $\Pfamily{MS}{\#2}{\#3}{\#4}$.
+
+\subsection{Computational complexity theory}
+\label{sec:comp-compl-theory}
+
+It is usual to define different complexity classes in the framework
+of membrane computing. In this sense, it would be interesting to
+automate the definition of these classes to avoid using all \LaTeX
+commands each time we want to use them.
+
+$
+\begin{array}{lll}
+    \mbox{} & \verb=\PMC[\alpha]{\beta}= & \PMC[\alpha]{\beta} \\
+    \mbox{} & \verb=\PSPACEMC[\alpha]{\beta}= & \PSPACEMC[\alpha]{\beta} \\
+    \mbox{} & \verb=\EXPMC[\alpha]{\beta}= & \EXPMC[\alpha]{\beta} \\
+    \mbox{} & \verb=\EXPSPACEMC[\alpha]{\beta}= & \EXPSPACEMC[\alpha]{\beta} \\
+\end{array}
+$
+
+To define a new notation for a complexity class in membrane systems, it is
+enough to make a new command as follows:
+
+\begin{verbatim}
+\newcommand{\C}[3]{\complClass{C}{#1}{#2}}
+\end{verbatim}
+
+This results in: $\complClass{C}{\#1}{\#2}$~\footnote{CMC does not
+  stand for Conference on Membrane Computing here.}.
+
+\subsection{P systems}
+\label{sec:p-systems}
+
+One of the two main contributions of this package is to make easier to
+name a P system. Usually, when we have to define a new membrane
+system, we have to write something like 
+
+\begin{verbatim}
+\Pi = (\Gamma, \mu, H, \mathcal{M}_1, \mathcal{M}_{2}, \mathcal{R}, i_{out})
+\end{verbatim}
+
+For making this task easier, the command \verb=psystem= has been
+defined. Basically, it takes 5 arguments (first is optional) and can
+be used as follows: \verb=\psystem[#1]{#2}{#3}{#4}{#5}=, where
+
+\begin{enumerate}[label=\texttt{\#\arabic*}]
+\item $\in \{\mathtt{recognizer}, \mathtt{nonrecognizer}\}$: adds an
+  input alphabet and an input region.
+\item $\in \{\mathtt{cell}, \mathtt{tissue}\}$: adds a membrane
+  structure in the first case.
+\item
+  $\in \{\mathtt{transition}, \mathtt{activemembranes},
+  \mathtt{symportantiport}, \mathtt{spiking}, \mathtt{kernel},
+  \mathtt{colony}\}$: changes some of the parameters of the P system.
+\item is a subscript for the symbol $\Pi$.
+\item $> 1$ is the degree of the system.
+\end{enumerate}
+
+For instance, the command
+\begin{verbatim}
+\psystem[recognizer]{cell}{activemembranes}{1}{10}
+\end{verbatim}
+would lead to the following:
+
+\begin{center}
+  \psystem[recognizer]{cell}{activemembranes}{1}{10}
+\end{center}
+
+Some templates have been prepared for most of the usual variants of P
+systems:
+
+$
+\begin{array}{ll}
+  \verb=\psystemAM= & \psystemAM \\
+  \verb=\rpsystemAM= & \rpsystemAM \\
+  \verb=\psystemSA= & \psystemSA \\
+  \verb=\rpsystemSA= & \rpsystemSA \\
+  \verb=\SNpsystem= & \SNpsystem \\
+  \verb=\rSNpsystem= & \rSNpsystem \\
+  \verb=\kpsystem= & \kpsystem \\
+  \verb=\rkpsystem= & \rkpsystem \\
+  \verb=\pcolony= & \pcolony \\
+  \verb=\rpcolony= & \rpcolony \\
+\end{array}
+$
+
+All commands preceded by a \verb=r= are the recognizer version of
+their r-less counterpart.
+
+\subsection{Rules}
+\label{sec:rules}
+
+The (current) big work of this paper is to normalise the notation of
+the rules of P systems. Several differences can be found in the
+literature, most of them about spacing, position of elements, and so
+on. The idea is to unify these notations in one big element: the
+\verb=\mcrule= command. This command tries to cover all types of rules
+in the membrane computing framework, including esoteric rules that
+could arise. The idea is to catch some basic elements and parse them
+in order to obtain the whole rule. As some types of P systems use
+different notations, as arrows, separators and so on, different cases
+have being contemplated. The definition of this command is
+\verb=\mcrule[#1]{#2}{#3}{#4}{#5}{#6}=, where:
+
+\begin{enumerate}[label=\texttt{\#\arabic*}]
+\item $\in \{\mathtt{written} (\mathit{Default}), \mathtt{plingua}\}$: the first one
+  makes it look as the usual scientific notation while the second one
+  transforms the rule into P-Lingua notation.
+\item It can be one of the following parameters:
+  
+  $
+  \begin{array}{lll}
+    \mathtt{rewriting} & \mbox{Classical rewriting rules} & \rewritingT \\
+    \mathtt{single} & \mbox{Rules with a single pair of brackets} & \pevolutionT \\
+    \mathtt{multiple} & \mbox{Rules with different brackets in the LHS and the RHS} & \psendoutT \\
+    \mathtt{paren} & \mbox{Rules delimited by parentheses} & \antiportT \\
+    \mathtt{spike} & \mbox{Spiking rules} & \spikingT
+  \end{array}
+$
+\item $> 1$: Number of regions in the LHS (the main region and the outside regions are counted as one)
+\item $> 1$: Number of regions in the RHS (the main region and the outside regions are counted as one)
+\item explained below
+\item explained below
+\end{enumerate}
+
+The \verb=\mcrule= command is a tool capable of representing a wide
+variety of types of rule. The idea is to represent all the rules in a
+standardised way and well-spaced. An example with each type of rule is
+given:
+
+\begin{itemize}
+\item $\mathtt{rewriting}$: \verb=\mcrule{rewriting}{}{}{u}{v}= will
+  produce $\mcrule{rewriting}{}{}{u}{v}$.
+\item $\mathtt{single}$:
+  \verb=\mcrule{single}{}{}{{a}{h}{+}}{{c_{2}\alpha}}= will produce
+  $\mcrule{single}{}{}{{a}{h}{+}}{c_{2}\alpha}$.
+\item $\mathtt{multiple}$:\newline
+  \verb=\mcrule{multiple}{4}{4}{{{a}{3}{+}}{{b}}{{e_{1}}{4}}{;}}=\newline
+  \verb={{}{{a}}{-}{{o}{!}}}= will produce\newline
+  $\mcrule{multiple}{4}{4}{{{a}{3}{+}}{{b}}{{e_{1}}{4}}{;}}{{}{{a}}{-}{{o}{!}}}$. I
+  will explain in detail what means each thing:
+  \begin{itemize}
+  \item \verb={4}{4}=: In the left-hand side of the rule, 4
+    ``regions'' will be analysed (in this case, membrane $3$, its
+    parent membrane, membrane $4$ and a special symbol); In the
+    right-hand side of the rule, 4 ``regions'' will be analysed (in
+    this case, the empty ``main'' membrane, its parent membrane, a
+    special symbol and a special region)~\footnote{It is a very
+      strange rule, but it will be useful to explain some special
+      cases to use in your own rules.}.
+  \item \verb={{{a}{3}{+}}{{b}}{{e_{1}}{4}}{;}}=: It is divided into
+    four parts:
+    \begin{itemize}
+    \item \verb={{a}{3}{+}}=: The ``main'' membrane of the rule has
+      label $3$ and polarisation $+$, and its contents is an object
+      $a$.
+    \item \verb={{b}}=: The outer content of the ``main'' membrane is
+      an object $b$.
+    \item \verb={{e_{1}}{4}}=: It has a inner membrane with label $4$
+      and its contents is an object $e_{1}$.
+    \item \verb={;}=: It writes down a $;$ symbol~\footnote{Useful for
+        creation/deletion rules in kP systems.}.
+    \end{itemize}
+  \item \verb={{}{{a}}{-}{{o}{!}}}=: It is divided into four
+    parts:
+    \begin{itemize}
+    \item \verb={}=: The ``main'' membrane of the rule is not
+      specified, so it is omitted~\footnote{Useful for dissolution
+        rules.}.
+    \item \verb={{a}}=: The outer content of the ``main'' membrane is
+      an object $a$.
+    \item \verb=-= It writes down a $-$ symbol~\footnote{Also useful
+        for creation/deletion rules in kP systems.}.
+    \item \verb={{o}{!}}=: The symbol $!$ in the label is a reserved
+      character to write down a guard $\{ o \}$~\footnote{Also used in
+      kP systems.}.
+    \end{itemize}
+  \end{itemize}
+\item $\mathtt{paren}$: \verb=\mcrule{paren}{}{}{{ab}{3}}{{c}{2}}=
+  will produce $\mcrule{paren}{}{}{{ab}{3}}{{c}{2}}$.
+\item $\mathtt{spike}$:
+  \verb=\mcrule{spike}{}{}{{a^{3}}{a^{2}}}{{a}{1}}= will produce
+  $\mcrule{spike}{}{}{{a^{3}}{a^{2}}}{{a}{1}}$.
+\end{itemize}
+
+Using $\mathtt{plingua}$ instead of
+$\mathtt{written}$ as the optional parameter, it will write the rule
+in the P-Lingua syntax. Therefore, the $\mathtt{multiple}$ rule
+previously used in this section would render as\newline
+$\mcrule[plingua]{multiple}{4}{4}{{{a}{3}{+}}{{b}}{{e_{1}}{4}}{;}}{{}{{a}}{-}{{o}{!}}}$.
+
+With this, anyone can create almost any kind of rule that one could
+think~\footnote{Do you have any idea about other kind of rule? Please
+  write me so I can think in a way to implement it.}. However, for the
+sake of simplicity, I have defined some commands for the basic types
+of rules from the bibliography. 
+
+{\footnotesize
+\begin{longtable}{ll}
+  \verb=\rewriting{u}{v}= & $\rewriting{u}{v}$ \\
+  \verb=\rewritingT= & $\rewritingT$ \\
+  \verb=\evolution{a}{b}{h}{\alpha}= & $\evolution{a}{b}{h}{\alpha}$ \\
+  \verb=\evolutionT= & $\evolutionT$ \\
+  \verb=\evolutionP{a}{b}{h}{\alpha}= & $\evolutionP{a}{b}{h}{\alpha}$ \\
+  \verb=\evolutionPT= & $\evolutionPT$ \\
+  \verb=\pevolution{a}{b}{h}= & $\pevolution{a}{b}{h}$ \\
+  \verb=\pevolutionT= & $\pevolutionT$ \\
+  \verb=\pevolutionP{a}{b}{h}= & $\pevolutionP{a}{b}{h}$ \\
+  \verb=\pevolutionPT= & $\pevolutionPT$ \\
+  \verb=\antiport{u}{i}{v}{j}= & $\antiport{u}{i}{v}{j}$ \\
+  \verb=\antiportT= & $\antiportT$ \\
+  \verb=\symportT= & $\symportT$ \\
+  \verb=\antiportP{u}{i}{v}{j}= & $\antiportP{u}{i}{v}{j}$ \\
+  \verb=\antiportPT= & $\antiportPT$ \\
+  \verb=\symportPT= & $\symportPT$ \\
+  \verb=\sendin{a}{b}{h}{\alpha_{1}}{\alpha_{2}}= & $\sendin{a}{b}{h}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\sendinT= & $\sendinT$ \\
+  \verb=\sendinP{a}{b}{h}{\alpha_{1}}{\alpha_{2}}= & $\sendinP{a}{b}{h}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\sendinPT= & $\sendinPT$ \\
+  \verb=\psendin{a}{b}{h}= & $\psendin{a}{b}{h}$ \\
+  \verb=\psendinT= & $\psendinT$ \\
+  \verb=\psendinP{a}{b}{h}= & $\psendinP{a}{b}{h}$ \\
+  \verb=\psendinPT= & $\psendinPT$ \\
+  \verb=\sendout{a}{b}{h}{\alpha_{1}}{\alpha_{2}}= & $\sendout{a}{b}{h}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\sendoutT= & $\sendoutT$ \\
+  \verb=\sendoutP{a}{b}{h}{\alpha_{1}}{\alpha_{2}}= & $\sendoutP{a}{b}{h}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\sendoutPT= & $\sendoutPT$ \\
+  \verb=\psendout{a}{b}{h}= & $\psendout{a}{b}{h}$ \\
+  \verb=\psendoutT= & $\psendoutT$ \\
+  \verb=\psendoutP{a}{b}{h}= & $\psendoutP{a}{b}{h}$ \\
+  \verb=\psendoutPT= & $\psendoutPT$ \\
+  \verb=\dissolution{a}{b}{h}{\alpha}= & $\dissolution{a}{b}{h}{\alpha}$ \\
+  \verb=\dissolutionT= & $\dissolutionT$ \\
+  \verb=\dissolutionP{a}{b}{h}{\alpha}= & $\dissolutionP{a}{b}{h}{\alpha}$ \\
+  \verb=\dissolutionPT= & $\dissolutionPT$ \\
+  \verb=\pdissolution{a}{b}{h}= & $\pdissolution{a}{b}{h}$ \\
+  \verb=\pdissolutionT= & $\pdissolutionT$ \\
+  \verb=\pdissolutionP{a}{b}{h}= & $\pdissolutionP{a}{b}{h}$ \\
+  \verb=\pdissolutionPT= & $\pdissolutionPT$ \\
+  \verb=\division{a}{b}{c}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\division{a}{b}{c}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\divisionT= & $\divisionT$ \\
+  \verb=\divisionP{a}{b}{c}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\divisionP{a}{b}{c}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\divisionPT= & $\divisionPT$ \\
+  \verb=\pdivision{a}{b}{c}{h}= & $\pdivision{a}{b}{c}{h}$ \\
+  \verb=\pdivisionT= & $\pdivisionT$ \\
+  \verb=\pdivisionP{a}{b}{c}{h}= & $\pdivisionP{a}{b}{c}{h}$ \\
+  \verb=\pdivisionPT= & $\pdivisionPT$ \\
+  \verb=\separation{a}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\separation{a}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\separationT= & $\separationT$ \\
+  \verb=\separationP{a}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\separationP{a}{h}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\separationPT= & $\separationPT$ \\
+  \verb=\pseparation{a}{h}= & $\pseparation{a}{h}$ \\
+  \verb=\pseparationT= & $\pseparationT$ \\
+  \verb=\pseparationP{a}{h}= & $\pseparationP{a}{h}$ \\
+  \verb=\pseparationPT= & $\pseparationPT$ \\
+  \verb=\creation{a}{b}{c}{h}{h_{1}}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\creation{a}{b}{c}{h}{h_{1}}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\creationT= & $\creationT$ \\
+  \verb=\creationP{a}{b}{c}{h}{h_{1}}{\alpha}{\alpha_{1}}{\alpha_{2}}= & $\creationP{a}{b}{c}{h}{h_{1}}{\alpha}{\alpha_{1}}{\alpha_{2}}$ \\
+  \verb=\creationPT= & $\creationPT$ \\
+  \verb=\pcreation{a}{b}{c}{h}{h_{1}}= & $\pcreation{a}{b}{c}{h}{h_{1}}$ \\
+  \verb=\pcreationT= & $\pcreationT$ \\
+  \verb=\pcreationP{a}{b}{c}{h}{h_{1}}= & $\pcreationP{a}{b}{c}{h}{h_{1}}$ \\
+  \verb=\pcreationPT= & $\pcreationPT$ \\
+  \verb=\spiking{E}{a^{n}}{a}{d}= & $\spiking{E}{a^{n}}{a}{d}$ \\
+  \verb=\spikingT= & $\spikingT$ \\
+  \verb=\forgettingT= & $\forgettingT$ \\
+  \verb=\spikingP{E}{a^{n}}{a}{d}= & $\spikingP{E}{a^{n}}{a}{d}$ \\
+  \verb=\spikingPT= & $\spikingPT$ \\
+  \verb=\forgettingPT= & $\forgettingPT$ \\
+  \verb=\krewriting{x}{y}{g}= & $\krewriting{x}{y}{g}$ \\
+  \verb=\krewritingT= & $\krewritingT$ \\
+  \verb=\krewritingP{x}{y}{g}= & $\krewritingP{x}{y}{g}$ \\
+  \verb=\krewritingPT= & $\krewritingPT$ \\
+  \verb=\linkcreation{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}= & $\linkcreation{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}$ \\
+  \verb=\linkcreationT= & $\linkcreationT$ \\
+  \verb=\linkcreationP{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}= & $\linkcreationP{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}$ \\
+  \verb=\linkcreationPT= & $\linkcreationPT$ \\
+  \verb=\linkdestruction{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}= & $\linkdestruction{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}$ \\
+  \verb=\linkdestructionT= & $\linkdestructionT$ \\
+  \verb=\linkdestructionP{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}= & $\linkdestructionP{x}{y}{t_{l_{i}}}{t_{l_{j}}}{g}$ \\
+  \verb=\linkdestructionPT= & $\linkdestructionPT$ \\
+  \verb=\tissueevolcomm{u}{v}{v'}{u'}{i}{j}= & $\tissueevolcomm{u}{v}{v'}{u'}{i}{j}$ \\
+  \verb=\tissueevolcommT= & $\tissueevolcommT$ \\
+  \verb=\tissueevolsympT= & $\tissueevolsympT$ \\
+  \verb=\tissueevolcommP{u}{v}{v'}{u'}{i}{j}= & $\tissueevolcommP{u}{v}{v'}{u'}{i}{j}$ \\
+  \verb=\tissueevolcommPT= & $\tissueevolcommPT$ \\
+  \verb=\tissueevolsympPT= & $\tissueevolsympPT$ \\
+  \verb=\evolcomm{u}{v}{v'}{u'}{i}{j}= & $\evolcomm{u}{v}{v'}{u'}{i}{j}$ \\
+  \verb=\evolcommT= & $\evolcommT$ \\
+  \verb=\evolsyminT= & $\evolsyminT$ \\
+  \verb=\evolsymoutT= & $\evolsymoutT$ \\
+  \verb=\evolcommP{u}{v}{v'}{u'}{i}{j}= & $\evolcommP{u}{v}{v'}{u'}{i}{j}$ \\
+  \verb=\evolcommPT= & $\evolcommPT$ \\
+  \verb=\evolsyminPT= & $\evolsyminPT$ \\
+  \verb=\evolsymoutPT= & $\evolsymoutPT$ \\
+\end{longtable}
+}
+
+As you can see, the names follow a pattern:
+
+\begin{itemize}
+\item Their name is descriptive in terms of the rule it represents.
+\item If the rule starts with a \texttt{p}, it means that it is a
+  polarizationless rule.
+\item If the rule ends with (or its second to last letter is) a
+  \texttt{P}, it means it will write the rule in P-Lingua format.
+\item If the rule ends with a \texttt{T}, it means it is a rule
+  template; that is, the typical rule used to describe its behaviour.
+\end{itemize}
+
+If you have an idea to make the notation simpler, please let me know.
+
+\section{Future work}
+\label{sec:future-work}
+
+A TODO list for the future development of the package. Please do not
+hesitate to contact me if you think that something should be included
+in this list, or if there is any bug or concept that should be
+included as soon as possible. Please, contact me at
+\href{mailto:dorellana@us.es}{dorellana@us.es}
+
+\begin{itemize}
+\item Add new variants of P systems, as well as some new templates for
+  other rules.
+\item Clean the code and create new command for analysing the
+  \texttt{multiple} case automatically.
+\item Add the possibility of define rules with more than one level of
+  deepness.
+\item Add a automatic parsing of a membrane structure, so a
+  well-spaced structure can appear in a paper. It would be interesting
+  to also let it export a string in the P-Lingua format.
+\item A long-term objective is to export a .pdf with the picture of a
+  P system with its contents. Creating an image for your paper could
+  be as simple as defining it as you usually do, it would be cool, right?
+\end{itemize}
+
+I hope you find the package interesting and useful for your
+purposes. And, as I said above, please do not hesitate to contact me
+if you have any questions of or suggestions for it.
+
+\end{document}

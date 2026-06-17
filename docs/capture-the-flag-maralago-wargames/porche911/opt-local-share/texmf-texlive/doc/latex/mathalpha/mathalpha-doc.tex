@@ -1,0 +1,545 @@
+% !TEX TS-program = pdflatexmk
+\documentclass[11pt]{article}
+\pdfmapfile{=mathalpha.map}  
+%\pdfmapfile{+BOONDOXUprScr.map}
+\usepackage[margin=1in]{geometry} 
+\usepackage[parfill]{parskip}\usepackage{url}
+\usepackage{graphicx}
+\DeclareFontEncoding{LS1}{}{}
+\DeclareFontSubstitution{LS1}{stix2}{m}{n}
+\DeclareFontEncoding{LMR}{}{}
+ \DeclareFontSubstitution{LMR}{hlcm}{m}{n}
+\DeclareFontFamily{U}{futm}{}
+\DeclareFontShape{U}{futm}{m}{n}{
+  <-> fourier-bb
+  }{}
+\DeclareSymbolFont{Ufutm}{U}{futm}{m}{n}
+\font\stixtwobb=stix2-mathbb at 11pt
+\font\stixtwobbi=stix2-mathbbit at 11pt
+\font\stixbb=stix-mathbb at 11pt
+\font\stixbbb=stix-mathbb-bold at 11pt
+\font\stixbbob=stix-mathbbit at 11pt
+\font\stixbbbob=stix-mathbbit-bold at 11pt
+\font\ncmbbr=mathalpha-ncmbb-regular at 11pt
+\font\ncmbbk=mathalpha-ncmbb-book at 11pt
+\font\ncmbbb=mathalpha-ncmbb-bold at 11pt
+
+\usepackage{longtable}
+\usepackage{trace,fonttable}
+\usepackage{ETbb}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage[bb=stixtwo]{mathalpha}
+\usepackage{hyperref}
+\title{The \textsf{mathalpha,} \textsc{aka} \textsf{mathalfa} package}
+\author{Michael Sharpe}
+%\email{msharpe at ucsd dot edu}
+\date{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\begin{document}
+\maketitle
+%\section{Introduction}
+
+The math alphabets normally addressed via the macros \verb|\mathcal|, \verb|\mathbb|, \verb|\mathfrak| and \verb|\mathscr| are in a number of cases not well-adapted to the \LaTeX\ math font structure. Some suffer from one or more of the following defects:
+\begin{itemize}
+\item
+font sizes are locked into  a size sequence that was appropriate for \textsf{metafont}--generated rather than  scalable fonts;
+\item there is no option in the loading package to enable scaling;
+\item  the font metrics are designed for text rather than math mode, leading to awkward spacing, subscript placement and accent placement when used for the latter;
+\item the means of selecting a set of math alphabets varies from package to package.
+\end{itemize}
+The goal of this package is to provide remedies for the above, where  possible. This means, in effect, providing virtual fonts with my personal effort at correcting the metric issues, rewriting the font-loading macros usually found in a \textsf{.sty} and/or \textsf{.fd} files to admit a scale factor in all cases, and providing a \textsf{.sty} file which is extensible and from which any such math alphabet may be specified using a standard recipe. 
+
+For example, the following fonts are potentially suitable as  targets for \verb|\mathcal| or \verb|\mathscr| and are either included as part of \TeX Live, as free downloads from CTAN or other free sources, or from commercial sites.
+\begin{verbatim}
+cm % Computer Modern Math Italic (cmsy)
+euler % euscript
+rsfs % Ralph Smith Formal Script---heavily sloped
+rsfso % based on rsfs, much less sloped
+lucida % From Lucida New Math (commercial)
+mathpi % Adobe Mathematical Pi or clones thereof (commercial)
+mma % Mathematica fonts
+pxtx % pxfonts/txfonts
+mt % Mathtime (commercial)
+mtc % Mathtime Curly (commercial)
+zapfc % Adobe Zapf Chancery (URW clone is part of TeXLive)
+esstix % ESSTIX-thirteen
+boondox % calligraphic alphabet derived from STIX1 fonts
+boondoxo % based on boondox, but less oblique
+dutchcal % regular and bold weights derived from ESSTIX13
+pxtx % from pxfonts and txfonts
+bickham % from commercial Bickham Script
+bickhams % using semibold for Latex regular
+stix % from STIX
+txupr % upright calligraphic based on txfonts
+boondoxupr % upright calligraphic based on STIX script 
+kp % regular and bold weights from kpfonts---script only
+stixplain % STIX1 calligraphic
+stixfancy % STIX1 script
+stixtwoplain % STIX2 calligraphic
+stixtwofancy % STIX2 script
+\end{verbatim}
+In all that follows, you may use the package names \textsf{mathalpha} and \textsf{mathalfa} interchangeably. Once you have installed the support packages for these fonts and the \textsf{mathalpha} package, you may select a particular calligraphic font for \verb|\mathcal| using something like
+\begin{verbatim}
+\usepackage[cal=rsfso,calscaled=.96]{mathalpha}
+\end{verbatim}
+which loads \textsf{rsfso} at 96\% of natural size as the math calligraphic alphabet. You may at the same time select the output for \verb|\mathbb|, \verb|\mathfrak|, \verb|\mathbfrak| (since the Mathematica fonts have a bold version of bb) and \verb|\mathscr| with
+\begin{verbatim}
+\usepackage[cal=mathpi,
+calscaled=.94,
+bb=ams,
+frak=mma,
+frakscaled=.97,
+scr=rsfs]{mathalpha}
+\end{verbatim}
+As initially configured, \textsf{mathalpha} makes available the following options:
+\begin{description}
+\item[cal=] Select the calligraphic alphabet from the list above.
+\item[calscaled=] Select a scale factor for \textsf{cal}.
+\item[bfcal] Force \verb|\mathcal| to point to the bold version.
+\item[calsymbols] Force the \texttt{cal} alphabet to load as a {\tt symbol} font.
+\item[scr=] Select the script alphabet from the  same list.
+\item[scrscaled=] Select a scale factor for \textsf{scr}.
+\item[bfscr] Force \verb|\mathscr| to point to the bold version.
+\item[scrsymbols] Force the \texttt{scr} alphabet to load as a {\tt symbol} font.
+\item[frak=] Select the fraktur alphabet from \textsf{euler, lucida, mathpi, mma, mt, esstix, boondox, pxtx, stixtwo}.
+\item[frakscaled=] Select a scale factor for \textsf{frak}.
+\item[bffrak] Force \verb|\mathfrak| to point to the bold version.
+\item[fraksymbols] Force the \texttt{frak} alphabet to load as a {\tt symbol} font.
+\item[bb=] Select the Blackboard bold alphabet from \textsf{ams, lucida, mathpi, mma, mt, mth, pazo, fourier, esstix, boondox, px, tx, txof, libus, dsserif, bboldxLight, bboldx, dsfontserif, dsfontsans, stixtwo, stix, ncmbbr, ncrbbk}.
+\item[bbscaled=] Select a scale factor for \textsf{bb}.
+\item[bfbb] Force \verb|\mathbb| to point to the bold version.
+\item[bbsymbols] Force the \texttt{bb} alphabet to load as a {\tt symbol} font.
+\item[oldbold] Provide aliases to the new names of the bold versions. For example, prior versions of {\tt mathalpha} used the names \verb|\mathbbb|, \verb|\mathbcal|, \verb|\mathbscr| and \verb|\mathbfrak|, while version 1.14 and higher will use names \verb|\mathbfbb|, \verb|\mathbfcal|, \verb|\mathbfscr| and \verb|\mathbffrak|, in line with unicode math usage. This option will make the old names available as aliases to the new names.
+\item[scaled=] Select a scale for all alphabets chosen within mathalpha.
+\item[showoptions] This option throws an error and shows a list of all installed option values for \textsf{bb}, \textsf{cal}, \textsf{frak} and \textsf{scr} on the console.
+\end{description}
+
+\textsc{Notes}
+\begin{itemize}
+\item If bold versions exist, they are loaded and may be used with the macros \verb|\mathbfcal|, \verb|\mathbfbb|, \verb|\mathbffrak| and \verb|\mathbfscr|. (These macro names changed in 2021.)
+\item If you prefer that the bold weight be the default target from \verb|\mathcal| etc, make use of the new (as of 2021) options {\tt bfcal} etc. If you prefer to use the older names like \verb|\mathbcal|, include the {\tt mathalpha} option {\tt oldbold}.
+\item
+Use of \textsf{zapfc} as a value for either \textsf{cal} or \textsf{scr} requires that you install the \textsf{urwchancal} package from\\
+ \url{http://mirror.tug.org/fonts/urwchancal}.\\
+  (It is distributed as part of \TeX\ Live and MiKTeX.)
+\item Use of the \textsf{rsfso} as a value for either \textsf{cal} or \textsf{scr} requires that you install the \textsf{rsfso} package from\\
+ \url{http://mirror.tug.org/fonts/rsfso}.\\
+ (It is distributed as part of \TeX\ Live and MiKTeX.)
+\item Use of \textsf{mma} as a value  requires that you have access to the older mathematic fonts from Mathematica versions near 3.\\
+The support files developed by Jens-Peer Kuska may be downloaded from \textsc{ctan}. (Search for {\tt Mathematica}.)\\
+In particular, {\tt wolfram.map} must be enabled. Virtual fonts with metrics that are suitable for math mode are also required. 
+\item Use of \textsf{mathpi}  requires that you purchase and install the Adobe Mathematical Pi fonts (\#2 and \#6) or  clones thereof.%If you choose to buy them, you may download support files, including virtual fonts with tuned metrics, from \\
+%\url{http://public.me.com/mjsharpe/mathpiTDS.zip}.
+\item The {\tt pxtx} package consists of virtual fonts drawn from the math alphabets in the {\tt pxfonts} and {\tt txfonts} packages, with modified metrics. The calligraphic fonts are identical to those in the Mathematica package, but the others seem distinct. The {\tt pxtx} package is part of \TeX\ Live and MiKTeX.
+\item The Adobe Bickham Script Pro font collection in OpenType format is rather expensive but quite elegant. Its upper-case glyphs are well-suited for adaptation as a math calligraphic font once the slant is reduced. The \textsf{bickham} package makes available virtual fonts and \LaTeX\ support files for these fonts, and can be used as the target for \verb|\mathcal| and \verb|\mathscr| as well as their bold variants. You may use the target \textsf{bickham} to load regular and bold weight of BickhamScriptPro. The target \textsf{bickhams} instead loads \textsf{bickham-s} (the semibold weight) in place of \textsf{bickham-r}, the regular weight. Note that this requires that you install the newest version of the \textsf{bickham} package, which provides support for the semibold weight.
+\item The ESSTIX collection is a creation of Elsevier Publishing in 2000, though never officially released by them. Before development was complete, the collection was donated to the STIX math font project, to which it seems to have been a precursor. Distribution has since been deprecated, but in my opinion, math alphabet fonts, especially math script fonts,  are so rare that none should be allowed to become extinct. The BlackBoard Bold ESSTIX font (\textsf{ESSTIX14}) is  close to both the mathpi and Fourier Blackboard Bold fonts, and the fraktur ESSTIX font (\textsf{ESSTIX15}) is  similar to mathpi fraktur. However, the ESSTIX script font (\textsf{ESSTIX13}) seems to be a distinct and interesting face. The PostScript versions of these fonts have been  hard to find, but the TrueType versions may be found embedded within the \textsf{Amaya} project, available at\\
+\url{http://www.w3.org/Amaya/}.\\
+    The ESSTIX PostScript fonts, virtual math fonts  and \LaTeX\ support files are distributed  as part of \TeX\ Live and MiKTeX.\\
+This provides virtual fonts with tfm names \textsf{esstixcal}, \textsf{esstixbb} and \textsf{esstixfrak}. 
+\item The STIX fonts are currently (2021) distributed only in OpenType and PostScript ({\tt pfb}) formats. The PostScript BOONDOX fonts (in the USA, \emph{the boondocks} and \emph{the sticks} are essentially synonymous) containing their  calligraphic, fraktur and double-struck (blackboard bold) alphabets in regular and bold weights were manufactured from STIX {\tt.otf} fonts using \textsf{FontForge}. Virtual fonts were then created using \textsf{fontinst} to customize the metrics for positioning accents and subscripts.
+\item STIX has now become a legacy package and is being replaced by STIX2, which has many similarities to STIX but also many dramatic differences. The calligraphic alphabets are quite different, the fraktur and blackboard bold not so much. 
+\item Two  new BB options are available starting with {\tt mathalpha} 1.144---\textsf{ncmbbr} and \textsf{ncmbbk}, both derived from the BB alphabets in {\tt NewCMMath}, with suffixes \text{r, k} standing for regular and book weights respectively. (There is also a bold weight (more properly medium weight) with suffix \textsf{b}.) For comparison: weights \textsf{r, k, b} look like {\ncmbbr Ab12}, {\ncmbbk Ab12} and {\ncmbbb Ab12}. Regular is IMO suited only for Computer Modern based math fonts.
+\item TeX permits only 16 different math families, and a typical math font setup can easily lead to 7 or 8 before you even begin. The {\tt bm} package will add 4 additional bold families even if you don't make any use of them. It's easy to see that adding new math alphabets can lead to problems with the math families count, and the problems can be compounded if the alphabets were not set up with these issues in mind.
+
+There are two basic ways to construct a math alphabet. In both cases, one must construct the information normally provided in the {\.fd} file, but which may be set out just as well in the {\tt sty} file. This information links the font name and attributes (bold, medium, etc) to the name of the corresponding {\tt tfm} files.\\
+\textbf{Case 1:} You wish to be able to access at most the upper and lower case letters and any available numerals as mathematical symbols. The appropriate command is \verb|\DeclareMathAlphabet|, which does not add to the math families count if not used in the document. Moreover, in recent versions of \LaTeX, \verb|\DeclareMathAlphabet| does not add to that count except in the math fragment in which it is applied.\\
+\textbf{Case 2:}  You wish to be able to access other slots to create mathematic symbols. These requires that you use the less efficient \verb|\DeclareSymbolFont|, which does add to the math families count even if not used in the document.
+In this package I have tried to  maximize the use of \verb|\DeclareMathAlphabet|.
+
+The other significant hazard in using external math alphabets is that, with a normal construction, if you use only the bold version of a math alphabet, you will use up two math family slots---one for normal weight and one for bold. It is therefore advantageous to provide a means of loading only the bold weight and referencing it as if it were the normal weight. This is possible in versions 1.14 and higher, using the options described above.
+\item In view of the information in the preceding above, you may wish to consider, given a choice, of how a given alphabet is constructed. If using \textbf{Case 1}, the available characters that are not Roman alphabetic or the numeral 1 can be accessed only as text characters, and that may be acceptable as you can insert text in a math environment using a simple \verb|\mbox{}| if you are in basic {\tt displaystyle} or {\tt textstyle}, and with the more capable \verb|\text{}| macro if you are using {\tt amsmath}. Here is a small example. Were you to load this package with the line 
+\begin{verbatim}
+\usepackage[bb=stixtwo]{mathalpha}
+\end{verbatim}
+the package would start to read the lines
+\begin{verbatim}
+\DeclareFontFamily{U}{stixtwobb}{\skewchar\font=45}% 
+\DeclareFontShape{U}{stixtwobb}{m}{n}{<->\mathalfa@bbscaled  stix2-mathbb}{}
+\end{verbatim}
+which define a font family {\tt stixtwobb} with encoding {\tt U} (undefined) whose only attribute entry is \verb|{m}{n}| (regular weight, upright shape) which, when invoked, loads its glyph metric data from {\tt stix2-mathbb.tfm} scaled by the factor \verb|\mathalfa@bbscaled| that was set by the option {\tt bbscaled}. Following that, the code test whether the option {\tt bbsymbols} was given, and, since not, it proceeds to use \verb|\DeclareMathAlphabet|. It then makes definitions of the symbols outside the range, like
+\begin{verbatim}
+\def\txtbbGamma{{\usefont{U}{stixtwobb}{m}{n}\char0 }}
+\def\txtbbdotlessi{{\usefont{U}{stixtwobb}{m}{n}\char123 }}
+\def\txtbbzero{{\usefont{U}{stixtwobb}{m}{n}0}}
+\def\txtbbtwo{{\usefont{U}{stixtwobb}{m}{n}2}}
+\end{verbatim}
+Then, assuming {\tt amsmath} is loaded,\\
+\verb|$\text{\txtbbGamma}^2+\text{\txtbbtwo}=\text{\txtbbdotlessi}$|\\
+renders as $\text{\txtbbGamma}^2+\text{\txtbbtwo}=\text{\txtbbdotlessi}$. Obviously, some manual corrections to the spacing may be needed.
+ \end{itemize}
+
+The following are my opinions. No objective judgment should be inferred.
+\begin{itemize}
+\item
+If your interest in math fonts goes beyond the basic level, you should look into the commercial products \textsf{Lucida} from \url{http://www.tug.org/store/lucida/order.html} and \textsf{Mathtime Pro 2} from \url{http://pctex.com}. Both are high quality products, and are excellent values for the prices. Even if you only use small pieces of the collections, these are much better buys than most commercial text fonts.
+\item 
+The Mathematica fonts are not of very high quality as a collection, but they have some good parts. In particular, the calligraphic math font may be turned into a useful target for \verb|\mathcal| after its metrics have been fine-tuned.
+ You are missing out on some good stuff if you don't install this free collection.
+\item The {\tt txfonts} and {\tt pxfonts} packages provide a number of math alphabets that deserve more attention---the fraktur in particular is quite handsome but should perhaps be scaled up a bit.
+\item
+The \textsf{rsfs} package is not suitable for \verb|\mathcal|, being much too slanted. The best options for \verb|\mathcal| are \textsf{rsfso}, \textsf{esstix}, \textsf{boondoxo} and \textsf{mt}, the latter requiring the (non-free) \textsf{mtpro2} collection. 
+\item
+If you own the \textsf{mtpro2} collection, look into the `curly' script font, which seems useful, though a bit heavy.
+\item It is questionable whether there is value in the \textsf{Mathpi} fonts given that there are free close approximants to each of them. 
+\item The STIX (BOONDOX) calligraphic font is quite handsome. I  prefer it to be less sloped, along the lines of rsfso. This is provided by the option {\tt boondoxo}, which provides virtual fonts sloped approximately like {\tt rsfso}.
+\end{itemize}
+
+\textsc{Height Comparisons:}
+
+The CapHeight of a font is supposed to represent the height of capital letters in the font in units where 1000 is equal to 1{\tt em}, the size of \verb|\quad| which, for a font of nominal size 10{\tt pt} is in most cases equal to 10{\tt pt}.  Script fonts often have irregularly sized capital letters, and the CapHeight should perhaps represent the median height of capitals. This is not always so. For example, \textsf{pzc} (Adobe Zapf Chancery) and \textsf{uzc} (its URW clone) have the same glyph metrics, but their CapHeights are listed respectively as 708 and 573. These numbers, taken from their AFM files, represent in the first case the second greatest height of  capital letters and the second case the second smallest. If the CapHeight is to provide useful information about scaling the font, a more central value is 595, indicating that in most cases, Zapf Chancery usually needs to be scaled up by about 15\%. 
+
+ For the purpose of making scale factors to mediate between these disparate fonts, the following chart may be helpful.
+
+\begin{longtable}{l r}
+Computer Modern Roman (cmr10)&683\\
+Zapf Chancery (pzcmi/uzcmi)&595\\
+Euler fraktur(eufm10)&690\\
+Euler script(eusm10)&695\\
+rsfs/rsfso&710\\
+%AMS fraktur (msbm10)&685\\
+Computer Modern calligraphic (cmsy10)&703\\
+Mathpi calligraphic (mh2scr)&720\\
+Mathpi fraktur (mh2)&762\\
+Mathpi Blackboard bold (mh6)&720\\
+pxtx calligraphic (txr-cal)&684\\
+pxtx calligraphic-bold (txb-cal)&684\\
+pxtx fraktur (txr-frak)&684\\
+pxtx fraktur-bold (txb-frak)&679\\
+pxtx openface (tx-of)&664\\
+pxtx openface-bold (txr-of)&678\\
+tx double-struck (txr-ds)&684\\
+px double-struck (pxr-ds)&693\\
+px double-struck-bold (pxb-ds)&698\\
+bickham calligraphic (bickham-r)&683\\
+bickham calligraphic (bickham-s)&683\\
+Lucida calligraphic (lbms)&723\\
+Lucida Blackboard bold (lbma)&723\\
+Lucida fraktur (lbl)&741\\
+mtpro2 calligraphic (mt2mst)&702\\
+mtpro2 curly (mt2mct)&702\\
+mtpro2 Blackboard bold (mt2bbt)&690\\
+mtpro2 Holey Roman (mt2hrbt)&690\\
+Mathematica calligraphic (Mathematica5)&685\\
+Mathematica fraktur (Mathematica6)&690\\
+Mathematica Blackboard bold (Mathematica7)&662\\
+Mathpazo Blackboard bold (fplmbb)&692\\
+Fourier Blackboard bold (fourier-bb)&693\\
+ESSTIX Calligraphic (ESSTIX13)&692\\
+ESSTIX Blackboard bold (ESSTIX14)&696\\
+ESSTIX fraktur (ESSTIX15)&700\\
+BOONDOX Calligraphic &687\\
+BOONDOX Blackboard bold &662\\
+BOONDOX fraktur &695
+\end{longtable}
+
+Here are some samples from the fonts mentioned above:
+\def\alf{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+\def\dtlsbb{\imathbb \jmathbb}
+\def\dtlsfr{\imathfrak \jmathfrak}
+\def\dtlsscr{\imathscr \jmathscr}
+\newdimen\pbw \setlength{\pbw}{\textwidth}
+\addtolength{\pbw}{-20pt}
+\newdimen\cw \setlength{\cw}{\pbw}\divide\cw 26\relax
+\newcommand{\al}{\hbox to\columnwidth{\hfil\parbox{\the\pbw}{%
+\hbox{\hbox to \cw{\hfil A\hfil}%
+\hbox to \cw{\hfil B\hfil}%
+\hbox to \cw{\hfil C\hfil}%
+\hbox to \cw{\hfil D\hfil}%
+\hbox to \cw{\hfil E\hfil}%
+\hbox to \cw{\hfil F\hfil}%
+\hbox to \cw{\hfil G\hfil}%
+\hbox to \cw{\hfil H\hfil}%
+\hbox to \cw{\hfil I\hfil}%
+\hbox to \cw{\hfil J\hfil}%
+\hbox to \cw{\hfil K\hfil}%
+\hbox to \cw{\hfil L\hfil}%
+\hbox to \cw{\hfil M\hfil}%
+\hbox to \cw{\hfil N\hfil}%
+\hbox to \cw{\hfil O\hfil}%
+\hbox to \cw{\hfil P\hfil}%
+\hbox to \cw{\hfil Q\hfil}%
+\hbox to \cw{\hfil R\hfil}%
+\hbox to \cw{\hfil S\hfil}%
+\hbox to \cw{\hfil T\hfil}%
+\hbox to \cw{\hfil U\hfil}%
+\hbox to \cw{\hfil V\hfil}%
+\hbox to \cw{\hfil W\hfil}%
+\hbox to \cw{\hfil X\hfil}%
+\hbox to \cw{\hfil Y\hfil}%
+\hbox to \cw{\hfil Z\hfil}}}}}
+\newcommand{\alx}{\hbox to\columnwidth{\hfil\parbox{\the\pbw}{%
+\hbox{\hbox to \cw{\hfil a\hfil}%
+\hbox to \cw{\hfil b\hfil}%
+\hbox to \cw{\hfil c\hfil}%
+\hbox to \cw{\hfil d\hfil}%
+\hbox to \cw{\hfil e\hfil}%
+\hbox to \cw{\hfil f\hfil}%
+\hbox to \cw{\hfil g\hfil}%
+\hbox to \cw{\hfil h\hfil}%
+\hbox to \cw{\hfil i\hfil}%
+\hbox to \cw{\hfil j\hfil}%
+\hbox to \cw{\hfil k\hfil}%
+\hbox to \cw{\hfil l\hfil}%
+\hbox to \cw{\hfil m\hfil}%
+\hbox to \cw{\hfil n\hfil}%
+\hbox to \cw{\hfil o\hfil}%
+\hbox to \cw{\hfil p\hfil}%
+\hbox to \cw{\hfil q\hfil}%
+\hbox to \cw{\hfil r\hfil}%
+\hbox to \cw{\hfil s\hfil}%
+\hbox to \cw{\hfil t\hfil}%
+\hbox to \cw{\hfil u\hfil}%
+\hbox to \cw{\hfil v\hfil}%
+\hbox to \cw{\hfil w\hfil}%
+\hbox to \cw{\hfil x\hfil}%
+\hbox to \cw{\hfil y\hfil}%
+\hbox to \cw{\hfil z\hfil}}}}}
+
+\long\def\sample#1#2{%#1=name, #2=font cmd
+\vspace{1.5pt plus 1pt minus .5pt}\parbox{\textwidth}{#1\\[2pt plus .5pt minus .5pt]{#2}}}
+
+\textsf{\textbf{Fraktur:}}
+
+{\parindent=0pt
+\sample{{\tt\small esstix} (ESSTIX fraktur):} {\usefont{U}{esstixfrak}{m}{n}\al\\\alx}
+
+\sample{{\tt\small mathpi} (Mathpi fraktur):} {\usefont{U}{mathpifrak}{m}{n}\al\\\alx}
+
+\sample{{\tt\small lucida} (Lucida fraktur):} {\usefont{T1}{hlcf}{m}{n}\al\\\alx}
+
+\sample{{\tt\small euler} (Euler fraktur):} {\usefont{U}{euf}{m}{n}\al\\\alx}
+
+\sample{{\tt\small euler} (Euler fraktur-bold):} {\usefont{U}{euf}{b}{n}\al\\\alx}
+
+\font\txrfrk=txr-frak at 11pt
+\sample{{\tt\small pxtx} (pxtx fraktur):} {\txrfrk \al\\\alx}
+
+\font\txbfrk=txb-frak at 11pt
+\sample{{\tt\small pxtx} (pxtx fraktur-bold):} {\txbfrk \al\\\alx}
+
+%\sample{{\tt\small pxtx} (pxtx fraktur):} {\usefont{OT1}{tx-frak}{m}{n}\al\\\alx}
+%
+%\sample{{\tt\small pxtx} (pxtx fraktur-bold):} {\usefont{OT1}{tx-frak}{b}{n}\al\\\alx}
+%
+\sample{{\tt\small mt} (Mathtime Pro 2 fraktur):} {\usefont{U}{mt2mf}{m}{n}\al\\\alx}
+
+\sample{{\tt\small mt} (Mathtime Pro 2 fraktur-bold):} {\usefont{U}{mt2mf}{b}{n}\al\\\alx}
+
+\sample{{\tt\small mma} (Mathematica fraktur):} {\usefont{U}{mmamfrak}{m}{n}\al\\\alx}
+
+\sample{{\tt\small mma} (Mathematica fraktur-bold):} {\usefont{U}{mmamfrak}{b}{n}\al\\\alx}
+
+\sample{{\tt\small boondox} (BOONDOX fraktur):} {\usefont{U}{BOONDOX-frak}{m}{n}\al\\\alx}
+
+\sample{{\tt\small boondox} (BOONDOX fraktur-bold):} {\usefont{U}{BOONDOX-frak}{b}{n}\al\\\alx}
+ 
+\sample{{\tt\small stix2} (STIX2 fraktur):} {\usefont{LS1}{stix2frak}{m}{n}\al\\\alx}
+
+\sample{{\tt\small stix2} (STIX2 fraktur-Bold):} {\usefont{LS1}{stix2frak}{b}{n}\al\\\alx}
+
+}
+
+
+
+\def\spc{\hspace*{7pt}}
+\textsf{\textbf{Calligraphic and Script:}}
+
+{\parindent=0pt
+\textsc{Upright:}\\[9pt]
+\sample{{\small\tt \spc euler} (Euler script):}{\usefont{U}{eus}{m}{n}\al}
+
+\sample{{\small\tt \spc euler} (Euler script-bold):} {\usefont{U}{eus}{b}{n}\al}
+
+\sample{{\small\tt\spc mtc} (Mathtime Pro 2 Curly script):} {\usefont{U}{mt2ms}{m}{n}\al}
+
+\sample{{\small\tt\spc txupr} (TXUprCal):} {\usefont{U}{txuprcal}{m}{n}\al}
+
+\sample{{\small\tt\spc boondoxupr} (BOONDOXUprScr):} {\usefont{U}{boondoxuprscr}{m}{n}\al\\\alx}
+
+\vspace{4pt}\textsc{Restrained:}\\[9pt]
+\sample{{\small\tt \spc cm} (CM calligraphic, cmsy):} {\usefont{OMS}{cmsy}{m}{n}\al}
+
+\sample{{\small\tt \spc cm} (CM calligraphic-bold, cmbsy):} {\usefont{OMS}{cmsy}{b}{n}\al}
+
+\font\zapf=pzcmi at 13pt
+\sample{{\small\tt\spc zapfc} (Zapf Chancery):} {\zapf \al}%{\usefont{T1}{pzc}{m}{it}\al}
+
+\sample{{\small\tt\spc lucida} (Lucida calligraphic):} {\usefont{OMS}{hlcy}{m}{n}\al}
+
+\sample{{\small\tt\spc lucida} (Lucida calligraphic-bold):} {\usefont{OMS}{hlcy}{b}{n}\al}
+
+\sample{{\small\tt\spc mma} (Mathematica script):} {\usefont{U}{mmamcal}{m}{n}\al}
+
+\sample{{\small\tt\spc mma} (Mathematica script-bold):} {\usefont{U}{mmamcal}{b}{n}\al}
+
+\sample{{\small\tt\spc pxtx} (pxtx script):} {\usefont{U}{tx-cal}{m}{n}\al}
+
+\sample{{\small\tt\spc pxtx} (pxtx script-bold):} {\usefont{U}{tx-cal}{b}{n}\al}
+
+\font\stixcal=stix-mathcal at 11pt
+\sample{{\small\tt\spc stix-plain} (STIX Calligraphic):} {\stixcal\al}
+
+\font\stixcalb=stix-mathcal-bold at 11pt
+\sample{{\small\tt\spc stix-plain} (STIX Calligraphic-bold):} {\stixcalb\al}
+
+\font\stixcal=stix2-mathcal at 11pt
+\sample{{\small\tt\spc stix2-plain} (STIX2 Calligraphic):} {\stixcal\al}
+
+
+\vspace{4pt}\textsc{Embellished:}\\[9pt]
+\sample{{\small\tt\spc mt} (Mathtime Pro 2 script):} {\usefont{U}{mt2ms}{m}{it}\al}
+
+\sample{{\small\tt\spc mt} (Mathtime Pro 2 script-bold):} {\usefont{U}{mt2ms}{b}{it}\al}
+
+\sample{{\small\tt\spc mathpi} (Mathpi script):} {\usefont{U}{mathpical}{m}{n}\al}
+
+\sample{{\small\tt\spc rsfso}:} {\usefont{U}{rsfso}{m}{n}\al}
+
+\sample{{\small\tt\spc esstix} (ESSTIX calligraphic):} {\usefont{U}{esstixcal}{m}{n}\al\\\alx}
+
+\sample{{\small\tt\spc dutchcal} (dutchcal calligraphic):} {\usefont{U}{dutchcal}{m}{n}\al\\\alx}
+
+\sample{{\small\tt\spc dutchcal} (dutchcal calligraphic-bold):} {\usefont{U}{dutchcal}{b}{n}\al\\\alx}
+
+\sample{{\small\tt\spc bickham} (bickham calligraphic):} {\usefont{U}{bickham}{m}{n}\al\\\alx}
+
+\sample{{\small\tt\spc bickham} (bickham calligraphic-bold):} {\usefont{U}{bickham}{b}{n}\al\\\alx}
+
+\sample{{\small\tt\spc bickhams} (bickham calligraphic semibold):} {\usefont{U}{bickham}{sb}{n}\al\\\alx}
+
+\sample{{\small\tt\spc bickhams} (bickham calligraphic-bold):} {\usefont{U}{bickham}{b}{n}\al\\\alx}
+
+\font\calo=zxxrow7z at 11pt
+\sample{{\small\tt\spc boondoxo} (BOONDOX Calligraphic Oblique):} {\calo \al\\\alx}
+
+\font\calo=zxxbow7z at 11pt
+\sample{{\small\tt\spc boondoxo} (BOONDOX Calligraphic Oblique-bold):} {\calo \al\\\alx}
+
+\font\stixscr=stix2-mathscr at 11pt
+\sample{{\small\tt\spc stix2-fancy} (STIX2 Script):} {\stixscr\al\\\alx}
+
+\font\stixscrb=stix2-mathscr-bold at 11pt
+\sample{{\small\tt\spc stix2-fancy} (STIX2 Script-bold):} {\stixscrb\al\\\alx}
+
+\vspace{4pt}\textsc{Heavily Sloped:}\\[9pt]
+\font\calo=rsfs10 at 11pt
+\sample{{\small\tt\spc rsfs}:} {\calo\al}
+
+\sample{{\small\tt\spc boondox} (BOONDOX Calligraphic):} {\usefont{U}{BOONDOX-cal}{m}{n}\al\\\alx}
+
+\sample{{\small\tt\spc boondox} (BOONDOX Calligraphic-bold):} {\usefont{U}{BOONDOX-cal}{b}{n}\al\\\alx}
+
+%\font\stixcalb=stix2-mathcal-bold at 11pt
+%\sample{{\small\tt\spc stix-plain} (STIX2 Calligraphic-bold):} {\stixcalb\al\\\alx}
+
+\font\calo=jkpsyd at 11pt
+\sample{{\small\tt\spc kp}: (kpfonts script regular)} {\calo\al}
+
+\font\calo=jkpbsyd at 11pt
+\sample{{\small\tt\spc kp}: (kpfonts script medium)} {\calo\al}
+
+}
+
+\textsf{\textbf{Double-Struck (Blackboard Bold):}}
+
+{\parindent=0pt
+\textsc{Hollowed-out Shapes:}\\[9pt]
+\font\amsbb=msbm10 at 11pt
+\sample{{\tt\small\spc ams} (AMS bb):} {\amsbb \al}
+
+\sample{{\tt\small\spc mth} (Mathtime Pro 2 Holey Roman):} {\usefont{U}{mt2hrb}{m}{n}\al}
+
+\sample{{\tt\small\spc mth} (Mathtime Pro 2 Holey Roman-bold):} {\usefont{U}{mt2hrb}{b}{n}\al}
+
+\sample{{\tt\small\spc txof} (tx of):} {\usefont{U}{tx-of}{m}{n}\al}
+
+\sample{{\tt\small\spc txof} (tx of bold):} {\usefont{U}{tx-of}{b}{n}\al}
+
+\vspace{4pt}\textsc{Geometric Shapes, Serifed:}\\[9pt]
+\sample{{\tt\small\spc pazo} (Mathpazo bb):} {\usefont{U}{fplmbb}{m}{n}\al}
+
+\sample{{\tt\small\spc px} (px bb):} {\usefont{U}{px-ds}{m}{n}\al}
+
+\sample{{\tt\small\spc px} (px bb bold):} {\usefont{U}{px-ds}{b}{n}\al}
+
+\sample{{\tt\small\spc tx} (tx bb):} {\usefont{OT1}{tx-ds}{m}{n}\al\\\alx}
+
+\font\libus=libertinust1-mathbb
+\sample{{\tt\small\spc libus} (libertinust1-mathbb):} {\libus \al\\\alx}
+
+\sample{{\tt\small\spc ncmbbr} (mathalpha-ncmbb-regular):} {\ncmbbr \al\\\alx}
+
+\sample{{\tt\small\spc ncmbbk} (mathalpha-ncmbb-book):} {\ncmbbk \al\\\alx}
+
+\sample{{\tt\small\spc ncmbbb} (mathalpha-ncmbb-bold):} {\ncmbbb \al\\\alx}
+
+\sample{{\tt\small\spc dsfont-serif} (Dsfont Serif):} {\usefont{U}{dsrom}{m}{n}\al\\\alx}
+\newpage
+%\vspace{4pt}
+\textsc{Geometric Shapes, Sans Serif:}\\[9pt]
+\sample{{\tt\small\spc lucida} (Lucida bb):} {\usefont{LMR}{hlcm}{m}{n}\al}
+
+\sample{{\tt\small\spc lucida} (Lucida Bold bb):} {\usefont{LMR}{hlcm}{b}{n}\al}
+
+\sample{{\tt\small\spc mathpi} (Mathpi bb):} {\usefont{U}{mathpibb}{m}{n}\al}
+
+\sample{{\tt\small\spc mt} (Mathtime Pro 2 bb):} {\usefont{U}{mt2bb}{m}{n}\al}
+
+\sample{{\tt\small\spc mt} (Mathtime Pro 2 bb-bold):} {\usefont{U}{mt2bb}{b}{n}\al}
+
+\sample{{\tt\small\spc mma} (Mathematica bb):} {\usefont{U}{mmambb}{m}{n}\al}
+
+\sample{{\tt\small\spc mma} (Mathematica bb-bold):} {\usefont{U}{mmambb}{b}{n}\al}
+
+\sample{{\tt\small\spc fourier} (Fourier bb):} {\usefont{U}{futm}{m}{n}\al}
+
+\sample{{\tt\small\spc esstix} (ESSTIX bb):} {\usefont{U}{esstixbb}{m}{n}\al}
+
+\sample{{\tt\small\spc boondox} (BOONDOX bb):} {\usefont{U}{BOONDOX-ds}{m}{n}\al}
+
+%{\tt\small\spc boondox} (BOONDOX bb-bold):\\[2pt] \hbox to \textwidth{\hspace*{.22in}{\def\spc{\hspace{9pt}}\usefont{U}{BOONDOX-ds}{b}{n}\al}
+\sample{{\tt\small\spc boondox} (BOONDOX bb-bold):}
+{\usefont{U}{BOONDOX-ds}{b}{n}\al}
+%\\[2pt] \hbox to \textwidth{\hspace*{.22in}{\def\spc{\hspace{9pt}}
+
+\sample{{\tt\small\spc bboldx} (Bboldx-light):} {\usefont{U}{bboldx}{l}{n}\al\\\alx}
+
+\sample{{\tt\small\spc bboldx} (Bboldx-regular):} {\usefont{U}{bboldx}{m}{n}\al\\\alx}
+
+\sample{{\tt\small\spc bboldx} (Bboldx-bold):} {\usefont{U}{bboldx}{b}{n}\al\\\alx}
+
+\sample{{\tt\small\spc dsfont-sans} (Dsfont Sans):} {\usefont{U}{dsss}{m}{n}\al\\\alx}
+
+\sample{{\tt\small\spc stix2} (stix2-mathbb):} {\stixtwobb \al\\\alx}
+
+%\sample{{\tt\small\spc stix2-bbit} (stix2-mathbbit):} {\traceon\stixtwobbi A\traceoff \al\\\alx}
+
+\sample{{\tt\small\spc stix} (stix-mathbb):} {\stixbb \al\\\alx}
+
+\sample{{\tt\small\spc stix} (stix-mathbb-bold):} {\stixbbb \al\\\alx}
+
+\sample{{\tt\small\spc stix} (stix-mathbbit):} {\stixbbob \al\\\alx}
+
+\sample{{\tt\small\spc stix} (stix-mathbbit-bold):} {\stixbbbob \al\\\alx}
+
+}
+\textsc{Notes:}
+\begin{itemize}
+\item Not many Blackboard Bold fonts contain Greek alphabets. A notable exception is {\tt bbold} and its new successor, {\tt bboldx}. The latest version of {\tt dsserif} supports most uppercase Greek letters.
+\item Several Blackboard Bold fonts (\verb|STIX*|, \verb|\tt ncmbb*|) contain a few Greek, dotless and slanted symbols, typically {\ncmbbb \char123 \char124 \char128 \char129 \char130 \char131 \char132 \char133 \char134 \char135 \char136 \char137}. Using one of these symbols in a fragment of math is best handled by using \verb|\usefont| and the {\tt amsmath} \verb|\text| macro. For example, in the current math font, {\tt stixtwo},  $\mathbb{\Gamma}$ is in slot 0 and you can define a text character for it by 
+\begin{verbatim}
+\def\txtbbGamma{{\usefont{U}{stixtwobb}{m}{n}\char0 }}
+\end{verbatim}
+\def\txtbbGamma{{\usefont{U}{stixtwobb}{m}{n}\char0 }}
+and then use it in a math expression, like \verb|$\text{\txtbbGamma}+\frac{1}{\text{\txtbbGamma}}$|, which renders as $\text{\txtbbGamma}+\frac{1}{\text{\txtbbGamma}}$. Note the correct sizing in the denominator.  (Actually, this definition is already in {\tt mathalpha.sty}, but that may not be the case with other math alphabets.)
+\item A growing number of Blackboard Bold fonts contain numerals: all {\tt STIX} and {\tt BOONDOX}, all {\tt bboldx}, all \verb|ncmbb*|, {\tt dsserif}, {\tt tx} offer a full list of numerals, and {\tt pazo} contains the most import figure, $\mathbb{1}$.
+\item Unlike the original \textsc{stix} {\tt type1} fonts, \textsc{stix2} {\tt type1} does not provide bold weight for blackboard bold and blackboard bold italic, and the latter has no alphabetic glyphs as of October 2021.
+\item
+\textsf{Lucida} fonts generally need to be reduced in scale to match other math and text fonts.
+\item \textsf{Zapf Chancery} needs to be scaled up by 15\% or so. This font is not really suited for use as a math alphabet due to the disparate heights and depths and the long tails on some glyphs. Use with care.
+\item \textsf{Mathematica} fraktur is quite readable, but not very attractive, seeming to have random variations in baseline and height. It's also a bit too heavy to be a good match to most other fonts. Similar comments could apply to \textsf{Lucida} fraktur, which has a very distinctive appearance with some features more similar to \textsf{Duc de Berry} than to other fraktur fonts.
+\item The calligraphic fonts break down into four natural groups---(i) the upright styled \textsf{Euler} and \textsf{Curly}; (ii) the less-embellished \textsf{CM, Lucida, Zapf Chancery, ESSTIX, dutchcal,  Mathematica} and \textsf{pxtx}; (iii) the moderately sloped but more embellished {Mathpi, Mathtime, bickham, rsfso} and \textsf{boondoxo}; (iv) the heavily sloped rsfs and the slightly less sloped boondox. My preference, if not using \textsf{mathtime} or \textsf{lucida}, is to set \verb|\mathcal| to one from group (ii) and \verb|\mathscr| to one from group (iii).
+    \item Blackboard bold can look poor in some cases. In my opinion, \textsf{AMS} bb and some of the others show up as ghostly (gray and indistinct) especially on the screen and may not appear to match the weights of other math glyphs. (\textsf{AMS bb, Mathtime Pro 2 Holey Roman} and the \textsf{txof} bb fonts appear to be formed by removing the interiors of solid glyphs from a bold, serifed font. \textsf{Mathtime Pro 2 Holey Roman Bold} is a much better fit to most math fonts of weight heavier than \textsf{Computer Modern}.) \textsf{Fourier,  Mathpi, ESSTIX} and \textsf{boondox} bb appear to be very close in style, with \textsf{mathpi} bb a bit less sharp. \textsf{Mathpazo bb, Mathematica bb, px bb} and \textsf{tx bb} have a heavier appearance and should work better with fonts other than \textsf{Computer Modern}.
+\end{itemize}
+\end{document}

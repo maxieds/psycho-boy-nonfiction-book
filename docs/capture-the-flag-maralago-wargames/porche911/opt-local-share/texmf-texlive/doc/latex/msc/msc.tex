@@ -1,0 +1,2299 @@
+% file: manual.tex
+% Copyright 2008-2013 V. Bos, T. van Deursen, P. Kordy, and S. Mauw
+% This file is part of the MSC Macro Package.
+%
+\documentclass[12pt,a4paper]{article}
+\def\pgfautoxrefs{1} 
+\usepackage[version=latest]{pgf}
+\usepackage{xparse}
+% \usepackage{a4wide}
+% \usepackage{url}
+\usepackage{moreverb}
+\usepackage{multicol}
+\usepackage{msc}
+\usepackage{showexpl}
+\usepackage{xkeyval,calc,listings,tikz,fp}
+\usepackage{hyperref}
+\usepackage{ifluatex}
+\usepackage[a4paper,left=2.25cm,right=2.25cm,top=2.5cm,bottom=2.5cm,nohead]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xxcolor}
+\usepackage{pifont}
+\usepackage{makeidx}
+\usepackage{compsci}
+\usepackage{xstring}
+% \usepackage{pgfmanual}
+\newcommand{\PK}[1]{%
+{\color{red}{\bf[PK]} #1}}
+
+% we allow a ragged right
+\setlength{\rightskip}{0pt plus 0.05\linewidth minus 0pt}
+
+\input{manual-macros.tex}
+% \hypersetup{hidelinks}
+\hypersetup{%
+  colorlinks=true, % use true to enable colors below:
+  linkcolor=blue,%red,
+  filecolor=blue,%magenta,
+  urlcolor=blue,%cyan,
+  citecolor=blue,
+  pdfborder=0 0 0,
+}
+
+\makeindex
+\makeatletter
+\def\convertto#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}%\dimexpr require etex
+\input{pgfmanual.code} 
+\pgfkeys{
+  % list is tried to find a match.
+  /pdflinks/search key prefixes in={/msc/,/tikz/,/pgf/,/depgraph/},
+  %
+}
+\newcommand{\msckey}[3]{
+ \IfEndWith*{\mscget{#1}}{pt}{%
+   \IfStrEq*{#1}{label distance}{
+     \def\tmp{\convertto{ex}{\mscget{#1}}ex}
+    }{
+     \def\tmp{\convertto{cm}{\mscget{#1}}cm}
+     }
+   }{%
+     \edef\tmp{\mscget{#1}}
+  }
+  
+ \begin{key}{/msc/#1=#2 (initially \tmp)}
+     #3
+ \end{key}
+}
+\newcommand{\mscstyle}[2]{
+ \begin{stylekey}{/msc/#1}
+     #2
+ \end{stylekey}
+}
+
+% The following code is taken from the doc package. It defines a global
+% macro \bslash that produces a bslash (if present in the current font).
+{\catcode`\|=\z@ \catcode`\\=12 |gdef|bslash{\}}
+\makeatother
+\title{
+  A \LaTeX{} macro package for Message Sequence Charts\\{\large User Manual}
+}
+
+\author{
+ \begin{tabular}{c}
+  \begin{tabular}{ccc}
+   Victor Bos & &
+   Ton van Deursen\\
+   & & \\
+   Piotr Kordy& &
+   Sjouke Mauw
+  \end{tabular}\\
+ \end{tabular}
+}
+
+\date{\small Version A\mscversion, last update \today\\
+      Describing \mscpack{} version \mscversion}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+The \mscpack{} facilitates the \LaTeX\ user to easily include
+Message Sequence Charts in his texts. This document describes the
+design and use of the \mscpack.
+\end{abstract}
+
+\tableofcontents
+\section{New}
+\label{new}
+\paragraph{Version~2.00} is the result of a complete rewrite of the package.
+The main difference is that the package is
+now implemented in \tikzname\ instead of \verb+PSTricks+, making it
+compatible with
+\verb+pdfLaTex+ and \beamer.
+
+In addition the syntax has been slightly extended. It now supports the
+specification of all options as a comma separated list in square
+brackets, while remaining backward compatible. All lengths are now
+stored using \pgfname\ keys. As a result it is possible to change
+sizes of shapes individually. Support for colors is added.
+
+We are much indebted to Adrian Farmadin (Masaryk University, Czech
+Republic) for initiating and contributing to this software rehaul.
+
+
+\paragraph{Version~1.17} slightly modifies the handling of the
+|offset| argument of the |\mess|, |\setstoptimer|, and
+|\settimeout| commands. All commands with an |offset|
+argument can now properly handle real numbers as
+argument. Furthermore, the \verb+\topheaddist+,
+\verb+\firstlevelheight+, and \verb+\instheadheight+ lengths are now
+taken into account when computing the height of the instance and the
+\verb+\gatesymbolradius+ length is now properly implemented.
+
+The |\condition*| macro is now extended to dynamically
+resize a condition symbol that spans multiple instances. The
+|\condition*| and |\action*| macros, introduced in the
+previous release, no longer shrink to a size smaller than their
+non-starred counterparts. The |\condition| and
+|\action| have crossed-out counterparts |\ncondition| and
+|\naction| respectively.
+
+A variation to the \verb+\stop+ command is implemented. Rather than
+drawing a cross to denote that an instance has stopped, the
+\verb+\stop*+ command draws an instance footer.
+
+Finally, the \verb+\create+ command no longer requires the
+\verb+creator+ parameter to be specified. If it is not specified, no
+arrow is drawn from the creator to the dynamically created instance.
+
+
+\paragraph{Version~1.16} solves a bug that was due to a change in
+syntax of the \verb+scalebox+ macro in the  \verb+PSTricks+ package.
+
+The |\action| and |\condition| macros are extended with a
+starred option. The starred version of the macros automatically
+adjusts the size of the rectangle and hexagon based on the size of the
+contents.
+
+\paragraph{Version~1.13} has a reimplementation of message commands in MSC
+diagrams. The affected commands are: |\create|, |\found|,
+|\lost|, |\mess|, and |\order|. The new implementation
+provides more control over the placement of message labels.
+
+The command \verb+\selfmesslabelpos+ has been removed.
+
+The bounding box bug has been partly solved. Now, a white |\fbox|
+is drawn around every (msc, mscdoc, hmsc) diagram. This makes it
+possible for \texttt{dvips -E} to compute the correct bounding box for
+the diagrams. Due to the |\fbox|, each diagram is extended with
+0.3pt on each side (left, top, right, and bottom). This bugfix fails
+if the background is not white. The xdvi program shows the white
+|\fbox| in black with the result that diagrams have two visible
+frames. This seems to be a bug of xdvi.
+
+The lines around comments (|\msccomment|, Section~\ref{comments})
+are changed from gray into black. The reason for this is that the gray
+lines became invisible after converting the document to HTML.
+
+\section{Introduction}
+\label{introduction}
+
+The \MSC{} language is a visual language for the description of the
+interaction between different components of a system.
+This language is standardized by the ITU (International
+Telecommunication Union) in Recommendation Z.120~\cite{z120}. An
+introductory text on \MSC{} can be found
+in~\cite{RudolphGrabowskiGraubmann96}. \MSC{}s have a
+wide application domain, ranging from requirements specification to
+testing and documentation.
+An example of a Message Sequence Chart is in Figure~\ref{quick}.
+
+In order to support easy drawing of \MSC{}s in \LaTeX\ documents, we have
+developed the \mscpack.  The current version of the \mscpack{}
+supports the following \MSC{} constructs: \MSC{} frame, instances (both
+single line width and double line width), messages (including
+self-messages and messages to the environment), actions, singular and
+combined timer events (set, timeout, reset, set-timeout, set-stop),
+lost and found messages, generalized order, conditions, coregions,
+activation regions, suspension regions, gates, instance creation,
+instance stop, time measurements, references, and inline
+expressions. In addition, there is support for \HMSC{}'s (high-level
+\MSC{}s) and \MSCdoc{}s.
+
+In this manual we explain the design and the use of the \mscpack. For
+a complete overview of all features, we refer to the reference
+manual~\cite{BM02}, which is included in the distribution under the
+name \verb+refman.ps+. Another way to learn how to use the \mscpack{}
+is to have a look at the \LaTeX{} source code of the manual and the
+source code of the reference manual. They are included in the
+distribution under the names \verb+manual.tex+ and \verb+refman.tex+,
+respectively.  The \MSC{} constructs are simply introduced as
+syntactic constructs. This paper is not meant to describe their use or
+meaning.
+
+We list the backgrounds of the package and some design decisions in
+Section~\ref{background}.
+Section~\ref{install} contains notes on installing the
+package. Section~\ref{quickstart} contains an example of using the
+package. It allows the impatient reader to quickly start using the
+package. The details of using the package are explained in
+Section~\ref{use}. In Section~\ref{parameters} the parameters are
+explained which determine detailed layout of the various symbols.
+A large but meaningless example is given in
+Section~\ref{example}.
+
+
+\section{Background and motivation}
+\label{background}
+Several commercial and non-commercial tools are available, which
+support drawing or generating Message Sequence Charts. However, these
+tools are in general not freely available and often not flexible
+enough to satisfy all user's wishes with respect to the layout and
+graphical appearance of an \MSC{}.
+Therefore, people often use general drawing tools, such as {\em xfig}
+to draw \MSC{}s. However flexible this approach is, it takes quite some
+effort to produce nice \MSC{} drawings in a tool which is not dedicated
+to \MSC{}s. Furthermore, when drawing a number of \MSC{}s it requires some
+preciseness in order to obtain a consistent set of \MSC{}s.
+
+For these reasons, we have started the design of a set of
+\LaTeX\ macros which support the drawing of \MSC{}s. In this way, an \MSC{} can be
+represented in \LaTeX\ in a textual format and compiled into
+e.g.\ PostScript.
+
+We aimed at satisfying the following requirements and design
+decisions.
+\begin{itemize}
+\item
+The package should follow the ITU standard with respect to shape and
+placement of the symbols. (The current version supports
+the \MSC2000 standard.)
+\item
+Static and dynamic semantics are not considered. The user is allowed
+to violate all semantical restrictions and draw inconsistent \MSC{}s.
+The package only supports elementary syntactical requirements.
+\item
+The package should offer functionality at the right level of
+abstraction. Rather than supplying coordinates of pixels, the
+user should be able to express the placement of symbols in terms of
+{\em levels}.
+Nevertheless, the textual representation of \MSC{}s as defined by the ITU
+standard has a level of abstraction which is too high for our purposes.
+It lacks information about the actual positioning of the \MSC{} symbols,
+while we think that in our package this should be under user control.
+\item
+There should be only minimal automatic restructuring and layout of the
+\MSC{} (e.g.\ the relative positioning of two messages should be as
+defined by the user, even if the messages are not causally ordered).
+\item
+The user can customize the appearance of the \MSC{}s by manipulating
+an appropriate set of parameters.
+\end{itemize}
+
+\section{Installation, copyright and system requirements}
+\label{install}
+
+The \mscpack{} is still under development. The authors
+appreciate any comments and suggestions for improvements. The most
+recent version of the package can be downloaded from
+\url{http://satoss.uni.lu/mscpackage/}.
+
+
+The \mscpack{} has a \emph{LaTeX Project Public License}
+(LPPL), see~\url{http://www.latex-project.org/lppl.txt}:
+{\small
+\verbatiminput{COPYRIGHT}
+} As such, it is free of charge and can be freely
+distributed. Furthermore, it is allowed to make modifications to the
+package, provided that modified versions get different names.  The
+authors accept no liability with respect to the functioning of the
+package.
+
+The \mscpack{} runs with \LaTeXe. It has been tested with \LaTeXe\
+version dated 1998/06/01 using \TeX\ version 3.14159.  The following
+additional packages are required: \textsf{tikz}, \textsf{calc},
+and \textsf{xstring}.  These packages are in general
+part of the standard \LaTeXe\ distribution. These additional packages
+can be obtained from the {\em ctan} database for \LaTeX\, e.g.\ via
+the following URL: \url{http://www.tex.ac.uk/}. The \textsf{tikz}
+package is described shortly in~\cite{mertz2007graphics} or in the \pgfname
+manual~\cite{tantau2022pgf}.
+The generated output can be previewed with pdf/ps previewing software.
+It may be needed to update all \LaTeX\ related software
+to a more recent version in order to smoothly work with the \mscpack.
+
+The \mscpack{} can be installed easily. Just put the file
+|msc.sty| in a directory which is searched by \LaTeX{} for style
+files. The set of directories actually searched depends on the \TeX\
+installation, but often the {\em current directory} is included. UNIX
+users may have to set the environment variable \texttt{\$TEXINPUTS} to
+an appropriate value.  For more details on this topic consult
+documentation of your \TeX\ installation.
+
+%The following text is currently not applicable -sm
+%
+%A problem may occur when using more packages than the \MSC{} macro
+%package in your \LaTeX\ document. This happens, e.g.\ when using the
+%{\em epsfig} package. These problems are due to the combination of
+%several packages which are required (but not provided) by the \MSC{}
+%macro package. The solution is to change the order of the
+%\verb+usepackage+ clauses.
+
+\section{Quick start}
+\label{quickstart}
+The \mscpack{} is easy to use.
+Below is an example of the use of the package and
+Figure~\ref{quick} shows the generated \MSC{}.
+\begin{figure}[htbp]
+\begin{center}
+\begin{codeexample}[width=\linewidth-6.8cm]
+\begin{msc}{Example}
+\declinst{usr}{User}{}
+\declinst{m1}{Machine 1}{control}
+\declinst{m2}{Machine 2}{drill}
+
+\mess[label position=below]
+{startm1}{usr}{m1}
+\nextlevel
+\mess{startm2}{m1}{m2}
+\nextlevel
+\mess{log}{m1}{envleft}
+\nextlevel
+\nextlevel
+\mess{output}{m2}{usr}[2]
+\mess{free}{m1}{usr}
+\nextlevel
+\end{msc}
+\end{codeexample}
+\end{center}
+\caption{The generated \MSC{}}
+\label{quick}
+\end{figure}
+The \mscpack{} is activated by the clause \verb+\usepackage{msc}+. This package
+contains, among others, a definition of the environment |msc|. This
+environment is used to draw \MSC{}s. The \MSC{} definition is surrounded by the
+clauses |\begin{msc}{Example}| and |\end{msc}|. The name of the
+\MSC{}, {\tt Example}, is displayed in the upper-left corner of the \MSC{}.
+
+The next four lines define the \emph{instances}:
+|\declinst{m1}{Machine 1}{control}| defines an instance with
+\meta{nickname} |m1| and a description consisting of two parts,
+namely, |Machine 1| and |control|.  The nickname is used in
+all subsequent references to this instance.  The first part of the
+description is drawn above the rectangular instance head symbol, and
+the second part of the description is drawn inside the instance head
+symbol.
+
+The following lines contain the definitions of the messages. Every
+message has a source and a destination instance. The clause
+|\mess[label position=below]{startm1}{usr}{m1}| defines a message with name
+|startm1|, which goes from instance |usr| to instance |m1|.
+Between square brackets we can put optional list of options. Each option is
+comma separated from another option. In this example we specify the placement of
+the label to be below the message arrow.
+
+In order to control the vertical placement of the messages, the \MSC{} is
+divided into levels. At every level, any number of messages may start.
+The vertical position of the end point of a message is determined
+by the optional fourth argument of the message definition, as in the
+clause |\mess{output}{m2}{user}[2]|.
+This argument is the vertical offset (in number of levels) between the
+start point of the message (i.e.,\ the current level) and its end point.
+If the value is 0 the message is drawn horizontally. A negative offset
+means that the arrow has an upward slope. Equivalently we could specify this
+value using option:  |\mess[level shift=2]{output}{m2}{user}|.
+
+The clause |\nextlevel| is used to advance to the next level.
+
+\section{Use of the \mscpack}
+\label{use}
+\subsection{Options}
+Each command supported by the \mscpack\ can be provided with a list of
+options. A list of
+options is surrounded by square brackets and options are separated
+by a comma. In fact options are \pgfname\ keys and the parsing of options
+is done internally by the \tikzname\ package. All keys defined by the
+\mscpack\ are
+prefixed by the |/msc| keyword. When a key is not fully specified (i.e.,\ it is
+specified without the |/msc|, |/tikz| or some other prefix) the
+package will search first for the keys in the |/msc| namespace and if no
+key is found it will search the default |/tikz| name space.
+
+In the description below, optional arguments are marked in \opt{green}.
+\subsection{The \MSC{} frame}
+\label{mscframe}
+The |msc| environment is used for making \MSC{} definitions. Thus, such a
+definition looks as follows.
+\begin{environment}{{msc}\opt{\oarg{options}}\marg{msc name}}
+This declares the |msc| environment. The frame and the header of the
+\MSC{} are drawn.
+The argument \meta{msc name} is the name of the \MSC{}.
+The header of an \MSC{} is formed from the keyword |msc|, followed
+by the \meta{msc name}.
+
+The size of the \MSC{} frame is determined vertically by the number of levels
+occurring in the \MSC{} (see Section~\ref{levels}) and horizontally by
+the number of instances (see Section~\ref{instances}).
+\msckey{title position}{\meta{position}}{
+  Controls the position of the header of the MSC. Possible values of
+  \meta{position} are:
+  |left|, |right|, and |center|.}
+\msckey{msc keyword}{\meta{keyword}}{
+  Specifies the \meta{keyword} in the header.}
+\msckey{title distance}{\meta{distance}}{
+  Specifies the \meta{distance} between left/right side of the frame and the MSC
+  header.}
+\msckey{title top distance}{\meta{distance}}{
+  Specifies the \meta{distance} between top of the frame and the (top
+  of the) MSC header.}
+\msckey{left environment distance}{\meta{distance}}{
+  Specifies the \meta{distance} between the left-most instance and the
+  left side of the frame.
+}
+\msckey{right environment distance}{\meta{distance}}{
+  Specifies the \meta{distance} between the right-most instance and
+  the right side of the frame.
+}
+ \begin{key}{/msc/environment distance}
+  Sets the keys |right environment distance| and |left environment distance| to
+  the provided value.
+ \end{key}
+\msckey{instance distance}{\meta{distance}}{
+  Sets the \meta{distance} between the (vertical) instance lines.
+}
+
+\begin{key}{/msc/draw frame=\meta{colour} (default , initially \mscget{draw frame})}
+  Sets the colour of the frame. If you do not want to draw a frame, set
+  \meta{colour} to |none|. When \meta{colour} is empty, then the last colour is used,
+  usually black.
+\end{key}
+
+\begin{key}{/msc/draw grid=\meta{grid type} (default grid, initially \mscget{draw grid})}
+  Specifies if we want to draw the help grid in msc. Possible values for
+  \meta{grid type} are |grid|,
+  |color grid| and |none|.
+\end{key}
+
+\end{environment}
+
+\subsection{Levels}
+\label{levels}
+An \MSC{} is vertically divided in {\em levels}. All events in an \MSC{} are
+attached to a certain level, or stretch out over several levels.
+Any number of events can be drawn at a certain level.
+An event will always be drawn (or started) at the current level, unless a level
+offset is specified (see e.g.\ the |\mess| command in
+Section~\ref{messages}). The \meta{level offset} is a positive integer number, which
+denotes at which level, relative to the current level, an event should
+be drawn.
+Drawing starts at level 0.
+The following command is used to advance to the next level.
+\begin{command}{\nextlevel\opt{\oarg{level offset}}}
+The \meta{lever offset} is a positive integer value which denotes the number of
+levels to advance. By default, the value of \meta{lever offset} is 1, which means
+drawing continues at the next level.
+\end{command}
+The following keys influence the |\nextlevel| command:
+\msckey{first level height}{\meta{distance}}{
+  Specifies the \meta{distance} between the instance start symbol and the first level.}
+\msckey{level height}{\meta{distance}}{
+  Specifies the \meta{distance} between two consecutive levels.}
+\msckey{last level height}{\meta{distance}}{
+  Specifies the \meta{distance} between the last level and the instance end symbol.}
+
+Figure~\ref{parametersfig} on page~\pageref{parametersfig} shows all lengths of
+the \mscpack.
+\subsection{Instances}
+\label{instances}
+All instances have to be declared before they can be used. An instance
+consists of an instance head symbol with an associated name, an
+instance axis and an instance end symbol. Normal instances have a
+single line axis. Fat instances have a double line axis.  The order of
+the instance declarations determines the order in which the instances
+occur in the drawing.
+
+An instance is declared with the following command.
+
+\begin{command}{\declinst\opt{*}\marg{nickname}\marg{instance name above}\marg{instance name within}}
+The starred version produces a fat instance.
+The \meta{nickname} is used for referring to this instance in the rest of the
+MSC definition.
+The \meta{instance name above} is put above the instance head symbol.
+The \meta{instance name within} is put inside the instance head symbol.
+\MSC{} definition.
+\end{command}
+The keys associated with the command:
+\msckey{head height}{\meta{height}} {
+  Specifes the minimum \meta{height} of the instance head symbol.}
+\msckey{instance width}{\meta{width}}{
+  Specifes the minimum \meta{width} of the instance head symbol.}
+\msckey{head top distance}{\meta{distance}}{
+  Specifes the \meta{distance} between top of the head symbols and frame.}
+\msckey{foot height}{\meta{height}}{
+  Specifes the \meta{height} of the instance foot symbol.}
+\msckey{foot distance}{\meta{distance}}{
+  Specifes the \meta{distance} between the instance foot symbol and the bottom of the \MSC{} frame.}
+\msckey{environment distance}{\meta{distance}}{
+  Specifies the \meta{distance} between the edge of the \MSC{} and the first/last instance axis.}
+\msckey{instance width}{\meta{width}}{
+  Specifies the \meta{width} of the instance head and foot symbols.}
+\msckey{label distance}{\meta{distance}}{
+  Specifies the \meta{distance} between the instance head symbol and the part of the
+  instance name drawn above the head symbol.}
+\msckey{draw head}{\meta{colour}}{
+  Sets the colour of the instance head. If you do not want to draw an instance head, set
+  \meta{colour} to |none|. When \meta{colour} is empty, then the last colour is used,
+  usually black.
+}
+
+% The command \verb+\setfootcolor{color}+ sets the
+% fill color of the footer symbol. Valid color values are, e.g.,
+% \texttt{black} (default), \texttt{white}, and \texttt{gray}.
+The following \MSC{} shows the declaration of an \MSC{} with three
+instances. The first and the last are normal instances (one line axis),
+whereas the second is a fat instance (double line axis). The optional
+parameter |values small|, indicates that the small drawing
+style should be used (see Section~\ref{parameters}).
+% \setmscvalues{small}
+\begin{codeexample}[width=\linewidth-8.8cm]
+\begin{msc}[small values]{instances}
+\declinst{i}{above}{within}
+\declinst*{j}{}{j}
+\declinst{k}{k}{}
+\end{msc}
+\end{codeexample}
+
+\subsection{Messages}
+\label{messages}
+A message is denoted by an arrow from the sending instance to the
+receiving instance. The instances are referred to by their nicknames.
+A message is defined with the following command.
+\begin{command}{\mess\opt{*}\opt{\oarg{options}}\marg{name}\marg{sender}\marg{receiver}\opt{\oarg{leveloffset}}}
+% \begin{verbatim}
+% \mess(*)[pos]{name}[labelpos]{sender}[placement]{receiver}[leveloffset]
+% \end{verbatim}
+The \meta{name} of the message may be any string. The \mscpack{}
+processes the \meta{name} argument in LR-mode,
+see~\cite[page~36]{Lam94}. This means that the string will consist of
+one line. To generate multi-line message names, use the standard
+\cmd{parbox} command, see the \emph{Tricks} section in the reference
+manual~\cite{BM02}.  By default, the name of a message label is drawn
+above the center of the arrow, but the optional keys |label position|,
+|side|, and |pos| influence the actual location,
+as described below.  The arrow starts at the current level at the
+sending instance. The arrow ends at the current level plus the
+level \meta{leveloffset}, at the receiving instance. \meta{leveloffset} can be
+also modified by specifying keys |level shift| and |offset|. The
+\meta{sender} and \meta{receiver} should be the nicknames of declared
+instances.
+Messages to or from the environment (i.e.,\ the left or the right side
+of the \MSC{} frame) can be
+specified by setting the sender or the receiver argument to one of the values
+|envleft| or |envright|. (Note: Since instances and
+environments are treated equally in the implementation, at every position
+where the nickname of an instance is required, also
+|envleft| and |envright| are allowed.)
+
+In case the sending and the receiving instance are the same, the
+message is a \emph{self message}. A self message is drawn as a
+polyline connecting the instance axis to itself.
+
+The starred version of the command, |\mess*|, produces the same
+result as |\mess|, except that the arrow is drawn with a dashed
+line. This can be used to draw a {\em method reply} (see~\cite{z120}).
+\end{command}
+The following keys influence the messages:
+\msckey{level shift}{\meta{integer}}{
+  For non-self message, \meta{integer} determines at which level message should arrive relative to the starting level
+  of the message. 
+}
+\msckey{offset}{\meta{integer}}{
+  For self message, \meta{integer} determines how many levels the message arrow should advance.
+}
+\msckey{side}{\meta{side}}{
+  Determine the position of the arrow with respect to the instance axis. Valid values
+  for \meta{side} are |left| and |right|. In case of a non-self message the key is ignored.
+}
+\msckey{label position}{\meta{position}}{
+ Determines the position of the label.In case of non-self message, valid values
+ for \meta{position} are |above|, |below|, |above~left|, |above~right|,
+ |below~left| and |below~right|. In case of self message valid values are |left|
+ and |right| and the default value is taken from the value of the key |side|. As
+ the implementation uses corresponding |/tikz| keys the |label~position=| part
+ can be skipped.
+}
+\msckey{pos}{\meta{real}}{
+  Determines the relative distance of the message label to the beginning of the
+  message. Valid values for \meta{real} are real numbers in the closed interval $[0,1]$.
+  The key works in similar way as |/tikz/pos| key.
+}
+\msckey{self message width}{\meta{width}}{
+  Controls the \meta{width} of the polyline used for drawing self-message.
+%   It also affects other commands such as |\order|, |\settimeout| or |\setstoptimer|.
+}
+\msckey{label distance}{\meta{distance}}{
+  Specifies the \meta{distance} between the label of a message and the message arrow.
+}
+\msckey{arrow scale}{\meta{scale}}{
+  The \meta{scale} specifies by which factor should the message arrow be scaled. Influences all
+  arrows drawn in |msc| environment.
+}
+
+In Figure~\ref{fig:mscsomeExample} we see \MSC{} that shows an example of the use of messages.
+In this sample \MSC{} and the following \MSC{}s in this section we will
+not list the complete textual representations of the \MSC{}s. For brevity
+we omit the environment call and the declarations of the instances.
+Note the final |\nextlevel| command which is needed
+to make the instance axis long enough to receive message
+\verb+a+.
+
+Figure~\ref{fig:refpoints:B} shows different options that can be used to
+position label. We use the keys |pos|, |label position| and |side| to place
+the labels. Additionally we use |/tikz/anchor| key, which is an alternative way
+to specify the placement of the label (see PGF Manual~\cite{tantau2022pgf}).
+
+\begin{figure}[htbp]
+\begin{codeexample}[width=\linewidth-9.8cm]
+\begin{msc}[small values,head top distance=0.8cm]{messages}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\mess{a}{j}{i}[3]
+\mess{self}{i}{i}[1]
+\nextlevel
+\mess*{b}{j}{k}
+\mess[b]{c}{k}{envright}
+\nextlevel
+\mess{d}{k}[.6]{i}
+\end{msc}
+\end{codeexample}
+\caption{Example showing msc messages}
+\label{fig:mscsomeExample}
+\end{figure}
+%
+\begin{figure}[htbp]
+\begin{codeexample}[width=\linewidth-9.8cm]
+\begin{msc}[small values]{Label reference points}
+\declinst{m0}{I0}{}
+\declinst{m1}{I1}{}
+\declinst{m2}{I2}{}
+\nextlevel
+
+\mess[label position=above]{above}{m0}{m1}
+\nextlevel
+\mess[label position=below]{below}{m1}{m2}
+\nextlevel[2]
+
+\mess[anchor=south,pos=0.1]{south}{m1}{m0}
+\nextlevel
+\mess[anchor=north]{north}{m2}{m1}
+\nextlevel[2]
+
+\mess[label position=left]{left}{m0}{m0}[2]
+\mess[side=right,pos=0.9]{right}{m2}{m2}[2]
+\nextlevel[4]
+\mess[label position=right]{right}{m0}{m0}[2]
+\mess[left,side=right]{left}{m2}{m2}[2]
+\nextlevel[6]
+
+\mess[anchor=east]{east}{m0}{m0}[-2]
+\mess[anchor=west,side=right]{west}{m2}{m2}[-2]
+\nextlevel[4]
+\mess[right]{right}{m0}{m0}[-2]
+\mess[side=right,left]{left}{m2}{m2}[-2]
+\nextlevel[2]
+
+\mess[below left]{below left}{m0}{m1}[2]
+\mess[above right]{above right}{m1}{m2}[2]
+\nextlevel[6]
+
+\mess[anchor=south west]{SW}{m1}{m0}[-2]
+\mess[anchor=north east,pos=0]{NE}{m2}{m1}[-2]
+\nextlevel[2]
+\end{msc}
+\end{codeexample}
+\caption{Different placing the message labels}
+\label{fig:refpoints:B}
+\end{figure}
+
+\subsection{Comments}
+\label{comments}
+
+Comments are additional texts to clarify (events on) an instance. The
+following command can be used to add comments to an \MSC{} diagram.
+\begin{command}{\msccomment\opt{\oarg{options}}\marg{text}\marg{instance}}
+
+The \meta{instance} parameter defines the instance to which the
+comment is attached. The text of the comment is specified by the
+\meta{text} parameter and is processed in LR-mode.
+The key |side| affect the horizontal position relative to its instance.
+\end{command}
+The following key affects the drawing of the comment:
+\msckey{msccomment distance}{\meta{distance}}{
+  Specifies the \meta{distance} at which the comment will be placed from the
+  \meta{instance} instance.
+}
+
+The following diagram shows how to use comments. In this diagram we modify the
+distance between the frame and the instances in order to fit the comments inside
+the frame.
+\begin{codeexample}[width=\linewidth-8.8cm]
+\begin{msc}[small values,
+ left environment distance=2.6cm,
+ right environment distance=1.9cm]{comments}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\mess{a}{i}{j}[2]
+\msccomment[msccomment distance=1.2cm]{start}{i}
+\nextlevel[2]
+\msccomment[side=right]{end}{j}
+\nextlevel
+\end{msc}
+\end{codeexample}
+
+
+
+\subsection{Actions}
+\label{actions}
+An instance can perform an action, which is denoted by a
+rectangle. There are two commands to draw actions:
+\begin{command}{\action\opt{*}\opt{\oarg{options}}\marg{name}\marg{instance}}
+The action is attached at the current level to the \meta{instance}.
+The \meta{name} is centered inside the action symbol and is processed
+in LR-mode. The height and width of the action symbol are adjusted so that
+the \meta{name} fits inside a rectangle.
+
+The starred version of the command, |\action*|, produces the same
+result as |\action|, except that the width of the action is not adjusted.
+
+The following keys determine the detailed drawing of the action
+symbol:
+\msckey{action width}{\meta{width}}{Specifies the \meta{width} of the action symbol.}
+\msckey{action height}{\meta{hegiht}}{Specifies the \meta{height} of the action symbol.}
+\end{command}
+\begin{command}{\naction\opt{*}\opt{\oarg{options}}\marg{name}\marg{instance}}
+The |\naction| command produces an action box with a diagonal
+cross in it. It is otherwise identical to the |\action| command.
+\end{command}
+
+
+The following example shows that after an action often a multiple level
+increment is needed to obtain nice pictures.
+\begin{codeexample}[width=\linewidth-8.8cm]
+\begin{msc}[small values, instance distance=1.6cm]{action}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\mess{a}{j}{i}
+\nextlevel
+\naction{doit}{i}
+\nextlevel[2]
+\action*{doitnow}{i}
+\nextlevel[2]
+\mess{b}{i}{j}
+\end{msc}
+\end{codeexample}
+
+\subsection{Timers}
+\label{timers}
+There are five commands to draw timer events.
+\begin{command}{\settimer\opt{\oarg{options}}\marg{name}\marg{instance}}%
+Setting of a timer is drawn as a line connecting the \meta{instance}
+to the {\em hour glass} symbol. The \meta{name} is put near this
+symbol. The key |side| is determines on which side of the instance axis the
+timer is drawn. The key |self message width| determines the lenght of the arm
+between the symbol and the instance axis. The key |label distance| determines
+the distance between the name and the timer symbol. The key |arrow scale|
+determines the scaling of the arrow.
+{\em hour glass} symbol to the \meta{instance}.
+\end{command}
+\begin{command}{\timeout\opt{\oarg{options}}\marg{name}\marg{instance}}
+A time-out is represented by an arrow from an
+{\em hour glass} symbol to the \meta{instance}.
+\end{command}
+\begin{command}{\stoptimer\opt{\oarg{options}}\marg{name}\marg{instance}}
+Stopping a timer is drawn as a line connecting the \meta{instance} with the timer stop
+symbol (denoted by a cross).
+\end{command}
+\begin{command}{\settimeout\opt{\oarg{options}}\marg{name}\marg{instance}\opt{\oarg{offset}}}
+The command |\settimeout| is a combination of the setting of a
+timer and a time out. The \meta{offset} denotes the number of levels
+between the two events. 
+\end{command}
+\begin{command}{\setstoptimer\opt{\oarg{options}}\marg{name}\marg{instance}\opt{\oarg{offset}}}
+Likewise, |\setstoptimer| is a combination
+of the setting of a timer and stopping a timer.
+\end{command}
+\msckey{offset}{\meta{offset}}{
+  The key holds the value of \meta{offset}. It denotes the number of levels
+  between the two events. 
+}%
+\msckey{timer width}{\meta{width}}{
+  The key determines the \meta{width} of the hour glass and the time out symbols.
+}
+
+The various timer symbols are shown in the following example.
+
+\medskip
+\begin{codeexample}[width=\linewidth-9.8cm]
+\begin{msc}[small values]{timers}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\settimer{T,50}{j}
+\setstoptimer[r]{V}{k}[6]
+\nextlevel[2]
+\timeout{T}{j}
+\settimeout{U}{i}
+\nextlevel[2]
+\settimer[r]{T,20}{j}
+\nextlevel[2]
+\stoptimer[r]{T}{j}
+\end{msc}
+\end{codeexample}
+
+\subsection{Time measurements}
+\label{measurements}
+There are several commands to add time measurements to an \MSC{}.
+\begin{command}{
+\mscmark\opt{\oarg{options}}\marg{name}\marg{instance}
+}
+This command attach an absolute time stamp to an event on an \meta{instance}.
+The \meta{name} is the text attached to the mark symbol, which is a dashed
+polyline. The position of the mark is determined by the keys |position| (above,
+below) and |side| (left,right).
+\end{command}
+\msckey{position}{\meta{position}}{
+  The key determines the position of the mark symbol relative to the marked
+  event. The allowed values for \meta{position} are |above|, |mid| and |below|.
+}
+\begin{command}{\measure\opt{*}\opt{\oarg{options}}\marg{name}\marg{instance1}\marg{instance2}\opt{\oarg{offset}}}
+  This command connects two events from \meta{instance1} and \meta{instance2}.
+  The first event is at the current level. The second event is \meta{offset}
+  levels lower than the first event. Not that instead giving optional argument
+  \meta{offset} we can specify the key |offset|. The \meta{name} is attached to
+  the measure symbol. The measure symbol can be placed ath the left or right of
+  \meta{instance1}. This is determined by the value of the key |side|. In the
+  starred version of the command arrow heads are at the outside of the measured
+  interval.
+\end{command}
+In case the two events are far apart, the measure may be split in two
+parts. We use two commands to draw this parts:
+\begin{command}{\measurestart\opt{*}\opt{\oarg{options}}\marg{name}\marg{instance}\marg{gate}}
+  Draws the first part of the measure. The points where these two parts should
+  be connected are drawn by a small cicle, to which the text \meta{gate} in
+  attached.
+  In the starred version of the command arrow heads are at the outside of the
+  measured interval.
+\end{command}
+\begin{command}{\measureend\opt{*}\opt{\oarg{options}}\marg{name}\marg{instance}\marg{gate}}
+  Draws the first part of the measure in similar way as |\measurestart| command.
+\end{command}
+
+
+Several keys can be used to control the detailed layout of the time measurement
+symbols. The |label distance| key specify the distance between the label of a
+measurement and the measurement symbol.
+\msckey{measure distance}{\meta{distance}}{
+This key specifies at which \meta{distance} the measurement symbols are drawn from the
+\meta{instance} line.
+}
+\msckey{measure symbol width}{\meta{width}}{
+  Specifies the \meta{width} of the measurement triangle symbol.
+}
+
+The following example illustrates marks and measurements in an \MSC{}..
+\begin{codeexample}[width=\linewidth-9.8cm]
+\begin{msc}[small values]{Time measurements}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\mess{m1}{i}{j}[1]
+\mscmark{t=0.0}{i}
+\measure{0.6}{i}{j}[4]
+\nextlevel
+\mscmark[position=above,side=right]{t=0.3}{j}
+\nextlevel[3]
+\mess{m2}{j}{k}
+\measurestart*[side=right]{0.2}{k}{g}
+\nextlevel[6]
+\mess{m3}{k}{i}
+\mscmark[position=below,side=left]{t=1.0}{i}
+\measureend*[side=right]{0.2}{k}{g}
+\nextlevel
+\end{msc}
+\end{codeexample}
+
+\subsection{Lost and found messages}
+\label{lostfound}
+\begin{command}{\lost\opt{\oarg{options}}\marg{name}\marg{gate}\marg{instance}}
+A lost message is denoted by an arrow starting at an instance and
+ending at a filled circle.
+The argument \meta{instance} determines the instance to which the
+arrow is attached.  The \meta{name} of the message is put above the
+message arrow. The \meta{gate} is a text associated to the circle.
+The keys |side|, |label position|, |pos|, |label distance| and
+|self message width|
+function in similar way as in the |\mess| command
+(Section~\ref{messages}). That is, |side| controls the placement of the lost or
+found message with respect to the instance axis. The |label position| and |pos|
+controls the placement of the \meta{name} with respect to the message arrow.
+The key |self message width| determines the length of the arrow and |label
+distance| specifies the distance between the name and the arrow.
+\end{command}
+\begin{command}{\found\opt{\oarg{options}}\marg{name}\marg{gate}\marg{instance}}
+A found message is denoted by an arrow starting at an open circle and ending at
+an instance. Otherwise the command is identical to the |\lost| command.
+\end{command}
+\msckey{lost symbol radius}{\meta{radius}}{
+  Determines the \meta{radius} of the circle for lost and found messages.
+}
+
+The following example shows a found and a lost message.
+
+\begin{codeexample}[width=\linewidth-9.8cm]
+\begin{msc}[small values]{lost and found}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\found{m}{g}{i}
+\nextlevel
+\mess{p}{i}{j}
+\nextlevel
+\lost[side=right]{n}{}{j}
+\end{msc}
+\end{codeexample}
+
+
+\subsection{Conditions}
+\label{conditions}
+There are two commands to draw condition boxes:
+\begin{command}{\condition\opt{*}\opt{\oarg{options}}\marg{text}\marg{instance list}}
+  A condition is denoted by a hexagon. It is used to express that the
+  system has entered a certain state. A condition relates to a number of
+  instances. All conditions which take part in the condition are covered
+  by the condition symbol. The other instances are drawn through the
+  condition symbol.
+  
+  The \meta{text} is placed in the center of the condition. The
+  \meta{instance list} expresses which instances take part in the
+  condition. It is a list of nicknames of instances, separated by
+  commas. Take care not to add extra white space around the nicknames,
+  since this is considered part of the nickname in \LaTeX.
+  The order in which the instances are listed is immaterial.
+
+  The starred version of the command |\condition*|, produces the same
+  result as the command |\condition|, except that the width of the
+  condition symbol is not adjusted to fit the contents of the hexagon.
+\end{command}
+\begin{command}{\ncondition\opt{*}\opt{\oarg{options}}\marg{text}\marg{instance list}}
+The |\ncondition| command produces a condition with a diagonal
+cross in it. It is otherwise identical to the |\condition| command.
+\end{command}
+
+There are several keys that controls the shape of the condition
+symbol:
+\msckey{condition height}{\meta{hegiht}}{
+  Determines the \meta{height} of the condition symbol.
+}
+\msckey{condition overlap}{\meta{distance}}{
+  The \meta{distance} determines the width of the part of the condition
+  symbol which extends over the rightmost/leftmost contained instance
+  axis.
+}
+
+The following example contains some conditions.
+\begin{codeexample}[width=\linewidth-10.6cm]
+\begin{msc}[small values]{conditions}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\condition{some condition}{i,k}
+\nextlevel[3]
+\mess{m}{i}{j}
+\action{a}{k}
+\nextlevel
+\condition{C}{i}
+\ncondition{D}{j}
+\nextlevel[2]
+\condition{A, B, C}{i,j,k}
+\nextlevel[2]
+\end{msc}
+\end{codeexample}
+
+\subsection{Generalized ordering}
+\label{ordering}
+A generalized order is treated much like a regular message (see
+Section~\ref{messages}). There
+are three differences: a generalized order is drawn with a
+dotted line, it has no label, and the arrow head is in the middle of
+the line. A generalized order is defined with the following command.
+\begin{command}{\order\opt{\oarg{options}}\marg{sender}\marg{receiver}\opt{\oarg{level offset}}}
+The \meta{sender} and \meta{receiver} are the nicknames of the
+instances which are connected by the generalized ordering symbol.
+At the \meta{receiver} instance, the generalized ordering symbol ends
+at the current level plus the \meta{level offset}. The
+\meta{level offset} is an optional integer value, with default 0.
+
+In case \meta{sender} and \meta{receiver} denote the same instance,
+the order is a \emph{self order}.  The placement of the order arrow of
+a self order is controlled by the key |side|.  It
+can have values |left| (meaning that the ordering symbol is drawn
+left of the instance axis) and |right| (meaning that the ordering
+symbol is drawn right of the instance axis). By default it is drawn at
+the left side of the instance.
+
+The position of the arrow is controlled with the |pos| key. The key |self
+message width| specify the width of the polyline used for drawing orderings on a
+single instance axis. The key |arrow scale| controls the size of the arrow.
+
+Orderings to or from the environment (i.e.,\ the left or the right side
+of the \MSC{} frame) can be
+specified by setting the sender or the receiver argument to the value
+|envleft| or |envright|.
+\end{command}
+
+An example of a generalized order is given in the following diagram.
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[head top distance=0.8cm]
+           {generalized order}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\mess{m}{envleft}{i}
+\order{i}{j}[1]
+\nextlevel
+\mess{k}{j}{envright}
+\nextlevel
+\end{msc}
+\end{codeexample}
+
+\subsection{Instance regions}
+\label{regions}
+A part of the instance axis can be drawn in a different style. Such a
+part is called an {\em instance region}. The following
+regions are supported:
+{\em coregion} (the instance axis is dashed, which means that the order of the
+attached instances is immaterial),
+{\em suspension region} (a small rectangle with dashed left and right
+sides, which denotes that the instance is suspended),
+{\em activation region} (a small filled rectangle, which denotes that
+the instance has control).
+
+The following commands are used to draw an instance region.
+\begin{command}{\regionstart\opt{\oarg{options}}\marg{type}\marg{instance name}}
+  After this command the instance axis of \meta{intstance name} is drawn in the
+  shape determined by \meta{type} starting from the current level.
+  The \meta{type} can have values |coregion|, |suspension|, and |activation|.
+\end{command}
+\begin{command}{\regionend\marg{instance name}}
+  After this command the instance axis for the \meta{instance name} is drawn in
+  the usual way. In other words it ends current region.
+\end{command}
+The following keys control the shape of on instance region:
+\msckey{region width}{
+  Determines the \meta{width} of the coregion start and end symbol and the \meta{width} of the activation and suspension rectangle.
+}
+
+In the following example, several instance regions are demonstrated.
+Note that the relative order of |\mess|, |\regionstart|, and
+|\regionend| commands does not matter. Also notice that the
+second activation region on~$i$ ends with a method reply
+(which is produced by the command |\mess*|).
+
+\medskip
+
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[small values]{regions}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\regionstart{activation}{i}   \nextlevel[3]
+\regionend{i}
+\mess{m}{i}{j}                \nextlevel
+\regionstart{coregion}{j}     \nextlevel
+\regionstart{suspension}{k}
+\mess{p}{j}{k}                \nextlevel
+\regionstart{activation}{i}
+\mess{q}{j}{i}                \nextlevel
+\regionend{j}                 \nextlevel[3]
+\regionend{i}
+\mess*{r}{i}{j}               \nextlevel
+\mess{s}{j}{k}
+\regionend{k}                 \nextlevel
+\end{msc}
+\end{codeexample}
+
+\subsection{Instance creation and instance stop}
+\label{createstop}
+The \MSC{} language offers constructs for dynamic instance creation and
+instance destruction.
+An instance can dynamically create another instance by issuing a
+create command. An instance creation is drawn as a dashed message
+arrow. At the side of the arrow head, the instance head symbol for the
+created instance is drawn.
+An instance end symbol does not denote the end of the specified
+process, but merely the end of its current description. Therefore, a
+different symbol is needed which denotes that an instance stops before
+the end of the \MSC{} in which it is contained.
+The instance stop symbol is a cross.
+
+The following commands are used for instance creation and instance
+stop.
+\begin{command}{\dummyinst\opt{\oarg{options}}\marg{created instance}}
+  This command reserve space for on instance which will be created dynamically.
+  |\dummyinst| command is mixed with the declarations of normal instances (see
+  the |\declinst| command, Section~\ref{instances}). The argument \meta{created
+  instance} is the nickname of the instance that will be created later.
+\end{command}
+\begin{command}{\startinst\opt{\oarg{options}}\marg{instance name}%
+    \marg{text above}\marg{text inside}}
+  This command create an instance. The created instance must have been declared
+  first with the |\dummyinst| command. The name of the created instance consists
+  of two parts. The part called \meta{text above} is placed above the instance
+  head and the \meta{text inside} is centered within the instance head.
+\end{command}
+\begin{command}{\create\opt{\oarg{options}}\marg{name}\marg{creator}\marg{instance name}%
+    \marg{text above}\marg{text inside}}
+  This command is identical to |\startinst| command except it allows to specify
+  the creator of the instance. The command results in a horizontal message arrow
+  labelled with \meta{name}. The arrow starts at the current level at the
+  instance with the nickname \meta{creator} and ends at the current level at the
+  instance head of the instance with nickname \meta{instance name}.
+  As with normal messages, placement of the message label is controlled by the
+  keys |label position| and |pos|.
+\end{command}
+\begin{command}{\stop\opt*\opt{\oarg{options}}\marg{instance name}}
+  An instance is stopped with the |\stop| command.
+  The \meta{instance} is the nickname of the stopped instance. The
+  instance axis is not drawn any further below the level at which the
+  |\stop| command is issued. Also, the instance foot symbol is not
+  drawn.
+  
+  If the |\stop*| command is used, then the instance foot symbol is
+  drawn instead of the stop symbol.
+\end{command}
+\msckey{stop width}{\meta{width}}{
+  The \meta{width} determines the size of the stop symbol.
+}
+
+
+Take care not to specify any events on an instance which has not yet
+been created or which has already been stopped. However, it is possible
+to create an instance after it has stopped, as showed in the next example.
+
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[small values]{dynamic instances}
+\declinst{i}{}{j}
+\dummyinst{j}
+\declinst{k}{}{k}
+
+\mess{p}{i}{k}
+\nextlevel[3]
+\create[label position=below]{kick}{k}{j}{}{j}
+\nextlevel[2]
+\stop*{k}
+\nextlevel
+\mess{ok}{j}{i}
+\nextlevel
+\stop{j}
+\nextlevel[2]
+\startinst{k}{}{again}
+\nextlevel[2]
+\end{msc}
+\end{codeexample}
+
+\subsection{\MSC{} references}
+\label{references}
+Within an \MSC{} a reference to other \MSC{}s can be included. Such a
+reference is drawn as a rectangle with rounded corners, covering part
+of the \MSC{}. The following commands are used to draw \MSC{} references.
+
+\begin{command}{\referencestart\opt{\oarg{options}}\marg{nickname}
+    \marg{text}\marg{left instance}\marg{right instance}}
+  The reference symbol starts at the level where the
+  |\referencestart| command is used, and ends at the level where
+  the corresponding |\referenceend| command occurs. These commands
+  correspond if they have the same \meta{nickname}. 
+  The \meta{text} is
+  placed in the center of the reference symbol. The reference covers all
+  instances from \meta{leftinstance} to \meta{rightinstance}.
+
+  The left and right edge of the reference symbol are
+  \meta{nickname}|left| and \meta{nickname}|right|, where \meta{nickname} is
+  the nickname of the \MSC{} reference as defined in the
+  |\referencestart| command.
+  These names can be used at every place where the nickname of an
+  instance is required, e.g.\ as the sender or receiver of a message.
+\end{command}
+\begin{command}{\referenceend\opt{\oarg{options}}\marg{nickname}}
+  This command end the reference \meta{nickname} that has been started with the
+  |\referencestart| command.
+\end{command}
+The following keys affect the drawing of reference symbol:
+\msckey{left reference overlap}{\meta{distance}}{
+  Determines the \meta{distance} between the left  edge of the reference symbol and the
+  leftmost covered instance axis.
+}
+\msckey{right reference overlap}{\meta{distance}}{
+  Determines the \meta{distance} between the right  edge of the reference symbol and the
+  rightmost covered instance axis.
+}
+
+The following example shows the usage of references:
+
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[small values]{references}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\mess{a}{j}{k}
+\nextlevel
+\referencestart{r}{a reference}{i}{j}
+\nextlevel
+\mess{b}{rright}{k}
+\nextlevel[2]
+\referenceend{r}
+\nextlevel[2]
+\referencestart{p}{another reference}{i}{k}
+\nextlevel
+\mess{c}{envright}{pright}
+\nextlevel[4]
+\referenceend{p}
+\end{msc}
+\end{codeexample}
+
+\subsection{Inline expressions}
+\label{inlines}
+An inline expression is a part of an \MSC{} on which an operation is
+defined. A rectangle surrounds the part of the \MSC{} containing the
+operands. The operands are separated by horizontal dashed lines.
+The operator is placed in the upper left corner of the inline
+expression symbol.
+The following commands are used to draw inline expressions.
+
+\begin{command}{\inlinestart\opt{\oarg{options}}\marg{nickname}\marg{operator}\marg{left instance}\marg{right instance}}
+  Starts the inline expression at the current level. The inline expression
+  spans over the instances from \meta{left instance} to \meta{right instance}.
+  The \meta{operand} is placed in the upper left corner of the rectangle.
+% 
+  The left and right edge of the inline expression symbol are named
+  \meta{nickname}|left| and \meta{nickname}|right|, where \meta{nickname} is
+  the nickname of the inline expression as defined in the
+  |\inlinestart| command.
+  These names can be used at every place where the nickname of an
+  instance is required, e.g.\ as the sender or receiver of a message.
+\end{command}
+\begin{command}{\inlineseparator\opt{\oarg{options}}\marg{nickname}}
+  Draws a dashed line at the current level for the inline expression with
+  nickname \meta{nickname}.
+\end{command}
+\begin{command}{\inlineend\opt{*}\opt{\oarg{options}}\marg{nickname}}
+  Ends the inline expresion with the nickname \meta{nickname} at the current level.
+  The command |\inlineend*| does the same as the command
+  |\inlineend|, except that the bottom line of the rectangle is
+  This is used to indicate that the operand is optional.
+  dashed.
+\end{command}
+
+\msckey{left inline overlap}{\meta{distance}}{
+  Determines the \meta{distance} which is a distance between the left edge of the inline expression
+  symbol and the leftmost  included instance axis. 
+}
+\msckey{right inline overlap}{\meta{distance}}{
+  Determines the \meta{distance} which is a distance between the right edge of the inline expression
+  symbol and the rightmost included instance axis. 
+}
+
+The following example shows how to draw inline expressions:
+
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[small values]{inline expressions}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\inlinestart{exp1}{par}{i}{k}      \nextlevel
+\mess{a}{k}{j}                     \nextlevel
+\inlinestart[left inline overlap=0.6cm]
+            {exp2}{alt}{i}{j}      \nextlevel[2]
+\mess{b}{j}{i}                     \nextlevel
+\inlineseparator{exp2}             \nextlevel
+\mess{c}{j}{i}                     \nextlevel
+\inlineend{exp2}                   \nextlevel
+\inlineseparator{exp1}             \nextlevel
+\mess{d}{j}{k}                     \nextlevel
+\inlineend{exp1}                   \nextlevel
+\inlinestart{exp3}{opt}{i}{j}      \nextlevel
+\mess{e}{envright}{exp3right}
+\mess{e}{exp3right}{j}             \nextlevel
+\mess{f}{j}{i}                     \nextlevel
+\inlineend*{exp3}
+\end{msc}
+\end{codeexample}
+%
+\subsection{Gates}
+\label{gates}
+
+A gate determines a connection point for messages.
+
+The following command can be used to draw gates.
+
+\begin{command}{\gate\opt{*}\opt{\oarg{options}}\marg{gate name}\marg{instance name}}
+  The unstarred version produces a normal (invisible) gate. The starred
+  version produces a visible gate (a small dot). The gate is drawn at the
+  current level at the instance \meta{instance name} (which can also be the
+  left and right edge of e.g.\ an \MSC{} reference).  The
+  \meta{gate name} is attached to the gate. The positioning of the \meta{gate
+  name} relative to the gate is determined by the keys |side| (|left| or
+  |right|) and |position| (|above|, |mid| or |below|).
+\end{command}
+
+There are several keys to control the size and shape of the gate symbol:
+\msckey{gate symbol radius}{\meta{radius}}{
+  The \meta{radius} defines the radius of the gate symbol.
+}
+
+The next example shows a number of gates.
+\begin{codeexample}[width=\linewidth-9.6cm]
+\begin{msc}[small values]{gates}
+\declinst{i}{}{i}
+\declinst{j}{}{j}
+\declinst{k}{}{k}
+\referencestart{r}{ref}{i}{j}
+\nextlevel
+\gate{$g$}{rright}
+\mess{b}{rright}{envright}
+\gate[r][c]{$h$}{envright}
+\nextlevel[2]
+\mess{c}{rright}{k}
+\gate*[l][b]{$h'$}{rright}
+\nextlevel[2]
+\referenceend{r}
+\end{msc}
+\end{codeexample}
+
+\subsection{High-level \MSC{}s}
+\label{hmsc}
+A High-level \MSC{} (\HMSC{}) is a drawing which defines the relation between
+a number of \MSC{}s. It is composed of a start symbol (an upside down
+triangle), a number of end symbols (represented by triangles), a
+number of \MSC{} references (these are rectangles with rounded corners),
+a number of conditions (hexagons) and possibly several connection
+points (circles). These symbols are connected by arrows.
+
+The following commands can be used to draw \HMSC{}s.
+\begin{environment}{{hmsc}\opt{\oarg{options}}\marg{hmsc name}\opt{(\meta{llx},\meta{lly})(\meta{urx},\meta{ury})}}
+  In order to draw \HMSC{}s, a new environment is defined, which is called
+  |hmsc|. The command to begin this environment has several
+  arguments.
+  
+  The header of an \HMSC{} is
+  formed from the value of the key |hmsc keyword| (initially |hmsc|), followed by the
+  \meta{hmsc name}. The positioning of the header depends on the key
+  |title position|. The possible values are |left|, |right| and |center|. The
+  keys |title top distance| and |title distance| control the distances of the
+  header from the frame.
+  The size of the \HMSC{} frame is calculated automatically unless the optional
+  parameters (\meta{llx},\meta{lly}) and (\meta{urx},\meta{ury}) are specified. In
+  such case the frame is determined by the
+  coordinates of the lower-left corner,(\meta{llx},\meta{lly}) , and the
+  coordinates of the upper-right corner, (\meta{urx},\meta{ury}).
+\msckey{hmsc keyword}{\meta{keyword}}%
+{The \meta{keyword} will be a starting word in a header of \HMSC{}.}
+\msckey{north hmsc margin}{\meta{distance}}%
+{The \meta{distance} determines the north margin of hmsc environment}
+\msckey{south hmsc margin}{\meta{distance}}%
+{The \meta{distance} determines the south margin of hmsc environment}
+\msckey{east hmsc margin}{\meta{distance}}%
+{The \meta{distance} determines the east margin of hmsc environment}
+\msckey{west hmsc margin}{\meta{distance}}%
+{The \meta{distance} determines the west margin of hmsc environment}
+\msckey{west hmsc margin}{\meta{distance}}%
+{The \meta{distance} determines the west margin of hmsc environment}
+\begin{stylekey}{/msc/hmsc margin=\meta{distance}}
+     Sets the |north hmsc margin|, |south hmsc margin|, |west hmsc margin|,
+     |east hmsc margin| to \meta{distance}.
+\end{stylekey}
+\end{environment}
+In the \HMSC{} we can draw number of symbols. Each symbol is in fact a \tikz{}
+node and \meta{options} can be used to specify for example the placement
+relative to the other nodes. The following commands are used to draw the symbols:
+\begin{command}{\hmscstartsymbol\opt{\oarg{options}}\marg{nicknamee}\opt{(\meta{x},\meta{y})}}
+  Draws an equilateral triangle pointed down representing the start symbol. The
+  \meta{nickname} can be used later as a reference to the drawn symbol. Optional
+  \meta{x} and \meta{y} specify the coordinates at which the symbol should be
+  drawn. 
+\end{command}
+\begin{stylekey}{/msc/start symbol}
+  A style that is applied to draw a triangle node in
+  the |\hmscstartsymbol| command.
+\end{stylekey}
+\msckey{hmsc symbol width}{\meta{width}}{
+  Sets the width of the triangle of the start and end symbol in hmsc to the \meta{width}.  
+}
+\begin{command}{\hmscendsymbol\opt{\oarg{options}}\marg{nickname}\opt{(\meta{x},\meta{y})}}
+  The command in identical to |\hmscstartsymbol| command but draws an
+  equilateral triangle pointed up representing the start symbol.
+\end{command}
+\begin{stylekey}{/msc/end symbol}
+  A style that is applied to draw a triangle node in
+  the |\hmscendsymbol| command.
+\end{stylekey}
+\begin{command}{\hmscreference\opt{\oarg{options}}\marg{nickname}\marg{text}\opt{(\meta{x},\meta{y})}}
+  Draws a \meta{text} inside a frame with rounded corners. The \meta{nickname}
+  can be used later to connect it to other hmsc elements.
+\end{command}
+\begin{stylekey}{/msc/reference}
+  A style that is applied to draw a reference node in the |\hmscreference| command.
+\end{stylekey}
+\msckey{reference height}{\meta{height}}%
+{ Sets the minimal height of the reference to \meta{height}.}
+\msckey{reference width}{\meta{width}}%
+{ Sets the minimal width of the reference to \meta{width}.}
+\begin{command}{\hmsccondion\opt{\oarg{options}}\marg{nickname}\marg{text}\opt{(\meta{x},\meta{y})}}
+  Draws a \meta{text} inside a rectangular frame with diamond shaped sides. The \meta{nickname}
+  can be used later to connect it to other hmsc elements.
+\end{command}
+\msckey{hmsc condition height}{\meta{height}}%
+{ Sets the minimal height of the condition to \meta{height}.}
+\msckey{hmsc condition width}{\meta{width}}%
+{ Sets the minimal width of the condition to \meta{width}.}
+\begin{command}{\hmscconnection\opt{\oarg{options}}\marg{nickname}\opt{(\meta{x},\meta{y})}}
+  Draws a small circle symbolizing connection at coordinates
+  (\meta{x},\meta{y}). Later we can refer to the connection using \meta{nickname}.
+\end{command}
+\msckey{hmsc connection radius}{\meta{distance}}%
+{ Sets the radius of the connection symbol to the \meta{distance}}
+
+The \HMSC{} grid is not drawn, but used to control the positioning of the
+\HMSC{} symbols  (|startsymbol|, |endsymbol|, |reference|,
+|condition|, and |connection|). 
+The center of each symbol is drawn on the grid point
+with coordinates (\meta{x},\meta{y}). Each symbol also has a \meta{nickname}
+for later reference.
+
+\begin{verbatim}
+\hmscreference{nickname}{text}(x,y)
+\hmsccondition{nickname}{text}(x,y)
+\hmscconnection{nickname}(x,y)
+\arrow{from-nickname}[coord-list]{to-nickname}
+\end{verbatim}
+
+\HMSC{} symbols can be connected by means of the \verb+arrow+ command.
+This draws an arrow from the symbol with nickname \verb+from-nickname+
+to the symbol with nickname \verb+to-nickname+. The optional argument
+\verb+coord-list+ can be used if the line connecting the source and
+the destination should not be straight. The \verb+coord-list+ has
+the following syntax: \verb+(x1,y1)(x2,y2)...(xk,yk)+. This means
+that the connecting line goes through the points with coordinates
+(x1,y1), (x2,y2), \ldots, (xk,yk).
+
+Arrows always leave the start symbol at the bottom. They enter the end symbol
+at the top.
+Arrows start and end either at the middle of the top or at the middle
+of the bottom of a reference and condition symbol. The incoming
+(outgoing) direction of the arrow determines whether it will start
+(end) at the top or at the bottom.
+
+There are several parameters to control the size and shape of the
+symbols (see Section~\ref{parameters}). These are
+\verb+\hmscconditionheight+ (the height of the condition symbol),
+\verb+\hmscconditionwidth+ (the width of the condition symbol,
+excluding the left and right angular parts),
+\verb+\hmscreferenceheight+ (the height of the reference symbol),
+\verb+\hmscreference width+ (the width of the reference symbol),
+\verb+\messarrowscale{size}+ (a command to set the size of the arrow
+head of a connection line);
+\verb+setconnectiontype(type)+ (set the shape of the polyline
+connection the symbols; \verb+type+ can be \verb+straight+,
+\verb+rounded+, and \verb+curved+),
+\verb+\startsymbolwidth+ (the width of the start and end symbol),
+\verb+\topnamedist+ (sets the distance between the top of the \HMSC{} frame
+and the \HMSC{} header).
+
+An example of an \HMSC{} is in the following diagram. Notice that the
+width and height of reference symbols are changed locally (i.e.,
+between \verb+{+ and \verb+}+ braces) just before the big
+reference~\verb+b+ is defined.
+
+\medskip
+
+\noindent
+\begin{minipage}[c]{0.375\linewidth}
+
+\begin{hmsc}{High level}(-3,0)(3,12)
+\hmscstartsymbol{s}(0,10)
+\hmscreference{a}{A}(0,9)
+\hmscconnection{c}(0,7.5)
+{
+\mscset{reference width=2cm}
+\mscset{reference height=2\baselineskip}
+% \setlength{\hmscreferencewidth}{2cm}
+% \setlength{\hmscreferenceheight}{3\baselineskip}
+\hmscreference{b}{\parbox{1.9cm}
+  {\centering
+   this is a big
+   hmsc reference}
+  }(0,6)
+}
+\hmsccondition{t}{Again}(1,4.25)
+\hmsccondition{ok}{Ok}(0,3.5)
+\hmsccondition{q}{\textit{Break}}(-2,3.5)
+\hmscendsymbol{e1}(-2,2)
+\hmscreference{do}{Do it!}(0,2)
+\hmscendsymbol{e2}(0,1)
+
+\arrow{s}{a}
+\arrow{a}{c}
+\arrow{c}{b}
+\arrow{c}[(-2,7.5)]{q}
+\arrow{b}{q}
+\arrow{q}{e1}
+\arrow{b}{ok}
+\arrow{ok}{do}
+\arrow{do}{e2}
+\arrow{b}{t}
+\arrow{t}[(1,3.5)(2.5,3.5)(2.5,7.5)]{c}
+\end{hmsc}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.6\linewidth}
+{\footnotesize
+\begin{verbatim}
+\begin{hmsc}{High level}(-3,0)(3,12)
+\hmscstartsymbol{s}(0,10)
+\hmscreference{a}{A}(0,9)
+\hmscconnection{c}(0,7.5)
+{\setlength{\hmscreferencewidth}{2cm}
+ \setlength{\hmscreferenceheight}
+           {3\baselineskip}
+ \hmscreference{b}{\parbox{1.9cm}
+   {\centering this is a big hmsc reference}
+   }(0,6)}
+\hmsccondition{t}{Again}(1,4.5)
+\hmsccondition{ok}{Ok}(0,3.5)
+\hmsccondition{q}{\textit{Break}}(-2,3.5)
+\hmscendsymbol{e1}(-2,2)
+\hmscreference{do}{Do it!}(0,2)
+\hmscendsymbol{e2}(0,1)
+\arrow{s}{a}
+\arrow{a}{c}
+\arrow{c}{b}
+\arrow{c}[(-2,7.5)]{q}
+\arrow{b}{q}
+\arrow{q}{e1}
+\arrow{b}{ok}
+\arrow{ok}{do}
+\arrow{do}{e2}
+\arrow{b}{t}
+\arrow{t}[(1,3.5)(2.5,3.5)(2.5,7.5)]{c}
+\end{hmsc}
+\end{verbatim}
+}
+\end{minipage}
+
+
+\subsection{\MSC{} documents}
+\label{mscdoc}
+An \MSCdoc{} is a drawing which contains various declarations
+of objects used in the \MSC{} description. For drawing \MSCdoc{}s
+he following commands are provided.
+
+\begin{verbatim}
+\begin{mscdoc}[headerpos]{mscdocname}{text}(llx,lly)(urx,ury)
+\end{mscdoc}
+\reference{text}(x,y)
+\separator{y}
+\end{verbatim}
+
+As for \MSC{} and \HMSC{}, a new environment is defined, which is named
+\verb+mscdoc+. The command to begin an \MSCdoc{} has several
+arguments. The argument \verb+headerpos+ is optional. It controls
+positioning of the header of the \MSCdoc{}.
+This argument can have values
+\verb+l+ (for a left aligned header), \verb+c+ (for a centered header)
+and \verb+r+ (for a right aligned header).
+The header of an \MSCdoc{} is formed from the keyword \verb+mscdocument+,
+followed by the \verb+mscdocname+.
+The \verb+text+ is placed left-aligned below the \MSCdoc{} header.
+The size of the \MSCdoc{} frame is determined by
+coordinates of the lower-left corner, \verb+(llx,lly)+, and the
+coordinates of the upper-right corner, \verb+(urx,ury)+.
+
+The \MSCdoc{} grid is not drawn, but used to control the positioning of the
+\MSC{} references.
+The center of such a reference is drawn on the grid point
+with coordinates \verb+{x,y}+.
+
+The \verb+separator+ command draws a dashed horizontal line. The \MSC{}
+references above the separator are the exported, while the ones below
+the separator are local.
+
+There are several parameters to control the size and shape of the
+symbols (see Section~\ref{parameters}).
+\verb+\mscdocreferenceheight+ (the height of the reference symbol),
+\verb+\mscdocreferencewidth+ (the width of the reference symbol),
+\verb+\topnamedist+ (sets the distance between the top of the \MSCdoc{}
+frame and the \MSCdoc{} header).
+
+An example of an \MSCdoc{} is in the following diagram. Notice that
+the size of references in an \MSCdoc{} had to be changed for the last
+reference.
+
+\medskip
+
+
+\begin{minipage}{0.4\linewidth}
+\begin{mscdoc}{My declarations}%
+              (0,0)(6,8)
+\reference{a}(1,6)
+\reference{b}(3,6)
+\reference{c}(1,4)
+\reference{d}(3,4)
+\separator{3}
+\mscset{reference width=4.5cm}
+\mscset{reference height=2\baselineskip}
+\reference{%
+ \parbox{4cm}%
+ {\raggedright This is a
+  two-line reference}}
+ (3,1.5)
+\end{mscdoc}
+\end{minipage}
+%
+\begin{minipage}{0.5\linewidth}
+{\small
+\begin{verbatim}
+\begin{mscdoc}{My declarations}%
+              (0,0)(6,8)
+\reference{a}(1,6)
+\reference{b}(3,6)
+\reference{c}(1,4)
+\reference{d}(3,4)
+\separator{3}
+\mscset{reference width=4.5cm}
+\mscset{reference height=2\baselineskip}
+\reference{%
+ \parbox{4cm}%
+ {\raggedright This is a
+  two-line reference}}
+ (3,1.5)
+\end{mscdoc}
+\end{verbatim}
+}
+\end{minipage}
+
+
+
+\section{Style parameters}
+\label{parameters}
+\definecolor{markColor}{rgb}{0.10,0.10,0.9}
+
+\makeatletter
+\NewDocumentCommand{\measureMark}{%
+    s       % arrows outside the measured distance
+    D<>{1.5pt} % offset of marks
+    O{.75cm}    % offset of label
+    m       % first point
+    m       % second point
+    m       % label
+    D<>{o}  % () coordinates -> angle
+            % h -> horizontal,
+            % v -> vertical
+            % o or what ever -> oblique
+    O{}     % options for tikzset
+    }{%
+
+    {\tikzset{#8}
+
+    \coordinate (@1) at #4 ;
+    \coordinate (@2) at #5 ;
+
+    \if #7v % vertical
+        \coordinate (@0) at ($($#4!.5!#5$) + (#3,0)$) ; 
+        \coordinate (@4) at (@0|-@1) ;
+        \coordinate (@5) at (@0|-@2) ;
+    \else
+    \if #7h % horizontal
+        \coordinate (@0) at ($($#4!.5!#5$) + (0,#3)$) ; 
+        \coordinate (@4) at (@0-|@1) ;
+        \coordinate (@5) at (@0-|@2) ;
+    \else % cotation encoche
+    \ifnum\pdfstrcmp{\unexpanded\expandafter{\@car#7\@nil}}{(}=\z@
+        \coordinate (@5) at ($#7!#3!#5$) ;
+        \coordinate (@4) at ($#7!#3!#4$) ;
+    \else % cotation oblique    
+        \coordinate (@5) at ($#5!#3!90:#4$) ;
+        \coordinate (@4) at ($#4!#3!-90:#5$) ;
+    \fi\fi\fi
+
+    \draw[dotted,very thin,shorten >= #2,shorten <= -2*#2] (@4) -- #4 ;
+    \draw[dotted,very thin,shorten >= #2,shorten <= -2*#2] (@5) -- #5 ;
+
+    \IfBooleanTF #1 {% with star
+    \draw[measureMark arrow,-,draw=none] (@4) -- (@5)
+        node[measureMark node] {#6\strut};
+    \draw[measureMark arrow,<-] (@4) -- ($(@4)!-2pt!(@5)$) ;   
+    \draw[measureMark arrow,<-] (@5) -- ($(@5)!-2pt!(@4)$) ;   
+    }{% without star
+    \ifnum\pdfstrcmp{\unexpanded\expandafter{\@car#7\@nil}}{(}=\z@
+        \draw[measureMark arrow] (@5) to[bend right]
+            node[measureMark node] {#6\strut} (@4) ;
+    \else
+    \draw[measureMark arrow] (@4) -- (@5)
+        node[measureMark node] {#6\strut};
+    \fi
+    }}
+    }
+\makeatother
+
+By means of a collection of parameters, the graphical appearance of
+an \MSC{} can be fine tuned to the user's taste.
+The general parameters
+are displayed in Figure~\ref{parametersfig} on page~\pageref{parametersfig}.
+%
+% %========================
+\begin{figure}[htb]
+  \begin{msc}[right environment distance=2.3cm]{Lengths}
+   \tikzset{%
+       measureMark node/.style={%
+           midway,
+           sloped,
+           fill=white,
+           text = markColor,
+           font=\footnotesize,
+           inner sep=1.5pt,
+           outer sep=2pt
+       },
+       measureMark arrow/.style={%
+           <->,
+           >=latex,
+           very thin,dashed
+       },
+       dimen/.style={<->,>=latex,thin,every rectangle node/.style={fill=white,midway,font=\sffamily}},
+       symmetry/.style={dashed,thin},
+   }
+  \declinst{m1}{aname}{iname}
+  \declinst{st}{}{}
+  \declinst{m2}{}{}
+  
+  \mess{msg1}{m1}{st}
+  \nextlevel
+  \mess{msg2}{m1}{st}
+  \nextlevel
+  \mess{self}{m1}{m1}
+  \coregionstart{m2}
+  \nextlevel[2]
+  \coregionend{m2}
+  \nextlevel
+  \lost[r]{x}{}{m2}
+  \stop{st}
+  \settimer{T}{m1}
+  \nextlevel
+  \inlinestart[left inline overlap=0.9cm,right inline overlap=0.5cm]{alt}{alt}{m1}{m1}
+  \nextlevel[2]
+  \inlineend{alt}
+  \action{a}{m2}
+  \nextlevel
+  \referencestart{ref}{\small reference}{m1}{m1}
+  \nextlevel
+  \referenceend{ref}
+  \nextlevel
+  \gate*{}{m1}
+  \nextlevel
+  \condition{cond1}{m1,m2}
+  \nextlevel[3]
+  \mess{msg3}{m2}{m1}
+  \makeatletter
+    \msc@endmsc[]
+  \makeatother
+    
+    \measureMark*[-2.5cm]{($(msc@env@nw)+(\mscget{title distance},0cm)$)}{($(msc@env@nw)+
+      (\mscget{title distance},-\mscget{title top distance})$)}%
+    {title top distance}%
+    [measureMark node/.append style={above right=-36pt and -2pt,rotate=90}]
+  
+    \measureMark*[-0.8cm]{($(msc@env@nw)+(0cm,-\mscget{title top distance}-1em)$)}{($(msc@env@nw)+
+      (\mscget{title distance},-\mscget{title top distance}-1em)$)}%
+    {title distance}[measureMark node/.append style={left=6pt}]
+  
+    \measureMark*[-1.1cm]{(msc@nodem1.north)}{($(msc@nodem1.north)+ (0cm,\mscget{label distance})$)}%
+    {label distance}[measureMark node/.append style={above left=6pt and 9pt,rotate=-90}]
+  
+    \measureMark*[-1.6cm]{($(msc@level2-|msc@nodem1)+(1.5cm,0)$)}
+    {($(msc@level2-|msc@nodem1)+ (1.5cm,\mscget{label distance})$)}%
+    {label distance}[measureMark node/.append style={above left=6pt and 9pt,rotate=-90}]
+  
+    \measureMark[0.0cm]{($(msc@env@nw)+(4cm,0)$)}{(msc@nodest.north)}%
+    {head top distance}<v>[measureMark node/.append style={right=0pt,rotate=90}]
+  
+    \measureMark[0.2cm]{($(msc@env@nw)+(0,-3cm)$)}{(msc@nodem1.south)}%
+    {left environment distance}<h>[measureMark node/.append style={above left=0pt and -7pt}]
+  
+    \measureMark[1.0cm]{($(msc@nodem1.south)+(-\mscget{self message
+        width},-2.4cm)$)}{($(msc@nodem1.south)+(0cm,-2.4cm)$)}%
+    {self message width}<h>[measureMark node/.append style={left=8pt}]
+  
+    \measureMark*[0.21cm]{($(msc@nodem1.south)+(-\mscget{self message width}-
+      \mscget{timer width}/2,-2.9cm)$)}
+    {($(msc@nodem1.south)+(-\mscget{self message width}+\mscget{timer width}/2,-2.9cm)$)}%
+    {timer width}<h>[measureMark node/.append style={left=7pt,yshift=1pt}]
+  
+    \measureMark[0.17cm]{($(msc@level8-|msc@nodem1)+(-0.9cm,-10pt)$)}
+    {($(msc@level8-|msc@nodem1)+(0,-10pt)$)}%
+    {left inline overlap}<h>[measureMark node/.append style={left=12pt}]
+  
+    \measureMark[0.17cm]{($(msc@level8-|msc@nodem1)+(0.5cm,-2pt)$)}
+    {($(msc@level8-|msc@nodem1)+(0,-2pt)$)}%
+    {right inline overlap}<h>[measureMark node/.append style={right=6pt}]
+  
+    \measureMark[0.0cm]{($(msc@level11-|msc@nodem1)+(-\mscget{left reference overlap},4pt)$)}
+    {($(msc@level11-|msc@nodem1)+(0,4pt)$)}%
+    {left reference overlap}<h>[measureMark node/.append style={left=14pt}]
+  
+    \measureMark*[-0.2cm]{($(msc@level12-|msc@nodem1)+(0,\mscget{gate symbol radius})$)}
+    {($(msc@level12-|msc@nodem1)$)}%
+    {gate symbol radius}<v>[measureMark node/.append style={left=1pt,rotate=90}]
+    
+    \measureMark[-0.3cm]{($(msc@level17-|msc@nodem1)+(-\mscget{instance width}/2,0pt)$)}
+    {($(msc@level17-|msc@nodem1)+(\mscget{instance width}/2,0pt)$)}%
+    {instance width}<h>[measureMark node/.append style={below=0pt}]
+  
+    \measureMark[0.2cm]{(msc@level0-|msc@nodest)}
+    {(msc@level1-|msc@nodest)}%
+    {first level height}<v>[measureMark node/.append style={align=left,right=0pt,rotate=90}]
+  
+    \measureMark[0.2cm]{(msc@level1-|msc@nodest)}
+    {(msc@level2-|msc@nodest)}%
+    {level height}<v>[measureMark node/.append style={align=left,right=0pt,rotate=90}]
+  
+    \measureMark[0.2cm]{(msc@nodem2.north east)}
+    {(msc@nodem2.south east)}%
+    {head height}<v>[measureMark node/.append style={align=left,right=0pt,rotate=90}]
+  
+    \measureMark[0.2cm]{($(msc@level3-|msc@nodem2)+(\mscget{region width}/2,0)$)}
+    {($(msc@level3-|msc@nodem2)+(-\mscget{region width}/2,0)$)}%
+    {region width}<h>[measureMark node/.append style={align=left,right=5pt}]
+  
+    \measureMark*[0.2cm]{($(msc@level6-|msc@nodem2)+(\mscget{self message width},\mscget{lost symbol radius})$)}
+    {($(msc@level6-|msc@nodem2)+(\mscget{self message width},0pt)$)}%
+    {lost symbol radius}<v>[measureMark node/.append style={align=left,right=0pt,rotate=90}]
+  
+    \measureMark[-0.2cm]{($(msc@level6-|msc@nodest)+(-\mscget{stop width}/2,-\mscget{stop width}/2)$)}
+    {($(msc@level6-|msc@nodest)+(\mscget{stop width}/2,-\mscget{stop width}/2)$)}%
+    {stop width}<h>[measureMark node/.append style={align=left,right=7pt}]
+  
+    \measureMark[-0.2cm]{($(msc@level4-|msc@nodem1)$)}
+    {($(msc@level4-|msc@nodest)$)}%
+    {instance\\ distance}<h>[measureMark node/.append style={align=left,fill=none,yshift=-1pt}]
+  
+    \measureMark[0.2cm]{($(msc@level9-|msc@nodem2)+(-\mscget{action width}/2,0)$)}
+    {($(msc@level9-|msc@nodem2)+(\mscget{action width}/2,0)$)}%
+    {action width}<h>[measureMark node/.append style={align=left,above=-1pt,xshift=3pt}]
+  
+    \measureMark[0.2cm]{($(msc@level9-|msc@nodem2)+(\mscget{action width}/2,0)$)}
+    {($(msc@level9-|msc@nodem2)+(\mscget{action width}/2,-\mscget{action height})$)}%
+    {action height}<v>[measureMark node/.append style={align=left,right=1pt,rotate=90}]
+  
+    \measureMark[0.5cm]{($(msc@level13-|msc@nodem2)+(\mscget{condition overlap},0)$)}
+    {($(msc@level13-|msc@nodem2)+(\mscget{condition overlap},-\mscget{condition height})$)}%
+    {condition height}<v>[measureMark node/.append style={align=left,right=1pt,rotate=90}]
+  
+    \measureMark[0.2cm]{($(msc@level13-|msc@nodem2)+(\mscget{condition overlap},0)$)}
+    {($(msc@level13-|msc@nodem2)+(0,0pt)$)}%
+    {right condition overlap}<h>[measureMark node/.append style={align=left,above=-1pt}]
+  
+    \measureMark<2pt>[0.2cm]{($(msc@level13-|msc@nodem2)+(\mscget{condition overlap},0)$)}
+    {($(msc@level13-|msc@nodem2)+(0,0pt)$)}%
+    {right condition overlap}<h>[measureMark node/.append style={align=left,above=-1pt}]
+  
+    \measureMark<2pt>[0.2cm]{($(msc@level16-|msc@nodem2)+(0,0)$)}
+    {($(msc@level17-|msc@nodem2)+(0,0pt)$)}%
+    {last level height}<v>[measureMark node/.append style={align=left,right=-2pt,rotate=90}]
+  
+    \measureMark*[0.2cm]{($(msc@level17-|msc@nodem2)+(\mscget{instance width}/2,0)$)}
+    {($(msc@level17-|msc@nodem2)+(\mscget{instance width}/2,-\mscget{foot height})$)}%
+    {foot height}<v>[measureMark node/.append style={align=left,right=1pt,rotate=90}]
+  
+    \measureMark<0pt>[0.0cm]{($(msc@level17-|msc@nodem2)+(0.3cm,-\mscget{foot height})$)}
+    {($(msc@env@se-|msc@nodem2)+(0.3cm,0)$)}%
+    {foot distance}<v>[measureMark node/.append style={align=left,left=-1pt,rotate=90}]
+  
+    \measureMark[0.2cm]{($(msc@env@se)+(0,7.5cm)$)}{(msc@nodem2.south)}%
+    {right\\ environment\\ distance}<h>[measureMark node/.append style={align=left,right=33pt}]
+    
+    \mscset{draw frame=none,msc keyword={},msc/name={}}
+  \end{msc}
+  
+  \caption{User controllable parameters}
+  \label{parametersfig}
+\end{figure}
+%
+% The value of a parameter can be changed using standard
+% \LaTeX\ commands, e.g.
+% \begin{verbatim}
+% \setlength{\levelheight}{1cm}
+% \end{verbatim}
+%
+% The following list describes all parameters.
+% The default values for drawing \MSC{}s at large, normal and small size are
+% included. See the command \verb+\setmscvalues{size}+ below for
+% restoring the parameters to their original values.
+%
+% %========================
+% \begin{defs}
+%
+% \item[\cmd{actionheight}]
+% Height of action symbols.\\
+% (\lnsvalue{0.75}{0.6}{0.5} cm.)
+%
+% \item[\cmd{actionwidth}]
+% Width of action symbol.\\
+% (\lnsvalue{1.25}{1.25}{1.2} cm.)
+%
+% \item[\cmd{bottomfootdist}]
+% Distance between bottom of foot symbol and frame.\\
+% (\lnsvalue{1.0}{0.7}{0.5} cm.)
+%
+% \item[\cmd{commentdist}]
+% Distance between a comment and its instance.\\
+% (\lnsvalue{0.5}{0.5}{0.5} cm.)
+%
+% \item[\cmd{conditionheight}]
+% Height of condition symbols.\\
+% (\lnsvalue{0.75}{0.6}{0.5} cm.)
+%
+% \item[\cmd{conditionoverlap}]
+% Overlap of condition symbol.\\
+% (\lnsvalue{0.6}{0.5}{0.4} cm.)
+%
+% \item[\cmd{envinstdist}]
+% Distance between environments and nearest instance line.\\
+% (\lnsvalue{2.5}{2.0}{1.2} cm.)
+%
+% \item[\cmd{firstlevelheight}] Height of level just below head
+% symbols. Should not be changed inside the \MSC{} environment.\\
+% (\lnsvalue{0.75}{0.6}{0.4} cm.)
+%
+% \item[\cmd{gatesymbolradius}] Radius of the gate symbol.\\
+% (\lnsvalue{0.5}{0.5}{0.5} mm.)
+%
+% \item[\cmd{hmscconditionheight}]
+% Height of \HMSC{} condition symbol.\\
+% (\lnsvalue{0.375}{0.3}{0.25} cm.)
+%
+% \item[\cmd{hmscconditionwidth}]
+% Width of \HMSC{} condition symbol.\\
+% (\lnsvalue{1.0}{0.8}{0.7} cm.)
+%
+% \item[\cmd{hmscconnectionradius}]
+% Radius of \HMSC{} connection symbol.\\
+% (\lnsvalue{0.06}{0.05}{0.04} cm.)
+%
+% \item[\cmd{hmscreferenceheight}]
+% Height of \HMSC{} reference symbol.\\
+% (\lnsvalue{0.375}{0.3}{0.25} cm.)
+%
+% \item[\cmd{hmscreferencewidth}]
+% Width of \HMSC{} reference symbol.\\
+% (\lnsvalue{1.0}{0.8}{0.7} cm.)
+%
+% \item[\cmd{hmscstartsymbolwidth}]
+% Width of \HMSC{} start symbol.\\
+% (\lnsvalue{0.75}{0.6}{0.3} cm.)
+%
+% \item[\cmd{inlineoverlap}]
+% Overlap of inline symbol.\\
+% (\lnsvalue{1.5}{1.0}{0.75} cm.)
+%
+% \item[\cmd{instbarwidth}]
+% Default width of vertical instance bars (applies to fat instances only).\\
+% (\lnsvalue{0.0}{0.0}{0.0} cm.)
+%
+% \item[\cmd{instdist}]
+% Distance between instance axes.\\
+% (\lnsvalue{3.0}{2.2}{1.5} cm.)
+%
+% \item[\cmd{instfootheight}] Height of foot symbols. Should not be
+% changed inside the \MSC{} environment.\\
+% (\lnsvalue{0.25}{0.2}{0.15} cm.)
+%
+% \item[\cmd{instheadheight}] Height of head symbols. Should not be
+% changed inside the \MSC{} environment.\\
+% (\lnsvalue{0.6}{0.55}{0.5} cm.)
+%
+% \item[\cmd{instwidth}]
+% Width of header and foot symbols.\\
+% (\lnsvalue{1.75}{1.6}{1.2} cm.)
+%
+% \item[\cmd{labeldist}]
+% Distance between labels and the symbols to which they belong (for instance, message labels and arrows).\\
+% (\lnsvalue{1.0}{1.0}{1.0} ex.)
+%
+% \item[\cmd{lastlevelheight}] Height of level just above foot
+% symbols. Should not be changed inside the \MSC{} environment.\\
+% (\lnsvalue{0.5}{0.4}{0.3} cm.)
+%
+% \item[\cmd{leftnamedist}] Distance between left of the frame and
+% (left of) \MSC, \HMSC, or \MSCdoc{} title.\\
+% (\lnsvalue{0.3}{0.2}{0.1} cm.)
+%
+% \item[\cmd{levelheight}]
+% Height of a level.\\
+% (\lnsvalue{0.75}{0.5}{0.4} cm.)
+%
+% \item[\cmd{lostsymbolradius}]
+% Radius of the lost and found symbols.\\
+% (\lnsvalue{0.15}{0.12}{0.08} cm.)
+%
+% \item[\cmd{markdist}]
+% Horizontal distance from a mark to its instance.\\
+% (\lnsvalue{1.0}{1.0}{1.0} cm.)
+%
+% \item[\cmd{measuredist}]
+% Horizontal distance from a measure to its (closest) instance.\\
+% (\lnsvalue{1.0}{1.0}{1.0} cm.)
+%
+% \item[\cmd{measuresymbolwidth}]
+% Width of a measure symbol.\\
+% (\lnsvalue{0.75}{0.6}{0.4} cm.)
+%
+% \item[\cmd{mscdocreferenceheight}]
+% Height of reference symbol in an \MSCdoc.\\
+% (\lnsvalue{0.375}{0.3}{0.25} cm.)
+%
+% \item[\cmd{mscdocreferencewidth}]
+% Width of reference symbol in an \MSCdoc.\\
+% (\lnsvalue{1.0}{0.8}{0.7} cm.)
+%
+% \item[\cmd{referenceoverlap}]
+% Overlap of reference symbol.\\
+% (\lnsvalue{1.5}{1.0}{0.75} cm.)
+%
+% \item[\cmd{regionbarwidth}]
+% Width of region bars.\\
+% (\lnsvalue{0.5}{0.4}{0.2} cm.)
+%
+% \item[\cmd{selfmesswidth}]
+% Length of horizontal arms of self messages.\\
+% (\lnsvalue{0.75}{0.6}{0.4} cm.)
+%
+% \item[\cmd{stopwidth}]
+% Width of the stop symbol.\\
+% (\lnsvalue{0.6}{0.5}{0.3} cm.)
+%
+% \item[\cmd{timerwidth}]
+% Width of the \emph{timer} symbols.\\
+% (\lnsvalue{0.4}{0.3}{0.2} cm.)
+%
+% \item[\cmd{topheaddist}]
+% Distance between top of head symbols and frame.\\
+% (\lnsvalue{1.5}{1.3}{1.2} cm.)
+%
+% \item[\cmd{topnamedist}] Distance between top of the frame and
+% (top of) \MSC, \HMSC, or \MSCdoc{} title.\\
+% (\lnsvalue{0.3}{0.2}{0.2} cm.)
+%
+% \end{defs}
+%
+% In addition there are several commands which allow the user to adjust
+% the \MSC{} drawing to his own taste.
+%
+% \begin{defs}
+%
+% \item[\cmd{messarrowscale}\{\emph{scalefactor}\}] Sets the scale
+% factor (a positive real number) of message arrow
+% heads. (\lnsvalue{2}{1.5}{1.2})
+%
+% \item[\cmd{setmscscale}\{\emph{scalefactor}\}] Sets the scale factor
+% of the \MSC{} environment to \emph{scalefactor}. the scale factor is
+% supposed to be a real number. Scaling is done when the \MSC{}
+% environment ends (\verb|\end{msc}|). The default of \emph{scalefactor}
+% is~1. A more consistent way for
+% varying the size of the \MSC{} can be obtained by using the
+% \verb+\setmesvalues+ command as described below.
+% (default value 1.)
+%
+% \item[\cmd{psset}\{\texttt{linewidth=D}\}] This command sets the width
+% of all lines in \MSC{}s, \HMSC{}s, and \MSCdoc{}s to length \verb+D+.  If
+% this command is issued outside the msc environment, then the value is
+% set for the complete document. If it is used directly after the start
+% of the msc environment it only holds for this \MSC{}.\\
+% (large/normal/small value 0.8/0.7/0.6 pt.)
+%
+% \item[\cmd{setfootcolor}\{\emph{color}\}] Sets the color of the foot
+% symbols of \MSC{} instances. Possible values are \emph{black},
+% \emph{white}, \emph{gray}, or \emph{lightgray}. For more color values,
+% see the documentation of the \LaTeXe{} \textsf{color} package.
+%
+% \end{defs}
+%
+% The following command can be used to set the above mentioned
+% style parameters to suitable values.
+%
+% \begin{defs}
+% \item[\cmd{setmscvalues}\{\emph{size}\}] Sets all parameters of the \mscpack{} to
+%  predefined values. Valid values for \emph{size} are:
+% \verb|small|, \verb|normal|, and \verb|large|.
+% (The default value of \verb+size+ is \verb+normal+.
+% This can be used for drawings with at maximum six instances on a
+% sheet of A4 paper.
+% For sizes \verb+large+ and \verb+small+, a maximum of four and nine
+% instances respectively fit on a sheet of A4 paper.)
+% \end{defs}
+%
+% Caution has to be taken when changing the value of a parameter within
+% the \MSC{} definition. The following parameters can be changed within an
+% \MSC{} definition without unexpected side effects:
+%
+% \begin{flushleft}
+% \verb+\actionheight+,
+% \verb+\actionwidth+,
+% \verb+\bottomfootdist+,
+% \verb+\conditionheight+,
+% \verb+\conditionoverlap+,
+% \verb+\inlineoverlap+,
+% \verb+\instfootheight+,
+% \verb+\instwidth+ (however, this may cause different sizes of
+% corresponding instance header and footer symbols),
+% \verb+\labeldist+,
+% \verb+\lastlevelheight+,
+% \verb+\levelheight+,
+% \verb+\lostsymbolradius+,
+% \verb+\referenceoverlap+,
+% \verb+\regionbarwidth+,
+% \verb+\selfmesswidth+,
+% \verb+\stopwidth+,
+% \verb+\timerwidth+, and
+% \verb+\topnamedist+.
+% \end{flushleft}
+%
+%
+% In addition to the parameters specific to the \mscpack,
+% standard \LaTeX\ commands can be used to change the type style and
+% other details.
+% For example, if the command \verb+\sffamily+ is included directly after
+% the start of the msc environment, the text in the \MSC{}
+% is drawn using a {\sf sans serif} font. Likewise, the text size can be
+% changed by inserting, e.g., the command \verb+\small+.
+% The \verb+\raisebox+ and \verb+\parbox+ commands
+% can also be used to position and format names.
+
+
+\section{Example}
+\label{example}
+Figure~\ref{ex} on page~\pageref{ex} shows the \MSC{} defined in the
+following \LaTeX\ fragment.
+
+{\small
+\begin{verbatim}
+\begin{msc}{Example}
+\declinst{usr}{The user}{User}
+\declinst{m1}{Control}{M1}
+\dummyinst{m2}
+\declinst{m3}{Another Machine}{M3}
+
+\create{start}{m1}{m2}{Processing}{M2}
+\mess{msg 0}{envleft}{usr}
+\mess{msg 1}{envright}{m2}[1]
+\nextlevel
+
+\mess{msg 2}{usr}{m1}
+\order{m1}{m2}[4]
+\action{a}{m3}
+
+\nextlevel
+\found{msg x}{}{usr}
+\nextlevel
+
+\mess{msg 3}{usr}{m2}[-1]
+\coregionstart{m1}
+\settimeout{S}{m3}[2]
+\nextlevel
+
+
+\mess{msg 4}{m1}{usr}
+\coregionstart{m2}
+\settimer[r]{T}{m3}
+\nextlevel
+
+\mess[r]{msg 5}{m2}{m2}[3]
+\mess{msg 6}{usr}{usr}[2]
+\nextlevel
+
+\mess{msg 7}{m2}{usr}
+\timeout[r]{T}{m3}
+\nextlevel
+
+\coregionend{m2}
+\nextlevel
+
+\coregionend{m1}
+\stoptimer[r]{T'}{m3}
+\nextlevel
+
+\lost[r]{msg y}{Mach 1}{usr}
+\mess{msg 8}{m1}{envright}
+\nextlevel
+
+\condition{condition 1}{usr,m2}
+\setstoptimer[r]{U}{m3}
+\nextlevel[2]
+\stop{usr}
+
+\end{msc}
+\end{verbatim}
+}
+
+\begin{figure}[htb]
+\begin{center}
+\begin{msc}{Example}
+\declinst{usr}{The user}{User}
+\declinst{m1}{Control}{M1}
+\dummyinst{m2}
+\declinst{m3}{Another Machine}{M3}
+
+\create{start}{m1}{m2}{Processing}{M2}
+\mess{msg 0}{envleft}{usr}
+\mess{msg 1}{envright}{m2}[1]
+\nextlevel
+
+\mess{msg 2}{usr}{m1}
+\order{m1}{m2}[4]
+\action{a}{m3}
+
+\nextlevel
+\found{msg x}{}{usr}
+\nextlevel
+
+\mess{msg 3}{usr}{m2}[-1]
+\coregionstart{m1}
+\settimeout{S}{m3}[2]
+\nextlevel
+
+
+\mess{msg 4}{m1}{usr}
+\coregionstart{m2}
+\settimer[r]{T}{m3}
+\nextlevel
+
+\mess[r]{msg 5}{m2}{m2}[3]
+\mess{msg 6}{usr}{usr}[2]
+\nextlevel
+
+\mess{msg 7}{m2}{usr}
+\timeout[r]{T}{m3}
+\nextlevel
+
+\coregionend{m2}
+\nextlevel
+
+\coregionend{m1}
+\stoptimer[r]{T'}{m3}
+\nextlevel
+
+\lost[r]{msg y}{Mach 1}{usr}
+\mess{msg 8}{m1}{envright}
+\nextlevel
+
+\condition{condition 1}{usr,m2}
+\setstoptimer[r]{U}{m3}
+\nextlevel[2]
+\stop{usr}
+
+\end{msc}
+
+\caption{A menagerie of \MSC{} symbols}
+\label{ex}
+\end{center}
+\end{figure}
+
+
+\section{Acknowledgments}
+Thanks are due to the following people for providing us with useful
+input: Cas Cremers, Hugo Jonker, Peter Peters, Sa\v{s}a Radomirovi\'c,
+Michel Reniers, and Pim Vullers.
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+\printindex
+
+\end{document}

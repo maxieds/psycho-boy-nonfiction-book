@@ -1,0 +1,1758 @@
+% arara: lualatex
+% arara: bib2gls: { group: on, options: [ "--replace-quotes" ] }
+% arara: lualatex
+% arara: bib2gls: { group: on, options: [ "--replace-quotes" ] } if found ("log", "Glossary entry `sym.")
+% arara: lualatex
+% arara: lualatex if found ("log", "Rerun to")
+
+% This document requires glossaries-extra v1.49, bib2gls v3.0
+% and nlctuserguide.sty. If they haven't already 
+% been uploaded to CTAN, they will be in a few days.
+
+\documentclass[titlepage=false,oneside,
+ fontsize=12pt,captions=tableheading]{scrbook}
+
+\usepackage
+ %[debug=showwrgloss]
+ {nlctuserguide}
+
+\nlctuserguidegls
+{
+  % \MFUsentencecase
+  \gcmd{MFU\-sen\-tence\-case}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{text}}%
+    \desc{converts \meta{text} to \idx+{sentence-case} with expansion}
+  }
+  % \MFUexcl
+  \gcmd{MFU\-excl}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{cs}}%
+    \desc{locally identifies \meta{cs} as an \idx{exclusion} command}
+    \field{seealso}{MFUblocker,MFUaddmap}
+  }
+  % \MFUblocker
+  \gcmd{MFU\-blocker}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{cs}}%
+    \desc{locally identifies \meta{cs} as a \idx{blocker} command}
+    \field{seealso}{MFUexcl,MFUaddmap}
+  }
+  % \MFUaddmap
+  \gcmd{MFU\-add\-map}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{cs1}\margm{cs2}}%
+    \desc{identifies a \idx{mapping} from the command \meta{cs1} to
+    command \meta{cs2}}
+    \field{seealso}{MFUexcl,MFUblocker}
+  }
+  % \MFUsaveatend
+  \gcmd{MFU\-save\-at\-end}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \desc{saves the list of \idxpl{exclusion}, \idxpl{blocker}
+     and \idxpl{mapping} to the \ext{aux} file (if required by some
+     external tool) at the end of the document. 
+     This command sets itself to \cmd{relax} so it
+     doesn't repeat the action if used multiple times, but it can
+     be overridden by \gls{MFUsave}}
+  }
+  % \MFUsave
+  \gcmd{MFU\-save}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \desc{saves the list of \idxpl{exclusion}, \idxpl{blocker}
+     and \idxpl{mapping} to the \ext{aux} file (if required by some
+     external tool). 
+     This command sets itself to \cmd{relax} so it
+     doesn't repeat the action if used multiple times, and
+     counteracts any use of \gls{MFUsaveatend}}
+  }
+  % \@mfu@excls
+  \gcmd{@mfu\-@\-excls}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{exclusions}}
+    \desc{an \ext{aux} file command that lists all the identified
+    \idxpl{exclusion}}
+    \field{seealso}{MFUsave,MFUsaveatend}
+  }
+  % \@mfu@blockers
+  \gcmd{@mfu\-@\-blockers}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{blockers}}
+    \desc{an \ext{aux} file command that lists all the identified
+    \idxpl{blocker}}
+    \field{seealso}{MFUsave,MFUsaveatend}
+  }
+  % \@mfu@mappings
+  \gcmd{@mfu\-@\-mappings}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{mappings}}
+    \desc{an \ext{aux} file command that lists all the identified
+    \idxpl{mapping} as a \keyval\ list}
+    \field{seealso}{MFUsave,MFUsaveatend}
+  }
+  % \mfirstucMakeUppercase
+  \gcmd{mfirst\-uc\-Make\-Up\-per\-case}
+  {
+    \providedby{\sty{mfirstuc} v1.07+}
+    \syntax{\margm{text}}%
+    \desc{converts \meta{text} to \idx{uppercase}. 
+     Now only used in \gls{mfugrabfirstuc}}
+  }
+  % \emakefirstuc
+  \gcmd{e\-make\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v1.10+}
+    \syntax{\margm{text}}%
+    \desc{fully expands \meta{text} before passing it to
+    \gls{makefirstuc}}
+  }
+  % \xmakefirstuc
+  \gcmd{x\-make\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v1.01+}
+    \syntax{\margm{text}}%
+    \desc{shortcut for
+     \code{\cmd{expandafter}\gls{makefirstuc}\cmd{expandafter}\margm{text}}}
+  }
+  % \makefirstuc
+  \gcmd{make\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v1.0+}
+    \syntax{\margm{text}}%
+    \desc{converts \meta{text} to \idx+{sentence-case} internally using
+    \gls{glsmakefirstuc} to perform the case-change, but first parses
+    \meta{text} to deal with special cases}
+  }
+  % \glsmakefirstuc
+  \gcmd{gls\-make\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v1.05+}
+    \syntax{\margm{text}}%
+    \desc{used by \gls{makefirstuc} to perform the case-change. This
+    uses \code{\gls{MFUsentencecase}\margm{text}} but by default
+    will prevent its argument from being expanded}
+  }
+  % \mfugrabfirstuc
+  \gcmd{mfu\-grab\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v2.08+}
+    \syntax{\margm{text}}
+    \note{avoid where possible}
+    \desc{provide to emulate \gls{glsmakefirstuc} in v2.07 and
+    below, but can still produce different results to v2.07.
+    This will attempt to grab only the first character of
+    \meta{text} and convert it to \idx{uppercase}, leaving the rest of
+    \meta{text} unchanged. This won't work if \meta{text} starts
+    with a \gls{utf8} character, unless you are using \XeLaTeX\ or
+    \LuaLaTeX}
+  }
+  % \MFUskippunc
+  \gcmd{MFU\-skip\-punc}
+  {
+    \providedby{\sty{mfirstuc} v2.07+}
+    \syntax{\margm{content}}%
+    \desc{an \idx{exclusion} command}
+  }
+  % \capitalisewords
+  \gcmd{cap\-i\-talise\-words}
+  {
+    \providedby{\sty{mfirstuc} v1.06+}
+    \syntax{\margm{text}}%
+    \desc{applies \idx+{title-case} to \meta{text}. This will apply 
+    \gls{MFUcapword} to each word in \meta{text} (unless the word has been
+    identified as an \idx{exclusion-word} and doesn't occur at the start of
+    \meta{text})}
+    \field{seealso}{capitalisefmtwords,MFUnocap,gMFUnocap,ifMFUhyphen}
+  }
+  % \xcapitalisewords
+  \gcmd{x\-cap\-i\-talise\-words}
+  {
+    \providedby{\sty{mfirstuc} v1.06+}
+    \syntax{\margm{text}}%
+    \desc{shortcut for
+     \code{\cmd{expandafter}\gls{capitalisewords}\cmd{expandafter}\margm{text}}}
+  }
+  % \ecapitalisewords
+  \gcmd{e\-cap\-i\-talise\-words}
+  {
+    \providedby{\sty{mfirstuc} v1.10+}
+    \syntax{\margm{text}}%
+    \desc{fully expands \meta{text} before passing it to \gls{capitalisewords}}
+  }
+  % \capitalisefmtwords
+  \gcmd{cap\-i\-talise\-fmt\-words}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \syntax{\margm{text}}%
+    \desc{similar to \gls{capitalisewords} but for content that may
+    contain formatting commands}
+    \field{modifiers}{*}
+    \field{seealso}{capitalisewords,MFUnocap,gMFUnocap,ifMFUhyphen}
+  }
+  % \xcapitalisefmtwords
+  \gcmd{x\-cap\-i\-talise\-fmt\-words}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \syntax{\margm{text}}%
+    \desc{shortcut for
+     \code{\cmd{expandafter}\gls{capitalisefmtwords}\cmd{expandafter}\margm{text}}
+     including the \code{*} modifier, if provided}
+    \field{modifiers}{*}
+  }
+  % \ecapitalisefmtwords
+  \gcmd{e\-cap\-i\-talise\-fmt\-words}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \syntax{\margm{text}}%
+    \desc{fully expands \meta{text} and passes it to
+      \gls{capitalisefmtwords} including the \code{*} modifier, if provided}
+    \field{modifiers}{*}
+  }
+  % \ifMFUhyphen
+  \gcond{if\-MFU\-hyphen}
+  {
+    \initval{\cmd{iffalse}}
+    \providedby{\sty{mfirstuc} v2.03+}
+    \desc{conditional that determines whether or not hyphens should
+    be considered word boundaries by the \idx{title-case} commands}
+  }
+  % \MFUhyphentrue
+  \gcmd{MFU\-hyphen\-true}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \desc{sets \gls{ifMFUhyphen} to true}
+  }
+  % \MFUhyphenfalse
+  \gcmd{MFU\-hyphen\-false}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \desc{sets \gls{ifMFUhyphen} to false}
+  }
+  % \MFUwordbreak
+  \gcmd{MFU\-word\-break}
+  {
+    \providedby{\sty{mfirstuc} v2.07+}
+    \syntax{\margm{text}}%
+    \desc{used to markup a character or command that should be
+    treated as a word break by the \idx{title-case} commands}
+  }
+  % \MFUcapword
+  \gcmd{MFU\-cap\-word}
+  {
+    \providedby{\sty{mfirstuc} v2.03+}
+    \syntax{\margm{text}}%
+    \desc{uses either \gls{MFUhyphencapword} or \gls{MFUcapwordfirstuc}
+     depending on \gls{ifMFUhyphen}}
+  }
+  % \MFUcapwordfirstuc
+  \gcmd{MFU\-cap\-word\-first\-uc}
+  {
+    \providedby{\sty{mfirstuc} v2.07+}
+    \syntax{\margm{word}}%
+    \desc{used by \gls{MFUcapword} and \gls{MFUhyphencapword} to 
+    apply the case-change to the given word. This just does 
+    \code{\gls{makefirstuc}\margm{text}} by default}
+    \field{seealso}{MFUcapword,MFUhyphencapword}
+  }
+  % \MFUhyphencapword
+  \gcmd{MFU\-hyphen\-cap\-word}
+  {
+    \providedby{\sty{mfirstuc} v2.07+}
+    \syntax{\margm{text}}%
+    \desc{used by \gls{MFUcapword} to apply \gls{MFUcapwordfirstuc} to 
+    each hyphen-separated word in \meta{text}, if hyphens should
+    indicate a word-break}
+    \field{seealso}{ifMFUhyphen,MFUcapword}
+  }
+  % \MFUnocap
+  \gcmd{MFU\-no\-cap}
+  {
+    \providedby{\sty{mfirstuc} v1.09+}
+    \syntax{\margm{word}}%
+    \desc{locally adds \meta{word} to the \idx{exclusion-word} list for
+    \gls{capitalisewords}}
+    \field{seealso}{gMFUnocap,MFUclear}
+  }
+  % \gMFUnocap
+  \gcmd{gMFU\-no\-cap}
+  {
+    \providedby{\sty{mfirstuc} v1.09+}
+    \syntax{\margm{word}}%
+    \desc{globally adds \meta{word} to the \idx{exclusion-word} list for
+    \gls{capitalisewords}}
+    \field{seealso}{MFUnocap,MFUclear}
+  }
+  % \MFUclear
+  \gcmd{MFU\-clear}
+  {
+    \providedby{\sty{mfirstuc} v1.09+}
+    \desc{locally clears the \idx{exclusion-word} list for \gls{capitalisewords}}
+    \field{seealso}{gMFUnocap,MFUnocap}
+  }
+  % PACKAGE OPTIONS
+  % option grabfirst
+  \gopt{grab\-first}
+  {%
+    \providedby{\sty{mfirstuc} v2.08+}
+    \note{avoid where possible}
+    \desc{redefines \gls{glsmakefirstuc} to use \gls{mfugrabfirstuc}
+     and \gls{mfirstucMakeUppercase} to use \gls{MakeUppercase}}
+  }
+  % option expanded
+  \gopt{expanded}
+  {%
+    \providedby{\sty{mfirstuc} v2.08+}
+    \desc{redefines \gls{glsmakefirstuc} to use \gls{MFUsentencecase}
+      without inhibiting the expansion of its argument}
+  }
+  % option unexpanded
+  \gopt{unexpanded}
+  {%
+    \providedby{\sty{mfirstuc} v2.08+}
+    \desc{redefines \gls{glsmakefirstuc} to use \gls{MFUsentencecase}
+      but inhibits expansion of its argument}
+  }
+  % COMMANDS: index only
+  \gcmd{text\dsb title\-case\dsb first:n}{}
+  \gcmd{text\dsb title\-case:n}{}
+  \gcmd{text\dsb upper\-case:n}{}
+  \gcmd{l\dsb text\dsb case\dsb ex\-clude\dsb arg\dsb tl}{}
+  \gcmd{protect}{}
+  \gcmd{unexpanded}{}
+  \gcmd{glsadd}{}
+  \gcmd{gls}{}
+  \gcmd{Gls}{}
+  \gcmd{GLS}{}
+  \gcmd{glspl}{}
+  \gcmd{Glspl}{}
+  \gcmd{GLSpl}{}
+  \gcmd{Make\-Upper\-case}{}% \MakeUppercase
+  \gcmd{Make\-Text\-Upper\-case}{}% \MakeTextUppercase
+  \gcmd{No\-Case\-Change}{}% \NoCaseChange
+  \gcmd{ensure\-math}{}
+  \gcmd{begin}{}
+  \gcmd{end}{}
+  \gcmd{cite}{}
+  \gcmd{label}{}
+  \gcmd{ref}{}
+  \gcmd{index}{}
+  \gcmd{space}{}
+  \gcmd{name\-ref}{}% \nameref
+  \gcmd{tex\-or\-pdf\-string}{}% \texorpdfstring
+  \gcmd{pdf\-string\-def\-Dis\-able\-Commands}{}% \pdfstringdefDisableCommands
+  \gpunc{nbsp}{\name{\code{\textasciitilde}}}% ~
+  % packages
+  \gpkg{mfirst\-uc}{\common}
+  \gpkg{mfirstuc\dhyphen english}{}
+  \gpkg{glossaries}{}
+  \gpkg{glossaries\dhyphen extra}{}
+  \gpkg{text\-case}{}% textcase
+  \gpkg{cs\-quotes}{}% csquotes
+  \gpkg{hyper\-ref}{}% hyperref
+  % file extensions
+  \gext{aux}{}
+  % terms
+  \gterm{exclusion}{\name{exclusion command}\field{text}{exclusion}
+  \desc{a command whose argument should be skipped
+  by the case-changer. The content that follows the command should
+  have its case-changed instead. See \sectionref{sec:exclusions}}}
+  \gterm{blocker}{\desc{a command that prohibits case-changing. If
+   encountered by \gls{makefirstuc}, it won't attempt to apply any
+   case-changing. See \sectionref{sec:blockers}}}
+  \gterm{mapping}{\desc{a command that should be substituted by
+   another, if encountered by \gls{makefirstuc}, instead of applying
+   a case-change. See \sectionref{sec:mappings}}}
+  \gterm{sentence-case}{\desc{content that should appear at the
+   start of a sentence that needs to have its first significant
+   character converted to \idx{uppercase}. See \sectionref{sec:sentencecase}}}
+  \gterm{title-case}{\desc{content that needs to appear in a title
+   that should have each significant word converted to
+   \idx{sentence-case}. See \sectionref{sec:capitalisewords}}}
+  \gterm{exclusion-word}{\name{exclusion word}
+   \desc{a word that shouldn't have its case changed by
+   \idx{title-case} commands, unless the word occurs at the start}}
+  \gtermacr{utf8}{UTF-8}{Unicode Transformation Format (8-bit)}
+  {%
+    \desc{a variable-width encoding that uses 8-bit code units. This
+    means that some characters are represented by more that one byte.
+    \XeLaTeX\ and \LuaLaTeX\ treat the multi-byte sequence as a single
+    token, but the older \LaTeX\ formats have single-byte tokens, which
+    can cause complications, although these have mostly been addressed with
+    the newer kernels introduced over the past few years. Related blog article:
+    \blog{binary-files-text-files-and-file-encodings/}{Binary Files,
+    Text Files and File Encodings}}
+  }
+  \gterm{semanticcommand}{\name{semantic command}
+    \desc{essentially, this is a command associated with a
+    particular element, idea or topic that hides the font
+    and other stylistic formatting inside its definition. For
+    example, Latin taxonomy is usually displayed in italic.
+    Explicitly using font commands, for example
+    \begin{compactcodebox}\cmd{textit}\marg{Clostridium}\end{compactcodebox}
+    is syntactic markup.
+    Whereas defining a command called, say, \cmd{bacteria} that 
+    displays its argument in italics is a semantic command. The
+    actual styling is hidden and the command relates specifically to
+    a particular concept.
+\begin{codebox}
+Syntactic: \cmd{textit}\marg{Clostridium}^^J\codepar
+\cmd{newrobustcmd}*\marg{\cmd{bacteria}}[1]{\cmd{emph}\marg{\#1}}\%\newline
+Semantic: \cmd{bacteria}\marg{Clostridium}
+\end{codebox}
+    The end result is the same: 
+\begin{resultbox}
+Syntactic: \textit{Clostridium}\glspar
+Semantic: \emph{Clostridium}
+\end{resultbox}
+    The advantage with semantic commands is that it's much easier to
+    change the style, simply by adjusting the command definition.
+    Note that I've used \cmd{newrobustcmd} to make the semantic
+    command robust as the style commands can cause a problem if they
+    expand too soon}
+  }
+  % index only
+  \gidx{punctuation}{}
+  \gpunc{sym.dollar}{\name{\code{\$}}}% $
+  \gidx{uppercase}{}
+  \gidx{lowercase}{}
+}
+
+\title{mfirstuc.sty v2.08: 
+sentence and title casing}
+\author{Nicola L.C. Talbot\\[10pt]
+Dickimaw Books\\
+\href{https://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}}
+\date{2022-10-14
+}
+
+\begin{document}
+\maketitle
+
+\htmlavailable
+
+\begin{information}
+The \sty{mfirstuc} package was originally part of the
+\sty{glossaries} bundle (added to \sty{glossaries} v1.12 
+in 2008) for use with commands like \gls{Gls},
+which need to have the first letter converted to uppercase
+(\idx{sentence-case}), but as the commands provided by 
+\sty{mfirstuc} may be used without \sty{glossaries}, the two 
+were split into separately maintained packages in 2015
+(\sty{mfirstuc} v2.0 and \sty{glossaries} v4.18).
+\end{information}
+
+Version 2.08 has reimplemented \gls{makefirstuc} using \LaTeX3
+commands. If there are any compatibility issues, you can rollback to
+v2.07:
+\begin{codebox}
+\cmd{usepackage}\marg{mfirstuc}[=2.07]
+\end{codebox}
+
+\frontmatter
+\tableofcontents
+
+\mainmatter
+\chapter{Sentence-Case}
+\label{sec:sentencecase}
+
+There are two \idx{sentence-case} commands provided: \gls{MFUsentencecase}
+and \gls{makefirstuc}. A summary of the principle features of 
+the two commands is given in
+\tableref{tab:sentencecasesummary}.
+
+\begin{table}[htbp]
+\caption{Principle features of
+\glsfmttext{MFUsentencecase} and \glsfmttext{makefirstuc}}
+\label{tab:sentencecasesummary}
+\centering
+\begin{tabular}{lcc}
+\bfseries Feature & \bfseries \gls{MFUsentencecase}[]
+& \bfseries \gls{makefirstuc}[]\\
+Can expand? & \proyes & \prono\\
+Supports \idxpl{exclusion}? & \proyes & \proyes\\
+Supports \idxpl{blocker}? & \prono & \proyes\\
+Supports \idxpl{mapping}? & \prono & \proyes\\
+Semantic commands must be robust? & \conyes & \conno
+\end{tabular}
+\end{table}
+
+\section{Examples}
+\label{sec:sentencecaseex}
+
+Text only (leading \idx{utf8} now supported):
+\begin{coderesult}
+\gls{makefirstuc}\marg{élite} /
+\gls{MFUsentencecase}\marg{élite}
+\tcblower
+\makefirstuc{élite} /
+\MFUsentencecase{élite}
+\end{coderesult}
+
+Leading \idx{punctuation} is ignored:
+\begin{coderesult}
+\gls{makefirstuc}\marg{`word'} /
+\gls{MFUsentencecase}\marg{`word'}
+\tcblower
+\makefirstuc{`word'} /
+\MFUsentencecase{`word'}
+\end{coderesult}
+However, if the \idx{punctuation} character is followed by a
+\idx{blocker} or \idx{mapping} command, the \idx{punctuation} will
+need to be excluded otherwise the command will be treated as an
+\idx{exclusion}. If possible, use \idxc{semanticcommand}{semantic
+markup} instead of directly including the \idx{punctuation}.
+
+Fragile commands need to be protected with
+\gls{MFUsentencecase}:
+\begin{codebox}
+\cmd{newcommand}\marg{\cmd{alert}}[1]\marg{\cmd{textcolor}\marg{red}\marg{\cmd{textbf}\marg{\#1}}}
+\gls{makefirstuc}\marg{\cmd{alert}\marg{élite}} /
+\gls{MFUsentencecase}\marg{\strong{\cmd{protect}}\cmd{alert}\marg{élite}}
+\end{codebox}
+\begin{resultbox}
+\newcommand{\alert}[1]{\textcolor{red}{\textbf{#1}}}
+\makefirstuc{\alert{élite}} /
+\MFUsentencecase{\protect\alert{élite}}
+\end{resultbox}
+
+\Idxpl{exclusion} are supported by both \gls{makefirstuc} and
+\gls{MFUsentencecase}:
+\begin{codebox}
+\gls{MFUexcl}\marg{\gls+{index}}
+\gls{makefirstuc}\marg{\gls{index}\marg{word}example} /
+\gls{MFUsentencecase}\marg{\gls{index}\marg{word}example}
+\end{codebox}
+\begin{resultbox}
+\MFUexcl{\index}
+\makefirstuc{\index{example}example} /
+\MFUsentencecase{\index{example}example}
+\end{resultbox}
+
+\Idxpl{blocker} are only supported by \gls{makefirstuc}. 
+They are treated as \idxpl{exclusion} with
+\gls{MFUsentencecase}, which produces a different result:
+\begin{codebox}
+\gls{MFUblocker}\marg{\gls+{nameref}}
+\gls{makefirstuc}\marg{\gls{nameref}\marg{sec:sentencecase} section} /
+\gls{MFUsentencecase}\marg{\gls{nameref}\marg{sec:sentencecase} section}
+\end{codebox}
+\begin{resultbox}
+\MFUblocker{\nameref}
+\makefirstuc{\nameref{sec:sentencecase} section} /
+\MFUsentencecase{\nameref{sec:sentencecase} section}
+\end{resultbox}
+
+\Idxpl{mapping} are only supported by \gls{makefirstuc}.
+They are treated as \idxpl{exclusion} with
+\gls{MFUsentencecase}, which produces a different result:
+\begin{codebox}
+\cmd{newrobustcmd}\marg{\cmd{secref}}[1]\marg{section\glstildechar\cmd{ref}\marg{\#1}}
+\cmd{newrobustcmd}\marg{\cmd{Secref}}[1]\marg{Section\glstildechar\cmd{ref}\marg{\#1}}
+\gls{MFUaddmap}\marg{\cmd{secref}}\marg{\cmd{Secref}}
+\gls{makefirstuc}\marg{\cmd{secref}\marg{sec:sentencecase} example} /
+\gls{MFUsentencecase}\marg{\cmd{secref}\marg{sec:sentencecase} example}
+\end{codebox}
+\begin{resultbox}
+\newrobustcmd{\secref}[1]{section~\ref{#1}}
+\newrobustcmd{\Secref}[1]{Section~\ref{#1}}
+\MFUaddmap{\secref}{\Secref}
+\makefirstuc{\secref{sec:sentencecase} example} /
+\MFUsentencecase{\secref{sec:sentencecase} example}
+\end{resultbox}
+
+Argument expansion: \gls{MFUsentencecase} expands its argument
+and then skips exclusions whereas \gls{makefirstuc} parses its
+argument without expansion and then passes the relevant content to
+\gls{glsmakefirstuc}. Note that different results will occur with
+the \opt{expanded} and \opt{unexpanded} package options.
+For example:
+\begin{codebox}
+\cmd{usepackage}[\opt{expanded}]\marg{mfirstuc}
+\cmd{newcommand}\marg{\cmd{testa}}\marg{sample}
+\cmd{newcommand}\marg{\cmd{testb}}\marg{\cmd{testa}\cmd{ }test}
+\cbeg{document}
+\gls{makefirstuc}\marg{\cmd{testb}} / \gls{xmakefirstuc}\marg{\cmd{testb}} /
+\gls{emakefirstuc}\marg{\cmd{testb}} / \gls{MFUsentencecase}\marg{\cmd{testb}}
+\cend{document}
+\end{codebox}
+\begin{resultbox}
+\newcommand{\testa}{sample}%
+\newcommand{\testb}{\testa\ test}%
+\renewcommand*{\glsmakefirstuc}[1]{\MFUsentencecase{#1}}%
+\makefirstuc{\testb} / \xmakefirstuc{\testb} /
+\emakefirstuc{\testb} / \MFUsentencecase{\testb}
+\end{resultbox}
+With the default \opt{unexpanded} option the result is:
+\begin{resultbox}
+\newcommand{\testa}{sample}
+\newcommand{\testb}{\testa\ test}
+\makefirstuc{\testb} / \xmakefirstuc{\testb} /
+\emakefirstuc{\testb} / \MFUsentencecase{\testb}
+\end{resultbox}
+Note that this is different from the result in earlier versions of
+\sty{mfirstuc}.
+\begin{codebox}
+\cmd{usepackage}\marg{mfirstuc}[=v2.07]
+\cmd{newcommand}\marg{\cmd{testa}}\marg{sample}
+\cmd{newcommand}\marg{\cmd{testb}}\marg{\cmd{testa}\cmd{ }test}
+\cbeg{document}
+\gls{makefirstuc}\marg{\cmd{testb}} / \gls{xmakefirstuc}\marg{\cmd{testb}} /
+\gls{emakefirstuc}\marg{\cmd{testb}}
+\cend{document}
+\end{codebox}
+This produces:
+\begin{resultbox}
+SAMPLE TEST / SAMPLE test / Sample test
+\end{resultbox}
+If this old result is required, either use rollback or try
+the \opt{grabfirst} option.
+
+Argument expansion with \idxpl{mapping} (and the default
+\opt{unexpanded} option):
+\begin{codebox}
+\cmd{newrobustcmd}\marg{\cmd{secref}}[1]\marg{section\glstildechar\cmd{ref}\marg{\#1}}
+\cmd{newrobustcmd}\marg{\cmd{Secref}}[1]\marg{Section\glstildechar\cmd{ref}\marg{\#1}}
+\gls{MFUaddmap}\marg{\cmd{secref}}\marg{\cmd{Secref}}
+\cmd{newcommand}\marg{\cmd{testa}}\marg{\cmd{secref}\marg{sec:sentencecase}}
+\cmd{newcommand}\marg{\cmd{testb}}\marg{\cmd{testa}\cmd{ }example}
+\gls{makefirstuc}\marg{\cmd{testb}} / \gls{xmakefirstuc}\marg{\cmd{testb}} /
+\gls{emakefirstuc}\marg{\cmd{testb}} / \gls{MFUsentencecase}\marg{\cmd{testb}}
+\end{codebox}
+\begin{resultbox}
+\newrobustcmd{\secref}[1]{section~\ref{#1}}
+\newrobustcmd{\Secref}[1]{Section~\ref{#1}}
+\MFUaddmap{\secref}{\Secref}
+\newcommand{\testa}{\secref{sec:sentencecase}}
+\newcommand{\testb}{\testa\ example}
+\makefirstuc{\testb} / \xmakefirstuc{\testb} /
+\emakefirstuc{\testb} / \MFUsentencecase{\testb}
+\end{resultbox}
+
+\section{Sentence Case Commands}
+\label{sec:sentencecasecmds}
+
+\cmddef{MFUsentencecase}
+This simply uses \gls{texttitlecasefirst:n}, which is provided by
+the \LaTeX3 kernel. Note that this fully expands the argument.
+If you use this command, ensure that your \idxpl{semanticcommand} are
+robust. For example:
+\begin{codebox}
+\cmd{newrobustcmd}\marg{\cmd{alert}}[1]\marg{\cmd{textcolor}\marg{red}\marg{\cmd{textbf}\marg{\#1}}}
+\gls{MFUsentencecase}\marg{\cmd{alert}\marg{sample} text}
+\end{codebox}
+\begin{resultbox}
+\newrobustcmd{\alert}[1]{\textcolor{red}{\textbf{#1}}}
+\MFUsentencecase{\alert{sample} text}
+\end{resultbox}
+Note that the following will fail:
+\begin{badcodebox}
+\cmd{newcommand}\marg{\cmd{alert}}[1]\marg{\cmd{textcolor}\marg{red}\marg{\cmd{textbf}\marg{\#1}}}
+\gls{MFUsentencecase}\marg{\cmd{alert}\marg{sample} text}
+\end{badcodebox}
+This is because the expansion that's performed before the case-change will result in:
+\begin{badcodebox}
+\cmd{textcolor}\marg{Red}\marg{\cmd{textbf}\marg{sample}} text
+\end{badcodebox}
+This triggers an error since \code{Red} isn't a recognised colour
+name.
+
+\cmddef{makefirstuc}
+This is the original command provided by \sty+{mfirstuc}, which was
+written to assist sentence-casing in the \sty{glossaries} package
+and had to take markup into account. It parses its argument to try
+to determine which part needs the case-change. The actual
+case-change is performed by \gls{glsmakefirstuc}.
+
+As from v2.08, the definition of \gls{makefirstuc} has been updated to use \LaTeX3
+code, but the argument is still parsed, which allows for non-robust 
+\idxpl{semanticcommand}, and now also takes \idxpl{blocker} and \idxpl{mapping} into
+account. For example:
+\begin{codebox}
+\cmd{newcommand}\marg{\cmd{alert}}[1]\marg{\cmd{textcolor}\marg{red}\marg{\cmd{textbf}\marg{\#1}}}
+\gls{makefirstuc}\marg{\cmd{alert}\marg{sample} text}
+\end{codebox}
+\begin{resultbox}
+\newcommand{\alert}[1]{\textcolor{red}{\textbf{#1}}}
+\makefirstuc{\alert{sample} text}
+\end{resultbox}
+
+The rules used when parsing \code{\gls{makefirstuc}\margm{text}} are as follows:
+\begin{enumerate}
+\item if \meta{text} is empty do nothing;
+
+\item if \meta{text} consists of a single item or starts
+with a group do \code{\gls{glsmakefirstuc}\margm{text}};
+
+\item if \meta{text} starts with a command \meta{cs}:
+
+  \begin{enumerate}
+  \item if \meta{cs} is \gls{protect}, skip it and continue to 
+  the next step where the command \meta{cs} under inspection 
+  is now the one that follows \gls{protect}:
+
+  \item if \meta{cs} has been identified as a \idx{blocker}, just do
+  \meta{text} (that is, no case-change is applied);
+
+  \item if \meta{cs} isn't followed by a group then do
+  \code{\gls{glsmakefirstuc}\margm{text}};
+
+  \item otherwise assume the format is \code{\meta{cs}\margm{arg}\meta{following}}
+  (where \meta{following} may be empty) and then:
+
+    \begin{enumerate}
+    \item if \meta{cs} has been \idxc{mapping}{mapped} to
+    \meta{Cs} then do \code{\meta{Cs}\margm{arg}\meta{following}};
+
+    \item if \meta{cs} has been identified as an \idx{exclusion}, 
+    do \code{\meta{cs}\margm{arg}\gls{makefirstuc}\margm{following}};
+
+    \item otherwise do \code{\meta{cs}\marg{\gls{makefirstuc}\margm{arg}}\meta{following}}.
+    \end{enumerate}
+
+  \end{enumerate}
+
+\item otherwise do \code{\gls{glsmakefirstuc}\margm{text}}.
+\end{enumerate}
+
+Note that the above algorithm uses recursion. The termination points
+are: don't implement a change, replace a command with another
+command, or apply the case-change via \gls{glsmakefirstuc}.
+
+For convenience, the following commands are also provided:
+\cmddef{xmakefirstuc}
+This is simply a shortcut for:
+\begin{compactcodebox}
+\cmd{expandafter}\gls{makefirstuc}\cmd{expandafter}\margm{text}
+\end{compactcodebox}
+This ensures the first token in \meta{text} is expanded before being
+passed to \gls{makefirstuc}.
+
+\cmddef{emakefirstuc}
+This fully expands its argument before passing it to
+\gls{makefirstuc}. For example:
+\begin{codebox}
+\cmd{newcommand}\marg{\cmd{test}}[1]\marg{sample \#1}
+\cmd{newcommand}\marg{\cmd{tmp}}\marg{\cmd{test}\marg{text}}
+\gls{makefirstuc}\marg{\cmd{tmp}} /
+\gls{xmakefirstuc}\marg{\cmd{tmp}} /
+\gls{emakefirstuc}\marg{\cmd{tmp}}
+\end{codebox}
+\begin{resultbox}
+\newcommand{\test}[1]{sample #1}
+\newcommand{\tmp}{\test{text}}
+\makefirstuc{\tmp} /
+\xmakefirstuc{\tmp} /
+\emakefirstuc{\tmp}
+\end{resultbox}
+If you don't have any mappings or blockers set up, it's simpler to
+use \gls{MFUsentencecase} instead of \gls{emakefirstuc}.
+
+\begin{important}
+With \gls{emakefirstuc}, mappings and blockers will only be
+detected if they are robust or protected, otherwise they will expand too soon to
+be detected.
+\end{important}
+
+\cmddef{glsmakefirstuc}
+This command is used by \gls{makefirstuc} to perform the
+case-change. The \qt{gls} prefix is for historical reasons as the original code
+was part of the \sty{glossaries} package. With the default
+\opt{unexpanded} option, this command is defined as:
+\begin{compactcodebox}
+\gls{MFUsentencecase}\marg{\gls+{unexpanded}\margm{text}}
+\end{compactcodebox}
+The use of \gls{unexpanded} inhibits the expansion of \meta{text}
+that would otherwise occur. This allows \gls{makefirstuc} to
+maintain as much backward-compatibility with version 2.07 as
+possible. This is particularly important when using the
+\sty{glossaries} package with a style that automatically converts
+the description to \idx{sentence-case}, as there may well be
+documents with complex descriptions that contain fragile commands.
+
+The \opt{expanded} package option will redefine \gls{glsmakefirstuc}
+to use \gls{MFUsentencecase} without \gls{unexpanded}. The
+\opt{grabfirst} package option will redefine \gls{glsmakefirstuc}
+to use \gls{mfugrabfirstuc} to emulates the behaviour of
+\gls{glsmakefirstuc} in v2.07 and below without using rollback.
+
+\cmddef{mfugrabfirstuc}
+This robust command is provided to emulate v2.07 and its use is discouraged.
+Note that you may still have different results compared to v2.07, so
+you may need to use rollback instead. (Note that the \opt{grabfirst} option
+additionally redefines \gls{mfirstucMakeUppercase} to
+\gls{MakeUppercase}, which you will also need.)
+
+This applies \gls{mfirstucMakeUppercase} to the first token in \meta{text}
+and leaves the remainder unchanged. This won't work if \meta{text}
+starts with a \gls{utf8} character unless you use \XeLaTeX\ or
+\LuaLaTeX, so avoid using this method where possible. For example:
+\begin{codebox}
+\cmd{renewcommand}\marg{\gls{mfirstucMakeUppercase}}[1]\marg{\comment{}
+  \gls{MakeUppercase}\marg{\#1}\comment{}
+}
+\gls{mfugrabfirstuc}\marg{sample}
+\end{codebox}
+This is equivalent to:
+\begin{codebox}
+\gls{mfirstucMakeUppercase}\marg{s}ample
+\end{codebox}
+Whereas
+\begin{unicodebox}
+\cmd{renewcommand}\marg{\gls{mfirstucMakeUppercase}}[1]\marg{\comment{}
+  \gls{MakeUppercase}\marg{\#1}\comment{}
+}
+\gls{mfugrabfirstuc}\marg{\'elite}
+\end{unicodebox}
+only works with \XeLaTeX\ or \LuaLaTeX.
+
+\begin{warning}
+As with earlier implementations of \gls{makefirstuc} that 
+tried to only apply the case-change to the first token, 
+this won't produce the desired result if the argument starts with a
+punctuation character.
+\end{warning}
+
+For example:
+\begin{codebox}
+\gls{mfugrabfirstuc}\marg{`sample'}
+\end{codebox}
+This is equivalent to:
+\begin{compactcodebox}
+\gls{mfirstucMakeUppercase}\marg{`}sample'
+\end{compactcodebox}
+so no case-change is applied.
+
+\section{Exclusions}
+\label{sec:exclusions}
+
+\begin{information}
+Exclusions will apply to all \LaTeX3 case-changing commands, so will
+also affect \gls{mfirstucMakeUppercase}, but this is generally
+desirable.
+\end{information}
+
+\cmddef{MFUexcl}
+Identifies the text-block command \code{\meta{cs}\margm{arg}} as
+an \idx{exclusion}. That is, one that should have its argument
+excluded from a case-change.
+
+Internally, \gls{MFUexcl} adds \meta{cs} to \LaTeX3's exclusion list
+\gls{ltextcaseexcludeargtl}, which means that \gls{MFUsentencecase}
+will skip the command and its argument and apply the case-change to
+the following content. Some common commands (\gls{begin} \gls{cite}
+\gls{end} \gls{label} and \gls{ref}) are automatically added by the
+\LaTeX3 kernel.
+The exclusions are also recognised by \gls{makefirstuc} when it
+parses its argument.
+
+\begin{information}
+The command \gls{NoCaseChange} is automatically treated as an
+exclusion by the \LaTeX3 case-changing commands with recent \LaTeX\
+kernels. You may want to add it as a blocker for \gls{makefirstuc}
+and keep \gls{MFUskippunc} for exclusions.
+
+Note that \gls{ensuremath} is added as an exclusion by \sty{mfirstuc} otherwise
+\gls{makefirstuc} will pass its argument to \gls{MFUsentencecase},
+which will cause a problem.
+\end{information}
+
+Another way of identifying content that should be excluded with
+\gls{makefirstuc} is to encapsulate it with:
+\cmddef{MFUskippunc}
+This is a robust command that simply does its argument and is
+automatically added to the exclusion list. This may be used for
+cases where the excluded command isn't a simple text-block command
+that only has one mandatory argument or where leading punctuation is
+followed by a \idx{blocker} or \idx{mapping}.
+
+The command name stems from earlier versions where leading
+\idx{punctuation} needed to be skipped. This is no longer necessary,
+but the command remains as a general purpose robust exclusion command.
+
+For example, \gls{glsadd} (provided by \sty{glossaries}) should have
+its argument skipped, since its argument is a label, so the
+following will ensure that \code{\gls{glsadd}\margm{label}} will be
+skipped, and the case-change will be applied to the following text
+for both \gls{MFUsentencecase} and \gls{makefirstuc}.
+\begin{codebox}
+\gls{MFUexcl}\marg{\gls{glsadd}}
+\gls{makefirstuc}\marg{\gls{glsadd}\marg{ex}some text}
+\gls{MFUsentencecase}\marg{\gls{glsadd}\marg{ex}some text}
+\end{codebox}
+This will be equivalent to:
+\begin{compactcodebox}
+\gls{glsadd}\marg{ex}Some text
+\end{compactcodebox}
+However, \gls{glsadd} can take an optional argument which, if
+present, will cause a problem. For example:
+\begin{badcodebox}
+\gls{MFUexcl}\marg{\gls{glsadd}}
+\gls{makefirstuc}\marg{\gls{glsadd}\oarg{counter=section}\marg{ex}some text}
+\gls{MFUsentencecase}\marg{\gls{glsadd}\oarg{counter=section}\marg{ex}some text}
+\end{badcodebox}
+Both commands will cause the following error:
+\begin{transcript}
+! Package glossaries Error: Glossary entry `\nlctopensqbracket' has not been defined.
+\end{transcript}
+This is because the open square bracket is assumed to be the
+argument of \gls{glsadd}, so this effectively becomes:
+\begin{compactcodebox}
+\gls{glsadd}\marg{\nlctopensqbracket}Counter=section\nlctclosesqbracket exsome text
+\gls{glsadd}\marg{\nlctopensqbracket}Counter=section\nlctclosesqbracket exsome text
+\end{compactcodebox}
+which means that now \code{\nlctopensqbracket} is considered the label and everything
+that follows is just text.
+
+For this situation to work, you need to encapsulate the problematic
+content with an exclusion command, such as \gls{NoCaseChange} or \gls{MFUskippunc}:
+\begin{codebox}
+\gls{makefirstuc}\marg{\gls{MFUskippunc}\marg{\gls{glsadd}\oarg{counter=section}\marg{ex}}some text}
+\end{codebox}
+This will also work with \gls{MFUsentencecase} because
+\sty{mfirstuc} automatically adds \gls{MFUskippunc} to the exclusion
+list.
+
+\begin{information}
+As from \sty{glossaries} v4.50, \gls{glsadd} is automatically added
+as an exclusion, but be aware of the problem with using the optional
+argument, as described above.
+\end{information}
+
+\Idx{punctuation} characters are skipped by \gls{MFUsentencecase}.
+For example:
+\begin{coderesult}
+\gls{MFUsentencecase}\marg{`word'}
+\tcblower
+\MFUsentencecase{`word'}
+\end{coderesult}
+However, leading \idx{punctuation} will result in \gls{makefirstuc}
+passing its entire argument to \gls{MFUsentencecase} (since the
+argument doesn't start with \code{\meta{cs}\margm{arg}}), which
+means that \gls{makefirstuc} won't detect any \idx{blocker} or
+\idx{mapping}.
+
+For example:
+\begin{codebox}
+\gls{MFUblocker}\marg{\gls+{nameref}}
+\cmd{newcommand}*\marg{\cmd{qt}}[1]\marg{``\#1''}
+\gls{makefirstuc}\marg{``\gls{nameref}\marg{sec:sentencecase} section''} /
+\gls{makefirstuc}\marg{\gls{MFUskippunc}\marg{``}\gls{nameref}\marg{sec:sentencecase} section''} /
+\gls{makefirstuc}\marg{\cmd{qt}\marg{\gls{nameref}\marg{sec:sentencecase} section}}
+\end{codebox}
+\begin{resultbox}
+\MFUblocker{\nameref}
+\makefirstuc{``\nameref{sec:sentencecase} section''} /
+\makefirstuc{\MFUskippunc{``}\nameref{sec:sentencecase} section''} /
+\makefirstuc{\qt{\nameref{sec:sentencecase} section}}
+\end{resultbox}
+If you are using a package such as \sty{csquotes}, bear in mind that
+if the command is followed by an asterisk (a \qt{starred command})
+or an optional argument then it won't fit the expected
+\code{\meta{cs}\margm{arg}} format and unexpected results will occur.
+
+\section{Blockers}
+\label{sec:blockers}
+
+A \idx{blocker} is a command that prevents any case-change if it occurs at
+the start of \gls{makefirstuc} or after the argument of an
+\idx{exclusion}. Blockers are not supported by
+\gls{MFUsentencecase} but are instead treated as exclusions. 
+
+\cmddef{MFUblocker}
+Identifies \meta{cs} as a \idx{blocker}. Since \idxpl{blocker}
+aren't supported by \gls{MFUsentencecase}, this automatically
+implements \code{\gls{MFUexcl}\margm{cs}} to protect its argument
+from \gls{MFUsentencecase}, but it won't prevent subsequent content
+from being changed.
+
+For example:
+\begin{codebox}
+\gls{MFUblocker}\marg{\gls+{nameref}}
+\gls{makefirstuc}\marg{\gls{nameref}\marg{sec:sentencecase} section} 
+\end{codebox}
+\begin{resultbox}
+\MFUblocker{\nameref}
+\makefirstuc{\nameref{sec:sentencecase} section}
+\end{resultbox}
+
+In the following, the \idx{blocker} isn't detected by
+\gls{makefirstuc} because the content doesn't start with 
+\code{\meta{cs}\margm{arg}} or
+\code{\cmd{protect}\meta{cs}\margm{arg}}. This means that the entire
+content is passed to \gls{MFUsentencecase} which treats
+\gls{nameref} as an \idx{exclusion}:
+\begin{codebox}
+\gls{MFUblocker}\marg{\gls{nameref}}
+\gls{makefirstuc}\marg{\cmd{relax}\gls{nameref}\marg{sec:sentencecase} section} 
+\end{codebox}
+\begin{resultbox}
+\MFUblocker{\nameref}
+\makefirstuc{\relax\nameref{sec:sentencecase} section}
+\end{resultbox}
+
+\begin{important}
+If a \idxc{blocker}{blocking command} is inside the definition of
+another command, it won't be visible to \gls{makefirstuc} unless
+the other command is expanded before applying \gls{makefirstuc}.
+For example, by using \gls{xmakefirstuc} or \gls{emakefirstuc}.
+If it doesn't get expanded until after it has been passed to
+\gls{MFUsentencecase}, then it will be treated as an \idx{exclusion}
+instead.
+\end{important}
+
+Recent \LaTeX\ kernels provide \gls{NoCaseChange} and automatically
+add it as an \idx{exclusion}. You may want to add it as a
+\idx{blocker} for \gls{makefirstuc}. For example:
+\begin{codebox}
+\gls{makefirstuc}\marg{\gls{ensuremath}\marg{\cmd{alpha}}-particle} /
+\gls{makefirstuc}\marg{\idx{dollar}\cmd{alpha}\idx{dollar}-particle} /
+\gls{MFUsentencecase}\marg{\gls{ensuremath}\marg{\cmd{alpha}}-particle} /
+\gls{MFUsentencecase}\marg{\idx{dollar}\cmd{alpha}\idx{dollar}-particle}
+\codepar
+\gls{MFUblocker}\marg{\gls{NoCaseChange}}\comment{}
+\gls{makefirstuc}\marg{\gls{ensuremath}\marg{\cmd{alpha}}-particle} /
+\gls{makefirstuc}\marg{\gls{NoCaseChange}\marg{\idx{dollar}\cmd{alpha}\idx{dollar}}-particle} /
+\gls{MFUsentencecase}\marg{\gls{ensuremath}\marg{\cmd{alpha}}-particle} /
+\gls{MFUsentencecase}\marg{\gls{NoCaseChange}\marg{\idx{dollar}\cmd{alpha}\idx{dollar}}-particle}
+\end{codebox}
+Note that \sty{mfirstuc} adds \gls{ensuremath} as an exclusion so
+\gls{makefirstuc} will skip it. Whereas the example above that
+starts with \idx{dollar} will have the entire argument passed to
+\gls{MFUsentencecase}, which skips the maths content. 
+In the first paragraph, \gls{NoCaseChange} is only an
+\idx{exclusion}, but in the second paragraph it's also a
+\idx{blocker}.
+\begin{resultbox}
+Exclusion:
+\makefirstuc{\ensuremath{\alpha}-particle} /
+\makefirstuc{$\alpha$-particle} /
+\MFUsentencecase{\ensuremath{\alpha}-particle} /
+\MFUsentencecase{$\alpha$-particle}
+
+Blocker:
+\MFUblocker{\NoCaseChange}%
+\makefirstuc{\ensuremath{\alpha}-particle} /
+\makefirstuc{\NoCaseChange{$\alpha$}-particle} /
+\MFUsentencecase{\ensuremath{\alpha}-particle} /
+\MFUsentencecase{\NoCaseChange{$\alpha$}-particle}
+\end{resultbox}
+
+\section{Mappings}
+\label{sec:mappings}
+
+A \idx{mapping} indicates that one command should be substituted for
+another, instead of applying a case-change. The assumption is that
+the substituted command should perform the case-change instead.
+\Idxpl{mapping} are not supported by \gls{MFUsentencecase} 
+but are instead treated as exclusions.
+
+\cmddef{MFUaddmap}
+Identifies a mapping which indicates that \gls{makefirstuc} should
+replace \meta{cs1} with \meta{cs2} and not apply a case-change.
+This automatically implements:
+\begin{compactcodebox}
+\gls{MFUexcl}\margm{cs1}\gls{MFUblocker}\margm{cs2}
+\end{compactcodebox}
+This means that \meta{cs2} is identified as a \idx{blocker} (since
+it's assumed to already be a \idx{sentence-case} command) and
+\meta{cs1} is identified as an \idx{exclusion} to protect its
+argument from \gls{MFUsentencecase}, which doesn't support
+\idxpl{mapping}.
+
+\begin{information}
+If either \meta{cs1} or \meta{cs2} is empty, no mapping is established, but an
+\idx{exclusion} or \idx{blocker} will be set for the non-empty argument.
+\end{information}
+
+For example (with \sty{glossaries}):
+\begin{codebox}
+\gls{MFUaddmap}\marg{\gls+{gls}}\marg{\gls+{Gls}}
+\gls{makefirstuc}\marg{\gls{gls}\marg{ex} some text}
+\end{codebox}
+This will be converted to:
+\begin{compactcodebox}
+\gls{Gls}\marg{ex} some text
+\end{compactcodebox}
+Note that this and similar \idxpl{mapping} are automatically added
+in \sty{glossaries} v4.50+ and \sty{glossaries-extra} v1.49+.
+
+\begin{important}
+If a \idxc{mapping}{mapped command} is inside the definition of
+another command, it won't be visible to \gls{makefirstuc} unless
+the other command is expanded before applying \gls{makefirstuc}.
+For example, by using \gls{xmakefirstuc} or \gls{emakefirstuc}.
+If it doesn't get expanded until after it has been passed to
+\gls{MFUsentencecase}, then it will be treated as an \idx{exclusion}
+instead.
+\end{important}
+
+\section{Package Options}
+\label{sec:pkgoptions}
+
+\optiondef{expanded}
+Redefines \gls{glsmakefirstuc} to simply use \gls{MFUsentencecase}.
+
+\optiondef{unexpanded}
+Redefines \gls{glsmakefirstuc} to use \gls{MFUsentencecase}
+without expanding its argument.
+
+\optiondef{grabfirst}
+Redefines \gls{glsmakefirstuc} to use \gls{mfugrabfirstuc} and also
+redefines \gls{mfirstucMakeUppercase} to use \gls{MakeUppercase}.
+
+This option is best avoided and is only provided to emulate the v2.07
+behaviour of \gls{glsmakefirstuc}. However, you may still have
+different results compared to v2.07, so you may need to use rollback
+instead.
+
+\chapter{Title-Case}
+\label{sec:capitalisewords}
+
+The \idx{title-case} commands are designed to convert the first letter of each
+word in a phrase to uppercase. These commands are robust.
+\cmddef{capitalisewords}
+This command applies a \idx{sentence-case} command to each word in \meta{text}
+where the space character is used as the word separator. Note that
+it has to be an ordinary space character, not another form of space,
+such as \idx{nbsp} or \gls{space}. Note that no expansion is performed
+on \meta{text}.
+For example:
+\begin{coderesult}
+\gls{capitalisewords}\marg{a sample phrase}
+\tcblower
+\capitalisewords{a sample phrase}
+\end{coderesult}
+See \sectionref{sec:nocap} for excluding words (such as \qt{of})
+from the case-changing.
+
+\begin{information}
+This isn't the same as the \LaTeX3 command \gls{texttitlecase:n},
+which converts the first letter to \idx{uppercase} and all other
+letters to \idx{lowercase}.
+\end{information}
+
+For convenience, there are shortcut commands if expansion is
+required before parsing the argument:
+\cmddef{xcapitalisewords}
+This is a shortcut for:
+\begin{compactcodebox}
+\cmd{expandafter}\gls{capitalisewords}\cmd{expandafter}\margm{text}
+\end{compactcodebox}
+\cmddef{ecapitalisewords}
+This fully expands \meta{text} before passing it to
+\gls{capitalisewords}.
+
+The parser used by \gls{capitalisewords} first splits up the text on
+each space character. Each of these space-separated words may
+actually be a compound, so further parsing is performed on each
+\qt{word}. The divisions within the compound word should be marked
+up with:
+\cmddef{MFUwordbreak}
+For example:
+\begin{coderesult}
+\gls{capitalisewords}\marg{a 
+big\gls{MFUwordbreak}\marg{/}small idea}
+\tcblower
+\capitalisewords{a big\MFUwordbreak{/}small idea}
+\end{coderesult}
+Each sub-word within the compound word is encapsulated with:
+\cmddef{MFUcapword}
+Since it's inconvenient to have to markup every hyphen,
+\gls{MFUcapword} can be enabled to check for hyphens.
+ 
+\cmddef{ifMFUhyphen}
+This conditional determines whether or not \gls{MFUcapword} should
+consider a hyphen a word break. If this conditional is true, then
+\gls{MFUcapword} will encapsulate its argument with:
+\cmddef{MFUhyphencapword}
+This will parse \meta{text} for hyphen characters and apply the case
+change to each hyphen-separated word.  Otherwise \gls{MFUcapword}
+will treat its argument as a single word.
+
+The conditional can be set to true with:
+\cmddef{MFUhyphentrue}
+and switched back off with:
+\cmddef{MFUhyphenfalse}
+
+For example:
+\begin{codebox}
+\gls{capitalisewords}\marg{server-side includes} /
+\gls{MFUhyphentrue}
+\gls{capitalisewords}\marg{server-side includes}
+\end{codebox}
+\begin{resultbox}
+\capitalisewords{server-side includes} /
+\MFUhyphentrue
+\capitalisewords{server-side includes}
+\end{resultbox}
+
+The actual case-change of each word is performed with:
+\cmddef{MFUcapwordfirstuc}
+This defaults to \code{\gls{makefirstuc}\margm{word}} but may be
+redefined to use \gls{MFUsentencecase}, if preferred.
+
+\begin{important}
+Hyphens and \gls{MFUwordbreak} must be visible to the parser that
+searches for word breaks. This means they won't be detected if they
+are within a group or in the definition of a command.
+\end{important}
+
+Formatting for the entire phrase must go outside
+\gls{capitalisewords} (unlike \gls{makefirstuc}).
+For example:
+\begin{codebox}
+\gls{capitalisewords}\marg{\cmd{emph}\marg{a sample phrase}} /
+\cmd{emph}\marg{\gls{capitalisewords}\marg{a sample phrase}}
+\end{codebox}
+\begin{resultbox}
+\capitalisewords{\emph{a sample phrase}} /
+\emph{\capitalisewords{a sample phrase}}
+\end{resultbox}
+
+If your phrase is likely to contain formatting commands, you can instead use:
+\cmddef{capitalisefmtwords}
+where \meta{text} may be just words (as with \gls{capitalisewords}):
+\begin{compactcodebox}
+\gls{capitalisefmtwords}\margm{words}
+\end{compactcodebox}
+or may be entirely enclosed in a formatting command in the form:
+\begin{compactcodebox}
+\gls{capitalisefmtwords}\marg{\meta{cs}\margm{words}}
+\end{compactcodebox}
+or contain formatted sub-phrases:
+\begin{compactcodebox}
+\gls{capitalisefmtwords}\marg{\meta{words} \meta{cs}\margm{sub-phrase} \meta{words}}
+\end{compactcodebox}
+The starred form only permits a text-block command at the
+start of the phrase. See \sectionref{sec:titlecaseexamples} for
+examples.
+
+\begin{warning}
+Avoid declarations, such as \cmd{bfseries} or \cmd{em}.
+\end{warning}
+
+If expansion is required, you can use:
+\cmddef{xcapitalisefmtwords}
+which is a shortcut for:
+\begin{compactcodebox}
+\cmd{expandafter}\gls{capitalisefmtwords}\cmd{expandafter}\margm{text}
+\end{compactcodebox}
+(The star modifier will be applied with 
+\code{\gls{xcapitalisefmtwords}*} in an appropriate manner.)
+
+\cmddef{ecapitalisefmtwords}
+This will fully expand its argument before passing it to
+\gls{capitalisefmtwords}. Again, the star modifier may be used.
+
+\begin{important}
+The unstarred \gls{capitalisefmtwords} is only designed for phrases that contain
+text-block commands with a single
+argument, which should be a word or sub-phrase. Anything
+more complicated is likely to break. Instead, use the
+starred form or \gls{capitalisewords}.
+\end{important}
+
+\section{Excluding Words From Case-Changing}
+\label{sec:nocap}
+
+\glsadd{exclusion-word}Some words typically shouldn't have their case changed unless they
+occur at the start. These words can be identified with:
+\cmddef{MFUnocap}
+This only has a local effect. The global version is:
+\cmddef{gMFUnocap}
+The list of words that shouldn't be capitalised can be cleared
+using:
+\cmddef{MFUclear}
+
+
+For example:
+\begin{codebox}
+\gls{capitalisewords}\marg{the wind in the willows}
+\codepar
+\gls{MFUnocap}\marg{in}\comment{}
+\gls{MFUnocap}\marg{the}\comment{}
+\codepar
+\gls{capitalisewords}\marg{the wind in the willows}
+\end{codebox}
+\begin{resultbox}
+\capitalisewords{the wind in the willows}
+
+\MFUnocap{in}%
+\MFUnocap{the}%
+
+\capitalisewords{the wind in the willows}
+\end{resultbox}
+
+Since the case-change is ultimately performed by \gls{makefirstuc},
+you can also use an \idx{exclusion} to prevent an individual word
+from being changed. For example:
+\begin{codebox}
+\cmd{newcommand}\marg{\cmd{NoChange}}[1]\marg{\#1}
+\gls{MFUexcl}\marg{\cmd{NoChange}}
+\gls{MFUclear}
+\gls{capitalisewords}\marg{the \cmd{NoChange}\marg{wind} in the willows}
+\end{codebox}
+\begin{resultbox}
+\providecommand{\NoChange}[1]{#1}
+\MFUexcl{\NoChange}
+\MFUclear
+\capitalisewords{the \NoChange{wind} in the willows}
+\end{resultbox}
+This can also work if you redefine \gls{MFUcapwordfirstuc} to use
+\gls{MFUsentencecase} provided the exclusion command doesn't expand
+(so \cmd{NoChange} would need to be protected or made robust in the above
+example). 
+
+\begin{important}
+Exceptions only apply to (non-leading) whole words or words separated with
+\gls{MFUwordbreak} but not to parts of a hyphenated
+word that are split by \gls{MFUhyphencapword}.
+\end{important}
+
+Examples:
+\begin{enumerate}
+\item
+Exceptions aren't applied if \gls{MFUwordbreak} occurs before the
+first space.
+\begin{codebox}
+\gls{MFUnocap}\marg{a}\gls{MFUnocap}\marg{the}\comment{}
+\gls{capitalisewords}\marg{a\gls{MFUwordbreak}\marg{/}the something}
+\end{codebox}
+\begin{resultbox}
+\MFUnocap{a}\MFUnocap{the}%
+\capitalisewords{a\MFUwordbreak{/}the something}
+\end{resultbox}
+
+\item
+Exceptions are applied for non-leading words:
+\begin{codebox}
+\gls{MFUnocap}\marg{and}\gls{MFUnocap}\marg{or}\comment{}
+\gls{capitalisewords}\marg{one and\gls{MFUwordbreak}\marg{/}or another}
+\end{codebox}
+\begin{resultbox}
+\MFUnocap{and}\MFUnocap{or}%
+\capitalisewords{one and\MFUwordbreak{/}or another}
+\end{resultbox}
+
+\item
+Exceptions aren't applied for hyphenated parts:
+\begin{codebox}
+\gls{MFUhyphentrue}
+\gls{MFUnocap}\marg{and}\gls{MFUnocap}\marg{or}\comment{}
+\gls{capitalisewords}\marg{one and-or another}
+\end{codebox}
+\begin{resultbox}
+\MFUhyphentrue
+\MFUnocap{and}\MFUnocap{or}%
+\capitalisewords{one and-or another}
+\end{resultbox}
+\end{enumerate}
+
+\pkgdef{mfirstuc-english}
+The supplementary package \sty{mfirstuc-english} loads \sty{mfirstuc} and uses
+\gls{MFUnocap} to add common English articles and conjunctions, such
+as \qt{a}, \qt{an}, \qt{and}, \qt{but}. You may want to add other
+words to this list, such as prepositions but, as there's some
+dispute over whether prepositions should be capitalised, I~don't
+intend to add them to this package. Note that you need to explicitly
+load \sty{mfirstuc-english} if you require it. There's no automatic
+language detection performed by \sty{mfirstuc}.
+
+If you want to write a similar package for another language, all you
+need to do is create a file with the extension \filefmt{.sty}
+that starts with:
+\begin{compactcodebox}
+\cmd{NeedsTeXFormat}\marg{LaTeX2e}
+\end{compactcodebox}
+The next line should identify the package. For example, if you have
+called the file \filefmt{mfirstuc-french.sty} then you need:
+\begin{compactcodebox}
+\cmd{ProvidesPackage}\marg{mfirstuc-french}
+\end{compactcodebox}
+It's a good idea to also add a version in the final optional
+argument, for example:
+\begin{compactcodebox}
+\cmd{ProvidesPackage}\marg{mfirstuc-french}[2014/07/30 v1.0]
+\end{compactcodebox}
+Next load \sty{mfirstuc}:
+\begin{compactcodebox}
+\cmd{RequirePackage}\marg{mfirstuc}
+\end{compactcodebox}
+Now add all your \gls{MFUnocap} commands. For example:
+\begin{compactcodebox}
+\gls{MFUnocap}\marg{de}
+\end{compactcodebox}
+At the end of the file add:
+\begin{compactcodebox}
+\cmd{endinput}
+\end{compactcodebox}
+
+Put the file somewhere on \TeX's path, and now you can use this
+package in your document. You might also consider
+\href{http://ctan.org/upload}{uploading it to CTAN} in case
+other users find it useful.
+
+
+\section{PDF Bookmarks}
+\label{sec:pdfbookmarks}
+
+If you are using \sty{hyperref} and want to use
+\gls{capitalisewords} or \gls{capitalisefmtwords} (or the expanded
+variants) in a section heading, the PDF bookmarks won't be able to
+use the command as it's not expandable, so you will get a warning
+that looks like:
+\begin{transcript}
+Package hyperref Warning: Token not allowed in a PDF string 
+(PDFDocEncoding):
+(hyperref)                removing `\gls{capitalisewords}'
+\end{transcript}
+
+If you want to provide an alternative for the PDF bookmark, you can
+use \sty{hyperref}'s \gls{texorpdfstring} command. For example:
+\begin{codebox}
+\cmd{chapter}\marg{\gls{texorpdfstring}
+  \marg{\gls{capitalisewords}\marg{a book of rhyme}}\comment{ TeX}
+  \marg{A Book of Rhyme}\comment{ PDF}
+}
+\end{codebox}
+Alternatively, you can use \sty{hyperref}'s mechanism for
+disabling commands within the bookmarks. For example:
+\begin{codebox*}
+\gls{pdfstringdefDisableCommands}\marg{\comment{}
+ \cmd{let}\gls{capitalisewords}\cmd{@firstofone}
+}
+\end{codebox*}
+The same applies to \gls{makefirstuc}. You can, however, use
+the expandable \gls{MFUsentencecase}. So you may prefer:
+\begin{codebox*}
+\gls{pdfstringdefDisableCommands}\marg{\comment{}
+ \cmd{let}\gls{capitalisewords}\cmd{MFUsentencecase}
+ \cmd{let}\gls{makefirstuc}\cmd{MFUsentencecase}
+}
+\end{codebox*}
+
+See the \sty{hyperref} manual for further details.
+
+\section{Examples}
+\label{sec:titlecaseexamples}
+
+\begin{enumerate}
+\item Text only:
+\begin{coderesult}
+\gls{capitalisewords}\marg{a little book of rhyme}
+\tcblower
+\capitalisewords{a little book of rhyme}
+\end{coderesult}
+
+\item Excluding words (see \sectionref{sec:nocap}):
+\begin{coderesult}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisewords}\marg{a little book of rhyme}
+\tcblower
+\MFUnocap{of}
+\capitalisewords{a little book of rhyme}
+\end{coderesult}
+
+\item \gls{space} isn't recognised as a word boundary:
+\begin{codebox}
+\gls{capitalisewords}\marg{a book of rhyme.}
+\codepar
+\gls{capitalisewords}\marg{a book\gls{space} of rhyme.}
+\end{codebox}
+\begin{resultbox}
+\capitalisewords{a book of rhyme.}
+
+\capitalisewords{a book\space of rhyme.}
+\end{resultbox}
+
+\item Phrase entirely enclosed in a formatting command:
+\begin{codebox}
+\gls{capitalisefmtwords}\marg{\cmd{emph}\marg{a small book of rhyme}}
+\end{codebox}
+\begin{resultbox}
+\capitalisefmtwords{\emph{a small book of rhyme}}
+\end{resultbox}
+
+\item Sub-phrase enclosed in a formatting command:
+\begin{codebox}
+\gls{capitalisefmtwords}\marg{a \cmd{emph}\marg{small book} of rhyme}
+\end{codebox}
+\begin{resultbox}
+\capitalisefmtwords{a \emph{small book} of rhyme}
+\end{resultbox}
+
+\item Nested text-block commands:
+\begin{codebox}
+\gls{capitalisefmtwords}\marg{\cmd{textbf}\marg{a \cmd{emph}\marg{small book}} of rhyme}
+\end{codebox}
+\begin{resultbox}
+\capitalisefmtwords{\textbf{a \emph{small book}} of rhyme}
+\end{resultbox}
+
+\item Formatting and case-change exception (see \sectionref{sec:nocap}):
+\begin{codebox}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisefmtwords}\marg{\cmd{textbf}\marg{a \cmd{emph}\marg{small book}} of rhyme}
+\end{codebox}
+\begin{resultbox}
+\MFUnocap{of}
+\capitalisefmtwords{\textbf{a \emph{small book}} of rhyme}
+\end{resultbox}
+
+\item Starred form:
+\begin{codebox}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisefmtwords}*\marg{\cmd{emph}\marg{a small book of rhyme}}
+\end{codebox}
+\begin{resultbox}
+\MFUnocap{of}
+\capitalisefmtwords*{\emph{a small book of rhyme}}
+\end{resultbox}
+
+\item The starred form also works with just text (no text-block
+command):
+\begin{codebox}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisefmtwords}*\marg{a small book of rhyme}
+\end{codebox}
+\begin{resultbox}
+\MFUnocap{of}
+\capitalisefmtwords*{a small book of rhyme}
+\end{resultbox}
+
+\item Expansion:
+\begin{codebox}
+\cmd{newcommand}\marg{\cmd{abc}}\marg{\cmd{xyz}\gls+{space} four five}
+\cmd{newcommand}\marg{\cmd{xyz}}\marg{one two three}
+No expansion: \gls{capitalisewords}\marg{\cmd{abc}}.
+\codepar
+First object one-level expansion: \gls{xcapitalisewords}\marg{\cmd{abc}}.
+\codepar
+Fully expanded: \gls{ecapitalisewords}\marg{\cmd{abc}}.
+\end{codebox}
+\begin{resultbox}
+\newcommand{\abc}{\xyz\space four five}
+\newcommand{\xyz}{one two three}
+No expansion: \capitalisewords{\abc}.
+
+First object one-level expansion: \xcapitalisewords{\abc}.
+
+Fully expanded: \ecapitalisewords{\abc}.
+\end{resultbox}
+
+Remember that the spaces need to be explicit. In the second case
+above, using \gls{xcapitalisewords}, the space before \qt{four} has
+been hidden within \gls{space} so it's not recognised as a word
+boundary, but in the third case, \gls{space} has been expanded to an
+actual space character.
+
+
+\end{enumerate}
+
+If there is a text-block command within the argument of the
+starred form, it's assumed to be at the start of the argument.
+Unexpected results can occur if there are other commands.
+For example:
+\begin{badcodebox}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisefmtwords}*\marg{\cmd{emph}\marg{a small} book \cmd{textbf}\marg{of rhyme}}
+\end{badcodebox}
+\begin{resultbox}
+\MFUnocap{of}
+\capitalisefmtwords*{\emph{a small} book \textbf{of rhyme}}
+\end{resultbox}
+In this case \code{\cmd{textbf}\marg{of rhyme}} is considered a
+single word. Similarly if the text-block command occurs
+in the middle of the argument:
+\begin{badcodebox}
+\gls{MFUnocap}\marg{of}
+\gls{capitalisefmtwords}*\marg{a \cmd{emph}\marg{very small} book of rhyme}
+\end{badcodebox}
+\begin{resultbox}
+\MFUnocap{of}
+\capitalisefmtwords*{a \emph{very small} book of rhyme}
+\end{resultbox}
+In this case \code{\cmd{emph}\marg{very small}} is considered a
+single word.
+
+Grouping causes interference.
+As with all the commands described here, avoid declarations.
+\begin{badcodebox}
+\gls{capitalisefmtwords}\marg{\marg{\cmd{bfseries} a \cmd{emph}\marg{small book}} of rhyme}
+\end{badcodebox}
+
+\begin{information}
+As a general rule, it's better to define \idxpl{semanticcommand} rather
+than directly using font commands and declarations within the
+document.
+\end{information}
+
+Avoid complicated commands in the unstarred version. For example,
+the following breaks:
+\begin{badcodebox}
+\cmd{newcommand}*\marg{\cmd{swap}}[2]\marg{\marg{\#2}\marg{\#1}}
+\gls{capitalisefmtwords}\marg{a \cmd{swap}\marg{bo}\marg{ok} of rhyme}
+\end{badcodebox}
+However it can work with the starred form and the simpler
+\gls{capitalisewords}:
+\begin{codebox}
+\cmd{newcommand}*\marg{\cmd{swap}}[2]\marg{\marg{\#2}\marg{\#1}}
+\gls{capitalisefmtwords}*\marg{a \cmd{swap}\marg{bo}\marg{ok} of rhyme}
+\codepar
+\gls{capitalisewords}\marg{a \cmd{swap}\marg{bo}\marg{ok} of rhyme}
+\end{codebox}
+\begin{resultbox}
+\newcommand*{\swap}[2]{{#2}{#1}}
+\capitalisefmtwords*{a \swap{bo}{ok} of rhyme}
+
+\capitalisewords{a \swap{bo}{ok} of rhyme}
+\end{resultbox}
+Note that the case change is applied to the first argument.
+
+\chapter{Miscellaneous}
+\label{sec:misc}
+
+\section{Saving \Glsfmtplural{exclusion}, \Glsfmtplural{blocker} and 
+\Glsfmtplural{mapping} in the \exttext{aux} File}
+\label{sec:savetoaux}
+
+If the \idxpl{exclusion}, \idxpl{mapping} and \idxpl{blocker} are
+required by some external tool, the information can be saved in the
+\ext+{aux} file.
+
+\cmddef{MFUsaveatend}
+This saves the information at the end of the document using a delayed
+write. This means that it can register all information identified 
+throughout the document, but there's a chance the document may end
+before the write takes place (for example, if the last page only
+contains floats). This command may be counteracted by:
+\cmddef{MFUsave}
+This saves the information using a protected write at the point
+where this command occurs, which may be too soon if additional
+\idxpl{exclusion}, \idxpl{mapping} or \idxpl{blocker} are identified
+later. This command will counteract any instance of
+\gls{MFUsaveatend}, regardless of whether or not \gls{MFUsaveatend}
+comes before or after \gls{MFUsave}.
+
+The associated \ext{aux} commands are listed below. In each case, a
+definition is provided in the \ext{aux} file that does nothing.
+\cmddef{@mfu@excls}
+Lists all \idxpl{exclusion}.
+For example:
+\begin{compactcodebox*}
+\gls{@mfu@excls}\marg{\gls{begin} \gls{cite} \gls{end} \gls{label}
+\gls{ref} \gls{cite} \gls{NoCaseChange} \gls{ensuremath}
+\gls{MFUskippunc} \gls{gls} \gls{glspl}}
+\end{compactcodebox*}
+
+\cmddef{@mfu@blockers}
+Lists all \idxpl{blocker}.
+For example:
+\begin{compactcodebox*}
+\gls{@mfu@blockers}\marg{\gls{Gls} \gls{Glspl} }
+\end{compactcodebox*}
+
+\cmddef{@mfu@mappings}
+Lists all \idxpl{mapping} as a \keyval\ list.
+For example:
+\begin{compactcodebox*}
+\gls{@mfu@mappings}\marg{ \marg{\gls{gls} }= \marg{\gls{Gls} }, \marg{\gls{glspl} }= \marg{\gls{Glspl} }}
+\end{compactcodebox*}
+
+\section{All-Caps}
+\label{sec:allcaps}
+
+\cmddef{mfirstucMakeUppercase}
+This command was originally used to perform the actual conversion to
+\idx+{uppercase} and was defined to use command \gls{MakeUppercase}.
+The \sty{glossaries} package (before v4.50) formerly loaded the
+\sty{textcase} package and redefined \gls{mfirstucMakeUppercase} to
+use \gls{MakeTextUppercase}, which was better than
+\gls{MakeUppercase}.
+
+The \sty{textcase} package has been deprecated as from 2022 and
+it now simply sets \gls{MakeTextUppercase} to \gls{MakeUppercase}
+because the new kernel now defines \gls{MakeUppercase} to use the
+newer \LaTeX3 command \gls{textuppercase:n}. Although that command
+is expandable, \gls{MakeUppercase} is robust.
+
+As from v2.08, \sty{mfirstuc} now defines \gls{mfirstucMakeUppercase}
+so that it uses \gls{texttitlecasefirst:n} directly, rather than
+indirectly through \gls{MakeUppercase}, which means that it's now
+expandable. However, \gls{mfirstucMakeUppercase} is no longer used
+by \sty{mfirstuc} except in \gls{mfugrabfirstuc}, which is provided
+to emulate v2.07. Note that the \opt{grabfirst} option will also
+redefine \gls{mfirstucMakeUppercase} to use \gls{MakeUppercase}.
+
+\section{UTF-8}
+\label{sec:utf8}
+
+\begin{information}
+See \blog{binary-files-text-files-and-file-encodings/}{Binary
+Files, Text Files and File Encodings} if you are confused about how
+file encodings, such as \gls{utf8}, relate to text files.
+\end{information}
+
+This section only applies to rollback or the use of \gls{mfugrabfirstuc}
+(implemented via the \opt{grabfirst} option).
+
+Prior to version 2.08, the case-change applied by the
+\gls{glsmakefirstuc} command worked by utilizing the fact that, in
+most cases, \TeX\ doesn't require a regular argument to be enclosed
+in braces if it only consists of a single token. (This is why you
+can do, say, \code{\cmd{frac}12} instead of
+\code{\cmd{frac}\marg{1}\marg{2}} or \code{x\char`\^2}
+instead of \code{x\char`\^\marg{2}}, although this
+practice is discouraged by some.)
+
+A~simplistic version of the original \gls{glsmakefirstuc} command is:
+\begin{codebox}
+\cmd{newcommand}*\marg{\cmd{FirstUC}}[1]\marg{\gls{MakeUppercase} \#1}
+\end{codebox}
+Here
+\begin{codebox}
+\cmd{FirstUC}\marg{abc}
+\end{codebox}
+is equivalent to
+\begin{codebox}
+\gls{MakeUppercase} abc
+\end{codebox}
+and since \gls{MakeUppercase} requires an argument, it grabs the
+first token (the character \qt{a} in this case) and uses that as the
+argument so that the result is \qt{Abc}. This behaviour can be
+achieved with \gls{mfugrabfirstuc}.
+
+Unfortunately, this will fail if the content starts with a \gls{utf8}
+character and you are using \pdfLaTeX, where each octet of the
+\gls{utf8} character is a separate token. This isn't a problem 
+with \XeLaTeX\ and \LuaLaTeX\ which both treat the entire multibyte
+character as a single token.
+
+\LaTeX3 now provides \gls{texttitlecasefirst:n}
+to convert the first character to uppercase, so now the
+case-change can be applied with:
+\begin{codebox}
+\cmd{ExplSyntaxOn}
+\gls{texttitlecasefirst:n}\marg{élite}
+\cmd{ExplSyntaxOff}
+\end{codebox}
+This is exactly what \gls{MFUsentencecase} does without the need to
+switch on \LaTeX3 syntax. The difference with the default definition
+of \gls{glsmakefirstuc} is that it prevents its argument from being
+expanded.
+
+\backmatter
+\printterms
+\printsummary
+\printuserguideindex
+
+\end{document}
