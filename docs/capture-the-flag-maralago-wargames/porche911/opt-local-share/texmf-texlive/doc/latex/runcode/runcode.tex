@@ -1,0 +1,359 @@
+% LaTeX Package: runcode 2025/01/17 v2.4
+% 
+% Copyright (C) 2020-2025 by Haim Bar and HaiYing Wang
+% 
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3c of this license or (at your option) any later
+% version.  The latest version of this license is in:
+% 
+% http://www.latex-project.org/lppl.txt
+% 
+% and version 1.3c or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+
+\documentclass{ltxdoc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\author{Haim Bar and HaiYing Wang \\haim.bar@uconn.edu, haiying.wang@uconn.edu}
+\date{\today}
+\title{The \textbf{runcode} package}
+\begin{document}
+
+\maketitle
+\begin{abstract}
+
+\texttt{runcode} is a \LaTeX{} package that executes programming source codes (including
+all command line tools) from \LaTeX{}, and embeds the results in the resulting pdf
+file. Many programming languages can be easily used and any command-line
+executable can be invoked when preparing the pdf file from a tex file. \texttt{runcode}
+is also available on \href{https://ctan.org/pkg/runcode}{CTAN}.
+
+It is recommended to use this package in the server mode together with the
+\href{https://www.python.org/}{Python} \href{https://pypi.org/project/talk2stat/}{talk2stat} package. Currently, the server mode supports \href{https://julialang.org/}{Julia}, \href{https://www.mathworks.com/products/matlab.html}{MatLab},
+\href{https://www.python.org/}{Python}, and \href{https://www.r-project.org/}{R}. More languages will be added.
+
+For more details and usage examples and troubleshooting, refer to the
+package’s github repository, at \url{https://github.com/Ossifragus/runcode}.
+
+\end{abstract}
+
+\section{Installation}
+\label{sec:org7b41ef7}
+You can simply put the runcode.sty file in the \LaTeX{} project folder.
+
+The server mode requires the \href{https://pypi.org/project/talk2stat/}{talk2stat} package, and some chunk command (e.g.,
+\texttt{\textbackslash{}showChunk}) requires the \href{https://pypi.org/project/advance-touch/}{advance-touch} package. To install them from the
+command line, use:
+
+\begin{verbatim}
+pip3 install talk2stat advance-touch
+\end{verbatim}
+
+\textbf{Note}: \texttt{runcode} requires to enable the \texttt{shell-escape} option when
+compiling a \LaTeX{} document.
+
+
+\section{Usage}
+\label{sec:org5034faf}
+\subsection{Load the package:}
+\label{sec:orge3286de}
+\begin{minted}[]{latex}
+\usepackage[options]{runcode}
+\end{minted}
+
+Available options are:
+
+\begin{itemize}
+\item \texttt{cache}: use cached results.
+
+\item \texttt{fvextra}: use the \href{https://ctan.org/pkg/fvextra}{fvextra} package to show code.
+
+\item \texttt{julia}: start server for \href{https://julialang.org/}{Julia} (requires \href{https://pypi.org/project/talk2stat/}{talk2stat}).
+
+\item \texttt{listings}: use the \href{https://ctan.org/pkg/listings?lang=en}{listings} package to show code.
+
+\item \texttt{matlab}: start server for \href{https://www.mathworks.com/products/matlab.html}{MatLab} (requires \href{https://pypi.org/project/talk2stat/}{talk2stat}).
+
+\item \texttt{minted}: use the \href{https://ctan.org/pkg/minted}{minted} package to show code (requires the \href{https://pygments.org/}{pygments} package).
+This is the default option.
+
+\item \texttt{nominted}: use the \href{https://ctan.org/pkg/fvextra}{fvextra} package
+instead of the \href{https://ctan.org/pkg/minted}{minted} package to show
+code (this does not require the \href{https://pygments.org/}{pygments}
+package, but it does not provide syntax highlights).
+
+\item \texttt{nohup}: use the \texttt{nohup} command when starting a server. When using
+the server-mode, some editors terminate all child processes after
+\LaTeX{} compiling such as Emacs with Auctex. This option set the
+variable notnohup to be false, and the server will not be terminated
+by the parent process. \textbf{This option has to be declared before
+declaring any language}, e.g., \texttt{[nohup, R]} works but \texttt{[R, nohup]}
+does not work.
+
+\item \texttt{python}: start server for \href{https://www.python.org/}{Python}
+(requires \href{https://pypi.org/project/talk2stat/}{talk2stat}).
+
+\item \texttt{run}: run source code.
+
+\item \texttt{R}: start server for \href{https://www.r-project.org/}{R} (requires
+\href{https://pypi.org/project/talk2stat/}{talk2stat}).
+
+\item \texttt{stopserver}: stop the server(s) when the pdf compilation is done.
+\end{itemize}
+
+\textbf{Note}: If \href{https://ctan.org/pkg/minted}{minted} is used, the style of
+the code block is controlled through the minted package,
+\href{https://github.com/Ossifragus/runcode/blob/master/examples/MontyHall/MontyHall.tex\#L3-L4}{e.g.:}
+
+\begin{minted}[]{latex}
+\setminted[julia]{linenos, frame=single, bgcolor=bg, breaklines=true}
+\setminted[R]{linenos, frame=single, bgcolor=lightgray, breaklines=true}
+\end{minted}
+
+Similarly, \href{https://ctan.org/pkg/fvextra}{fvextra} and \href{https://ctan.org/pkg/listings?lang=en}{listings} packages can be customized through the \texttt{\textbackslash{}fvset}
+and \texttt{\textbackslash{}lstset} commands, respectively, e.g.: 
+
+\begin{minted}[]{latex}
+\fvset{fontsize=\small, linenos=true, frame=single}
+\lstset{basicstyle=\large, frame=single}
+\end{minted}
+
+The outputs from executing codes are displayed in
+\href{https://ctan.org/pkg/tcolorbox?lang=en}{tcolorbox}, so the style can
+be customized with \texttt{\textbackslash{}tcbset},
+\href{https://github.com/Ossifragus/runcode/blob/master/examples/MontyHall/MontyHall.tex\#L5}{e.g.:}
+
+\begin{minted}[]{latex}
+\tcbset{breakable,colback=red!5!white,colframe=red!75!black}
+\end{minted}
+
+\subsection{Basic commands:}
+\label{sec:org496679c}
+\begin{itemize}
+\item \texttt{\textbackslash{}runExtCode\{Arg1\}\{Arg2\}\{Arg3\}[Arg4]} runs an external code.
+
+\begin{itemize}
+\item \texttt{Arg1} is the executable program.
+\item \texttt{Arg2} is the source file name.
+\item \texttt{Arg3} is the output file name (with an empty value, the counter \texttt{codeOutput} is
+used).
+\item \texttt{Arg4} controls whether to run the code. \texttt{Arg4} is optional with three possible
+values.
+\begin{itemize}
+\item empty value or skipped: the value of the global Boolean variable \texttt{runcode}
+is used;
+\item \texttt{run}: the code will be executed;
+\item \texttt{cache} (or anything else): use cached results; if the output file does not
+exist, the cache option will be overridden and the code will run.
+\end{itemize}
+\end{itemize}
+
+\item \texttt{\textbackslash{}showCode\{Arg1\}\{Arg2\}[Arg3][Arg4]} shows the source code, using
+\href{https://ctan.org/pkg/minted}{minted} (requires \href{https://pygments.org/}{pygments}), \href{https://ctan.org/pkg/fvextra}{fvextra}, or \href{https://ctan.org/pkg/listings?lang=en}{listings}.
+
+\begin{itemize}
+\item \texttt{Arg1} is the programming language.
+\item \texttt{Arg2} is the source file name.
+\item \texttt{Arg3} is the first line to show (optional with a default value 1).
+\item \texttt{Arg4} is the last line to show (optional with a default value of
+the last line).
+\end{itemize}
+
+\item \texttt{\textbackslash{}includeOutput\{Arg1\}[Arg2]} is used to embed the output from executed
+code.
+
+\begin{itemize}
+\item \texttt{Arg1} is the output file name, and it needs to have the same value
+as that of \texttt{Arg3} in \texttt{\textbackslash{}runExtCode}. If an empty value is given to
+\texttt{Arg1}, the counter \texttt{codeOutput} is used.
+\item \texttt{Arg2} is optional and it controls the type of output with a default
+value \texttt{vbox}.
+\begin{itemize}
+\item \texttt{vbox} (or skipped) = verbatim in a box;
+\item \texttt{tex} = pure latex;
+\item \texttt{inline} = embed result in text.
+\end{itemize}
+\end{itemize}
+
+\item \texttt{\textbackslash{}inln\{Arg1\}\{Arg2\}[Arg3][Arg4]} is designed for simple calculations; it runs
+one command (or a short batch) and displays the output within the
+text.
+
+\begin{itemize}
+\item \texttt{Arg1} is the executable program or programming language.
+\item \texttt{Arg2} is the source code.
+\item \texttt{Arg3} is the output file name (optional);
+\item \texttt{Arg4} is the output type and controls whether to run the code.
+\begin{itemize}
+\item \texttt{inline} (or skipped or with empty value): embed result in text;
+\item \texttt{vbox}: verbatim in a box;
+\item \texttt{cache} or appending \texttt{.cache} to the argument (e.g., \texttt{vbox.cache}) AND the
+output file in \texttt{Arg3} exists: the cached result will be used and the code
+will not run.
+\end{itemize}
+\end{itemize}
+
+\item \texttt{\textbackslash{}showChunk\{Arg1\}\{Arg2\}[Arg3][Arg4]} prints a selected chunk from source
+code. The chunk is identified in the source code by two strings that define
+the beginning and end of the chunk. The default beginning is \texttt{label===<name>}
+where \texttt{<name>} should be a unique user-defined chunk ID. The default end marker is
+\texttt{===end}. In the code, these markers should appear after a comment character, so
+that the code will run.
+
+\begin{itemize}
+\item \texttt{Arg1} is the programming language.
+\item \texttt{Arg2} is the source file name.
+\item \texttt{Arg3} is is the chunk identifier.
+\item \texttt{Arg4} and \texttt{Arg5} are the beginning and end markings of a chunk (optional with
+default \texttt{label==} and \texttt{===end}.
+\end{itemize}
+\end{itemize}
+
+
+
+\subsection{Extended commands:}
+\label{sec:orgf1638ce}
+\begin{itemize}
+\item \texttt{\textbackslash{}runCodeIncOut\{Arg1\}\{Arg2\}[Arg3][Arg4][Arg5]} runs an external code and
+embeds the output. This is a combination of \texttt{\textbackslash{}runExtCode} and \texttt{\textbackslash{}includeOutput}.
+\begin{itemize}
+\item \texttt{Arg1} is the executable program.
+\item \texttt{Arg2} is the source file name.
+\item \texttt{Arg3} (optional) controls whether to run the code. Its functionality is the
+same as that of \texttt{Arg4} of \texttt{\textbackslash{}runExtCode}.
+\item \texttt{Arg4} (optional) is the output file name. Its functionality is the same as
+that of \texttt{Arg3} of \texttt{\textbackslash{}runExtCode}.
+\item \texttt{Arg5} (optional) controls the type of output with a default value \texttt{vbox}. Its
+functionality is the same as that of \texttt{Arg3} of \texttt{\textbackslash{}includeOutput}.
+\end{itemize}
+\end{itemize}
+
+\subsection{Language specific shortcuts:}
+\label{sec:org8195ea0}
+Replace \texttt{LANG} with \texttt{Julia}, \texttt{MatLab}, \texttt{Python}, or \texttt{R}, for the \href{https://julialang.org/}{Julia}, \href{https://www.mathworks.com/products/matlab.html}{MatLab}, \href{https://www.python.org/}{Python}, \href{https://www.r-project.org/}{R}
+language, respectively, for the following commands.
+
+\begin{itemize}
+\item \texttt{\textbackslash{}runLANG[Arg1]\{Arg2\}\{Arg3\}[Arg4]} runs an external \texttt{LANG} code file.
+\begin{itemize}
+\item \texttt{Arg1} is optional and uses \href{https://pypi.org/project/talk2stat/}{talk2stat}'s \texttt{LANG} server by default.
+\item \texttt{Arg2}, \texttt{Arg3}, and \texttt{Arg4} have the same effects as those of the basic command
+\texttt{\textbackslash{}runExtCode}.
+\end{itemize}
+\item \texttt{\textbackslash{}runLANGIncOut[Arg1]\{Arg2\}[Arg3][Arg4][Arg5]} runs an external \texttt{LANG} code
+file and embeds the output.
+\begin{itemize}
+\item \texttt{Arg1} is optional and uses \href{https://pypi.org/project/talk2stat/}{talk2stat}'s \texttt{LANG} server by default.
+\item \texttt{Arg2}, \texttt{Arg3}, \texttt{Arg4}, and \texttt{Arg5} have the same effects as those of the command
+\texttt{\textbackslash{}runCodeIncOut}.
+\end{itemize}
+\item \texttt{\textbackslash{}inlnLANG[Arg1]\{Arg2\}[Arg3][Arg4]} runs \texttt{LANG} source code (\texttt{Arg2}) and displays
+the output in line.
+\begin{itemize}
+\item \texttt{Arg1} is optional and uses the \texttt{LANG} server by default.
+\item \texttt{Arg2} is the \texttt{LANG} source code to run. If the \texttt{LANG} source code is wrapped
+between "\texttt{```}" on both sides (as in the markdown grammar), then it will be
+implemented directly; otherwise the code will be written to a file on the
+disk and then be called.
+\item \texttt{Arg3} and \texttt{Arg4} have the same effects as those of the basic command \texttt{\textbackslash{}inln}.
+\end{itemize}
+
+\item \texttt{\textbackslash{}runLANGChunk[Arg1]\{Arg2\}\{Arg3\}[Arg4][Arg5][Arg6]} runs a selected chunk from
+an external \texttt{LANG} code file and embeds the output. 
+\begin{itemize}
+\item \texttt{Arg1} (optional ) uses \href{https://pypi.org/project/talk2stat/}{talk2stat}'s \texttt{LANG} server by default.
+\item \texttt{Arg2} is the source file name.
+\item \texttt{Arg3} is is the chunk identifier.
+\item \texttt{Arg4} (optional) controls whether to run the code.
+\item \texttt{Arg5} (optional) is the output file name.
+\item \texttt{Arg6} (optional) controls the type of output with a default value \texttt{vbox}.
+\end{itemize}
+\end{itemize}
+
+For example,
+\begin{minted}[]{latex}
+\runR{code/MontyHall_1.R}{montyhall-R1}
+\runRIncOut{code/MontyHall_1.R}[][montyhall-R1]
+\end{minted}
+
+Specifically for \href{https://www.python.org/}{Python}, 
+
+\begin{itemize}
+\item \texttt{\textbackslash{}runPythonBatch[Arg1][Arg2]} runs an external \href{https://www.python.org/}{Python} code file in batch mode
+(without a server running). Python (at least currently), unlike the other
+languages we use, does not have an option to save and restore a session, which
+means that once a Python session ends, the working environement (variable,
+functions) is deleted. In order to allow a batch-mode in Python, we
+implemented such capability. It requires the \href{https://pypi.org/project/dill/}{dill} module, which has to be
+installed via \texttt{pip3 install dill}.
+\begin{itemize}
+\item \texttt{Arg1} is the \href{https://www.python.org/}{Python} source file name,
+\item \texttt{Arg2} is the output file name.
+\end{itemize}
+\end{itemize}
+
+
+\section{Revisions}
+\label{sec:orge3b69ca}
+\begin{itemize}
+\item v2.4, January 17, 2025: 1. put file names within \$\$ for more robust
+warnings; 2. use the python \href{https://pypi.org/project/advance-touch/}{advance-touch} package to create sub-folders for
+chunk related commands.
+\item v2.3, January 12, 2024: two bug fixes (1. removed an extra space after
+\texttt{\textbackslash{}inlnX}; 2. when an underscore appeared inside R code, the tex file would
+compile with an error).
+\item v2.2, September 8, 2023: add \texttt{\textbackslash{}showChunk} basic command and \texttt{\textbackslash{}runLANGChunk}
+commands for multiple languages.
+\item v2.1, June 30, 2023: detokenize code which is passed to \texttt{\textbackslash{}inln}. This is
+necessary when the code contains special latex characters like backslash.
+These characters are escaped by latex when they are passed to macros as arguments,
+which, in the case of \texttt{\textbackslash{}inln}, alters the correct syntax and causes execution errors.
+Detokenizing ensures that the code is passed as-is to R/Julia/MatLab/Python.
+We thank \href{https://github.com/kiryph}{kiryph} for reporting the issue.
+\item v2.0, June 23, 2023: add \texttt{\textbackslash{}runCodeIncOut} command that runs an external code and
+embeds the output and andd some language specific shortcuts; update
+\texttt{\textbackslash{}runExtCode} so that if the output file does not exist, the \texttt{cache} option will
+be overridden and the code will run; update \texttt{\textbackslash{}inln} so that its \texttt{Arg4} accept
+\texttt{cache} or appending \texttt{.cache} to use the cached result. We thank \href{https://github.com/kiryph}{kiryph} for
+suggesting these features.
+\item v1.9, June 13, 2023: update \texttt{\textbackslash{}inln} command; the optional \texttt{Arg3} is the output
+file name and the optional \texttt{Arg4} is the output type.
+\item v1.8, January 18, 2023, add support to \href{https://ctan.org/pkg/listings?lang=en}{listings.}
+\item v1.7, August 20, 2022: changed the tmp/ folder to generated/ in order to
+conform with CTAN suggestions; renamed the troubleshooting file.
+\item v1.6, August 10, 2022: stop only configured/running servers; a new
+reducedspace option - some document classes put more space after the code box;
+changed the default timeout of servers to 60 seconds; expanded the
+troubleshooting document. New examples are now available on GitHub, including
+how to collaborate with people who use Overleaf.
+\item v1.5, July 23, 2022: Removed the utf8x option when loading inputenc due to a
+conflict with hyperref.
+\item v1.4, July 18, 2022: Fixed a bug in the cache mode.
+\item v1.3, May 14, 2022: Removed the hard-coded minted options.
+\item v1.2, May 3, 2022: Added python options (server and batch).
+\item v1.1, April 17, 2021: Added a nohup option; improved error handling (missing
+code files, zero bytes in output files.)
+\end{itemize}
+
+\section{Contributing}
+\label{sec:orged22cfb}
+We welcome your contributions to this package by opening issues on
+GitHub and/or making a pull request. We also appreciate more example
+documents written using \texttt{runcode}.
+
+
+\textbf{Citing} \texttt{runcode}:
+Haim Bar and HaiYing Wang (2021). \href{https://jds-online.org/journal/JDS/article/103/info}{Reproducible Science with \LaTeX{}},
+\emph{Journal of Data Science} 2021; 19, no. 1, 111-125, DOI 10.6339/21-JDS998
+\end{document}

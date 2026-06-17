@@ -1,0 +1,345 @@
+  %% Copyright 2023 Francesco Lambertini
+  %
+  % This work may be distributed and/or modified under the
+  % conditions of the LaTeX Project Public License, either version 1.3c
+  % of this license or any later version.
+  % The latest version of this license is in
+  % http://www.latex-project.org/lppl.txt
+  % and version 1.3c or later is part of all distributions of LaTeX
+  % version 2023/04/17 or later.
+  %
+  % This work has the LPPL maintenance status `maintained'.
+  % 
+  % The Current Maintainer of this work is Francesco Lambertini.
+  %
+  % This work consists of the files quickreaction.sty, quickreaction.tex and quickreaction.pdf.
+  %
+  % v1.02.01 2023/04/17
+\documentclass{scrarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{microtype} 
+\usepackage{siunitx} 
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage[dvipsnames ]{xcolor}
+\definecolor{unipd}{RGB}{176, 0, 0}
+
+\usepackage{xparse}
+\usepackage{tikz}
+\usepackage{chemfig}
+\usepackage{mol2chemfig}
+
+\usepackage[iupac]{quickreaction}
+
+
+%molecules
+%C1=COC=C1
+\newcommand{\furan}{\chemfig{-[:180,,,,dbl={73}{73}]-[:252]O-[:324]-[:36,,,,dbl={73}{73}](-[:108])}}
+%CC(=O)[Cl]
+\newcommand{\acetylchloride}{\chemfig{-[:90](=[:150]O)-[:30]Cl}}
+%CC(=O)C1=CC=CO1
+\newcommand{\acetylfuran}{\chemfig{-[:294](=[:234]O)-[:354]-[:300,,,,dbl={73}{73}]-[:12]-[:84,,,,dbl={73}{73}]-[:156]O(-[:228])}}
+%C(CC(=O)OCC)(=O)OCC
+\newcommand{\diethylmalonate}{\chemfig{-[:30]-[:-30]O-[:30](=[:90]O)-[:-30]-[:30](=[:90]O)-[:-30]O-[:30]-[:-30]}}
+%4-chlorobenzaldehyde
+\newcommand{\chlorobenzaldehyde}{\chemfig{O=[:300](-[:-120]H)--[:300,,,,dlh]--[:60,,,,dlh](-Cl)-[:120]-[:180,,,,dlh](-[:240])}}
+%CC(=O)CC(C1=CC=C(C=C1)Cl)O
+\newcommand{\clhydroxybutanone}{\chemfig{-[:300](=[:240]O)--[:60](<:[:120,,,2]HO)--[:300,,,,dlh]--[:60,,,,dlh](-Cl)-[:120]-[:180,,,,dlh](-[:240])}}
+%CC(=O)C
+\newcommand{\acetone}{\chemfig{-[:30](=[:90]O)-[:-30]}}
+%C1C[C@H](NC1)C(=O)O
+\newcommand{\Lproline}{\chemfig{O=[:132](-[:72,,,1]OH)>[:192]-[:138]-[:210]-[:282]-[:354]\mcfbelow{N}{H}(-[:66])}}
+
+
+\usepackage{listings}
+\lstset{%
+columns=fullflexible ,
+basicstyle=\small\ttfamily,
+language={[LaTeX]TeX},   
+breaklines=true,
+frame=single,
+framexleftmargin=3mm, 
+xleftmargin=3mm,
+prebreak = {\hbox{\textcolor{gray}{\%}}},
+backgroundcolor=\color{blue!5},
+rulecolor=\color{black},
+morekeywords={printatom, setchemfig, chemfig, arrowlength, quickarrow, fixrow},
+%keywordstyle=[2]{\color{gray}},
+%morekeywords=[2]{tikz, xparse, chemfig, quickreaction},
+moredelim=[is][\ttfamily]{|}{|},
+literate=*{\&}{{\textcolor{red}{\&}}}{1},
+keywordstyle=\color[rgb]{0,0,1},                    
+commentstyle=\color[RGB]{128,128,128},    
+stringstyle=\color[rgb]{0.627,0.126,0.941}  
+}
+
+\usepackage{hyperref}
+\hypersetup{
+colorlinks=true,
+urlcolor=ForestGreen,
+linkcolor=black,
+}
+
+
+\begin{document}
+
+\begin{center}
+\textbf{\Huge quickreaction} 
+
+\vspace{0.5cm}
+
+v1.02.01 \hspace{1cm} 2023/04/17
+
+\vspace{0.5cm}
+
+Simple and fast way to typeset chemical reactions
+ 
+ \vspace{0.5cm}
+
+Francesco Lambertini
+
+\vspace{0.5cm}
+
+\href{mailto: kekko.francy@gmail.com}{kekko.francy@gmail.com}
+\end{center}
+
+
+\tableofcontents
+
+\section{Licence}
+This work may be distributed and/or modified under the conditions of the \LaTeX~Project Public License, version 1.3c or later. The latest version of this license is at \url{https://www.latex-project.org/lppl.txt}.
+
+\section{Requirements}
+\lstinline{quickreaction} needs the packages \href{https://ctan.org/pkg/xparse}{\ttfamily xparse} and \href{https://ctan.org/pkg/tikz-page}{\ttfamily tikz}. It loads tiks libraries \href{https://tikz.dev/library-matrix}{\ttfamily matrix} and \href{https://tikz.dev/tikz-shapes#sec-17.5}{\ttfamily positioning}.
+
+\section{Motivations}
+The aim of this package is to provide a simple and fast way to typeset elementary chemical reactions. There are already some packages that provide many and more sophisticated ways to draw all kinds of schemes, but all of them require a lot of effort. When you try to typeset a reaction, problems arise when it is time to align all reactants and, most of all, to align their names. For simple compounds, it is not so difficult to get good results, but for larger molecules, you have to spend a lot of time in order to do it. In addition, there are many commands and environments that provide various types of arrows to use in reaction schemes, but none of them have all the necessary functions: an arrow must extend with the text, support arguments of any type, and have the ability to use parboxes for any numbered indications, which are common in chemistry. 
+
+This package is nothing else than a bunch of macros I used to create reactions in the fastest way when an incoming project is imminent, but I decided to publish it in order to help everyone who gets stuck at first and decides to switch to other programs which, even if they can be powerful reaction setters, often do not match the style of the document with different fonts, graphical styles and blurred images that, when inserted, irremediably compromise the style of the document. A chemist-proof way to create reactions may help to initiate newbies and expand the use of \LaTeX \ in chemistry.
+
+\section{Options}
+
+Using \href{https://www.ctan.org/pkg/chemfig}{\ttfamily chemfig} as a chemical structure drawer, the option {\ttfamily iupac} sets the style of bonds following what I have inferred and summarized from the \href{https://iupac.qmul.ac.uk/drawing/drawing.html}{\ttfamily IUPAC reccomendations}. Without this option, the chemfig style will be the standard one. In case you want your own configuration, simply copy and paste the code below in your preamble to change it as you like. You can find the explanation of the terms and more options in the \href{https://ctan.mirror.garr.it/mirrors/ctan/macros/generic/chemfig/chemfig-en.pdf}{\ttfamily chemfig manual}.
+
+\begin{lstlisting}
+\renewcommand{\printatom}[1]{%
+\fontsize{8pt}{10pt}\selectfont{\ensuremath{\mathsf{#1}}}}
+\setchemfig{
+cram rectangle=false,
+cram width=2.5pt,
+cram dash width=0.5pt,
+cram dash sep=1.5pt,
+atom sep=16pt,
+bond offset=1pt,
+double bond sep=2pt,
+bond join = true,
+bond style={line width=0.5pt}
+}
+\end{lstlisting}
+
+\section{Basic Usage}
+This package provides the \lstinline{quickreaction} environment and the command \lstinline{\quickarrow}. It is based on the \href{https://tikz.dev/tikz-matrices}{\ttfamily TikZ matrix of nodes} and aligns all the reactants and products at the center of the TikZ box in which they are contained. For most cases, it is a sufficient setting to get good results, but to achieve perfection, one can use many other packages, for example, \href{https://www.ctan.org/pkg/chemfig}{\ttfamily chemfig} itself or \href{https://www.ctan.org/pkg/mychemistry}{\ttfamily mychemistry}. An example is worth more than a thousand words:
+
+\begin{lstlisting}
+%Preamble
+|\usepackage{xparse}
+\usepackage{tikz}
+\usepackage{chemfig}
+\usepackage[iupac]{quickreaction}|
+%Document
+\begin{quickreaction}
+\chemfig{[:30]-(-[:90])=_[:-30]--[:-30]} \&  \quickarrow[\chemfig{O_3}][\chemfig{DMS}]   \& \chemfig{[:30]-(-[:90])=_[:-30]O}  \& + \& \chemfig{O=_[:-30]-[:30]-[:-30]} \\
+2-methyl-2-pentene                               \&     \& |acetone|                                       \&    \& 1-propanone                     \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\chemfig{[:30]-(-[:90])*6(=-(-[:-30]))} \&  \quickarrow[\chemfig{O_3}][\chemfig{DMS}]   \& \chemfig{-[:30](=[:90]O)-[:-30]}  \& + \& \chemfig{H-[:30](=[:90]O)-[:-30]-[:30]} \\
+2-methyl-2-pentene                               \&     \& acetone                                      \&    \& 1-propanone                     \\
+\end{quickreaction}
+\end{center}
+
+The structure of the reaction simply follows the TikZ matrix syntax: the separator between cells is \lstinline{\&} and for rows is \lstinline{\\}. I changed the cell separator from the standard \lstinline{&} to \lstinline{\&} to avoid beamer issues.
+
+The \lstinline{\quickarrow} command has two optional arguments: one for the label above and one for the label below. The minimum arrow length is set at \qty{1}{\centi \m}. 
+\begin{center}
+\lstinline{\quickarrow[label above][label below]}
+\end{center}
+ 
+
+\section{Advises for Ultra-fast Reaction Typeset}
+
+As far as I know, with the introduction of this package, the combo \href{https://www.ctan.org/pkg/mol2chemfig}{\ttfamily mol2chemfig} and \lstinline{quickreaction} can lead to the fastest way to draw chemical reactions with \LaTeX. \href{https://www.ctan.org/pkg/mol2chemfig}{\ttfamily mol2chemfig} is a Python program that generates the chemfig code just from the SMILES (Simplified Molecular Input Line Entry System), which can be obtained from any graphical software for drawing molecules or from any online database. The unofficial version available for Python3 is downloadable at \url{https://pypi.org/project/mol2chemfigPy3/}. To obtain the chemfig string, I usually use the command 
+\begin{center}
+\lstinline{|mol2chemfig -zwf -i direct "SMILES"|}
+\end{center}
+
+Once obtained, the chemfig code can be slapped into the \lstinline{quickreaction} environment without any knowledge of what you are doing, but obtaining almost instantly the desired result.
+
+\section{Examples}   
+Chemfig string can be very long so in the next examples I will create a macro for every compound with a \lstinline{\newcommand} in the preamble in order to keep the environment clean and to focus on the examples aspects. 
+
+\subsection{Labels Aligment}
+It is common in chemistry to specify the order of multiple separate steps in a reaction.
+
+\begin{lstlisting}
+%Preamble
+|\usepackage{xparse}
+\usepackage{tikz}
+\usepackage{chemfig}
+\usepackage{mol2chemfig}
+\usepackage[iupac]{quickreaction}|
+
+%C1=COC=C1
+\newcommand{\furan}{\chemfig{-[:180,,,,dbl={73}{73}]-[:252]O-[:324]-[:36,,,,dbl={73}{73}](-[:108])}}
+%CC(=O)[Cl]
+\newcommand{\acetylchloride}{\chemfig{-[:90](=[:150]O)-[:30]Cl}}
+%CC(=O)C1=CC=CO1
+\newcommand{\acetylfuran}{\chemfig{-[:294](=[:234]O)-[:354]-[:300,,,,dbl={73}{73}]-[:12]-[:84,,,,dbl={73}{73}]-[:156]O(-[:228])}}
+
+%Document
+\begin{quickreaction}
+\furan \& + \& \acetylchloride \& \quickarrow[1) \chemfig{BF_3}][2)\chemfig{H_2O}] \& \acetylfuran \\
+furan \&    \& acetyl chloride  \&   \&  2-acetylfuran \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\furan \& + \& \acetylchloride \& \quickarrow[1) \chemfig{BF_3}][2) \chemfig{H_2O}] \& \acetylfuran \\
+furan \&    \& acetyl chloride  \&   \&  2-acetylfuran \\
+\end{quickreaction}
+\end{center}
+
+Usually, when there are no steps, arrow labels above and below are centered but when there are multiple steps labels are left aligned, as in a list. In the above example labels are centered by default  and the numbers result not correctly aligned. The use of a properly sized \lstinline{\parbox} solves the problem:
+
+\begin{lstlisting}
+\begin{quickreaction}
+\furan \& + \& \acetylchloride \& \quickarrow[\parbox{1.2cm}{1) \chemfig{BF_3}}][\parbox{1.2cm}{2) \chemfig{H_2O}}] \& \acetylfuran \\
+|furan| \&    \& |acetyl chloride|  \&   \&  |2-acetylfuran| \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\furan \& + \& \acetylchloride \& \quickarrow[\parbox{1.2cm}{1) \chemfig{BF_3}}][\parbox{1.2cm}{2) \chemfig{H_2O}}] \& \acetylfuran \\
+furan \&    \& acetyl chloride  \&   \&  2-acetylfuran \\
+\end{quickreaction}
+\end{center}
+
+\subsection{Multiple Labels}
+Similarly to the previous example, reactions with multiple consecutive steps can be set using \lstinline{\parbox}.
+
+\begin{lstlisting}
+%Preamble
+|\usepackage{xparse}
+\usepackage{tikz}
+\usepackage{chemfig}
+\usepackage[iupac]{quickreaction}|
+
+%C(CC(=O)OCC)(=O)OCC
+\newcommand{\diethylmalonate}{\chemfig{-[:30]-[:-30]O-[:30](=[:90]O)-[:-30]-[:30](=[:90]O)-[:-30]O-[:30]-[:-30]}}
+\newcommand{\malonicproduct}{\chemfig{HO-[:30](=[:90]O)-[:-30](-[:-90]R_2)-[:30]R_1}}
+%Document
+\begin{quickreaction}
+\diethylmalonate \& \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \& \malonicproduct \\
+diethylmalonate \& \& \\
+\end{quickreaction}
+
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\diethylmalonate \& \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \& \chemfig{HO-[:30](=[:90]O)-[:-30](-[:-90]R_2)-[:30]R_1} \\
+diethylmalonate \& \& \\
+\end{quickreaction}
+\end{center}
+
+\subsection{Adjusting Column and Row Spacing}
+This is only the application of some examples from the \href{https://tikz.dev/tikz-matrices#sec-20.3.2}{\ttfamily Tikz manual}. To adjust the spacing between two specific columns or rows you can add a positive or negative length value as \lstinline{[length]} after \lstinline{\&} for adjusting row spacing or after \lstinline{\\} for adjusting column spacing.
+
+\begin{lstlisting}
+%Document
+\begin{quickreaction}
+\diethylmalonate \& \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \& \malonicproduct \\[-1cm]
+|diethylmalonate| \& \& \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\diethylmalonate \& \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \& \chemfig{HO-[:30](=[:90]O)-[:-30](-[:-90]R_2)-[:30]R_1} \\[-1cm]
+diethylmalonate \& \& \\
+\end{quickreaction}
+\end{center}
+
+\begin{lstlisting}
+%Document
+\begin{quickreaction}
+\diethylmalonate \&[0.5cm] \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \&[0.5cm] \chemfig{HO-[:30](=[:90]O)-[:-30](-[:-90]R_2)-[:30]R_1} \\
+|diethylmalonate| \& \& \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\diethylmalonate \&[0.5cm] \quickarrow[\parbox{1.8cm}{1) \chemfig{OEt^{-}} \\ 2) \chemfig{R_1-Br}}][\parbox{1.8cm}{3) \chemfig{OEt^{-}} \\ 4) \chemfig{R_2-Br} \\ 5) \chemfig{H_3O^{+}}, $\Delta$}] \&[0.5cm] \chemfig{HO-[:30](=[:90]O)-[:-30](-[:-90]R_2)-[:30]R_1} \\
+diethylmalonate \& \& \\
+\end{quickreaction}
+\end{center}
+
+\subsection{Auto-adjusting Column Spacing for Large Labels}
+When the above arrow label is higher than the depth of the deepest molecule, molecules names get shifted down to preserve the symmetry of the entire reaction box.
+\begin{lstlisting}
+%Preamble
+|\usepackage{xparse}
+\usepackage{tikz}
+\usepackage{chemfig}
+\usepackage{mol2chemfig}
+\usepackage[iupac]{quickreaction}|
+
+%CC(=O)C
+\newcommand{\acetone}{\chemfig{-[:90](-[:150])=[:30]O}}
+%C1=CC(=CC=C1C=O)Cl
+\newcommand{\chlorobenzaldehyde}{\chemfig{O=[:300](-[:-120]H)--[:300,,,,dlh]--[:60,,,,dlh](-Cl)-[:120]-[:180,,,,dlh](-[:240])}}
+%C1C[C@H](NC1)C(=O)O
+\newcommand{\Lproline}{\chemfig{O=[:132](-[:72,,,1]OH)>[:192]-[:138]-[:210]-[:282]-[:354]\mcfbelow{N}{H}(-[:66])}}
+\newcommand{\clhydroxybutanone}{\chemfig{-[:300](=[:240]O)--[:60](<:[:120,,,2]HO)--[:300,,,,dlh]--[:60,,,,dlh](-Cl)-[:120]-[:180,,,,dlh](-[:240])}}
+
+%Document
+\begin{quickreaction}
+\acetone \& + \& \chlorobenzaldehyde   \& \quickarrow[\Lproline] \& \clhydroxybutanone\\
+acetone  \&     \& 4-chlorobenzaldehyde \&                                  \& 4-(4-chlorophenyl)-4-hydroxy-2-butanone \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}
+\acetone \& + \& \chlorobenzaldehyde   \& \quickarrow[\Lproline] \& \clhydroxybutanone\\
+acetone  \&     \& 4-chlorobenzaldehyde \&                                  \& 4-(4-chlorophenyl)-4-hydroxy-2-butanone \\
+\end{quickreaction}
+\end{center}
+
+To replace them at their standard distance, add the deepest molecule and the entire \lstinline{\quickarrow[\Lproline]} as two optional argument of the environment to compute and store the negative shift to apply and specify the stored length with \lstinline{\fixrow}.
+
+\begin{lstlisting}
+%Document
+\begin{quickreaction}[\quickarrow[\Lproline]][\clhydroxybutanone]
+\acetone \& + \& \chlorobenzaldehyde   \& \quickarrow[\Lproline] \& \clhydroxybutanone\\[\fixrow]
+|acetone|  \&     \& |4-chlorobenzaldehyde| \&                                  \& 4-(4-chlorophenyl)-4-hydroxy-2-butanone \\
+\end{quickreaction}
+\end{lstlisting}
+
+\begin{center}
+\begin{quickreaction}[\clhydroxybutanone][\quickarrow[\Lproline]]
+\acetone \& + \& \chlorobenzaldehyde   \& \quickarrow[\Lproline] \& \clhydroxybutanone\\[\fixrow]
+acetone  \&     \& 4-chlorobenzaldehyde \&                                  \& 4-(4-chlorophenyl)-4-hydroxy-2-butanone \\
+\end{quickreaction}
+\end{center}
+
+\end{document}

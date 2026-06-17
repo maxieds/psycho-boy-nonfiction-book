@@ -1,0 +1,997 @@
+\documentclass{article}
+
+\usepackage{tabstackengine}[2016-10-04]
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\parskip 1em
+\parindent 0em
+\newcommand\rl{\rule{1em}{0in}}
+\def\rdar{\textsf{readarray}}
+\def\loi{\textsf{listofitems}}
+\def\cmd#1{\texttt{\string\ \unskip#1}}
+\usepackage{readarray,tokcycle}
+\usepackage{verbatimbox}
+\newcommand\bverb[1][]{\begingroup\ifx\relax#1\relax
+  \def\tmpA{\allowbreak}\def\tmpB{0}\else
+  \def\tmpA{}\def\tmpB{#1}\fi
+  \catcode`\%=12 \bverbaux}
+\newcommand\bverbaux[2][\allowbreak\textvisiblespace\allowbreak]{%
+  \ttfamily\tokencycle
+  {\expandafter\tctestifx\expandafter{\tmpB##1}{\allowbreak}
+    {\string##1\tmpA}}
+  {\{\processtoks{##1}\}}
+  {\tctestifx{\isiteleven##1}{##1}
+    {\expandafter\tctestifx\expandafter{\tmpB##1}{\allowbreak}
+    {\tcpush{\string##1\isiteleven}}}}
+  {#1}#2\endtokencycle\endgroup}
+\def\isiteleven{\tcpeek\zzz\ifcat\noexpand\zzz A\tcpush{\space}\fi}
+\begin{filecontents*}[overwrite]{file1data.txt}
+A111 A112 A113 A114
+A121 A122 A123 A124
+A131 A132 A133 A134
+
+A211 A212 A213 A214
+A221 A222 A223 A224
+A231 A232 A233 A234
+\end{filecontents*}
+\begin{filecontents*}[overwrite]{file2data.txt}
+\def{\dataA}{%
+A111 A112 A113 A114
+A121 A122 A123 A124
+A131 A132 A133 A134
+%
+A211 A212 A213 A214
+A221 A222 A223 A224
+A231 A232 A233 A234
+}
+\end{filecontents*}
+\begin{filecontents*}[overwrite]{file3data.txt}
+\textit{am} ,  \textit{are}, have \textit{been}, have \textit{been}
+\textit{are}, \textit{are} , have \textit{been}, have \textit{been}
+\textit{is} , \textit{are} , has \textit{been} , have \textit{been}
+ 
+\textit{was} , \textit{were}, had \textit{been}, had \textit{been}
+\textit{were}, \textit{were}, had \textit{been}, had \textit{been}
+\textit{was} , \textit{were}, had \textit{been}, had \textit{been}
+ 
+will \textit{be}, will \textit{be}, will have \textit{been}, will have \textit{been}
+will \textit{be}, will \textit{be}, will have \textit{been}, will have \textit{been}
+will \textit{be}, will \textit{be}, will have \textit{been}, will have \textit{been}
+\end{filecontents*}
+
+
+\let\vb\verb
+\def\bs{{\ttfamily\char'134}}
+\reversemarginpar
+\marginparwidth 1.5in
+\newcommand\margcmd[1]{\marginpar{\hfill\ttfamily\char'134#1}}
+
+\begin{document}
+\begin{center}
+\LARGE The {\rdar} Package\\
+\rule{0em}{.7em}\small Routines for inputting formatted array data and 
+recalling it on an element-by-element basis.\\
+\rule{0em}{2.7em}\large Steven B. Segletes\\
+SSegletes@verizon.net\\
+\rule{0em}{1.7em}\readarrayPackageDate\\
+V\readarrayPackageVersion
+\end{center}
+
+\subsection*{Comments About Version 3.0}
+
+\vspace{-5pt}
+Version 3.0 of \rdar{} introduces several new features.
+Arrays can be initialized  with the \vb|\initarray| command,
+  rather than being read from a file.
+With \vb|\setvalue|, the tokens of individual
+  array cells can be revised on demand.
+The contents of one array can be merged into another
+  by way of the \vb|\mergearray| command.
+The \vb|\typesetarray| command allows for versatile ways
+  to format your array output, including by way
+  of \vb|tabular| environments.
+The way end-of-line characters can be handled on a data-read
+  is made more versatile with this package version.
+There are many new things here---check them out.\vspace{-10pt}
+
+
+\subsubsection*{Comments About Version 2.0}
+
+\vspace{-5pt}
+Version 2.0 of the \rdar{} package brought major changes,
+  including a \textit{new and improved} syntax.
+Functionally, the data-reading/parsing code of the package
+  was revised to use the powerful \loi{} package.
+This has two primary advantages: 1) the data that is read is no
+  longer expanded prior to the read, so that macros can be read
+  and stored in the data arrays using their unexpanded tokens; and 2) 
+  list separators other than a space may now be employed
+  to parse the data into array cells.
+The user will also note other small changes, such as the fact that errors
+  arising from array-boundary violations now appear in the log file
+  rather than the document itself.\vspace{-10pt}
+
+\section{Description and Commands}
+
+The {\rdar} package allows for the creation of data arrays (numeric,
+  string, or even formatted) using either file contents or \vb|\def| 
+  format for input, such that the elements of multiple arrays can be 
+  set and later recalled in an orderly fashion, on a cell-by-cell basis.  
+Routines have been developed to support the storage and recall of both 
+  2-D and 3-D arrays, as well as 1-D file-record arrays.%
+\footnote{
+Note: for 1-D arrays that are to be simply parsed on the basis of a 
+  specified separator, the \loi{} package is already prepared 
+  to do this, without the help of this package.
+}
+
+The commands included in this package help the user to input data, define
+it in terms of array elements, and recall those elements at will. Those
+commands are:
+
+
+\itshape
+\textup{To place file data into a data macro:}\\
+\rl\vb|\readdef{|filename\vb|}\|data-macro\\
+\textup{To place file data into a 1-D file-record array:}\\
+\rl\vb|\readrecordarray{|filename\vb|}\|array-identifier%
+ \hfill\textup{(1-D)}\\
+\textup{To parse a data macro and place the results into a new 2-D or 3-D array:}\\
+\rl\vb|\readarray\|data-macro\vb|\|array-identifier\vb|[-,|columns\vb|]|%
+  \hfill\textup{(2-D)}\\
+\rl\vb|\readarray\|data-macro\vb|\|array-identifier\vb|[-,|rows\vb|,|columns\vb|]|%
+  \hfill\textup{(3-D)}\\
+\textup{Same as above, with leading/trailing spaces removed from array cells:}\\
+\rl\vb|\readarray*\|data-macro\vb|\|array-identifier\vb|[-,|columns\vb|]|%
+  \hfill\textup{(2-D)}\\
+\rl\vb|\readarray*\|data-macro\vb|\|array-identifier\vb|[-,|rows\vb|,|columns\vb|]|%
+  \hfill\textup{(3-D)}\\
+\textup{To create a new array, each cell initialized to a default 
+  value:}\\
+\rl\vb|\initarray\|array-identifier\vb|[|rows\vb|,|columns\vb|]|%
+  \hfill\textup{(2-D)}\\
+\rl\vb|\initarray\|array-identifier\vb|[|planes\vb|,|rows\vb|,|columns%
+  \vb|]|\hfill\textup{(3-D)}\\
+\textup{To merge each cell of one array into another:}\\
+\rl\vb|\mergearray\|from-array-id\vb|\|to-array-id\vb|[|row\vb|,|%
+  column\vb|]|\hfill\textup{(2-D)}\\
+\rl\vb|\mergearray\|from-array-id\vb|\|to-array-id\vb|[|plane\vb|,|%
+  row\vb|,|column\vb|]|\hfill\textup{(3-D)}\\
+\textup{To typeset an array:}\\
+\rl\vb|\typesetarray\|array-identifier\hfill\textup{(2-D/3-D)}\\
+\textup{Recall (typeset) data from indexed array cell:}\\
+\rl\vb|\|array-identifier\vb|[|row\vb|,|column\vb|]|%
+  \hfill\textup{(2-D)}\\
+\rl\vb|\|array-identifier\vb|[|plane\vb|,|row\vb|,|column\vb|]|%
+  \hfill\textup{(3-D)}\\
+\textup{To place the actual tokens of an array cell into a macro:}\\
+\rl\vb|\arraytomacro\|array-identifier\vb|[|row\vb|,|column\vb|]\|macro%
+  \hfill\textup{(2-D)}\\
+\rl\vb|\arraytomacro\|array-identifier\vb|[|plane\vb|,|row\vb|,|column%
+  \vb|]\|macro\hfill\textup{(3-D)}\\
+\textup{To manually (re)set the value of an existing array cell:}\\
+\rl\vb|\setvalue\|array-identifier\vb|[|row\vb|,|column\vb|]{|%
+  value\vb|}|\hfill\textup{(2-D)}\\
+\rl\vb|\setvalue\|array-identifier\vb|[|plane\vb|,|row\vb|,|column\vb|]{|%
+  value\vb|}|\hfill\textup{(3-D)}\\
+\textup{To change the array-parsing separator for}
+  \vb|\readdef| \textup{and/or} \vb|\readarray|\textup{:}\\
+\rl\vb|\readarraysepchar{|parsing-separator-char\vb|}|\\
+\textup{To change the default (=9) end-of-line catcode for}
+  \vb|\readdef|\textup{:}\\
+\rl\vb|\readarrayendlinechar=|end-of-line-catcode\\
+\textup{To redefine default cell initialization for} \vb|\initarray|
+  \textup{:}\\
+\rl\vb|\renewcommand\readarrayinitvalue{|value\vb|}|\\
+\textup{To redefine default cell format in} \vb|\typesetarray|\textup{:}\\
+\rl\vb|\renewcommand\typesetcell[1]{|format-for-\#1\vb|}|\\
+\textup{To redefine default plane, row, column separator formats for}
+  \vb|\typesetarray|\textup{:}\\
+\rl\vb|\renewcommand\typesetplanesepchar{|format\vb|}|\\
+\rl\vb|\renewcommand\typesetrowsepchar{|format\vb|}|\\
+\rl\vb|\renewcommand\typesetcolsepchar{|format\vb|}|\\
+\textup{To select the level of bounds checking on array cell recall:}\\
+\rl\vb|\nocheckbounds|\hfill OR\hfill%
+\vb|\checkbounds|\hfill OR\hfill%
+\vb|\hypercheckbounds|\\
+\textup{To ignore blank (or fully commented) records during the
+  course of a record-array read (this can be undone with a false
+  setting):}\\
+\rl\vb|\ignoreblankreadarrayrecordstrue|
+\upshape 
+
+In these commands, \cmd{}\textit{data-macro} is a control sequence into
+  which the contents of \texttt{filename} are set into a \cmd{def}. 
+The \cmd{}\textit{array-identifier} is the array into which cell data is
+  inserted.
+The starred version of the commands are used if, during the array 
+  creation, it is desired to automatically excise the array data of 
+  leading and trailing spaces.
+
+Unlike earlier versions of this package, where error messages were
+  output into the typeset document, error messages are now
+  set in the log file.
+The level of error messaging is defined by the level of bounds checking,
+  with \cmd{hypercheckbounds} providing the 
+  most intense level of error checking.
+When a bounds-checking error is found in an array invocation, in addition 
+  to the error message in the log file, a ``?'' is typeset in the document,
+  unless bound checking is disabled with \cmd{nocheckbounds}.
+
+
+Several strings of fixed name are defined through the use the
+\cmd{readdef} command, which are accessible to the user:
+
+\itshape
+\rl\vb|\nrows|\\
+\rl\vb|\ncols|\\
+\rl\vb|\nrecords|\\
+\rl\vb|\ArrayRecord[|record\vb|]|%
+  \hfill\textup{(to retrieve record from most recent \cmd{readdef})}\upshape
+
+The macros \cmd{nrows} and \cmd{ncols}, which were gleaned from the file
+  structure, may be used in the subsequent \cmd{readarray} 
+  invocation to specify the array dimensions.
+Alternately, those values may be manually overridden by specifying 
+  the desired values in the \cmd{readarray} invocation.
+Individual records of the original file, from the most recent
+  \cmd{readdef}, may be recalled with the
+  \cmd{ArrayRecord} macro.
+
+In addition to the strings of fixed name created during the 
+  \cmd{readdef}, there are various strings created during
+  the \cmd{readarray} whose name is a function of the 
+  \cmd{}\textit{array-identifier}, such as
+
+\itshape
+\rl\vb|\|array-identifier\vb|CELLS|\\
+\rl\vb|\|array-identifier\vb|PLANES|\\
+\rl\vb|\|array-identifier\vb|ROWS|\\
+\rl\vb|\|array-identifier\vb|COLS|\upshape
+
+where \cmd{}\textit{array-identifier} is the name
+you have designated a particular array.  
+Their meaning will be discussed later in this document.
+
+
+\section{Data Structure}
+
+The first requirement is to lay out a format for the data interface to
+  this package.  
+The {\rdar} package is set up to digest data separated by a user-defined 
+  separator character.
+The default separator is a space character but the separator
+  may be specified by way of \vb|\readarraysepchar{|\textit{separator}\vb|}|.
+The format for the data organization to be digested is as follows, 
+  for 2-D arrays:
+
+\TABstackTextstyle{\tiny}
+\setstackgap{L}{3pt}
+\newcommand\SEP{\,\langle\smash{\raisebox{1pt}{\tabbedCenterstack{s\\e\\p}}}\rangle\,}
+\renewcommand\arraystretch{1.1}
+{\arraycolsep=3pt\relax\small\(
+\begin{array}{lll@{\hspace{2pt}}ll}
+A_{11}\SEP &A_{12}\SEP &A_{13}\SEP & \ldots & A_{1\mathrm{(columns)}} \\
+A_{21}\SEP &A_{22}\SEP & \ldots && \\
+\vdots&&&&\\
+A_{\mathrm{(rows)}1}\SEP &A_{\mathrm{(rows)}2}\SEP &A_{\mathrm{(rows)}3}\SEP & 
+              \ldots & A_{\mathrm{(rows)}\mathrm{(columns)}} \\
+\end{array}
+\)}
+
+For 3-D arrays, the following structure is employed:
+
+{\arraycolsep=3pt\relax\small\(
+\begin{array}{lll@{\hspace{2pt}}ll}
+A_{111}\SEP &A_{112}\SEP &A_{113}\SEP & \ldots & A_{11\mathrm{(columns)}} \\
+A_{121}\SEP &A_{122}\SEP & \ldots && \\
+\vdots&&&&\\
+A_{1\mathrm{(rows)}1}\SEP &A_{1\mathrm{(rows)}2}\SEP &A_{1\mathrm{(rows)}3}\SEP & 
+                     \ldots & A_{1\mathrm{(rows)}\mathrm{(columns)}} \\
+\rlap{\scriptsize$<$blank line$>$}&&&&\\
+A_{211}\SEP &A_{212}\SEP &A_{213} & \ldots & A_{21\mathrm{(columns)}} \\
+A_{221}\SEP &A_{222}\SEP & \ldots && \\
+\vdots&&&&\\
+A_{2\mathrm{(rows)}1}\SEP &A_{2\mathrm{(rows)}2}\SEP &A_{2\mathrm{(rows)}3}\SEP & 
+                     \ldots & A_{2\mathrm{(rows)}\mathrm{(columns)}} \\
+&&&&\\
+\vdots&&&&\\
+&&&&\\
+A_{\mathrm{(planes)}11}\SEP &A_{\mathrm{(planes)}12}\SEP &A_{\mathrm{(planes)}13}\SEP & \ldots & A_{\mathrm{(planes)}1\mathrm{(columns)}} \\
+A_{\mathrm{(planes)}21}\SEP &A_{\mathrm{(planes)}22}\SEP & \ldots && \\
+\vdots&&&&\\
+A_{\mathrm{(planes)}\mathrm{(rows)}1}\SEP &A_{\mathrm{(planes)}\mathrm{(rows)}2}\SEP &A_{\mathrm{(planes)}\mathrm{(rows)}3}\SEP & 
+                     \ldots & A_{\mathrm{(planes)}\mathrm{(rows)}\mathrm{(columns)}} \\
+\end{array}
+\)}
+
+
+Here,\,$\SEP${}\,is the data separator that is used to parse the input.
+Terms like $A_{\mathrm{(plane)}\mathrm{(row)}\mathrm{(column)}}$ refers
+  to the \LaTeX{}-formatted data to be associated with the particlar plane, 
+  row, and column of data.
+Note, that for 3-D arrays, a blank line can be used to signify to the
+  parsing algorithm the size of a data plane (alternately, the number of
+  rows per data plane can be explicitly provided to the \cmd{readarray}
+  command).
+
+\section{Getting Data into Array Structures\label{s:ex}}
+
+One can provide data to be digested by this package in one of two ways:
+either through an external file, or by way of ``cut and paste'' into a
+\vb|\def|.  If one chooses the external file approach, the command
+\vb|\readdef|\margcmd{readdef} is the command which can achieve this
+result.  The command takes two arguments.  The first is the file in
+which the data is stored, while the second is the data macro into which the
+file's data will be placed, for example
+
+\rl\vb|\readdef{data.txt}{\dataA}|\readdef{file1data.txt}{\dataA}
+
+In this case, the contents of the file \vb|data.txt| will be placed
+  into the data macro \vb|\dataA|.  
+Two alterations to the format occur during this conversion from file
+  to \cmd{def}: 1) blank lines in the file are ignored; and 
+  2) a data separator replaces the end-of-line.
+At this point, the data is still not digested into a 2-D or 3-D data 
+  ``array.'' 
+However, two things have been accomplished: 1) the file contents are \cmd{def}'ed
+  into the data macro \cmd{dataA}; and 2) they are also placed into a 1-D
+  file record array, \cmd{ArrayRecord}.
+
+Regarding the point that end-of-line characters are replaced
+  with a data separator, these are controlled by two separate
+  mechanisms, each with its own control.
+First, end-of-lines are, by default discarded---this is accomplished
+  internally with \rdar{} setting \vb|\endlinechar| equal to 9,
+  during the \vb|\readdef|.
+This is not the native \LaTeX{} behavior.
+In \LaTeX{}, end-of-lines are converted into spaces, unless 
+  preempted with a \vb|%| character or a line-ending control
+  sequence.
+To recover the \LaTeX{} way of treating end-of-lines, the 
+  count \vb|\readarrayendlinechar| is provided, which can
+  be set in the manner desired for subsequent invocations
+  of \vb|\readdef|.
+For example, \vb|\readarrayendlinechar=5 | will change 
+  subsequent treatment of end-of-line characters to the normal
+  \LaTeX{} treatment.
+
+The second aspect regarding end-of-lines is the data
+  separator inserted when the end-of-line is 
+  reached.  This is one of the functions of the
+  \vb|\readarraysepchar| macro, the argument to which
+  is the separator inserted into the read, when 
+  end-of-line is encountered during a \vb|\readdef|.
+If you don't want any record separators inserted during
+ the \vb|\readdef|, one may set \vb|\readarraysepchar{}|.
+Note, however, that an empty \rdar{} sepchar, while valid
+  during a \vb|\readdef|, is meaningless during a
+  \vb|\readarray| invocation, since it would like to
+  use the sepchar to parse the data.  
+Therefore, an empty sepchar should be redefined to
+  a meaningful value prior to invoking \vb|\readarray|.
+See section~\ref{s:sepchar} for more information on the
+  separator character.
+
+There is no
+\textit{requirement} that the input file be organized with structured rows
+  of data corresponding to individual file records, nor that blank 
+  lines exist between planes of data (if the data is 3-D). 
+\textit{However}, there is a reason to do so, nonetheless.  
+In particular, for datafiles that are organized in the
+preferred fashion, for example:
+
+\verbfilebox{file1data.txt}
+\rl\theverbbox
+
+a \vb|\readdef| attempts to estimate the number columns, and 
+  rows-per-plane of the dataset by analyzing the data structure.
+These estimates are given by 
+  \vb|\ncols|\margcmd{ncols} and \vb|\nrows|\margcmd{nrows}, in this
+  case to values of \texttt{\ncols} and \texttt{\nrows}, respectively.  
+Such data could prove useful if the array size is not known in advance.
+When \verb|\readdef| is invoked, a string 
+  \verb|\nrecords|\margcmd{nrecords} will also be set to the number of
+  file records processed by the \vb|\readdef| command, in this case,
+  to \texttt{\nrecords}.
+Finally, the 1-D file-record array, \cmd{ArrayRecord}\margcmd{ArrayRecord},
+  is created to allow access to the most recently read file records.
+For example, \vb|\ArrayRecord[3]| produces: ``\ArrayRecord[3]''.
+Note, however, that the array, \cmd{ArrayRecord}, will be overwritten on 
+  the subsequent invocation of \cmd{readdef}.
+
+Because \cmd{ArrayRecord} is only a 1-D file-record array, the 
+  \textit{actual} array metrics, given by \cmd{ArrayRecordCOLS}, 
+  \cmd{ArrayRecordROWS}, \cmd{ArrayRecordPLANES}, and 
+  \cmd{ArrayRecordCELLS} are 
+  \ArrayRecordCOLS, \ArrayRecordROWS, \ArrayRecordPLANES, and
+  \ArrayRecordCELLS, respectively, which do not align with the
+  estimations provided by \cmd{ncols} and \cmd{nrows}.
+
+In lieu of \verb|\readdef|, a generally less preferred, but viable way
+to make the data available is to cut and paste into a \vb|\def|.
+However, because a blank line is not permitted as part of the \vb|\def|,
+a filler symbol (\vb|%| or \vb|\relax|) must be used in its place, if it
+is desired to visually separate planes of data, as shown in the
+\verb|\def| example at the top of the following page.  Note that the
+\vb|%| is also required at the end of the line containing \vb|\def|, in
+order to guarantee that, in this case, \vb|A111| is the first element of
+data (and not a space separator).  However, unlike \vb|\readdef|, this
+definition will neither set the value of \vb|\ncols| nor \vb|\nrows|.
+
+\verbfilebox{file2data.txt}
+\rl\theverbbox
+
+Once the data to be placed into an array is available in a macro,
+  by way of either
+  \vb|\readdef| or \vb|\def|, the command to digest the data into an
+   array is \vb|\readarray| for the case of 2-D or 3-D data.  
+For 1-D file-record arrays, in contrast, the \cmd{readrecordarray}
+  command is used to go directly from a file into the 1-D array,
+  bypassing the intermediate step of a data macro.
+
+\subsection{1-D File-Record Arrays}
+
+If the desire is merely to parse a string of data based on a common 
+  data separator,  such as a comma or any other character, there is 
+  no need to use the \rdar{} package.
+The \loi{} package, which is employed by \rdar, already has those provisions
+  and should be used directly.%
+\begin{verbbox}[\footnotesize]
+\setsepchar{ }
+\readlist\oneDlist{\dataA}
+\oneDlistlen{} list items, 12th item is ``\oneDlist[12]''.
+\end{verbbox}
+\footnote{%
+For a simple 1-D list punctuated by data separators, one may use the 
+\loi{} package directly:\\
+\rl\theverbbox\\
+which produces the following output:
+\setsepchar{ }%
+\readlist\oneDlist{\dataA}%
+\oneDlistlen{} list items, 12th item is ``\oneDlist[12]''.
+}
+
+On the other hand, if one wishes a 1-D file-record array, in which each
+  array element corresponds to the record from a file, then \rdar{}
+  can be used.
+The command \cmd{readrecordarray} can be used to stick the individual 
+  ``file records'' from a designated file into a 1-D array.
+
+The \cmd{readrecordarray} command takes two arguments: a file
+  name containing data records, and the name of a 1-D record-array
+  into which to place the file records. 
+
+So, for example, with the invocation of 
+  \vb|\readrecordarray{data.txt}\oneD|, the data from the file 
+  \texttt{data.txt} is now saved in the \cmd{oneD} array, and can 
+  be retrieved, for example, the 3rd record, with \cmd{oneD[3]}, which
+  returns \readrecordarray{file1data.txt}\oneD``\oneD[3]''.
+
+If an array name is reutilized, its prior definitions are cleared,
+  so that ``old'' data is not inadvertantly retrieved following the
+  reutilization.
+
+One option (introduced in v3.1) in this regard is the if-condition%
+  \margcmd{ifignoreblank readarrayrecords}
+  \bverb[.]{\ifignore.blankreadarrayrecords}, which can take on
+  values of either \bverb[\-]{\ignoreblank\-readarrayrecordstrue} or
+  \bverb{\ignoreblankreadarrayrecordsfalse}.  
+When set to the true condition, ``blank'' records in the input file
+  (defined either when the record is actually blank or if the first 
+  non-blank token in the record is a catcode-14 \verb|%|) will 
+  be ignored.
+This setting will only affect the record array itself---the result
+  of any \cmd{readdef} will be unaffected by this setting, except
+  as detailed in the next paragraph.
+
+The only warning to heed when setting 
+  \bverb[\-]{\ignoreblankreadarrayrecords\-true} is that the first
+  blank line in a \bverb{\readdef}'ed file is used to set the value
+  of \cmd{nrows}, which can be used to set the row-depth of a 3-D 
+  array plane within subsequent invocations of \cmd{readarray}.
+Of course, the array plane's row-depth may always be set
+  manually, in lieu of using \bverb{\nrows}.
+
+
+\subsection{Creating 2-D and 3-D Arrays from Data}
+
+The \cmd{readarray}\margcmd{readarray} command, used to convert
+  raw parsable data into data arrays,
+  takes three arguments.  
+The first is the data macro into which the unarrayed raw data had 
+  previously been stuffed (e.g., by way of \cmd{readdef} or \cmd{def}).  
+The second is array-identifier macro into which the parsed data is to 
+  be placed.
+Finally, the last compound argument, enclosed in square brackets, denotes the
+  rank and range of the array to be created. 
+
+There is a starred version of the command, \cmd{readarray*}, which is used
+  to remove leading/trailing spaces from the array elements, when parsed.
+This option, is only relevant when the data separator is not already a
+  space.
+
+\subsubsection{2-D Arrays}
+
+\begin{sloppypar}
+For a 2-D array, this last argument of \cmd{readarray} will be 
+  of the form \vb|[-,<columns>]|. 
+If the data had recently been read by way of \vb|\readdef|, the 
+  string \vb|\ncols| may be used to signify the \vb|<columns>| value.
+The \texttt{-} (or any other character before the initial comma)
+  reminds us that the range of row numbers is not specified in advance,
+  but is dictated by the length of the data macro containing the raw
+  file data.
+For such a 2-D array, only the column range is specified.
+\end{sloppypar}
+
+Consider, for example, the previously discussed file, \texttt{dataA.txt}, 
+  which had been digested into the data macro \cmd{dataA}. 
+One can process that as a 2-D array with an invocation of
+  \vb|\readarray\dataA\twoD[-,\ncols]|, since \cmd{ncols} had been
+  set to a value of \texttt{\ncols}, based on the prior \cmd{readdef}.
+Thereafter, data may be retieved, for example the 3rd row, 2nd column,
+  with \cmd{twoD[3,2]}, to give
+\readarray\dataA\twoD[-,\ncols]
+``\twoD[3,2]''.
+
+The actual array size is given by
+\cmd{twoDROWS}, \cmd{twoDCOLS}, \cmd{twoDCELLS}
+as 
+\twoDROWS, \twoDCOLS, and \twoDCELLS, respectively.
+The number of rows in the array is fewer than the number of file records,
+  \oneDCELLS, because blank rows in the input file are ignored.
+One should also note that if the end of the data stream results in a 
+  partial final row of data, the partial row will be discarded.
+
+\subsubsection{3-D Arrays}
+
+For the 3-D case, the only difference in the invocation of
+  \vb|\readarray| is in the 3rd argument, in which the 
+  rank and range of the array is specified.
+This last argument will be of the form
+  \vb|[-,<rows>,<columns>]|. 
+As before, the \vb|-| denotes the fact that the range of the planes
+  of data is unknown before the fact, and governed by the length 
+  of data in the dataset.
+Only the range of rows and columns are specifiable here.
+If \vb|\readdef| had been used on a properly formed
+input file, both \vb|\nrows| and \vb|\ncols| may be used to supply the
+range arguments of the 3-D array.
+
+For example, using the same \cmd{dataA} dataset, but reading it as a 
+  3-D array can be accomplished with 
+  \vb|\readarray\dataA\threeD[-,\nrows,\ncols]|.%
+\readarray\dataA\threeD[-,\nrows,\ncols]
+This results in an array with \threeDPLANES{} planes, 
+  \threeDROWS{} rows, and \threeDCOLS{} columns
+(\threeDCELLS{} data cells total).
+Data from the 2nd plane, 1st row, 2nd column can be obtained via
+\cmd{threeD[2,1,2]} as ``\threeD[2,1,2]''.
+
+If, perchance, a row or plane is only partially defined by 
+  \cmd{readarray}, the partial data is discarded from the array.
+
+\subsubsection{Array Parsing Separator\label{s:sepchar}}
+
+While it may be easily envisioned that the array data is numerical, this
+  need not be the case.  
+The array data may be text, and even formatted text.
+
+A key setting, either when inputting information from a file
+  by way of \vb|\readdef| or when parsing a \vb|\def|'ed
+  argument into an array by way of \vb|\readarray|, is the
+  macro \vb|\readarraysepchar|.\margcmd{readarraysepchar}
+
+The value of \vb|\readarraysepchar| is used in distinct
+  ways for \vb|\readdef| and \vb|\readarray|.
+For \vb|\readdef|, the separator is inserted into the 
+  \vb|\data-macro|
+  definition whenever an end-line-char (end of record)
+  is encountered.
+For the subsequent \vb|\readarray| (with or without a \vb|*|), the
+  \vb|\readarraysepchar| is used to separate the data
+  contained in the \vb|\data-macro| into individual cell
+  data that will be placed into the \vb|\array-identifier|.
+
+For example, if your data file is comma separated, but the
+  last item of data in each record is not followed by a 
+  trailing comma, setting \vb|\readarraysepchar{,}| will
+  assure that the comma gets inserted into the 
+  \vb|\data-macro| after each record, during the 
+  \vb|\readdef|.
+This will preclude confusion of the last item of 
+  each record with the first item of the subsequent 
+  record when the \vb|\readarray| is executed.
+
+If the trailing comma were present in the data file,
+  then \vb|\readarraysepchar{}| could be set for the
+  \vb|\readdef|, to avoid inserting an extra comma.
+However, it would have to be reset to a comma before
+  executing the \vb|\readarray|, in order to parse
+  the data using the comma to separate cell data.
+
+Finally, if one wished to employ lists rather than
+  arrays (wherein each row could have a variable
+  number of columns, for example), then one could
+  set \vb|\readarraysepchar{\\}| prior to the 
+  \vb|\readdef|, so as to insert a \vb|\\| macro
+  between each record.
+Then, if the file data were otherwise comma separated,
+  one could use the \loi{} tools rather than \rdar{}
+  to absorb the data as a list, rather than an array.
+In this case, \vb|\setsepchar{\\/,}| would set a
+  two-tier nested parsing for \loi{}.
+Then, \vb|\readlist\|\textit{listname}\vb|{\|%
+  \textit{data-macro}\vb|}| would read the data into
+  a list, with a variable column dimension for each row,
+  based on the number of commas in each file record.
+
+
+Note also, using the facilities of the underlying \loi{} package,
+  that compound separators are possible.
+For example, when employing \vb|\readarray|.
+  \textit{either} a comma \textit{or} a period may be used
+  for the data parsing, by specifying a
+  \textbf{logical-OR} (\vb+||+) separated list: \vb:\readarraysepchar{,||.}:.
+Similarly, a multicharacter separator is possible, so that setting
+  \vb|\readarraysepchar{!!}| will cause \cmd{readarray} to look for 
+ instances of ``!!'' to divide the data into separate array elements.
+
+Consider the following comma-separated input in, let us say, the file
+  \textsf{conjugation.txt}.
+
+\verbfilebox[\footnotesize]{file3data.txt}
+\rl\theverbbox
+
+The sequence of commands
+
+\begin{verbbox}
+\readarraysepchar{,}
+\readdef{conjugation.txt}\dataC
+\readarray*\dataC\tobeConjugation[-,\nrows,\ncols]
+\end{verbbox}
+\rl\theverbbox
+\readarraysepchar{,}
+\readdef{file3data.txt}\dataC
+\readarray*\dataC\tobeConjugation[-,\nrows,\ncols]
+
+will read the file into \vb|\dataC|, adding a comma between
+  records.
+It will then employ a comma separator to parse the file.
+As a result, it will create a 3-D array using data from the
+  \vb|\dataC| macro, and create a parsed array by the name of
+  \cmd{tobeConjugation}.
+During the \vb|\readdef|, it will have been gleaned that the file
+  is arranged with 4 columns (stored in \vb|\ncols|) and
+  3 rows per plane (stored in \vb|\nrows|).
+These row \& column specifications could be manually overridden
+  merely by specifying actual numbers in the bracketed argument to
+  \vb|\readarray|.
+Leading/trailing spaces will be removed from the data, with the use of the
+  star form of the \cmd{readarray} command.
+Data can then be directly accessed, so that, for example
+\cmd{tobeConjugation[1,3,3]} will yield  the entry from the
+  1st plane, 3rd row, 3rd column as ``\tobeConjugation[1,3,3]''.
+
+The 3-D array metrics are \cmd{tobeConjugationPLANES},
+  \cmd{tobeConjugationROWS}, \cmd{tobeConjugationCOLS}, and 
+  \cmd{tobeConjugationCELLS}, which are
+  here given as \tobeConjugationPLANES,
+  \tobeConjugationROWS, \tobeConjugationCOLS, and 
+  \tobeConjugationCELLS.
+  respectively.
+
+\section{Initializing an Array Structure}
+
+With the \vb|readarray| macro described above, data can be
+  introduced into an array structure that is specifically created
+  to receive the data.
+However, sometimes, an array placeholder must be defined before 
+  knowing exactly what will eventually reside there.
+For this purpose, that package provides \vb|\initarray|.
+  \margcmd{initarray}
+
+With a command like \vb|\initarray\z[3,4]|, a 2-D array identified
+  as \vb|\z| is created with 3 rows and 4 columns.
+Each cell is initialized with a standard value (default
+  \vb|-|).
+However, the standard initialization value may be changed,
+  for example, to a \vb|0| with an invocation of
+  \vb|\renewcommand\readarrayinitvalue{0}|.%
+  \margcmd{readarrayinitvalue}
+
+\section{Manually Setting Array-Cell Data}
+
+While \vb|\readarray| and \vb|\initarray| are used to create
+  new arrays and to populate their cells with content, we here
+  examine a way to update or change the content of a single existing
+  array cell.
+The command \vb|\setvalue|\margcmd{setvalue} is used to place
+  content into an existing array cell.
+Let us assume that the array \vb|\z| was created as a 
+  2-D array of size 3 rows by 4 columns.
+The command \vb|\setvalue\z[2,3]{xyz}| will replace the
+  existing content of the array's 2nd row and 3rd column
+  with the tokens \vb|xyz|.
+All other cells in the \vb|\z| array will remain as they
+  were; the pre-existing content of cell \vb|\z[2,3]|, once
+  replaced, will no longer be available.
+
+
+\section{Merging Data from Separate Arrays}
+
+The command \vb|\setvalue| was described as a way to replace
+  the contents of a single cell in an array.
+Here, we describe a way to replace the contents of multiple
+  cells at once, in the form of merging two arrays with the
+  macro \vb|\mergearray|\margcmd{mergearray}.
+This command sets up a loop of repeated invocations of 
+  \vb|\setarray|.
+
+Let's assume that we had created arrays 
+  \vb|\Q[10,10]| and \vb|\R[3,2]|.
+The command
+  \vb|\mergarray\R\Q[6,3]| will overlay the contents of 
+  \vb|\R|'s 3x2 cells into the \vb|\Q| cells, beginning with
+  \vb|\Q[6,3]|.
+The overlay will, therefore, include the cells: \vb|[6,3]|, \vb|[6,4]|, 
+  \vb|[7,3]|, \vb|[7,4]|, \vb|[8,3]|, and \vb|[8,4]|.
+If the overlay of the \textit{from-array} causes the bounds in 
+  the \textit{to-array} to be exceeded, no copy is made of those 
+  cells.
+However, a warning will be noted in the log file if error
+  checking is enabled.
+
+
+\section{Recalling Cell Data from Array Structures}
+
+\begin{sloppypar}
+While one must specify the number of columns and/or rows associated
+with the \vb|\readarray| invocation, those numbers may not yet
+be known to the user, if the values employed came from the
+\vb|\readdef| estimations of 
+\vb|\ncols| and \vb|\nrows|.  Therefore, the \cmd{readrray}
+\margcmd{{\rmfamily\itshape array-identifier}CELLS}%
+\margcmd{{\rmfamily\itshape array-identifier}PLANES}%
+\margcmd{{\rmfamily\itshape array-identifier}ROWS}%
+\margcmd{{\rmfamily\itshape array-identifier}COLS}%
+command variants also define the following strings:
+\itshape\vb|\|array-identifier\vb|CELLS|, \vb|\|array-identifier\vb|PLANES|,
+\vb|\|array-identifier\vb|ROWS|{\upshape, and} 
+\vb|\|array-identifier\vb|COLS|\upshape, where
+\cmd{array-identifier} is the array name supplied to
+the \cmd{readarray} command. Note, for 3-D arrays, that
+\end{sloppypar}
+
+\rl\itshape\vb|\|array-identifier\vb|CELLS| $=$ \\\rl\quad
+  \vb|\|array-identifier\vb|PLANES| $\times$ \vb|\|array-identifier\vb|ROWS|
+   $\times$ \vb|\|array-identifier\vb|COLS|\upshape
+
+For the \cmd{tobeConjugation} example of the prior section,
+\tobeConjugationCELLS $=$\tobeConjugationPLANES 
+$\times$\tobeConjugationROWS $\times$%
+\tobeConjugationCOLS. Likewise, for 2-D arrays
+
+\rl\itshape\vb|\|array-identifier\vb|CELLS| $=$ \vb|\|array-identifier\vb|ROWS| 
+$\times$ \vb|\|array-identifier\vb|COLS|\upshape
+
+To retrieve the data from the array, one merely supplies the
+  array name in the form of
+  \cmd{}\textit{array-identifier}\margcmd{\rmfamily\itshape array-identifier%
+  \upshape\ttfamily[...]},
+  along with the array-cell nomenclature in the form of 
+  \textit{\texttt{\upshape[}plane\texttt{\upshape,}row\texttt{\upshape,}%
+  column\texttt{\upshape]}} for 3-D arrays, 
+  \textit{\texttt{\upshape[}row\texttt{\upshape,}%
+  column\texttt{\upshape]}} for 2-D arrays, and
+  \textit{\texttt{\upshape[}row\texttt{\upshape]}} for 1-D arrays.
+
+Thus, in the case of the earlier example involving conjugation of the
+verb \textit{to be}, the second-person future-perfect tense of the verb
+is given by
+
+\rl\cmd{tobeConjugation[3,2,4]}
+
+which yields ``\tobeConjugation[3,2,4]''.
+
+\section{Typesetting Whole Arrays}
+
+Often, one wishes not just to recall the contents of a single
+  cell, but to recall a whole array for the purposes of typesetting.
+The command \vb|\typesetarray| does just that.
+Let us create an array \vb|\Q[2,2,2]| whose cell \vb|[i,j,k]| contains
+  the tokens ``($i,j,k$)'', where $i$, $j$ and $k$ denote a particular
+  plane, row and column of \vb|\Q|.
+If one invokes \vb|\typesetarray\Q|\margcmd{typesetarray}, the default 
+  dump of the array will be:
+
+\initarray\Q[2,2,2]
+\setvalue\Q[1,1,1]{(1,1,1)}
+\setvalue\Q[1,2,1]{(1,2,1)}
+\setvalue\Q[1,1,2]{(1,1,2)}
+\setvalue\Q[1,2,2]{(1,2,2)}
+\setvalue\Q[2,1,1]{(2,1,1)}
+\setvalue\Q[2,2,1]{(2,2,1)}
+\setvalue\Q[2,1,2]{(2,1,2)}
+\setvalue\Q[2,2,2]{(2,2,2)}
+\typesetarray\Q
+
+The presentation of the array is governed by four defined macros,
+  whose definitions can be renewed:\\
+  \vb|\typesetplanesepchar| (default \vb|\\---\\|),\\
+  \vb|\typesetrowsepchar| (default \vb|\\|),\\
+  \vb|\typesetcolsepchar| (default \vb|,|) and\\
+  \vb|\typesetcell|,\\
+  the last of which takes 1 argument (the cell content) and, by
+  default, presents it unaltered.
+One can see that the default treatment separates columns with
+  a comma, performs a linefeed between each row, and
+  inserts an em-dash on a line by itself between each plane, which
+  is exactly how \vb|\Q| was presented above.
+
+However, these defaults can be renewed to produce a different
+  visual format, for example, that obtainable from a \vb|tabular|
+  environment.
+For example, upon issuing these renewals
+\begin{verbatim}
+\renewcommand\typesetplanesepchar{\\\hline}
+\renewcommand\typesetrowsepchar{\\}
+\renewcommand\typesetcolsepchar{&}
+\renewcommand\typesetcell[1]{\scriptsize\textbf{#1}}
+\end{verbatim}
+one may insert the \vb|\typesetarray| inside a \vb|\tabular|
+  and it will format according to those rules:
+\begin{verbatim}
+\begin{tabular}{cc}
+\hline
+\typesetarray\Q\\
+\hline
+\end{tabular}
+\end{verbatim}
+yielding the following output:
+\renewcommand\typesetplanesepchar{\\\hline}
+\renewcommand\typesetrowsepchar{\\}
+\renewcommand\typesetcolsepchar{&}
+\renewcommand\typesetcell[1]{\scriptsize\textbf{#1}}
+\begin{tabular}{cc}
+\hline
+\typesetarray\Q\\
+\hline
+\end{tabular}
+.
+
+%@@@
+
+\section{Bounds Checking}
+
+While the user is developing his or her application involving the {\rdar}
+package, there may accidentally arise the unintended circumstance where
+an array element is requested which falls outside the array bounds.
+In general, when a non-existent array element is requested in the
+  absence of bounds checking, the call will expand to \cmd{relax}.
+
+The package provides three declarations to set the manner in
+  which array bounds are be monitored.
+The setting \cmd{nocheckbounds}\margcmd{nocheckbounds} is used when bounds
+  are not to be checked.
+This is the default behavior for \rdar.
+For some bounds checking, \cmd{checkbounds}\margcmd{checkbounds}
+   may be set.
+With this setting, bounds violations are noted, but no guidance is
+  provided as to the allowable index range for the array.
+However, with \cmd{hypercheckbounds}\margcmd{hypercheckbounds} set, 
+  full bounds checking is possible.
+With this setting, not only are violations noted, but a description
+  of the actual array range is provided.
+
+As of V2.0, bounds violations are noted in the log file, rather than the
+  document itself.
+However, if an array bound is violated when bounds checking is turned on,
+a ``?'' shows up in the document itself.
+
+
+\section{Accessing Array Cells if Full Expansion is Required
+  (e.g., placed in an \texttt{\bs edef}) }
+
+If full expansion is required of array cell contents (and assuming the cell
+  content is expandable), it is advisable to set \cmd{nocheckbounds}%
+  , so that the error checking code is not 
+  included in the expansion.
+Results may be also expanded even with \cmd{checkbounds}
+   set, though the error-checking code is part of the expansion.
+However, with \cmd{hypercheckbounds} set, full
+  expansion of array cells is no longer possible.
+
+\section{Transfer Array Cell Tokens to Macro}
+
+With the normal use of \cmd{\rmfamily\itshape array-identifier} syntax
+  for accessing array cells,
+  several levels of expansion are required to directly recover the original
+  tokens of the cell, and then only when bounds checking is disabled.
+When the actual unexpanded tokens of cell are required, the use of the
+  \cmd{arraytomacro}\margcmd{arraytomacro} command provides the means
+  to accomplish this.
+The command takes the array name and index as the initial arguments followed
+  by a generic macro name into which to place the unexpanded tokens of the 
+  indexed array cell.
+
+So, for example \vb|\arraytomacro\tobeConjugation[2,2,3]\thiscell| will
+  place the cell's original tokens in the macro \cmd{thiscell}.
+Upon detokenization, the macro \cmd{thiscell} contains
+\arraytomacro\tobeConjugation[2,2,3]\thiscell
+``\texttt{\detokenize\expandafter{\thiscell}}''.
+
+
+\section{Deprecated and Defunct Features}
+
+\textbf{Deprecated}
+
+The following commands are supplied, but are no longer the preferred
+embodiment of package syntax.
+
+\rl\vb|\arraydump|\\
+\rl\vb|\scalardump|
+
+To replace the function of these, \vb|\typesetarray| is
+  the preferred embodiment.
+
+\textbf{Defunct}
+
+The following macros are no longer supported.
+
+\itshape
+\rl\vb|\copyrecords{|array-identifier\vb|}|%
+\\
+\rl\vb|\readArrayij{\|data-macro\vb|}{|array-identifier\vb|}{|columns\vb|}|%
+\\
+\rl\vb|\readArrayij*{\|data-macro\vb|}{|array-identifier\vb|}{|columns\vb|}|%
+\\
+\rl\vb|\readArrayijk{\|data-macro\vb|}{|array-identifier\vb|}{|rows\vb|}{|columns\vb|}|%
+\\
+\rl\vb|\readArrayijk*{\|data-macro\vb|}{|array-identifier\vb|}{|rows\vb|}{|columns\vb|}|%
+\\
+\rl\vb|\showrecord[|error\vb|]{|record number\vb|}|\\
+\rl\vb|\Arrayij[|error\vb|]{|array-identifier\vb|}{|row\vb|}{|column\vb|}|\\
+\rl\vb|\Arrayijk[|error\vb|]{|array-identifier\vb|}{|plane\vb|}{|row\vb|}{|%
+     column\vb|}|\\
+\rl\vb|\arrayij{|array-identifier\vb|}{|row\vb|}{|column\vb|}|\\
+\rl\vb|\arrayijk{|array-identifier\vb|}{|plane\vb|}{|row\vb|}{|%
+     column\vb|}|\upshape
+\itshape
+\rl\vb|\getargsC{\|macro {\upshape or} string\vb|}|\\
+\rl\vb|\arg|index\\
+\rl\vb|\narg|\\
+\rl\vb|\showargs|%
+\rl\vb|\converttilde|\\
+\rl\vb|\record|index
+\upshape
+
+
+\section{Acknowledgements}
+
+I am profoundly thankful to Christian Tellechea for using
+  my simplistic (read ``deficient'') \textsf{getargs} package to
+  inspire his effort in creating the powerful \loi{} package. 
+It is precisely the tool I have sought for a long time, and I have
+  adapted its use into the workings of this package.
+
+I would like to thank Dr. David Carlisle for his assistance in
+helping the author rewrite the \vb|\getargs| command, originally found
+in the \textsf{stringstrings} package.  To distinguish the two versions,
+and in deference to him, it is herein named \vb|\getargsC|. However,
+as of V2.0, its presence is vestigial, having instead been superceded with 
+the \loi{} package macros.
+
+I am likewise grateful to Ken Kubota, who suggested moving the
+  \vb|\newread| outside of \vb|\readdef|, so as not to prematurely 
+  exhaust the 16 available file streams.
+
+%\clearpage
+\section{Code Listing}
+
+\verbfilenobox[\footnotesize]{readarray.sty}
+\end{document}
+
+
+
