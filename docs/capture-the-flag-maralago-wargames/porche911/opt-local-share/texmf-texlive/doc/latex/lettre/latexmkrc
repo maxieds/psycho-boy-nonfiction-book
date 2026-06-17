@@ -1,0 +1,55 @@
+$dvi_mode = 0;
+$pdf_mode = 1;
+$makeindex = "makeindex %O -s letdoc.ist -o %D %S";
+$pdflatex  = 'pdflatex -interaction=nonstopmode %O %S';
+$clean_ext .= ' tns fax trimmed';
+$clean_full_ext .= ' odt';
+@default_files=('letex1.tex', 'letex2.tex', 'letex3.tex', 'letex4.tex', 'letex5.tex', 'letex6.tex', 'letex7.tex', 'letex8.tex', 'testfaxf.tex', 'testfaxe.tex', 'testfaxd.tex', 'lettre.tex' );
+
+sub do_tex2trimmed {
+	my $in;
+	my $inputfile = "$_[0].tex";
+	open($in,  "<", "$inputfile")  or die "Can't open $inputfile $!";	
+	my $out;
+	my $cur_out = \*STDOUT;
+	my $outputfile = "$_[0].trimmed";
+	open($out, ">", $outputfile) or die "Can't open $outputfile $!";
+	# 0 = in header
+	# 1 = in body
+	my $state = 0;
+  LINE: 
+	while(<$in>){
+		$line = $_ ;
+		if($state eq 0)
+		{
+			if($line =~ /\A\s*\\documentclass/)
+			{
+				$state = 1;
+				goto OUTPUT;
+			}
+			next LINE;
+		}
+		if($state eq 1)
+		{
+		  OUTPUT:
+			print $out "$line";
+			if($line =~ /\A\s*\\end\{document\}/)
+			{
+				$state = 2;
+				goto CLOSEIT;
+			}
+			next LINE;
+		}
+		goto CLOSEIT;
+  }
+  CLOSEIT:
+	close $in;
+	close $out;
+	return 0;
+}
+
+add_cus_dep('tex','trimmed',0,'do_tex2trimmed');
+
+# Local Variables:
+# mode: perl
+# End:

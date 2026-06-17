@@ -1,0 +1,139 @@
+%%
+%% This is file `listparskip_user_guide.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% listparskip_code.dtx  (with options: `user')
+%% 
+%% This file is from version 1.0 of the free and open-source
+%% LaTeX package "listparskip," released December 2024.
+%% 
+%% Copyright 2024 Conrad Kosowsky
+%% 
+%% This file may be used, distributed, and modified under the
+%% terms of the LaTeX Public Project License, version 1.3c or
+%% any later version. The most recent version of this license
+%% is available online at
+%% 
+%%           https://www.latex-project.org/lppl/
+%% 
+%% This work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this software may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% Happy TeXing!
+%% 
+\documentclass[12pt]{article}
+\usepackage[margin=72.27pt]{geometry}
+\usepackage[factor=700,stretch=14,shrink=14,step=1]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist{topsep=\smallskipamount,itemsep=\smallskipamount,
+  parsep=0pt,partopsep=0pt}
+\usepackage{shortvrb}
+\MakeShortVerb{|}
+
+\begin{document}
+
+\def\documentname{User Guide}
+\newdimen\MacroIndent
+\input listparskip_heading.tex
+
+\noindent Most \LaTeX\ users are familiar with the enumerate and itemize environments, and a number of other environments share the same underlying macros and structure. These list environments are useful and versatile, and they come up in many different situations where fine control over vertical spacing is important.\footnote{There is an overlap in terminology. The list environments described in this document are very different from horizontal and vertical lists in the \TeX\ language.} The dimensions |\topsep|, |\parsep|, |\partopsep|, and |\itemsep| control vertical spacing for list environments, and by default, \LaTeX\ determines the space immediately outside a list as follows:
+\begin{itemize}
+\item Always add |\topsep| before and after a list
+\item Add |\parskip| (not |\parsep|) always before a list and usually after it\footnote{\TeX\ treats any text after a list as the start of a new paragraph, so if the next material to be typeset is text, \TeX\ adds \vrb\parskip\ after the list. If the user includes a box or rule instead of text, it does not trigger the start of a paragraph, and \TeX\ does not add \vrb\parskip.}
+\item If a list begins outside of a paragraph, add |\partopsep| before and after the list
+\end{itemize}
+If |\parskip| is nonzero, for example in a formal letter, it is impossible to include a list inside a paragraph without the inter-paragraph space suggesting that the list forms its own paragraph. (Unless the user manually changes |\parskip| or adds negative vertical glue.) Similarly, \LaTeX\ chooses whether to add |\partopsep| after a list independently of what happens at that point in the source code.
+
+The \textsf{listparskip} package modifies this behavior by making the |\parskip| and |\partopsep| spacing depend more closely on paragraph structure from the source code. Under \textsf{listparskip} rules, the space around lists happens as follows:
+\begin{itemize}
+\item Always add |\topsep| before and after a list
+\item If a list begins outside of a paragraph, add |\parskip| and |\partopsep| before the list
+\item If a blank line comes immediately after the list in the source code, always add |\partopsep| and usually add |\parskip|
+\end{itemize}
+These changes happen automatically after loading the package, and they allow the user to control whether \TeX\ positions a list environment as its own paragraph or as part of the surrounding paragraph. When |\parskip| and |\partopsep| are both 0pt, this package does nothing, but for an example of what can happen when either dimension is positive, see |listparskip_example.pdf|, which is included with the \textsf{listparskip} installation and is available on \textsc{ctan}. Users can load \textsf{listparskip} with the standard |\usepackage{listparskip}| syntax, and the package has no options.
+
+\begin{figure}[t]
+\centerline{\bfseries Table 1: Recommended Source Code to Insert after a List\strut}
+\begin{tabularx}{\textwidth}{lXX}\toprule
+Next Material to Typeset & No New Paragraph Desired & New Paragraph Desired \\\midrule
+Text & Nothing & Blank line \\
+|\item| & Nothing & Nothing or blank line \\
+Box or Rule & |\nullline| & Blank line, then |\nullline| \\\bottomrule
+\end{tabularx}
+\end{figure}
+
+\begin{figure}[tb]
+\centerline{\bfseries Table 2: Space after a List When Using \textsf{listparskip}\strut}
+\begin{tabularx}{\textwidth}{XX}\toprule
+Material after a List & Vertical Space Used in Addition to |\topsep|\\\midrule
+Text* & None \\
+Box & Don't do this\textsuperscript\ddag \\
+|\item|*\textsuperscript\dag & $\vrb\parsep+\vrb\itemsep$ \\\midrule
+Blank line, then text* & $\vrb\partopsep+\vrb\parskip$ \\
+Blank line, then box & Don't do this\textsuperscript\ddag \\
+Blank line, then |\item|*\textsuperscript\dag &
+  $\vrb\partopsep+\vrb\parsep+\vrb\itemsep$ \\\midrule
+|\nullline|, then text & |\parskip| \\
+|\nullline|, then box* & None \\
+|\nullline|, then |\item|\textsuperscript\dag &
+  $\vrb\parsep+\vrb\itemsep$ \\\midrule
+Blank line, then |\nullline|, then text &
+  $\vrb\partopsep+2\vrb\parskip$ \\
+Blank line, then |\nullline|, then box* &
+  $\vrb\partopsep+\vrb\parskip$ \\
+Blank line, then |\nullline|, then |\item|\textsuperscript\dag &
+  $\vrb\partopsep+2\vrb\parsep+\vrb\itemsep$ \\
+\bottomrule
+\end{tabularx}
+\smallskip
+\vbox{\footnotesize\noindent\hskip 1.8em\llap{*}Recommended use.
+
+\noindent\hskip 1.8em\llap{\textsuperscript\dag}For \vrb\item\ in a nested list, the \vrb\parsep\ and \vrb\itemsep\ refer to the dimensions in the outer list, not the list that just ended.
+
+\noindent\hskip 1.8em\llap{\textsuperscript\ddag}With \textsf{listparskip}, putting a box after the end of a list environment without text or \vrb\nullline\ previously may mess up vertical spacing or paragraph indentation after the box depending on what comes next.}
+\end{figure}
+
+Immediately after the end of a list environment, \textsf{listparskip} expects to see a some text, a blank line followed by text, or an |\item|. As a general rule, text means an extra |\topsep|, and a blank line followed by text leads to an extra $\vrb\topsep+\vrb\partopsep+\vrb\parskip$. If you want to put something else, such as a box or rule, after the end of a list environment, you should type |\nullline| before the other material to prevent any spacing mishaps. This macro instructs \TeX\ to behave like it just encountered a line of text except without adding any vertical space. Table~1 shows my recommendations for code to include after a list in various cases depending on the desired result, and Table~2 shows the full rules for what happens after a list with \textsf{listparskip} in various situations. For more information, see |listparskip_code.pdf|, which is included with the \textsf{listparskip} installation and is available on \textsc{ctan}.
+
+\end{document}
+\endinput
+%%
+%% End of file `listparskip_user_guide.tex'.

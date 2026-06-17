@@ -1,0 +1,161 @@
+\documentclass[a4paper,article,oneside,10pt]{memoir}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{kpfonts,microtype}
+
+\usepackage{leftindex,listings,showexpl}
+
+\usepackage[hidelinks]{hyperref}
+
+\frenchspacing
+
+\newcommand\entrydescription[1]{%
+	\textlangle\textrm{\textit{#1}}\textrangle
+}
+
+\catcode`<=\active
+
+\def<#1>{\entrydescription{#1}}
+
+\lstset{
+	language=[LaTeX]TeX,
+	basicstyle=\ttfamily\small,
+	commentstyle=\itshape\ttfamily\small,
+	escapechar=@,
+	alsoletter=\\,
+	breaklines=true,
+	breakindent={0pt},
+	captionpos=t,
+	pos=r,
+	tabsize=2,
+	inputencoding=utf8,
+	extendedchars=true,
+	explpreset={numbers=none,},
+}
+
+\newcommand\pkgleftindex{\texttt{leftindex}}
+
+\title{\pkgleftindex\ -- left indices with better spacing (v0.2$\beta$)}
+\date{\today}
+\author{Sebastian \O rsted (\href{mailto:sorsted@gmail.com}{sorsted@gmail.com})}
+
+\hypersetup{
+	pdfauthor={Sebastian \O rsted},
+	pdftitle={leftindex -- left indices with better spacing},
+}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+The package \pkgleftindex\ provides commands for typesetting left indices.
+Unlike any other similar package I know of, \pkgleftindex\ also indents the left superscript, producing much better spacing in general:
+\[
+	\leftindex^a_b{f}
+	\qquad\text{(compare to $\leftindex[]^a_b{f}$)}
+	.
+\]
+As \TeX\ provides no metrics for the indentation of left superscripts,
+the only way to accomplish this is to measure the negative indentation of the right subscript and then use that value.
+This works well for most symbols, with a few exceptions, which can be dealt with by
+supplying a few extra arguments.
+The package is a generalization of egreg's excellent code found at
+\begin{center}
+	\url{https://tex.stackexchange.com/questions/557655/low-level-command-for-controlling-left-superscript-spacing/}
+\end{center}
+
+\chapter*{The commands}
+
+The main user-level command of~\pkgleftindex\ is called~\lstinline!\leftindex! and has
+the syntax
+\begin{lstlisting}
+\leftindex^{@<left superscript>@}_{@<left subscript>@}{@<symbol>@}
+\end{lstlisting}
+Both the arguments <left superscript> and <left subscript>
+are optional. Let us see it in action:
+\begin{LTXexample}
+$ \leftindex^a_b {f} $,
+$ \leftindex^t {X} $
+$ \leftindex_b {J} $,
+$ \leftindex_v^u {\Pi} $,
+$ \leftindex{A} $,
+\[
+	\leftindex^1_0 { \int }
+		f(x)\, dx
+\]
+\end{LTXexample}
+For the indentaiton of the left superscript, the package by default
+uses the negative indentation of the right subscript. This yields good results
+most of the time, as seen above. However, there are cases where this goes wrong,
+the most notable example being the Greek letter~$ \Gamma $ in many fonts (not in Computer Modern, though). Less serious examples arise with letters like $P$ and $L$:
+\begin{LTXexample}
+$ \Gamma^a_b $
+vs.
+$ \leftindex^a_b {\Gamma} $,
+$ L^a_b $
+vs.
+$ \leftindex^a_b {L} $,
+$ P^a_b $
+vs.
+$ \leftindex^a_b {P} $
+\end{LTXexample}
+To solve this issue, \lstinline!\leftindex! takes two
+additional, optional arguments:
+\begin{lstlisting}
+\leftindex[@<slanting phantom>@][@<height phantom>@]
+			^{@<left superscript>@}_{@<left subscript>@}{@<symbol>@}
+\end{lstlisting}
+The package will then use the <slanting phantom> instead of the <symbol> to calculate the indentation of the superscript. The argument can be left empty, in which
+case the left superscript will not be indented at all, which is the right solution for the symbol~$ \Gamma $:
+\begin{LTXexample}
+$\leftindex[]^a_b {\Gamma}$,
+$\leftindex[I]^a_b {L}$,
+$\leftindex[I]^a_b {P}$
+\end{LTXexample}
+By default, the <slanting phantom> is also used for calculating the height of the indices.
+If this is not the behaviour you want, you can supply an additional <height phantom>:
+\begin{LTXexample}
+$\leftindex[][\Bigg|]^a_b{x}$
+\end{LTXexample}
+I doubt anyone will ever really need this much in practice, but the option is provided for completeness.
+
+Sometimes, having to include the symbol as a mandatory argument can be a burden. For these cases, I also provide the command~\lstinline!\LeftIndex! with the syntax:
+\begin{lstlisting}
+\LeftIndex[@<slanting phantom>@][@<height phantom>@]
+			^{@<left superscript>@}_{@<left subscript>@}
+\end{lstlisting}
+Here, all arguments are optional.
+With this, we can do stuff like:
+\begin{LTXexample}
+$\LeftIndex^a_b \Gamma $,
+$\LeftIndex[]^a_b L $,
+$\LeftIndex[I]^a_b$,
+$\LeftIndex[I]^a_b$
+\end{LTXexample}
+
+
+I also provide the more primitive, underlying command with four mandatory arguments:
+\begin{lstlisting}
+\manualleftindex{@<height phantom>@}{@<slanting phantom>@}
+			{@<left superscript>@}{@<left subscript>@}
+\end{lstlisting}
+This one is mainly intended for use in commands and by other packages.
+Note that the arguments <height phantom> and <slanting phantom> have
+switched places compared to the commands \lstinline!\leftindex! and~\lstinline!\LeftIndex!.
+This is because <height phantom> is regarded as a ``more important''
+argument than <slanting phantom> from an implementation point of view,
+but the user is probably less likely to change it. Therefore,
+the user-level commands \lstinline!\leftindex! and~\lstinline!\LeftIndex! have <slanting phantom>
+before <height phantom>.
+Note also that \lstinline!\manualleftindex! (like \lstinline!\LeftIndex!) does not take a <symbol>;
+you will have to write this yourself afterwards:
+\begin{LTXexample}
+$\manualleftindex{P}{I}{a}{b}$
+vs.
+$\manualleftindex{P}{I}{a}{b} P$
+\end{LTXexample}
+
+\end{document}

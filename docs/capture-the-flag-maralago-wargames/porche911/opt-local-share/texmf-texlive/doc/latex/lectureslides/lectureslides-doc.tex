@@ -1,0 +1,91 @@
+\PassOptionsToClass{a4paper, 12pt}{article}
+\documentclass{ltxdoc}
+\usepackage[british]{babel}
+\usepackage[babel]{microtype}
+\newcommand{\thispackage}{lectureslides}
+\title{The \texttt{\thispackage} Package\footnote{This document corresponds to \texttt{lectureslides} version 1.0 / 2022-03-01.}}
+\author{Taihao Zhang\protect\\\ttfamily t@taihao.de}
+\date{1st March 2022}
+\begin{document}
+\maketitle
+
+% \subsection*{Motivation}
+    When studying, there frequently occurs the situation where one uses \texttt{Ctrl\,+\,F} many times to search for a keyword in all the lecture slides. Throughout an entire semester, there can be a large number of PDFs that would need to be searched.
+    \par
+    This package allows for easily combining individual PDFs into a large one, indexing each with a title that PDF viewers can display. \verb+lectureslides+ also provides a table of contents.
+    
+\subsection*{Usage}
+In general, usage of \texttt{\thispackage} works as follows:
+\begin{verbatim}
+    \documentclass{article}
+    \usepackage{lectureslides}
+    \begin{document}
+        \course{Engineering Mechanics}
+        \tableofcontents
+        
+        \lecture{Introduction to EM}{intro}
+        \lecture{Centre of gravity}{centre}
+    \end{document}
+\end{verbatim}
+
+    \begin{macro}{\course}
+        Acts as the title on the cover page, used in the form \newline
+        \verb+\course[]{Engineering Mechanics}+. The optional argument specifies the footnote text, which otherwise defaults to \textbf{Compiled \textbackslash today}. This text adapts to an \verb+ngerman+ setting in babel.\footnote{This requires that this package is loaded after babel.}
+        \end{macro}
+    
+    \newpage
+    \begin{macro}{\lecture}
+        Inserts one set of lecture slides. This command takes two mandatory arguments in the following form:
+        \begin{verbatim}
+        \lecture{Title of this lecture}{pdf_file_name}
+        \end{verbatim}
+        Two optional arguments can specify the range of slides that need to be included. For example, to include slides 10~--35 of \verb+intro.pdf+:
+        \begin{verbatim}
+        \lecture{Introduction to EM}[10][35]{intro}
+        \end{verbatim}
+        Either optional argument can be left empty. To include slides up to slide number 35:
+        \begin{verbatim}
+        \lecture{Introduction to EM}[][35]{intro}
+        \end{verbatim}
+        To include slides from slide number 10 til the end:
+        \begin{verbatim}
+        \lecture{Introduction to EM}[10][]{intro}
+        \end{verbatim}
+        Internally, this command calls \verb+\lecturetitle+ and \verb+\lectureslides+.
+        \end{macro}
+    
+    \begin{macro}{\tableofcontents}
+        Prints a table of contents of all lectures. Each \verb+\lecture+ (and consequently \verb+\lecturetitle+) gets its own entry here. \verb+\tocline+ customises the appearance.
+        \end{macro}
+    
+\subsection*{Option}
+    \DescribeMacro{landscape}
+    \DescribeMacro{portrait}
+    \verb+landscape+ is the default orientation if no option is passed, as lecture slides are most often given out in this format. \verb+portrait+ can be used instead to insert slides in portrait orientation.
+    
+\subsection*{Advanced}
+    \begin{macro}{\lecturetitle}
+        Declares a new set of slides, but doesn't insert any PDF pages yet. When followed by \verb+\lectureslides+, an actual entry in the table of contents gets created.
+        \begin{verbatim}
+        \lecturetitle{Title of this lecture}
+        \end{verbatim}
+        \end{macro}
+        
+    \begin{macro}{\lectureslides}
+        Inserts a set of slides from a given PDF. Optional arguments specify the range of slides to be included.
+        \begin{verbatim}
+        \lectureslides[10][35]{pdf_file_name}
+        \end{verbatim}
+        Multiple \verb+\lectureslides+ can be stringed together to include slides from different PDFs. These will then all organised under the last preceding \verb+\lecturetitle+.
+        \end{macro}
+ 
+    \begin{macro}{\tocline}
+        Determines how the lecture title appears in the table of contents (ToC). Putting the following in the preamble redefines this, for example:
+        \begin{verbatim}
+        \renewcommand{\tocline}[1]{%
+            Semana \arabic{section}: #1%
+        }
+        \end{verbatim}
+        Alternatively, \verb+\renewcommand{\tocline}[1]{#1}+ omits the numbering, putting only the title in the ToC.
+        \end{macro}
+\end{document}
