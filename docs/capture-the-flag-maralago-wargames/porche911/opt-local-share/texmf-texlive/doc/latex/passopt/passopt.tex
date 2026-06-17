@@ -1,0 +1,106 @@
+\PassOptionsToPackage{svgnames}{xcolor}
+\documentclass[load-preamble+]{cnltx-doc}
+
+\usepackage{hologo,changelog,enumitem,codehigh}
+\usepackage[margin = 1in,marginparwidth = 0.6in,footskip = 0.5in]{geometry}
+\setcnltx
+  {
+    package           = passopt,
+    version           = v1.01c,
+    date              = 2024/10/22,
+    authors           = Qu Yi,
+    title             = \passopt{} package,
+    info              = Passing options to packages or classes,
+    email             = toquyi@163.com,
+    url               = https://github.com/texno3/passopt,
+    abstract          =
+      {
+        \pkg*{passopt} allow reset the global options of a loaded macro package or document class, or to change the position of the pre-passed options in the list to the right.
+      },
+    color-scheme      = blue,
+    title-format      = \LARGE
+  }
+\makeatletter
+\newcommand{\splitmeta}[2]{\meta{#1}\texttt{,}\meta{#2}}
+\newcommand{\newsplitarg}[4][\splitmeta]
+  {
+    \newcommand{#2}[2]
+      {\code{\textcolor{argument}{#3\textnormal{#1{##1}{##2}}#4}}}
+  }
+\newcommand{\kvsplit}[3]
+  {
+    \item\code{\option{#1}\cnltx@isvalue\splitmarg{#2}{#3}}
+    \cnltx@checkdefault{\hfill\newline}
+  }
+\newsplitarg{\splitoarg}{[}{]}
+\newsplitarg{\splitmarg}{\{}{\}}
+\newsplitarg{\splitdarg}{(}{)}
+\newnote{\newtag}[1]{\textcolor{red}{#1}}
+\renewcommand{\emph}[1]{\textcolor{red}{#1}}
+\renewcommand{\cnltx@write@lastname}{}
+\renewcommand{\cnltxpackagenameformat}[1]{\textcolor{cnltx}{\textsf{#1}}}
+\setlist{nosep,topsep = \smallskipamount}
+\setlist[description,1]{leftmargin = \parindent}
+\setlist[itemize,1]{leftmargin = *}
+\SetCodeHighStyle[default]{2}{cs}
+\colorlet{link}{DeepPink}
+\makeatother
+
+\begin{document}
+\section{Preface}
+For a developer, there are some cases where packages and classes may load other packages or classes with options. However, other developers or users may wish to disable the enabled options or enable new ones. To enable new options, \hologo{LaTeXe} provides the \cs{PassOptionsToPackage} and \cs{PassOptionsToClass} commands to pass the options before the package or class is loaded, but the passed options are located on the \textcolor{red}{left} side of the final options list.
+\begin{codehigh}
+\PassOptionsToPackage{opt1,opt2=A}{mypackage}
+
+\documentclass{book}
+\usepackage[opt3]{mypackage}
+
+\begin{document}
+\end{codehigh}
+
+In the example above, the list of options that the \pkg*{mypackage} macro package ends up executing is \fbox{\code{opt1,opt2=A,opt3}}. If you wish to \textcolor{red}{disable} the pre-enabled options or place the newly enabled options to the \textcolor{red}{right} of the list (last executed), then you need to modify the code of the load command in the package or class file, but this is not recommended for public sharing. Therefore, this macro package provides commands to reset the options and change the order of the new options.
+
+\section{User commands}
+Four commands are provided to set the options to be passed later, all of which are \textcolor{red}{locally} assigned. Subsequent loading of the macro package is not must required due to the hook mechanism used to modify the list of options.
+\begin{commands}
+  \command{SetOptionsToPackage}[\sarg\marg{options list}\marg{package}]
+  Passes options to the macro package, the location of the passed options is to the right of the options used when loading the macro package. If an asterisk parameter is used, only the passed options were ultimately retained.
+  \command{SetOptionsToClass}[\sarg\marg{options list}\marg{class}]
+  Similar to the previous command, but passing options for the document class.
+\begin{codehigh}
+\RequirePackage{passopt}
+\SetOptionsToPackage{opt1,opt2=A}{mypackage}
+
+\documentclass{book}
+\usepackage[opt3]{mypackage}
+
+\begin{document}
+\end{codehigh}
+
+  In the example above, the list of options that the \pkg*{mypackage} macro package ends up executing is \fbox{\code{opt3,opt1,opt2=A}}. If the asterisk parameter is used, the list is \fbox{\code{opt1,opt2=A}}.
+
+  Note that since macro packages or document classes can only be loaded effectively once (using the \cs{usepackage} and \cs{RequirePackage} commands), only options passed before the first loading of a macro package or document class are effective, and it is recommended for users to use commands that pass options before \cs{documentclass}.
+  \command{ClearPackageOptions}[\marg{package}]
+  Clears the options that will be loaded into the macro package. The following commands has the same effect as \cs*{SetOptionsToPackage}\code{*}.
+\begin{codehigh}
+\ClearPackageOptions{mypackage}
+\SetOptionsToPackage{opt1,opt2=A}{mypackage}
+\end{codehigh}
+  \command{ClearClassOptions}[\marg{class}]
+  Similar to the previous command, but passing options for the document class.
+\end{commands}
+
+\section{Acknowledgment}
+Thanks Jonathan P. Spratte for the improvement suggestions.
+
+\appendix
+\begin{changelog}[simple]
+  \begin{version}[v = 1.01,date = 2024/07/15]
+  \item Synchronized modification for lists of \code{@raw@opt@} and \code{opt@}.
+  \item Options that are set are expanded once rather than fully expanded.
+  \end{version}
+\end{changelog}
+\nocite{*}
+\AddToHook{cmd/printindex/before}{\clearpage}
+
+\end{document}

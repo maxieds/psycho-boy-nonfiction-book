@@ -1,0 +1,168 @@
+%! Author = Jander Moreira (moreira.jander@gmail.com)
+%! Date = 15/01/2025
+
+\documentclass[a4paper, 11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+
+\usepackage[presets]{packdoc}
+
+\title{The \textit{change history} support in the \PackageName{packdoc} package}
+\author{Jander Moreira}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    This document aims to demonstrate how versions and their changes can be managed within a document using the \PackageName{packdoc} package.
+\end{abstract}
+
+\noindent This shows the history change using \Macro{PDPrintChanges}.
+
+\PDPrintChanges
+
+
+\section{The Initial Version and the Placement of the Change Log}
+
+This document includes the \PackageName{packdoc} package in its preamble\footnote{Actually, the \Option{presets} option is used, since some example uses macros, options, and environments.}.
+
+\begin{PDListing}
+    \usepackage{packdoc}
+\end{PDListing}
+
+As with any document that tracks versioning, it must at least define an initial version. This can be achieved using the following commands.
+
+\PDNewVersion{0.1}{2025/01/15}
+\PDAddChange{0.1}{
+    description = {Initial version.},
+    no page,  % no page number
+    no box,  % no box in margin
+}%
+\begin{PDListing}
+    \PDNewVersion{0.1}{2020/01/01}
+    \PDAddChange{0.1}{
+        description = {Initial version.},
+        no page,  % no page number
+        no box,  % no box in margin
+    }%
+\end{PDListing}
+
+With these instructions, the initial version 0.1 will be created, and its description will be added to the change log. The \Option{no page} option omits the page number indication in the list of changes, while \Option{no box} prevents the highlight box from being displayed in the margin.
+
+The \Macro{PDPrintChanges} command generates list of changes by compiling all recorded modifications, descriptions, and version details. In this example document, the macro is positioned immediately after the abstract section. This strategic placement ensures that the revision history is displayed at the beginning of the document. Alternatively, the macro can be placed at the end of the document, providing a summary of changes for readers who prefer to review the revision history after exploring the main content.
+
+\begin{PDExample}
+    \PDPrintChanges[version prefix = {\textit{v}~}, header style = \footnotesize\slshape]
+\end{PDExample}
+
+
+\section{Working with Multiple Versions}\label{sec:working-with-multiple-versions}
+
+As new versions are introduced, the \Macro{PDNewVersion} macro should be used to define each one. While it is recommended to define the various versions at the beginning of the document, there is no strict requirement for this.
+
+\PDNewVersion{0.2}{2020/01/01}
+\PDNewVersion{0.2a}{2021/01/01}
+\PDNewVersion{0.2b}{2021/06/01}
+\PDNewVersion{0.3}{2023/01/01}
+\begin{PDListing}
+    \PDNewVersion{0.2}{2020/01/01}
+    \PDNewVersion{0.2a}{2021/01/01}
+    \PDNewVersion{0.2b}{2021/06/01}
+    \PDNewVersion{0.3}{2020/01/01}
+\end{PDListing}
+
+The order in which each version is defined in the source code dictates how they are displayed in the change log. Versions created earlier will appear first, while those defined later will follow sequentially, ensuring a clear and chronological representation of the document's revision history.
+
+To demonstrate the introduction of new versions, this document will define a set of fictional macros. The macros from the initial version will not appear in the change log, whereas those introduced in subsequent versions will be highlighted indicating when they were added.
+
+The macros in the first version do not necessitate any version indicators. As a result, they are defined directly without the need for specifying a particular version.
+
+\begin{PDExample}
+    \begin{Macro*}{ExampleCommand}{\MArg{text}}{}
+        This macro was created in the initial version and serves as the foundation for subsequent versions.
+    \end{Macro*}
+
+    \begin{Macro*}{InitSetup}{}{}
+        This macro was created in the initial version and serves as the foundation for subsequent versions.
+    \end{Macro*}
+\end{PDExample}
+
+On the other hand, macros introduced in versions subsequent to the initial release may include an indication of the version in which they were first introduced.
+
+\begin{PDExample}
+    \begin{Macro*}{InsertReference}{}{}
+        \PDAddChange{0.2}{description = {\Macro{InsertReference} is a new feature.}}%
+        This macro was introduced in a subsequent version, following the initial release of the document. It represents a new feature.
+    \end{Macro*}
+
+    \begin{Macro*}{VersionTracker}{\OArg{options}\MArg{version}}{}
+        \PDAddChange{0.3}{description = {\Macro{VersionTracker} is a new feature.}}%
+        This macro was introduced in a subsequent version, following the initial release of the document. It represents a new feature.
+    \end{Macro*}
+\end{PDExample}
+
+Some macros, while maintaining their functionality or backward compatibility, may have been modified in some way. Therefore, it is also possible to specify the version in which such changes occurred, providing a clearer understanding of when and how the macro's behavior was altered.
+
+\begin{PDExample}
+    \begin{Macro*}{UpdateDatabase}{}{}
+        \PDAddChange{0.2}{description = {\Macro{UpdateDatabase} is a new feature.}}%
+        \PDAddChange{0.2a}{update, description = {\Macro{UpdateDatabase} was fixed in some way.}}%
+        \PDAddChange{0.3}{update, description = {\Macro{UpdateDatabase} macro has been improved.}}%
+        This macro was introduced in a subsequent version, following the initial release of the document. It represents a new feature. Some fixes and improvements also took place.
+    \end{Macro*}
+\end{PDExample}
+
+In many cases, changes have been made, but there is no need to specifically highlight them within the text itself. Instead, these changes should simply be documented in the change log, providing a record of the updates without requiring modifications to the main content.
+
+\begin{PDExample}
+    \PDAddChange{0.2b}{change, no box, no page, description = {This package no longer depends on the \PackageName{OldPackage} package.}}%
+    The initial version depended on the \PackageName{OldPackage} package, which has been discontinued, with the last available release dating back to 1960. To address this, a custom solution was created to meet the original needs, ensuring ongoing functionality and compatibility without relying on obsolete or unsupported packages.
+\end{PDExample}
+
+To prevent the change log from becoming overcrowded with too many entries, a summary of the modification can be included directly in the text. Additionally, individual markings can be inserted for the modified items, but these specific changes are not included in the change log itself.
+
+\begin{PDExample}
+    \PDAddChange{0.2b}{update, no box, description = {\Macro{ExampleOne}, \Macro{ExampleTwo}, and \Macro{ExampleThree} were rewritten with \LaTeX 3.}}%
+    Several macros have been reimplemented using the \LaTeX 3 syntax to improve consistency. These rewritten macros include \Macro{ExampleOne}, \Macro{ExampleTwo}, and \Macro{ExampleThree}, which have now better performance.
+
+    \begin{Macro*}{ExampleOne}{}{}
+        \PDAddChange{0.2b}{update, no listing}%
+        This macro was created in the initial version and serves as the foundation for subsequent versions.
+
+        The code has been restructured to maintain the same functionality, while enhancing performance.
+    \end{Macro*}
+
+    \begin{Macro*}{ExampleTwo}{}{}
+        \PDAddChange{0.2b}{update, no listing}%
+        This macro was created in the initial version and serves as the foundation for subsequent versions.
+
+        The code has been restructured to maintain the same functionality, while enhancing performance.
+    \end{Macro*}
+
+    \begin{Macro*}{ExampleThree}{}{}
+        \PDAddChange{0.2b}{update, no listing}%
+        This macro was created in the initial version and serves as the foundation for subsequent versions.
+
+        The code has been restructured to maintain the same functionality, while enhancing performance.
+    \end{Macro*}
+\end{PDExample}
+
+When changes are presented closely together in the main body of text, it can be difficult to determine which version box corresponds to each modification. Optionally, additional title text can be included to provide clarification.
+
+\begin{PDExample}
+    In addition to the \Macro{True} and \Macro{False} macros, which are commonly used for logical operations, the \Macro{Undefined}\PDAddChange{0.2a}{title = \Macro{Undefined}, description = New macro: \Macro{Undefined}.} and \Macro{Fuzzy}\PDAddChange{0.3}{title = \Macro{Fuzzy}, description = New macro: \Macro{Fuzzy}.} macros have also been introduced. These provide more specialized functionality. To make this available, use the \Option{bool}\PDAddChange{0.2a}{title = \Option{bool}, description = New option: \Option{bool}.} option.
+\end{PDExample}
+
+In certain situations, it may be necessary to log a reference other than the page in the change log. To do so, the \Option{page} option can be used to specify any other text. In the following example, a (fictional) reference to another package has been added.
+
+\begin{PDExample}
+    \PDAddChange{0.2}{update, title = {Regarding \Environment{otherpackage}}, description = {\Environment{otherpackage} error fixed.}, page = {\textit{see} \PackageName {otherpackage} documentation, p.4.}}%
+    The behavior of the functions in this package has changed due to recent modifications in \PackageName{otherpackage}.
+\end{PDExample}
+
+\section{The end}
+That's all.
+
+\end{document}

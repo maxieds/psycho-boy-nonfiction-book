@@ -1,0 +1,194 @@
+% environnement "ifactors" : decomposition en produit de facteurs premiers
+
+\begin{VerbatimOut}{pascours-ifactors.cxx}
+maple_mode(0);
+n:=read("n.val");
+F:=ifactors(n);
+l:=size(F);
+T:="";
+c:=0;
+for (k:=0;k<l;k:=k+2) { if c!=0 then T:=T+"\\times"; end_if T:=T+F[k]+"^{"+F[k+1]+"}"; c++; };
+Sortie:=fopen("pascours-ifactors.tex");
+fprint(Sortie,Unquoted,T);
+fclose(Sortie);
+\end{VerbatimOut}
+  
+\newenvironment*{ifactors}
+{\VerbatimEnvironment\begin{VerbatimOut}{n.val}}
+{\end{VerbatimOut}
+\immediate\write18{giac <pascours-ifactors.cxx}
+\ensuremath{\input{pascours-ifactors.tex}}
+}
+
+% environnement "ifactorstable"
+
+\begin{VerbatimOut}{pascours-ifactorstable.cxx}
+maple_mode(0);
+n:=read("n.val");
+F:=ifactors(n);
+l:=size(F);
+for (k:=0;k<l;k:=k+2){ L[k/2]:=F[k]; }; 
+T:="\\begin{tabular}{r|l}";
+k:=0;
+while (n!=1) { T:=T+n+"&"; if (irem(n,L[k])==0) { T:=T+L[k]+"\\\\"; n:=n/L[k]; } else { k:=k+1; T:=T+L[k]+"\\\\"; n:=n/L[k]; };  };
+T:=T+"1 & \\\\\\end{tabular}";
+Sortie:=fopen("pascours-ifactorstable.tex");
+fprint(Sortie,Unquoted,T);
+fclose(Sortie);
+\end{VerbatimOut}
+  
+\newenvironment*{ifactorstable}
+{\VerbatimEnvironment\begin{VerbatimOut}{n.val}}
+{\end{VerbatimOut}
+\immediate\write18{giac <pascours-ifactorstable.cxx}
+\input{pascours-ifactorstable.tex}
+}
+
+% environnement "fracsimplify"
+
+\begin{VerbatimOut}{pascours-fracsimplify.cxx}
+maple_mode(0);
+L:=read("n.val");
+n:=L[0];
+d:=L[1];
+s:=ratnormal(n/d);
+T:="\\ensuremath{\\frac{\\numprint{"+n+"}}{\\numprint{"+d+"}}="+latex(s)+"}";
+Sortie:=fopen("pascours-fracsimplify.tex");
+fprint(Sortie,Unquoted,T);
+fclose(Sortie);
+\end{VerbatimOut}
+  
+\newenvironment*{fracsimplify}
+{\VerbatimEnvironment\begin{VerbatimOut}{n.val}}
+{\end{VerbatimOut}
+\immediate\write18{giac <pascours-fracsimplify.cxx}
+\input{pascours-fracsimplify.tex}
+}
+
+% environnement "exprsimplify"
+
+\begin{VerbatimOut}{pascours-exprsimplify.cxx}
+maple_mode(0);
+expression:=read("n.val");
+s:=simplifier(expression);
+T:="\\ensuremath{\\StrSubstitute{"+s+"}{*}{}}";
+Sortie:=fopen("pascours-exprsimplify.tex");
+fprint(Sortie,Unquoted,T);
+fclose(Sortie);
+\end{VerbatimOut}
+  
+\newenvironment*{exprsimplify}
+{\VerbatimEnvironment\begin{VerbatimOut}{n.val}}
+{\end{VerbatimOut}
+\immediate\write18{giac <pascours-exprsimplify.cxx}
+\input{pascours-exprsimplify.tex}
+}
+
+% Commande "graphsuite"
+
+\define@cmdkey [PAS] {graphsuite} {xmin}{}
+\define@cmdkey [PAS] {graphsuite} {xmax}{}
+\define@cmdkey [PAS] {graphsuite} {ymin}{}
+\define@cmdkey [PAS] {graphsuite} {ymax}{}
+\define@cmdkey [PAS] {graphsuite} {gridcolor}{}
+\define@cmdkey [PAS] {graphsuite} {gridstyle}{}
+\define@cmdkey [PAS] {graphsuite} {gridxstep}{}
+\define@cmdkey [PAS] {graphsuite} {gridystep}{}
+\define@cmdkey [PAS] {graphsuite} {colorfunction}{}
+\define@cmdkey [PAS] {graphsuite} {function}{}
+\define@cmdkey [PAS] {graphsuite} {u}{}
+\define@cmdkey [PAS] {graphsuite} {nmax}{}
+\define@cmdkey [PAS] {graphsuite} {colorconstruction}{}
+\define@cmdkey [PAS] {graphsuite} {styleconstruction}{}
+\define@boolkey[PAS] {graphsuite} {grid}[true]{} 
+\define@boolkey[PAS] {graphsuite} {nograd}[true]{} 
+
+\presetkeys    [PAS] {graphsuite} {%
+									gridcolor=gray,%
+									gridstyle=dotted,%
+									gridxstep=1,%
+									gridystep=1,%
+									grid=false,%
+									nograd=false,%
+									colorfunction=black,%
+									colorconstruction=green!50!black,%
+									nmax=5,%
+									styleconstruction=dotted,%
+									}{}
+
+\newcommand*{\graphsuite}[1][]
+{
+	\setkeys[PAS]{graphsuite}{#1}
+	\begin{tikzpicture}[>=latex,declare function={f(\x)=\cmdPAS@graphsuite@function;}]
+		\ifPAS@graphsuite@grid
+			\draw[color=\cmdPAS@graphsuite@gridcolor,style=\cmdPAS@graphsuite@gridstyle] (\cmdPAS@graphsuite@xmin,\cmdPAS@graphsuite@ymin) grid[xstep=\cmdPAS@graphsuite@gridxstep,ystep=\cmdPAS@graphsuite@gridystep] (\cmdPAS@graphsuite@xmax,\cmdPAS@graphsuite@ymax);
+		\fi
+		\draw[thick,->] (\cmdPAS@graphsuite@xmin,0) -- (\cmdPAS@graphsuite@xmax,0);
+		\draw[thick,->] (0,\cmdPAS@graphsuite@ymin) -- (0,\cmdPAS@graphsuite@ymax);
+		\pgfmathparse{\cmdPAS@graphsuite@xmax-1}\let\xmaxgrad\pgfmathresult
+		\pgfmathparse{\cmdPAS@graphsuite@ymax-1}\let\ymaxgrad\pgfmathresult
+		\foreach \x in {\cmdPAS@graphsuite@xmin,...,\xmaxgrad}
+		{
+			\ifnum\x=0
+			\else
+			\draw[thick] (\x,0.1) -- (\x,-0.1) node[below] {\x};
+			\fi
+		}
+		\foreach \y in {\cmdPAS@graphsuite@ymin,...,\ymaxgrad}
+		{
+			\ifnum\y=0
+			\else
+			\draw[thick] (0.1,\y) -- (-0.1,\y) node[left] {\y};
+			\fi
+		}
+		\clip (\cmdPAS@graphsuite@xmin,\cmdPAS@graphsuite@ymin) rectangle (\cmdPAS@graphsuite@xmax,\cmdPAS@graphsuite@ymax);
+		\ifnum\cmdPAS@graphsuite@xmin<\cmdPAS@graphsuite@ymin
+			\let\min\cmdPAS@graphsuite@xmin
+		\else
+			\let\min\cmdPAS@graphsuite@ymin
+		\fi
+		\ifnum\cmdPAS@graphsuite@xmax<\cmdPAS@graphsuite@ymax
+			\let\max\cmdPAS@graphsuite@ymax
+		\else
+			\let\max\cmdPAS@graphsuite@xmax
+		\fi
+		\draw (\min,\min) -- (\max,\max);
+		\draw[color=\cmdPAS@graphsuite@colorfunction] plot[domain=\cmdPAS@graphsuite@xmin:\cmdPAS@graphsuite@xmax,samples=100] (\x,{f(\x)});
+		% Début de la construction
+		\global\let\x\cmdPAS@graphsuite@u
+		\draw[style=\cmdPAS@graphsuite@styleconstruction,color=\cmdPAS@graphsuite@colorconstruction] (\x,0) -- (\x,{f(\x)});
+		\global\let\xant\x\pgfmathparse{f(\x)}\global\let\x\pgfmathresult
+		\foreach \f in {1,...,\cmdPAS@graphsuite@nmax}
+		{	
+			\draw[style=\cmdPAS@graphsuite@styleconstruction,color=\cmdPAS@graphsuite@colorconstruction] (\xant,\x) -- (\x,\x) -- (\x,{f(\x)});
+			\global\let\xant\x\pgfmathparse{f(\x)}\global\let\x\pgfmathresult
+		}
+	\end{tikzpicture}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%Environnement xcas
+
+\newcommand{\executGiac}[1]{
+    \ifwindows
+    \immediate\write18{giac  #1 }
+    \else
+    \immediate\write18{giac  <#1 }
+    \fi }
+
+    \begin{VerbatimOut}{xcas.in}
+    maple_mode(0);
+    Sortie:=fopen("xcas.tex");
+    read("xcas.out");
+    Resultat:=cat(latex(ans()));
+    fprint(Sortie,Unquoted,Resultat);
+    fclose(Sortie);
+    \end{VerbatimOut}
+    
+
+    \newenvironment{xcas}
+    {\VerbatimEnvironment\begin{VerbatimOut}{xcas.out}}
+    {\end{VerbatimOut}
+               \executGiac{xcas.in}
+               \input{xcas.tex}
+    }

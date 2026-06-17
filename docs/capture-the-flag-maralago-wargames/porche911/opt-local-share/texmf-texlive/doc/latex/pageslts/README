@@ -1,0 +1,223 @@
+README for pageslts package, 2025-01-10, v2.0d
+
+
+TABLE OF CONTENTS
+=================
+
+1 Introduction
+2 Download
+3 Installation
+4 Additional Packages
+5 Package Compatibility
+6 Author/Maintainer
+7 Bug Reports
+8 Known Problems
+
+
+1 INTRODUCTION
+==============
+
+This package puts the labels LastPage
+(\AddToHook{enddocument/afterlastpage}, formerly
+\AtEndDocument) and VeryLastPage (also
+\AddToHook{enddocument/afterlastpage}, but formerly
+\AfterLastShipout) into the .aux file,
+allowing the user to refer to the last page of a document.
+This might be particularly useful in places like headers or
+footers.
+When more than one page numbering scheme is used, these
+references do not give the total number of pages. For this
+case the label LastPages is introduced. Additionally,
+at the last page of each page numbering scheme a label
+pagesLTS.<numbering scheme> is placed, where
+<numbering scheme> is e.g. arabic, roman, Roman, alph,
+Alph, gobble, or silly (requiring the sillypage package).
+For fnsymbol, gobble, and silly please use
+\lastpageref{pagesLTS.fnsymbol},
+\lastpageref{pagesLTS.gobble}, \lastpageref{pagesLTS.silly}
+instead of \pageref{pagesLTS.fnsymbol},
+\pageref{pagesLTS.gobble}, \pageref{pagesLTS.silly}.
+When the same numbering scheme is used twice,
+the page numbers are either reset to one or
+continued automatically, depending on the option given when
+the package is called. The command \theCurrentPage prints
+the current total/absolute page number - in contrast to
+\thepage, which gives only the page name in the current page
+numbering scheme. \theCurrentPageLocal gives the current
+number of pages in the current page numbering scheme.
+\thepage and \theCurrentPageLocal are different e.g. when
+\addtocounter{page}{...} or \setcounter{page}{...} were
+used.
+At the first page of the document a label pagesLTS.0 is
+created. This label can be referred to, too. Further labels
+are provided for special cases.
+The alphalph package is supported, i.e. page numbers alph
+or Alph > 26 and fnyambol > 9 can be used (with according
+options set). Even zero and negative page numbers can be
+used with arabic, alph, Alph, roman, Roman, fnsymbol,
+and gobble page numbering (with alphalph package and
+according options).
+\pageref* and \pageref*, for using hyperref but suppressing
+links, are supported.
+
+This material is published under the LPPL 1.3c: This work
+may be distributed and/or modified under the conditions of
+the LaTeX Project Public License, either version 1.3c
+of this license or (at your option) any later version.
+This version of this license is in
+https://www.latex-project.org/lppl/lppl-1-3c.txt
+and the latest version of this license is in
+https://www.latex-project.org/lppl.txt
+and version 1.3c or later is part of all distributions of
+LaTeX version 2005-12-01 or later.
+
+
+2 DOWNLOAD
+==========
+
+"pageslts" is available on CTAN:
+https://ctan.org/pkg/pageslts
+
+Also a ZIP file is provided that contains the files:
+the manual (pageslts.pdf),
+the example (pageslts-example.tex),
+the compiled example (pageslts-example.pdf),
+driver (pageslts.drv), pageslts.dtx,
+installation file (pageslts.ins),
+the style file (pageslts.sty),
+and this README, already sorted in a TDS tree:
+https://mirror.ctan.org/install/macros/latex/contrib/pageslts.tds.zip
+
+
+3 INSTALLATION
+==============
+
+Installation with ZIP file in TDS format
+----------------------------------------
+The ZIP file "pageslts.tds.zip" contains the files
+sorted in a TDS tree. Thus you can directly unpack the
+ZIP file inside a TDS tree.
+See https://ctan.org/TDS-guidelines for an explanation
+of TDS.
+Example:
+  cd /...somewhere.../texmf
+  unzip /...downloadpath.../pageslts.tds.zip
+Do not forget to refresh the file name database of this
+TDS tree.
+Example:
+  texhash /...somewhere.../texmf
+
+Manual installation
+-------------------
+a) Download the pageslts files from CTAN.
+   If necessary, unpack them.
+b) Check for old `pagesLTS.sty' at other locations in your
+    TeX installation and delete them (or back them up,
+    but in a way TeX does NOT find them automatically).
+c) Generate the package and driver files, if necessary:
+     tex pageslts.dtx
+d) Install the file "pageslts.sty" in your TDS tree:
+     cp pageslts.sty TDS:tex/latex/pageslts/
+   Replace "TDS:" by the prefix of your TDS tree
+   (texmf directory).
+e) Create the documentation, if necessary, e.g.
+     pdflatex pageslts.dtx
+     makeindex -s gind.ist pageslts.idx
+     pdflatex pageslts.dtx
+     makeindex -s gind.ist pageslts.idx
+     pdflatex pageslts.dtx
+f) Update the databases, if necessary, e.g. for TeXLive
+     texhash or mktexlsr.
+g) Create the pageslts-example.pdf, if necessary, e.g.
+     pdflatex pageslts-example.tex
+     pdflatex pageslts-example.tex
+     pdflatex pageslts-example.tex
+h) Copy the documentation files to
+   "TDS:doc/latex/pageslts/":
+   README, pageslts.pdf, pageslts-example.tex,
+   pageslts-example.pdf.
+
+
+4 ADDITIONAL PACKAGES
+=====================
+
+The pageslts.sty for LaTeX2e (i.e. all documents using the
+pageslts package) requires:
+- TeXFormat LaTeX2e, 2024-11-01
+- package undolabl, 2024-12-05, v1.0n,
+   https://ctan.org/pkg/undolabl
+- if any of the options alphMult, AlphMulti, or fnsymbolmult
+   is used: package alphalph, 2019/12/09, v2.6,
+   https://ctan.org/pkg/alphalph
+
+The pageslts-example.tex requires the same files as all
+documents using the pageslts package, and additionally:
+- class article, 2024/06/29, v1.4n, from classes.dtx: https://ctan.org/pkg/classes
+- package alphalph, 2019/12/09, v2.6,   https://ctan.org/pkg/alphalph
+- package lipsum,   2021-09-20, v2.7,   https://ctan.org/pkg/lipsum
+- package showkeys, 2024/05/23, v3.21,  https://ctan.org/pkg/showkeys
+- package hyperref, 2024-11-05, v7.01l, https://ctan.org/pkg/hyperref
+- package pageslts, 2025-01-10, v2.0d,  https://ctan.org/pkg/pageslts
+  (Well, it is the example file for this package, and because
+   you are reading the README for the pageslts package,
+   it can be assumed that you already have some version of it
+   - is it the current one?)
+which again load other packages (see the result of the
+\listfiles command in the log-file of the example).
+
+Also the pageslts.dtx loads other packages
+(for unpacking and constructing the documentation),
+see "7.1 Downloads" in the manual
+https://mirror.ctan.org/macros/latex/contrib/pageslts/pageslts.pdf
+
+
+5 PACKAGE COMPATIBILITY
+=======================
+
+This package really does not work with an old LaTeX format
+without hooks, or without e-TEX, or with a pagesLTS package,
+or with version 2.0 from 1992 of the endfloats package, or
+hyperref from 2015, or _*ANCIENT*_ versions of undolabl or
+lastpage or turnthepage and so on.
+It requires a recent version of the undolabl package
+(>= 2024-12-05, v1.0n)!
+
+
+6 AUTHOR/MAINTAINER
+=====================
+
+   H.-Martin Münch
+
+
+7 BUG REPORTS
+==============
+
+A bug report should contain:
+* Comprehensive problem description. This includes error or
+  warning messages.
+* \errorcontextlines=\maxdimen can be added in the
+  TeX code to get more information in TeX error messages.
+* Minimal test file that shows the problem,
+   but does not contain any unnecessary packages and code.
+* Used drivers/programs.
+* Version information about used packages and programs.
+* If you are using LaTeX, then add "\listfiles" to the document.
+  Then a list of version information is printed at the end
+  of the LaTeX run.
+* Please no other files than the minimal test file.
+  The other files .log, .dvi, .ps, .pdf are seldom
+  necessary, so send them only on request.
+* Please .zip or .tar.gz your file(s) before sending them!
+
+Bug address
+-----------
+Bug reports can be send to the maintainer:
+  H.-Martin Münch
+  <Martin [dot] Muench [at] Uni-Bonn [dot] de>
+
+
+8 KNOWN PROBLEMS
+================
+
+except those already mentioned under point 5 above: none,
+but see chapter 3 of the documentation.

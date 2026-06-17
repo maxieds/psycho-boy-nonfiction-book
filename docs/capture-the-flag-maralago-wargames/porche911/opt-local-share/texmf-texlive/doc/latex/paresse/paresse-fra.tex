@@ -1,0 +1,423 @@
+%%
+%% This is file `paresse-fra.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% paresse.dtx  (with options: `doc,FRA')
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file.
+%% 
+%% File: paresse.dtx
+%% Copyright (C) 2021 Yvon Henel aka Le TeXnicien de surface
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+\RequirePackage{expl3}[2020/09/24]
+\GetIdInfo$Id: paresse.dtx 5.0.2 2021-05-16 TdS $
+  {}
+\documentclass[full, french]{l3doc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,main=french]{babel}
+\usepackage{xparse}
+\usepackage{xspace}
+
+\usepackage[tame]{paresse}[2020-10-06]
+
+\newcommand*\PS{\texttt{\S}\xspace}
+\newcommand*\PSVerb[1]{\texttt{\S #1}}
+\newcommand\BOP{\discretionary{}{}{}}
+\newcommand\Option[1]{\textsc{#1}}
+\newcommand{\TO}{\textemdash\ \ignorespaces}
+\newcommand{\TF}{\unskip\ \textemdash\xspace}
+
+\begin{document}
+\title{Guide de l'utilisateur de \pkg{paresse}\thanks{Ce fichier décrit la
+    version~\ExplFileVersion, dernière révision~\ExplFileDate. Édition
+    \emph{Adieu à skeyval}.}}
+\author{Yvon Henel\thanks{E-mail:
+    \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+    {le.texnicien.de.surface@yvon-henel.fr}}}
+\maketitle
+\noindent\hrulefill
+
+\begin{abstract}
+  Cette extension, reprenant un exemple de T.~\textsc{Lachand-Robert}
+  dans~\cite{tlachand}, fournit un moyen de taper des lettres grecques isolées
+  à l'aide du caractère \PS actif et redéfini. Au lieu de |\(\alpha\)| ou tape
+  \PSVerb{a} pour obtenir \(\alpha\).
+
+  \textbf{Important} : Il doit être chargé \textbf{après} \pkg{inputenc} si ce
+  dernier est utilisé. De plus, il faut que le signe \PS soit une lettre pour
+  \TeX.
+
+  Depuis la version~4, on peut utiliser cette extension même dans un source
+  codé en utf-8 avec \hologo{LaTeX}, \hologo{LuaLaTeX} ou \hologo{XeLaTeX}.
+\end{abstract}
+
+\noindent\hrulefill
+
+ \begin{otherlanguage}{english}
+\begin{abstract}
+The English documentation for the final user of the package
+\pkg{paresse} is available in the file \texttt{paresse-eng}.
+\end{abstract}
+\end{otherlanguage}
+
+\noindent\hrulefill
+\vspace{\baselineskip}
+
+\tableofcontents{}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Cette extension ne fournit qu'un accès \og rapide et économique \fg aux lettres
+grecques qui s'obtiennent à l'aide d'une macro comme \cs{alpha} ou
+\cs{Omega}. Elle fournit un environnement et une commande qui permettent
+d'utiliser § pour taper ces lettres. Un \cs{ensuremath} nous dispense de nous
+placer explicitement \TO c'est-à-dire en tapant |$ $| ou bien |\( \)| ou encore
+|\[ \]| ou tout autre chose ayant le même effet\TF en mode mathématique pour
+obtenir une lettre grecque.
+
+
+L'idée de la méthode est due à T.~\textsc{Lachand-Robert} et est
+exposée dans~\cite{tlachand}. Je n'ai fait qu'ajouter le
+\cs{ensuremath} bien agréable pour l'écriture de macros.
+
+Bien entendu, on \textbf{ne} dispose \textbf{pas} de macros pour la
+minuscule omicron ni pour les majuscules alpha, beta\dots{} qui
+s'obtiennent à l'aide des latines romaines de même
+apparence\footnote{Je ne ferai aucune remarque sur les problèmes de
+  codage que cela pose.}. Je ne me suis pas senti le courage ni la
+force de fournir une solution qui permettent d'obtenir dans une
+formule baignant dans un texte en italique gras un alpha majuscule
+droit, romain, \&c.
+
+Pour finir cette introduction, glosons le nom de cette
+extension. |paresse| vient de ce que le signe § indique un  \og
+paragraphe \fg  en ayant une forme lointainement apparentée au
+S et n'a donc aucun lien avec le \emph{défaut} si fréquent,
+encore que, à bien y réfléchir\dots
+
+\subsection{Pourquoi une 5\ieme version?}
+
+\emph{Sur mon brin de laurier, je dormais comme un loir} en utilisant
+\pkg{paresse} presque quotidiennement quand il y a quelques jours, patatras!
+Plus rien ne va, je me fais insulter rien qu'à charger l'extension. Je passe sur
+les détails: la faute en revient à une modification du noyau qui vient perturber
+le code acrobatique de \pkg{skeyval}. Comme la mise à jour de la dite extension
+semble extrèmement improbable, j'ai décidé de réparer \pkg{paresse} en recourant
+aux commandes de expl3.
+
+Ce n'est donc que pour remettre en marche ce dont je me sers souvent que je
+viens soulever le capot de cette extension vieille de plus de 7~ans.
+
+Avec cette 5\ieme version, apparaissent deux \emph{sous}-extensions:
+\pkg{paresse-old} et \pkg{paresse-utf8} que l'on peut charger directement et qui
+offrent les mêmes options et les mêmes commandes. De fait, \pkg{paresse} charge
+l'une ou l'autre suivant la situation.
+
+On utilisera \pkg{paresse-utf8} uniquement si le source est codé en utf-8 et que
+l'on compile avec \texttt{latex} c.-à-d. avec le moteur \TeX{} et le format
+\LaTeX{}. Dans tous les autres cas de figure on utilisera \pkg{paresse-old}.
+
+La documentation de \pkg{paresse} couvre donc l'utilisation des trois
+extensions.
+
+\subsection{Pourquoi une 4\ieme version?}
+
+Je ne sais plus bien à quelle occasion \TO l'age et les pannes de machine
+avec \og crachage\fg de disque aidant\TF et encore moins quand \TO si ce
+n'est que cela remonte à plus d'un an maintenant\footnote{J'ai écrit cette
+  section à l'occasion de la sortie de la 4\ieme version, en 2013.}\TF
+Christian \textsc{Tellechea} me faisait part de son désir d'utiliser
+\pkg{paresse} avec des sources codées en utf-8 sous \hologo{LaTeX} \TO et
+non \hologo{XeLaTeX} ou \hologo{LuaLaTeX}.
+
+Une discussion s'engagea, Christian me fit parvenir du matériel en
+ordre de marche. Il me fit même cadeau de deux versions, la deuxième
+améliorant la reconnaissance du codage déclaré avec
+\pkg{inputenc}. Toutefois, je procrastinais. Il se peut que ma vie
+personnelle et mon travail aient interféré avec le développement de
+cette extension.
+
+Enfin, voici la chose.
+
+Le plus nouveau devrait échapper à l'utilisateur de \hologo{LuaLaTeX}
+ou \hologo{XeLaTeX} et même de \hologo{LaTeX} chargeant \pkg{inputenc}
+avec une option comme \texttt{latin1} ou \texttt{latin9}. Cependant,
+désormais, on peut utiliser cette extension avec \hologo{LaTeX} en
+chargeant \pkg{inputenc} avec l'option \texttt{utf8}.
+
+J'ai profité de cette nouvelle version pour ajouter une macro en \PS:
+\PSVerb{Z} qui produit \S, symbole déjà accessible par |\S|, ce qui
+fait que je n'ose pas vraiment parler de \og raccourci\fg.
+
+\subsection{Pourquoi une 3\ieme version?}
+
+C'est par courriel que Claudio \textsc{Beccari} m'a signalé très
+aimablement qu'il existait un codage de l'alphabet grec en lettres
+latines près de 15~ans avant que je ne commette cette extension. Ce
+codage était dû à Sylvio \textsc{Levi} qui l'avait mis au point, alors
+qu'il dessinait les premières fontes grecques pour \TeX, en s'appuyant
+sur la correspondance entre les claviers américain et grec.  Il me
+faisait remarquer à juste titre que si quelqu'un avait pris l'habitude
+du codage de Sylvio \textsc{Levi}, il préférerait conserver ses
+habitudes pour \pkg{paresse}.
+
+J'ai donc décidé de fournir un nouveau couple d'options exclusives
+l'une de l'autre que j'ai nommées, pour l'une, \Option{legacy} ---
+pour \og héritage\fg --- qui assure le codage originel de cette
+extension et qui est active par défaut et, pour l'autre, \Option{Levi}
+qui assure le codage de Sylvio \textsc{Levi}.
+
+J'en profite pour faire quelques changements cosmétiques:
+désormais toutes les macros internes \emph{secrètes}\footnote{À la mode
+  \LaTeXe{}, pour la version~5.0 j'utilise en partie expl3 et, dans ce cas,
+  le préfixe \texttt{paresse}.} ont un nom qui
+commence par \cs{GA@};
+le fichier |.dtx| est réorganisé pour faciliter la tache de
+traduction de la documentation.
+
+\section{Utilisation}
+
+On charge cette extension avec |\usepackage{paresse}|. Quand on utilise
+\hologo{LaTeX} avec un codage 8-bits (comme \texttt{latin9} par exemple),
+on la charge \textbf{après} l'extension \pkg{inputenc} avec l'option
+idoine. Avec un \hologo{LaTeX} moderne \TO post 2019\TF et un source codé
+en utf-8, on n'a pas besoin de charger explicitement \pkg{inputenc}. Dans
+ce cas, \pkg{paresse} suppose que le source est codé en utf-8.
+
+Dans tous les cas il faut que le \og caractère \fg § soit reconnu par \TeX\
+comme une lettre.
+
+
+On obtiendra le même comportement, à l'exception \TO signalée dans le
+paragraphe intitulé \textbf{restriction} page~\pageref{restriction}\TF
+près, avec \pkg{inputenc} et l'option \texttt{utf8}.
+
+Il n'y a pas ce genre de restriction quand on travaille avec
+\hologo{LuaLaTeX} ou \hologo{XeLaTeX} sur un source codé en utf-8.
+
+Par défaut, l'extension est chargée avec l'option |wild| ce qui
+signifie que les macros de la forme |§a| sont disponibles. Si l'on
+préfère, on peut passer à \pkg{paresse} l'option \Option{tame} avec
+|\usepackage[tame]|\BOP|{paresse}|. Il faut alors utiliser la commande
+\cs{ActiveLaParesse} ou l'environnement |ParesseActive| pour utiliser
+les macros en~§.
+
+Lorsque la \og paresse est active \fg, il suffit de taper |§a| pour
+obtenir \(\alpha\). On a de même accès à toutes les lettres grecques
+auxquelles sont consacrées une macro comme \cs{alpha},
+voyez~\ref{codageorig} et~\ref{codagelevi}. On obtient, de même,
+\(\alpha^{\beta}\) avec |\(§a^{§b}\)| lorsque § est active.
+
+\paragraph{Restriction}
+On notera que les accolades sont optionelles et qu'on obtient un
+résultat identique avec |\(§a^§b\)|, \textbf{à moins que} l'on utilise
+un source codé en utf-8 avec \hologo{LaTeX}.\label{restriction}
+
+
+\section{Les options de l'extension}
+\label{sec:clefs}
+
+Dans la marge, les options par défaut sont données en gras.
+
+
+\begin{itemize}
+\item \Option{tame} \DescribeOption{tame / \textbf{wild}} s'oppose à
+  \Option{wild} qui est l'option par défaut. Lorsque \Option{tame}
+  règne, il \textbf{faut} un environnement |ParesseActive| ou une
+  commande \cs{ActiveLaParesse} pour utiliser les macros à §.
+
+\item \Option{Levi} \DescribeOption{\textbf{legacy} / Levi} s'oppose à
+  \Option{legacy} qui est l'option par défaut. Avec l'option
+  \Option{legacy} on utilise le codage \og originel\fg de
+  \pkg{paresse} tel que le donne la
+  table~\ref{codageorig}. Sinon, le codage est celui défini par Sylvio
+  \textsc{Levi}, cf. la table~\ref{codagelevi}.
+
+\item \Option{ttau} \DescribeOption{ttau / \textbf{ttheta}} s'oppose à
+  \Option{ttheta} qui est l'option par défaut. Lorsque \Option{ttheta}
+  est active |§t| donne \(\theta\) dans le cas contraire |§t| donne
+  \(\tau\). En tous cas, \(\theta\) est accessible par |§v| et
+  \(\tau\) par |§y|.  Cette option est inopérante si l'option
+  \Option{Levi} a été choisie.
+
+  \textbf{Remarque :}  quand l'option \Option{legacy} a été choisie,
+  \(\Theta\) est obtenu par |§V| de manière \og régulière \fg et
+  \emph{également} par |§T| quelle que soit l'option choisie. Dans
+  le cas de l'option \Option{Levi}, |§V| ne correspond à aucune lettre
+  grecque.
+
+\item \Option{epsilon} \DescribeOption{epsilon / \textbf{varepsilon}} s'oppose à
+  \Option{varepsilon} qui est l'option par défaut. Avec
+  \Option{epsilon}, |§e| donne \(\epsilon\) sinon |§e| donne
+  \(\varepsilon\).
+
+\item Se comportent comme le couple \Option{epsilon},
+  \Option{varepsilon} les couples suivants \Option{theta} et
+  \Option{vartheta} ; \Option{pi} et \Option{varpi} ; \Option{rho} et
+  \Option{varrho} ; \Option{sigma} et \Option{varsigma} \og |§s| donne
+  \(\varsigma\)\fg; \Option{phi} et \Option{varphi}.
+\end{itemize}
+
+Par défaut on a \Option{varepsilon}, \Option{theta}, \Option{pi},
+\Option{rho}, \Option{sigma}, \Option{varphi}, \Option{wild} et
+\Option{legacy}. Cela assure que cette version~3, se comporte,
+par défaut, comme la précédente.
+
+\section{Commandes et environnement}
+
+\DescribeMacro{\makeparesseletter}
+Cette macro donne au \og caractère \fg § le catcode d'une
+lettre. Après cela, on peut se servir de § dans un nom de macro, par
+exemple. C'est le pendant de \cs{makeatletter}.
+
+\DescribeMacro{\makeparesseother}
+Cette macro donne au caractère § le catcode \emph{other}. C'est le \og
+contraire \fg de la précédente. Cela équivaut au \cs{makeatother}.
+
+Cette macro est inactive avec un codage utf-8 sous
+\hologo{LaTeX}. Elle n'aurait d'ailleurs pas vraiment de sens. Son
+utilisation produit un avertissement dans le fichier |.log|.
+
+\DescribeMacro{\ActiveLaParesse}
+Cette macro active le caractère § et permet ainsi d'accéder aux
+macros dont le nom commence par § comme |§a|. Pour une liste de ces
+macros et leurs significations, voyez les tableaux~\ref{codageorig}
+et~\ref{codagelevi}.
+
+\DescribeEnv{ParesseActive}
+Dans cet environnement le caractère § est actif ce qui permet
+d'utiliser les macros en §.  On utilisera cet environnement si l'on
+veut utiliser les macros quand on a chargé l'extension
+\pkg{paresse} avec l'option \texttt{tame}.
+
+\newpage{}
+
+\section{Tableaux des macros}
+
+\subsection{Codage originel de \pkg{paresse}}
+
+C'est le codage actif lorsque l'on a choisit les options \Option{legacy} et
+\Option{ttheta} qui sont des options par défaut.
+
+Cette version~5.0 ajoute \(\varsigma\) obtenu avec \PSVerb{j}.
+
+\begin{center}\Large
+\begin{ParesseActive} \label{codageorig}
+\begin{tabular}{*4{||>{\ttfamily \S}c|c}||}\hline
+a & §a & b & §b & g & §g & d & §d\\ \hline
+e & §e & z & §z & h & §h & v & §v\\ \hline
+i & §i & k & §k & l & §l & m & §m\\ \hline
+n & §n & x & §x & p & §p & r & §r\\ \hline
+s & §s & y & §y & u & §u & f & §f\\ \hline
+c & §c & q & §q & w & §w & j & §j\\ \hline\hline
+G & §G & D & §D & V & §V & L & §L\\ \hline
+X & §X & P & §P & S & §S & U & §U\\ \hline
+F & §F & Q & §Q & W & §W & Z & §Z\\ \hline
+\end{tabular}
+\end{ParesseActive}
+\end{center}
+
+\vspace{2\baselineskip}
+
+\begin{center}\Large
+\begin{ParesseActive} \label{codageorig}
+\begin{tabular}{*7{||>{\ttfamily \S}c|c}||}\hline
+a&§a&b&§b&c&§c&d&§d&e&§e&f&§f\\ \hline
+g&§g&h&§h&i&§i&j&§j&k&§k&l&§l\\ \hline
+m&§m&n&§n&o&  &p&§p&q&§q&r&§r\\ \hline
+s&§s&t&§t&u&§u&v&§v&w&§w&x&§x\\ \hline
+y&§y&z&§z&A&  &B&  &C&  &D&§D\\ \hline
+E&  &F&§F&G&§G&H&  &I&  &J&  \\ \hline
+K&  &L&§L&M&  &N&  &O&  &P&§P\\ \hline
+Q&§Q&R&  &S&§S&T&§T&U&§U&V&§V\\ \hline
+W&§W&X&§X&Y&  &Z&§Z&\multicolumn{4}{c||}{}\\ \hline
+\end{tabular}
+\end{ParesseActive}
+\end{center}
+
+\paragraph{Remarques : } à l'exception de {\ActiveLaParesse §v, §y, §q et §j}
+les lettres utilisées dans les noms des macros sont chargées de vertu
+mnémotechniques \texttt{:-)} et les capitales grecques, quand elles différent
+des capitales latines, s'obtiennent à l'aide de la majuscule correspondante.
+
+\pagebreak[4]
+
+\subsection{Codage de Sylvio \textsc{Levi}}
+
+On active ce codage avec l'option \Option{Levi}.
+
+\begin{center}\Large
+\begin{ParesseActive} \label{codagelevi}
+\begin{tabular}{*4{||>{\ttfamily \S}c|c}||}\hline
+a & §a & b & §b & g & §g & d & §d\\ \hline
+e & §e & z & §z & h & §h & j & §v\\ \hline
+i & §i & k & §k & l & §l & m & §m\\ \hline
+n & §n & x & §x & p & §p & r & §r\\ \hline
+s & §s & t & §y & u & §u & f & §f\\ \hline
+q & §c & y & §q & w & §w & c & \(\varsigma\)\\ \hline\hline
+G & §G & D & §D & J & §V & L & §L\\ \hline
+X & §X & P & §P & S & §S & U & §U\\ \hline
+F & §F & Y & §Q & W & §W & Z & §Z\\ \hline
+\end{tabular}
+\end{ParesseActive}
+\end{center}
+
+Le codage de Sylvio \textsc{Levi} donne accès directement à \cs{varsigma}
+(\(\varsigma\)) avec |§||c| et ne diffère du codage originel que pour
+les lettres {\ActiveLaParesse §v, §y, §c et §q}. Voici un résumé de
+ces différences:
+
+\begin{center}
+\newcommand\CT[1]{\multicolumn{1}{c|}{\texttt{#1}}}
+\begin{ParesseActive}
+\begin{tabular}{|l|*{7}{c|}}\hline
+lettres grecques
+& §v & §y & §c & §q & §V & §Q & \(\varsigma\)\\\hline
+codage originel
+&\CT{\S{}v/\S{}t}&\CT{\S{}y/\S{}t}&\CT{\S{}c}
+&\CT{\S{}q}&\CT{\S{}V/\S{}T}&\CT{\S{}Q}& \CT{\S{}j} \\\hline
+codage de S. \textsc{Levi}
+&\CT{\S{}j}&\CT{\S{}t}&\CT{\S{}q}&\CT{\S{}y}
+&\CT{\S{}J}&\CT{\S{}Y} & \CT{\S{}c}\\\hline
+\end{tabular}
+\end{ParesseActive}
+\end{center}
+
+\vspace{\stretch{2}}
+
+\begin{thebibliography}{99}
+\addcontentsline{toc}{section}{Bibliographie}
+\bibitem{tlachand} T.~\textsc{Lachand-Robert}.
+\emph{La maîtrise de \TeX{} et \LaTeX{}}.
+Masson, Paris, Milan, Barcelone, \oldstylenums{1995}.
+\textsc{isbn} : \texttt{2-225-84832-7}.
+\end{thebibliography}
+
+\vspace{\stretch{2}}
+
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+\begin{center}
+  \textsl{Le TeXnicien de Surface scripsit.}
+\end{center}
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+
+\vspace*{\stretch{2}}
+
+\end{document}
+\endinput
+%%
+%% End of file `paresse-fra.tex'.
