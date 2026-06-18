@@ -1,0 +1,87 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 132 Multi-entries: skipping elements (prefix and post-link hooks)
+% Label: "ex:multientryskipprefixpostlink"
+% arara: pdflatex
+% arara: makeglossaries
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks]{hyperref}
+\usepackage[stylemods,style=long]{glossaries-extra}
+
+
+\makeglossaries
+
+
+\setabbreviationstyle{long-postshort-sc-user}
+
+
+\newabbreviation{ssi}{ssi}{server-side includes}
+\newabbreviation{html}{html}{hypertext markup language}
+
+
+\newrobustcmd{\combinedpre}[1]{\glsps{#1}}
+\newrobustcmd{\combinedpost}[1]{\glsps{#1}}
+
+
+\newabbreviation{shtml}{shtml}
+{{}\combinedpre{ssi} enabled \combinedpost{html}}
+
+
+\glssetcategoryattribute{combinedabbrv}{multioptions}
+ {%
+ mpostlinkelement=main,
+ usedskipothers
+ }
+
+
+\multiglossaryentry
+ [category=combinedabbrv]
+ {shtml}[shtml]{ssi,shtml,html}
+
+
+\mglsdefcategoryprefix{combinedabbrv}{%
+ \renewcommand{\combinedpre}[1]{\ignorespaces}%
+ \renewcommand{\combinedpost}[1]{\unskip}%
+} 
+\begin{document}
+Individual elements first use: \gls{ssi} and \gls{html}.
+
+
+Individual elements next use: \gls{ssi} and \gls{html}.
+
+
+Multi-entry first use: \mgls{shtml}.
+
+
+Multi-entry next use: \mgls{shtml}.
+
+
+Individual entry first use: \gls{shtml}.
+
+
+Resetting all\glsresetall\mglsresetall:
+
+
+Multi-entry first use: \mgls{shtml}.
+
+
+Multi-entry next use: \mgls{shtml}.
+
+
+Individual elements: \gls{ssi} and \gls{html}.
+
+
+Resetting all\glsresetall\mglsresetall:
+
+
+Individual entry first use: \gls{shtml}.
+
+
+Multi-entry first use: \mgls{shtml}. (Wrong!)
+
+
+\printglossaries 
+\end{document}

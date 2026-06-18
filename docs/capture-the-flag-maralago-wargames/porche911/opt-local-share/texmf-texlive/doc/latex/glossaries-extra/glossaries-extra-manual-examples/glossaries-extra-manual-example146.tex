@@ -1,0 +1,49 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 146 Sub-glossary for a given counter value ordered by use in the section
+% Label: "ex:minigloss2"
+% arara: pdflatex
+% arara: bib2gls
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{\jobname.bib}
+@symbol{pi,name={\ensuremath{\pi}},
+description={ratio of the length of the circumference of a circle to its diameter}}
+@symbol{root2,name={\ensuremath{\surd2}},
+description={Pythagoras' constant}}
+@symbol{zeta3,name={\ensuremath{\zeta(3)}},
+description={Ap\'ery's constant}}
+@symbol{zero,name={0},
+description={nothing or nil}}
+@symbol{one,name={1},
+description={single entity, unity}} 
+\end{filecontents*}
+\usepackage[record,stylemods,style=index]{glossaries-extra}
+ \GlsXtrRecordCounter{section}
+ \GlsXtrLoadResources[src={\jobname},
+ symbol-sort-fallback=description
+] 
+
+\renewcommand{\glsxtrAddCounterRecordHook}[3]{%
+ \provideignoredglossary{#2.#3}%
+ \glsxtrcopytoglossary*{#1}{#2.#3}%
+} 
+
+\newcommand{\minigloss}{%
+ \printunsrtglossary*[type=section.\thesection,
+ target=false]
+ {\renewcommand*{\glossarysection}[2][]{}}
+ \printunsrtglossaryunitpostskip
+} 
+\begin{document}
+\section{Sample}
+\minigloss
+This section discusses \gls{pi}, \gls{root2} and \gls{zeta3}. 
+
+\section{Another Sample}
+\minigloss
+This section discusses \gls{one}, \gls{pi} and \gls{zero}. 
+
+\printunsrtglossaries 
+\end{document}

@@ -1,0 +1,79 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 161 Using bib2gls: unit record counting mini-glossary
+% Label: "ex:recordcountminigloss"
+% arara: pdflatex
+% arara: bib2gls: { recordcountunit: on }
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{scrreport}
+\pagestyle{empty}
+\begin{filecontents*}{abbrvs.bib}
+@string{ssi={server-side includes}}
+@string{html={hypertext markup language}} 
+
+@abbreviation{shtml,
+  short="shtml",
+  fulllong = ssi # " enabled " # html,
+  nestedlong = "\glsps{ssi} enabled \glsps{html}",
+  description={a combination of \gls{html} and \gls{ssi}}
+} 
+
+@abbreviation{html,
+  short ="html",
+  long = html,
+  description={a markup language for creating web pages}
+} 
+
+@abbreviation{ssi,
+  short="ssi",
+  long = ssi,
+  description={a simple interpreted server-side scripting language}
+}
+
+@abbreviation{xml,
+  short={xml},
+  long={extensible markup language},
+  description={a simple text-base format for representing structured information}
+}
+
+@abbreviation{mathml,
+  short={m\BibGlsNoCaseChange{ath}ml},
+  long={mathematical markup language},
+  description={an \gls{xml}-based language for describing mathematical notation}
+}
+\end{filecontents*}
+\usepackage[T1]{fontenc}
+\usepackage{kpfonts}
+\usepackage[colorlinks]{hyperref}
+\usepackage[record,postdot,stylemods=longextra]{glossaries-extra} 
+
+\renewcommand{\chapterpagestyle}{empty}% to assist cropping
+\setabbreviationstyle{long-short-sc-desc} 
+
+\newcommand*{\bibglssetlocationrecordcount}[4]{% 
+ \GlsXtrSetField{#1}{recordcount.#2.#3}{#4}% 
+ \provideignoredglossary{minigloss.#2.#3}% 
+ \glsxtrcopytoglossary{#1}{minigloss.#2.#3}% 
+} 
+
+\GlsXtrLoadResources[src={abbrvs},
+ field-aliases={fulllong=long}
+] 
+
+\renewcommand{\glslinkpresetkeys}{% 
+ \glsadd[format=glsignore,counter=chapter]{\glslabel}}
+\newcommand{\minigloss}{% 
+ \printunsrtglossary*[style=abbr-short-long,type=minigloss.chapter.\theHchapter,groups=false,target=false]% 
+ {\renewcommand{\glossarysection}[2][]{}% 
+ \renewcommand{\glslongextraShortLongTabularHeader}{\toprule}% 
+}} 
+\begin{document}
+\chapter{First} \minigloss \gls{html}. \gls{html}. \gls{html}. \gls{ssi}. 
+
+\chapter{Second} \minigloss \gls{html}. \gls{ssi}. \gls{ssi}. \gls{xml}. 
+
+\renewcommand*{\printunsrtglossaryentryprocesshook}[1]{% 
+ \glsxtrifhasfield*{location}{#1}{}{\printunsrtglossaryskipentry}% 
+}
+\printunsrtglossaries 
+\end{document}

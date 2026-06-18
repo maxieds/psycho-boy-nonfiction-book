@@ -1,0 +1,227 @@
+%% $Id: hvqrurl.tex 901 2024-05-26 07:18:06Z herbert $
+\listfiles
+\errorcontextlines=100
+\documentclass[twoside=on,usegeometry]{scrartcl}
+\usepackage{libertinus-otf}
+\setmonofont[Scale=MatchLowercase,FakeStretch=0.85]{DejaVu Sans Mono}
+\usepackage{microtype}
+\usepackage[english]{babel}
+\usepackage[automark]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+
+\usepackage[showframe=false]{geometry}
+\usepackage{listings}
+\usepackage[imakeidx]{xindex}
+\makeindex
+%
+\lstset{%
+    language=[LaTeX]TeX,%
+    showstringspaces=false,%
+    tabsize=5,%
+    frame=single,%
+%    lineskip=-1pt,%
+    extendedchars=true,%
+    basicstyle={\small\ttfamily},%
+%    numbers=left,%
+%    stepnumber=1,%
+%    numberstyle=\tiny,%
+%    xleftmargin=2em,%
+    breaklines=true}
+%
+
+\usepackage{ragged2e}
+\usepackage{hvqrurl}
+\usepackage{hvdoctools}
+
+\usepackage{hyperref}
+\hypersetup{%urlcolor=blue, 
+linktocpage, colorlinks=true}%
+
+\begin{document}
+\title{Package \texttt{hvqrurl}\\Creating a QR-code of an URL in the margin \\\small ver 0.09}
+\author{Herbert Voß\thanks{\protect\url{hvoss@tug.org}}}
+\date{\today}
+\maketitle
+
+
+\begin{abstract}
+This package allows to draw an URL as a QR code into the margin of a one- or twosided
+document. The following packages are loaded by default:
+\LPack{qrcode}, \LPack{marginnote}, \LPack{url}, \LPack{xcolor},
+and 
+\LPack{xkeyval}.
+\end{abstract}
+
+
+\section{Package option}
+There is only one package option \Lkeyword{forget}. If it is used, then all
+qrcodes are always created new and the already existing codes in the \Lext{aux} file
+are not used. The deafult is not to use this option. For example: 100 qrcodes needs
+about 30 seconds with option \Lkeyword{forget}, but only 4 seconds without it. It is obvious
+that for the first \LaTeX\ run the codes will allways be created new.
+If  a qrcode is
+created, e.g. for \hvqrurl{https://pkks.de}, then there is something like 
+
+\begin{verbatim}
+\qr@savematrix{https://pkks.de}{2}{3}{11111110001010011011111111000001001110110101000001101110100
+0000011101011101101110101010001000101110110111010001111110010111011000001011010001001000001111111
+1010101010101111111000000001111001110000000001100010000011101011010000000010011010110001101011001
+0011100111001010111101101011001011110011100100011110010100001011010000010010010100101101101100011
+1101111011111111110001101001010000001010011111100011100011000101011111100100000000011101110100010
+0011111111001100110101010001100000100101100110001001110111010001010011111100001011101000110010110
+010100101110101010010000011101110000010101110101001100001111111001001011100001001}
+\end{verbatim}
+
+in the \Lext{aux} file (all in one line!). This is always used in following
+\LaTeX\ runs and created only new if the URL changes or the option \Lkeyword{forget}
+is used.
+
+\section{The macros}
+
+\begin{BDef}
+\Lcs{hvqrset}\Largb{key=value, \ldots}\\
+\Lcs{hvqrurl}\OptArg{key=value, \ldots}\Largb{URL}\\
+\Lcs{hvqrurl*}\OptArg{key=value, \ldots}\Largb{URL}
+\end{BDef}
+
+With the default macro \Lcs{hvqrurl} the URL is printed as as QR code into the margin and
+in the the text as usual with the macro \Lcs{url}, for example \hvqrurl{https://mirror.ctan.org/pkg/hvqrurl}.
+With \LPack{hyperref} you'll get the the same color for the QR code as for  the URL link and, of course,
+it is also a link. This example shows the output of the  QR code with the default setting and
+an active \LPack{hyppref}.
+The star version of the command
+prints only the QR code but not the URL in the text.
+
+With \Lcs{hvqrset} one can set the optional arguments globally. For example if one do not want all
+QR codes not as a link when using \LPack{hyperref}:
+
+\begin{lstlisting}
+\hvqrset{qrlink=nolink} 
+\end{lstlisting}
+
+
+\section{Optional arguments}
+
+\subsection{No link with \LPack{hyperref}}
+
+This needs package hyperref, which is loaded by default. With the optional argument
+\Lkeyword{nohyperref} you can prevent the loading of this package.
+
+\begin{lstlisting}
+With qrlink=nolink the QR code is no link: \hvqrurl[qrlink=nolink]{https://mirror.ctan.org/pkg/hvqrurl}.
+The default setting is qrlink=link.
+\end{lstlisting}
+With \Lkeyset{qrlink=nolink} the QR code is no link: \hvqrurl[qrlink=nolink]{https://mirror.ctan.org/pkg/hvqrurl}.
+The default setting is \Lkeyset{qrlink=link}. Without using \LPack{hyperref} this optional argument
+has no meaning. The optional argument \Lkeyword{linktext} is also only valid, 
+if hyperref is aktive.
+
+
+
+
+
+
+\subsection{Color of the QR code}
+The default color is \Lkeyval{black}. It can be changed by
+the optional argument \Lkeyword{qrcolor}. The package 
+\LPack{xcolor}\hvqrurl*[qrlink=nolink,qrcolor=red!40!white]{https://mirror.ctan.org/pkg/xcolor}
+is loaded by default, 
+the reason why an extended color definition is possible. For this example we used
+
+\begin{lstlisting}
+The package xcolor\hvqrurl*[qrcolor=red!40!white]{https://mirror.ctan.org/pkg/xcolor}
+ is loaded by default, ...
+\end{lstlisting}
+
+\subsection{Vertical position of the QR code}
+By default the baseline of the QR code is nearly at the same height as the baseline of the text.
+However, when changing the size of the QR code it may be nessesary to move up or down the QR code.
+The default value of \Lkeyword{qradjust} is \verb|-1.5\normalbaselineskip|. Setting the value
+to 0pt the QR code 
+\hvqrurl[qrlink=nolink,qradjust=0pt]{https://latex.texnik.de/tutorials/packages/#header-footer} 
+is moved down which is the default
+setting without a vertical adjustment.
+
+\begin{lstlisting}
+The default value of qradjust is \verb|-1.5\normalbaselineskip|. Setting the value
+to 0pt the QR code 
+\hvqrurl[qradjust=0pt]{https://latex.texnik.de/tutorials/packages/#header-footer} 
+is moved down which is the default setting without a vertical adjustment.
+\end{lstlisting}
+
+
+\subsection{Size of the QR code}
+By default the QR code is a square with height and width of 1cm.
+it can be changed by setting \Lkeyword{qrheight} to another value, for example to 2cm:
+\hvqrurl*[qrlink=nolink,qrheight=2cm]{https://identity.fu-berlin.de/idp-fub/profile/SAML2/Redirect/SSO;jsessionid=71C984647E3B8F2E716CA067CB13387E?execution=e1s1}
+This is an extremely long url where it may make sense to use a larger QR code.
+
+\begin{lstlisting}
+it can be changed by setting qrheight to another value, for example to 2cm:
+\hvqrurl*[qrheight=2cm]{https://identity.fu-berlin.de/idp-fub/profile/SAML2/Redirect/SSO;jsessionid=71C984647E3B8F2E716CA067CB13387E?execution=e1s1}
+This is an extremely long url where it may make sense to use a larger QR code.
+\end{lstlisting}
+
+
+\subsection{QR code level}
+The QR code specification includes four levels of encoding: 
+Low (L) (\hvqrurl[qrlink=nolink]{https://www.tug.org/}), Medium (M), Quality (Q), 
+and High (H) (\hvqrurl[qrlink=nolink,qradjust=0pt,qrlevel=H]{https://www.tug.org/}), 
+in increasing order of error-correction capability. 
+In general, for a given text a higher error-correction level requires 
+more bits of information in the QR code. 
+
+\begin{lstlisting}
+The QR code specification includes four levels of encoding: 
+Low (L) (\hvqrurl{https://www.tug.org/}), Medium (M), Quality (Q), 
+and High (H) (\hvqrurl[qradjust=0pt,qrlevel=H]{https://www.tug.org/}), 
+in increasing order of error-correction capability. 
+\end{lstlisting}
+
+The first QR code has the default level \Lkeyval{M} and the last one the
+level \Lkeyval{H}. In general the user has not to set this keyword it will be
+controlled internally by the package.
+
+
+\subsection{Inner or outer margin for  the QR code}
+By default the QR code is set in the right (oneside document) or outer margin (twoside) of the
+document. This one (\hvqrurl{https://hvoss.org}) is at the default position.
+With the optional argument \Lkeyword{qrreverse} it can be placed in the left or inner margin.
+This one (\hvqrurl[qrreverse]{https://latex.texnik.de}) is in the other margin.
+
+\begin{lstlisting}
+This one (\hvqrurl{https://hvoss.org}) is at the default position.
+With the optional argument \Lkeyword{qrreverse} it can be placed in the left or inner margin.
+This one (\hvqrurl[qrreverse]{https://latex.texnik.de}) is in the other margin.
+\end{lstlisting}
+
+\subsection{Alternative link text}
+By default the QR code is set with the given text. If the link is too long, one
+can use a short link with the optional argument \Lkeyword{linktext} for the text and 
+the long link for the qrcode, like
+this one: \hvqrurl[linktext=https://www.uni-bonn.de]%
+{https://www.uni-bonn.de/de/studium/studienangebot/studiengaenge-a-z/kunstgeschichte-bazf?set_language=de}.
+
+
+\begin{lstlisting}
+By default the QR code is set with the given text. If the link is too long, one
+can use a short link with the optional argument \Lkeyword{linktext} for the text and 
+the long link for the qrcode, like
+this one: \hvqrurl[linktext=https://www.uni-bonn.de]%
+{https://www.uni-bonn.de/de/studium/studienangebot/studiengaenge-a-z/kunstgeschichte-bazf?set_language=de}.
+\end{lstlisting}
+
+It makes no sense to use the star version \Lcs{hvqrurl*} together with the optional argument
+\Lkeyword{linktext}!
+
+
+
+\printindex
+
+
+\section{The Package Source}
+\lstinputlisting[basicstyle=\ttfamily\footnotesize,tabsize=3,numbers=left,numberstyle=\tiny]{hvqrurl.sty}
+
+
+\end{document} 
+

@@ -1,0 +1,63 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 140 Displaying unsorted glossaries with custom groups and sub-group headings
+% Label: "ex:unsrtcustomsubgrp"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage[record,stylemods=bookindex,style=bookindex]{glossaries-extra}
+
+
+\glsxtrsetgrouptitle{group1label}{Group 1}
+\glsxtrsetgrouptitle{group2label}{Group 2}
+\glsxtrsetgrouptitle{group3label}{Group 3}
+\glsxtrsetgrouptitle{group4label}{Group 4}
+
+
+\newglossaryentry{waterfowl}{name={waterfowl},
+ description={},
+ group={group1label}}
+\newglossaryentry{ant}{name={ant},
+ description={},
+ group={group1label}}
+\GlsXtrSetField{ant}{secondarygroup}{group4label}
+\newglossaryentry{adder}{name={adder},
+ description={},
+ group={group2label}}
+\newglossaryentry{duck}{name={duck},
+ parent={waterfowl},
+ description={},group={group4label}}
+\GlsXtrSetField{duck}{secondarygroup}{group2label}
+\newglossaryentry{zebra}{name={zebra},
+ description={},
+ group={group2label}}
+\GlsXtrSetField{zebra}{secondarygroup}{group3label}
+\newglossaryentry{aardvark}{name={aardvark},
+ description={},
+ group={group2label}}
+\GlsXtrSetField{aardvark}{secondarygroup}{group1label}
+\newglossaryentry{gazelle}{name={gazelle},
+ description={},
+ group={group1label}}
+\newglossaryentry{mallard}{name={mallard},
+ parent={duck},description={},
+ group={group2label}}
+\GlsXtrSetField{mallard}{secondarygroup}{group3label}
+
+
+\newglossary*{another}{Another Glossary}
+\glsxtrcopytoglossary{mallard}{another}
+\glsxtrcopytoglossary{aardvark}{another}
+\glsxtrcopytoglossary{zebra}{another}
+\glsxtrcopytoglossary{ant}{another}
+\glsxtrcopytoglossary{duck}{another}
+\setglossarypreamble[another]
+ {\renewcommand{\glsxtrgroupfield}{secondarygroup}} 
+\begin{document}
+\renewcommand*{\glsxtraddgroup}[2]{#2}
+\printunsrtglossary
+\renewcommand*{\glsxtraddgroup}[2]{%
+ \ifnum\glscurrententrylevel<2 #2\fi
+}
+\printunsrtglossary[type=another] 
+\end{document}

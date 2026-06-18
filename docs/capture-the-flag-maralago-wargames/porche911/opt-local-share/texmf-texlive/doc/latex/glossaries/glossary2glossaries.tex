@@ -1,0 +1,1028 @@
+% arara: lualatex
+% arara: bib2gls: { group: on }
+% arara: lualatex
+% arara: bib2gls: { group: on } if found ("log", "Glossary entry `sym.")
+% arara: lualatex
+% arara: lualatex if found ("log", "Rerun to")
+
+\documentclass[titlepage=false,oneside,
+ fontsize=12pt,captions=tableheading]{scrarticle}
+
+\usepackage[noatsymgroup]{nlctuserguide}
+
+\renewcommand*{\thispackagename}{glossaries}
+
+\glsxtrnewgls{opt.glostyle.}{\glostyle}
+\glsxtrnewgls{opt.acrstyle.}{\acrstyle}
+
+\defsemanticcmd{\glostylefmt}{\textsf}{}
+\defsemanticcmd{\acrstylefmt}{\textsf}{}
+
+\glsxtrnewgls{opt.printgloss.}{\printglossopt}
+\newcommand{\printglossoptval}[2]{\optval{printgloss.#1}{#2}}
+\newcommand{\printglossoptvalm}[2]{\optval{printgloss.#1}{\marg{#2}}}
+
+\glsxtrnewgls{opt.gloskey.}{\gloskey}
+\newcommand{\gloskeyval}[2]{\optval{gloskey.#1}{\marg{#2}}}
+
+\glsxtrnewgls{opt.storegloskey.}{\storegloskey}
+\newcommand{\storegloskeyval}[2]{\optval{storegloskey.#1}{\marg{#2}}}
+
+\glsxtrnewgls{opt.glsopt.}{\glsopt}
+\newcommand{\glsoptval}[2]{\optval{glsopt.#1}{#2}}
+
+\glsxtrnewgls{opt.useglsopt.}{\useglsopt}
+\newcommand{\useglsoptval}[2]{\optval{useglsopt.#1}{#2}}
+
+\renewcommand{\nlctuserguidecustomentryaliases}{%
+   glossarystyle=index,
+   acronymstyle=index,
+}
+
+\nlctuserguidegls
+{
+  \def\gprintglossopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.printgloss.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{printglossary}#2}}%
+  \def\gglosty#1#2{\glsbibwriteentry{glossarystyle}{opt.glostyle.#1}%
+    {\field{name}{\glostylefmt{#1}}\parent{idx.glossarystyle}#2}}%
+  \def\gacrsty#1#2{\glsbibwriteentry{acronymstyle}{opt.acrstyle.#1}%
+    {\field{name}{\acrstylefmt{#1}}\parent{setacronymstyle}#2}}%
+  \def\ggloskey#1#2{%
+   \glsbibwriteentry{commandoption}{opt.gloskey.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{newglossaryentry}#2}}%
+  \def\gstoregloskey#1#2{%
+   \glsbibwriteentry{commandoption}{opt.storegloskey.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{storeglosentry}#2}}%
+  \def\gglsopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.glsopt.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{gls}#2}}%
+  \def\guseglsopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.useglsopt.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{useglosentry}#2}}%
+  \gidx{glossarystyle}{\name{glossary styles}\field{text}{glossary style}}
+  % \newglossarytype
+  \gcmd{new\-glossary\-type}
+  {%
+    \syntax{\oargm{log-ext}\margm{type}\margm{out-ext}\margm{in-ext}\oargm{old style list}}
+  }
+  % \newglossary
+  \gcmd{new\-glossary}
+  {
+    \syntax{\oargm{log-ext}\margm{type}\margm{out-ext}\margm{in-ext}\margm{title}}
+  }
+  % \setglossarystyle
+  \gcmd{set\-glossary\-style}
+  {
+    \syntax{\margm{new-style}}
+  }
+  % \printglossary (glossary.sty)
+  \gcmd{oldprintglossary}
+  {
+    \name{\csfmt{print\-glossary} (\styfmt{glossary.sty})}
+    \field{text}{\csfmt{print\-glossary}}
+    \syntax{\oargm{type}}
+  }
+  % \printglossary (glossaries.sty)
+  \gcmd{print\-glossary}
+  {
+    \name{\csfmt{print\-glossary} (\styfmt{glossaries.sty})}
+    \field{text}{\csfmt{print\-glossary}}
+    \syntax{\oargm{options}}
+  }
+  % \printglossaries
+  \gcmd{print\-glossaries}{}
+  % \printacronym
+  \gcmds{print\-acronym}{}
+  % \acronymtype
+  \gcmd{acronym\-type}{}
+  % \print<type>
+  \gcmdmeta{print}{type}{}{}
+  % \glossaryname
+  \gcmd{glossary\-name}{}
+  % \acronymname
+  \gcmd{acronym\-name}{}
+  % \<glossary-type>name
+  \gcmdmeta{}{glossary\dhyphen type}{name}{}
+  % \short<glossary-type>name
+  \gcmdmeta{short}{glossary\dhyphen type}{name}{}
+  % \make<glossary-type>
+  \gcmdmeta{make}{glossary\dhyphen type}{}{}
+  % \makeglossary
+  \gcmd{make\-glossary}{}
+  % \makeacronym
+  \gcmd{make\-acronym}{}
+  % \makeglossaries
+  \gcmd{make\-glossaries}{}
+  % \glossary
+  \gcmd{glossary}{}
+  % \storeglosentry
+  \gcmd{store\-glos\-entry}
+  {
+    \syntax{\margm{label}\marg{\keyvallist}}
+  }
+  % \newglossaryentry
+  \gcmd{new\-glossary\-entry}
+  {
+    \syntax{\margm{label}\marg{\keyvallist}}
+  }
+  % \glsnumberformat
+  \gcmd{gls\-number\-format}{\syntax{text}}
+  % \gls (glossary.sty)
+  \gcmd{oldgls}{
+    \name{\csfmt{gls} (\styfmt{glossary.sty})}
+    \field{text}{\csfmt{gls}}
+    \syntax{\oargm{options}\margm{label}}
+  }
+  % \gls
+  \gcmd{gls}
+  {
+    \name{\csfmt{gls} (\styfmt{glossaries.sty})}
+    \field{text}{\csfmt{gls}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+  }
+  % \Gls
+  \gcmd{Gls}
+  {
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+  }
+  % \glsadd
+  \gcmd{glsadd}{\syntax{\oargm{new options}\margm{label}}}
+  % \glslink
+  \gcmd{glslink}{\syntax{\oargm{new options}\margm{label}\margm{text}}}
+  % \useglosentry
+  \gcmd{use\-glos\-entry}{\syntax{\oargm{old options}\margm{label}}}
+  % \useGlosentry
+  \gcmd{use\-Glos\-entry}{\syntax{\oargm{old options}\margm{label}\margm{text}}}
+  % \newacronym (glossary.sty)
+  \gcmd{oldnewacronym}
+  {
+    \name{\csfmt{new\-acronym} (\styfmt{glossary.sty})}
+    \field{text}{\csfmt{new\-acronym}}
+    \syntax{\oargm{cmd-name}\margm{acronym}\margm{long}\margm{old-options}}
+  }
+  % \newacronym (glossaries.sty)
+  \gcmd{new\-acronym}
+  {
+    \name{\csfmt{new\-acronym} (\styfmt{glossaries.sty})}
+    \field{text}{\csfmt{new\-acronym}}
+    \syntax{\oargm{options}\margm{label}\margm{abbrv}\margm{long}}
+  }
+  % \oldacronym
+  \gcmd{oldacronym}
+  {
+    \syntax{\oargm{cmd-name}\margm{acronym}\margm{long}\margm{old-options}}
+  }
+  % \setacronymstyle
+  \gcmd{set\-acronym\-style}
+  {
+    \syntax{\oargm{glossary-type}\margm{style-name}}
+  }
+  % \useacronym
+  \gcmds{use\-acronym}
+  {
+    \syntax{\oargm{insert}\margm{acr-name}}
+  }
+  % \acrlong
+  \gcmd{acr\-long}{\syntax{\margm{label}}}
+  % \acrshort
+  \gcmd{acr\-short}{\syntax{\margm{label}}}
+  % \acrlongpl
+  \gcmd{acr\-long\-pl}{\syntax{\margm{label}}}
+  % \acrshort
+  \gcmd{acr\-short\-pl}{\syntax{\margm{label}}}
+  % \acs
+  \gcmd{acs}{\syntax{\margm{label}}}
+  % \acl
+  \gcmd{acl}{\syntax{\margm{label}}}
+  % \acrln
+  \gcmd{acrln}{\syntax{\margm{acr-name}}}
+  % \acrsh
+  \gcmd{acrsh}{\syntax{\margm{acr-name}}}
+  % \ifacronymfirstuse
+  \gcmd{if\-acronym\-first\-use}
+  {
+    \syntax{\margm{acr-name}\margm{not used text}\margm{has been used text}}
+  }
+  % \ifglsused
+  \gcmd{if\-gls\-used}
+  {
+    \syntax{\margm{label}\margm{has been used text}\margm{not used text}}
+  }
+  % \resetacronym
+  \gcmd{reset\-acronym}{\syntax{\margm{acr-name}}}
+  % \unsetacronym
+  \gcmd{unset\-acronym}{\syntax{\margm{acr-name}}}
+  % \resetallacronyms
+  \gcmd{reset\-all\-acronyms}{}
+  % \unsetallacronyms
+  \gcmd{unset\-all\-acronyms}{}
+  % \glsreset
+  \gcmd{gls\-reset}{\syntax{\margm{label}}}
+  % \glslocalreset
+  \gcmd{gls\-local\-reset}{\syntax{\margm{label}}}
+  % \glsunset
+  \gcmd{gls\-unset}{\syntax{\margm{label}}}
+  % \glslocalunset
+  \gcmd{gls\-local\-unset}{\syntax{\margm{label}}}
+  % \glsresetall
+  \gcmd{gls\-reset\-all}{\syntax{\oargm{glossary-types}}}
+  % \glsunsetall
+  \gcmd{gls\-unset\-all}{\syntax{\oargm{glossary-types}}}
+  % \glslocalresetall
+  \gcmd{gls\-local\-reset\-all}{\syntax{\oargm{glossary-types}}}
+  % \glslocalunsetall
+  \gcmd{gls\-local\-unset\-all}{\syntax{\oargm{glossary-types}}}
+  % \<acr-name>
+  \gcmdmeta{}{acr\dhyphen name}{}{\field{modifiers}{*}}
+  % new key: type
+  \ggloskey{type}{\syntax{\meta{glossary-type}}}
+  % new key: name
+  \ggloskey{name}{\syntax{\margm{text}}}
+  % new key: description
+  \ggloskey{description}{\syntax{\margm{text}}}
+  % new key: counter
+  \ggloskey{counter}{\syntax{\margm{counter-name}}}
+  % new key: sort
+  \ggloskey{sort}{\syntax{\margm{text}}}
+  % new key: first
+  \ggloskey{first}{\syntax{\margm{text}}}
+  % new key: firstplural
+  \ggloskey{first\-plural}{\syntax{\margm{text}}}
+  % new key: text
+  \ggloskey{text}{\syntax{\margm{text}}}
+  % new key: plural
+  \ggloskey{plural}{\syntax{\margm{text}}}
+  % old key: name
+  \gstoregloskey{name}{\syntax{\margm{text}}}
+  % old key: description
+  \gstoregloskey{description}{\syntax{\margm{text}}}
+  % old key: format
+  \gstoregloskey{format}{\syntax{\meta{csname}}}
+  % old key: number
+  \gstoregloskey{number}{\syntax{\meta{counter-name}}}
+  % old key: sort
+  \gstoregloskey{sort}{\syntax{\margm{text}}}
+  % gls key: format
+  \gglsopt{format}{\syntax{\meta{csname}}}
+  % gls key: counter
+  \gglsopt{counter}{\syntax{\meta{counter-name}}}
+  % useglosentry key: format
+  \guseglsopt{format}{\syntax{\meta{csname}}}
+  % useglosentry key: number
+  \guseglsopt{number}{\syntax{\margm{counter-name}}}
+  % package option style
+  \gstyopt{style}%
+  {%
+    \syntax{\meta{style-name}}
+  }
+  % package option nonumberlist
+  \gstyopt{nonumberlist}{}
+  % package option counter
+  \gstyopt{counter}%
+  {%
+    \syntax{\meta{counter-name}}
+  }
+  % package option toc
+  \gstyopt{toc}%
+  {%
+    \syntax{\meta{boolean}}
+  }
+  % package option section
+  \gstyopt{section}
+  {
+    \syntax{\meta{value}}
+  }
+  % package option acronym
+  \gstyopt{acronym}%
+  {%
+    \syntax{\meta{boolean}}
+  }
+  % printgloss style
+  \gprintglossopt{style}{%
+    \syntax{\meta{style-name}}
+  }
+  % printgloss type
+  \gprintglossopt{type}{%
+    \syntax{\meta{glossary-label}}
+  }
+  % printgloss nonumberlist
+  \gprintglossopt{no\-number\-list}{}
+  % printgloss toctitle
+  \gprintglossopt{toc\-title}{}
+  % acronym style: long-short-desc
+  \gacrsty{long\dhyphen short\dhyphen desc}{}
+  % glossary style: long
+  \gglosty{long}{}
+  % glossary style: longheader
+  \gglosty{long\-header}{}
+  % glossary style: longborder
+  \gglosty{long\-border}{}
+  % glossary style: longheaderborder
+  \gglosty{long\-header\-border}{}
+  % glossary style: long3col
+  \gglosty{long3col}{}
+  % glossary style: long3colheader
+  \gglosty{long3col\-header}{}
+  % glossary style: long3colborder
+  \gglosty{long3col\-border}{}
+  % glossary style: long3colheaderborder
+  \gglosty{long3col\-header\-border}{}
+  % glossary style: super
+  \gglosty{super}{}
+  % glossary style: superheader
+  \gglosty{super\-header}{}
+  % glossary style: superborder
+  \gglosty{super\-border}{}
+  % glossary style: superheaderborder
+  \gglosty{super\-header\-border}{}
+  % glossary style: super3col
+  \gglosty{super3col}{}
+  % glossary style: super3colheader
+  \gglosty{super3col\-header}{}
+  % glossary style: super3colborder
+  \gglosty{super3col\-border}{}
+  % glossary style: super3colheaderborder
+  \gglosty{super3col\-header\-border}{}
+  % applications:
+  \gapp{makeindex}{}
+  \gapp{xindy}{}
+  \gapp{makeglos}{}
+  \gapp{makeglossaries}{}
+  \gapp{bib2gls}{}
+  % punctuation
+  \gpunc{at}{\name{\code{@}}}
+  \gpunc{excl}{\name{\code{!}}}
+  \gpunc{dblquote}{\name{\code{"}}}
+  \gpunc{vbar}{\name{\code{|}}}
+  % packages
+  \gpkg{xspace}{}
+  \gpkg{glossaries\dhyphen extra}{}
+  % file types
+  \gext{glo}{}
+  \gext{glg}{}
+  \gext{gls}{}
+}
+
+\title{Upgrading from the glossary package to the glossaries
+package}
+\author{Nicola L.C. Talbot}
+\date{2025-03-03}
+
+\newenvironment{oldway}
+{\begin{codebox*}[title={\styfmt{glossary.sty}}]}
+{\end{codebox*}}
+
+\newenvironment{newway}
+{\begin{codebox*}[title={\styfmt{glossaries.sty}}]}
+{\end{codebox*}}
+
+\begin{document}
+\maketitle
+
+\htmlavailable
+
+\begin{abstract}
+The purpose of this document is to provide advice if you want to
+convert a \LaTeX\ document from using the obsolete \styfmt{glossary}
+package to the replacement \styfmt{glossaries} package.
+The final version of the \styfmt{glossary} package is 2.4 (2006-07-20).
+It was made obsolete after the release of \styfmt{glossaries}
+v1.0 (2007-05-16). 
+\end{abstract}
+
+For the main \styfmt{glossaries} user guide, see
+\filefmt{glossaries-user.pdf}.
+\texdocref{glossaries-user}
+For a shorter guide for beginners, see
+\filefmt{glossariesbegin.pdf}.
+\texdocref{glossariesbegin}
+
+\tableofcontents
+
+\section{Why the Need for a New Package?}
+\label{whyglossaries}
+
+The \styfmt{glossary} package started out as an example in a tutorial,
+but I decided that I may as well package it up and upload it to CTAN.
+Unfortunately it was fairly rigid and unable to adapt well to the
+wide variation in glossary styles. Users began making requests for
+enhancements, but with each enhancement the code became more
+complicated and bugs crept in. Each fix in one place seemed to cause
+another problem elsewhere. In the end, it was taking up too much
+of my time to maintain, so I decided to replace it with a much
+better designed package. With the new \styfmt{glossaries} package:
+
+\begin{itemize}
+\item you can define irregular plurals;
+
+\item glossary terms can have an associated symbol in addition
+to the name and description;
+
+\item new glossary styles are much easier to design;
+
+\item you can add dictionaries to supply translations for the
+fixed names used in headings and by some of the glossary styles;
+
+\item you can choose between using \app{makeindex} or \app{xindy} to
+sort the glossary. Using \app{xindy} means that:
+
+  \begin{itemize}
+  \item there is much better support for terms containing accented 
+  or non-Latin characters;
+
+  \item there is support for non-standard location numbers;
+  \end{itemize}
+
+(Additional indexing options have since been added. See
+the \qt{Indexing Options} section
+of the \styfmt{glossaries} user manual.)
+
+\item you don't need to remember to escape \app{makeindex}['s]
+special characters as this is done internally;
+
+\item hierarchical entries and homographs are supported (as
+from v1.17);
+
+\item there is better support for cross-referencing glossary entries;
+
+\item acronyms are just another glossary term which helps to
+maintain consistency;
+
+\item different acronym styles are supported.
+
+\end{itemize}
+
+\section{Package Options}
+
+When converting a document that currently uses the obsolete
+\styfmt{glossary} package to the replacement \styfmt{glossaries} package,
+it should be fairly obvious that the first thing you need to do is
+replace \code{\cmd{usepackage}\marg{glossary}} with
+\code{\cmd{usepackage}\marg{glossaries}}, however some of the package options
+are different, so you may need to change those as well.
+Table~\ref{tab:pkgopt} shows the mappings from the \styfmt{glossary} 
+to the \styfmt{glossaries} package options.
+
+\begin{table}[htbp]
+\caption[Mappings]{Mappings from \styfmt{glossary} to \styfmt{glossaries} 
+package options}
+\label{tab:pkgopt}
+\centering
+\begin{tabular}{ll}
+\bfseries \styfmt{glossary} option & \bfseries \styfmt{glossaries} option\\
+style=list & style=list\\
+style=altlist & style=altlist\\
+style=long,header=none,border=none,cols=2 & \opt{style}=\glostyle{long}\\
+style=long,header=plain,border=none,cols=2 & \opt{style}=\glostyle{longheader}\\
+style=long,header=none,border=plain,cols=2 & \opt{style}=\glostyle{longborder}\\
+style=long,header=plain,border=plain,cols=2 & \opt{style}=\glostyle{longheaderborder}\\
+style=long,header=none,border=none,cols=3 & \opt{style}=\glostyle{long3col}\\
+style=long,header=plain,border=none,cols=3 & \opt{style}=\glostyle{long3colheader}\\
+style=long,header=none,border=plain,cols=3 & \opt{style}=\glostyle{long3colborder}\\
+style=long,header=plain,border=plain,cols=3 & \opt{style}=\glostyle{long3colheaderborder}\\
+style=super,header=none,border=none,cols=2 & \opt{style}=\glostyle{super}\\
+style=super,header=plain,border=none,cols=2 & \opt{style}=\glostyle{superheader}\\
+style=super,header=none,border=plain,cols=2 & \opt{style}=\glostyle{superborder}\\
+style=super,header=plain,border=plain,cols=2 & \opt{style}=\glostyle{superheaderborder}\\
+style=super,header=none,border=none,cols=3 & \opt{style}=\glostyle{super3col}\\
+style=super,header=plain,border=none,cols=3 & \opt{style}=\glostyle{super3colheader}\\
+style=super,header=none,border=plain,cols=3 & \opt{style}=\glostyle{super3colborder}\\
+style=super,header=plain,border=plain,cols=3 & \opt{style}=\glostyle{super3colheaderborder}\\
+number=none & \opt{nonumberlist}\\
+number=\meta{counter name} & \opt{counter}=\meta{counter name}\\
+toc & \opt{toc}\\
+hypertoc & \opt{toc}\\
+hyper & \emph{no corresponding option}\\
+section=true & \opt{section}\\
+section=false & \emph{no corresponding option}\\ 
+acronym & \opt{acronym}\\
+global & \emph{no corresponding option}
+\end{tabular}
+\end{table}
+
+\section{Defining new glossary types}
+
+If you have created new glossary types, you will need to 
+replace all instances of
+\begin{oldway}
+\cmddefsyntax{}{newglossarytype}\newline
+\csfmt{newcommand}\marg{\meta{type}name}\margm{title}
+\end{oldway}%
+with
+\begin{newway}
+\cmddefsyntax{}{newglossary}
+\end{newway}%
+in the preamble, and, if the new glossary requires a different style
+to the main (default) glossary, you will also need to put
+\begin{newway}
+\cmddefsyntax{}{setglossarystyle}
+\end{newway}%
+immediately before the glossary is displayed, or you can specify
+the style when you display the glossary using \gls{printglossary}
+(see below). 
+
+The \meta{old style list} optional argument can be converted to
+\meta{new-style} using the same mapping given in 
+Table~\ref{tab:pkgopt}.
+
+For example, if your document contains the following:
+\begin{oldway}
+\gls{newglossarytype}\oarg{nlg}\marg{notation}\marg{not}\marg{ntn}\oarg{style=long,header}
+\cmd{newcommand}\marg{\cmd{notationname}}\marg{Index of Notation}
+\end{oldway}
+You will need to replace the above two lines with:
+\begin{newway}
+\gls{newglossary}\oarg{nlg}\marg{notation}\marg{not}\marg{ntn}\marg{Index of Notation}
+\end{newway}
+in the preamble and set the style to \glostyle{longheader} with
+\begin{newway}
+\gls{setglossarystyle}\marg{\glostyle{longheader}}
+\end{newway}
+prior to displaying this glossary. Alternatively, you
+can specify the style using \opt{style} package option (which makes
+it the default style) or the \printglossopt{style} key in
+the optional argument of \gls{printglossary}. For example:
+\begin{newway}
+\gls{printglossary}\oarg{\printglossoptval{type}{notation},\printglossoptval{style}{\glostyle{longheader}}}
+\end{newway}
+
+Note that the glossary title is no longer specified using
+\gls{glossary-typename} (except for \gls{glossaryname}
+and \gls{acronymname}) but is instead specified in the \meta{title}
+argument of \gls{newglossary}. The short title which is specified in
+the \styfmt{glossary} package by the command
+\gls{shortglossary-typename} is now specified using
+the \printglossopt{toctitle} key in the optional argument to
+\gls{printglossary}.
+
+\section{\glsfmttext{makeglossary-type}}
+
+All instances of \gls{makeglossary-type} (e.g.\ 
+\gls{makeglossary} and \gls{makeacronym}) should be replaced
+by the single command \gls{makeglossaries}. For example, if
+your document contained the following:
+\begin{oldway}
+\gls{makeglossary}
+\gls{makeacronym}
+\end{oldway}
+then you should replace both lines with the single line:
+\begin{newway}
+\gls{makeglossaries}
+\end{newway}
+
+\section{Storing glossary information}
+
+With the old \styfmt{glossary} package you could optionally store
+glossary information for later use, or you could simply use
+\gls{glossary} whenever you wanted to add information to the glossary.
+With the new \styfmt{glossaries} package, the latter option is no longer
+available. (This is mainly because having a key value list in
+\gls{glossary} caused problems, but it also helps consistency.)  If
+you have stored all the glossary information using
+\gls{storeglosentry}, then you will need to convert these commands
+into the equivalent \gls{newglossaryentry}. If you have only
+used \gls{glossary}, then see \sectionref{sec:csglossary}.
+
+Substitute all instances of
+\begin{oldway}
+\cmddefsyntax{}{storeglosentry}
+\end{oldway}%
+with
+\begin{newway}
+\cmddefsyntax{}{newglossaryentry}
+\end{newway}%
+This should be fairly easy to do using the search and replace
+facility in your editor (but see notes below).
+
+If you have used the optional argument of \gls{storeglosentry}
+(i.e.\ you have multiple glossaries) then you will need to
+substitute
+\begin{oldway}
+\gls{storeglosentry}\oargm{gls-type}\margm{label}\marg{\keyvallist}
+\end{oldway}%
+with
+\begin{newway}
+\gls{newglossaryentry}\margm{label}\marg{\keyvallist,\gloskeyval{type}{\meta{gls-type}}}
+\end{newway}
+
+The glossary entry information \keyvallist\ may also need 
+changing. If \keyvallist\ contains any of \app{makeindex}['s] 
+special characters (i.e.\ \idx{at} \idx{excl} \idx{dblquote} or
+\idx{vbar}) then they should no longer be escaped with \idx{dblquote}
+since the \styfmt{glossaries} package deals with these characters
+internally. For example, if your document contains the following:
+\begin{oldway}
+\gls{storeglosentry}\marg{card}\marg{\storegloskeyval{name}{\$\idx{dblquote}\idx{vbar}\cmd{mathcal}\marg{S}\idx{dblquote}\idx{vbar}\$},
+\storegloskeyval{description}{The cardinality of the set \$\cmd{mathcal}\marg{S}\$}}
+\end{oldway}
+then you will need to replace it with:
+\begin{newway}
+\gls{newglossaryentry}\marg{card}\marg{\gloskeyval{name}{\$\idx{vbar}\cmd{mathcal}\marg{S}\idx{vbar}\$},
+\gloskeyval{description}{The cardinality of the set \$\cmd{mathcal}\marg{S}\$}}
+\end{newway}
+
+The \storegloskey{number} key available in \gls{storeglosentry}
+should be replaced with the \gloskey{counter} key in
+\gls{newglossaryentry}. The \storegloskey{sort} key in \gls{storeglosentry}
+is also called \gloskey{sort} in \gls{newglossaryentry}.
+
+The \gls{storeglosentry} \storegloskey{format} key doesn't have a
+counterpart in \gls{newglossaryentry}. You can, however, specify the
+format in the optional argument of commands like \gls{gls} or
+\gls{glsadd} or you can change the default format by redefining
+\gls{glsnumberformat}.
+
+\section{Adding an entry to the glossary}
+
+The \styfmt{glossary} package provided two basic means to add
+information to the glossary: firstly, the term was defined
+using \gls{storeglosentry} and the entries for that term were
+added using \gls{useglosentry}, \gls{useGlosentry} and \gls{gls}.
+Secondly, the term was added to the glossary using \gls{glossary}.
+This second approach is unavailable with the \styfmt{glossaries}
+package, since all entries must be defined before they can be
+indexed.
+
+\subsection{\glsfmttext{useglosentry}}
+\label{sec:useglosentry}
+
+The \styfmt{glossary} package allows you to add information to the
+glossary for a predefined term without producing any text in the
+document using
+\begin{oldway}
+\cmddefsyntax{}{useglosentry}
+\end{oldway}%
+Any occurrences of this command will need to be replaced with
+\begin{newway}
+\cmddefsyntax{}{glsadd}
+\end{newway}%
+The \useglsopt{format} key in \meta{old options} is also called
+\glsopt{format} in \meta{new options}. However the
+\optdefsyntax{}{useglsopt.number} key in
+\meta{old options} should be replaced with
+\optdefsyntax{}{glsopt.counter} in \meta{new options}.
+
+\subsection{\glsfmttext{useGlosentry}}
+
+The \styfmt{glossary} package allows you to add information to the
+glossary for a predefined term with the given text using
+\begin{oldway}
+\cmddefsyntax{}{useGlosentry}
+\end{oldway}%
+Any occurrences of this command will need to be replaced with
+\begin{newway}
+\cmddefsyntax{}{glslink}
+\end{newway}%
+The mapping from \meta{old options} to \meta{new options} is
+the same as that given \sectionref{sec:useglosentry}.
+
+\subsection{\glsfmttext{oldgls}}
+
+The \styfmt{glossary} defines:
+\begin{oldway}
+\cmddefsyntax{}{oldgls}
+\end{oldway}
+The \styfmt{glossaries} package defines a command with the same
+name, but be aware that it has a final optional argument:
+\begin{newway}
+\cmddefsyntax{}{gls}
+\end{newway}
+In this case, the only thing you need to
+change is the \useglsopt{number} key in the optional argument
+to \glsopt{counter}. The \meta{insert} optional argument in the 
+new form of \gls{gls} can be used to insert text into the
+automatically generated text, which will put it inside the hyperlink
+(if hyperlinks are supported).
+
+\subsection{\glsfmttext{glossary}}
+\label{sec:csglossary}
+
+When using the \styfmt{glossaries} package, you should not use
+\gls{glossary}. This is because the appropriate indexing syntax (including
+escaping any of \app{makeindex}'s or \app{xindy}'s special
+characters) is generated when the entry is defined. This reduces
+overall complexity as it no longer needs to be performed every time
+an entry is indexed. By placing the glossary definitions within the
+preamble, it also reduces the chance that the indexing special
+character may have their category code changed, which can cause
+interference.
+
+If, with the old package, you have opted to
+explicitly use \gls{glossary} instead of storing the glossary
+information with \gls{storeglosentry}, then converting from
+\styfmt{glossary} to \styfmt{glossaries} will be more time-consuming,
+although in the end, I hope you will see the benefits. From
+the user's point of view, using \gls{glossary} throughout the
+document is time consuming, and if you use it more than once for the
+same term, there's a chance extra spaces may creep in which will
+cause \app{makeindex} to treat the two entries as different
+terms, even though they look the same in the document.  If you have
+used \gls{glossary} with the old glossary package, you will instead
+need to define the relevant glossary terms using
+\gls{newglossaryentry} and reference the terms using
+\gls{glsadd}, \gls{glslink}, \gls{gls} etc.
+
+If you don't like the idea of continually scrolling back to the
+preamble to type all your \gls{newglossaryentry} commands, you may
+prefer to create a new file, in which to store all these commands,
+and then input that file in your document's preamble. Most text
+editors and front-ends allow you to have multiple files open, and
+you can tab back and forth between them.
+
+\section{Acronyms}
+
+In the \styfmt{glossary} package, acronyms were treated differently
+to glossary entries. This resulted in inconsistencies and sprawling
+unmaintainable code. The new \styfmt{glossaries} package treats
+acronyms in exactly the same way as normal glossary terms. 
+
+Both packages provide \csfmt{newacronym}, but the syntax is
+different. With the \styfmt{glossary} package, the syntax is:
+\begin{oldway}
+\cmddefsyntax{}{oldnewacronym}
+\end{oldway}
+With the \styfmt{glossaries} package, the default definition of:
+\begin{newway}
+\cmddefsyntax{}{newacronym}
+\end{newway}
+is a shortcut for:
+\begin{newway}
+\gls{newglossaryentry}\margm{label}\marg{type=\gls{acronymtype},
+\gloskeyval{name}{\meta{abbrv}},
+\gloskeyval{description}{\meta{long}},
+\gloskeyval{text}{\meta{abbrv}},
+\gloskeyval{first}{\meta{long} (\meta{abbrv})},
+\gloskeyval{plural}{\meta{abbrv}s},
+\gloskeyval{firstplural}{\meta{long}s (\meta{abbrv}s)},
+\meta{options}}
+\end{newway}
+(Note that this shortcut default is an older method of defining
+acronyms. If you use \gls{setacronymstyle} introduced to
+\styfmt{glossaries} v4.02, then a more flexible method is adopted.)
+
+This is different to the \styfmt{glossary} package which set the
+\storegloskey{name} key to \meta{long} (\meta{abbrv}) and
+allowed you to set a description using the
+\storegloskey{description} key. If you still want to do
+this, you can use one of the description styles, such as
+\acrstyle{long-short-desc}, and use
+the \gloskey{description} key in the optional
+argument of \gls{newacronym}.
+
+For example, if your document originally had the following:
+\begin{oldway}
+\gls{oldnewacronym}\marg{SVM}\marg{Support Vector Machine}\marg{\storegloskeyval{description}{Statistical
+pattern recognition technique}}
+\end{oldway}
+Then you would need to first set the style:
+\begin{newway}
+\gls{setacronymstyle}\marg{\acrstyle{long-short-desc}}
+\end{newway}
+and change the acronym definition to:
+\begin{newway}
+\gls{newacronym}\oarg{\gloskeyval{description}{Statistical pattern recognition 
+technique}}\marg{svm}\marg{SVM}\marg{Support Vector Machine}
+\end{newway}
+You can then reference the acronym using any of the new referencing
+commands, such as \gls{gls} or \gls{glsadd}.
+
+With the old \styfmt{glossary} package, when you defined an
+acronym, it also defined a command \gls{acr-name} which
+could be used to display the acronym in the text. So the
+above SVM example would create the command \csfmt{SVM} with the old
+package. In the new \styfmt{glossaries} package, the acronyms are just
+another type of glossary entry, so they are displayed using
+\code{\gls{gls}\margm{label}}.  Therefore, in the above example, you will
+also need to replace all occurrences of \csfmt{SVM} with
+\code{\gls{gls}\marg{svm}}.
+
+If you have used \gls{useacronym} instead of \gls{acr-name},
+then you will need to replace all occurrences of
+\begin{oldway}
+\cmddefsyntax{}{useacronym}
+\end{oldway}%
+with
+\begin{newway}
+\gls{gls}\margm{label}\oargm{insert}
+\end{newway}%
+Note that the starred versions of \gls{useacronym} and
+\gls{acr-name} (which make the first letter uppercase) should
+be replaced with \code{\gls{Gls}\margm{label}}.  
+
+Alternatively (as from v1.18 of the \styfmt{glossaries} package),
+you can use \gls{oldacronym} which uses the same syntax as
+the old \styfmt{glossary} package's \gls{oldnewacronym} and also 
+defines \gls{acr-name}.
+For example, if your document originally had the following:
+\begin{oldway}
+\gls{oldnewacronym}\marg{SVM}\marg{Support Vector Machine}\marg{\storegloskeyval{description}{Statistical
+pattern recognition technique}}
+\end{oldway}
+then you can change this to:
+\begin{newway}
+\gls{oldacronym}\marg{SVM}\marg{Support Vector Machine}\marg{\gloskeyval{description}{Statistical
+pattern recognition technique}}
+\end{newway}
+You can then continue to use \csfmt{SVM}\@. However, remember that
+\LaTeX\ generally ignores spaces after command names that consist of
+alphabetical characters. You will therefore need to force a space
+after \gls{acr-name}, unless you also load the \sty{xspace} package.
+(See the \qt{Acronyms} of the \styfmt{glossaries} documentation for
+further details.) Note that \gls{oldacronym} uses its first argument
+to define the acronym's label (as used by commands like \gls{gls}),
+so in the above example, with the new \styfmt{glossaries} package,
+\csfmt{SVM} becomes a shortcut for \code{\gls{gls}\marg{SVM}} and
+\csfmt{SVM*} becomes a shortcut for \code{\gls{Gls}\marg{SVM}}.
+
+\subsection{\glsfmttext{acrln} and \glsfmttext{acrsh}}
+\label{sec:acrlnsh}
+
+In the \styfmt{glossary} package, it is possible to produce the
+long and short forms of an acronym without adding an entry to
+the glossary using \gls{acrln} and \gls{acrsh}. With the 
+\styfmt{glossaries} package (provided you defined the acronym using
+\gls{newacronym} or \gls{oldacronym} and provided you haven't
+redefined \gls{newacronym}) 
+you can replace
+\begin{oldway}
+\cmddefsyntax{}{acrsh}
+\end{oldway}%
+with
+\begin{newway}
+\cmddefsyntax{}{acrshort}
+\end{newway}%
+and you can replace
+\begin{oldway}
+\cmddefsyntax{}{acrln}
+\end{oldway}%
+with
+\begin{newway}
+\cmddefsyntax{}{acrlong}
+\end{newway}%
+The \styfmt{glossaries} package also provides the related commands
+\gls{acrshortpl} (plural short form) and \gls{acrlongpl} (plural long
+form) as well as upper case variations. If you use the 
+\styfmt{glossaries} \qt{shortcuts} package option, you can use
+\gls{acs} in place of \gls{acrshort} and \gls{acl} in place of
+\gls{acrlong}.
+
+See the \qt{Acronyms}
+of the \styfmt{glossaries} manual for further details of
+how to use these commands.
+
+\subsection{\glsfmttext{ifacronymfirstuse}}
+
+The \styfmt{glossary} package command
+\begin{oldway}
+\cmddefsyntax{}{ifacronymfirstuse}
+\end{oldway}%
+can be replaced by the \styfmt{glossaries} command:
+\begin{newway}
+\cmddefsyntax{}{ifglsused}
+\end{newway}%
+Note that \gls{ifglsused} evaluates the opposite condition to
+that of \gls{ifacronymfirstuse} which is why the last two arguments
+have been reversed.
+
+\subsection{\glsfmttext{resetacronym} and \glsfmttext{unsetacronym}}
+\label{sec:unreset}
+
+The \styfmt{glossary} package allows you to reset and unset the
+acronym flag which is used to determine whether the acronym has
+been used in the document. The \styfmt{glossaries} package also
+provides a means to do this on either a local or a global level.
+To reset an acronym, you will need to replace:
+\begin{oldway}
+\cmddefsyntax{}{resetacronym}
+\end{oldway}%
+with either
+\begin{newway}
+\cmddefsyntax{}{glsreset}
+\end{newway}%
+or
+\begin{newway}
+\cmddefsyntax{}{glslocalreset}
+\end{newway}
+
+To unset an acronym, you will need to replace:
+\begin{oldway}
+\cmddefsyntax{}{unsetacronym}
+\end{oldway}%
+with either
+\begin{newway}
+\cmddefsyntax{}{glsunset}
+\end{newway}%
+or
+\begin{newway}
+\cmddefsyntax{}{glslocalunset}
+\end{newway}
+
+To reset all acronyms, you will need to replace:
+\begin{oldway}
+\cmddefsyntax{}{resetallacronyms}
+\end{oldway}
+with
+\begin{newway}
+\gls{glsresetall}\oarg{\gls{acronymtype}}
+\end{newway}
+or
+\begin{newway}
+\gls{glslocalresetall}\oarg{\gls{acronymtype}}
+\end{newway}
+To unset all acronyms, you will need to replace:
+\begin{oldway}
+\cmddefsyntax{}{unsetallacronyms}
+\end{oldway}
+with
+\begin{newway}
+\gls{glsunsetall}\oarg{\gls{acronymtype}}
+\end{newway}
+or
+\begin{newway}
+\gls{glslocalunsetall}\oarg{\gls{acronymtype}}
+\end{newway}
+
+\section{Displaying the glossary}
+\label{sec:printgloss}
+
+The \styfmt{glossary} package provides the command \gls{oldprintglossary}
+(or \gls{printtype} for other glossary types) which
+can be used to print individual glossaries. The \styfmt{glossaries}
+package provides the command \gls{printglossaries} which 
+will print all the glossaries which have been defined, or
+\cmddefsyntax{}{printglossary} to print individual glossaries.
+So if you just have \gls{oldprintglossary}, then you can leave it as
+it is, but if you have, say:
+\begin{oldway}
+\gls{oldprintglossary}
+\gls{oldprintglossary}\oarg{acronym}
+\end{oldway}
+or
+\begin{oldway}
+\gls{oldprintglossary}
+\gls{printacronym}*
+\end{oldway}
+then you will need to replace this with either
+\begin{newway}
+\gls{printglossaries}
+\end{newway}
+or 
+\begin{newway}
+\gls{printglossary}
+\gls{printglossary}\oarg{type=\gls{acronymtype}}
+\end{newway}
+
+The \styfmt{glossary} package allows you to specify a short title
+(for the table of contents and page header) by defining a command of
+the form \gls{shortglossary-typename}. The
+\styfmt{glossaries} package doesn't do this, but instead provides
+the \printglossopt{toctitle} key which can be used in the
+optional argument to \gls{printglossary}. For example, if you have
+created a new glossary type called \code{notation}, and you had
+defined
+\begin{oldway}
+\cmd{newcommand}\marg{\cmd{shortnotationname}}\marg{Notation}
+\end{oldway}
+then you would need to use the \printglossopt{toctitle} key:
+\begin{newway}
+\gls{printglossary}\oarg{\printglossoptval{type}{notation},\printglossoptval{toctitle}{Notation}}
+\end{newway}
+The \styfmt{glossaries} package will ignore \csfmt{shortnotationname},
+so unless you have used it elsewhere in the document, you may as
+well remove the definition.
+
+\section{Processing Your Document}
+\label{sec:makeglos}
+
+If you convert your document from using the \styfmt{glossary} package
+to the \styfmt{glossaries} package, you will need to delete any of
+the additional files, such as the \ext+{glo} file, that were
+created by the \styfmt{glossary} package, as the \styfmt{glossaries}
+package uses a different format. 
+Remember also, that if you used the \app{makeglos} Perl script,
+you will need to use the \app{makeglossaries} Perl script 
+instead. As from v1.17, the \styfmt{glossaries} package can be
+used with either \app{makeindex} or \app{xindy}. Since
+\app{xindy} was designed to be multilingual, the 
+new \styfmt{glossaries} package is a much better option for 
+non-English documents. If you use the extension package,
+\sty{glossaries-extra}, then you also have the option of using
+\app{bib2gls} instead (which also provides multilingual support).
+
+For further information on using \app{makeglossaries},
+\app{makeindex} or \app{xindy} to create your glossaries, see the
+\qt{Generating the Associated Glossary Files} section of the
+\styfmt{glossaries} documentation.
+
+\section{Troubleshooting}
+\label{sec:troubleshooting}
+
+Please check the \dickimawhref{faqs/glossariesfaq.html}{FAQ} 
+for the \styfmt{glossaries} package if you have any
+problems.
+
+\printterms
+\printuserguideindex
+
+\end{document}

@@ -1,0 +1,32 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 141 Displaying sorted glossaries with groups using bib2gls
+% Label: "ex:bib2glsgrp"
+% arara: pdflatex
+% arara: bib2gls: { group: on }
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{animalfamilies.bib}
+@index{waterfowl,user1={Anseriformes}}
+@index{ant,user1={Formicidae}}
+@index{adder,user1={Vipera berus}}
+@index{duck,parent={waterfowl},user1={Anatidae}}
+@index{zebra,user1={Hippotigris}}
+@index{aardvark,user1={Orycteropus afer}}
+@index{gazelle,user1={Gazella}}
+@index{mallard,parent={duck},user1={Anas platyrhynchos}} 
+\end{filecontents*}
+\usepackage[record,stylemods=bookindex,style=bookindex]{glossaries-extra}
+\newglossary*{another}{Another Glossary}
+\GlsXtrLoadResources[selection=all,% select all entries
+ src={animalfamilies},% identify bib file(s)
+ sort=en-GB,% sort method
+ secondary={la:user1:another}% sort again and copy to `another'
+ ]
+\glsdefpostname{index}{ 
+ (\emph{\glsentryuseri{\glscurrententrylabel}})} 
+\begin{document}
+\printunsrtglossary
+\printunsrtglossary[type=another] 
+\end{document}

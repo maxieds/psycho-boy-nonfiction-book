@@ -1,0 +1,37 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 164 Using bib2gls: dual entry label prefixes
+% Label: "ex:bib2glsduallabelprefixes"
+% arara: pdflatex
+% arara: bib2gls
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{\jobname.bib}
+@index{duck}
+@dualindexabbreviation{svm,
+ short={SVM},
+ long={support vector machine}
+}
+ @dualindexsymbol{pi,
+ symbol={\ensuremath{\pi}},
+ description={ratio of a circle's circumference to its diameter}
+}
+\end{filecontents*}
+\usepackage{hyperref}
+\usepackage[record,abbreviations,symbols]{glossaries-extra} 
+
+\newcommand{\bibglsnewdualindexsymbolsecondary}[5]{%
+ \longnewglossaryentry*{#1}{name={#3},category={symbol},
+ type={symbols},symbol={#4},#2}{#5}%
+} 
+
+\GlsXtrLoadResources[src={\jobname},
+ combine-dual-locations=primary]
+\glsxtraddlabelprefix{dual.}
+\glsxtraddlabelprefix{} 
+\begin{document}
+First use: \dgls{duck}, \dgls{svm}, \dgls{pi}.
+Next use: \dgls{duck}, \dgls{svm}, \dgls{pi}.
+\printunsrtglossaries 
+\end{document}

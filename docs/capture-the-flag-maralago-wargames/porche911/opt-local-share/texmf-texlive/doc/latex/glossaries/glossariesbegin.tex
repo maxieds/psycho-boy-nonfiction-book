@@ -1,0 +1,3056 @@
+% arara: lualatex
+% arara: bib2gls: { group: on }
+% arara: lualatex
+% arara: bib2gls: { group: on } if found ("log", "Glossary entry `sym.")
+% arara: lualatex
+% arara: lualatex if found ("log", "Rerun to")
+\documentclass[titlepage=false,oneside,
+ fontsize=12pt,captions=tableheading]{scrarticle}
+
+\usepackage{pifont}
+\usepackage[noatsymgroup]{nlctuserguide}
+
+\renewcommand*{\thispackagename}{glossaries}
+
+\glsxtrnewgls{opt.glostyle.}{\glostyle}
+\glsxtrnewgls{opt.acrstyle.}{\acrstyle}
+\glsxtrnewgls{opt.abbrstyle.}{\abbrstyle}
+
+\defsemanticcmd{\glostylefmt}{\textsf}{}
+\defsemanticcmd{\acrstylefmt}{\textsf}{}
+\defsemanticcmd{\abbrstylefmt}{\textsf}{}
+
+\newcommand{\atentry}[1]{\texorpdfstring{\code{@#1}}{@#1}}
+
+\glsxtrnewgls{opt.printgloss.}{\printglossopt}
+\newcommand{\printglossoptval}[2]{\optval{printgloss.#1}{#2}}
+\newcommand{\printglossoptvalm}[2]{\optval{printgloss.#1}{\marg{#2}}}
+
+\glsxtrnewgls{opt.gloskey.}{\gloskey}
+\newcommand{\gloskeyval}[2]{\optval{gloskey.#1}{\marg{#2}}}
+
+\newcommand*{\catfmt}{\csoptfmt}
+
+\glsxtrnewgls{opt.cat.}{\cat}
+\glsxtrnewgls{opt.catattr.}{\catattr}
+\glsxtrnewgls{opt.resource.}{\resourceopt}
+\newcommand{\resourceoptval}[2]{\optval{resource.#1}{#2}}
+\newcommand{\resourceoptvalm}[2]{\optval{resource.#1}{\marg{#2}}}
+
+\renewcommand{\optionlistprefix}{idx.opt.}
+\renewcommand{\glsxtrtaggedlistsep}{~}
+\newcommand{\idxoptiondef}[1]{\hypertarget{option\glsentrytext{idx.opt.#1}}{}\inlineidxdef{opt.#1}}
+
+\renewcommand{\nlctuserguidecustomentryaliases}{%
+   glossarystyle=index,
+   acronymstyle=index,
+   abbreviationstyle=index,
+}
+
+\newcommand{\comxr}{\comment{\glslink{pkg.glossaries-extra}{glossaries-extra.sty}}}
+\newcommand{\comxronly}{\comment{\glslink{pkg.glossaries-extra}{glossaries-extra.sty} only}}
+\newcommand{\comxrkey}{\comment{\glslink{pkg.glossaries-extra}{glossaries-extra.sty} key}}
+\newcommand{\comxropt}[1]{\comment{requires \glslink{pkg.glossaries-extra}{glossaries-extra.sty} '\opt{#1}' option}}
+
+\nlctuserguidegls
+{
+  \def\gprintglossopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.printgloss.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{idx.printglossopt}#2}}%
+  \def\gglosty#1#2{\glsbibwriteentry{glossarystyle}{opt.glostyle.#1}%
+    {\field{name}{\glostylefmt{#1}}\parent{idx.glossarystyle}#2}}%
+  \def\gacrsty#1#2{\glsbibwriteentry{acronymstyle}{opt.acrstyle.#1}%
+    {\field{name}{\acrstylefmt{#1}}\parent{idx.acrstyle}#2}}%
+  \def\gabbrsty#1#2{\glsbibwriteentry{abbreviationstyle}{opt.abbrstyle.#1}%
+    {\field{name}{\abbrstylefmt{#1}}\parent{idx.abbrstyle}#2}}%
+  \def\ggloskey#1#2{%
+   \glsbibwriteentry{commandoption}{opt.gloskey.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{idx.gloskey}#2}}%
+  \def\gglsopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.glsopt.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{gls}#2}}%
+  \def\gcat#1#2{%
+   \glsbibwriteentry{optionvalue}{opt.cat.#1}{%
+    \field{name}{\catfmt{#1}}\parent{idx.category}#2}}%
+  \def\gcatattr#1#2{%
+   \glsbibwriteentry{optionvalue}{opt.catattr.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{idx.categoryattribute}#2}}%
+  \def\gresourceopt#1#2{%
+   \glsbibwriteentry{commandoption}{opt.resource.#1}{%
+    \field{name}{\csoptfmt{#1}}\parent{GlsXtrLoadResources}#2}}%
+  \gidx{category}{\field{plural}{categories}}
+  \gidx{glossarystyle}{\name{glossary styles}\field{text}{glossary style}}
+  \gidx{acrstyle}{\name{acronym styles}\field{text}{acronym style}
+   \field{see}{setacronymstyle}}
+  \gidx{abbrstyle}{\name{abbreviation styles}\field{text}{abbreviation style}
+   \field{see}{setabbreviationstyle}}
+  \gidx{printglossopt}{\name{print [unsrt|noidx] glossary options}%
+    \field{text}{print glossary option}%
+  }
+  % \newglossary
+  \gcmd{new\-glossary}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{log-ext}\margm{glossary-label}\margm{out-ext}\margm{in-ext}\margm{title}}
+    \desc{defines a \idx{glossary} identified by \meta{glossary-label} (which can
+    be referenced by the \gloskey{type} key when defining an entry)}
+  }
+  % \newglossary*
+  \gcmd{new\-glos\-sary*}%
+  {% 
+    \providedby{\sty{glossaries} v4.08+}
+    \syntax{\margm{glossary-label}\margm{title}}
+    \desc{a shortcut that supplies file extensions based on the
+    \idx{glossary} label:\begin{compactcodebox}%
+\gls{newglossary}\oarg{\meta{glossary-label}-glg}\margm{glossary-label}\marg{\meta{glossary-label}-gls}\marg{\meta{glossary-label}-glo}\margm{title}%
+\end{compactcodebox}\glsxtrnopostpunc
+}
+  }
+  % \GlsSetQuote
+  \gcmd{Gls\-Set\-Quote}
+  {
+    \providedby{\sty{glossaries} v4.24+}
+    \syntax{\margm{character}}
+    \desc{set \app{makeindex}['s] quote character to \meta{character}}
+  }
+  % \glsdisablehyper
+  \gcmd{gls\-disable\-hyper}
+  {
+    \providedby{\sty{glossaries}}%
+    \desc{suppresses all \idx{glossary} related hyperlinks}
+  }
+  % \glsenablehyper
+  \gcmd{gls\-enable\-hyper}
+  {
+    \providedby{\sty{glossaries}}%
+    \desc{enables \idx{glossary} related hyperlinks. This is the
+    default if \sty{hyperref} is loaded. Has no effect if
+    \sty{hyperref} wasn't loaded}
+  }
+  % \setglossarystyle
+  \gcmd{set\-glossary\-style}
+  {
+    \providedby{\sty{glossaries}}%
+    \syntax{\margm{style name}}
+    \desc{set the current \idx{glossarystyle} to \meta{style name}}
+  }
+  % \printglossary
+  \gcmd{print\-glos\-sary}
+  {
+    \providedby{\sty{glossaries}}%
+    \syntax{\oargm{options}}
+    \desc{displays the \idx{glossary} by inputting a file created by
+     \app+{makeindex} or \app+{xindy}. Must be used with
+     \gls{makeglossaries} and either \app{makeindex} or \app{xindy}}
+  }
+  % \printglossaries
+  \gcmd{print\-glos\-saries}
+  {
+    \providedby{\sty{glossaries}}%
+    \desc{iterates over all glossaries and does
+     \code{\gls{printglossary}\oarg{\printglossoptval{type}{\meta{type}}}}
+     for each \idx{glossary}}
+  }
+  % \printnoidxglossary
+  \gcmd{print\-no\-idx\-glos\-sary}%
+  {%
+    \providedby{\sty{glossaries} v4.04+}
+    \syntax{\oargm{options}}
+    \desc{displays the \idx{glossary} by obtaining the \gls{indexing} information from
+     the \ext+{aux} file and using \TeX\ to sort and collate. Must be used with
+     \gls{makenoidxglossaries}. This method can be very slow and has limitations}
+  }%
+  % \printnoidxglossaries
+  \gcmd{print\-no\-idx\-glos\-saries}%
+  {%
+    \providedby{\sty{glossaries} v4.04+}
+    \desc{iterates over all glossaries and does
+     \code{\gls{printnoidxglossary}\oarg{\printglossoptval{type}{\meta{type}}}}
+     for each \idx{glossary}}
+  }
+  % \printunsrtglossary
+  \gcmd{print\-un\-srt\-glos\-sary}%
+  {%
+    \providedby{\sty{glossaries-extra} v1.08+}
+    \syntax{\oargm{options}}
+    \desc{displays the \idx{glossary} by iterating over all entries
+     associated with the given \idx{glossary} (in the order in which they
+     were added to the \idx{glossary}). The location lists and group headers
+     will only be present if the associated fields have been set
+     (typically by \app{bib2gls})}
+  }%
+  % \printunsrtglossaries
+  \gcmd{print\-un\-srt\-glos\-saries}%
+  {%
+    \providedby{\sty{glossaries-extra} v1.08+}
+    \desc{iterates over all glossaries and does
+     \code{\gls{printunsrtglossary}\oarg{\printglossoptval{type}{\meta{type}}}}
+     for each \idx{glossary}}
+  }
+  % \glsdefaulttype
+  \gcmd{gls\-default\-type}%
+  {%
+    \providedby{\sty{glossaries}}
+    \initval{main}%
+    \desc{expands to the label of the default \idx{glossary}}
+  }%
+  % \acronymname
+  \gcmd{acronym\-name}%
+  {% 
+    \providedby{\sty{glossaries}}
+    \initval{Acronyms}%
+    \note{language-sensitive}
+    \desc{expands to the title of the \code{acronym} \idx{glossary}}
+  }%
+  % \loadglsentries
+  \gcmd{load\-gls\-entries}
+  {
+    \providedby{\sty{glossaries}}%
+    \syntax{\oargm{type}\margm{filename}}
+    \desc{locally assigns \gls{glsdefaulttype} to \meta{type} and
+     inputs \meta{filename}. If the optional argument is omitted,
+     the default glossary is assumed. Note that if any entries within
+     \meta{filename} have the \gloskey{type} key set (including
+     implicitly in commands like \gls{newacronym}), then this will
+     override the type given in the optional argument}
+  }
+  % \makeglossaries
+  \gcmd{make\-glos\-saries}
+  {
+    \providedby{\sty{glossaries}}
+    \desc{opens the associated \idx{glossary} files that need to be
+     processed by \app+{makeindex} or \app+{xindy}}
+  }
+  % \makenoidxglossaries
+  \gcmd{make\-no\-idx\-glos\-saries}%
+  {%
+    \providedby{\sty{glossaries} v4.04+}
+    \desc{sets up all glossaries so that they can be displayed
+    with \gls{printnoidxglossary}}
+  }
+  % \GlsXtrLoadResources
+  \gcmd{Gls\-Xtr\-Load\-Resources}%
+  {%
+    \providedby{\sty{glossaries-extra} v1.11+}
+    \syntax{\oargm{options}}
+    \desc{for use with \app{bib2gls}, this both sets up the resource options
+     (which \app{bib2gls} can detect from the \ext{aux} file) and
+     inputs the \ext{glstex} file created by \app{bib2gls}}
+  }
+  % \newglossaryentry
+  \gcmd{new\-glos\-sary\-entry}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{label}\marg{\keyvallist}}
+    \desc{defines a new \idx{glossary} entry with the given label. The
+    second argument is a comma-separated list of \idxpl{gloskey}}
+  }
+  % \longnewglossaryentry
+  \gcmd{long\-new\-glos\-sary\-entry}%
+  {%
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{label}\margm{key=value list}\margm{description}}
+    \desc{defines a new \idx{glossary} entry with the given label. The
+    second argument is a comma-separated list of \idxpl{gloskey}.
+    The third argument is the description, which may include
+    paragraph breaks}
+  }
+  % \newterm
+  \gcmd{new\-term}%
+  {%
+    \syntax{\oargm{key=value list}\margm{entry-label}}
+    \note{requires \opt{index} package option}
+    \desc{defines a new \idx{glossary} entry with the given label,
+    \gloskey{type} set to \code{index}, the \gloskey{name}
+    set to \meta{entry-label} and the \gloskey{description}
+    set to \gls{nopostdesc}. The
+    optional argument is a comma-separated list of \idxpl{gloskey},
+    which can be used to override the defaults}
+  }
+  % \glsnamefont
+  \gcmd{gls\-name\-font}
+  {  
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{text}}
+    \desc{used within the predefined glossary styles to apply a font change to the
+    \gloskey{name}}
+  } 
+  % \gls
+  \gcmdsp{gls}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{references the entry identified by \meta{label}. The text
+    produced may vary depending on whether or not this is the \idx{firstuse}}
+  }
+  % \glspl
+  \gcmdsp{glspl}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{as \gls{gls} but uses the plural form}
+  }
+  % \Gls
+  \gcmdsp{Gls}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{as \gls{gls} but converts the first character of the
+    \idx{linktext} to \idx{uppercase}\glsadd{idx.sentencecase} (for
+    the start of a sentence) using \gls{makefirstuc}}
+  }
+  % \Glspl
+  \gcmdsp{Glspl}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{as \gls{Gls} but uses the plural form}
+  }
+  % \glssymbol
+  \gcmdsp{gls\-symbol}{%
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{references the entry identified by \meta{label}. The text
+    produced is obtained from the \gloskey{symbol} value.
+    The \meta{insert} argument will be inserted at the end of the
+    \idx{linktext}. This command does not alter or depend on the
+    \idx{firstuseflag}}
+  }
+  % \glslink
+  \gcmdsp{gls\-link}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\margm{text}}
+    \desc{references the entry identified by \meta{label} with the
+     given \meta{text} as the \idx{linktext}. This command doesn't
+     change the \idx{firstuseflag}}
+  }
+  % \glsadd
+  \gcmd{gls\-add}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}}
+    \desc{indexes the entry identified by \meta{label} without
+    producing any text. This ensures the entry appears in the
+    \idx{glossary}}
+  }
+  % \glsfmttext
+  \gcmd{gls\-fmt\-text}
+  {
+     \syntax{\margm{entry-label}}
+     \desc{for use within captions or section titles to display the
+      formatted \gloskey{text}}
+  }
+  % \glsfmtshort
+  \gcmd{gls\-fmt\-short}
+  {
+     \syntax{\margm{entry-label}}
+     \desc{for use within captions or section titles to display the
+      formatted short form}
+  }  
+  % \glsentrytext
+  \gcmd{gls\-entry\-text}
+  {%
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{entry-label}}
+    \desc{simply expands to the value of the \gloskey{text} field.
+     Does nothing if the entry hasn't been defined. May be used in
+     expandable contexts provided that the \gloskey{text} field doesn't
+     contain any fragile commands}
+  }
+  % \glsentryshort
+  \gcmd{gls\-entry\-short}
+  {%
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{entry-label}}
+    \desc{simply expands to the value of the \gloskey{short} field.
+     Does nothing if the entry hasn't been defined. May be used in
+     expandable contexts provided that the \gloskey{short} field doesn't
+     contain any fragile commands}
+  }
+  % \glsentrylong
+  \gcmd{gls\-entry\-long}
+  {%  
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{entry-label}}
+    \desc{simply expands to the value of the \gloskey{long} field.
+     Does nothing if the entry hasn't been defined. May be used in
+     expandable contexts provided that the \gloskey{long} field doesn't
+     contain any fragile commands}
+  } 
+  % \glsabbrvscfont
+  \gcmd{gls\-abbrv\-sc\-font}
+  {
+    \providedby{\sty{glossaries-extra} v1.17+}
+    \syntax{\margm{text}} 
+    \desc{short form font used by the small-caps \qt{sc} abbreviation styles}   
+  }  
+  % \glslongonlyfont
+  \gcmd{gls\-long\-only\-font}
+  {
+    \providedby{\sty{glossaries-extra} v1.17+}
+     \syntax{\margm{text}} 
+     \desc{long form font used by the \qt{only} abbreviation styles}
+  }   
+  % \glsabbrvonlyfont
+  \gcmd{gls\-abbrv\-only\-font} 
+  {
+    \providedby{\sty{glossaries-extra} v1.17+}
+     \syntax{\margm{text}}
+     \desc{short form font used by the \qt{only} abbreviation styles}
+  }
+  % \glsxtrnewsymbol
+  \gcmd{gls\-xtr\-new\-symbol}%
+  {%
+    \syntax{\oargm{key=value list}\margm{label}\margm{sym}}
+    \providedby{\sty{glossaries-extra}}
+    \note{requires \code{\csfmt{usepackage}\oarg{\opt{symbols}}\marg{glossaries-extra}}}
+    \desc{defines a new \idx{glossary} entry with the given label,
+    \gloskey{type} set to \code{symbols}, the \gloskey{category} set
+    to \code{symbol}, the \gloskey{name} set to \meta{sym} and the \gloskey{sort}
+    set to \meta{label}. The optional argument is a comma-separated list of \idxpl{gloskey},
+    which can be used to override the defaults}
+  }
+  % \newacronym
+  \gcmd{new\-acronym}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\margm{short}\margm{long}}
+    \desc{this command is provided by the base \sty{glossaries}
+     package but is redefined by \sty{glossaries-extra} to use
+     \gls{newabbreviation} with the \gloskey{category} key set to
+     \cat{acronym}. With just the base \sty{glossaries} package, use
+     \gls{setacronymstyle} to set the style. With
+     \sty{glossaries-extra}, use
+     \code{\gls{setabbreviationstyle}\oarg{\cat{acronym}}\margm{style}} to
+     set the style that governs \gls{newacronym}}
+  }
+  % \setacronymstyle
+  \gcmd{set\-acronym\-style}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{glossary-type}\margm{style-name}}
+    \desc{sets the acronym style. Don't use with \sty{glossaries-extra}}
+  }
+  % \newabbreviation
+  \gcmd{new\-abbreviation}
+  {
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\oargm{options}\margm{label}\margm{short}\margm{long}}
+    \desc{defines a new entry that represents an abbreviation.
+     This internally uses \gls{newglossaryentry} and any provided
+     \meta{options} (\idxpl{gloskey}) will be appended. The
+     \gloskey{category} is set to \cat{abbreviation} by default, but
+     may be overridden in \meta{options}. The
+     appropriate style should be set before the abbreviation is
+     defined with \gls{setabbreviationstyle}}
+  }
+  % \setabbreviationstyle
+  \gcmd{set\-abbreviation\-style}
+  {
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\oargm{category}\margm{style-name}}
+     \desc{sets the current \idx{abbrstyle} to \meta{style-name}
+      for the category identified by \meta{category}. If the
+      optional argument is omitted, \cat{abbreviation} is assumed}
+  }
+  % \acrlong
+  \gcmdsp{acr\-long}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{displays the long form of an acronym. Only for use with
+     the base \sty{glossaries} package's acronym mechanism. With
+    \sty{glossaries-extra}, use \gls{glsxtrlong} instead}
+  }
+  % \acrshort
+  \gcmdsp{acr\-short}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{displays the short form of an acronym. Only for use with
+     the base \sty{glossaries} package's acronym mechanism. With
+    \sty{glossaries-extra}, use \gls{glsxtrshort} instead}
+  }
+  % \glsxtrlong
+  \gcmdsp{gls\-xtr\-long}
+  {
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{displays the long form of an abbreviation}
+  }
+  % \glsxtrshort
+  \gcmdsp{gls\-xtr\-short}
+  {
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\oargm{options}\margm{label}\oargm{insert}}
+    \desc{displays the short form of an abbreviation}
+  }
+  % \ifglsused
+  \gcmd{if\-gls\-used}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{label}\margm{true text}\margm{false text}}
+    \desc{does \meta{true} if the entry has been marked as
+    \idxc{firstuseflag}{used} and does \meta{false} if the entry is
+    marked as \idxc{firstuseflag}{unused}}
+  }
+  % \glsnoexpandfields
+  \gcmd{gls\-no\-expand\-fields}
+  {
+    \providedby{\sty{glossaries}}
+    \desc{don't expand field values when defining entries, except
+     for those that explicitly have expansion enabled}
+  }
+  % \glsreset
+  \gcmd{gls\-reset}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{label}}
+    \desc{globally resets the entry's \idx{firstuseflag}. That is, this marks the entry
+     as \qt{not used}}
+  }
+  % \glsunset
+  \gcmd{gls\-unset}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\margm{label}}
+    \desc{globally unsets the entry's \idx{firstuseflag}. That is, this marks the entry
+     as \qt{used}}
+  }
+  % \glsresetall
+  \gcmd{gls\-reset\-all}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{types}}
+    \desc{globally resets all entries associated with the listed
+     glossaries or all glossaries if \meta{types} is omitted}
+  }
+  % \glsunsetall
+  \gcmd{gls\-unset\-all}
+  {
+    \providedby{\sty{glossaries}}
+    \syntax{\oargm{types}}
+    \desc{globally unsets all entries associated with the listed
+     glossaries or all glossaries if \meta{types} is omitted}
+  }
+  % \glslowercase
+  \gcmd{gls\-lower\-case}
+  {
+    \providedby{\sty{glossaries} v4.50+}
+    \syntax{\margm{text}}
+    \desc{converts \meta{text} to \idx{lowercase} using the modern \LaTeX3
+    case-changing command, which is expandable}
+  }
+  % \makefirstuc
+  \gcmd{make\-first\-uc}%
+  {%
+    \syntax{\margm{text}}
+    \providedby{\sty{mfirstuc}}
+    \desc{robust command that converts the first character of \meta{text} to
+    \idx{uppercase} (\idx{sentencecase}). See the \sty{mfirstuc} 
+    documentation for further details, either:
+    \texdocref{mfirstuc} or visit \ctanpkg{mfirstuc}}
+  }
+  % \nopostdesc
+  \gcmd{no\-post\-desc}
+  {%
+    \providedby{\sty{glossaries} v1.17+}
+    \desc{when placed at the end of the \gloskey{description}, this
+     switches off the post-description punctuation (if it has been
+     enabled). Does nothing outside of the \idx{glossary}}
+  }
+  % \seename
+  \gcmd{see\-name}
+  {
+    \providedby{\sty{glossaries}}
+    \initval{see}
+    \note{language-sensitive}
+    \desc{used as a cross-reference tag}
+  }
+  % \seealsoname
+  \gcmd{see\-also\-name}
+  {
+    \providedby{\sty{glossaries-extra}}
+    \initval{see also}
+    \note{language-sensitive}
+    \desc{used as a cross-reference tag}
+  }
+  % \newglossaryentry (glossentry) keys
+  \gidxpl{gloskey}{%
+    \common
+    \field{text}{glossary entry key}
+    \desc{these are options that can be passed to commands that
+     define entries, such as \gls{newglossaryentry} or
+     \gls{newabbreviation}}
+  }
+  % glossentry name
+  \ggloskey{name}%
+  {%
+    \syntax{\margm{text}}
+    \desc{the entry's name, as displayed in the \idx{glossary}}
+  }
+  % glossentry description
+  \ggloskey{description}%
+  {%
+    \syntax{\margm{text}}
+    \desc{the entry's description, as displayed in the \idx{glossary}}
+  }
+  % glossentry type
+  \ggloskey{type}%
+  {%
+    \syntax{\meta{\idx{glossary}-label}}
+    \initval{\gls{glsdefaulttype}}%
+    \desc{assigns the entry to the \idx{glossary} identified by
+      \meta{\idx{glossary}-label}}
+  }
+  % glossentry parent
+  \ggloskey{parent}%
+  {%
+    \syntax{\meta{parent-label}}
+    \desc{the label of the entry's parent (from which the entry's
+    hierarchical level is obtained)}
+  }
+  % glossentry category
+  \ggloskey{category}%
+  {%
+    \syntax{\meta{category-label}}%
+    \initval{general}%
+    \providedby{\sty{glossaries-extra}}
+    \desc{the entry's \idx{category} (must be a simple label)}
+  }
+  % glossentry sort
+  \ggloskey{sort}%
+  {%
+    \syntax{\meta{value}}
+    \initval{\meta{entry name}}
+    \desc{specifies the value to use for sorting (overrides the
+     default). This key is usually required for \app+{xindy} if the
+      \gloskey{name} key only contains commands (for example, the
+      entry is a symbol), but explicitly using this key in other
+      contexts can break certain sort methods.
+      \gallerypage{bib2gls-sorting}{Don't use the \gloskey{sort} field
+      with \app{bib2gls}}}
+  }
+  % glossentry see
+  \ggloskey{see}%
+  {%
+    \syntax{\oargm{tag}\margm{label-list}}
+    \desc{indexes each item in \meta{label-list} with the
+     cross-reference in place of a normal location}
+  }
+  % glossentry seealso
+  \ggloskey{see\-also}%
+  {%
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\margm{label-list}}
+    \desc{like \gloskey{see} but always uses \gls{seealsoname} as the tag}
+  }
+  % glossentry alias
+  \ggloskey{alias}%
+  {%
+    \providedby{\sty{glossaries-extra}}
+    \syntax{\margm{xr-label}}
+    \desc{like \gloskey{see} but only allows a single
+    cross-reference with no optional tag, and sets up aliasing, which
+    changes the hyperlink target}
+  }
+  % glossentry text
+  \ggloskey{text}%
+  {%
+    \syntax{\margm{text}}
+    \desc{the entry's text, as displayed on \idx{subsequentuse} of
+     \gls{glslike} commands. If omitted, this value is assumed to be
+     the same as the \gloskey{name} key}
+  }
+  % glossentry plural
+  \ggloskey{plural}%
+  {%
+    \syntax{\margm{text}}
+    \desc{the entry's plural form, as displayed on \idx{subsequentuse} of
+     plural \gls{glslike} commands, such as \gls{glspl}. This should
+     be the appropriate plural form of the value provided by the
+    \gloskey{text} key. If omitted, this value is assumed to be the
+    value of the \gloskey{text} key with \gls{glspluralsuffix}
+    appended}
+  }
+  % glossentry symbol
+  \ggloskey{symbol}%
+  {%
+    \initval{\gls{relax}}
+    \syntax{\margm{symbol}}
+    \desc{the entry's associated symbol (optional), which can be
+     displayed with \gls{glssymbol} (if \gls{indexing} and hyperlinks are
+     required) or with \gls{glsentrysymbol}}
+  }
+  % glossentry first
+  \ggloskey{first}%
+  {%
+    \syntax{\margm{first}}
+    \desc{the entry's text, as displayed on \idx{firstuse} of
+     \gls{glslike} commands. If omitted,
+     this value is assumed to be the same as the \gloskey{text} key}
+  }
+  % glossentry firstplural
+  \ggloskey{first\-plural}%
+  {%
+    \syntax{\margm{text}}
+    \desc{the entry's plural form, as displayed on \idx{firstuse} of
+     plural \gls{glslike} commands, such as \gls{glspl}. If this key
+    is omitted, then the value will either be the same as the
+    \gloskey{plural} field, if the \gloskey{first} key wasn't used, or
+    the value will be taken from the \gloskey{first} key with
+    \gls{glspluralsuffix} appended}
+  }
+  % glossentry short
+  \ggloskey{short}%
+  {%
+    \syntax{\margm{short form}}
+    \desc{a key that is set implicitly by \gls{newabbreviation}
+     and \gls{newacronym} to the entry's short (abbreviated) form. It
+     typically shouldn't be used explicitly with
+     \gls{newglossaryentry}. However, if you are using \app{bib2gls}
+     then this field should be used in the \ext{bib} file when
+     defining abbreviations}
+  }
+  % glossentry long
+  \ggloskey{long}%
+  {%
+    \syntax{\margm{long form}}
+    \desc{a key that is set implicitly by \gls{newabbreviation}
+     and \gls{newacronym} to the entry's long (unabbreviated) form. It
+     typically shouldn't be used explicitly with
+     \gls{newglossaryentry}. However, if you are using \app{bib2gls}
+     then this field should be used in the \ext{bib} file when
+     defining abbreviations}
+  }
+  % glossentry shortplural
+  \ggloskey{short\-plural}%
+  {%
+    \syntax{\margm{plural short form}}
+    \desc{the plural corresponding to the \gloskey{short} key if the
+    default value is inappropriate}
+  }
+  % glossentry longplural
+  \ggloskey{long\-plural}%
+  {%
+    \syntax{\margm{plural long form}}
+    \desc{the plural corresponding to the \gloskey{long} key if the
+    default value is inappropriate}
+  }
+  % glossentry user1
+  \ggloskey{user1}%
+  {%
+    \syntax{\margm{text}}
+    \desc{a generic field, which can be
+     displayed with \gls{glsuseri} (if \gls{indexing} and hyperlinks are
+     required) or with \gls{glsentryuseri}}
+  }
+  % package option style
+  \gstyopt{style}%
+  {%
+    \syntax{\meta{style-name}}
+  }
+  % package option nogroupskip
+  \gstyopt{no\-group\-skip}
+  {
+    \initval{false}
+    \defval{true}
+    \syntax{\meta{boolean}}
+  }
+  % package option nopostdot
+  \gstyopt{no\-post\-dot}
+  {
+    \initval{false}
+    \defval{true}
+    \syntax{\meta{boolean}}
+  }
+  % package option postdot
+  \gstyopt{post\-dot}{\providedby{\sty{glossaries-extra}}}
+  % package option nonumberlist
+  \gstyopt{no\-number\-list}{}
+  % package option symbols
+  \gstyopt{symbols}{}
+  % package option numbers
+  \gstyopt{numbers}{}
+  % package option index
+  \gstyopt{index}{}
+  % package option abbreviations
+  \gstyopt{abbreviations}{}
+  % package option counter
+  \gstyopt{counter}%
+  {%
+    \syntax{\meta{counter-name}}
+  }
+  % package option toc
+  \gstyopt{toc}%
+  {%
+    \syntax{\meta{boolean}}
+  }
+  % package option section
+  \gstyopt{section}
+  {
+    \syntax{\meta{value}}
+  }
+  % package option acronym
+  \gstyopt{acronym}%
+  {%
+    \initval{false}
+    \defval{true}
+    \syntax{\meta{boolean}}
+  }
+  % package option acronyms
+  \gstyopt{acronyms}{}
+  % package option stylemods
+  \gstyopt{style\-mods}{}
+  % package option sort
+  \gstyopt{sort}%
+  {%
+    \syntax{\meta{setting}}
+  }
+  % package option sanitizesort
+  \gstyopt{sanitize\-sort}{}
+  % package option record
+  \gstyopt{record}%
+  {%
+    \initval{off}
+    \defval{only}
+    \syntax{\meta{setting}}
+  }
+  % package option automake
+  \gstyopt{auto\-make}{}
+  % package option xindy
+  \gstyopt{xindy}{}
+  % package option order
+  \gstyopt{order}{}
+  % package option nohypertypes
+  \gstyopt{no\-hyper\-types}{\syntax{\margm{label list}}}
+  % package option hyperfirst
+  \gstyopt{hyper\-first}
+  {
+     \initval{true}
+     \defval{true}
+     \syntax{\meta{boolean}}
+  }
+  % category: abbreviation
+  \gcat{abbreviation}{}
+  % category: acronym
+  \gcat{acronym}{}
+  % glossary style: index
+  \gglosty{index}{}
+  % glossary style: indexgroup
+  \gglosty{index\-group}{}
+  % glossary style: mcolindex
+  \gglosty{mcol\-index}{}
+  % glossary style: altlist
+  \gglosty{alt\-list}{}
+  % glossary style: long4col
+  \gglosty{long4col}{}
+  % acronym style: long-short
+  \gacrsty{long\dhyphen short}{}
+  % acronym style: long-sc-short
+  \gacrsty{long\dhyphen sc\dhyphen short}{}
+  % acronym style: long-short-desc
+  \gacrsty{long\dhyphen short\dhyphen desc}{}
+  % acronym style: short-long
+  \gacrsty{short\dhyphen long}{}
+  % acronym style: short-long-desc
+  \gacrsty{short\dhyphen long\dhyphen desc}{}
+  % abbreviation style: long-short
+  \gabbrsty{long\dhyphen short}{}
+  % abbreviation style: long-short-sc
+  \gabbrsty{long\dhyphen short\dhyphen sc}{}
+  % abbreviation style: short-nolong
+  \gabbrsty{short\dhyphen nolong}{}
+  % abbreviation style: long-only-short-only
+  \gabbrsty{long\dhyphen only\dhyphen short\dhyphen only}{}
+  % resource option src
+  \gresourceopt{src}{\syntax{bib list}}
+  % resource option type
+  \gresourceopt{type}{\syntax{glossary-label}}
+  % resource option sort
+  \gresourceopt{sort}{\syntax{method}}
+  % resource option sort-field
+  \gresourceopt{sort\dhyphen field}{\syntax{field name}}
+  % resource option save-locations
+  \gresourceopt{save\dhyphen locations}{\syntax{\meta{boolean}}}
+  % printgloss style
+  \gprintglossopt{style}{%
+    \syntax{\meta{style-name}}
+  }
+  % printgloss type
+  \gprintglossopt{type}{%
+    \syntax{\meta{glossary-label}}
+  }
+  % printgloss nonumberlist
+  \gprintglossopt{no\-number\-list}{}
+  % printgloss toctitle
+  \gprintglossopt{toc\-title}{}
+  % printgloss sort
+  \gprintglossopt{sort}{}
+  % general commands and environments
+  \gcmd{textsc}{}% \textsc
+  \gcmd{item}{}% \item
+  \gcmd{tex\-or\-pdf\-string}{}% \texorpdfstring
+  \genv{description}{}
+  % applications:
+  \gapp{make\-index}{}
+  \gapp{xindy}{}
+  \gapp{make\-glos\-saries}{}
+  \gapp{make\-glos\-saries\dhyphen lite}{}% makeglossaries-lite
+  \gapp{bib2gls}{}
+  \gapp{arara}{}
+  % --group
+  \glongswitch{group}{\inapp{bib2gls}}
+  % -g
+  \gshortswitch{g}{\inapp{bib2gls}\field{alias}{switch.group}}
+  % packages
+  \gpkg{glossaries}{\common}% glossaries.sty
+  \gpkg{glossaries\dhyphen extra}{\common}% glossaries-extra.sty
+  \gpkg{glossary\dhyphen mcols}{}% glossary-mcols.sty
+  \gpkg{data\-tool}{}% datatool.sty
+  \gpkg{data\-tool\dhyphen base}{}% datatool-base.sty
+  \gpkg{mfirst\-uc}{}% mfirstuc.sty
+  \gpkg{hyper\-ref}{}% hyperref.sty
+  \gpkg{babel}{}% babel.sty
+  \gpkg{poly\-glossia}{}% polyglossia.sty
+  \gpkg{input\-enc}{}% inputenc.sty
+  \gpkg{font\-enc}{}% fontenc.sty
+  % files
+  \gfilemeta{glossaries\dhyphen}{language}{}{}% glossaries-<language>
+  \gfile{glossaries\dhyphen french}{}% glossaries-french
+  \gfile{glossaries\dhyphen german}{}% glossaries-german
+  \gext{log}{}
+  \gext{tex}{}
+  \gext{bib}{}
+  \gext{glo}{}
+  \gext{gls}{}
+  \gext{glg}{}
+  \gext{ist}{}
+  \gext{xdy}{}
+  \gext{aux}{}
+  \gext{glstex}{}
+  \gext{alg}{}
+  \gext{acr}{}
+  \gext{acn}{}
+  % terms
+  \gterm{field}%
+  {%
+    \name{field}
+    \desc{entry data is stored in fields. These may have a
+     corresponding key used to set the value, such as \gloskey{name}
+     or \gloskey{description}}
+  }
+  \gterm{indexing}{%
+    \name{indexing (or recording)}
+    \field{text}{indexing}
+    \desc{the process of saving the location (for example, the page number) and any
+      associated information that is required in the \idx{glossary}.
+      The data may be sorted and collated by an indexing application
+      as part of the document build}
+  }
+  \gterm{glossary}%
+  {%
+    \common
+    \name{glossary}
+    \field{plural}{glossaries}
+    \desc{technically a glossary is an alphabetical list of words
+    relating to a particular topic. For the purposes of describing
+    the \styfmt{glossaries} and \sty{glossaries-extra} packages, a
+    glossary is either the list produced by commands like
+    \gls{printglossary} or \gls{printunsrtglossary} (which may or
+    may not be ordered alphabetically) or a glossary is a set of
+    entry labels where the set is identified by the glossary label
+    or type}
+  }
+  \gterm{firstuseflag}{\name{first use flag}%
+    \common
+    \desc{a conditional that keeps track of whether or not an entry
+     has been referenced by any of the \gls{glslike} commands (which
+     can adjust their behaviour according to whether or not this flag is
+     true). The conditional is true if the entry hasn't been used by
+     one of these commands
+     (or if the flag has been reset) and false if it has been used
+     (or if the flag has been unset)}
+  }
+  \gterm{firstuse}{\name{first use}%
+    \common
+    \desc{the first time an entry is used by a command that unsets
+     the \idx{firstuseflag} (or the first time since the flag was
+     reset)}
+  }
+  \gterm{firstusetext}{\name{first use text}%
+    \common
+    \desc{the \idx{linktext} that is displayed on \idx{firstuse} of
+    the \gls{glslike} commands}
+  }
+  \gterm{subsequentuse}{\name{subsequent use}
+    \common
+    \desc{using an entry that unsets the \idx{firstuseflag} when it
+    has already been unset}
+  }
+  \gterm{glslike}{\common\name{{}\csfmt{gls}-like}
+    \desc{commands like \gls{gls} that change the
+    \idx{firstuseflag}. These commands index the entry (if indexing
+    is enabled), create a hyperlink to the entry's \idx{glossary} listing (if enabled)
+    and unset the \idx{firstuseflag}}
+  }
+  \gterm{linktext}{\name{link text}%
+    \desc{the text produced by commands like \gls{gls} that have the 
+    potential to be a hyperlink}
+  }
+  \gterm{semanticcommand}{\name{semantic command}
+    \desc{essentially, a semantic command is one that's associated with a
+    particular document element, idea or topic that hides the font
+    and other stylistic formatting inside its definition. For
+    example, Latin taxonomy is usually displayed in italic.
+    Explicitly using font commands, for example
+    \code{\cmd{textit}\marg{Clostridium}}, is syntactic markup.
+    Whereas defining a command called, say, \csfmt{bacteria} that
+    displays its argument in italics is a semantic command. The
+    actual styling is hidden and the command relates specifically to
+    a particular concept.
+\begin{codebox}
+Syntactic: \cmd{textit}\marg{Clostridium}\codepar
+\cmd{newrobustcmd}*\marg{\cmd{bacteria}}[1]\marg{\cmd{emph}\marg{\#1}}\%\newline
+Semantic: \cmd{bacteria}\marg{Clostridium}
+\end{codebox}
+    The end result is the same:
+\begin{resultbox}
+Syntactic: \textit{Clostridium}\glspar
+Semantic: \emph{Clostridium}
+\end{resultbox}
+    The advantage with semantic commands is that it's much easier to
+    change the style, simply by adjusting the command definition.
+    Note that I've used \csfmt{newrobustcmd} to make the semantic
+    command robust as the style commands can cause a problem if they
+    expand too soon. Alternatively, use \csfmt{NewDocumentCommand}}
+  }
+  % index only
+  \gidx{uppercase}{\field{seealso}{idx.sentencecase}}
+  \gidx{lowercase}{}
+  \gidx{sentencecase}{\name{sentence case}}
+  \gidx{allcaps}{\name{all caps}}
+  % punctuation
+  \gpunc{sym.nbsp}{\name{\code{\textasciitilde} (non-breaking space)}
+    \field{see}{idx.nbsp}
+  }
+  \gidx{nbsp}{\name{non-breaking space (\code{\textasciitilde})}
+    \field{symbol}{\code{\textasciitilde}}
+  }
+  \gpunc{sym.colon}{\name{\code{:} (colon)}}
+  \gpunc{unknowntag}{\name{\code{??} (unknown entry marker)}
+    \field{text}{\code{??}}}
+  % indexing options
+  \gidx{opt.noidx}{\name{Option 1 (\qt{noidx})}\field{text}{1}}
+  \gidx{opt.mkidx}{\name{Option 2 (\appfmt{makeindex})}\field{text}{2}}
+  \gidx{opt.xdy}{\name{Option 3 (\appfmt{xindy})}\field{text}{3}}
+  \gidx{opt.b2g}{\name{Option 4 (\appfmt{bib2gls})}\field{text}{4}}
+}
+
+\title{The glossaries package v4.56: 
+a guide for beginners}
+\author{Nicola L.C. Talbot\\\href{https://www.dickimaw-books.com/}{\nolinkurl{dickimaw-books.com}}}
+\date{2025-03-03}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \sty{glossaries} package is very flexible, but this means
+that it has a~lot of options, and since a user guide is supposed to
+provide a complete list of all the high-level user commands, the main
+user manual is quite big. This can be rather
+daunting for beginners, so this document is a brief introduction
+just to help get you started. If you find yourself saying, 
+\qt{but how can I do\ldots?} then it's time to move on to the 
+\docref{main user manual}{glossaries-user}.
+
+I've made some statements in this document that don't actually tell
+you the full truth, but it would clutter the document and cause
+confusion if I keep writing \qt{except when \ldots} or \qt{but you can
+also do this, that or the other} or \qt{you can do it this way but
+you can also do it that way, but that way may cause complications
+under certain circumstances}.
+\end{abstract}
+
+\tableofcontents
+
+\section{Getting Started}
+\label{sec:start}
+
+As with all packages, you need to load \sty+{glossaries} with
+\csfmt{usepackage}, but there are certain packages that must be loaded
+before \styfmt{glossaries}, \emph{if} they are required: \sty{hyperref},
+\sty{babel}, \sty{polyglossia}, \sty{inputenc} and \sty{fontenc}.
+(You don't have to load these packages, but if you want them, you
+must load them before \sty{glossaries}.)
+
+\begin{important}
+If you require multilingual support you must also install 
+the relevant language module. Each language module is called
+\file{glossaries-language}, where \meta{language} is the
+root language name. For example, \file{glossaries-french}
+or \file{glossaries-german}. If a language module is required,
+the \sty{glossaries} package will automatically try to load it
+and will give a warning if the module isn't found.
+\end{important}
+
+Once you have loaded the \sty{glossaries} package, you need to define
+your terms in the preamble and then you can use them throughout the
+document. Here's a simple example:
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\comment{define a term:}
+\gls{newglossaryentry}\marg{\strong{ex}}\marg{\gloskeyval{name}{sample},
+ \gloskeyval{description}{an example}}
+\cbeg{document}
+Here's my \gls{gls}\marg{\strong{ex}} term.
+\cend{document}
+\end{codebox*}
+The above defines a simple term identified by the label \qt{ex}.
+When the term is referenced by its label with \gls{gls}, the
+provided text (\qt{sample}) is inserted into the document:
+\begin{resultbox}
+Here's my sample term.
+\end{resultbox}
+Note that a description has been given in the definition but it doesn't
+appear in the document yet.
+
+In general, it's best to choose a label that's easy to remember and
+makes the source code (reasonably) easy to read. In the above example, a better
+label would be \qt{sample}, the same as the term itself. However,
+bear in mind that labels mustn't contain non-expandable content.
+The next example defines a term that's actually a symbol. 
+In this case, the label must be
+different from the provided term, which contains the commands to
+typeset the symbol:
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{newglossaryentry}\marg{\strong{emptyset}}\marg{
+ \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+ \gloskeyval{description}{the empty set}}
+\cbeg{document}
+The empty set is denoted \gls{gls}\marg{\strong{emptyset}}.
+\cend{document}
+\end{codebox*}
+This produces:
+\begin{resultbox}
+The empty set is denoted $\emptyset$.
+\end{resultbox}
+
+The next example defines a term with the label \qt{svm} that has both 
+a long form (\qt{support vector machine}) and a short form (\qt{SVM}):
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{setacronymstyle}\marg{\acrstyle{long-short}}
+\gls{newacronym}\marg{\strong{svm}}\marg{SVM}\marg{support vector machine}
+\cbeg{document}
+First use: \gls{gls}\marg{\strong{svm}}. Second use: \gls{gls}\marg{\strong{svm}}.
+\cend{document}
+\end{codebox*}
+This has used a different command to define the term, but the term is
+still referenced with \gls{gls} in the same way as before. However,
+the text produced by \gls{gls} now varies:
+\begin{resultbox}
+First use: support vector machine (SVM). Second use: SVM.
+\end{resultbox}
+In this case, the text (the \qt{\idx{linktext}}) produced by 
+\code{\gls{gls}\marg{svm}}
+changed after the \idx{firstuse}. The \idx{firstuse} produced the
+long form followed by the short form in parentheses because I set
+the acronym style to \acrstyle{long-short}. The \idx{subsequentuse}
+just showed the short form.
+
+I suggest you try the above examples to make sure you have the
+package correctly installed.  If you get an \qt{undefined control
+sequence} error for any of the examples provided in this guide, check that the version
+number at the top of this document matches the version you have
+installed. (Open the \ext+{log} file and search for the line that
+starts with \qt{Package: glossaries} followed by a date and
+version.) 
+
+\begin{important}
+Be careful of fragile commands. If a command causes a problem when
+used in one of the \gls{newglossaryentry} fields, consider adding
+\gls{glsnoexpandfields} before you start defining your entries.
+Where possible use robust \idxpl{semanticcommand}.
+\end{important}
+
+Abbreviations are slightly different if you use the extension package
+\sty+{glossaries-extra} (which needs to be installed separately).
+This automatically loads \sty{glossaries} so you don't need to
+explicitly load it:
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries-extra}
+\comment{commands provided by \sty{glossaries-extra}:}
+\gls{setabbreviationstyle}\marg{\abbrstyle{long-short}}
+\gls{newabbreviation}\marg{svm}\marg{SVM}\marg{support vector machine}
+\cbeg{document}
+First use: \gls{gls}\marg{svm}. Second use: \gls{gls}\marg{svm}.
+\cend{document}
+\end{codebox*}
+Since \abbrstyle{long-short} happens to be the default for
+\gls{newabbreviation} you may omit the \gls{setabbreviationstyle} 
+line in this example.
+
+If you still want to use \gls{newacronym} (rather than
+\gls{newabbreviation}) then you need the optional
+argument of \gls{setabbreviationstyle}:
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries-extra}
+\gls{setabbreviationstyle}\oarg{\cat{acronym}}\marg{\abbrstyle{long-short}}
+\gls{newacronym}\marg{svm}\marg{SVM}\marg{support vector machine}
+\cbeg{document}
+First use: \gls{gls}\marg{svm}. Second use: \gls{gls}\marg{svm}.
+\cend{document}
+\end{codebox*}
+In this example, if you omit the \gls{setabbreviationstyle} line you
+will notice a difference because the \abbrstyle{short-nolong} style (not
+the \abbrstyle{long-short} style) is the default with \gls{newacronym}.
+With the \abbrstyle{short-nolong} style the first use simply shows just
+the short form.
+
+\begin{important}
+You can't use \gls{setacronymstyle} with \sty{glossaries-extra}.
+\end{important}
+
+If you like, you can put all your definitions in another file (for
+example, \filefmt{defns.tex}) and load that file in the preamble using
+\gls{loadglsentries} with the filename as the argument. For example:
+\begin{codebox}
+\gls{loadglsentries}\marg{defns}
+\end{codebox}
+If you find you have a really large number of definitions that are
+hard to manage in a \ext+{tex} file, you might want to have a
+look at \app{bib2gls} (installed separately) which requires 
+a \ext+{bib} format instead.
+
+Avoid explicitly using formatting commands in abbreviation definitions 
+as they can interfere with the underlying mechanism. Instead, the
+formatting should be done by the style. For example, suppose I~want
+to replace \code{SVM} with \code{\gls{textsc}\marg{svm}}, then
+I~need to select a style that uses \gls{textsc}, like this (for the
+base \sty{glossaries} style):
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{setacronymstyle}\marg{\strong{\acrstyle{long-sc-short}}}
+\gls{newacronym}\marg{svm}\marg{svm}\marg{support vector machine}
+\cbeg{document}
+First use: \gls{gls}\marg{svm}. Second use: \gls{gls}\marg{svm}.
+\cend{document}
+\end{codebox*}
+The abbreviation styles have a different naming scheme with
+\sty{glossaries-extra}:
+\begin{codebox*}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries-extra}
+\comment{commands provided by \sty{glossaries-extra}:}
+\gls{setabbreviationstyle}\marg{\strong{\abbrstyle{long-short-sc}}}
+\gls{newabbreviation}\marg{svm}\marg{svm}\marg{support vector machine}
+\cbeg{document}
+First use: \gls{gls}\marg{svm}. Second use: \gls{gls}\marg{svm}.
+\cend{document}
+\end{codebox*}
+With \sty{glossaries-extra} you can have different abbreviation
+styles for different categories. Many of these styles have their
+own associated formatting commands that can be redefined 
+for minor adjustments. See the \sty{glossaries-extra} manual for
+further details or \gallerypage{sample-name-font}{Gallery: Mixing Styles}.
+
+As you can hopefully see from the above examples, there are two main ways of
+defining a term: as a general entry (\gls{newglossaryentry}) or as an
+abbreviation (\gls{newacronym} or, with \sty{glossaries-extra},
+\gls{newabbreviation}).
+
+\begin{information}
+Regardless of the method of defining a term, the term is always 
+given a label which is used to uniquely identify the term (like the standard
+\csfmt{label}\slash\csfmt{ref} or \csfmt{cite} mechanism). The label may be
+the same as the text produced with \gls{gls} (provided it doesn't
+contain any formatting commands) or may be completely different.
+\end{information}
+
+The labels are identified in bold in the following:
+\begin{codebox}
+\gls{newglossaryentry}\marg{\strong{elite}}\marg{\gloskeyval{name}{\'elite},
+ \gloskeyval{description}{select group}}
+\gls{newglossaryentry}\marg{\strong{set}}\marg{\gloskeyval{name}{set},
+ \gloskeyval{description}{collection of distinct elements}}
+\gls{newglossaryentry}\marg{\strong{sym.set}}\marg{
+ \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{mathcal}\marg{S}}},
+ \gloskeyval{description}{a set}}
+\gls{newacronym}\marg{\strong{tool.cnc}}\marg{CNC}\marg{computer numerical control}
+\gls{newacronym}\marg{\strong{police.cnc}}\marg{CNC}\marg{civil nuclear constabulary}
+\gls{newacronym}\marg{\strong{miltary.cnc}}\marg{CNC}\marg{commander in chief}
+\end{codebox}
+
+With modern \TeX\ installations you should now be able to use UTF-8
+characters in the label, but beware of active characters. For
+example, \sty{babel} makes some punctuation characters, such as
+\idx{sym.colon}, active for certain languages. This means that the
+character behaves like a command which is unsuitable for a label.
+
+For example, the following works:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{newglossaryentry}\marg{sym:set}\marg{\gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{mathcal}\marg{S}}},
+ \gloskeyval{description}{a set}}
+\cbeg{document}
+\gls{gls}\marg{sym:set}
+\cend{document}
+\end{codebox}
+However, if \sty{babel} is loaded with \optfmt{french} then the
+\idx{sym.colon} character becomes active.
+\begin{badcodebox}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}[T1]\marg{fontenc}
+\cmd{usepackage}[french]\marg{babel}
+\cmd{usepackage}\marg{glossaries}
+\codepar
+\comment{the colon : is a normal character here}
+\gls{newglossaryentry}\marg{sym:set}\marg{
+ \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{mathcal}\marg{S}}},
+ \gloskeyval{description}{a set}}
+\codepar
+\cbeg{document}
+\comment{the colon : is now an active character}
+\gls{gls}\marg{sym:set}
+\cend{document}
+\end{badcodebox}
+You may find that the above example seems to work, but a problem
+will occur if \sty{hyperref} and a \idx{glossary} list are added to the
+document as the active character will interfere with the hyperlink
+target name.
+
+\begin{important}
+Don't use \gls{gls} in chapter or section headings as it can have
+some unpleasant side-effects. Instead use \gls{glsentrytext} for
+regular entries and either \gls{glsentryshort} or \gls{glsentrylong}
+for acronyms. Alternatively use
+\sty{glossaries-extra} which provides special commands for use in
+section headings and captions, such as \gls{glsfmttext} and \gls{glsfmtshort}.
+\end{important}
+
+The above examples are reasonably straightforward. The difficulty
+comes if you want to display a \emph{sorted} list of all the entries you
+have used in the document. The \sty{glossaries-extra} package
+provides an easy way of listing all the defined entries:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}[\optval{sort}{none}]\marg{glossaries-extra}
+\codepar
+\gls{newglossaryentry}\marg{potato}\marg{\gloskeyval{name}{potato},
+ \gloskeyval{plural}{potatoes},
+ \gloskeyval{description}{starchy tuber}}
+\codepar
+\gls{newglossaryentry}\marg{cabbage}\marg{\gloskeyval{name}{cabbage},
+ \gloskeyval{description}{vegetable with thick green
+   or purple leaves}}
+\codepar
+\gls{newglossaryentry}\marg{turnip}\marg{\gloskeyval{name}{turnip},
+  \gloskeyval{description}{round pale root vegetable}}
+\codepar
+\gls{newglossaryentry}\marg{carrot}\marg{\gloskeyval{name}{carrot},
+  \gloskeyval{description}{orange root}}
+\codepar
+\cbeg{document}
+Chop the \gls{gls}\marg{cabbage}, \gls{glspl}\marg{potato} and 
+\gls{glspl}\marg{carrot}.
+\codepar
+\gls+{printunsrtglossaries} \comment{list all entries}
+\cend{document}
+\end{codebox}
+However this method doesn't sort the entries (they're listed in
+order of definition) and it will display all the defined entries,
+regardless of whether or not you've used them all in the document,
+so \qt{turnip} appears in the glossary even though there's
+no \code{\gls{gls}\marg{turnip}} (or similar) in the document.
+
+The \optval{sort}{none} option isn't essential in this case (there's
+no other sort option available for this document), but it prevents
+the automatic construction of the sort value and so slightly
+improves the document build time.
+
+This example document uses the same command
+(\gls{printunsrtglossaries}) that's used with \app{bib2gls} (\option{b2g})
+but with \app{bib2gls} you instead need to use the 
+\opt{record} package option (not \opt{sort}) and one or more instances of
+\gls{GlsXtrLoadResources} in the preamble (more on this later).
+
+Most users prefer to have an automatically sorted list that only
+contains entries that have been used in the document, optionally
+with a page list (\gls{indexing}).
+The \sty{glossaries} package provides
+three options: use \TeX\ to perform the sorting (\option{noidx}); use
+\app{makeindex} to perform the sorting (\option{mkidx}); use \app{xindy} to
+perform the sorting (\option{xdy}). The extension package \sty{glossaries-extra}
+provides a fourth method: use \app{bib2gls} (\option{b2g}).
+
+The first option (using \TeX) is the simplest method, as it doesn't
+require an external tool. It works best with at least version 3.0 of
+the \sty{datatool-base} package, which is provided with
+\sty{datatool} (and automatically loaded by \sty{glossaries}). 
+That version introduced the ability to provide localisation support,
+which needs to be installed separately. (See the \sty{datatool}
+manual for further details.)
+
+To use this method, add
+\gls{makenoidxglossaries} to the preamble (before the entries are
+defined) and put \gls{printnoidxglossaries} at the place where 
+you want your glossary.
+For example:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}\marg{glossaries}
+\codepar
+\gls{makenoidxglossaries} \comment{use TeX to sort}
+\codepar
+\gls{newglossaryentry}\marg{potato}\marg{\gloskeyval{name}{potato},
+ \gloskeyval{plural}{potatoes},
+ \gloskeyval{description}{starchy tuber}}
+\codepar
+\gls{newglossaryentry}\marg{cabbage}\marg{\gloskeyval{name}{cabbage},
+ \gloskeyval{description}{vegetable with thick green
+   or purple leaves}}
+\codepar
+\gls{newglossaryentry}\marg{turnip}\marg{\gloskeyval{name}{turnip},
+ \gloskeyval{description}{round pale root vegetable}}
+\codepar
+\gls{newglossaryentry}\marg{carrot}\marg{\gloskeyval{name}{carrot},
+ \gloskeyval{description}{orange root}}
+\codepar
+\cbeg{document}
+Chop the \gls{gls}\marg{cabbage}, \gls{glspl}\marg{potato} and 
+\gls{glspl}\marg{carrot}.
+\codepar
+\gls{printnoidxglossaries}
+\cend{document}
+\end{codebox}
+
+Try this out and run \LaTeX\ (or \pdfLaTeX) \emph{twice}. The first
+run won't show the \idx{glossary}. It will only appear on the second run.
+This doesn't include \qt{turnip} in the \idx{glossary} because that term
+hasn't been referenced (with commands like \code{\gls{gls}\marg{turnip}}) 
+in the document.
+
+The glossary has a vertical gap between the \qt{carrot} term and the
+\qt{potato} term. This is because the entries in the glossaries are
+grouped according to their first letter. If you don't want this gap,
+just add \opt{nogroupskip} to the package options:
+\begin{codebox}
+\cmd{usepackage}[\opt{nogroupskip}]\marg{glossaries}
+\end{codebox}
+or you may want to try out a style that shows the group headings:
+\begin{codebox*}
+\cmd{usepackage}[\optval{style}{\glostyle{indexgroup}}]\marg{glossaries}
+\end{codebox*}
+If you try out this example you may also notice that the description
+is followed by a full stop (period) and a number. The number is the
+location in the document where the entry was referenced (page~1 in this
+case), so you can look up the term in the \idx{glossary} and be directed to
+the relevant pages. It may be that you don't want this
+back-reference, in which case you can suppress it using the
+\opt{nonumberlist} package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{nonumberlist}]\marg{glossaries}
+\end{codebox}
+If you don't like the terminating full stop, you can suppress that
+with the \opt{nopostdot} package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot}]\marg{glossaries}
+\end{codebox}
+The \sty{glossaries-extra} package has this option as the default,
+so if you want terminating full stop, you need to explicitly add it
+with the \opt{postdot} option:
+\begin{codebox}
+\cmd{usepackage}[\opt{postdot}]\marg{glossaries-extra}
+\end{codebox}
+
+You may have noticed that I've used another command in the above examples:
+\glsadd{glslike}\gls{glspl}. This displays the plural form. By default, this is just
+the singular form with the letter \qt{s} appended, but in the case of
+\qt{potato} I had to specify the correct plural using the
+\gloskey{plural} key.
+
+Using \TeX\ to sort the entries is the simplest but least efficient
+method. If you have a large \idx{glossary}, then you will have a
+much faster build time if you use \app{makeindex} (\option{mkidx})
+or \app{xindy} (\option{xdy}) or \app{bib2gls} (\option{b2g}). If
+you are using extended Latin or non-Latin characters, then
+\app{xindy} or \app{bib2gls} are the recommended methods.  These
+methods are described in more detail in
+\sectionref{sec:printglossaries}.
+
+The rest of this document briefly describes the main commands
+provided by the \sty{glossaries} package. (Most of these are also
+available with \sty{glossaries-extra} but may behave slightly
+differently.)
+
+\section{Defining Terms}
+\label{sec:defterm}
+
+When you use the \sty{glossaries} package, you need to define
+glossary entries before you can reference them. This is best 
+done in the document preamble, as shown in the earlier examples, or
+in a separate file that's input in the preamble.
+
+These entries could be a~word, phrase, abbreviation or symbol.
+They're usually accompanied by a~description, which could be a short
+sentence or an in-depth explanation that spans multiple paragraphs.
+The simplest method of defining an entry is to use:
+\cmddef{newglossaryentry}
+where \meta{label} is a unique label that identifies this entry.
+(Don't include the angle brackets \meta{ }. They just indicate the parts of
+the code that you need to change when you use this command in your document.) 
+The two most important keys are \gloskey{name} and
+\gloskey{description}:
+\begin{compactcodebox}
+\gls{newglossaryentry}\margm{label}
+\marg{
+  \gloskeyval{name}{\meta{name}},
+  \gloskeyval{description}{\meta{description}},
+  \meta{other options}
+}
+\end{compactcodebox}%
+The \meta{name} is the word, phrase or symbol you are defining,
+and \meta{description} is the description to be displayed in the
+glossary.
+
+This command is a \qt{short} command, which means that
+\meta{description} can't contain a~paragraph break. If you have
+a~long description, you can instead use:
+\cmddef{longnewglossaryentry}
+In this case the \gloskey{name} key is in the second argument but the
+description is supplied in the third argument instead of via a key.
+\begin{compactcodebox}
+\gls{longnewglossaryentry}\margm{label}
+\marg{
+  \gloskeyval{name}{\meta{name}},
+  \meta{other options}
+}
+\margm{description}
+\end{compactcodebox}
+
+Examples:
+\begin{enumerate}
+\item Define the term \qt{set} with the label \code{set}:
+\begin{codebox}
+\gls{newglossaryentry}\marg{set}
+\marg{
+  \gloskeyval{name}{set},
+  \gloskeyval{description}{a collection of objects}
+}
+\end{codebox}
+
+\item Define the symbol $\emptyset$ with the label
+\code{emptyset}:
+\begin{codebox}
+\gls{newglossaryentry}\marg{emptyset}
+\marg{
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the empty set}
+}
+\end{codebox}
+(This will also need a \gloskey{sort} key if you use \optionsor{noidx,xdy}, see
+below.)
+
+\item Define the phrase \qt{Fish Age} with the label
+\code{fishage}:
+\begin{codebox}
+\gls{longnewglossaryentry}\marg{fishage}
+\marg{\gloskeyval{name}{Fish Age}}
+\marg{\%
+  A common name for the Devonian geologic period 
+  spanning from the end of the Silurian Period to
+  the beginning of the Carboniferous Period.
+\codepar
+  This age was known for its remarkable variety of 
+  fish species.
+}
+\end{codebox}
+(The percent character discards the end of line character that would
+otherwise cause an unwanted space to appear at the start of the
+description.)
+
+\item If you are using UTF-8 characters with the \sty{inputenc}
+package, make sure you have \sty{mfirstuc} v2.08+ installed:
+\begin{codebox}
+\comment{\sty{mfirstuc} v2.08+}
+\gls{newglossaryentry}\marg{\'elite}
+\marg{
+  \gloskeyval{name}{\'elite},
+  \gloskeyval{description}{select group or class}
+}
+\end{codebox}
+If you have an older version of \sty{mfirstuc} then any initial
+character that is an extended Latin or non-Latin character must be
+grouped in order to work with sentence-casing commands, such as
+\gls{Gls}. An older version possibly also means there may not be support
+for UTF-8 characters in labels either:
+\begin{codebox}
+\comment{\sty{mfirstuc} v2.07 or older}
+\gls{newglossaryentry}\marg{elite}
+\marg{
+  \gloskeyval{name}{\marg{\'e}lite},
+  \gloskeyval{description}{select group or class}
+}
+\end{codebox}
+Likewise if accent commands are used:
+\begin{codebox}
+\gls{newglossaryentry}\marg{elite}
+\marg{
+  \gloskeyval{name}{\marg{\cmd{'}e}lite},
+  \gloskeyval{description}{select group or class}
+}
+\end{codebox}
+\end{enumerate}
+
+If you use \app{bib2gls} with \sty{glossaries-extra} then the
+terms must be defined in a \ext+{bib} file. For example:
+\begin{codebox}
+\comment{Encoding: UTF-8}
+\codepar
+\atentry{entry}\marg{set,
+  \gloskeyval{name}{set},
+  \gloskeyval{description}{a collection of objects}
+}
+\codepar
+\atentry{entry}\marg{emptyset,
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the empty set}
+}
+\codepar
+\atentry{entry}\marg{fishage,
+  \gloskeyval{name}{Fish Age},
+  \gloskeyval{description}{A common name for the Devonian 
+  geologic period spanning from the end of the 
+  Silurian Period to the beginning of the 
+  Carboniferous Period.
+\codepar
+  This age was known for its remarkable variety of 
+  fish species.}
+}
+\codepar
+\atentry{entry}\marg{\'elite,
+  \gloskeyval{name}{\'elite},
+  \gloskeyval{description}{select group or class}
+}
+\end{codebox}
+(The \ext+{bib} format doesn't allow spaces in labels so you can't
+have \code{fish age} as the label, but you can have 
+\code{fish-age}.)
+This method requires \sty{glossaries-extra}['s] \opt{record}
+package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{record}]\marg{glossaries-extra}
+\end{codebox}
+The \ext{bib} file is specified in the resource command. For
+example, if the \ext{bib} file is called \filefmt{entries.bib}
+then put the following line in the document preamble:
+\begin{codebox}
+\gls{GlsXtrLoadResources}\oarg{\resourceoptvalm{src}{entries}}
+\end{codebox}
+You can have a comma-separated list. For example, if you also
+have entries defined in the file \filefmt{entries2.bib}:
+\begin{codebox}
+\gls{GlsXtrLoadResources}\oarg{\resourceoptvalm{src}{entries,entries2}}
+\end{codebox}
+
+There are other keys you can use when you define an entry. For
+example, the \gloskey{name} key indicates how the term
+should appear in the list of entries (\idx{glossary}), but if the term should
+appear differently when you reference it with \code{\gls{gls}\margm{label}} in 
+the document, you need to use the \gloskey{text} key as well.
+
+For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{latinalph}
+\marg{
+  \gloskeyval{name}{alphabet, Latin},
+  \gloskeyval{text}{Latin alphabet},
+  \gloskeyval{description}{alphabet consisting of the letters 
+  a, \cmd{ldots}, z, A, \cmd{ldots}, Z}
+}
+\end{codebox}
+This will appear in the text as \qt{Latin alphabet} but will be listed in
+the glossary as \qt{alphabet, Latin} (and therefore sorted under
+\qt{A} not \qt{L}).
+With \app{bib2gls} this entry is defined in the \ext{bib}
+file as:
+\begin{codebox}
+\atentry{entry}\marg{latinalph,
+  \gloskeyval{name}{alphabet, Latin},
+  \gloskeyval{text}{Latin alphabet},
+  \gloskeyval{description}{alphabet consisting of the letters 
+  a, \cmd{ldots}, z, A, \cmd{ldots}, Z}
+}
+\end{codebox}
+
+Another commonly used key is \gloskey{plural} for specifying the
+plural of the term. This defaults to the value of the \gloskey{text}
+key with an \qt{s} appended, but if this is incorrect, just use the
+\gloskey{plural} key to override it:
+\begin{codebox}
+\gls{newglossaryentry}\marg{oesophagus}
+\marg{
+  \gloskeyval{name}{\oe{}sophagus},
+  \gloskeyval{plural}{\oe{}sophagi},
+  \gloskeyval{description}{canal from mouth to stomach}
+}
+\end{codebox}
+
+Abbreviations can be defined using:
+\cmddef{newacronym}
+where \meta{label} is the label (as per \gls{newglossaryentry}), 
+\meta{short} is the short form and \meta{long} is the long form. 
+For example, the
+following defines an abbreviation:
+\begin{codebox}
+\gls{newacronym}\marg{svm}\marg{SVM}\marg{support vector machine}
+\end{codebox}
+This internally uses \gls{newglossaryentry} to define an entry with
+the label \code{svm}. By default, the \gloskey{name} key is set to
+\meta{short} (\qt{SVM} in the above example) and the
+\gloskey{description} key is set to \meta{long} (\qt{support vector
+machine} in the above example). If, instead, you want to be able to
+specify your own description you can do this using the optional
+argument:
+\begin{codebox}
+\gls{newacronym}
+ \oarg{\gloskeyval{description}{statistical pattern recognition
+ technique}}
+ \marg{svm}\marg{SVM}\marg{support vector machine}
+\end{codebox}
+
+Before you define your acronyms, you need to specify which style to use with:
+\cmddef{setacronymstyle}
+where \meta{style-name} is the name of the style. There are a number
+of predefined styles, such as: \acrstyle{long-short} (on \idx{firstuse}
+display the long form with the short form in parentheses);
+\acrstyle{short-long} (on \idx{firstuse} display the short form with the
+long form in parentheses); \acrstyle{long-short-desc} (like
+\acrstyle{long-short} but you need to specify the description); or
+\acrstyle{short-long-desc} (like \acrstyle{short-long} but you need to
+specify the description). There are some other styles as well that
+use \gls{textsc} to typeset the acronym in small-caps or that use a footnote on
+first use. See the main user guide for further details.
+
+The \sty{glossaries-extra} package provides improved abbreviation
+handling with \gallerypage{sample-abbr-styles}{a lot more predefined styles}.
+With this extension package, abbreviations are defined using:
+\cmddef{newabbreviation}
+You can still use \gls{newacronym} but it's redefined to 
+use the new abbreviation interface. The style must now be set using:
+\cmddef{setabbreviationstyle}
+The default \meta{category} is \cat{abbreviation}. If you use
+\gls{newacronym} the category is \cat{acronym}, which is why you
+need to use the optional argument if you define abbreviations with
+\gls{newacronym} when \sty{glossaries-extra} has been loaded:
+\begin{compactcodebox*}
+\gls{setabbreviationstyle}\oarg{\cat{acronym}}\margm{style name}
+\end{compactcodebox*}
+If you use \app{bib2gls} then abbreviations are defined in the
+\ext{bib} file in the format:
+\begin{compactcodebox*}
+\atentry{abbreviation}\marg{\meta{label},
+  \gloskeyval{long}{\meta{long form}},
+  \gloskeyval{short}{\meta{short form}}
+}
+\end{compactcodebox*}
+
+The plural forms for abbreviations can be specified using the
+\gloskey{longplural} and \gloskey{shortplural} keys. For example:
+\begin{codebox}
+\gls{newacronym}
+ \oarg{\gloskeyval{longplural}{diagonal matrices}}
+ \marg{dm}\marg{DM}\marg{diagonal matrix}
+\end{codebox}
+or (with \sty{glossaries-extra}):
+\begin{codebox}
+\gls{newabbreviation} \comxr
+ \oarg{\gloskeyval{longplural}{diagonal matrices}}
+ \marg{dm}\marg{DM}\marg{diagonal matrix}
+\end{codebox}
+If omitted, the defaults are again obtained by appending an \qt{s} to
+the singular versions. (The \sty{glossaries-extra} package provides
+a way of not appending \qt{s} for abbreviation plurals via category
+attributes.) With \app{bib2gls}, the definition in the
+\ext{bib} file is:
+\begin{codebox}
+\atentry{abbreviation}\marg{dm,
+  \gloskeyval{short}{DM},
+  \gloskeyval{long}{diagonal matrix},
+  \gloskeyval{longplural}{diagonal matrices}
+}
+\end{codebox}
+
+It's also possible to have both a~name and a~corresponding symbol.
+Just use the \gloskey{name} key for the name and the \gloskey{symbol} key
+for the symbol. For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{emptyset}
+\marg{
+  \gloskeyval{name}{empty set},
+  \gloskeyval{symbol}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the set containing no elements}
+}
+\end{codebox}
+or with \app{bib2gls} the definition in the \ext{bib} file is:
+\begin{codebox}
+\atentry{entry}\marg{emptyset,
+  \gloskeyval{name}{empty set},
+  \gloskeyval{symbol}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the set containing no elements}
+}
+\end{codebox}
+If you want commands such as \csfmt{emptyset} in the \gloskey{name} field 
+then you must supply a \gloskey{sort} value with \options{noidx,xdy} 
+otherwise you'll end up with errors from \TeX\ or \app{xindy}. With \option{mkidx}
+(\app{makeindex}) you're unlikely to get an error, but you may find
+the resulting order is a little odd. For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{emptyset}
+\marg{
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{sort}{empty set},
+  \gloskeyval{description}{the set containing no elements}
+}
+\end{codebox}
+This displays the symbol as $\emptyset$ but sorts according to
+\qt{empty set}. You may want to consider using
+\sty{glossaries-extra}['s] \opt{symbols} package option which
+provides
+\cmddef{glsxtrnewsymbol}
+This internally uses \gls{newglossaryentry} but automatically sets
+the \gloskey{sort} key to the \meta{label}. For example:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}[\opt{symbols}]\marg{glossaries-extra}
+\gls{makeglossaries}
+\gls{glsxtrnewsymbol}
+ \oarg{\gloskeyval{description}{the set containing no elements}}
+ \marg{emptyset}\comment{label (and sort value)}
+ \marg{\cmd{ensuremath}\marg{\cmd{emptyset}}}\comment{symbol}
+\cbeg{document}
+\gls{gls}\marg{emptyset}
+\gls{printglossaries}
+\cend{document}
+\end{codebox}
+Now the sort value is automatically set to the label \qt{emptyset}.
+
+With \app{bib2gls} you can define this entry in the \ext{bib} file
+as
+\begin{codebox}
+\atentry{entry}\marg{emptyset,
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the set containing no elements}
+}
+\end{codebox}
+in which case \app{bib2gls} will try to interpret the \gloskey{name} 
+field to determine the sort value. Alternatively you can use:
+\begin{codebox}
+\strong{\atentry{symbol}}\marg{emptyset,
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the set containing no elements}
+}
+\end{codebox}
+which will use the label (\code{emptyset}) as the sort value.
+(You don't need the \opt{symbols} package option in this case,
+unless you want a separate symbols list.) The corresponding document
+(where the definition is in the file \filefmt{entries.bib}) is now:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}[\opt{record}]\marg{glossaries-extra}
+\gls{GlsXtrLoadResources}\oarg{\resourceoptvalm{src}{entries}}
+\cbeg{document}
+\gls{gls}\marg{emptyset}
+\gls{printunsrtglossaries}
+\cend{document}
+\end{codebox}
+
+Note that, while the \gloskey{sort} key is advised for symbols when
+using \gls{makeglossaries} or \gls{makenoidxglossaries}, the
+\gloskey{sort} field shouldn't be used with \app{bib2gls}. Instead,
+\app{bib2gls} has its own algorithm for determining the sort value
+based on the entry type (\atentry{entry}, \atentry{symbol} etc) and
+various settings. See
+\gallerypage{bib2gls-sorting}{bib2gls gallery: sorting} for further
+details.
+
+\section{Using Entries}
+\label{sec:useterm}
+
+Once you have defined your entries, as described above, you can
+reference them in your document. There are a~number of commands to
+do this, but the most common one is:
+\cmddef{gls}
+where \meta{label} is the label you assigned to the entry when you
+defined it. For example, \code{\gls{gls}\marg{fishage}} will display \qt{Fish
+Age} in the text (given the definition from the previous section).
+If you are using \app{bib2gls} then this will display \idx{unknowntag} (like
+\csfmt{ref} and \csfmt{cite}) until \app{bib2gls} has created the
+relevant files and \LaTeX\ is rerun.
+
+If you are using the \sty{hyperref} package (remember to load it
+before \sty{glossaries}) \gls{gls} will create a hyperlink to the
+corresponding entry in the glossary. If you want to suppress the
+hyperlink for a particular instance, use the starred form \code{\gls{gls}*}
+for example, \code{\gls{gls}*\marg{fishage}}. The other commands described in
+this section all have a similar starred form.
+
+If the entry was defined as an acronym (using \gls{newacronym} with
+\sty{glossaries} described above) or an abbreviation (using
+\gls{newabbreviation} with \sty{glossaries-extra}), then \gls{gls}
+will display the full form the first time it's used (\idx{firstuse}) and just the
+short form on \idx{subsequentuse}. For example, if the style is
+set to \acrstyle{long-short}, then \code{\gls{gls}\marg{svm}} will display
+\qt{support vector machine (SVM)} the first time it's used, but the
+next occurrence of \code{\gls{gls}\marg{svm}} will just display \qt{SVM}.
+(If you use \gls{newacronym} with \sty{glossaries-extra} the default
+doesn't show the long form on \idx{firstuse}. You'll need to change the
+style first, as described earlier.)
+
+If you want the plural form, you can use:
+\cmddef{glspl}
+instead of \code{\gls{gls}\margm{label}}. For example,
+\code{\gls{glspl}\marg{set}} displays \qt{sets}.
+
+If the term appears at the start of a~sentence, you can convert the
+first letter to \idx{uppercase} (\idx{sentencecase}) using:
+\cmddef{Gls}
+for the singular form or
+\cmddef{Glspl}
+for the plural form. For example:
+\begin{codebox}
+\gls{Glspl}\marg{set} are collections.
+\end{codebox}
+produces \qt{Sets are collections}.
+
+If you've specified a symbol using the \gloskey{symbol} key, you can
+display it using:
+\cmddef{glssymbol}
+For example
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{newglossaryentry}\marg{emptyset}
+\marg{
+  \gloskeyval{name}{empty set},
+  \gloskeyval{symbol}{\cmd{ensuremath}\marg{\cmd{emptyset}}},
+  \gloskeyval{description}{the set containing no elements}
+}
+\cbeg{document}
+The \gls{gls}\marg{emptyset} is denoted \gls{glssymbol}\marg{emptyset}.
+\cend{document}
+\end{codebox}
+\begin{resultbox}
+The empty set is denoted $\emptyset$.
+\end{resultbox}
+
+\section{Displaying a List of Entries}
+\label{sec:printglossaries}
+
+In \sectionref{sec:start}, I mentioned that there are three options
+you can choose from to create an automatically sorted glossary with the base 
+\sty{glossaries} package. These are also available with the
+extension package \sty{glossaries-extra} along with a fourth
+option. These four options are listed below in a little more detail.
+\Tableref{tab:optionsp+c} summarises the main advantages and
+disadvantages.  (There's a more detailed summary in the main
+\sty{glossaries} user manual.) See also
+\dickimawhref{latex/buildglossaries/}{Incorporating makeglossaries or makeglossaries-lite or bib2gls into the document build}.
+
+Note that \app{makeindex} and \app{xindy} are general purpose
+indexing applications that are developed independently of
+\sty{glossaries} and \sty{glossaries-extra}. This makes them harder
+to integrate, as glossaries have more complex requirements than a
+simple index, particularly for documents where some terms may only
+appear in the description of another term. (There's also the
+possibility that they may change in a manner that becomes
+incompatible with \sty{glossaries} or may even be declared obsolete.)
+The \app{bib2gls} application, on the other hand, is designed
+specifically for, and developed alongside, the
+\sty{glossaries-extra} package.
+
+\begin{table}[htbp]
+ \caption{Comparison of Glossary Options}
+ \label{tab:optionsp+c}
+ {%
+ \centering
+ \begin{tabular}{>{\raggedright}p{0.3\textwidth}cccc}
+   & \bfseries \option{noidx} 
+   & \bfseries \option{mkidx} 
+   & \bfseries \option{xdy}
+   & \bfseries \option{b2g}\\
+   Requires \sty{glossaries-extra}? &
+   \conno & \conno & \conno & \conyes\\
+   Requires an external application? &
+   \conno & \conyes & \conyes & \conyes\\
+   Requires Perl? &
+   \conno & \conno & \conyes & \conno\\
+   Requires Java? &
+   \conno & \conno & \conno & \conyes\\
+   Can sort extended Latin
+   or non-Latin alphabets? &
+   \prono\tablefnmark{\asteriskmarker} & \prono & \proyes & \proyes\\
+   Efficient sort algorithm? &
+   \prono & \proyes & \proyes & \proyes\\
+   Can use different sort methods for each glossary? &
+   \proyes & \prono & \prono & \proyes\\
+   Any problematic sort values? &
+   \conyes & \conyes & \conyes & \conno\\
+   Can form ranges in the location lists? &
+   \prono & \proyes & \proyes & \proyes\\
+   Can have non-standard locations? &
+   \proyes & \prono & \proyes\tablefnmark{\textdagger} & \proyes
+ \end{tabular}
+ \par}\medskip
+ \tablefntext{\asteriskmarker}{Requires corresponding \sty{datatool} v3.0+
+localisation support.}
+ \tablefntext{\textdagger}{Requires some setting up.}
+\end{table}
+
+\begin{deflist}
+\itemtitle{\idxoptiondef{noidx}}
+
+\begin{itemdesc}
+ This is the simplest option but it's slow and if you want a sorted list,
+ it can be problematic with extended or non-Latin alphabets.
+ If the \gloskey{name} contains commands then  the
+ \gloskey{sort} value must be supplied unless you 
+ using the option \optval{sort}{def} 
+ or \optval{sort}{use}. This method works best with at least version
+ 3.0 of the \sty{datatool-base} package (which is supplied with
+ \sty{datatool} and automatically loaded by \sty{glossaries}).
+
+  \begin{enumerate}
+    \item Add \gls{makenoidxglossaries} to your preamble (before you
+    start defining your entries, as described in
+    \sectionref{sec:defterm}).
+
+    \item Put
+\begin{compactcodebox*}
+\gls{printnoidxglossary}\oarg{\printglossoptval{sort}{\meta{order}},\meta{other options}}
+\end{compactcodebox*}
+    where you want your list of entries to appear. The sort
+    \meta{order} may be one of: \code{word} (word ordering),
+    \code{letter} (letter ordering), \code{case} (case-sensitive
+    ordering), \code{def} (in order of definition) or
+    \code{use} (in order of use). Alternatively, use
+\begin{compactcodebox*}
+\gls{printnoidxglossaries}
+\end{compactcodebox*}%
+    to display all your glossaries (if you have more than one).
+
+    This option allows you to have different sort methods. For
+    example:
+\begin{codebox}
+\gls{printnoidxglossary}\oarg{\printglossoptval{sort}{word}}\comment{main glossary}
+\gls{printnoidxglossary}\oarg{
+ \printglossoptval{type}{symbols},\comment{symbols glossary}
+ \printglossoptval{sort}{use}}
+\end{codebox}
+
+    \item Run \LaTeX\ twice on your document. (As you would do to
+    make a~table of contents appear.) For example, click twice on
+    the \qt{typeset} or \qt{build} or \qt{PDF\LaTeX} button in your editor.
+  \end{enumerate}
+Here's a complete document (\filefmt{myDoc.tex}):
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}\marg{glossaries}
+\codepar
+\gls{makenoidxglossaries}\comment{use TeX to sort}
+\codepar
+\gls{newglossaryentry}\marg{sample}\marg{\gloskeyval{name}{sample},
+  \gloskeyval{description}{an example}}
+\codepar
+\cbeg{document}
+A \gls{gls}\marg{sample}.
+\codepar
+\comment{iterate over all indexed entries:}
+\gls{printnoidxglossaries}
+\cend{document}
+\end{codebox}
+Document build:
+\begin{terminal}
+pdflatex myDoc
+pdflatex myDoc
+\end{terminal}
+\end{itemdesc}
+
+\itemtitle{\idxoptiondef{mkidx}}
+
+\begin{itemdesc}
+   This option uses an application called \app{makeindex} to sort 
+   the entries. This application comes with all modern \TeX\ distributions, 
+   but it's hard-coded for the non-extended Latin alphabet. This process 
+   involves making \LaTeX\ write the glossary information to a temporary 
+   file which \app{makeindex} reads. Then \app{makeindex} writes 
+   a~new file containing the code to typeset the glossary. \LaTeX\ then 
+   reads this file on the next run. The \app{makeindex}
+   application is automatically invoked by the helper
+   \app{makeglossaries} script, which works out all the
+   appropriate settings from the \ext+{aux} file.
+
+   \begin{enumerate}
+    \item Add \gls{makeglossaries} to your preamble (before you start
+    defining your entries).
+
+    \item Put
+\begin{compactcodebox*}
+\gls{printglossary}\oargm{options}
+\end{compactcodebox*}%
+    where you want your list of entries (\idx{glossary}) to appear. (The
+    \printglossopt{sort} key isn't available in \meta{options}.)
+    Alternatively, use
+\begin{compactcodebox*}
+\gls{printglossaries}
+\end{compactcodebox*}%
+    which will display all glossaries (if you have more than one).
+
+\begin{important}
+All glossaries are sorted using the same method
+which may be identified with one of the package options:
+\optval{sort}{standard} (default), \optval{sort}{use}
+or \optval{sort}{def}.
+\end{important}
+
+    \item Run \LaTeX\ on your document. This creates files with the
+    extensions \ext+{glo} and \ext+{ist} (for example, if your 
+    \LaTeX\ document is called \filefmt{myDoc.tex}, then you'll have 
+    two extra files called \filefmt{myDoc.glo} and \filefmt{myDoc.ist}).
+    If you look at your document at this point, you won't see the 
+    \idx{glossary} as it hasn't been created yet.
+
+    \item Run \app{makeglossaries} with the base name of your 
+    document (without the \ext{tex} extension). If
+    you have access to a terminal or a command prompt then you need 
+    to run the command:
+\begin{terminal}
+makeglossaries myDoc
+\end{terminal}%
+   (Replace \filefmt{myDoc} with the base name of your \LaTeX\
+    document file without the extension.) If you don't have Perl installed
+    use \app{makeglossaries-lite} instead:
+\begin{terminal}
+makeglossaries-lite myDoc
+\end{terminal}
+
+\begin{important}
+Some beginners get confused by \app{makeglossaries} the
+application (run as a system command) and \gls{makeglossaries}
+the \LaTeX\ command which should be typed in the document
+preamble. These are two different concepts that happen to have
+similar looking names.
+\end{important}
+
+    If you don't know how to use the command prompt, then you can 
+    probably configure your text editor to add 
+    \app{makeglossaries} (or \app{makeglossaries-lite})
+    as a build tool, but each editor has a
+    different method of doing this, so I~can't give a~general
+    description. However, there are some guidelines in
+\dickimawhref{latex/buildglossaries/}{Incorporating
+makeglossaries or makeglossaries-lite or bib2gls into the document
+build}.
+    If you still have problems, try adding the \opt{automake}
+    package option:
+\begin{compactcodebox}
+\cmd{usepackage}[\opt{automake}]\marg{glossaries}
+\end{compactcodebox}
+
+    The default sort is word order (\qt{sea lion} comes before \qt{seal}). 
+    If you want letter ordering you need to add the
+    \optval{order}{letter} package option
+\begin{compactcodebox}
+\cmd{usepackage}[\optval{order}{letter}]\marg{glossaries}
+\end{compactcodebox}
+
+    \item Once you have successfully completed the previous step,
+    you can now run \LaTeX\ on your document again.
+   \end{enumerate}
+Here's a complete document (\filefmt{myDoc.tex}):
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}\marg{glossaries}
+\codepar
+\gls{makeglossaries} \comment{create \app{makeindex} files}
+\codepar
+\gls{newglossaryentry}\marg{sample}\marg{\gloskeyval{name}{sample},
+  \gloskeyval{description}{an example}}
+\codepar
+\cbeg{document}
+A \gls{gls}\marg{sample}.
+\codepar
+\comment{input files created by makeindex:}
+\gls{printglossaries}
+\cend{document}
+\end{codebox}
+Document build:
+\begin{terminal}
+pdflatex myDoc
+makeglossaries myDoc
+pdflatex myDoc
+\end{terminal}
+or
+\begin{terminal}
+pdflatex myDoc
+makeglossaries-lite myDoc
+pdflatex myDoc
+\end{terminal}
+\end{itemdesc}
+
+\itemtitle{\idxoptiondef{xdy}}
+
+\begin{itemdesc}
+   This option uses an application called
+   \app{xindy} to sort the entries. This application is more
+   flexible than \app{makeindex} and is able to sort extended
+   Latin or non-Latin alphabets. It comes with both \TeX~Live and 
+   MiK\TeX. Since \app{xindy} is a Perl script, you will also 
+   need to ensure that Perl is installed. In a~similar way to \option{mkidx}, this 
+   option involves making \LaTeX\ write the glossary information to 
+   a~temporary file which \app{xindy} reads. Then \app{xindy} 
+   writes a~new file containing the code to typeset the glossary. 
+   \LaTeX\ then reads this file on the next run. The \app{xindy}
+   application is automatically invoked by the helper
+   \app{makeglossaries} script, which works out all the
+   appropriate settings from the \ext+{aux} file.
+   See \url{http://www.xindy.org/} for further information about
+   \app{xindy} and links to its mailing list and issue tracker.
+
+   \begin{enumerate}
+     \item Add the \opt{xindy} option to the \sty{glossaries}
+package option list:
+\begin{compactcodebox}
+\cmd{usepackage}[\opt{xindy}]\marg{glossaries}
+\end{compactcodebox}%
+If you aren't using a Latin script, you may need to suppress the
+default number group:
+\begin{compactcodebox}
+\cmd{usepackage}[\optvalm{xindy}{glsnumbers=false}]\marg{glossaries}
+\end{compactcodebox}
+
+     \item Add \gls{makeglossaries} to your preamble (before you start
+     defining your entries).
+
+    \item Put
+\begin{compactcodebox*}
+\gls{printglossary}\oargm{options}
+\end{compactcodebox*}%
+    where you want your list of entries (glossary) to appear. (The
+    \printglossopt{sort} key isn't available in \meta{options}.)
+    Alternatively, use
+\begin{compactcodebox*}
+\gls{printglossaries}
+\end{compactcodebox*}
+
+\begin{important}
+All \idxpl{glossary} are sorted using the same method
+which may be identified with one of the package options:
+\optval{sort}{standard} (default), \optval{sort}{use}
+or \optval{sort}{def}.
+\end{important}
+
+    \item Run \LaTeX\ on your document. This creates files with the
+    extensions \ext+{glo} and \ext+{xdy} (for example, if your 
+    \LaTeX\ document is called \filefmt{myDoc.tex}, then you'll have 
+    two extra files called \filefmt{myDoc.glo} and \filefmt{myDoc.xdy}).
+    If you look at your document at this point, you won't see the 
+    \idx{glossary} as it hasn't been created yet.
+
+    \item Run \app{makeglossaries} with the base name of the
+    document (omitting the \ext{tex} extension).
+    If you have access to a terminal or a command prompt then 
+    you need to run the command:
+\begin{terminal}
+makeglossaries myDoc
+\end{terminal}%
+    (Replace \filefmt{myDoc} with the base name of your \LaTeX\
+    document file without the \ext{tex} extension.)
+    If you don't know how to use the command prompt, then as mentioned above, you may
+    be able to configure your text editor to add
+    \app{makeglossaries} as a build tool. Note that the \opt{automake} option
+    won't work in \TeX's restricted mode, as \app{xindy} isn't on the
+    list of trusted applications.
+
+    The default sort is word order (\qt{sea lion} comes before \qt{seal}). 
+    If you want letter ordering you need to add the
+    \optval{order}{letter} package option:
+\begin{compactcodebox}
+\cmd{usepackage}[\opt{xindy},\optval{order}{letter}]\marg{glossaries}
+\end{compactcodebox}
+
+    \item Once you have successfully completed the previous step,
+    you can now run \LaTeX\ on your document again.
+
+   \end{enumerate}
+Here's a complete document (\filefmt{myDoc.tex}):
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}[\opt{xindy}]\marg{glossaries}
+\codepar
+\gls{makeglossaries} \comment{create \app{xindy} files}
+\codepar
+\gls{newglossaryentry}\marg{sample}\marg{\gloskeyval{name}{sample},
+  \gloskeyval{description}{an example}}
+\codepar
+\cbeg{document}
+A \gls{gls}\marg{sample}.
+\codepar
+\gls{printglossaries} \comment{input files created by \app{xindy}}
+\cend{document}
+\end{codebox}%
+Document build:
+\begin{terminal}
+pdflatex myDoc
+makeglossaries myDoc
+pdflatex myDoc
+\end{terminal}
+
+If you use \app{xindy} and the \gloskey{name} only contains a command or
+commands (such as \csfmt{P} or
+\code{\cmd{ensuremath}\marg{\cmd{pi}}}) you must add the
+\gloskey{sort} key. This is also advisable for the other options
+(except \option{b2g}, \gallerypage{bib2gls-sorting}{which, in general, shouldn't
+have the \optfmt{sort} field set}), but is essential for \option{xdy}. For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{P}\marg{\gloskeyval{name}{\cmd{P}},\gloskeyval{sort}{P},
+  \gloskeyval{description}{paragraph symbol}}
+\end{codebox}
+
+\end{itemdesc}
+
+\itemtitle{\idxoptiondef{b2g}}
+
+\begin{itemdesc}
+   This requires the extension package \sty+{glossaries-extra} and
+   an application called \app{bib2gls}. This application is able
+   to sort extended Latin or non-Latin alphabets. It comes with both
+   \TeX~Live and MiK\TeX\ but requires Java. This method
+   works differently to \options{mkidx,xdy}. Instead of creating a file
+   containing the code to typeset the glossary it creates a
+   \ext+{glstex} file containing the entry definitions obtained from
+   data that was fetched from the \ext+{bib} file (or files), but only those entries 
+   that are required in the document are defined and they are 
+   defined in the order obtained from the chosen sort method. 
+   This means that you can just use
+   \gls{printunsrtglossary} to display each glossary (or
+   \gls{printunsrtglossaries} to display them all).
+
+   \begin{enumerate}
+   \item Add the \opt{record} option to the \sty{glossaries-extra}
+   package option list:
+\begin{compactcodebox}
+\cmd{usepackage}\oarg{\opt{record}}\marg{glossaries-extra}
+\end{compactcodebox}
+
+   \item Add one or more 
+\begin{compactcodebox*}
+\gls{GlsXtrLoadResources}\oarg{\resourceoptvalm{src}{\meta{bib list}},\meta{options}}
+\end{compactcodebox*}%
+   to your preamble where \meta{bib list} is the
+   list of \ext{bib} files containing the entries. You may
+   use different sort methods for each resource set. For example:
+\begin{codebox*}
+\cmd{usepackage}\oarg{\opt{record},\comment{using \app{bib2gls}}
+ \opt{abbreviations},\comment{create abbreviations list}
+ \opt{symbols},\comment{create symbols list}
+ \opt{numbers}\comment{create numbers list}
+}\marg{glossaries-extra}
+\codepar
+\gls{GlsXtrLoadResources}\oarg{
+  \resourceoptvalm{src}{terms},\comment{entries in terms.bib}
+\comment{put these entries in the 'main' list:}
+  \resourceoptval{type}{main},
+\comment{sort according to this locale:}
+  \resourceoptval{sort}{de-CH-1996}
+}
+\gls{GlsXtrLoadResources}\oarg{
+  \resourceoptvalm{src}{abbrvs},\comment{entries in abbrvs.bib}
+\comment{put these entries in the 'abbreviations' list:}
+  \resourceoptvalm{type}{abbreviations},
+\comment{case-sensitive letter (non-locale) sort:}
+  \resourceoptval{sort}{letter-case}
+}
+\gls{GlsXtrLoadResources}\oarg{
+  \resourceoptvalm{src}{syms},\comment{entries in syms.bib}
+\comment{put these entries in the 'symbols' list:}
+  \resourceoptval{type}{symbols},
+\comment{sort according to first use in the document:}
+  \resourceoptval{sort}{use}
+}
+\gls{GlsXtrLoadResources}\oarg{
+  \resourceoptvalm{src}{constants},\comment{entries in constants.bib}
+\comment{put these entries in the 'numbers' list:}
+  \resourceoptval{type}{numbers},
+\comment{sort according to the \gloskey{user1} field:}
+  \resourceoptval{sort-field}{user1},
+  \resourceoptval{sort}{double}\comment{double-precision numeric sort}
+}
+\end{codebox*}%
+The last resource set assumes that the entries defined in the
+file \filefmt{constants.bib} have a number stored in the \gloskey{user1}
+field. For example:
+\begin{compactcodebox}
+\atentry{number}\marg{pi,
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{pi}}},
+  \gloskeyval{description}{pi},
+  \gloskeyval{user1}{3.141592654}
+}
+\end{compactcodebox}
+
+   \item Put 
+\begin{compactcodebox*}
+\gls{printunsrtglossary}\oarg{\printglossoptval{type}{\meta{type}},\meta{options}}
+\end{compactcodebox*}%
+    where you want your list of entries (\idx{glossary}) to appear. (The
+    \printglossopt{sort} key isn't available in \meta{options}. The
+    \resourceopt{sort} setting needs to be
+    used in \gls{GlsXtrLoadResources} instead.)
+    Alternatively, use
+\begin{compactcodebox*}
+\gls{printunsrtglossaries}
+\end{compactcodebox*}
+    which will display all glossaries (if you have more than one).
+
+    \item Run \LaTeX\ on your document. The \opt{record} option 
+    adds information to the \ext+{aux} file that provides
+    \app{bib2gls} with all required details for each resource set.
+    For example, if the file is called \filefmt{myDoc.tex}:
+\begin{terminal}
+pdflatex myDoc
+\end{terminal}
+
+    \item Run \app{bib2gls}
+\begin{terminal}
+bib2gls myDoc
+\end{terminal}%
+or (if you need letter groups)
+\begin{terminal}
+bib2gls \switch{group} myDoc
+\end{terminal}
+
+    \item Run \LaTeX\ again.
+   \end{enumerate}
+Here's a complete document (\filefmt{myDoc.tex}) with only one
+resource set for brevity:
+\begin{codebox}
+\cmd{documentclass}\marg{article}
+\codepar
+\cmd{usepackage}[\opt{record}]\marg{glossaries-extra}
+\comment{input the \ext{glstex} file created by \app{bib2gls}:}
+\gls{GlsXtrLoadResources}
+ \oarg{\comment{instructions to \app{bib2gls}:}
+   \resourceoptvalm{src}{entries}, \comment{data in entries.bib}
+   \resourceoptval{sort}{en-GB}\comment{sort according to this locale}
+ }
+\codepar
+\cbeg{document}
+A \gls{gls}\marg{sample}.
+\codepar
+\comment{iterate over all defined entries:}
+\gls{printunsrtglossaries}
+\cend{document}
+\end{codebox}
+The accompanying \filefmt{entries.bib} file:
+\begin{compactcodebox}
+\atentry{entry}\marg{sample,
+  \gloskeyval{name}{sample},
+  \gloskeyval{description}{an example}
+}
+\end{compactcodebox}
+Document build:
+\begin{terminal}
+pdflatex myDoc
+bib2gls myDoc
+pdflatex myDoc
+\end{terminal}
+\end{itemdesc}
+
+\end{deflist}
+
+If you are having difficulty integrating \app{makeglossaries} (or
+\app{makeglossaries-lite}) or \app{bib2gls}
+into your document build process, you may want to consider using
+\app{arara}, which is a Java application that searches the
+document for special comment lines that tell \app{arara} which
+applications to run. For example, the file \filefmt{myDoc.tex} might
+start with:
+\begin{codebox}
+\araraline{pdflatex}
+\araraline{makeglossaries}
+\araraline{pdflatex}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\marg{glossaries}
+\gls{makeglossaries}
+\end{codebox}
+then to build the document you just need the single system call:
+\begin{terminal}
+arara myDoc
+\end{terminal}
+Alternatively, if you want to use \app{makeglossaries-lite}, change
+the second line to:
+\begin{compactcodebox}
+\araraline{makeglossarieslite}
+\end{compactcodebox}
+There's also a rule for \app{bib2gls}. For example, the following
+indicates that letter groups are required:
+\begin{codebox}
+\araraline{pdflatex}
+\araraline{bib2gls: \marg{ group: on }}
+\araraline{pdflatex}
+\cmd{documentclass}\marg{article}
+\cmd{usepackage}\oarg{\opt{record}}\marg{glossaries-extra}
+\gls{GlsXtrLoadResources}
+\end{codebox}
+
+\section{Customising the Glossary}
+\label{sec:glosstyle}
+
+The default glossary style uses the \env{description} environment
+to display the entry list. Each entry name is set in the optional
+argument of \gls{item} which means that it will typically be
+displayed in bold. You can switch to medium weight by redefining
+\gls{glsnamefont}:
+\begin{codebox}
+\cmd{renewcommand}*\marg{\gls{glsnamefont}}[1]\marg{\cmd{textmd}\marg{\#1}}
+\end{codebox}
+Some classes and packages redefine the \env{description} environment
+in such as way that's incompatible with the \sty{glossaries}
+package. In which case you'll need to select a different glossary
+style (see below).
+
+By default, a~full stop is appended to the description (unless you
+use \sty{glossaries-extra}). To prevent
+this from happening use the \opt{nopostdot} package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot}]\marg{glossaries}
+\end{codebox}
+or to add it with \sty{glossaries-extra}:
+\begin{codebox}
+\cmd{usepackage}[\opt{postdot}]\marg{glossaries-extra}
+\end{codebox}
+
+By default, a~location list is displayed for each entry (except
+when \gls{printunsrtglossary} is used without \app{bib2gls}). This refers
+to the document locations (for example, the page number) where the
+entry has been referenced. If you use \optionsor{mkidx,xdy} described in
+\sectionref{sec:printglossaries} or \option{b2g} (with \app{bib2gls} and
+\sty{glossaries-extra}) then location ranges will be compressed.
+For example, if an entry was used on pages~1, 2 and~3, then with
+\optionsor{mkidx,xdy,b2g} the location list will appear as 1--3, but
+with \option{noidx} it
+will appear as 1, 2, 3. If you don't want the locations displayed
+you can hide them using the \opt{nonumberlist} package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{nonumberlist}]\marg{glossaries}
+\end{codebox}
+or with \app{bib2gls} use \resourceoptval{save-locations}{false} in the
+optional argument of the appropriate \gls{GlsXtrLoadResources}
+(it's possible to have some resource sets with locations and some
+without).
+
+Entries are grouped according to the first letter of
+each entry's \gloskey{sort} value. By default a~vertical gap is placed
+between letter groups for most of the predefined styles. You can suppress this with the
+\opt{nogroupskip} package option:
+\begin{codebox}
+\cmd{usepackage}[\opt{nogroupskip}]\marg{glossaries}
+\end{codebox}
+
+If the default style doesn't suit your document, you can change the
+style using:
+\cmddef{setglossarystyle}
+\dickimawhref{gallery/glossaries-styles/}{There are a~number of predefined styles.} Glossaries can vary from
+a~list of symbols with a~terse description to a~list of words or
+phrases with descriptions that span multiple paragraphs, so there's
+no \qt{one style fits all} solution. You need to choose a~style that
+suits your document. For example:
+\begin{codebox*}
+\gls{setglossarystyle}\marg{\glostyle{index}}
+\end{codebox*}
+You can also use the \opt{style} package option for the preloaded
+styles. For example:
+\begin{codebox}
+\cmd{usepackage}[\optval{style}{index}]\marg{glossaries}
+\end{codebox}
+
+Examples:
+\begin{enumerate}
+ \item You have entries where the name is a~symbol and the
+ description is a~brief phrase or short sentence. Try one of the 
+ \qt{mcol} styles defined in the \sty{glossary-mcols} package. For example:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot}]\marg{glossaries}
+\cmd{usepackage}\marg{glossary-mcols}
+\gls{setglossarystyle}\marg{\glostyle+{mcolindex}}
+\end{codebox}
+or
+\begin{codebox*}
+\cmd{usepackage}[\optval{stylemods}{mcols},\optval{style}{mcolindex}]\marg{glossaries-extra}
+\end{codebox*}
+
+ \item You have entries where the name is a~word or phrase and the
+description spans multiple paragraphs. Try one of the \qt{altlist} styles. For
+example:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot}]\marg{glossaries}
+\gls{setglossarystyle}\marg{\glostyle+{altlist}}
+\end{codebox}
+or
+\begin{codebox}
+\cmd{usepackage}[\opt{stylemods},\optval{style}{altlist}]\marg{glossaries-extra}
+\end{codebox}
+
+ \item You have entries where the name is a~single word, the
+  description is brief, and an associated symbol has been set.
+  Use one of the styles that display the symbol (not all of them do). 
+  For example, one of the tabular styles:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot},\opt{nonumberlist},
+ \optval{style}{\glostyle+{long4col}}]\marg{glossaries}
+\end{codebox}
+or one of the \qt{tree} styles:
+\begin{codebox}
+\cmd{usepackage}[\opt{nopostdot},\opt{nonumberlist},\optval{style}{tree}]\marg{glossaries}
+\end{codebox}
+\end{enumerate}
+
+If your glossary consists of a~list of abbreviations and you also want to
+specify a~description as well as the long form, then you need to use
+an abbreviation style that will suit the glossary style. For example,
+use the \acrstyle{long-short-desc} acronym style:
+\begin{codebox*}
+\gls{setacronymstyle}\marg{\acrstyle{long-short-desc}}
+\end{codebox*}
+Define the acronyms with a~description:
+\begin{codebox*}
+\gls{newacronym}
+ \oarg{\gloskeyval{description}{statistical pattern
+   recognition technique}}
+ \marg{svm}\marg{SVM}\marg{support vector machine}
+\end{codebox*}
+Alternatively with \sty{glossaries-extra}:
+\begin{codebox*}
+\gls{setabbreviationstyle}\marg{\acrstyle{long-short-desc}}
+\codepar
+\gls{newabbreviation}
+ \oarg{\gloskeyval{description}{statistical pattern
+    recognition technique}}
+ \marg{svm}\marg{SVM}\marg{support vector machine}
+\end{codebox*}
+
+Choose a~glossary style that suits wide entry names. For example:
+\begin{codebox*}
+\gls{setglossarystyle}\marg{\glostyle{altlist}}
+\end{codebox*}
+
+\section{Multiple Glossaries}
+\label{sec:multigloss}
+
+The \sty{glossaries} package predefines a~default \code{main}
+\idx{glossary}. When you define an entry (using one of the commands
+described in \sectionref{sec:defterm}), that entry is automatically
+assigned to the default \idx{glossary}, unless you indicate otherwise 
+using the \gloskey{type} key. However you first need to
+make sure the desired \idx{glossary} has been defined. This is done using:
+\cmddef{newglossary}
+The \meta{glossary-label} is a~label that uniquely identifies this new
+\idx{glossary}. As with other types of identifying labels, be careful not
+to use active characters in \meta{label}. The final argument
+\meta{title} is the section or chapter title used by
+\gls{printglossary}, \gls{printnoidxglossary} or
+\gls{printunsrtglossary}. The other arguments
+indicate the file extensions used by
+\app{makeindex} or \app{xindy} (described in
+\sectionref{sec:printglossaries}). If you're not using either
+\app{makeindex} or \app{xindy}, 
+then the \meta{log-ext}, \meta{in-ext} and \meta{out-ext} arguments aren't
+relevant, in which case you may prefer to use the starred version
+where those arguments are omitted:
+\cmddef{newglossary*}
+
+In the case of \optionsor{mkidx,xdy}, all new \idxpl{glossary} must
+be defined before \gls{makeglossaries}. (\emph{Entry} definitions
+should come after \gls{makeglossaries}.) In the case of
+\option{b2g}, all new \idxpl{glossary} must be defined before any
+\gls{GlsXtrLoadResources} that requires them.
+
+Since it's quite common for documents to have both a~list of terms
+and a~list of abbreviations, the \sty{glossaries} package provides the
+package option \opt{acronyms} (or \opt{acronym}), which 
+is a~convenient shortcut for
+\begin{compactcodebox}
+\gls{newglossary}\oarg{\ext+{alg}}\marg{acronym}\marg{\ext+{acr}}\marg{\ext+{acn}}\marg{\gls+{acronymname}}
+\end{compactcodebox}
+The option also changes the behaviour of \gls{newacronym} so that acronyms
+are automatically put in the list of acronyms instead of the main
+glossary. The \sty{glossaries-extra} package also supports the
+\opt{acronyms} option for abbreviations defined using \gls{newacronym} but
+additionally has the package option \opt{abbreviations} to create
+a list of abbreviations for \gls{newabbreviation}.
+
+There are some other package options for creating commonly used
+lists: \opt{symbols} (lists of symbols), \opt{numbers} (lists
+of numbers), \opt{index} (an index). Since indexes don't
+typically have descriptions, the \opt{index} option also defines:
+\cmddef{newterm}
+This is just a shortcut that uses \gls{newglossaryentry} with the
+\gloskey{name} set to \meta{entry-label} and the \gloskey{description} is
+suppressed.
+
+For example, suppose you want a~main glossary for terms, a~list of
+acronyms and a~list of notation:
+\begin{codebox}
+\cmd{usepackage}[\opt{acronyms}]\marg{glossaries}
+\gls{newglossary}\oarg{nlg}\marg{notation}\marg{not}\marg{ntn}\marg{Notation}
+\end{codebox}
+After \gls{makeglossaries} (or \gls{makenoidxglossaries}) you can
+define the entries in the preamble. For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{gls:set}
+\marg{\comment{This entry goes in the `main' glossary}
+  \gloskeyval{name}{set},
+  \gloskeyval{description}{A collection of distinct objects}
+}
+\codepar
+\comment{This entry goes in the `acronym' glossary:}
+\gls{newacronym}\marg{svm}\marg{svm}\marg{support vector machine}
+\codepar
+\gls{newglossaryentry}\marg{not:set}
+\marg{\comment{This entry goes in the `notation' glossary:}
+  \gloskeyval{type}{notation},
+  \gloskeyval{name}{\cmd{ensuremath}\marg{\cmd{mathcal}\marg{S}}},
+  \gloskeyval{description}{A set},
+  \gloskeyval{sort}{S}}
+\end{codebox}
+or if you don't like using \csfmt{ensuremath}:
+\begin{codebox}
+\gls{newglossaryentry}\marg{not:set}
+\marg{\comment{This entry goes in the `notation' glossary:}
+  \gloskeyval{type}{notation},
+  \gloskeyval{name}{\$\cmd{mathcal}\marg{S}\$},
+  \gloskeyval{text}{\cmd{mathcal}\marg{S}},
+  \gloskeyval{description}{A set},
+  \gloskeyval{sort}{S}
+}
+\end{codebox}
+
+Each glossary is displayed using:
+\begin{compactcodebox*}
+\gls{printnoidxglossary}\oarg{\printglossoptval{type}{\meta{type}}}
+\end{compactcodebox*}%
+(\option{noidx}) or
+\begin{compactcodebox*}
+\gls{printglossary}\oarg{\printglossoptval{type}{\meta{type}}}
+\end{compactcodebox*}%
+(\options{mkidx,xdy}). Where \meta{type} is the glossary label. If the
+type is omitted the default \code{main} glossary is assumed.
+
+If you're using \app{bib2gls} then each glossary is displayed
+using:
+\begin{compactcodebox*}
+\gls{printunsrtglossary}\oarg{\printglossoptval{type}{\meta{type}}}
+\end{compactcodebox*}%
+With this method you don't use \gls{makeglossaries} or
+\gls{makenoidxglossaries}. Instead you can assign the entry type
+with the resource command. For example:
+\begin{codebox*}
+\cmd{usepackage}[\opt{record},\opt{abbreviations},\opt{symbols}]\marg{glossaries-extra}
+\codepar
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{terms}, \comment{entries defined in terms.bib}
+ \resourceoptval{type}{main}\comment{put in main glossary}
+}
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{abbrvs}, \comment{entries defined in abbrvs.bib}
+ \resourceoptval{type}{abbreviations}\comment{put in abbreviations glossary}
+}
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{syms}, \comment{entries defined in syms.bib}
+ \resourceoptval{type}{symbols}\comment{put in symbols glossary}
+}
+\end{codebox*}
+Later in the document:
+\begin{codebox*}
+\gls{printunsrtglossary} \comment{main}
+\gls{printunsrtglossary}\oarg{\printglossoptval{type}{abbreviations}}
+\gls{printunsrtglossary}\oarg{\printglossoptval{type}{symbols}}
+\end{codebox*}
+
+There's a~convenient shortcut that will display all the defined
+glossaries depending on the indexing method:
+\cmddef{printnoidxglossaries}
+(\option{noidx}) or
+\cmddef{printglossaries}
+(\options{mkidx,xdy}) or (\sty{glossaries-extra} only)
+\cmddef{printunsrtglossaries}
+
+If you use \optionsor{noidx,b2g}, you don't need to do anything different
+for a document with multiple \idxpl{glossary}. If you use
+\optionsor{mkidx,xdy} with the \app{makeglossaries} Perl script or the
+\app{makeglossaries-lite} Lua script, you
+similarly don't need to do anything different to the document build
+(compared to building a document with only one \idx{glossary}).
+
+If you use \optionsor{mkidx,xdy} without the helper \app{makeglossaries}
+Perl script or \app{makeglossaries-lite} Lua script then you need to
+make sure you run \app{makeindex}\slash\app{xindy} \emph{for each
+defined glossary}. The \meta{gls} and \meta{glo} arguments of
+\gls{newglossary} specify the file extensions to use instead of
+\ext+{gls} and \ext+{glo}. The optional argument \meta{glg} is the
+file extension for the transcript file. This should be different for
+each glossary in case you need to check for
+\app{makeindex}\slash\app{xindy} errors or warnings if things go
+wrong.
+
+For example, suppose you have three glossaries in your document
+(\code{main}, \code{acronym} and \code{notation}), 
+specified using:
+\begin{codebox}
+\cmd{usepackage}[\opt{acronyms}]\marg{glossaries}
+\gls{newglossary}\oarg{nlg}\marg{notation}\marg{not}\marg{ntn}\marg{Notation}
+\end{codebox}
+Then (assuming your \LaTeX\ document is in a~file called
+\filefmt{myDoc.tex}):
+
+\begin{description}
+\item\option{mkidx}:
+Either use one \app{makeglossaries} or
+\app{makeglossaries-lite} call:
+\begin{terminal}
+makeglossaries myDoc
+\end{terminal}
+or
+\begin{terminal}
+makeglossaries-lite myDoc
+\end{terminal}
+Or you need to run \app{makeindex} three times:
+\begin{terminal}
+makeindex -t myDoc.glg -s myDoc.ist -o myDoc.gls myDoc.glo
+makeindex -t myDoc.alg -s myDoc.ist -o myDoc.acr myDoc.acn
+makeindex -t myDoc.nlg -s myDoc.ist -o myDoc.not myDoc.ntn
+\end{terminal}
+
+\item\option{xdy}:
+Either use one \app{makeglossaries} call:
+\begin{terminal}
+makeglossaries myDoc
+\end{terminal}
+Or you need to run \app{xindy} three times (be careful not to insert
+line breaks where the line has wrapped.)
+\begin{terminal}
+xindy -L english -C utf8 -I xindy -M myDoc -t myDoc.glg -o myDoc.gls myDoc.glo
+xindy -L english -C utf8 -I xindy -M myDoc -t myDoc.alg -o myDoc.acr myDoc.acn
+xindy -L english -C utf8 -I xindy -M myDoc -t myDoc.nlg -o myDoc.not myDoc.ntn
+\end{terminal}
+
+\item\option{b2g}:
+With \app{bib2gls} only one call is required:
+\begin{terminal}
+pdflatex myDoc
+bib2gls \switch{group} myDoc
+pdflatex myDoc
+\end{terminal}
+(Omit \switch{group} if you don't need letter groups.)
+\end{description}
+
+\section{Hyperlinks (\stytext{glossaries} and \stytext{hyperref})}
+\label{sec:hyperref}
+
+Take care if you use the \sty{glossaries} package with
+\sty{hyperref}. Contrary to the usual advice that \sty{hyperref}
+should be loaded last, \sty{glossaries} (and \sty{glossaries-extra}) 
+must be loaded \emph{after} \sty{hyperref}:
+\begin{codebox}
+\cmd{usepackage}[colorlinks]\marg{hyperref}
+\cmd{usepackage}\marg{glossaries}
+\end{codebox}
+
+By default, if the \sty{hyperref} package has been loaded, commands
+like \gls{gls} will form a~hyperlink to the relevant entry in the
+\idx{glossary}. If you want to disable this for \emph{all} your
+glossaries, then use:
+\cmddef{glsdisablehyper}
+If you want hyperlinks suppressed for entries in specific
+glossaries, then use the \opt{nohypertypes} package option. For
+example, if you don't want hyperlinks for entries in the \code{acronym} and
+\code{notation} glossaries but you do want them for entries in the
+\code{main} glossary, then do:
+\begin{codebox}
+\cmd{usepackage}[colorlinks]\marg{hyperref}
+\cmd{usepackage}[\opt{acronym},\optvalm{nohypertypes}{acronym,notation}]\marg{glossaries}
+\gls{newglossary}\oarg{nlg}\marg{notation}\marg{not}\marg{ntn}\marg{Notation}
+\end{codebox}
+
+If you want the hyperlinks suppressed the first time an entry is
+used, but you want hyperlinks for subsequence references then use
+the \optval{hyperfirst}{false} package option:
+\begin{codebox}
+\cmd{usepackage}[colorlinks]\marg{hyperref}
+\cmd{usepackage}[\optval{hyperfirst}{false}]\marg{glossaries}
+\end{codebox}
+The \sty{glossaries-extra} extension package provides another method
+using category attributes. See the \sty{glossaries-extra} user
+manual for further details.
+
+Take care not to use non-expandable commands in PDF bookmarks. This
+isn't specific to the \sty{glossaries} package but is a~limitation
+of PDF bookmarks. Non-expandable commands include commands like 
+\gls{gls}, \gls{glspl}, \gls{Gls} and \gls{Glspl}. The \sty{hyperref}
+package provides a~way of specifying alternative text for the PDF
+bookmarks via \gls{texorpdfstring}. For example:
+\begin{codebox}
+\cmd{section}\marg{The \gls{texorpdfstring}\marg{\gls{gls}\marg{fishage}}\marg{Fish Age}}
+\end{codebox}
+However, it's not a~good idea to use commands like \gls{gls} in
+a~section heading as you'll end up with the table of contents page in 
+your location list and it will unset the \idx{firstuseflag} too soon. 
+Instead you can use
+\cmddef{glsentrytext}
+This is expandable provided that the \gloskey{text} key doesn't
+contain non-expandable code. For example, the following works:
+\begin{codebox}
+\cmd{section}\marg{The \gls{glsentrytext}\marg{fishage}}
+\end{codebox}
+and it doesn't put the table of contents in the location list.
+
+If you use \sty{glossaries-extra} then use the commands that are
+provided specifically for use in section headers. For example:
+\begin{codebox*}
+\cmd{section}\marg{The \gls{glsfmttext}\marg{fishage}}
+\end{codebox*}
+
+\section{Cross-References}
+\label{sec:xr}
+
+You can add a~reference to another entry in a~location list using
+the \gloskeyval{see}{\meta{label-list}} key when you define an entry. 
+The referenced entry (or entries) must also be defined.
+
+For example:
+\begin{codebox}
+\gls{longnewglossaryentry}\marg{devonian}\marg{\gloskeyval{name}{Devonian}}\comment{}
+\marg{\comment{}
+  The geologic period spanning from the end of the 
+  Silurian Period to the beginning of the
+  Carboniferous Period.
+\codepar
+  This age was known for its remarkable variety of 
+  fish species.
+}
+\codepar
+\gls{newglossaryentry}\marg{fishage}
+\marg{
+  \gloskeyval{name}{Fish Age},
+  \gloskeyval{description}{Common name for the Devonian period},
+  \gloskeyval{see}{devonian}
+}
+\end{codebox}
+The cross-reference will appear as \qt{\emph{see} Devonian}. You can
+change the \qt{see} tag for an individual entry using the format
+\gloskeyval{see}{\oargm{tag}\meta{label-list}}. For example:
+\begin{codebox}
+\gls{newglossaryentry}\marg{latinalph}
+\marg{
+  \gloskeyval{name}{Latin alphabet},
+  \gloskeyval{description}{alphabet consisting of the letters 
+  a, \cmd{ldots}, z, A, \cmd{ldots}, Z},
+  \gloskey{see}=[see also]\marg{exlatinalph}
+}
+\gls{newglossaryentry}\marg{exlatinalph}
+\marg{
+   \gloskeyval{name}{extended Latin alphabet},
+   \gloskeyval{description}{The Latin alphabet 
+   extended to include other letters such as 
+   ligatures or diacritics.}
+}
+\end{codebox}
+In the above, I haven't enclosed the entire value of the
+\gloskey{see} key in braces.
+If you use the \gloskey{see} key in an optional argument, such as
+the optional argument of \gls{newacronym}, make sure you enclose the 
+value (including the optional tag) in braces. For example:
+\begin{codebox}
+\gls{newacronym}\marg{ksvm}\marg{ksvm}\marg{kernel support vector machine}
+\gls{newacronym}
+ \oarg{\gloskeyval{see}{[see also]\marg{ksvm}}}
+ \marg{svm}\marg{svm}\marg{support vector machine}
+\end{codebox}
+The \sty{glossaries-extra} package provides a \gloskey{seealso}
+key. This doesn't allow a tag but behaves much like
+\gloskeyval{see}{[\gls{seealsoname}]\margm{label-list}}. For example:
+\begin{codebox}
+\gls{newabbreviation}\marg{ksvm}\marg{ksvm}
+  \marg{kernel support vector machine}
+\gls{newabbreviation}
+ \oarg{\gloskeyval{seealso}{ksvm}}
+ \marg{svm}\marg{svm}\marg{support vector machine}
+\end{codebox}
+Additionally, the \sty{glossaries-extra} package provides
+an \gloskey{alias} key where the value must be just a single label.
+See \gallerypage{aliases}{glossaries-extra gallery: aliases} for an example.
+
+Since the cross-reference appears in the location list, if you
+suppress the location list using the \opt{nonumberlist} package
+option, then the cross-reference will also be suppressed. With
+\app{bib2gls}, don't use the \opt{nonumberlist} package
+option in this case, but instead use 
+\resourceoptval{save-locations}{false} in the resource
+options. For example:
+\begin{codebox}
+\cmd{usepackage}[\opt{record},\opt{abbreviations},\opt{symbols}]\marg{glossaries-extra}
+\codepar
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{terms}, \comment{entries defined in terms.bib}
+ \resourceoptval{type}{main}\comment{put in main glossary}
+}
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{abbrvs}, \comment{entries defined in abbrvs.bib}
+ \resourceoptval{type}{abbreviations},\comment{put in abbreviations glossary}
+\comment{no number list for these entries:}
+ \resourceoptval{save-locations}{false}
+}
+\gls{GlsXtrLoadResources}\oarg{
+ \resourceoptvalm{src}{syms}, \comment{entries defined in syms.bib}
+ \resourceoptval{type}{symbols}\comment{put in symbols glossary}
+}
+\end{codebox}
+
+\section{Further Information}
+\label{sec:moreinfo}
+
+\begin{itemize}
+\item \ctanmirrordocnofn{support/bib2gls/bib2gls-begin}{\styfmt{glossaries-extra}
+and \appfmt{bib2gls}: an introductory guide}.
+\item The main \sty{glossaries} \docref{user manual}{glossaries-user}.
+\item The \dickimawhrefnofn{faqs/glossariesfaq.html}{glossaries FAQ}.
+\item \dickimawhrefnofn{latex/buildglossaries/}{Incorporating
+makeglossaries or makeglossaries-lite or bib2gls into the document
+build}.
+\item The \href{https://ctan.org/pkg/glossaries-extra}{\styfmt{glossaries-extra}} package.
+\item The \href{https://ctan.org/pkg/bib2gls}{\appfmt{bib2gls}}
+application.
+\end{itemize}
+The \gallery{Dickimaw Books Gallery} provides additional example documents.
+
+\printterms
+\printsummary
+\clearpage
+\printuserguideindex
+
+\end{document}

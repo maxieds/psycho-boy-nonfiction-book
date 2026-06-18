@@ -1,0 +1,30 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 163 Using bib2gls: dual backlinks
+% Label: "ex:bib2glsdualbacklinks"
+% arara: pdflatex
+% arara: bib2gls
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{\jobname.bib}
+@dualindexsymbol{L,
+ name={Lagrangian function},
+ symbol={\ensuremath{L}},
+ description={a function of generalized co-ordinates}
+}
+\end{filecontents*}
+\usepackage[colorlinks]{hyperref}
+\usepackage[record,symbols,nostyles,stylemods={tree,bookindex}]{glossaries-extra}
+\GlsXtrLoadResources[src={\jobname},
+ dual-type=symbols,dual-field
+]
+\glsdefpostlink{index}{\glsxtrpostlinkAddSymbolOnFirstUse}
+\glsdefpostname{index}{%
+ \ifglshassymbol{\glscurrententrylabel}
+ { (\GlsXtrDualBackLink{\glsentrysymbol{\glscurrententrylabel}}{\glscurrententrylabel})}{}} 
+\begin{document}
+Primary: \gls{L}.
+\printunsrtglossary[type=symbols,style=tree]
+\printunsrtglossary[title=Index,style=bookindex] 
+\end{document}

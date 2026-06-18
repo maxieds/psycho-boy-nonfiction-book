@@ -1,0 +1,193 @@
+\documentclass[12pt]{article}
+\usepackage{url,xspace}
+\usepackage[a4paper,text={16cm,22.7cm},centering]{geometry}
+
+\usepackage[pdflatex,recompilepics=true]{gastex}
+\gasset{frame=false,Nw=6,Nh=6,loopdiam=5}
+
+\parindent=0pt
+\parskip=1.5ex
+
+\newcommand\GasTeX{\textsf{GasTeX}\xspace}
+\newcommand{\leftend}{{\vdash}}
+\newcommand{\rightend}{{\dashv}}
+
+\title{\GasTeX: Graphs and Automata Simplified in \TeX}
+\author{Paul Gastin \\[1ex]
+        LMF, ENS Paris-Saclay \\
+        {\small\texttt{paul.gastin@ens-paris-saclay.fr}}}
+\date{v3.1}
+\begin{document}
+\maketitle
+\begin{abstract}
+  This is a very minimal startup guide including some examples.  
+\end{abstract}
+
+\begin{gpicture}[name=gpic:LR-concat,ignore]
+  \gasset{Nframe=n}
+  \node(ui)(15,3){$u$}
+  \node(ui+1)(45,3){$v$}
+  \gasset{AHnb=0}
+  \drawline(0,2)(0,-31)
+  \drawline(30,2)(30,-31)
+  \drawline(60,2)(60,-31)
+  \gasset{AHnb=1,arcradius=0.8}
+  \drawline(0,-1)(20,-1)(20,-3)(5,-3)(5,-5)(30,-5)
+  \node(x0)(23,-2){$\rho_0$}
+  \drawline[linecolor=red](30,-5)(50,-5)(50,-7)(35,-7)(35,-9)(45,-9)(45,-11)(30,-11)
+  \node(x0)(53,-6){\color{red}$\rho_1$}
+  \drawline[linecolor=red](30,-11)(20,-11)(20,-13)(25,-13)(25,-15)(18,-15)(18,-17)(30,-17)
+  \node(x1)(17,-12){\color{red}$\rho_2$}
+  \drawline[linecolor=red](30,-17)(40,-17)(40,-19)(30,-19)
+  \node(x2)(43,-18){\color{red}$\rho_3$}
+  \drawline[linecolor=red](30,-19)(15,-19)(15,-21)(22,-21)(22,-23)(10,-23)(10,-25)(30,-25)
+  \node(x3)(12,-20){\color{red}$\rho_4$}
+  \drawline(30,-25)(50,-25)(50,-27)(40,-27)(40,-29)(60,-29)
+  \node(x2)(53,-26){$\rho_5$}
+  \gasset{Nw=1.6,Nh=1.6,Nfill=y,ExtNL=y,NLdist=.7}
+  \node[NLangle=45](p)(0,-1){$p$}
+  \node[fillcolor=red,NLangle=45](p1)(30,-5){\color{red}$p_1$}
+  \node[fillcolor=red,NLangle=135](p2)(30,-11){\color{red}$p_2$}
+  \node[fillcolor=red,NLangle=45](p3)(30,-17){\color{red}$p_3$}
+  \node[fillcolor=red,NLangle=-135](p4)(30,-19){\color{red}$p_4$}
+  \node[fillcolor=red,NLangle=45](p5)(30,-25){\color{red}$p_5$}
+  \node[NLangle=0](q)(60,-29){$q$}
+\end{gpicture}
+\begin{gpicture}[name=gpic:LL-concat,ignore]
+  \gasset{Nframe=n}
+  \node(ui)(15,3){$u$}
+  \node(ui+1)(45,3){$v$}
+  \gasset{AHnb=0}
+  \drawline(0,2)(0,-31)
+  \drawline(30,2)(30,-31)
+  \drawline(60,2)(60,-31)
+  \gasset{AHnb=1,arcradius=0.8}
+  \drawline(0,-1)(20,-1)(20,-3)(5,-3)(5,-5)(30,-5)
+  \node(x0)(23,-2){$\rho_0$}
+  \drawline[linecolor=red](30,-5)(50,-5)(50,-7)(35,-7)(35,-9)(45,-9)(45,-11)(30,-11)
+  \node(x0)(53,-6){\color{red}$\rho_1$}
+  \drawline[linecolor=red](30,-11)(20,-11)(20,-13)(25,-13)(25,-15)(18,-15)(18,-17)(30,-17)
+  \node(x1)(17,-12){\color{red}$\rho_2$}
+  \drawline[linecolor=red](30,-17)(40,-17)(40,-19)(30,-19)
+  \node(x2)(43,-18){\color{red}$\rho_3$}
+  \drawline[linecolor=black](30,-19)(15,-19)(15,-21)(22,-21)(22,-23)(10,-23)(10,-25)(15,-25)
+  (15,-27)(0,-27)
+  \node(x3)(12,-20){\color{black}$\rho_4$}
+  \gasset{Nw=1.6,Nh=1.6,Nfill=y,ExtNL=y,NLdist=.7}
+  \node[NLangle=45](p)(0,-1){$p$}
+  \node[fillcolor=red,NLangle=45](p1)(30,-5){\color{red}$p_1$}
+  \node[fillcolor=red,NLangle=135](p2)(30,-11){\color{red}$p_2$}
+  \node[fillcolor=red,NLangle=45](p3)(30,-17){\color{red}$p_3$}
+  \node[fillcolor=red,NLangle=-135](p4)(30,-19){\color{red}$p_4$}
+  \node[NLangle=180](q)(0,-27){$q$}
+\end{gpicture}
+
+
+For the documentation, please see \url{http://www.lsv.fr/~gastin/gastex/index.html}.
+Solutions to known problems can be found in this page.  In particular, some problems which
+started with TeXLive 2021 and related to the use of the document class
+\textsf{lipics-v2021}, or the package \textsf{todonotes}, or the library \textsf{shadows} of
+\textsf{tikz}, and possibly other contexts.
+
+
+The package consists of two files \verb|gastex.sty| and \verb|gastex.pro|.
+\begin{itemize}
+  \item \verb|gastex.sty| contains the definition of all \GasTeX macros.
+  This file could be in your working folder but it is best placed where \verb|.sty| files are, e.g.,
+  
+  \verb|.../texmf-dist/tex/latex/gastex/gastex.sty| \\  
+  or \\  
+  \verb|.../texmf-local/tex/latex/gastex/gastex.sty|
+
+  \item  \verb|gastex.pro| which contains all the postscript procedures used to actually draw the pictures.
+  This file could be in your working folder but it is best placed where \verb|.pro| files are, e.g.,
+  
+  \verb|.../texmf-dist/dvips/gastex/gastex.pro| \\
+  or \\  
+  \verb|.../texmf-local/dvips/gastex/gastex.pro|
+\end{itemize}
+
+This documentation file simply contains a few simple examples on how to make figures with
+\GasTeX. It should be compiled with
+\begin{quote}
+  \verb|pdflatex --shell-escape gastex-doc.tex| \\ 
+  or \\
+  \verb|pdflatex --enable-write18 gastex-doc.tex|
+\end{quote}
+
+The first example below is a 2-way deterministic finite state transducer. It consists of 
+a \verb|gpicture| environment which contains the \GasTeX commands for nodes and 
+transitions.
+
+\begin{center}
+  \begin{gpicture}[name=gpic:2DFT]
+    \gasset{Nframe=y,Nw=8,Nh=8,loopdiam=6}
+    \unitlength=2.8mm
+    \node[Nmarks=i](0)(0,0){$q_0$}
+    \node(1)(10,0){$q_1$}
+    \node[Nmarks=r](2)(20,0){$q_2$}
+    \node(6)(30,0){$q_3$}
+    \node(3)(30,-8){$q_4$}
+    \node(4)(20,-8){$q_5$}
+    \node(5)(10,-8){$q_6$}
+    
+    \drawloop(0){$\leftend/\varepsilon,+1$}
+    \drawloop(1){$a/\varepsilon,+1$}
+    \drawloop(2){$\rightend/\varepsilon,+1$}
+    \drawloop(6){$a/\varepsilon,+1$}
+    \drawloop[loopangle=-90](3){$a/a,-1$}
+    \drawloop[loopangle=-90](4){$a/b,-1$}
+    \drawloop[loopangle=-90](5){$a/\varepsilon,+1$}
+    
+    \drawedge(0,1){$b/\varepsilon,+1$}
+    \drawedge(1,2){$b/\varepsilon,+1$}
+    \drawedge[ELpos=25,ELdist=0,ELside=r](2,3){$b/\varepsilon,-1$}
+    \drawedge[ELpos=50](6,3){$b/\varepsilon,-1$}
+    \drawedge[ELside=l](3,4){$b/\varepsilon,-1$}
+    \drawedge[ELpos=50](4,5){$b/\varepsilon,+1$}
+    \drawedge[ELpos=50](5,1){$b/\varepsilon,+1$}
+    \drawedge(2,6){$a/\varepsilon,+1$}
+  \end{gpicture}
+\end{center}
+
+The second one is in Figure~\ref{fig:LR-concat}.  The pictures have been defined at the
+beginning of the \LaTeX\ document, with the \verb|name| and \verb|ignore| optional
+parameters given to the \verb|gpicture| environment.  These pictures are generated but not
+inserted immediately.  Instead, the \verb|\gusepicture| command allows to include each
+named picture, possibly multiple times at different places.
+
+All pictures defined in \verb|gpicture| environments are compiled and stored in a file
+called \verb|filename-pics.pdf|, one picture per page.  These pictures could be included
+in any \LaTeX\ file, possibly another \LaTeX\ file which need not use the \GasTeX package,
+simply by using \verb|\includegraphics| as follows:
+\begin{quote}
+  \verb|\includegraphics[page=2,scale=0.6]{gastex-doc-pics.pdf}|
+
+  \includegraphics[page=2,scale=0.6]{gastex-doc-pics.pdf}
+\end{quote}
+This is convenient for instance when sending the \LaTeX\ file to \verb|Arxiv| or to an 
+editor (journal, proceedings) which does not allow the \verb|--shell-escape| option when 
+compiling with \verb|pdflatex|. Actually, \GasTeX does this automatically for you. When 
+loading the package, set the \verb|recompilepics| option to \verb|false| as follows:
+\begin{quote}
+  \verb|\usepackage[pdflatex,recompilepics=false]{gastex}|
+\end{quote}
+then you may compile without the \verb|--shell-escape| option
+\begin{quote}
+    \verb|pdflatex gastex-doc.tex| 
+\end{quote}
+and \GasTeX automatically calls \verb|\includegraphics| to include the pictures that have 
+been previously generated and stored in the file \verb|gastex-doc-pics.pdf|.
+
+\begin{figure}[htb]
+  \centering
+  \gusepicture{gpic:LR-concat}
+  \hfill
+  \gusepicture{gpic:LL-concat}
+  \caption{Decomposition of a left-right run and a left-left run over the product $w=uv$.}
+  \label{fig:LR-concat}
+\end{figure}
+
+
+\end{document}
+

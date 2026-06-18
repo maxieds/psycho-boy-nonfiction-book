@@ -1,0 +1,39 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 118 Alternatives to buffering
+% Label: "ex:protectinnertextformat"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage[T1]{fontenc}
+\usepackage{soul}
+\usepackage{glossaries-extra}
+
+
+\newabbreviation{html}{HTML}{hypertext markup language}
+% custom command to expand content before using \ul:
+ \newrobustcmd{\xpul}[1]{\GlsXtrExpandedFmt{\ul}{#1}} 
+
+
+\begin{document}
+First approach (inner formatting):
+{% scope
+ \renewcommand{\glsxtrdefaultentrytextfmt}[1]{\ul{#1}}%
+ \ul{Some text about \protect\gls{html}.
+ Next use: \protect\gls{html}}
+}
+
+
+Next use: \gls{html}.
+
+
+Second approach (middle formatting with expanded link text):
+\glsresetall
+{% scope
+ \renewcommand{\glsxtrabbreviationfont}[1]{\xpul{#1}}%
+ \renewcommand{\glsxtrregularfont}[1]{\xpul{#1}}%
+ \ul{Some text about \protect\gls{html}. Next use: \gls{html}.}
+} 
+
+Next use: \gls{html}. 
+\end{document}

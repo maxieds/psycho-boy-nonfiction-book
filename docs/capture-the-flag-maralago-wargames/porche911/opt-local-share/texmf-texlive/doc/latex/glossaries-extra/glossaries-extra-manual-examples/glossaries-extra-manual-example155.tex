@@ -1,0 +1,104 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 155 Using bib2gls: one resource set
+% Label: "ex:bib2gls"
+% arara: pdflatex
+% arara: bib2gls
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{terms.bib}
+@entry{bird,
+  name={bird},
+  description={feathered animal},
+  seealso={duck,goose}
+} 
+
+@entry{duck,
+  name={duck},
+  description={a waterbird with short legs}
+} 
+
+@entry{goose,
+  name = "goose",
+  plural = "geese",
+  description={a waterbird with a long neck}
+}
+
+@index{example}
+\end{filecontents*}
+\begin{filecontents*}{abbrvs.bib}
+@string{ssi={server-side includes}}
+@string{html={hypertext markup language}} 
+
+@abbreviation{shtml,
+  short="shtml",
+  fulllong = ssi # " enabled " # html,
+  nestedlong = "\glsps{ssi} enabled \glsps{html}",
+  description={a combination of \gls{html} and \gls{ssi}}
+} 
+
+@abbreviation{html,
+  short ="html",
+  long = html,
+  description={a markup language for creating web pages}
+} 
+
+@abbreviation{ssi,
+  short="ssi",
+  long = ssi,
+  description={a simple interpreted server-side scripting language}
+}
+
+@abbreviation{xml,
+  short={xml},
+  long={extensible markup language},
+  description={a simple text-base format for representing structured information}
+}
+
+@abbreviation{mathml,
+  short={m\BibGlsNoCaseChange{ath}ml},
+  long={mathematical markup language},
+  description={an \gls{xml}-based language for describing mathematical notation}
+}
+\end{filecontents*}
+\begin{filecontents*}{symbols.bib}
+@preamble{"\providecommand{\mtx}[1]{\boldsymbol{#1}}"} 
+
+@symbol{M,
+  name={\ensuremath{\mtx{M}}},
+  description={a matrix}
+} 
+
+@symbol{v,
+  name={\ensuremath{\vec{v}}},
+  description={a vector}
+} 
+
+@symbol{S,
+  name={\ensuremath{\mathcal{S}}},
+  description={a set}
+}
+\end{filecontents*}
+\usepackage[T1]{fontenc}
+\usepackage[record]{glossaries-extra} 
+
+\setabbreviationstyle{long-short-sc-desc} 
+
+\GlsXtrLoadResources[src={terms,abbrvs,symbols},
+ field-aliases={fulllong=long},
+ description-case-change=firstuc,
+ post-description-dot=all
+] 
+
+
+\begin{document}
+\gls{bird} 
+
+\gls{shtml} 
+
+\gls{M} 
+
+\GlsXtrSetDefaultNumberFormat{glsignore}
+\printunsrtglossaries 
+\end{document}
