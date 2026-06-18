@@ -1,0 +1,312 @@
+# Examples Makefile
+#
+# Type "make" to generate examples.pdf containing many examples.
+# Type "make clean; make examples.ps" to invoke latex intead of pdflatex.
+# Type "make <diag>.ps" to make a postscript file from <diag>.m4
+#  It may be necessary to type "make clean" before this or any of the following:
+# Type "make <diag>.eps" to make an .eps file from <diag>.m4
+# Type "make <diag>.svg" to make an .svg file from <diag>.m4 using pdf2svg
+#   The following require ImageMagick convert:
+# Type "make <diag>.png" to make a .png file from <diag>.m4
+# Type "make <diag>.tif" to make a .tif file from <diag>.m4
+#
+#      See also: dpv subdirectory for creating svg with dpic -v without LaTeX
+#
+# To test the file test.m4, type "make tst" if boxdims is used, otherwise
+# type "make tst1".  In either case the file tst.ps is created.
+#
+# There are more examples in the extras directory. Go to that
+# directory and process them one at a time, or type "make".
+#
+# To debug a single diagram in a directory other than this examples
+# directory, copy this makefile and tst.tex to where you want to work,
+# redefine LIBDIR (below) appropriately, and type "make <diag>.xxx"
+# where xxx is one of ps, eps, png, or pdf
+
+#########################################################################
+
+# Circuit_macro directory, change this if necessary:
+# LIBDIR = $$HOME/lib
+LIBDIR = ..
+
+# The dpic processor:
+PIC = dpic
+#PIC = $$HOME/dpic/bisondev/dpic
+#PIC = $$HOME/dpic/bison/dpic
+#PIC = $$HOME/dpic/pascaldev/test/dpic
+#PIC = $$HOME/dpic/pascal/test/dpic
+
+# Quiet mode for MiKTeX:
+# QLATEX = latex --quiet
+# Quiet mode for texlive:
+QLATEX = latex -interaction=batchmode
+
+#MODE = -p
+MODE = -g
+
+#CONF = pstricks.m4
+CONF = pgf.m4
+
+# Uncomment for gpic.  Use gpic or pic as applicable on your machine:
+# PIC = gpic
+# PIC = pic
+# MODE = -t
+# CONF = gpic.m4
+
+# Convert options
+EPSOPTS =
+PNGOPTS = -quiet -density 400 -scale 25% -alpha Remove
+
+# M4 = m4 -I $(LIBDIR)
+# If environment variable M4PATH has been set to the installation directory:
+M4 = m4
+
+DOC = examples
+TEXPICS = \
+  ABlogix.tex Adder.tex Alogix.tex AmpTable.tex Antennas.tex Arresters.tex \
+  Audio.tex Bip.tex Btree.tex Buttons.tex Byte.tex \
+  Capacitors.tex CanLogic.tex Chips.tex Conn.tex Connectors.tex \
+  Contacts.tex Contact.tex control.tex Crow.tex \
+  cbresistor.tex csc.tex Csource.tex Decoder.tex \
+  Demultiplexer.tex diamond.tex Dini.tex Diodes.tex Drive.tex \
+  EEP.tex Emarrows.tex Escher.tex EVplugs.tex \
+  ex01.tex ex03.tex ex04.tex ex05.tex ex08.tex \
+  ex09.tex ex10.tex ex11.tex ex12.tex ex15.tex ex16.tex ex18.tex \
+  ex21.tex exp.tex fet.tex Flow.tex Fuses.tex \
+  Geometry.tex GrayCode.tex graysurf.tex Grounds.tex \
+  Headers.tex Heathkit.tex \
+  I2L.tex Incleps.tex Inductors.tex Jack.tex \
+  lcct.tex Logic.tex Loglog.tex LT3724.tex \
+  MC.tex Mixer.tex MoreTable.tex MotorControl.tex Multiplexer.tex \
+  NLG.tex NPDT.tex Nport.tex OneLine.tex Opamp.tex Optoiso.tex \
+  Pconn.tex Plate.tex PushPull.tex pwrsupply.tex \
+  Quantum.tex quick.tex \
+  random.tex Rectifiers.tex recycle.tex relaycoil.tex Relay.tex \
+  Resistors.tex Rotbox.tex \
+  Schottky.tex Sevensegment.tex sfg.tex Shadowed.tex shapes.tex \
+  ShiftR.tex Sierpinski.tex Sixpole.tex \
+  Smithchart.tex Sources.tex Switches.tex \
+  Tgate.tex Three.tex thyristor.tex TTLnand.tex Tubediags.tex \
+  UNO.tex ujt.tex Variable.tex Windings.tex worm.tex Xform.tex XOR.tex
+
+# Files that have to be processed twice:
+BOXDIMS = Btree.tex ex09.tex Crow.tex Incleps.tex Loglog.tex Opamp.tex \
+ random.tex Windings.tex
+
+#########################################################################
+
+DVIPSOPTS = -G0 -t letter
+DIMFILE = $(DOC).dim
+BS = tr '|' '\134'
+
+# Might be needed (change latex commands to $(LTX) )
+# LTX = latex --shell-escape
+LTX = pdflatex --shell-escape
+
+PDFLTXSRC=printf "|documentclass[11pt]{standalone}\n\
+|usepackage[dvipsnames]{xcolor}\n\
+|usepackage{times,boxdims,siunitx,amssymb,tikz,geometry}\n\
+|geometry{paperwidth=15in,paperheight=14in,margin=1in}\n\
+|pagestyle{empty}|thispagestyle{empty}\n\
+|begin{document}|noindent|input{"$*".tex}|end{document}\n" | $(BS)
+
+# [dvipsnames]{xcolor} defines the colors near the end of:
+# https://steeven9.github.io/USI-LaTeX/html/packages_hyperref_babel_xcolor3.html
+# Better: use adjusted colors from http://latexcolor.com/
+
+LTXFILE=printf "|documentclass[11pt]{article}\n\
+|usepackage[dvipsnames]{xcolor}\n\
+|usepackage{times,boxdims,graphicx,pstricks}\n\
+|usepackage{siunitx}\n\
+|setlength{|textwidth}{28cm}|setlength{|textheight}{28cm}\n\
+|setlength{|oddsidemargin}{0pt}|setlength{|evensidemargin}{0pt}\n\
+|setlength{|hoffset}{-1cm}\n\
+|pagestyle{empty}|thispagestyle{empty}\n\
+|newbox|graph\n\
+|begin{document}\n\
+|noindent|input{"$*".tex}|box|graph\n\
+|end{document}\n" | $(BS)
+
+.SUFFIXES: .ps .dvi .tex .m4 .pic .eps .png .pdf .svg .tif .gif
+.m4.pic:
+	@touch $(DIMFILE) F_$*.dim
+	$(M4) $(CONF) $(DIMFILE) F_$*.dim $*.m4 > $*.pic
+.m4.tex:
+	@touch $(DIMFILE) F_$*.dim
+#	$(M4) $(CONF) $(DIMFILE) F_$*.dim $*.m4 | $(PIC) $(MODE) > $*.tex
+	$(M4) $(CONF) $(DIMFILE) F_$*.dim $*.m4 > $*.pic
+	$(PIC) $(MODE) $*.pic > $*.tex
+.m4.dvi:
+	@touch $(DIMFILE) F_$*.dim
+	$(M4) pstricks.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -p > $*.tex
+	@$(LTXFILE) > F_$*.tex
+	$(QLATEX) F_$*
+	touch F_$*.dim $(DIMFILE)
+	$(M4) pstricks.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -p > $*.tex
+	$(QLATEX) F_$*
+	mv F_$*.dvi $*.dvi
+	rm -f F_*
+.dvi.ps:
+	dvips $(DVIPSOPTS) $* -o $*.ps
+	chmod 644 $*.ps
+.m4.ps:
+	@touch $(DIMFILE) F_$*.dim
+	$(M4) pstricks.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -p > $*.tex
+	@$(LTXFILE) > F_$*.tex
+	$(QLATEX) F_$*
+	dvips $(DVIPSOPTS) F_$* -o $*.ps
+	chmod 644 $*.ps
+	rm -f F_*
+.m4.eps:
+	@touch $(DIMFILE) F_$*.dim
+	$(M4) pstricks.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -p > $*.tex
+	@$(LTXFILE) > F_$*.tex
+	$(QLATEX) F_$*
+	$(M4) pstricks.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -p > $*.tex
+	$(QLATEX) F_$*
+	dvips F_$* -T128cm,28cm -o $*.ps
+# Recent changes to PSTricks(?) have clashed with the use of TeXtoEPS
+#  so use ps2epsi
+	ps2epsi $*.ps $*.epsi
+	sed -e '/%%Pages:/d' -e '/BeginPreview/,$$d' $*.epsi \
+     | tr '\015' '\012' > $*.eps
+	sed -e '1,/EndPreview/d' $*.epsi >> $*.eps
+	rm -f F_*
+.m4.pdf:
+	@touch $(DIMFILE) F_$*.dim
+	$(M4) pgf.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -g > $*.tex
+	@$(PDFLTXSRC) > F_$*.tex
+	pdf$(QLATEX) F_$*
+	$(M4) pgf.m4 $(DIMFILE) F_$*.dim $*.m4 | $(PIC) -g > $*.tex
+	pdf$(QLATEX) F_$*
+	mv F_$*.pdf $*.pdf
+	rm -f F_*
+.m4.png:
+	make $*.pdf
+	convert $(PNGOPTS) $*.pdf $*.png
+	@if test -f $*.png.0 ; then mv $*.png.0 $*.png ; fi
+#	rm $*.pdf
+.m4.gif:
+	make $*.pdf
+	convert $(GIFOPTS) $*.pdf $*.gif
+#	rm $*.pdf
+.m4.tif:
+	make $*.pdf
+	convert $(EPSOPTS) $*.pdf $*.tif
+	@if test -f $*.tif.0 ; then mv $*.tif.0 $*.tif ; fi
+#	rm $*.pdf
+.m4.svg:
+	make $*.pdf
+#	dvisvgm --pdf $*.pdf $*.svg
+	pdf2svg $*.pdf $*.svg
+	chmod 644 $*.svg
+#	rm $*.pdf
+	rm -f F_*
+
+#########################################################################
+
+$(DOC).pdf: clean pdfmode $(DOC).tex files.tex header.tex
+	touch $(DOC).dim
+	make CONF=pgf.m4 MODE=-g DIMFILE=$(DOC).dim pics
+	cp $(LIBDIR)/doc/Version.tex .
+	pdflatex $(DOC)
+	rm -f $(BOXDIMS) ${BOXDIMS:%.tex=%.pic} $(DOC).pdf
+	make CONF=pgf.m4 MODE=-g DIMFILE=$(DOC).dim $(BOXDIMS)
+	pdflatex $(DOC)
+	@printf "\n\n optpdf trims the pdf file\n"
+	optpdf $(DOC).pdf
+
+rose.pdf: rose.m4
+	m4 pdf.m4 rose.m4 | dpic -d > rose.pdf
+
+keyboard.svg: keyboard.m4
+	m4 svg.m4 keyboard.m4 | dpic -v > keyboard.svg
+
+keyboard.pdf: keyboard.svg
+	-conv=`which convert` ; if test "`basename $$conv`" = "convert" ; then \
+       convert keyboard.svg keyboard.pdf ; \
+     else printf '.PS\n "keyboard.pdf requires imagemagick convert"\n.PE\n' \
+       | dpic -d > keyboard.pdf ; fi
+
+pics: rose.pdf keyboard.pdf $(TEXPICS)
+	touch pics
+
+$(DOC).ps: psmode $(DOC).dvi
+
+psmode:
+	printf "|usepackage{pstricks,pst-grad}\n" | $(BS) > mode.tex
+
+pdfmode:
+	printf "|usepackage{tikz}\n" | $(BS) > mode.tex
+
+$(DOC).dvi: $(DOC).tex files.tex header.tex psmode
+	touch $(DOC).dim
+	make CONF=pstricks.m4 MODE=-p DIMFILE=$(DOC).dim pics
+	cp $(LIBDIR)/doc/Version.tex .
+	latex $(DOC)
+	rm -f $(BOXDIMS) ${BOXDIMS:%.tex=%.pic} $(DOC).dvi
+	make CONF=pstricks.m4 MODE=-p DIMFILE=$(DOC).dim $(BOXDIMS)
+	latex $(DOC)
+
+tst:
+	@$(LTXFILE) | sed -e 's/{\.tex}/{test.tex}/' > tst.tex
+	make CONF=pstricks.m4 PIC=dpic MODE=-p test.tex; $(QLATEX) tst
+	rm -f test.tex test.pic
+	make CONF=pstricks.m4 PIC=dpic MODE=-p test.tex; $(QLATEX) tst
+	dvips $(DVIPSOPTS) tst -o tst.ps
+
+tst1:
+	@$(LTXFILE) | sed -e 's/{\.tex}/{test.tex}/' > tst.tex
+	make CONF=pstricks.m4 PIC=dpic MODE=-p test.tex; $(QLATEX) tst
+	dvips $(DVIPSOPTS) tst -o tst.ps
+
+tikz:
+	@$(LTXFILE) | sed -e 's/{\.tex}/{test.tex}/' -e 's/pstricks/tikz/' > tst.tex
+	make CONF=pgf.m4 PIC=dpic MODE=-g test.tex; $(QLATEX) tst
+	dvips $(DVIPSOPTS) tst -o tst.ps
+
+gpic:
+	@$(LTXFILE) | sed -e 's/{\.tex}/{test.tex}/' > tst.tex
+	rm -f test.tex test.pic
+	make CONF=gpic.m4 PIC=pic MODE=-t test.tex; $(QLATEX) tst
+	dvips $(DVIPSOPTS) tst -o tst.ps
+
+echopics:
+	@echo $(TEXPICS)
+
+testall:
+	(cd mf; make)
+	(cd mpost; make)
+	(cd psfrag; make)
+	(cd dpv; make)
+	(cd xfig; make)
+
+clobber:	clean
+	rm -f *.ps
+	-@for dir in mf mpost pdflatex xfig psfrag svg dev test; \
+      do (if test -d $$dir ; then cd $$dir; make clobber; fi) ; done
+	rm -f ../doc/Circuit_macros.pdf ../Circuit_macros.pdf
+	rm -f *.warn
+	rm -f examples.pdf
+	rm -rf index.html html basenames *.png* dist zips htmlfiles svgfiles
+	rm -rf $(TMP)/Cir* $(ECETMP)/Cir* $(ECEDIR)
+	if test -f Incl.pdf ; then \
+      mv Incl.pdf Incl.pdx; rm -f *.pdf; mv Incl.pdx Incl.pdf ; fi
+	for file in `ls *.tex` ; do \
+      nm=`echo $$file | sed -e "s/\(.*\)\.tex/\1/"` ; \
+      if test -s $$nm.m4 ; then rm -f $$nm.pic $$nm.tex ; fi ; done
+	(cd dpv; make clobber)
+#	@if test -f distmakefile ; then make -f distmakefile clobber ; fi
+
+clean:
+	@printf "\n\n examples clean:\n\n"
+	rm -f core boxdims.tar.gz pics
+	rm -f *.dvi *.aux *.log *.toc *.blg *.eps *.tif *.epsi eps *-mfpic* *.svg
+	rm -f fig*.tex $(TEXPICS) *.roff *.int *.pic gpic.m4 test.tex xxx* *.fig
+	rm -f rose.pdf keyboard.pdf
+	rm -f *.dim *.bak rotate.ps tst.ps *.bbl *-pics.ps
+	rm -f *.tfm *[0-9]pk *.png *.svg *.1 *.gif
+	rm -f F_* Version.tex *stackdump *.ico ./.[A-Za-z]*
+	rm -rf distfile distfile.tar.gz mode.tex
+	@printf "\n"
+#	@if test -f distmakefile ; then make -f distmakefile clean ; fi

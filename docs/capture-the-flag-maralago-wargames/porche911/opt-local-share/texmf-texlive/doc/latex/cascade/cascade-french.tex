@@ -1,0 +1,340 @@
+% -*- coding: utf-8 ; -*-
+\documentclass[dvipsnames]{article}% dvipsnames is for xcolor (loaded by Tikz, loaded by nicematrix)
+\usepackage{xltxtra}
+\usepackage[french]{babel}
+\frenchsetup{og = « , fg = »}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{geometry}
+\geometry{left=2.8cm,right=2.8cm,top=2.5cm,bottom=2.5cm,papersize={21cm,29.7cm}}
+
+\usepackage{cascade}
+
+
+\usepackage{enumitem}
+\usepackage{verbatim}
+\usepackage{amsmath}
+
+% We use \MakeShortVerb of shortvrb and not \DefineShortVerb of fancyvrb
+% because we don't want the contents of short verbatim colored in gray
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+
+\setlength{\fboxsep}{0pt}
+
+\usepackage{fancyvrb}
+\fvset{commandchars=\~\#\@,formatcom=\color{gray}}
+
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{6.5ex plus 1ex minus .2ex}{4.3ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{4.5ex plus 1ex minus .2ex}{2ex plus .2ex}
+
+
+\def\interitem{\vspace{7mm plus 2 mm minus 3mm}}          
+\def\emphase{\bgroup\color{RoyalPurple}\let\next=}
+
+\usepackage{footnote}
+
+\usepackage{varwidth}
+
+\usepackage[hyperfootnotes = false]{hyperref}
+
+\hypersetup
+  {
+    pdfinfo = 
+      {
+        Title = L’extension cascade ,
+        Subject = Une extension LaTeX ,
+        Author = F. Pantigny 
+      }
+  } 
+
+
+\NewDocumentEnvironment {scope} {} {} {}
+
+\NewDocumentCommand {\pkg} {m} {\textsf{#1}}
+\NewDocumentCommand {\cls} {m} {\textsf{#1}}
+
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+
+\VerbatimFootnotes
+
+
+\title{L'extension LaTeX \pkg{cascade}\thanks{Ce document correspond à la 
+version~\myfileversion\space de \pkg{cascade}, à la date du~\myfiledate.}} 
+\author{F. Pantigny \\ \texttt{fpantigny@wanadoo.fr}}
+
+\maketitle
+
+\begin{abstract}
+L'extension LaTeX \pkg{cascade} fournit une commande |\Cascade| pour faire des constructions qui présentent des
+démonstrations mathématiques avec des accolades enchaînées pour les déductions. L'extension \pkg{cascade} fournit
+également une commande |\Edacsac| (\emph{cascade} à l'envers) qui construit une structure similaire mais avec des
+accolades allant dans l'autre sens. 
+\end{abstract}
+
+
+
+\vspace{1cm}
+\section{La commande \textbackslash Cascade}
+
+L'extension \pkg{cascade} fournit une commande |\Cascade| qui permet des
+constructions comme la suivante, où la taille de l'accolade de droite est
+calculée sur seulement une partie des éléments LaTeX composés à gauche.
+\begin{center}
+\Cascade{$\det(A) = \begin{vmatrix}3&4\\ -1&7\end{vmatrix}\neq 0$}
+        {et, par conséquent, $A$ est inversible}
+        {}
+        {or $AX=Y$} 
+donc, $X = A^{-1}Y$
+\end{center}
+        
+\medskip
+\begin{Verbatim}
+~emphase#\Cascade@{$\det(A) = \begin{vmatrix}3&4\\ -1&7\end{vmatrix}\neq 0$}
+        {et, par conséquent, $A$ est inversible}
+        {}
+        {or $AX=Y$} 
+donc, $X = A^{-1}Y$
+\end{Verbatim}
+
+
+\interitem
+La commande |\Cascade| prend ses quatre arguments comme suit :
+\begin{center}
+\Cascade{\fbox{\hbox to 2cm{\vrule height 18 pt depth 5 pt width 0pt\hfil \texttt{\#1}\hfil}}}%
+{\fbox{\hbox to 3cm{\vrule height 10 pt depth 12 pt width 0pt\hfil \texttt{\#2}\hfil}}}%
+{\fbox{\hbox to 2.5cm{\vrule height 15 pt depth 14 pt width 0pt\hfil \texttt{\#3}\hfil}}}%
+{\fbox{\hbox to 1.7cm{\vrule height 12 pt depth 5 pt width 0pt\hfil \texttt{\#4}\hfil}}}
+\end{center}
+
+\interitem
+Les commandes |\Cascade| peuvent être imbriquées comme dans l'exemple suivant :
+\begin{center}
+\Cascade{\ShortCascade{$(BH) \perp (AC)$}{$(OC) \perp (AC)$}}
+        {or\enskip $(BH) \parallel (OC)$}
+        {\ShortCascade{$(CH) \perp (AB)$}{$(OB) \perp (AB)$}}
+        {or\enskip $(CH) \parallel (OB)$}
+donc $(OBHC)$ est un parallélogramme
+\end{center}
+
+\interitem
+Pour la lisibilité de ces constructions, une version simplifiée de |\Cascade|
+est disponible, nommée |\ShortCascade|.  
+
+
+Le code |\ShortCascade{X}{Y}| est simplement un raccourci pour le code
+|\Cascade{}{X}{}{Y}|.
+
+\medskip
+L'exemple précédent peut être codé avec deux commandes |\ShortCascade|
+et une commande |\Cascade| englobante.
+\begin{Verbatim}
+~emphase#\Cascade@{~emphase#\ShortCascade@{$(BH) \perp (AC)$}
+                      {$(OC) \perp (AC)$}}
+        {or\enskip $(BH) \parallel (OC)$}
+        {~emphase#\ShortCascade@{$(CH) \perp (AB)$}
+                      {$(OB) \perp (AB)$}}
+        {or\enskip $(CH) \parallel (OB)$}
+donc $(OBHC)$ est un parallélogramme
+\end{Verbatim}
+
+
+\bigskip
+\section{L'option t}
+
+Si on utilise l'option |t| sur la commande |\Cascade| englobante, une structure
+complète de commandes |\Cascade| est alignée sur la ligne du haut.
+
+Quand cette clé |t| est utilisée, si on souhaite ajouter du texte après la
+structure, on doit le placer entre chevrons pour que ce texte soit aligné avec
+la dernière accolade.
+
+
+\begin{Verbatim}
+\begin{enumerate}
+\item \Cascade~emphase#[t]@{\ShortCascade{$(BH) \perp (AC)$}{$(OC) \perp (AC)$}}
+        {or\enskip $(BH) \parallel (OC)$}
+        {\Cascade{}{$(CH) \perp (AB)$}{}{$(OB) \perp (AB)$}}
+        {or\enskip $(CH) \parallel (OB)$}
+        ~emphase#<donc $(OBHC)$ est un parallélogramme>@
+\end{enumerate}
+\end{Verbatim}
+
+
+\begin{enumerate}
+\item \Cascade[t]{\ShortCascade{$(BH) \perp (AC)$}{$(OC) \perp (AC)$}}
+        {or\enskip $(BH) \parallel (OC)$}
+        {\Cascade{}{$(CH) \perp (AB)$}{}{$(OB) \perp (AB)$}}
+        {or\enskip $(CH) \parallel (OB)$}
+        <donc $(OBHC)$ est un parallélogramme>
+\end{enumerate}
+
+
+
+\bigskip
+\section{Autres options}
+
+\begin{itemize}
+\item L'option |space-between| est une dimension LaTeX décrite sur la figure
+suivante. Sa valeur initiale est de $0.5$~em. Elle s'applique à la commande
+courante mais aussi à toutes les éventuelles commandes imbriquées dedans.
+
+
+\item L'option |interline| peut être utilisée pour \emph{augmenter}
+l'«interligne»
+comme illustré sur la figure suivante. La valeur initiale de |interline| est de
+$0$~pt et s'applique seulement à la commande |\Cascade| courante.
+
+\item L'option |interline-all| change la valeur initiale de |interline| utilisée
+par la commande |\Cascade| courante mais aussi toutes les éventuelles commandes
+|\Cascade| imbriquées.
+\end{itemize}
+
+\vspace{1cm}
+
+\begin{center}
+\Cascade{\fbox{\hbox to 2cm{\vrule height 18 pt depth 5 pt width 0pt\hfil \texttt{\#1}\hfil
+                            \tikz[remember picture] \coordinate (one) at (0,0) ;}}}%
+{\fbox{\vtop{\hbox to 3cm{\tikz[remember picture] \coordinate (two) at (0,0) ;
+                          \vrule height 10 pt depth 12 pt width 0pt\hfil \texttt{\#2}\hfil}
+             \hbox{\tikz[remember picture] \coordinate (three) at (0,0) ;}}}}%
+{\fbox{\vbox{\hbox{\tikz[remember picture] \coordinate (four) at (0,0) ;}%
+             \hbox to 2.5cm{\vrule height 15 pt depth 14 pt width 0pt\hfil \texttt{\#3}\hfil}}}}%
+{\fbox{\hbox to 1.7cm{\vrule height 12 pt depth 5 pt width 0pt\hfil \texttt{\#4}\hfil}}}
+\begin{tikzpicture}[remember picture,overlay,blue]
+\draw (one) to ++(0,1cm) coordinate (A) to ++(0,2mm) ;
+\draw (two) to ++(0,1cm) coordinate (B) to ++(0,2mm) ;
+\draw (A) -- (B) ;
+\draw[<-] (A) -- ++(-1mm,0) ;
+\draw[<-] (B) -- ++(1mm,0) ;
+\path (B) node [right=2mm] {\texttt{space-between}} ;
+\draw (three) to ++(-3cm,0) coordinate (C) to ++(-2mm,0) ;
+\draw (four) -| coordinate (D) (C) ; 
+\draw (D) to ++(-2mm,0) ;
+\draw[<-] (C) -- ++(0,1mm) ;
+\draw[<-] (D) -- ++(0,-1mm) ; 
+\path ($(C)!0.5!(D)$) node [left=2mm] {l'«interligne»} ;
+\end{tikzpicture}
+\end{center}
+
+\begin{Verbatim}
+\Cascade[~emphase#interline=4mm@]{\ShortCascade{A}{B}}{E}{\ShortCascade{C}{D}}{F} G
+\end{Verbatim}
+
+\begin{center}
+\Cascade[interline=4mm]{\ShortCascade{A}{B}}{E}{\ShortCascade{C}{D}}{F} G
+\end{center}
+
+\bigskip
+\begin{Verbatim}
+\Cascade[~emphase#interline-all=4mm@]{\ShortCascade{A}{B}}{E}{\ShortCascade{C}{D}}{F} G
+\end{Verbatim}
+
+\begin{center}
+\Cascade[interline-all=4mm]{\ShortCascade{A}{B}}{E}{\ShortCascade{C}{D}}{F} G
+\end{center}
+
+\interitem
+Ces options peuvent être fixées au niveau du document avec la commande 
+|\CascadeOptions|. Dans ce cas, la portée de ces déclarations est le groupe TeX
+courant (ces déclarations sont, comme on dit parfois «semi-globales»).
+
+\bigskip
+\section{La commande \textbackslash Edacsac}
+
+La commande |\Edacsac| (\textsl{cascade} écrit à l'envers) est similaire à la commande |\Cascade| mais avec des
+accolades dans l'autre sens. La clé~|t| n'est pas disponible dans cette commande. 
+
+\begin{Verbatim}
+Singularity 
+~emphase#\Edacsac@
+  {elementary}
+    {
+      ~emphase#\Edacsac@
+        {non-degenerate elementary}
+          {~emphase#\ShortEdacsac@{hyperbolic}{non-hyperbolic}}
+        {degenerate elementary}
+          {}
+      }
+  {non-elementary}
+    {~emphase#\ShortEdacsac@{Nilpotent}{Higher order}}
+\end{Verbatim}
+
+
+Singularity 
+\Edacsac
+  {elementary}
+  {
+    \Edacsac
+      {non-degenerate elementary}
+      {\ShortEdacsac{hyperbolic}{non-hyperbolic}}
+      {degenerate elementary}
+      {}
+    }
+  {non-elementary}
+  {\ShortEdacsac{nilpotent}{higher order}}
+
+
+\bigskip
+\section{Remarque technique}
+
+Les commandes de \pkg{cascade} sont conçues pour fournir par défaut des résultats similaires à ceux fournis par les
+environnements de l'\pkg{amsmath} (et de \pkg{mathtools}), en particulier |{aligned}|.
+
+
+\bigskip
+\begin{BVerbatim}[baseline=c,boxwidth=10cm]
+\[\left.\begin{aligned}
+& A = \sqrt{a^2+b^2} \\
+& B = \frac{ax+b}{cx+d}
+\end{aligned}\right\}\]
+\end{BVerbatim}
+$\left.\begin{aligned}
+& A = \sqrt{a^2+b^2} \\
+& B = \frac{ax+b}{cx+d}
+\end{aligned}\right\}$
+
+\bigskip
+\begin{BVerbatim}[baseline=c,boxwidth=10cm]
+\ShortCascade{$\displaystyle A = \sqrt{a^2+b^2}$}
+             {$B = \dfrac{ax+b}{cx+d}$}
+\end{BVerbatim}
+\ShortCascade{$\displaystyle A = \sqrt{a^2+b^2}$}{$B = \dfrac{ax+b}{cx+d}$}
+
+\interitem
+L'extension \pkg{cascade} construit les accolades avec la paire habituelle
+|\left|-|\right| de TeX. Néanmoins, les délimiteurs extensibles, en TeX, ne
+peuvent pas prendre toutes les tailles. On donne, dans l'exemple suivant, les
+accolades obtenues en entourant des filets verticaux de $6$~mm à $17$~mm (le code
+utilise la couche programmative de LaTeX3).
+
+\begin{Verbatim}
+\int_step_inline:nnnn 6 1 {17} { $\left.\hbox{\vrule height ~#1 mm}\right\}$\quad }
+\end{Verbatim}
+
+\medskip
+\begin{center}
+\ExplSyntaxOn
+\int_step_inline:nnnn 6 1 {17} { $\left.\hbox{\vrule height #1 mm}\right\}$\quad}
+\ExplSyntaxOff
+\end{center}
+
+
+\section*{Autre documentation}
+
+Le document |cascade.pdf| (fourni avec l'extension \pkg{cascade}) contient une traduction anglaise de la
+documentation ici présente, ainsi que le code source commenté et un historique des versions.
+
+
+\end{document}
+
+
+
+
+

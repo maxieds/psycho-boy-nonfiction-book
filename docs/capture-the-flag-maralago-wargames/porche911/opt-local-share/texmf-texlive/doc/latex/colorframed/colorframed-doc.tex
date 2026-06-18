@@ -1,0 +1,396 @@
+\documentclass[a4paper,dvipdfmx,10pt,english]{article}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage[straightquotes,ttzdefault]{newtxtt}
+\usepackage{framed}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{colorframed}
+% we put this here but it does not have to be in preamble of
+% course
+% titled-frame
+\colorlet{TFFrameColor}{teal!20}
+\colorlet{TFTitleColor}{purple}
+\def\colorframedTFconlabcolorcommand{\color{purple}}
+% shaded
+%\colorlet{shadecolor}{orange!10}
+\colorlet{shadecolor}{lightgray!25}
+
+% framed
+\FrameRule5pt\relax
+\FrameSep9pt\relax % this is framed.sty default anyhow, 3\fboxsep
+% attention that \FrameSep influences framed but also shaded, shaded* and
+% oframed, which is not so clear from reading only framed documentation
+\def\colorframedbordercolorcommand{\color{red!20}}
+
+\title{The \colorframed package%
+\vadjust{\vtop to 0pt{\hbox
+    to\linewidth{\strut\footnotesize Release 0.9b of
+      2022/10/01\hss report issues at \url{https://github.com/jfbu/colorframed/issues}}\vss}}%
+}
+\author{Jean-François Burnol}
+\date{}
+\usepackage{shortvrb}\MakeShortVerb\|
+%\usepackage{url}\urlstyle{same}
+\usepackage{hyperref}
+\def\ctanpackage#1{\href{https://ctan.org/pkg/#1}{#1}}
+
+\usepackage{amssymb}
+
+\usepackage{parskip}
+\usepackage{xspace}
+\usepackage{metalogo}
+\setlogokern{La}{-0.258em}
+\setlogokern{aT}{-0.08em}
+\setlogokern{eL}{-0.1em}
+%\setlogokern{X2}{0em}
+\usepackage{enumitem}
+
+\definecolor{joli}{RGB}{225,95,0}
+\definecolor{JOLI}{RGB}{225,95,0}
+\newcommand\colorframed{%
+        \texorpdfstring{{\color{joli}\bfseries colorframed}}{colorframed}\xspace}
+
+
+% ATTENTION: dvipdfmx syntax here!
+{\makeatletter
+     \sbox0{\color{RawSienna}%
+            \xdef\verbatimpushcolor{\special{color push \current@color}}}%
+}
+\def\verbatimpopcolor{\special{color pop}}
+\AddToHook{env/verbatim/before}{\verbatimpushcolor}
+\AddToHook{env/verbatim/end}{\verbatimpopcolor}
+
+\newcommand\ghissue[2][]{\href{https://github.com/jfbu/colorframed/issues/#2}{#1\##2}}
+
+\makeatletter
+  %\show\verbatim@font % pas changé at begin doc
+  \def\verbatim@font{\normalfont\ttfamily\color{RawSienna}}%
+\makeatother
+
+\begin{document}
+\maketitle
+
+\vskip-1.75\baselineskip
+
+{\footnotesize
+\halign{\tabskip1em\bfseries#\unskip&\hfil(#\unskip)\hfil&#\unskip\hfil\cr
+0.9  & 2022/09/22 & initial release\cr
+0.9a & 2022/09/23 & doc fixes, mention \ctanpackage{longfbox}\cr
+0.9b & 2022/10/01 & - fix "placement of titled-frame title
+                                  is not backwards compatible" (\ghissue{2})\cr
+\omit&\omit& - |\colorframedTitleBarFrame| as workaround to upstream issues with titled-frame
+               (\ghissue{3}, \ghissue{4})\cr
+\omit&\omit& - add link to \ghissue{5} for usage with list items, other doc improvements
+               such as \ghissue{1}\cr
+}}
+
+\vskip-\baselineskip\vskip0pt\relax
+
+\section{Description}
+
+
+This package fixes various colour leaks one encounters with
+the environments from Donald Arseneau's package
+\ctanpackage{framed}.  Typically, colour leaks occur if using
+|\color| (at top level or whose scope involves a page break) inside the
+environments, or more subtly also when using |\textcolor| with
+an argument ending up being split at a page break.
+
+This latter type of colour leak (or colour disappearance) is the
+more challenging one as the fix requires modifications or
+replacements not only of some of the \ctanpackage{framed}.sty
+macros (such as its |\CustomFBox|, which \colorframed overwrites)
+but also to some \LaTeX{} internals, as some environments of
+\ctanpackage{framed}.sty rely on usage of |\fbox| or |\colorbox|.
+Rather than overwriting internal \LaTeX{} macros such as
+|\@frameb@x| or |\color@b@x|, \colorframed simply replaces |\fbox|
+and |\colorbox| in the \ctanpackage{framed}.sty environments by
+appropriate substitutes.
+
+I am aware \ctanpackage{tcolorbox} package documentation explains at
+least one colour issue which looks similar to those fixed
+here in \ctanpackage{framed} context, and that the fix overthere uses
+an extra colour stack, hence is not \XeLaTeX{} compatible
+currently.
+
+The problems are solved here without involving an extra
+colour stack, hence the fixes work also with \XeLaTeX.
+
+\section{The environments from \ctanpackage{framed}}
+
+  We refer the reader to \ctanpackage{framed} for the official
+  documentation and provide here only a few relevant details,
+  particularly
+  regarding the `titled-frame' environment.
+\begin{titled-frame}{A list of the environments from package \ctanpackage{framed}}
+  This list indicates which boxing macros are
+  used in the original, and their replacement.
+% (investigate later why something such as shortverb |#| in
+% preamble does not work)
+\halign{\bfseries#\hfil&(#\unskip)~\hfil&#\hfil\cr
+%
+  framed & |\fbox| & Replaced by specialization of own \rlap{\expandafter|\string\CustomFBox|.}\cr
+%
+  oframed & |\CustomFBox| & \colorframed uses a redefined |\CustomFBox|.\cr
+%
+  titled-frame & |\CustomFBox| & \emph{id.}\cr
+%
+  shaded & |\colorbox| & Replaced by |\colorframedcolorbox|.\cr
+%
+  shaded* & |\colorbox| & \emph{id.}\cr
+%
+  snugshade & |\colorbox| & \emph{id.}\cr
+%
+  snugshade* & |\colorbox| & \emph{id.}\cr
+%
+  leftbar & none & This one does not use any boxing macro.\cr
+}
+\end{titled-frame}
+The previous box gives an example of use of `titled-frame' environment.
+  It is an environment with
+  one mandatory argument which provides the title of the
+  frame, which is repeated after a page break with |(cont)|
+  appended.  The colours |TFFrameColor| and
+  |TFTitleColor| must have been defined by the user.
+  \colorframed adds the possibility to colorize separately the continuation
+  label.  For example we used
+\begin{verbatim}
+\renewcommand\colorframedTFconlabcolorcommand{\color{purple}}
+\end{verbatim}
+  and the default definition of this macro is to do nothing (and then the
+  symbol obeys the |TFFrameColor|).
+
+\medskip
+% check why topsep influences separation of item 1 and 2
+% it shouldn't? hmm... ah yes I think framed itself uses \topsep...
+%\begin{enumerate}[noitemsep,topsep=6pt,font=\normalcolor]
+% j'utilise enumitem+noitemsep sinon je vois dans la partie ombrée
+% de l'espace supplémentaire au début de l'item (peut-être aussi
+% lié à l'emploi du package parskip)
+% \colorlet{shadecolor}{lightgray!25}
+
+\begin{footnotesize}
+\begin{itemize}[noitemsep,topsep=3pt,% influences strangely item separation
+                         parsep=3pt]
+\begin{shaded}
+\item
+\emph{The current box is an example of \emph{`shaded'}
+    environment; The
+    |shadecolor| must have been defined by user. See the
+    \ghissue[repository issue ]{5} for some comments about how to use
+    such environment with list items, if the environment is to start
+    at start of the item, as here. }
+\end{shaded}
+
+\begin{snugshade}
+\item \emph{This is an example of \emph{`snugshade'}
+    environment. It shares with \emph{`shaded'} the usage of |shadecolor|.}
+\end{snugshade}
+
+\begin{snugshade*}
+\item \emph{This is an example of \emph{`snugshade*'}.}
+\end{snugshade*}
+
+\begin{snugshade}
+\item
+%
+  The `titled-frame' environment was in effect broken in recent \LaTeX\ which
+  has modified how |\smash| behaves (the continuation label created a blank
+  line interrupting the framing); \colorframed fixes this infelicity in
+  passing.
+
+  To customize
+  further usage of `titled-frame' one must renew its definition,
+  which is left untouched by \colorframed.
+  Here is its source from \ctanpackage{framed}.sty: (code and
+  comments by Donald Arseneau)%
+\begin{verbatim}
+% A particular type of titled frame with continuation marks.  
+% Parameter #1 is the title, repeated on each page.
+\newenvironment{titled-frame}[1]{%
+  \def\FrameCommand{\fboxsep8pt\fboxrule2pt
+     \TitleBarFrame{\textbf{#1}}}%
+  \def\FirstFrameCommand{\fboxsep8pt\fboxrule2pt
+     \TitleBarFrame[$\blacktriangleright$]{\textbf{#1}}}%
+  \def\MidFrameCommand{\fboxsep8pt\fboxrule2pt
+     \TitleBarFrame[$\blacktriangleright$]{\textbf{#1\ (cont)}}}%
+  \def\LastFrameCommand{\fboxsep8pt\fboxrule2pt
+     \TitleBarFrame{\textbf{#1\ (cont)}}}%
+  \MakeFramed{\advance\hsize-20pt \FrameRestore}}%
+%  note: 8 + 2 + 8 + 2 = 20.  Don't use \width because the frame title
+%  could interfere with the width measurement.
+ {\endMakeFramed}
+\end{verbatim}
+  The continuation label used in the `titled-frame' environment
+  is |$\blacktriangleright$|
+  (which despite its name reacts to current text colour setting).
+  It requires to
+  the best of the author knowledge loading \ctanpackage{amssymb} or
+  some other math symbols package and it is up to user to do it.
+\end{snugshade}
+
+% \begin{shaded} % nesting does not work
+\begin{framed}
+\item
+\emph{(one can not nest environments of \ctanpackage{framed}.sty, else we would
+  have done so here.)}
+
+\textcolor{blue}{(Here is an attempt to use the {`framed'} environment
+  around a list item; we can see an unexpected
+  induced indentation of the
+  paragraph. And, by the way, there is no {`snugframe'} environment which would
+  let the border fit not the whole width but only the indented item.)}
+\end{framed}
+% \end{shaded} % nesting does not work
+
+\begin{snugshade}
+\item To customize the `titled-frame' output, one may simply redefine the
+  environment via suitable changes e.g. to the setting of |\fboxsep| and
+  |\fboxrule|.  But doing so, one quickly discovers that the layout from
+  |\TitleBarFrame| has problems (see on this the repository issues \ghissue{3}
+  and \ghissue{4}).  So \colorframed |0.9b| provides
+  |\colorframedTitleBarFrame|, which can be used as a replacement to
+  |\TitleBarFrame| in a redefined custom `titled-framed' environment.  Check
+  the source code for comments.  This alternative
+  obeys added customizing
+  macros whose defaults are shown here:
+\begin{verbatim}
+% (such \fboxsep should be set by environment itself, like titled-frame does)
+\def\colorframedTFtitlesep{\fboxsep}% hor. distance of title from left border
+\def\colorframedTFconlabsep{3pt}% hor. distance of continuation label from border
+\end{verbatim}
+  This variant handles differently than its model the horizontal and vertical
+  placement of the title.  It is provided as an exception
+  to the general rule that this package should take care only of fixing colour
+  problems (addition of \emph{new} environments may be considered in future,
+  but fixing existing environments will not be done beyond what is described here).
+
+\end{snugshade}
+\end{itemize}
+  As was already
+  mentioned `titled-frame' had been broken some years ago by an
+  upstream \LaTeX\ change and we did not change it beyond
+  fixing this problem.  The alternative |\colorframedTitleBarFrame| must be
+  opted-for explicitly by user in a re-definition of `titled-frame'
+  environment, the default remaining with the problematic
+  |\TitleBarFrame|. Or the user can do
+  |\let\TitleBarFrame\colorframedTitleBarFrame|
+  and use `titled-frame', not a new environment.
+  \par
+\end{footnotesize}
+
+
+
+% The aim of \colorframed regarding \ctanpackage{framed} existing
+% code base is strictly limited to fixing the colour leak issues,
+% there is no general intent to modify the existing environments of
+% \ctanpackage{framed} for them to acquire additional capabilities and
+% customizability.
+
+Already we have mentioned
+\begin{verbatim}
+\colorframedTFconlabcolorcommand
+\end{verbatim}
+whose default definition let it expands to nothing at all (the continuation label
+then inherits the |TFFrameColor| colour).
+
+Regarding the `framed' environment, \colorframed adds the
+\begin{verbatim}
+\colorframedbordercolorcommand
+\end{verbatim}
+which expands by default to |\normalcolor|.  It influences the colour of the
+framing done by environment `framed', the original having no such
+customizability.  Do not redefine it to do nothing, it always should set some
+colour, else the borders may display colour loss after a page break.
+
+For example
+\begin{verbatim}
+\setlength{\FrameRule}{5pt}
+\setlength{\FrameSep}{9pt}
+\renewcommand\colorframedbordercolorcommand{\color{gray!50}}
+\end{verbatim}
+configures the next usage of `framed'.
+
+\setlength{\FrameRule}{5pt}
+\setlength{\FrameSep}{9pt}
+\renewcommand\colorframedbordercolorcommand{\color{gray!50}}
+\begin{framed}
+  This environment allows indeed customization of the border width
+  and of the separation with contents, via |\FrameRule| and
+  |\FrameSep|.
+
+  The length |\FrameSep| influences also `oframed', `shaded', and `shaded*',
+  but `snugshade' and `snugshade*' employ |\fboxsep| rather.
+
+  |\FrameRule| influences both `framed' and `oframed'.
+\end{framed}
+
+\section{Technicalities, musings about future}
+
+\begin{snugshade}
+I first developed the analysis of the colour leaks/losses at page breaks with
+\ctanpackage{framed} on occasion of some contributions I made to
+the \href{https://github.com/sphinx-doc/sphinx}{Sphinx project} and I am
+transferring here the gained knowledge.
+
+The key thing is that the boxes handled by \ctanpackage{framed}.sty may
+contain isolated colour push or colour pop.  We must make
+sure an isolated colour push, if followed by colour changes,
+is always followed by paired ones, and never by a colour pop
+from a colour command originated "prior" and symmetrically that a sole
+colour pop does not follow a yet unpaired colour push from some other
+colour command related to the framing.
+
+This means we can not ever use things such as |\fbox|, |\colorbox| or
+|\fcolorbox| (whether or not \ctanpackage{xcolor} is loaded) as they will
+cause colour pops after a possibly isolated colour push contained in the
+(already boxed) contents which are fetched to them as arguments by
+\ctanpackage{framed}.sty internals.  We must re-implement them otherwise.
+This is what is done here, without touching the \LaTeX\ internal macros
+themselves.
+
+Some portion of the macro file is occupied with the
+`titled-frame' environment of \ctanpackage{framed}.sty, which was broken by an
+upstream LaTeX change related to |\smash|, and has obvious problems
+apart from that.
+Further "obvious problems" do exist for the other \ctanpackage{framed}.sty
+environments but it is not the matter of this package to fix them.
+Perhaps in future another package will be provided based upon the
+work here and adding a completely new environment fixing the "obvious
+problems" (some of them being simply lack of customizability).
+
+The author has developed based upon usage of \ctanpackage{pict2e}
+breakable boxes with round corners, background colour, optional
+shadow (possibly inset), and other goodies and was planning on
+incorporating this environment into the package at some time in future.
+
+% Hopefully this addition will be done when time will permit.
+
+% \thispagestyle{empty}
+% \enlargethispage{2\baselineskip}
+
+%\colorlet{shadecolor}{lightgray!50}
+% \footnotesize
+  But after initial release made it to CTAN on
+  2022/09/22 I became aware of \ctanpackage{longfbox} which
+  provides already such \ctanpackage{pict2e} breakable boxes with
+  rounded corners (even elliptical arcs), and furthermore with a
+  CSS-like interface which is exactly what I had done on my side
+  too... I need to check more \ctanpackage{longfbox} before a
+  decision is made here!  Perhaps it will be better to keep
+  \colorframed as it is currently and
+  extras such as new \ctanpackage{pict2e}-based boxes with a key-value
+  interface to `inline' or `display' boxing macros and environments
+  should make it to another package (loading \colorframed of course).
+
+  Of course, such a package would remain limited in its graphics abilities
+  (and customizability) in comparison to the customizable boxing environments
+  provided by package \ctanpackage{mdframed} or \ctanpackage{tcolorbox} but
+  testing with my own \ctanpackage{pict2e}-based boxes showed significant
+  speed-up in build time compared to using \ctanpackage{framed}+|\tcbox| or
+  the "breakable" option of \ctanpackage{tcolorbox}.
+
+\end{snugshade}
+\centerline{\hrulefill documentation ends here\hrulefill}
+\end{document}

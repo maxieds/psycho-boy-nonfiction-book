@@ -1,0 +1,405 @@
+%! TEX program = xelatex
+\documentclass[classical]{einfart}
+
+\linenumbers
+
+\usepackage{ProjLib}
+
+\setmonofont[Scale=.9]{Iosevka}
+
+%%================================
+%% For typesetting code
+%%================================
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{setspace}
+\definecolor{code-main}{RGB}{70,130,180}
+\definecolor{code-expl3}{RGB}{240,50,60}
+\definecolor{code-option}{RGB}{40,110,20}
+\definecolor{code-keys}{RGB}{100,130,150}
+\definecolor{code-comment}{RGB}{20,120,80}
+\definecolor{code-background}{gray}{0.99}
+\lstset{
+    language = [LaTeX]TeX,
+    basicstyle = \ttfamily,
+    keywordstyle = \color{code-main},
+    commentstyle = \color{code-comment},
+    showstringspaces = false,
+    breaklines = true,
+    frame = lines,
+    backgroundcolor = \color{code-background},
+    basewidth = .5em,
+    escapeinside = {(*}{*)},
+    alsoletter = {_,:},
+    % numbers = left,
+    % firstnumber = last,
+    numberstyle = \scriptsize\ttfamily,
+    stepnumber = 1,
+    numbersep = 5pt,
+}
+\newcommand{\meta}[1]{$\langle${\normalfont\itshape#1}$\rangle$}
+\lstset{% LaTeX2 commands
+    classoffset = 0,
+    texcsstyle =* \color{code-main},
+    moretexcs =
+      {
+        cref,crefname,
+        Cref,Crefname,
+        namecref,namecrefs,
+        nameCref,nameCrefs,
+        cpageref,Cpageref,
+        crefformat,
+        crefthe,crefthename,
+        Crefthe,Crefthename,
+        crefthevariantname,Crefthevariantname,
+        setcrefname,setCrefname,
+        namecrefthe,namecrefsthe,
+        nameCrefthe,nameCrefsthe,
+        cpagerefthe,Cpagerefthe,
+        crefthemark,
+        crefthepatchname,
+        selectlanguage,
+      }
+}
+\lstset{% LaTeX3 commands
+    classoffset = 1,
+    texcsstyle =* \color{code-expl3},
+    moretexcs =
+      {
+      }
+}
+\lstnewenvironment{code}{\setstretch{1.05}\LocallyStopLineNumbers}{\ResumeLineNumbers\vspace{-.3\baselineskip}\vspace{-.5\parskip}}
+\lstnewenvironment{code*}{\setstretch{1.05}\lstset{numbers=left}\LocallyStopLineNumbers}{\ResumeLineNumbers\vspace{-.3\baselineskip}\vspace{-.5\parskip}}
+
+\newcommand{\packageoption}[1]{\textcolor{code-option}{\texttt{#1}}}
+\newcommand{\commandoption}[1]{\textcolor{code-keys}{\texttt{#1}}}
+
+%%================================
+%% tip
+%%================================
+\usepackage[many]{tcolorbox}
+\newenvironment{tip}[1][Tip]
+  {%
+    \LocallyStopLineNumbers%
+    \begin{tcolorbox}[breakable,
+        enhanced,
+        width = \textwidth,
+        colback = paper, colbacktitle = paper,
+        colframe = gray!50, boxrule=0.2mm,
+        coltitle = black,
+        fonttitle = \sffamily,
+        attach boxed title to top left = {yshift=-\tcboxedtitleheight/2, xshift=.5cm},
+        boxed title style = {boxrule=0pt, colframe=paper},
+        before skip = 3mm,
+        after skip = 3mm,
+        top = 2.5mm,
+        bottom = 1.5mm,
+        title={\scshape\sffamily #1}]%
+  }
+  {%
+    \end{tcolorbox}%
+    \ResumeLineNumbers%
+  }
+
+%%================================
+%% demo
+%%================================
+\newenvironment{demo}
+  {%
+    \LocallyStopLineNumbers%
+    \begin{tcolorbox}[enhanced jigsaw,pad at break*=1mm,breakable,
+        left=2.5mm,right=3mm,top=0.5mm,bottom=0mm,
+        colback=gray!5!paper,boxrule=0pt,frame hidden,
+        borderline west={1.2mm}{0mm}{gray!55!paper},arc=.7mm]%
+  }
+  {%
+    \end{tcolorbox}%
+    \ResumeLineNumbers%
+  }
+
+
+\newcommand{\crefthepackage}{\textsf{crefthe}}
+
+\begin{document}
+
+\def\PackageVersion{2024/02/25}
+\def\PackageSubVersion{}
+
+\title{\crefthepackage{}\\\smallskip\itshape Cross referencing with proper definite articles and declensions}
+\author{Jinwen XU}
+\thanks{Corresponding to: \texttt{\crefthepackage{} \PackageVersion\PackageSubVersion}.}
+\date{\TheDate{\PackageVersion}[only-year-month], in Paris}
+
+\maketitle
+
+\begin{abstract}
+    \raggedleft
+    The package \crefthepackage{} provides a command \lstinline|\crefthe| parallel to \textsf{cleveref}'s \lstinline|\cref| for handling definite articles and declensions properly (especially for the phenomenon of article contractions in some European languages, such as French and German).
+\end{abstract}
+
+\section{The motivation}
+
+By default, with \textsf{cleveref}'s \lstinline|\cref| to reference theorem-like environments, the names do not contain definite articles. While this might be acceptable for English, it is certainly not good enough for languages such as French, German, Italian, Portuguese, Spanish, etc. --- in these cases there shall be grammatical errors and would give you a strong feeling that it is machine-generated.
+
+However, even if we manually add the definite articles to the names, there would still be other problems. As an example, if we define the French names to be:
+
+\begin{code}
+\crefname{theorem}{le théorème}{les théorèmes}
+\crefname{proposition}{la proposition}{les propositions}
+\end{code}
+
+then when one writes (which means ``\emph{We can deduce this from ...}'')
+
+\begin{code}
+On peut le déduire de \cref{thm1,thm2,prop3}.
+\end{code}
+
+the result would be:
+
+\begin{demo}
+    On peut le déduire \textbf{de les} théorèmes 1 et 2 et \textbf{la} proposition 3.
+\end{demo}
+
+which is wrong, as the correct result should be:
+
+\begin{demo}
+    On peut le déduire \textbf{des} théorèmes 1 et 2 et \textbf{de la} proposition 3.
+\end{demo}
+
+\lstinline|\cref| cannot handle such cases automatically --- that is when \lstinline|\crefthe| comes into play.
+
+
+\section{The usage}
+
+\subsection[How to load it]{How to load it\,?}
+
+Simply load the package with:
+
+\begin{code}
+\usepackage{crefthe}
+\end{code}
+
+\begin{tip}
+    \begin{itemize}
+        \item Since \crefthepackage{} uses \textsf{cleveref} internally, it should usually be placed at the last of your preamble, and notably, after \textsf{varioref} and \textsf{hyperref}.
+        \item To handle article contractions correctly, \lstinline|\crefthe| shall detect the current language, thus you need to use packages such as \textsf{babel} or \textsf{polyglossia} to set your languages, and use commands like \lstinline|\selectlanguage| to select them appropriately.
+    \end{itemize}
+\end{tip}
+
+\subsection[How to use it]{How to use it\,?}
+
+Before everything, you need to define the names, which can be done with \lstinline|\crefthename|. Its syntax is similar to \lstinline|\crefname|, but now you can specify the definite articles, for example:
+
+\begin{code}
+\crefthename{theorem}[le]{théorème}[les]{théorèmes}
+\end{code}
+
+\begin{tip}
+    The \lstinline|\crefthename|s should be placed in your preamble, otherwise the \lstinline|\cref| formats will not be set. These names can, however, be reset within the document body.
+\end{tip}
+
+Then you can use the command \lstinline|\crefthe| as follows:
+\begin{itemize}[label=,leftmargin=1.25em,itemindent=-1.25em]
+    \item \lstinline|\crefthe[|\meta{prep}\lstinline|]{|\meta{labels}\lstinline|}|
+    \begin{itemize}
+        \item This will pass the preposition \meta{prep} to the definite articles that follows. Its behavior depends on the current language (for example, in Spanish, \meta{prep} is passed only to the first definite article, while in French it is passed to everyone).
+    \end{itemize}
+    \item \lstinline|\crefthe-[|\meta{prep}\lstinline|]{|\meta{labels}\lstinline|}| and \lstinline|\crefthe+[|\meta{prep}\lstinline|]{|\meta{labels}\lstinline|}|
+    \begin{itemize}
+        \item In case the automatic version does not meet your needs, here are two manual ones. The \verb|-| version passes the preposition \meta{prep} only to the first definite article, while the \verb|+| version passes \meta{prep} to every definite article.
+    \end{itemize}
+\end{itemize}
+
+\begin{tip}
+    \begin{itemize}
+        \item There is also a stared version \lstinline|\crefthe*| for generating the same referencing text without creating hyperlinks.
+        \item The name-only relatives are also available: \lstinline|\namecrefthe| and \lstinline|\namecrefsthe|.
+        \item \lstinline|\cpagerefthe| and \lstinline|\Cpagerefthe| are provided as well.
+    \end{itemize}
+\end{tip}
+
+% However, before using it, you should first define the \lstinline|\crefname|s carefully. The definite article in \lstinline|\crefname|s needs to be marked manually using \lstinline|\crefthemark|, for example:
+
+% \begin{code}
+% \crefname{theorem}{\crefthemark{le} théorème}
+%                   {\crefthemark{les} théorèmes}
+% \end{code}
+
+
+\enlargethispage*{\baselineskip}
+\section{Example}
+
+Let us come back to the example at the beginning, now you can do this:
+
+\begin{code}
+\crefthename{theorem}[le]{théorème}[les]{théorèmes}
+\crefthename{proposition}[la]{proposition}[les]{propositions}
+\end{code}
+
+And the sentence shall be written as:
+
+\begin{code}
+On peut le déduire \crefthe[de]{thm1,thm2,prop3}.
+\end{code}
+
+which would result in (provided that you have done \lstinline|\selectlanguage{french}|):
+
+\begin{demo}
+    On peut le déduire \textbf{des} théorèmes 1 et 2 et \textbf{de la} proposition 3.
+\end{demo}
+
+Voilà !
+
+\section{For language with declensions}
+
+In German, there are four declensions: nominative (\texttt{Nominativ}), genitive (\texttt{Genitiv}), dative (\texttt{Dativ}) and accusative (\texttt{Akkusativ}), making the previously presented mechanism insufficient. For such situation, we introduce the command \lstinline|\crefthevariantname| to specify the referencing name for the correspond environment. Below is an example of usage:
+
+\begin{code}
+\crefthevariantname{theorem}
+  {
+    {Satz}{Sätze}
+    , Nominativ = [der]{Satz}[die]{Sätze}
+    , Genitiv   = [des]{Satzes}[der]{Sätze}
+    , Dativ     = [dem]{Satz}[den]{Sätzen}
+    , Akkusativ = [den]{Satz}[die]{Sätze}
+  }
+\end{code}
+
+\begin{tip}
+    \begin{itemize}
+        \item The first line in the configuration is the default set of names when no variant is specified. It is recommended, though not required.
+        \item There is also an equivalent but shorter name \lstinline|\setcrefname| for this command.
+    \end{itemize}
+\end{tip}
+
+After this, you may refer to a theorem via
+
+\begin{code}
+\crefthe[(*\meta{prep}*),(*\commandoption{variant}*)=(*\meta{declension}*)]{(*\meta{label}*)}
+\end{code}
+
+You may also use the shortcuts (\texttt{nom.}, \texttt{gen.}, \texttt{dat.} and \texttt{akk.}), such as:
+
+\begin{code}
+\crefthe[(*\meta{prep}*),(*\commandoption{Nom}*)]{(*\meta{label}*)}     \crefthe[(*\meta{prep}*),(*\commandoption{Nom.}*)]{(*\meta{label}*)}
+\crefthe[(*\meta{prep}*),(*\commandoption{nom}*)]{(*\meta{label}*)}     \crefthe[(*\meta{prep}*),(*\commandoption{nom.}*)]{(*\meta{label}*)}
+\end{code}
+
+These four are all equivalent and you may choose one to use according to your preference.
+
+Article contractions are by default enabled for German, but if you don't want this, you may use the package option \packageoption{disable german article contractions}.
+
+\section{Using abbreviation form}
+
+There is another usage of \lstinline|\crefthevariantname| (or equivalently, \lstinline|\setcrefname|): setting the abbreviation form. This allows you to use both the full form and the abbreviation form within the same document. For example, you may set
+
+\begin{code}
+\setcrefname{theorem}
+  {
+    {theorem}{theorems}
+    , abbr. = {th.}{ths.}
+  }
+\end{code}
+
+Then, when referencing, you can use the command option \commandoption{abbr.} to enable abbreviation:
+
+\begin{code}
+\crefthe[(*\commandoption{abbr.}*)]{(*\meta{label}*)}
+\end{code}
+
+\begin{tip}[Attention]
+    Please note that \commandoption{abbr.} has more priority than the option(s) for specifying declensions. This means that when \commandoption{abbr.} is enabled, the declensions are simply ignored.
+\end{tip}
+
+\section{Regarding the upper and lower cases}
+
+As with \textsf{cleveref}, these commands have corresponding uppercased version: \lstinline|\Crefthename|, \lstinline|\Crefthe|, \lstinline|\nameCrefthe|, \lstinline|\nameCrefsthe| and \lstinline|\Cpagerefthe|, similar to \lstinline|\Crefname|, \lstinline|\Cref|, \lstinline|\nameCref|, \lstinline|\nameCrefs| and \lstinline|\Cpageref|, reserved for using at the beginning of a sentence. Their usage is essentially the same as the corresponding lowercase version.
+
+For languages with declensions, such as German, there is also a \lstinline|\Crefthevariantname| (or equivalently, \lstinline|\setCrefname|), corresponding to the above \lstinline|\crefthevariantname|.
+
+\lstinline|\Crefthe| (and the name-only relatives) can handle case changing automatically: for example, with \lstinline|\Crefthe[À]{thm1,thm2,prop3}|, you will get something like
+
+\begin{demo}
+    \textbf{Aux} théorèmes 1 et 2 et \textbf{à la} proposition 3
+\end{demo}
+
+Of course, you would have to define the \lstinline|\Crefthename|s separately, for example as:
+
+\begin{code}
+\Crefthename{theorem}[Le]{théorème}[Les]{théorèmes}
+\Crefthename{proposition}[La]{proposition}[Les]{propositions}
+\end{code}
+
+\enlargethispage*{\baselineskip}
+\section{On the coordination of gender and number}
+
+In many languages, adjectives and verbs need to be properly inflected for the gender and singular or plural of the noun. Take French as example, you may see the following expressions:
+\begin{itemize}
+    \item La proposition précédent\textbf{e}/suivant\textbf{e}... (The previous/next proposition...)
+    \item La proposition est illustré\textbf{e} par... (The proposition is illustrated by...)
+\end{itemize}
+Thus if you later decide to change this proposition (feminine) into a theorem (masculine), you would have to modify the adjectives and verbs accordingly. Similar things happens in many other languages, and it is not quite realistic to fully automate such modifications.
+
+The name-only relatives \lstinline|\namecrefthe|, \lstinline|\nameCrefthe| etc. are designed for this purpose. They do not automatically solve these kinds of problems, but you may later search for the \meta{label} of the environment that changes, and modify the surrounding context manually --- in other words, these commands serve as recorders: if you write the word like \textquote{theorem} or \textquote{proposition} directly in the text, then later it would be unclear which part of your text needs to be update when the environment itself changes.
+
+There is another case. For example, if you wish to say \textquote{ce théorème} (\textquote{this theorem}), the pre-defined set of names that contains definite articles would be somewhat redundant. In such situation, you may use the command option \commandoption{noun} to show only the noun:
+
+\begin{code}
+\namecref[(*\commandoption{noun}*)]{(*\meta{label}*)}
+\end{code}
+
+But then of course you shall need to write the word \textquote{Ce/Cet/Cette} (these are all different forms of \textquote{This} in French) by yourself --- and if you later decide to change the type of the environment to which this \meta{label} refers, don't forget to change this word accordingly.
+
+\section{For writing multi-language documents}
+
+To place hyperlinks at the correct place, \lstinline|\crefthename| touches the corresponding format macro \lstinline|\crefformat| internally, which makes the format language-dependent. If you are writing multi-language documents, you may consider putting \lstinline|\crefthename| inside your language configuration so as to reset it each time you select a new language.
+
+\section{Dealing with existed \texttt{cref} / \texttt{Cref} names}
+
+For those preset names defined with \lstinline|\crefname|\,/\,\lstinline|\Crefname|, such as the ones for \texttt{chapter}, \texttt{section} and \texttt{subsection}, etc., the optional argument of \lstinline|\crefthe|\,/\,\lstinline|\Crefthe| shall be useless: names defined with \lstinline|\crefthename|\,/\,\lstinline|\Crefthename| have a \lstinline|\crefthemark| marking the definite articles, which also deals with the given preposition ; without \lstinline|\crefthemark|, the preposition is simply ignored.
+
+\lstinline|\crefthepatchname{|\meta{counters}\lstinline|}| is provided for this purpose. With this, an empty mark shall be added before the existed singular and plural names. However, it is still recommended to simply redefine the names with \lstinline|\crefthename|\,/\,\lstinline|\Crefthename|, especially in multilingual documents.
+
+% For multilingual documents, you may need to add this to your language configuration so as to reapply it each time you select a new language.
+
+
+\section{The relationship with \textsf{cleveref}}
+
+\crefthepackage{} loads \textsf{cleveref} automatically and passes related options to it. All its commands, used without optional arguments, degenerate to those in \textsf{cleveref}. For example, \lstinline|\crefthe{...}|%
+will produce the same result as \lstinline|\cref{...}|, and \lstinline|\crefthename| shall behave the same as \lstinline|\crefname| if the definite articles are not specified. That said, you may safely use the command \lstinline|\crefthe| everywhere in your document without causing extra trouble.
+
+With the package option \packageoption{overwrite}, user commands in \textsf{cleveref} will be replaced by those offered here, thus you can simply write \lstinline|\cref| for \lstinline|\crefthe| --- and similarly with \lstinline|\Cref|, \lstinline|\crefname| and \lstinline|\Crefname|, etc.
+
+
+\clearpage
+
+
+\section{Acknowledgement}
+
+There are so many people I wish to express my gratitude to during the development of this package, including:
+
+\begin{itemize}
+    \item Patrick Bideault, without whose advice and careful explanation, this package would probably never have been born. Merci !
+    \item Enrico Gregorio, Phelype Oleinik and Joseph Wright (in alphabetical order). They made valuable suggestions in the early development of this package and even edited some of the code themselves.
+    \item Jonathan P. Spratte, without whose help the German support would probably take much longer to complete.
+\end{itemize}
+
+
+\bigskip
+\section{Known issues}
+\begin{itemize}
+    \item \crefthepackage{} currently works for French, German, Italian, Portuguese (European and Brazilian) and Spanish --- certainly more languages would be added to this list in the future.
+    % \item For now, you cannot specify the masculine/masculine/... of words. This means, for instance, that you cannot make the suffix adjective automatically adopted to the word when using \lstinline|\namecref| --- as an example, if you wish to say \textquote{la proposition suivante} (in French), you would have to write the feminine adjective manually. The situation should be improved with the introduction of a new key-value configuration system, which is currently on the todo-list.
+    % Meanwhile, you may consider the package \textsf{zref-clever}, which has a much more powerful and sophisticated interface for configuring cross referencing.
+    \item The names of theorem-like environments are not provided here, you need to define them by yourself. However, users are encouraged to use the \ProjLib{} toolkit (more specifically, the internal package \textsf{create-theorem}), which already handles everything for you.
+\end{itemize}
+
+\medskip
+If you run into any issues or have ideas for improvement, feel free to discuss on:
+\begin{center}
+    \url{https://github.com/Jinwen-XU/crefthe/issues}
+\end{center}
+or email me via \href{mailto:ProjLib@outlook.com}{\texttt{ProjLib@outlook.com}}.
+
+
+\end{document}
