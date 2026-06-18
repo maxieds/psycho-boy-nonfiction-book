@@ -1,0 +1,35 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 6 Datum Tests for Equality
+% Label: "ex:datumifeq"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{datatool-base}
+\DTLparse{\Fruit}{Pear}
+\DTLparse{\Price}{\$1.50}
+\DTLparse{\Quantity}{10}
+\DTLsetcurrencydatum{\OtherPrice}{1 dollar 50\textcent}{1.5}{\$}
+\DTLsetdecimaldatum{\OtherQuantity}{10.00}{10.0}
+\newcommand{\test}[3]{#1=#2 (\texttt{\string#3}) ? #3{#1}{#2}{true}{false}.\par} 
+\begin{document}
+\ExplSyntaxOn
+\test \Fruit {Pear} \tl_if_eq:NnTF
+\test \Fruit {Pear} \tl_if_eq:enTF
+\test \Fruit {Pear} \datatool_if_value_eq:NnTF 
+
+\test \Price {\$1.50} \tl_if_eq:NnTF
+\test \Price {\$1.50} \tl_if_eq:enTF
+\test \Price {\$1.50} \datatool_if_value_eq:NnTF
+\test \Price {\$1.5} \datatool_if_value_eq:NnTF
+\test \Price \OtherPrice \tl_if_eq:NNTF
+\test \Price \OtherPrice \datatool_if_value_eq:NNTF 
+
+\test \Quantity {10} \tl_if_eq:NnTF
+\test \Quantity {10} \tl_if_eq:enTF
+\test \Quantity {10} \datatool_if_value_eq:NnTF
+\test \Quantity {10.00} \datatool_if_value_eq:NnTF
+\test \Quantity \OtherQuantity \tl_if_eq:NNTF
+\test \Quantity \OtherQuantity \datatool_if_value_eq:NNTF
+\ExplSyntaxOff 
+\end{document}

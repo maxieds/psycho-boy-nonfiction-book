@@ -1,0 +1,71 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 12 Icelandic Sorting and Letter Groups
+% Label: "ex:icelandiclettergroup"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{datatool-base}
+\ExplSyntaxOn 
+
+\newcommand{\DTLisLocaleHandler}[1]{
+ \regex_replace_case_all:nN
+ {
+  { Á } { A\cL\x{7f} }
+    { á } { a\cL\x{7f} }
+    { Ð } { D\cL\x{7f} }
+    { ð } { d\cL\x{7f} }
+    { É } { E\cL\x{7f} }
+    { é } { e\cL\x{7f} }
+    { Í } { I\cL\x{7f} }
+    { í } { i\cL\x{7f} }
+    { Ó } { O\cL\x{7f} }
+    { ó } { o\cL\x{7f} }
+    { Ú } { U\cL\x{7f} }
+    { ú } { u\cL\x{7f} }
+    { Ý } { Y\cL\x{7f} }
+    { ý } { y\cL\x{7f} }
+    { Þ } { \cL\x{5b} }
+    { þ } { \cL\x{7b} }
+    { Æ } { \cL\x{5c} }
+    { æ } { \cL\x{7c} }
+    { Ö } { \cL\x{5d} }
+    { ö } { \cL\x{7d} }
+    { ([[:punct:]]+) } { \cO"\1 }
+    }
+ #1
+} 
+
+\newcommand{\DTLisLocaleGetInitialLetter}[2]{
+ \tl_set:Nn #2 { #1 }
+ \regex_replace_case_all:nN
+ {
+  { A\cL\x{7f} } { Á } { a\cL\x{7f} } { á }
+  { D\cL\x{7f} } { Ð } { d\cL\x{7f} } { ð }
+  { E\cL\x{7f} } { É } { e\cL\x{7f} } { é }
+  { I\cL\x{7f} } { Í } { i\cL\x{7f} } { í }
+  { O\cL\x{7f} } { Ó } { o\cL\x{7f} } { ó }
+  { U\cL\x{7f} } { Ú } { u\cL\x{7f} } { ú }
+  { Y\cL\x{7f} } { Ý } { y\cL\x{7f} } { ý }
+  { \cL\x{5b} } { Þ } { \cL\x{7b} } { þ }
+  { \cL\x{5c} } { Æ } { \cL\x{7c} } { æ }
+  { \cL\x{5d} } { Ö } { \cL\x{7d} } { ö }
+  } #2
+ \exp_args:No \datatool_get_first_letter:nN { #2 } #2
+} 
+
+\ExplSyntaxOff 
+
+\let\DTLCurrentLocaleWordHandler\DTLisLocaleHandler \let\DTLCurrentLocaleGetInitialLetter\DTLisLocaleGetInitialLetter 
+
+\newcommand{\mylist}{bókstafinn, vera, eða, 
+ ég, býsna, þú, vakna, epli, bragðs, aldar, bað, bolli, ýmist, af, 
+ óáreiðanleg, bær, dalur, ör, þorn, þau, október, esja, öngull, dæmi, að, yfir, 
+ öðrum, orð, detta, áhrif, yngri, óvinur, ætlað} 
+\begin{document}
+\DTLsortwordlist{\mylist}{\DTLsortletterhandler}
+\renewcommand{\DTLlistformatitem}[1]{#1 (\DTLsortedletter{#1})}
+Sorted list: \DTLformatlist{\mylist}. 
+\end{document}

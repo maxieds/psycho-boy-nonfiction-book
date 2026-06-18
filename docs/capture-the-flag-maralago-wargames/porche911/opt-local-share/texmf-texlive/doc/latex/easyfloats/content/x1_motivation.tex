@@ -1,0 +1,377 @@
+% !TeX root = ../easyfloats.tex
+
+\section{Motivation}
+\label{motivation}
+
+In this section I will explain how to insert figures and tables in standard \LaTeX\ without this package and how this package can improve that.
+If you are only interested in how to use this package not why, see \cref{examples} for examples and \cref{documentation} for an explanation of the commands, environments and options defined by this package.
+
+\subsection{Graphics}
+\label{graphics}
+
+Inserting a graphic without using this package requires 6 lines of code (\pkg{graphicx} or \pkg{graphbox} must be loaded for `\includegraphics`):
+\begin{examplecode\starred}{\ExamplecodeNoBox\ExamplecodeLinenumbers}
+\begin{figure}
+	\centering
+	\includegraphics[graphic width=.8\linewidth]{ctan_lion}
+	\caption{CTAN lion drawing by Duane Bibby}
+	\label{ctan_lion}
+\end{figure}
+\end{examplecode\starred}
+
+\begin{description}
+\item[Lines 1 and 6]
+  open\slash close a floating environment.
+  The content of this environment can float around so that it won't cause a bad page break.
+  You don't need this if you really just want to insert a graphic exactly here (like a logo in a header)
+  but a graphic cannot break across pages so if it is too large for the end of the current page it will move to the next page leaving the end of this page empty.
+  This is a waste of paper and may confuse a reader by suggesting this might be the end of a chapter.
+  A floating environment can help you by putting the figure where it fits best.
+
+  The placement determines where a float is allowed to be placed.
+  Initially that's the top or bottom of a text page or a separate page just for floats.
+  The placement can be specified for a single floating object by passing an optional argument to the floating environment
+  or for all floating objects using the `\floatplacement` command defined by the \pkg{float} package.
+  (The floating environments `figure` and \env{table} are standard \LaTeX\ and do not require the \pkg{float} package.)
+  The allowed values for the placement are described in the description of the \env{object} environment's `placement` key.
+
+  There are people who are concerned that a figure not sitting at the exact position might confuse a reader.
+  However, a graphic naturally attracts the reader's attention.
+  Therefore it does not matter where it is located on the double page.
+  The reader will see it.
+
+  Of course the author must ensure that the figure does not float too far away.
+  If that is the case changing the size of this or another graphic,
+  `\usepackage[section]{placeins}`,
+  `\FloatBarrier` (defined by the \pkg{placeins} package),
+  moving this block of lines in the code,
+  changing the placement or
+  tweaking the parameters which govern the placing of floats \autocite[page~28]{latex2e}
+  can help.
+
+\item[Line 2]
+  centers the graphic horizontally on the line.
+
+  The `\centering` command is used instead of the `center` environment because the latter would insert additional vertical space.
+
+  \begin{examplecode\starred}{\ExamplecodeNoBox}
+  \begin{center}
+  	...
+  \end{center}
+  \end{examplecode\starred}
+  is in \LaTeX2\footnote{This will change in \LaTeX3~\autocite{ltx3env}.}
+  \makeatletter
+  (somewhat simplified\footnote{`\begin` checks that it's argument is defined, `\end` checks that it's argument matches that of `\begin` and deals with `\ignorespacesafterend` and `\@endparenv`. Since 2019/10/01 `\begin` and `\end` are robust. Since 2020/10/01 they include hooks. \autocite[section \sectionname{ltmiscen.dtx}]{source2e}})
+  \makeatother
+  equivalent to
+  \begin{examplecode\starred}{\ExamplecodeNoBox}
+  \begingroup
+  \center
+  	...
+  \endcenter
+  \endgroup
+  \end{examplecode\starred}
+
+  This means that if you accidentally try to use `\centering` as an environment instead of a command you will *not* get an error.
+  You might expect to get an error at least for `\endcentering` not being defined
+  but the \TeX\ primitive `\csname` which is used to produce the `\endcentering` token instead defines it to `\relax`, a no operation.
+
+  The output, however, will not be as desired: the group is closed before the end of the paragraph and `\centering` is forgotten before it can take effect.
+
+\item[Line 3]
+  inserts the graphic.
+  This requires the \pkg{graphicx} or \pkg{graphbox} package.
+
+  If you want all graphics to have the same width you can set the `width` globally with `\setkeys{Gin}{width=<dimen>}`.
+  However, that does not work with all options.
+  Unfortunately the \pkg{graphicx} package documentation~\autocite[section~4.6]{graphicx} is not getting more specific than that this works with \enquote{Most of the keyval keys}.
+
+\item[Line 4]
+  inserts the caption.
+
+  Captions for a figure should be placed *below* the figure.
+  Captions for a table should be placed *above* the table.
+  \autocite{texexchange_caption_position}
+
+  `\caption` can be used inside of a floating environment only.
+  If you need a caption for a non-floating object you can either use `\captionof{<type>}{<caption>}` defined by the \pkg{capt-of} or \pkg{caption} package
+  or use a floating environment with the placement `H` defined by the \pkg{float} package.
+
+\item[Line 5]
+  defines a label.
+  This is not visible in the output but can be referenced using `\ref{<label>}` or `\pageref{<label>}`.
+  You might want to consider using the \pkg{cleveref} package for references.
+
+  The label must be set inside of or after the caption.
+  A label always refers to the last `\refstepcounter` inside of the current group. \autocite[section \sectionname{ltxref.dtx}]{source2e}
+  `\refstepcounter` is used for example by `\caption` and `\section`.
+  Therefore if you use `\label` after the caption it refers to the caption.
+  If you use it before the caption it refers to the current section\slash subsection\slash subsubsection.
+\end{description}
+
+There are many things that a beginner can do wrong without even getting a warning.
+Three out of this six lines are always the same (lines 1, 2 and~6).
+I don't want to always write them out.
+There is no way to easily switch floating on or off globally.
+
+\bigpar
+
+This package reduces these six lines to a single command and loads \pkg{graphicx} automatically (unless this package is loaded with the `nographic` option).
+\begin{examplecode\starred}{}
+\includegraphicobject[%
+	caption = CTAN lion drawing by Duane Bibby,
+	graphic width = .8\linewidth,
+]{ctan_lion}
+\end{examplecode\starred}
+
+The floating environment is applied automatically.
+It can be changed using the `type` key but I discourage doing so manually.
+Instead I recommend to use the separate optional `<style>` argument if necessary.
+If you do not want the object to float you can pass `placement=H`.
+This works also globally with `\objectset`.
+
+`\centering` is applied automatically.
+It can be changed using the `align` key.
+
+You can set any of the options passed to the `\includegraphics` command globally using:
+\begin{examplecode\starred}{}
+\objectset[figure]{graphic width=.8\linewidth}
+\end{examplecode\starred}
+
+Caption and label can be passed as options.
+Which one is specified first makes no difference.
+I recommend to stick with caption first in case you ever need to work without this package and to not confuse other people who are not familiar with this package.
+If you omit one of them the file name is used.
+See `auto label`, `auto caption`, `auto label strip path` and `auto caption strip path`.
+
+Whether the caption is put above or below the object is specified by the `float style`.
+
+\subsection{Tables}
+\label{tables}
+
+Inserting a table is similar to inserting a graphic except that you replace the `\includegraphics` command with an environment which creates a table, place the caption above the table not below it and use another floating environment, namely \env{table} instead of `figure`.
+
+The following example (not using this package) requires the \pkg{booktabs} package for the horizontal rules and the \pkg{caption} package to have an appropriate space below the caption.
+
+\begin{examplecode\starred}{\ExamplecodeNoBox\ExamplecodeLinenumbers}
+\begin{table}
+	\centering
+	\caption{Some catcodes}
+	\label{catcodes}
+	\begin{tabular}{cl}
+		\toprule
+			Catcode & Meaning          \\
+		\midrule
+			0       & Escape Character \\
+			1       & Begin Group      \\
+			2       & End Group        \\
+			\vdots  & \quad \vdots     \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\end{examplecode\starred}
+
+What I have said about floating environments, `\centering`, `\caption` and `\label` in \cref{graphics} is also valid for tables.
+New are lines 5--14.
+We now have two environments nested inside of each other.
+The outer environment (lines 1 and~15) is the floating environment.
+The inner environment (lines 5--14) is the environment which creates the table.
+The inner environment takes a column specification telling \LaTeX\ how many columns the table has and how they are supposed to be aligned.
+In this case that is `cl`: Two columns, the first centered, the second left aligned.
+For more information about column specifications see the \pkg{array} package documentation~\autocite[section~1]{array}.
+
+`\toprule`, `\midrule` and `\bottomrule` (defined by the \pkg{booktabs} package) produce horizontal lines.
+They differ in the width of the line and\slash or spacing around them.
+In contrast to the standard \LaTeX\ `\hline` command they have proper spacing around them.
+
+`&` separates columns, `\\` separates rows.
+Indentation and spaces at the beginning and end of a cell are ignored.
+
+\bigpar
+
+Using this package we don't need two environments and we don't even need to type out the rule commands if we use `table head`.
+The packages \pkg{caption}, \pkg{booktabs} and \pkg{array} are loaded automatically (unless you load this package with `nobooktabs` or `noarray`).
+\begin{examplecode\starred}{}
+\begin{tableobject}{%
+	caption = Some catcodes,
+	label = catcodes,
+	env = tabular,
+	arg = cl,
+	table head = Catcode & Meaning,
+}
+	0       & Escape Character \\
+	1       & Begin Group      \\
+	2       & End Group        \\
+	\vdots  & \quad \vdots     \\
+\end{tableobject}
+\end{examplecode\starred}
+
+Also we gain the possibility to easily switch between different tabular-like environments, see \cref{longtable} and the example given for the `(<env>) arg(s) +` key in \cref{object-environment}.
+
+\subsection{Subobjects}
+\label{subobjects}
+
+There are several packages to combine several figures\slash tables into a single floating environment.
+\mycite{l2tabu} recommends using \pkg{subcaption} over \pkg{subfig} and the long deprecated \pkg{subfigure}.
+
+The \pkg{subcaption} package provides several ways to do this.
+The first one is using the `\subcaptionbox` command.
+
+\begin{examplecode\starred}{\ExamplecodeNoBox\ExamplecodeLinenumbers}
+\begin{table}
+	\centering
+	\caption{Category and character codes}
+	\label{codes}
+	\subcaptionbox{Category codes\label{catcodes}}{%
+		\begin{tabular}{cl}
+			\toprule
+				Catcode & Category         \\
+			\midrule
+				0       & Escape Character \\
+				1       & Begin Group      \\
+				2       & End Group        \\
+				\vdots  & \quad \vdots     \\
+			\bottomrule
+		\end{tabular}%
+	}%
+	\qquad
+	\subcaptionbox{Character codes\label{charcodes}}{%
+		\begin{tabular}{cr<{\hspace{1.3em}}}
+			\toprule
+				Character      & \multicolumn1c{Charcode} \\
+			\midrule
+				\textbackslash & \number`\\               \\
+				\{             & \number`\{               \\
+				\}             & \number`\}               \\
+				\vdots         & \vdots \phantom{0}       \\
+			\bottomrule
+		\end{tabular}%
+	}%
+\end{table}
+\end{examplecode\starred}
+
+As the subobjects are inside of an argument they cannot contain code which relies on changing catcodes e.g.\ `\verb`.
+Aside from that it just doesn't seem elegant to put an environment inside of an argument.
+
+If you accidentally put the label in the second argument of `\subcaptionbox` instead of in the first it refers to the parent object instead of the subobject and you won't get an error or a warning for that.
+
+Note how I have commented out line breaks in order to avoid undesired spaces.
+
+The second way is to use the `subfigure`\slash `subtable` environment.
+Because the subobject is not inside of an argument it is possible to use `\verb`.
+
+\begin{examplecode\starred}{\ExamplecodeNoBox\ExamplecodeLinenumbers}
+\begin{table}
+	\caption{Category and character codes}
+	\label{codes}
+	\begin{subtable}{.5\linewidth}
+		\centering
+		\caption{Category codes}
+		\label{catcodes}
+		\begin{tabular}{cl}
+			\toprule
+				Catcode & Category         \\
+			\midrule
+				0       & Escape Character \\
+				1       & Begin Group      \\
+				2       & End Group        \\
+				\vdots  & \quad \vdots     \\
+			\bottomrule
+		\end{tabular}%
+	\end{subtable}%
+	\begin{subtable}{.5\linewidth}
+		\centering
+		\caption{Character codes}
+		\label{charcodes}
+		\begin{tabular}{cr<{\hspace{1.3em}}}
+			\toprule
+				Character & \multicolumn1c{Charcode} \\
+			\midrule
+				\verb|\|  & \number`\\               \\
+				\verb|{|  & \number`\{               \\
+				\verb|}|  & \number`\}               \\
+				\vdots    & \vdots \phantom{0}       \\
+			\bottomrule
+		\end{tabular}%
+	\end{subtable}%
+\end{table}
+\end{examplecode\starred}
+
+But why having different environments for subfigures and subtables?
+The floating environment specifies the type already.
+
+These environments are based on a minipage and require you to always explicitly specify the width of this minipage.
+On the one hand I don't want to always type that out.
+On the other hand I want to be able to change the width once for all subobjects for easier consistency.
+
+Caption and label must be placed correctly, see \cref{graphics}.
+Even if you restyle the floating environment to always put the caption at the top or bottom using the \pkg{float} package this does *not* apply to subobjects.
+
+It is important to comment out line breaks because the widths of the two minipages add up to the line width, a space between them would cause an overfull hbox or a line break.
+
+We need two `\centering`s, one for each subobject.
+Remember what I said about `\centering` and `center` in \cref{graphics}.
+
+\bigpar
+
+This package defines an environment called `subobject` which is a unified wrapper around `\subcaptionbox` and `subfigure`\slash `subtable`.
+Which of these two backends should be used can be specified with the `subcaptionbox` and `subpage` options.
+`subpage` is used by default so that you can usually use `\verb` in the content.
+
+`subobject` can be used inside of any `*object` environment.
+If you define a new object environment with `\NewObjectStyle` it defines a corresponding subpage environment like `subfigure`\slash `subtable` if it does not exist already and if the \pkg{caption} package is new enough.
+If the \pkg{caption} package is older than August~30, 2020 you need to define the subtype manually by putting the following line *before* loading this package \autocite{texexchange_subtype_workaround}:
+\begin{examplecode\starred}{}
+\AtBeginDocument{\DeclareCaptionSubType{<type>}}
+\end{examplecode\starred}
+
+You don't need to write out the width, `.5\linewidth` is used automatically. You can change this value for all subobjects using
+\begin{examplecode\starred}{}
+\objectset{subobject linewidth=<dimen>}
+\end{examplecode\starred}
+
+Caption and label are given as options like for `tableobject`.
+Their order does not matter.
+They are placed above or below the subobject based on the internal command `\caption@iftop` defined by the \pkg{caption} package.
+
+Spaces after `\begin{subobject}` and before and after `\end{subobject}` are ignored so you don't need to comment out the line breaks.
+\unskip\footnote{Actually, spaces after `\begin{subobject}` and before `\end{subobject}` are ignored only if `env` is empty. But if `env` is not empty I am expecting it to be a tabular-like environment where spaces are ignored at the beginning and end of a cell or a tikzpicture where spaces are ignored as well. Spaces after `\end{subobject}` are ignored regardless of `env`.}
+Just make sure you don't have an empty line between the subobject environments.
+That would *not* be ignored.
+
+`\centering` is inserted automatically. It can be changed with `subpage align`.
+
+\begin{examplecode\starred}{}
+\begin{tableobject}{caption=Category and character codes, label=codes, env=tabular, sub}
+	\begin{subobject}{caption=Category codes, label=catcodes}{cl}
+		\toprule
+			Catcode & Category         \\
+		\midrule
+			0       & Escape Character \\
+			1       & Begin Group      \\
+			2       & End Group        \\
+			\vdots  & \quad \vdots     \\
+		\bottomrule
+	\end{subobject}
+	\begin{subobject}{caption=Character codes, label=charcodes}{cr<{\hspace{1.3em}}}
+		\toprule
+			Character & \multicolumn1c{Charcode} \\
+		\midrule
+			\verb|\|  & \number`\\               \\
+			\verb|{|  & \number`\{               \\
+			\verb|}|  & \number`\}               \\
+			\vdots    & \vdots \phantom{0}       \\
+		\bottomrule
+	\end{subobject}
+\end{tableobject}
+\end{examplecode\starred}
+
+A separator for the subobjects could be defined globally using `sep`, see also `hor` and `ver`.
+
+For including a graphic from an external file this package defines a wrapper command around `subobject` and `\includegraphics` in order to reduce the typing effort:
+\begin{examplecode\starred}{}
+\begin{figureobject}{caption=Two lions, label=lions, sub}
+	\includegraphicsubobject[caption=A lion]{lion-1}
+	\includegraphicsubobject[caption=Another lion]{lion-2}
+\end{figureobject}
+\end{examplecode\starred}

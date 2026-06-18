@@ -1,0 +1,202 @@
+\makeatletter
+\RequirePackage{enverb}
+\global\let\enverb@ex@stored\@empty
+\ekvdefinekeys{enverb/ex}
+  {
+     boolTF         store          = \enverb@ex@ifstore
+    ,invboolTF      no-store       = \enverb@ex@ifstore
+    ,boolTF         restore        = \enverb@ex@ifrestore
+    ,boolTF         no-lst         = \enverb@ex@ifnolst
+    ,also nmeta     no-lst         = below
+    ,nmeta          undo-no-lst    = {no-lst=false, undo-below}
+    ,boolTF         no-tcb         = \enverb@ex@ifnotcb
+    ,also nmeta     no-tcb         = below
+    ,nmeta          undo-no-tcb    = {no-tcb=false, undo-below}
+    ,boolTF         same-line      = \enverb@ex@ifsameline
+    ,unknown-choice same-line      =
+      \let\enverb@ex@ifsameline\@firstoftwo\def\enverb@ex@codeshare{#1}
+    ,initial        same-line      = 0.6
+    ,invboolTF      other-line     = \enverb@ex@ifsameline
+    ,nmeta          below          = {other-line}
+    ,nmeta          undo-below     = {same-line}
+    ,store          inter          = \enverb@ex@inter
+    ,code           aboveskip      = \def\enverb@ex@above{\vskip#1\relax}
+    ,code           belowskip      = \def\enverb@ex@below{\vskip#1\relax}
+    ,default        aboveskip      = \medskipamount
+    ,default        belowskip      = \medskipamount
+    ,initial        aboveskip
+    ,initial        belowskip
+    ,noval          no-aboveskip   = \let\enverb@ex@above\@empty
+    ,noval          no-belowskip   = \let\enverb@ex@below\@empty
+    % listings
+    ,store          lst            = \enverb@ex@options@lst
+    ,initial        lst            = {aboveskip=0pt, belowskip=0pt}
+    ,store          same-line-lst  = \enverb@ex@options@lst@same
+    ,meta           slst           = same-line-lst={#1}
+    ,store          other-line-lst = \enverb@ex@options@lst@other
+    ,meta           olst           = other-line-lst={#1}
+    % tcolorbox
+    ,store          tcb            = \enverb@ex@options@tcb
+    ,initial        tcb            = {nobeforeafter}
+    ,store          same-line-tcb  = \enverb@ex@options@tcb@same
+    ,initial        same-line-tcb  = {box align=center}
+    ,meta           stcb           = same-line-tcb={#1}
+    ,store          other-line-tcb = \enverb@ex@options@tcb@other
+    ,meta           otcb           = other-line-tcb={#1}
+  }
+\newenvironment{ex}
+  {\enverb{key-set=enverb/ex}}
+  {%
+    \par
+    \enverb@ex@above
+    \noindent
+    \expanded{\noexpand\begin{exwrap}{\enverb@ex@ifsameline{}{breakable}}}
+      \enverb@ex@ifnolst
+        {}%
+        {%
+          \enverb@ex@ifsameline
+            {\noindent\begin{minipage}[c]{\enverb@ex@codeshare\linewidth}}%
+            {}%
+          \ExpandArgs{ne}\enverbListing{lstlisting}%
+            {%
+              [{%
+                \unexpanded\expandafter{\enverb@ex@options@lst},%
+                \enverb@ex@ifsameline
+                  {\unexpanded\expandafter{\enverb@ex@options@lst@same}}%
+                  {\unexpanded\expandafter{\enverb@ex@options@lst@other}}%
+              }]%
+            }%
+          \enverb@ex@ifsameline
+            {\end{minipage}}%
+            {}%
+        }%
+      \enverb@ex@ifstore
+        {%
+          \xdef\enverb@ex@stored
+            {%
+              \unexpanded\expandafter{\enverb@ex@stored}%
+              \unexpanded\expandafter{\enverbBody}%
+            }%
+        }%
+        {}%
+      \enverb@ex@ifrestore
+        {%
+          \edef\enverbBody
+            {%
+              \unexpanded\expandafter{\enverb@ex@stored}%
+              \unexpanded\expandafter{\enverbBody}%
+            }%
+          \global\let\enverb@ex@stored\@empty
+        }%
+        {}%
+      \enverb@ex@ifnotcb
+        {}%
+        {%
+          \enverb@ex@ifsameline{}{\medskip}%
+          \expanded{\noexpand\begin{exbox}%
+              {%
+                \unexpanded\expandafter{\enverb@ex@options@tcb},%
+                \enverb@ex@ifsameline
+                  {\unexpanded\expandafter{\enverb@ex@options@tcb@same}}%
+                  {\unexpanded\expandafter{\enverb@ex@options@tcb@other}}%
+              }}%
+              {%
+                \linewidth
+                \enverb@ex@ifsameline{-\enverb@ex@codeshare\linewidth}{}%
+              }%
+            \enverbExecute
+          \end{exbox}%
+        }%
+    \end{exwrap}%
+    \par
+    \enverb@ex@below
+    \@endpetrue
+  }
+
+\RequirePackage{listings}% >>=
+\newcommand\extexcsstyle{\exbasestyle\color{green!50!black}\bfseries}
+\newcommand\exbasestyle{\ttfamily}
+\lstset
+  {
+     language=[LaTeX]TeX
+    ,flexiblecolumns=true
+    ,basicstyle=\exbasestyle
+    ,texcsstyle=*\extexcsstyle
+    ,moretexcs=%
+      {%
+        UseName,ExpandArgs,textcolor,color,colorbox,expanded,unexpanded,@empty,%
+        @firstoftwo,@endpetrue,RequirePackage,lstset,usetikzlibrary,%
+        pgfmathsetseed,newtcolorbox,tcbsubskin,tikzset,dimexpr%
+      }
+    ,moretexcs=[2]{enverb,enverbBody,enverbExecute,enverbListing}
+    ,texcsstyle=*[2]\exbasestyle\color{enverbred}\bfseries
+    ,literate={\{}{{\extexcsstyle\string{\iffalse}\fi}}{1}
+              {\}}{{\extexcsstyle\iffalse{\fi\string}}}{1}
+  }% =<<
+\RequirePackage[most]{tcolorbox}%>>=
+\RequirePackage{tikz}
+\usetikzlibrary{decorations.pathmorphing,calc}
+\pgfmathsetseed{1} % To have predictable results
+% Define paper style
+\tikzset{
+  % based on https://tex.stackexchange.com/questions/580671
+  ragged border/.style={%
+    decoration={random steps, segment length=2mm, amplitude=0.5mm},
+    decorate,
+  }
+}
+\tcbsubskin{exwrap}{standard}
+  {%
+     width=\linewidth
+    ,colframe=enverbgrey
+    ,colback=enverbred!15!white
+    ,title=Example
+    ,nobeforeafter
+    ,arc=5mm
+    ,sharp corners=northwest
+    ,toprule at break=-1sp
+    ,bottomrule at break=-1sp
+  }
+\tcbsubskin{exwrap-first}{exwrap}{sharp corners=south}
+\tcbsubskin{exwrap-mid}{exwrap}{sharp corners=all}
+\tcbsubskin{exwrap-last}{exwrap}{sharp corners=north}
+\newtcolorbox{exbox}[2]
+  {%
+     colback=white%
+    ,colframe=white%
+    ,geometry nodes=true
+    ,interior code=
+      {%
+        \fill[white]
+          decorate[ragged border]{
+            ($(frame.south east) - (0, 1mm)$) --
+            ($(frame.south west) - (0, 1mm)$)
+          }
+          -- (frame.south west) -- ++(0, 1pt) -| (frame.south east) -- cycle;
+        \fill[white]
+          decorate[ragged border]{
+            ($(frame.north east) + (0, 1mm)$) --
+            ($(frame.north west) + (0, 1mm)$)
+          }
+          -- (frame.north west) -- ++(0, -1pt) -| (frame.north east) -- cycle;
+      }
+    ,fontupper=\small
+    ,width={\dimexpr#2\relax}%
+    ,sharp corners=all
+    ,boxsep=0pt
+    ,top=\fboxsep
+    ,bottom=\fboxsep
+    ,left=\fboxsep
+    ,right=\fboxsep
+    ,#1%
+  }
+\newtcolorbox{exwrap}[1]
+  {%
+     skin=exwrap
+    ,skin first=exwrap-first
+    ,skin middle=exwrap-mid
+    ,skin last=exwrap-last
+    ,#1%
+  }
+%=<<
+\makeatother

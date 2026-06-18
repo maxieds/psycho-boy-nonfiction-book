@@ -1,0 +1,246 @@
+\section{Comparisons}\label{sec:cmp}
+
+This section makes some basic comparison between \expkv\ and other \kv\
+packages. The comparisons are really concise, regarding speed, feature range
+(without listing the features of each package, comparisons are done against the
+base \expkv\ not counting other packages in \expkvbundle\ that extend it, so
+\enquote{bigger feature set} might not necessarily be true if everything is
+included), and bugs and misfeatures.
+
+Comparisons of speed are done with a very simple test key and the help of the
+\pkg{l3benchmark} package. The key and its usage should be equivalent to
+\begin{enverb}[no-tcb]
+  \protected\ekvdef{test}{height}{\def\myheight{#1}}
+  \ekvsetdef\expkvtest{test}
+  \expkvtest{ height = 6 }
+\end{enverb}
+and only the usage of the key, not its definition, is benchmarked. For the
+impatient, the essence of these comparisons regarding speed and buggy
+behaviour is contained in \autoref{tab:comp}.
+
+As far as I know \expkv\ is the only fully expandable \kv\ parser. I tried to
+compare \expkv\ to every \kv\ package listed on
+\href{https://ctan.org/topic/keyval}{CTAN}, however, one might notice that
+some of those are missing from this list. That's because I didn't get the
+others to work due to bugs, or because they just provide wrappers around other
+packages in this list.
+
+In this subsection is no benchmark of |\ekvparse| and |\keyval_parse:NNn|
+contained, as most other packages don't provide equivalent features to my
+knowledge. |\ekvparse| is slightly faster than |\ekvset|, but keep in mind
+that it does less. The same is true for |\keyval_parse:NNn| compared to
+|\keys_set:nn| of \pkg{expl3} (where the difference is much bigger). Comparing
+just the two, |\ekvparse| is a tad faster than |\keyval_parse:NNn| because of
+two tests (for empty key names and only a single equal sign) which are
+omitted.
+
+\paragraph{\pkg{keyval}} is the fastest \kv\ package there is and has a minimal
+feature set with a slightly different way how it handles keys without values
+compared to \expkv. That might be considered a drawback, as it limits the
+versatility, but also as an advantage, as it might reduce doubled code. Keep in
+mind that as soon as someone loads \pkg{xkeyval} the performance of \pkg{keyval}
+gets replaced by \pkg{xkeyval}'s.
+
+Also \pkg{keyval} has a \pmso{bug}feature, which unfortunately can't really be
+resolved without breaking backwards compatibility for \emph{many} documents,
+namely it strips braces from the argument before stripping spaces if the
+outer most braces aren't surrounded by spaces, also it might strip more than one
+set of braces. Hence all of the following are equivalent in their outcome,
+though the last two lines should result in something different than the first
+two:
+\begin{enverb}[no-tcb]
+  \setkeys{foo}{bar=baz}
+  \setkeys{foo}{bar= {baz}}
+  \setkeys{foo}{bar={ baz}}  % should be ` baz'
+  \setkeys{foo}{bar={{baz}}} % should be `{baz}'
+\end{enverb}
+
+\pkg{keyval} doesn't work with non-standard category codes of |=| and |,|. Also
+if a \kv\ pair contains multiple equals signs outside of braces everything post
+the first is silently ignored so the following two inputs yield identical
+outputs:
+\begin{enverb}[no-tcb,lst=belowskip=0pt]
+  \setkeys{foo}{bar=baz}
+  \setkeys{foo}{bar=baz=and more}
+\end{enverb}
+
+\paragraph{\pkg{xkeyval}} is pretty slow (yet not the slowest), but it provides
+more functionality, e.g., it has an interface to disable a list of keys, can
+search multiple sets simultaneously, and has an intriguing mechanism it calls
+\enquote{Pointers} to save the value of particular keys for later reuse. It
+contains the same bug as \pkg{keyval} as it has to be compatible with it by
+design (it replaces \pkg{keyval}'s frontend), but also adds even more cases in
+which braces are stripped that shouldn't be stripped, worsening the situation.
+
+\pkg{xkeyval} does work with non-standard category codes of |=| and |,|, but the
+used mechanism fails if the input contains a mix of different category codes for
+the same character. Just like with \pkg{keyval} equals signs after the first and
+everything after those is ignored.
+
+\paragraph{\pkg{ltxkeys}} is no longer compatible with the \LaTeX\ kernel
+starting with the release 2020-10-01. It is by far the slowest \kv\ package I've
+tested -- which is funny, because it aims to be ``[\ldots] faster [\ldots] than
+these earlier packages [referring to \pkg{keyval} and \pkg{xkeyval}].'' It needs
+more time to parse zero~keys than five of the packages in this comparison need
+to parse 100~keys.  Since it aims to have a bigger feature set than
+\pkg{xkeyval}, it most definitely also has a bigger feature set than \expkv.
+Also, it can't parse |\long| input, so as soon as your values contain a |\par|,
+it'll throw errors.  Furthermore, \pkg{ltxkeys} doesn't strip outer braces at
+all by design, which, imho, is a weird design choice. Some of the more
+intriguing features (e.g., the |\argpattern| mechanism) didn't work for me. In
+addition \pkg{ltxkeys} loads \pkg{catoptions} which is known to introduce bugs
+(e.g., see \url{https://tex.stackexchange.com/questions/461783}). Because it is
+no longer compatible with the kernel, I stop benchmarking it (so the numbers
+listed here and in \autoref{tab:comp} regarding \pkg{ltxkeys} were last updated
+on 2020-10-05).
+
+\pkg{ltxkeys} works with non-standard category codes, it also silently ignores
+any additional equals signs and the following tokens.
+
+\paragraph{\pkg{l3keys}} is at the slower end of the midfield yet not unusably
+slow, but has an, imho, great interface to define keys. It strips \emph{all}
+outer spaces, even if somehow multiple spaces ended up on either end. It offers
+more features, but has pretty much been bound to \pkg{expl3} code before.
+Nowadays the \LaTeX\ kernel has an interface with the macros |\DeclareKeys|,
+|\SetKeys|, and |\ProcessKeyOptions| that provides access to \pkg{l3keys} from
+the \LaTeXe\ layer as well as parsing package options with it. Because of the
+|\ProcessKeyOptions| macro and its features the only two viable options to
+provide \kv\ options for new projects in my opinion are the kernel's methods and
+\expkvo\ as those are the only two until now up to my knowledge that support
+parsing the raw options, and future options.
+
+\pkg{l3keys} handles active commas and equals signs fine. Multiple equals signs
+lead to an error if additional equals signs aren't nested inside of braces, so
+perfectly predictable behaviour here.
+
+\paragraph{\pkg{pgfkeys}} is among the top~4 of speed if one uses |\pgfqkeys|
+over |\pgfkeys|, else the initialisation parsing the family path takes roughly
+\SI{43}{\ops} and moves it two spots down the list (so in \autoref{tab:comp}
+both $p_0$ and $T_0$ would be about \SI{43}{\ops} bigger if
+|\pgfkeys{|\meta{path}|/.cd,|\meta{keys}|}| was used instead). It has an
+\emph{enormous} feature set. It stores keys in a way that reminds one of folders
+in a Unix system which allows interesting features and has other syntactic
+sugars. It is another package that implements something like the \expnotation\
+with less different options though. To get the best performance |\pgfqkeys| was
+used in the benchmark. It has the same or a very similar bug \pkg{keyval} has.
+The brace bug (and also the category fragility) can be fixed by \pkg{pgfkeyx},
+but this package was last updated in 2012 and it slows down |\pgfkeys| by
+factor~\num{8}. Also \pkg{pgfkeyx} is no longer compatible with versions of
+\pkg{pgfkeys} newer than 2020-05-25.
+
+\pkg{pgfkeys} silently drops anything after the second unbraced equals sign in a
+\kv\ pair.
+
+\paragraph{\pkg{kvsetkeys} with \pkg{kvdefinekeys}} is in the slower midfield,
+but it works even if commas and equals have category codes different from 12
+(just as some other packages in this list). It has quadratic run-time unlike
+most other \kv\ implementations which behave linear. The features of the
+keys are equal to those of \pkg{keyval}, the parser adds handling of unknown
+keys.
+
+\pkg{kvsetkeys} does include any additional equals sign in the value. But any
+active equals sign is turned into one of category code 12 if it's not nested in
+braces. Also spaces around superfluous equals signs are stripped. So the
+following all result in the same:
+\begin{enverb}[no-tcb,lst=belowskip=0pt]
+  \kvsetkeys{foo}{bar=baz=morebaz}
+  \kvsetkeys{foo}{bar=baz =morebaz}
+  \kvsetkeys{foo}{bar=baz= morebaz}
+  \kvsetkeys{foo}{bar=baz = morebaz}
+\end{enverb}
+
+\paragraph{\pkg{options}} is in the midfield of speed. It is faster per
+individual key than \pkg{pgfkeys} but has no shortcut like |\pgfqkeys|.
+It has a much bigger feature set than \expkv. Similar to \pkg{pgfkeys} it uses a
+folder like structure, makes searching multiple paths easy, incorporates package
+options and more. It also features a form of expansion control, predefined
+expansion kinds are limited though one can define additional ones. Unfortunately
+it also suffers from the premature unbracing bug \pkg{keyval} has.
+
+\pkg{options} can't handle non-standard category codes and will silently ignore
+superfluous equals signs and following tokens.
+
+\paragraph{\pkg{simplekv}} is hard to compare because I don't speak French (so
+I don't understand the documentation). There was an update released on
+2020-04-27 which greatly improved the package's performance and added
+functionality so that it can be used more like most of the other \kv\
+packages. Speed wise it is pretty close to \expkv. Regarding unknown keys it got
+a very interesting behaviour. It doesn't throw an error, but stores the \val\ in
+a new entry accessible with \cs[no-index]{useKV}. Also if you omit \val\ it
+stores |true| for that \key.
+
+\pkg{simplekv} can't correctly handle non-standard category codes. It silently
+ignores any unbraced equals sign beyond the first and any following tokens.
+
+\paragraph{\protect\yax} is the second slowest package I've tested. It has a
+pretty strange syntax for the \TeX-world, imho, and again a direct equivalent is
+hard to define (don't understand me wrong, I don't say I don't like the syntax,
+quite the contrary, it's just atypical). It has the premature unbracing bug,
+too. \yax\ features some prefixes one can use to make an assignment use |\edef|,
+|\gdef| or |\xdef| so has something that comes close to expansion control. Also
+somehow loading \yax\ broke \pkg{options} for me. The tested definition was:
+\begin{enverb}[no-tcb]
+  \usepackage{yax}
+  \defactiveparameter yax {\storevalue\myheight yax:height } % setup
+  \setparameterlist{yax}{ height = 6 }                       % benchmark
+\end{enverb}
+This seems important to state as \yax\ supports two different input syntaxes,
+the tested one was the one closer to traditional \kv\ input.
+
+\yax\ won't handle non-standard category codes correctly. Superfluous equals
+signs end up in the value in an unaltered form (just like with \expkv).
+
+\begin{table}
+  \def\fnsym{\textcolor{red!80!black}{*}}%
+  \sisetup{round-precision=1, round-mode=places}%
+  \begingroup
+  \centering
+  \newcommand*\yes{\textcolor{red!80!black}  {yes}}^^A
+  \newcommand*\no {\textcolor{green!80!black}{no}}^^A
+  \caption[Comparison of \kv\ packages]
+    {^^A
+      Comparison of \kv\ packages. The packages are ordered from
+      fastest to slowest for one \kv\ pair. Benchmarking was done using
+      \pkg{l3benchmark} and the scripts in the \file{Benchmarks} folder
+      of \href{https://github.com/Skillmon/tex_expkv}{the original \expkv's git
+      repository}.
+      The columns $p_i$ are the polynomial coefficients of a linear fit to the
+      run-time, $p_0$ can be interpreted as the overhead for initialisation
+      and $p_1$ the cost per key. The $T_0$ column is the actual mean ops
+      needed for an empty list argument, as the linear fit doesn't match that
+      point well in general. The column ``BB'' lists whether the
+      parsing is affected by some sort of brace bug, ``CF'' stands for
+      category code fragile and lists whether the parsing breaks with active
+      commas or equal signs.^^A
+      \label{tab:comp}^^A
+    }
+  \begin{tabular}
+      {>{\collectcell\pkg}l<{\endcollectcell}*3{S[table-format=4.1]}ccc}
+    \toprule
+    \rmfamily Package & {$p_1$} & {$p_0$} & {$T_0$}& BB & CF & Date \\
+    \midrule
+    keyval    &   13.557 &    2.202 &    7.185 & \yes & \yes & 2022-05-29 \\
+    \expkv    &   16.669 &    3.132 &    5.836 & \no  & \no  & 2023-01-10 \\
+    simplekv  &   19.943 &    2.850 &   15.120 & \no  & \yes & 2022-10-01 \\
+    pgfkeys   &   24.465 &    2.244 &   10.283 & \yes & \yes & 2021-05-15 \\
+    options   &   23.255 &   16.160 &   20.400 & \yes & \yes & 2015-03-01 \\
+    kvsetkeys & {\fnsym} & {\fnsym} &   40.360 & \no  & \no  & 2022-10-05 \\
+    l3keys    &   70.643 &   35.602 &   32.230 & \no  & \no  & 2022-12-17 \\
+    xkeyval   &  255.906 &  221.276 &  173.400 & \yes & \yes & 2022-06-16 \\
+    \yax      &  438.242 &  131.846 &  114.800 & \yes & \yes & 2010-01-22 \\
+    ltxkeys   & 3400.142 & 4737.958 & 5368.000 & \no  & \no  & 2012-11-17 \\
+    \bottomrule
+  \end{tabular}
+  \par
+  \endgroup
+  \medskip
+  \fnsym For \pkg{kvsetkeys} the linear model used for the other
+  packages is a poor fit, \pkg{kvsetkeys} seems to have approximately
+  quadratic run-time, the coefficients of the second degree polynomial fit are
+  $p_2=\num{7.617}$, $p_1=\num{47.727}$, and $p_0=\num{57.988}$. Of course the
+  other packages might not really have linear run-time, but at least from 1~to
+  20~keys the fits don't seem too bad. If one extrapolates the fits for 100
+  \kv\ pairs one finds that most of them match pretty well, the exception
+  being \pkg{ltxkeys}, which behaves quadratic as well with
+  $p_2=\num{23.500}$, $p_1=\num{2906.634}$, and $p_0=\num{6547.489}$.
+\end{table}

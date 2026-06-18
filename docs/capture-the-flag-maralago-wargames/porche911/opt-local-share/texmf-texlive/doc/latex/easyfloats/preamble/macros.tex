@@ -1,0 +1,296 @@
+% !TeX root = ../easyfloats.tex
+
+% Copyright © 2020 E. Zöllner
+% Alternatively to the terms of the LPPL, at your choice,
+% you can redistribute and/or modify this file under the
+% terms of the Do What The Fuck You Want To Public License, Version 2,
+% as published by Sam Hocevar. See http://www.wtfpl.net/about/.
+
+% Defines additional macros which are not provided
+% by the document class or other packages.
+%
+% \TikZ
+% Typesets the name of the TikZ package.
+% dtxdescribe defines the \tikz macro for that
+% but it's wrong, the Z is not capitalized.
+%
+% \eTeX
+% Typesets the name of eTeX.
+% In standard LaTeX there are \TeX, \LaTeX and \LaTeXe.
+% metalogo and dtxdescribe define more logos.
+% But I have failed to find a package which provides
+% the eTeX logo.
+% In contrast to the other logo macros \eTeX includes a
+% link to the eTeX manual on CTAN.
+%
+% \radioon
+% draws an activated radio button
+% \radiooff
+% draws a deactivated radio button
+%
+% \DescribeMacro{<name>}
+% \DescribeEnv{<name>}
+% \DescribeKey{<name>}
+% \DescribeHandler{<name>}
+% Prints the name in the margin, similar to the dtxdescribe package.
+% A link target and \ignorespaces are added in description-links.tex.
+%
+% \cmd{<name>}
+% To reference a command described with \DescribeMacro.
+%
+% \env{<name>}
+% To reference an environment described with \DescribeEnv.
+%
+% \handler{<name>}
+% To reference a handler described with \DescribeHandler.
+%
+% \filename{<filename>}
+% Typesets a file name in the pdf.
+%
+% \pkg{<name>}
+% To reference a package.
+%
+% \tikzlibrary{<name>}
+% To reference a TikZ library.
+%
+% \meta{<name>}
+% Similar to the dtxdescribe package.
+%
+% \pkgoptn{<option>}
+% Typesets a package option in the pdf.
+% \key{<option>}
+% Typesets a macro/environment option in the pdf.
+% When using the dtxdescribe package \optn is used for both macro options and package options.
+% However, I am using pgfkeys for macro options and standard LaTeX
+% for package options making the two types of options quite different.
+% Unlike some other packages the easyfloats package does not allow to
+% pass macro options as package options.
+% Therefore I like to have a better distinction between them even
+% if they are formatted in the same way.
+% Also, dtxdescribe defines two different macros for the description:
+% \DescribeOption for package/class options and
+% \DescribeKey for macro/environment options.
+% So it is only consistent to have two different macros for typesetting
+% macro/environment and package/class options.
+% I have defined \optn to print an error in order to avoid confusion.
+% \val{<value>}
+% typesets the value of a key. Package options don't have values.
+%
+% \errormessage{<message>}
+% Typesets an error message in the pdf. Changes category codes so that
+% control sequences and active characters do *not* need to be prefixed
+% by \string.
+%
+% \sectionname{<title>}
+% Format the name of a section of a different document which I am referring to.
+% For sections of this document use \cref or \Cref instead.
+%
+% \newlicense{<name>}{<display text>}{<url>}
+% \license{<name>}
+% Define a license in the preamble with displayed name and URL with \newlicense
+% and use it in the document with \license.
+% Changes catcodes for the <url> only so that special characters
+% can be used there without worrying (except for curly braces).
+%
+% \formatcode{<texcode>}
+% Formats inline code.
+% It does not change catcodes or performs any other kind of magic.
+% <texcode> is executed as TeX code.
+%
+% \formatlabel{<label>}
+% How to format the name of a label used in an example.
+%
+% \formatcaption{<label>}
+% How to format the caption used in an example.
+%
+% \notocspace
+% inserts a negative vertical space in the table of contents
+% in order to cancel out an undesired space after a section
+
+\usepackage{relsize}
+
+
+\makeatletter
+\newcommand{\version}{\newcommand\theversion}
+\newcommand{\package}{\newcommand\thepackage}
+\newcommand{\thedate}{\@date}
+\AtBeginDocument{%
+	\let\thedate=\@date
+	\ifundef{\theversion}{}{\appto\@date{\strut\\\strut\thepackage~\theversion}}%
+}
+\makeatother
+
+\makeatletter
+\newcommand\parskipintoc[1]{%
+	\def\@starttoc##1{%
+		\begingroup
+			\makeatletter
+			\parskip=#1\relax
+			\@input{\jobname.##1}%
+			\if@filesw
+				\expandafter\newwrite\csname tf@##1\endcsname
+				\immediate\openout\csname tf@##1\endcsname \jobname.##1\relax
+			\fi
+			\@nobreakfalse
+		\endgroup
+	}
+}
+\makeatother
+\parskipintoc{0pt plus .6em minus 1pt}
+
+\newcommand{\bigpar}{\par{\centering*~*~*\pagebreak[3]\par}}
+\newcommand{\bigparinlist}{\par\medskip\pagebreak[3]\par}
+\let\OriginalItemize=\itemize
+\def\itemize{\OriginalItemize\let\bigpar\bigparinlist}
+
+\newcommand{\eTeX}{\texorpdfstring{\href{https://ctan.org/pkg/etex}{\ensuremath{\varepsilon}-\TeX}}{eTeX}}
+\newcommand{\TikZ}{Ti\emph{k}Z}
+
+\newcommand{\radioon}{\radio{\fill circle (.45);}}
+\newcommand{\radiooff}{\radio\relax}
+\newcommand{\radio}[1]{\tikz[x=1ex,y=1ex,baseline=-.6ex,very thin]{\draw circle (.75);#1}}
+
+
+\newcommand{\filename}{\emph}
+
+% links are added in description-links.tex
+\newcommand\cmd[1]{\texttt{\string#1}}
+\newcommand\env[1]{\texttt{#1}}
+\newcommand\optn[1]{\texttt{#1}}
+\newcommand\meta[1]{\ensuremath{\langle}\textit{#1}\ensuremath{\rangle}}
+\newcommand\pkg[1]{\textsf{#1}}
+\newcommand\tikzlibrary[1]{\textsf{#1}}
+
+\newcommand{\pkgoptn}{\optn}
+\newcommand{\key}{\optn}
+\let\pkgoptn=\optn
+\let\key=\optn
+\let\handler=\optn
+% Do *not* add the optional argument, otherwise \renewcommand would not only redefine \optn
+% but also two internal macros which \pkgoptn and \key depend on.
+\renewcommand{\optn}[1]{\PackageError{macros}{\string\optn\space is ambiguous}{Please use \string\key\space for macro/environment options and \string\pkgoptn\space for package/class options.}}
+
+\newcommand{\val}[1]{#1}
+
+\makeatletter
+\newcommand\MacroFont{%
+	% copied from dtxdescribe.sty
+	\fontencoding\encodingdefault
+	\fontfamily\ttdefault
+	\fontseries\mddefault
+	\fontshape\updefault
+	\small
+}
+\DeclareDocumentCommand{\MarginParForDescribe}{om}{%
+	\leavevmode
+	\marginpar{%
+		\raggedleft
+		\makebox[0pt][r]{%
+			\strut
+			\IfValueT{#1}{{\scriptsize\sffamily#1}\quad}%
+			\MacroFont
+			#2%
+		}%
+	}%
+}
+% link target and \ignorespaces are added in description-links.tex
+\NewDocumentCommand{\DescribeMacro}{m}{\MarginParForDescribe{\string#1}}
+\NewDocumentCommand{\DescribeEnv}{m}{\MarginParForDescribe[Env]{#1}}
+\NewDocumentCommand{\DescribeKey}{m}{\MarginParForDescribe[Key]{#1}}
+\NewDocumentCommand{\DescribeHandler}{m}{\MarginParForDescribe[Handler]{#1}}
+% \valdoc (defined in description-links.tex) is used for values to keys
+% \pkgoptndoc (defined in description-links.tex) is used for package options
+
+\newcommand{\errormessage}{%
+	\begingroup
+	\let\do=\@makeother
+	\dospecials
+	\@makeother`
+	\catcode`{=1
+	\catcode`}=2
+	\catcode` =10
+	\do@errormessage
+}
+\newcommand{\do@errormessage}[1]{%
+	\endgroup
+	\enquote{\texttt{#1}}%
+}
+\makeatother
+
+
+\newrobustcmd{\sectionname}[1]{{\let\formatcode\formatcodeinsection\emph{#1}}}
+
+
+\makeatletter
+\newcommand{\license@csname}[1]{license@cs@#1}
+\newcommand{\FormatLicense}{\emph}
+
+\newcommand{\newlicense}[2]{%
+	\begingroup
+	\let\do=\@makeother
+	\dospecials
+	\catcode`{=1
+	\catcode`}=2
+	\newlicense@do{#1}{#2}%
+}
+\newcommand{\newlicense@do}[3]{% #1: name, #2: display text, #3: url
+	\endgroup
+	\expandafter \newcommand \csname\license@csname{#1}\endcsname{\href{#3}{\FormatLicense{#2}}}%
+}
+
+\newcommand{\license}[1]{% #1: name
+	\ifcsname\license@csname{#1}\endcsname
+		\csname\license@csname{#1}\endcsname
+	\else
+		\PackageError{macros}{license name `#1' undefined}{}%
+	\fi
+}
+
+
+\newcommand\notocspace{\addtocontents{toc}{\vspace*{-.8em}}}
+
+
+\newcommand\UnderscoreSubscript{_}
+\ExplSyntaxOn
+\NewDocumentCommand\formatlabel{m}{%
+	\group_begin:
+	\def\l_format_label_name_tl{#1}
+	\exp_args:NNo \tl_replace_all:Nnn \l_format_label_name_tl {\UnderscoreSubscript}{\textunderscore}
+	\texttt{\l_format_label_name_tl}
+	\group_end:
+}
+\ExplSyntaxOff
+\let\formatcaption=\formatlabel
+
+
+% ---------- \formatcode ---------
+
+\newcommand{\formatcode}[1]{{\ttfamily\smaller[.5]\fboxsep=.5pt\colorbox{codebackground!50}{\vphantom\}\colorlet{linkcolor}{codelinkcolor}#1}}}
+\newcommand{\formatchar}[1]{\formatcode{\char`#1}}
+\newcommand{\formatcodeinsection}[1]{{\ttfamily#1}}
+\newcommand{\formatcodeinmarginpar}[1]{\formatcodeinsection{\small#1}}
+
+% patch section commands and toc to use \formatcodeinsection instead of \formatcode
+\newcommand{\patchsection}[3]{% #1: command to be patched, #2: code to be inserted before, #3 code to be appended
+	\expandafter\let\csname @@originalsec@\string#1\endcsname #1%
+	\expandafter\def\csname @@sec@\string#1\endcsname##1##2{#2\csname @@originalsec@\string#1\endcsname##1{##2}#3}%
+	\def#1##1##{\csname @@sec@\string#1\endcsname{##1}}%
+}
+\@tfor \@sec@cmd :=\section\subsection\subsubsection \do{%
+	\expandafter\expandafter\expandafter\patchsection\expandafter\@sec@cmd\expandafter{%
+		\csname My\expandafter\string\@sec@cmd Hook\endcsname
+		\let\@original@formatcode=\formatcode
+		\let\formatcode=\formatcodeinsection
+	}{%
+		\let\formatcode=\@original@formatcode
+	}%
+}
+\let\@@original@toc=\tableofcontents
+\def\tableofcontents{{\let\formatcode\formatcodeinsection\DisableLinks\@@original@toc}}
+
+% patch \marginpar to use \formatcodeinmarginpar instead of \formatcode
+\let\@@original@marginpar=\marginpar
+\renewcommand\marginpar[1]{\@@original@marginpar{\let\formatcode=\formatcodeinmarginpar#1}}
+
+
+\makeatother

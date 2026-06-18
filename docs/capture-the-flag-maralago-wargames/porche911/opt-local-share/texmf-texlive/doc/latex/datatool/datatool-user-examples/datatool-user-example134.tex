@@ -1,0 +1,44 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 134 Multi Bar Chart With Group Labels
+% Label: "ex:barchartgrouplabel"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+
+\usepackage{databar}
+% Load data from studentmarks.csv file:
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv} 
+\begin{document}
+\DTLmultibarchart
+{
+ variables={\assignI,\assignII,\assignIII},
+ round=0,
+ bar-width=12pt,
+ group-label-align={center,top},
+ bar-label={\xDTLinitials{\Forename}\xDTLinitials{\Surname}},
+ multi-bar-labels={A1,A2,A3},
+ upper-multi-bar-labels={\DTLbarvalue,\DTLbarvalue,\DTLbarvalue},
+}
+{marks}% database name
+{
+ \assignI=Assign1,
+ \assignII=Assign2,
+ \assignIII=Assign3,
+ \Surname=Surname,
+ \Forename=Forename
+} 
+\end{document}

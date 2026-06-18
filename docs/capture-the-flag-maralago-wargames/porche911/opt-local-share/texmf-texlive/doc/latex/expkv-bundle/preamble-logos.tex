@@ -1,0 +1,107 @@
+\definecolor{ekvred}{HTML}{9F393D}
+\colorlet{ekvgrey}{black!75}
+\makeatletter
+\newcommand*\kvstyle%>>=
+  {\normalfont\rmfamily\bfseries\color{ekvred}}%=<<
+\newcommand*\expFormat % used for the title only >>=
+  {%
+    {%
+      \rmfamily
+      \bfseries
+      {\color{ekvgrey}e\kern-.05em x\kern-.05em}%
+      \lower.493ex\hbox{{\color{ekvgrey}P}}%
+    }%
+  }%=<<
+\newcommand\expnotation% >>=
+  {%
+    \begingroup
+    \BeginAccSupp{ActualText=exp|notation,E=expansion-notation}%
+      \rmfamily
+      \bfseries
+      \color{ekvgrey}%
+      e\kern-.05em x\kern-.05em%
+      \lower.493ex\hbox{{\color{ekvgrey}P}}%
+      \kern-.05em:%
+      \kern.05em\textsc{notation}%
+    \EndAccSupp{}%
+    \endgroup
+  }% =<<
+\newcommand\expkvLogoFormat[1]% >>=
+  {%
+    \begingroup
+      \rmfamily
+      \bfseries
+      {\color{ekvgrey}e\kern-.05em x\kern-.05em}%
+      \lower.493ex\hbox{{\color{ekvgrey}P}\kern-.1em{\color{ekvred}k}}%
+      \kern-.18em{\color{ekvred}v}%
+      \IfValueT{#1}
+        {%
+          \begingroup
+            \color{ekvgrey}%
+            \kern.05em\rule[-.1ex]{.08em}{1.2ex}%
+            \kern.05em\textsc{#1}%
+          \endgroup
+        }%
+    \endgroup
+  }% =<<
+\NewDocumentCommand \expkvLogo { o }%>>=
+  {%
+    \mbox
+      {%
+        \BeginAccSupp{ActualText=expkv\IfValueT{#1}{-#1}}%
+          \ifodd\ekvdoc@insection
+            \href{https://gitlab.com/islandoftex/texmf/expkv-bundle}%
+              {\expkvLogoFormat{#1}}%
+          \else
+            \hyperref[sec:expkv\IfValueT{#1}{-#1}]{\expkvLogoFormat{#1}}%
+          \fi
+        \EndAccSupp{}%
+      }%
+  }%=<<
+\newcommand*\expkv%>>=
+  {%
+    \texorpdfstring
+      {\expkvLogo}
+      {expkv}%
+  }%=<<
+\newcommand*\expkvpkg[1]%>>=
+  {%
+    \texorpdfstring
+      {\expkvLogo[{#1}]}%
+      {expkv-#1}%
+  }%=<<
+\newcommand*\expkvbundle% >>=
+  {%
+    \texorpdfstring
+      {\begingroup\chardef\ekvdoc@insection1 \expkvpkg{bundle}\endgroup}%
+      {\expkvpkg{bundle}}%
+  }% =<<
+\newcommand*\expkvc{\expkvpkg{cs}}
+\newcommand*\expkvd{\expkvpkg{def}}
+\newcommand*\expkvo{\expkvpkg{opt}}
+\newcommand*\expkvp{\expkvpkg{pop}}
+\ExplSyntaxOn
+\cs_new_protected:Npn \pkglogo #1%>>=
+  {
+    \texorpdfstring
+      {
+        \mbox
+          {
+            \BeginAccSupp{ActualText=#1}
+            \rmfamily
+            \str_case:nn {#1}
+              {
+                {yax}
+                  {
+                    Y\kern-.1em
+                    \raise.15em\hbox{\scshape a}
+                    \kern-.1em \lower.15em\hbox{X}%
+                  }
+              }
+            \EndAccSupp{}
+          }
+      }
+      {#1}
+  }%=<<
+\newcommand*\yax{\pkglogo{yax}}
+\ExplSyntaxOff

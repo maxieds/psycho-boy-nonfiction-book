@@ -1,0 +1,39 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 11 IJ-Initial Support
+% Label: "ex:ijinitial"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{datatool-base}
+\ExplSyntaxOn
+ \newcommand{\DTLdutchLocaleGetInitialLetter}[2]{
+ \tl_clear:N #2
+ \text_map_inline:nn { #1 } 
+ { 
+ \tl_if_empty:NTF #2 
+  {
+    \datatool_if_letter:nT { ##1 }
+    {
+      \tl_set:Nn #2 { ##1 }
+      \tl_if_in:nnF { Ii } { ##1 } { \text_map_break: } 
+    }
+  } 
+ {
+  \tl_if_in:nnT { Jj } { ##1 } 
+    {
+      \tl_put_right:Nn #2 { ##1 }
+    }
+  \text_map_break:
+ }
+ }
+}
+\ExplSyntaxOff 
+
+\let\DTLCurrentLocaleGetInitialLetter\DTLdutchLocaleGetInitialLetter 
+\begin{document}
+IJsselmeer: \DTLinitials{IJsselmeer}
+Industrieel: \DTLinitials{Industrieel}
+``IJsselmeer'': \DTLinitials{``IJsselmeer''}
+``Industrieel'': \DTLinitials{``Industrieel''} 
+\end{document}

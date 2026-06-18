@@ -1,0 +1,47 @@
+\subsection{Grabbing an Environment Verbatim}
+\begin{function}{\enverb}
+  \begin{syntax}
+    \cs{enverb}\marg{key=value}\oarg{key=value}
+    \cs{enverb}\meta{*}\marg{key=value}
+  \end{syntax}
+  This function will store the contents of the enclosing environment verbatim
+  inside of \cs{enverbBody}. It should be the last thing you invoke inside the
+  |\begin| code of your environment and mustn't be enclosed in any nested
+  environment. Both the mandatory and the optional \meta{key=value} argument are
+  parsed by \cs{enverb} -- see \autoref{sec:keys} about the specifics of this.
+  The mandatory argument is meant for a package/code developer to assign the
+  sensible default values for the envisioned functionality and always parsed
+  inside the keyset of \cs{enverb}, while the optional one is meant to be used
+  by the user and as such should be the first thing inside the enclosing
+  environment (if the user wants to use an optional argument).\par
+  \cs{enverb} sets the special characters
+  \begingroup
+    \def\do#1%
+      {%
+        \ifx\ #1\else
+          , \texttt{\csname @gobble\expandafter\endcsname\string#1}%
+        \fi
+      }%
+    \csname @secondoftwo\expandafter\endcsname\romannumeral`\^^@\dospecials
+  \endgroup
+  \ to the category code 12 (other), and makes both spaces and tabulators active
+  tokens. By default each line break will be a category code 12 carriage return
+  (character code 13), but see the |eol| option in \autoref{sec:keys}.\par
+  A line that contains only whitespace on input will be output as an empty
+  line.\par
+  The \cs{enverb} syntax of the optional argument has a few peculiarities. It is
+  scanned for the opening bracket either on the same line as the |\begin|
+  statement of the enclosing environment, or on any subsequent line until a
+  non-whitespace character is found. The optional argument is read using the
+  \enquote{normal} (so surrounding) category code regime, but it is scanned for
+  it in a way that the first token is still read verbatim if no optional
+  argument was given.\par
+  The first non-whitespace token that's not an opening bracket must not be found
+  on the same line as the |\begin| statement, and if there was an optional
+  argument there shouldn't be any non-whitespace token trailing it in that line.
+  Additionally there should be no non-whitespace material following the |\end|
+  statement (anything preceding it in the same line is for the most part
+  ignored; |\begin| and |\end| are not balanced, the first |\end| with the
+  correct environment as argument terminates scanning).\par
+  The starred version of \cs{enverb} doesn't search for an optional argument.
+\end{function}

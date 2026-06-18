@@ -1,0 +1,38 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 119 Pie Chart (Changing the Label Format)
+% Label: "ex:piechartlabelfmt"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{fruit.csv}
+Name,Quantity
+"Apples",30
+"Pears",25
+"Lemons,Limes",40.5
+"Peaches",34.5
+"Cherries",20
+\end{filecontents}
+
+
+\usepackage{datapie}
+% Load data from fruit.csv file:
+\DTLsetup{store-datum,default-name=fruit}
+\DTLread{fruit.csv}
+% customize the label format:
+\renewcommand{\DTLdisplayinnerlabel}[1]{% 
+ \textcolor{lightgray}{\bfseries #1}% 
+}
+\renewcommand{\DTLdisplayouterlabel}[1]{\textsf{#1}} 
+\begin{document}
+\DTLpiechart
+{
+ variable=\Quantity,
+ round=0,
+ inner-label=\DTLpiepercent\%,
+ outer-label=\Name\ (\DTLpievariable)
+}
+{fruit}% database
+{\Quantity=Quantity,\Name=Name} 
+\end{document}

@@ -1,0 +1,110 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 96 Display Data With Missing (Null) Values Shown as a Dash
+% Label: "ex:displaydbnullmissing"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+ \usepackage{datatool}
+\DTLsetup{default-name=customers}
+% define database:
+\DTLaction{new}
+% add columns in desired order:
+\DTLaction[key=Id]{add column}
+\DTLaction[key=Organisation]{add column}
+\DTLaction[key=Surname]{add column}
+\DTLaction[key=Forename]{add column}
+\DTLaction[key=Email]{add column}
+\DTLaction[key=Age]{add column}
+% 1st row:
+\DTLaction[
+ assign={
+  % Organisation not set
+  Id = 1, Email = {pp@example.com},
+  Surname = {Parrot}, Forename = {Polly}, Age = 42
+ }
+]{new row}
+% 2nd row:
+\DTLaction[
+ assign={
+  % Age not set
+  Id = 2, Organisation = {University of Somewhere},
+  Email = {mc@example.com}, Surname = {Canary}, 
+  Forename = {Mabel}
+ }
+]{new row}
+% 3rd row:
+\DTLaction[
+ assign={
+  Id = 3, Organisation = {University of Somewhere}, 
+  Age = 21, Email = {zz@example.com}, Surname = {Zebra},
+  Forename = {Zoë}
+ }
+]{new row}
+% 4th row:
+\DTLaction[
+ assign={
+  Id = 4, Organisation = {Zinnia Florestry}, Age = 42,
+  Email = {ja@example.com}, Surname = {Arara},
+  Forename = {José}
+ }
+]{new row}
+% 5th row:
+\DTLaction[
+ assign={
+  % Organisation and Age not set
+  Id = 5, Surname = {Duck}, Forename = {Dickie},
+  Email = {dd@example.com}
+ }
+]{new row}
+% 6th row:
+\DTLaction[
+ assign={
+  % Age not set
+  Id = 6, Organisation = {Newt Fellowship},
+  Email = {la@example.com}, Surname = {Axolotl},
+  Forename = {Lizzie}
+ }
+]{new row}
+% 7th row:
+\DTLaction[
+ assign={
+  Id = 7, Organisation = {Avian Emporium}, Age =19,
+  Email = {fc@example.com}, Surname = {Canary},
+  Forename = {Fred}
+ }
+]{new row}
+% 8th row:
+\DTLaction[
+ assign={
+  % Age and Surname not set
+  Id = 8, Organisation = {Newt Fellowship},
+  Email = {m@example.com}, Forename = {Molgina}
+ }
+]{new row}
+% 9th row:
+\DTLaction[
+ assign={
+  % Organisation empty and Age and Email not set
+  Id = 9, Organisation = {},
+  Surname = {Mander}, Forename = {Sally}
+ }
+]{new row}
+% 10th row:
+\DTLaction[
+ assign={
+  Id = 10, Organisation = {Élite Emporium}, Age = 101,
+  Email = {ef@example.com}, Surname = {Fant},
+  Forename = {Eli}
+ }
+]{new row}
+
+% Empty values are not the same as null values!
+\newcommand{\checkmissing}[1]{\DTLifnull{#1}{---}{#1}}
+\renewcommand{\dtlstringformat}[1]{\checkmissing{#1}}
+\renewcommand{\dtlnumericformat}[1]{\checkmissing{#1}} 
+\begin{document}
+Missing values are shown as a dash. 
+
+\DTLaction{display} 
+\end{document}

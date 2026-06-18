@@ -1,0 +1,57 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 79 Adjusting the Item Hook to Calculate Totals and Show Negative Numbers in Red
+% Label: "ex:balancesheet"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents}[noheader,overwrite]{balance.csv}
+Description,In,Out,Balance
+Travel expenses,,230,-230
+Conference fees,,400,-630
+Grant,700,,70
+Train fare,,70,0
+\end{filecontents}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{datatool} 
+
+\DTLsetup{store-datum,default-name=balance} 
+
+\DTLread[
+ headers={
+  Description,
+  in (\pounds),
+  Out (\pounds),
+  Balance (\pounds)
+ }
+]{balance.csv} 
+
+\newcommand{\theInTotal}{0}
+\newcommand{\theOutTotal}{0}
+\RenewDocumentCommand \DTLdisplaydbAddItem { m m m m m m m m }
+{% 
+ \DTLifnullorempty{#2}{}% skip null or empty
+ {% 
+ \dtlifnumeq{#8}{4}% balance column
+ {% 
+  \DTLifnumlt{#2}{0}{\appto#1{\color{red}}}{}% 
+ }% 
+ {% 
+  \dtlifnumeq{#8}{2}% in column
+  {\DTLadd{\theInTotal}{\theInTotal}{#2}}% 
+ {% 
+  \dtlifnumeq{#8}{3}{\DTLadd{\theOutTotal}{\theOutTotal}{#2}}{}% out column
+ }% 
+ }% 
+ \appto#1{#3{#2}}% 
+ }% 
+ } 
+\begin{document}
+\DTLaction[
+ options={
+  after-head={\midrule},
+  foot={\midrule Totals & \theInTotal & \theOutTotal &}
+ }
+]{display} 
+\end{document}

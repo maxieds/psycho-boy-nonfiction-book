@@ -1,0 +1,104 @@
+\PassOptionsToPackage{svgnames}{xcolor}
+\documentclass[load-preamble+]{cnltx-doc}
+
+\usepackage{hologo,enumitem,dashrulex,tikz,codehigh}
+\usepackage[noto]{newtxmath}
+\setcnltx
+  {
+    package           = dashrulex,
+    title             = dashrulex,
+    version           = v1.02d,
+    date              = 2025/02/04,
+    authors           = Qu Yi,
+    title             = \dashrulex{} package,
+    info              = Draw dashed rules,
+    email             = toquyi@163.com,
+    url               = https://github.com/texno3/dashrulex,
+    abstract          =
+      {
+        The \pkg*{dashrulex} package provides a flexible solution for drawing dashed rules in the body, and currently provides two commands \cs{hdashrule} and \cs{hanyrule}. It's written in \hologo{LaTeX3} and can be used as an alternative to the \pkg*{dashrule} package.
+      },
+    color-scheme      = blue,
+    title-format      = \LARGE
+  }
+\makeatletter
+\newcommand{\splitmeta}[3][\code{,}]{\meta{#2}#1\meta{#3}}
+\newcommand{\newsplitarg}[4][\splitmeta]
+  {
+    \newcommand{#2}[2]
+      {\code{\textcolor{argument}{#3\textnormal{#1{##1}{##2}}#4}}}
+  }
+\newcommand{\kvsplit}[3]
+  {
+    \item\code{\option{#1}\cnltx@isvalue\splitmarg{#2}{#3}}
+    \cnltx@checkdefault{\hfill\newline}
+  }
+\newsplitarg{\splitoarg}{[}{]}
+\newsplitarg{\splitmarg}{\{}{\}}
+\newsplitarg{\splitdarg}{(}{)}
+\newnote{\newtag}[1]{\textcolor{red}{#1}}
+\renewcommand{\emph}[1]{\textcolor{red}{#1}}
+\renewcommand{\cnltx@write@lastname}{}
+\renewcommand{\cnltxpackagenameformat}[1]{\textcolor{cnltx}{\textsf{#1}}}
+\setlist{nosep,topsep = \smallskipamount}
+\setlist[description,1]{leftmargin = \parindent}
+\setlist[itemize,1]{leftmargin = *}
+\SetCodeHighStyle[default]{2}{cs}
+\colorlet{link}{DeepPink}
+\makeatother
+
+\begin{document}
+\section{Preface}
+Sometimes it is necessary to draw dashed rules when writing documents, such as guides in the table of contents and indexes, horizontal lines in headers and footers, and even adding horizontal lines after headings. Macro packages such as \pkg*{dashrule} and \pkg*{nccrules} are available to accomplish this. Considering that \pkg*{dashrule} has not been updated for a long time, \pkg*{dashrulex} rewrites it using \hologo{LaTeX3} syntax and enhances it a bit.
+
+\section{User commands}
+\begin{commands}
+  \command{hdashrule}[\oarg{raise}\oarg{leader}\marg{width}\marg{thickness list}\marg{dash rules}]
+  This command is used to draw a dashed line, based on the \cs{rule} command, and the same as the \cs{rule} command when the \meta{dash rules} are empty. \meta{raise} is the vertical offset of the rule. \meta{leader} is the alignment of the dashed line fill, which can be empty, \code{c}, or \code{x} (the \textcolor{red}{default}), corresponding to the \cs{leaders}, \cs{cleaders}, and \cs{xleaders} commands, respectively. \meta{width} is the length of the dashed line, which can be set to \cs{fill} when used to fill the remaining part of the current text line. \meta{thickness list} stands for \textcolor{red}{vertical} dashed line rules, separated by \textcolor{red}{commas} and written as \fbox{\splitmeta{height 1}{height a}\code{,...}}, where \meta{height 1} denotes the height of a solid line and \meta{height a} denotes the height of a blank space. \meta{dash rules} stands for \textcolor{red}{horizontal} dashed line rules, which expressed as \fbox{\splitmeta[\code{:}]{length 1}{length a}\code{,}\splitmeta[\code{:}]{length 2}{length b}\code{,...}}, where \meta{length 1} represents the length of the solid line and \meta{length a} represents the length of the blank space, such as \fbox{\code{5pt:2pt,3pt}}, if the blank space is empty, then it is equal to the solid line length.
+\begin{demohigh}
+1X\rule{2cm}{1pt}x \\
+2X\hdashrule{2cm}{1pt}{}x \\
+3X\hdashrule{2cm}{1pt}{1pt}x \\
+4X\hdashrule{4cm}{1pt}{1pt}x \\
+5X\hdashrule[0.5ex]{4cm}{1pt}{1pt}x \\
+6X\hdashrule[0.5ex]{4cm}{1pt}{3mm}x \\
+7X\hdashrule[0.5ex]{4cm}{1mm}{3mm}x \\
+8X\hdashrule[0.5ex]{4cm-3mm}{1mm}{3mm}\vrulemod[0.5ex]{3mm}{1mm}x \\
+9X\hdashrule[0.5ex]{4cm}{1mm}{3mm:3pt}x \\
+10X\hdashrule[0.5ex]{4cm}{1mm}{3mm:3pt,1mm:2pt}x \\
+11X\hdashrule[0.5ex]{4cm}{2pt,1pt,1pt}{3mm:3pt,1mm:2pt}x \\
+12X\hdashrule[0.5ex]{\fill}{2pt,1pt,1pt}{3mm:3pt,1mm:2pt}x \\
+13X\hdashrule[0.5ex]{\fill}{1pt}{}x
+\end{demohigh}
+  \command{vrulemod}[\oarg{raise}\oarg{height}\oarg{depth}\marg{width}\marg{thickness list}]
+  The vertical model used to fill the dashed line. \meta{thickness list} is consistent with the \cs{hdashrule} command, \meta{width} represents the length of the component, and the three optional parameters are consistent with those of the \cs{raisebox} command.
+  \command{hanyrule}[\oarg{leader}\marg{width}\marg{symbol list}]
+  This command sets the length of the dashed line and fills it with arbitrary symbols. \meta{symbol list} can be more than one symbol and they are separated by \textcolor{red}{commas}. Symbols are best packed in boxes of a certain length, as spacing between symbols is not provided.
+\begin{demohigh}
+\newcommand{\dblblock}
+  {%
+    \tikz[color=teal]
+      {
+        \draw[line width=0.8mm](0mm,1.1mm)--(3mm,1.1mm);
+        \draw[line width=0.3mm](0mm,0mm)--(3mm,0mm);
+      }%
+  }
+1X\hanyrule[]{5cm}{\makebox[8pt]{$\cdot$}}x \\
+2X\hanyrule[c]{5cm}{\makebox[8pt]{$\cdot$}}x \\
+3X\hanyrule[x]{5cm}{\makebox[8pt]{$\cdot$}}x \\
+4X\hanyrule[x]{5cm}{\makebox[8pt][l]{$\cdot$}}x \\
+5X\hanyrule[x]{5cm}{\makebox[8pt][r]{$\cdot$}}x \\
+6X\hanyrule[x]{5cm}{\makebox[8pt]{$\cdot$},\makebox[8pt]{$\circ$}}x \\
+7X\hanyrule[x]{5cm}{\makebox[5mm]{\vrulemod{3mm}{2pt,1pt,1pt}}}x \\
+8X\hanyrule[x]{5cm}{\makebox[5mm]{\dblblock}}x
+\end{demohigh}
+\end{commands}
+
+\section{Known issues}
+Currently only horizontal dashed line drawing is supported, with future plans to support vertical dashed lines, and even box dashed borders and so on.
+
+\appendix
+\nocite{*}
+\AddToHook{cmd/printindex/before}{\clearpage}
+
+\end{document}

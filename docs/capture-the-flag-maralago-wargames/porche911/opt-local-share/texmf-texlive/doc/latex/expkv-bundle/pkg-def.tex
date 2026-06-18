@@ -1,0 +1,773 @@
+\genericekv\expkvd{-def}
+
+Since the trend for the last couple of years goes to defining keys for a \kv\
+interface using a \kv\ interface, I thought that maybe providing such an
+interface for \expkv\ will make it more attractive for actual use. But at the
+same time I didn't want to broaden \expkv's initial scope. So here is \expkvd,
+go define \kv\ interfaces with \kv\ interfaces.
+
+Unlike many of the other established \kv\ interfaces to define keys, \expkvd\
+works using prefixes instead of suffixes (\emph{e.g.}, |.tl_set:N| of
+\pkg{l3keys}) or directory like handlers (\emph{e.g.}, |/.store in| of
+\pkg{pgfkeys}). This was decided as a personal preference, more over in \TeX\
+parsing for the first spaces is way easier than parsing for the last one, so
+this should also turn out to be faster. \expkvd's prefixes are sorted into two
+categories: \prefixes, which are equivalent to \TeX's prefixes like |\long| and
+of which a \key\ can have multiple, and \types\ defining the basic behaviour of
+the \key\ and of which a \key\ must have one. For a description of the available
+\prefixes\ take a look at \autoref{sec:d:prefixes}, the \types\ are described in
+\autoref{sec:d:types}.
+
+
+\subsection{Macros\label{sec:d:macros}}
+
+The number of user-facing macros is quite manageable:
+
+\begin{function}{\ekvdefinekeys}
+  \begin{syntax}
+    \cs{ekvdefinekeys}\marg{set}\kvarg
+  \end{syntax}
+  In \meta{set}, define \key\ to have definition \val. The general syntax for
+  \key\ should be
+  \begin{quote}
+    \ttfamily
+    \meta{prefix} \meta{name}
+  \end{quote}
+  where \meta{prefix} is a space separated list of optional \prefixes\ followed
+  by one \type. The syntax of \val\ is dependent on the used \type.
+\end{function}
+
+\begin{function}{\ekvdDate,\ekvdVersion}
+  These two macros store the version and date of the package.
+\end{function}
+
+
+\subsection{Prefixes}
+
+As already said, prefixes are separated into two groups, \prefixes\ and \types.
+Not every \prefix\ is allowed for all \types.
+
+
+\subsubsection{\textit{Prefixes}\label{sec:d:prefixes}}
+
+\begin{function}[module=expkv-def prefix]{new}
+  The following \key\ must be new (so previously undefined). An error is thrown
+  if it is already defined and the new definition is ignored. |new| only asserts
+  that there are no conflicts between \Nkey{}s and other \Nkey{}s or \Vkey{}s
+  and other \Vkey{}s.
+\end{function}
+\begin{example}{The effects of the \texttt{new} \prefix}
+  You can test the following (lines throwing an error are marked by a comment,
+  error messages are printed in red for this example):
+  \expkvdocPrintErrors[\par]%
+  \begin{enverb}[below]
+    \ekvdefinekeys{new-example}
+      {
+         new code  key = \domystuffwitharg{#1}
+        ,new noval KEY = \domystuffwithoutarg
+        ,new bool  key = \mybool % Error!
+        ,new bool  KEY = \mybool % Error!
+        ,new meta  key = {KEY}   % Error!
+        ,new nmeta KEY = {key}   % Error!
+      }
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def prefix]{also}
+  The following key \type\ will be \emph{added} to an existing \key's
+  definition. You can't add a \type\ taking an argument at use time to an
+  existing \key\ which doesn't take an argument and vice versa. Also you'll get
+  an error if you try to add an action which isn't allowed to be either |\long|
+  or |\protected| to a \key\ which already is |\long| or |\protected| (the
+  opposite order would be suboptimal as well, but can't be really captured with
+  the current code).
+
+  A \key\ already defined as |\long| or |\protected| will stay that way, but you
+  can add |\long| or |\protected| to a \key\ which isn't by using |also|.
+\end{function}
+\begin{example}
+    {Overload a key \type\ with another with the \texttt{also} \prefix}
+  Suppose you want to create a boolean \key, but additionally to setting a
+  boolean value you want to execute some more code as well. For this you can use
+  the following:
+  \begin{enverb}[no-tcb]
+    \ekvdefinekeys{also-example}
+      {
+         bool key      = \ifmybool
+        ,also code key = \domystuff{#1}
+      }
+  \end{enverb}
+\end{example}
+
+If you use |also| on a |choice|, |bool|, |invbool|, or |boolpair| \key\ it is
+tried to determine if the key already is of one of those types. If this test is
+true the declared choices will be added to the possible choices but the key's
+definition will not be changed other than that. If that wouldn't have been done,
+the callbacks of the different choices could get called multiple times.
+
+\begin{function}[module=expkv-def prefix]{protected,protect}
+  The following \key\ will be defined |\protected|. Note that \types\ which
+  can't be defined expandable will always use |\protected|. This only affects
+  the key at use time not the \key\ definition.
+\end{function}
+
+\begin{function}[module=expkv-def prefix]{long}
+  The following \key\ will be defined |\long| (so can take an explicit |\par|
+  token in its \val). Please note that this only changes the \key\ at use time.
+  |long| being present or not doesn't limit you to use |\par| inside of the
+  \key's definition (if the \type\ allows this).
+\end{function}
+
+
+\subsubsection{\textit{Types}\label{sec:d:types}}
+
+Since the \prefixes\ apply to some of the \types\ automatically but sometimes
+one might be disallowed we need some way to highlight this behaviour. In the
+following an enforced \prefix\ will be printed black
+(\texttt{\enfprefix{protected}}), allowed \prefixes\ will be grey
+(\texttt{\allprefix{protected}}), and disallowed \prefixes\ will be red
+(\texttt{\notprefix{protected}}). This will be put flush-right in the syntax
+showing line.
+
+\begin{function}[module=expkv-def type]{code,ecode}
+  \begin{syntax}
+    code \key\ = \marg{definition} \prefixes2222
+  \end{syntax}
+  Define \key\ to be a \Vkey\ expanding to \meta{definition}. You can use |#1|
+  inside \meta{definition} to access the \key's \val. The |ecode| variant will
+  fully expand \meta{definition} inside an |\edef|.
+\end{function}
+\ekvset{enverb}{no-tcb,store}% affect all the next examples.
+\begin{example}
+    {Defining a \Vkey\ with arbitrary effect with the \texttt{code} \type}
+  The following defines the key |foo|, that'll count the number of tokens passed
+  to it (we'll borrow a function from \pkg{expl3} for this). It'll accept
+  explicit |\par| tokens. Also it'll flip the \TeX-if \cs[no-index]{iffoo} to
+  true. The result of the counting will be stored in a count register. (Don't
+  get confused, all the next examples are part of this |\ekvdefinekeys| call, so
+  there is no closing brace here.)
+  \begin{enverb}
+    \ExplSyntaxOn
+      \cs_new_eq:NN \exampleCount \tl_count_tokens:n
+    \ExplSyntaxOff
+    \newcount\examplefoocount
+    \newif\iffoo
+    \ekvdefinekeys{example}
+      {
+         protected long code foo =
+          \footrue
+          \examplefoocount=\exampleCount{#1}\relax
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{noval,enoval}
+  \begin{syntax}
+    noval \key\ = \marg{definition} \prefixes2223
+  \end{syntax}
+  The |noval| \type\ defines \key\ as a \Nkey\ expanding to \meta{definition}.
+  |enoval| fully expands \meta{definition} inside an |\edef|.
+\end{function}
+\begin{example}{An arbitrary \Nkey\ action with the \texttt{noval} \type}
+  The following defines the \Nkey\ |foo| to toggle the \TeX-if
+  \cs[no-index]{iffoo} to false and set |\examplecount| to |0|. It'll be
+  |\protected| and mustn't override any existing key.
+  \begin{enverb}
+        ,new protected noval foo = \foofalse\examplefoocount=0\relax
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{default,odefault,fdefault,edefault}
+  \begin{syntax}
+    default \key\ = \marg{definition} \prefixes2223
+  \end{syntax}
+  This serves to place a default \val\ for a \Vkey. Afterwards if you use \key\
+  as a \Nkey\ it will be the same as if \key\ got passed \meta{definition} as
+  its \val. The |odefault| variant will expand the key-macro once, so will be
+  slightly quicker, but not change if you redefine the \Vkey\ afterwards. The
+  |fdefault| version will expand the key-code until a non-expandable token or a
+  space is found, a space would be gobbled.\footnotemark{}
+  The |edefault| on the other hand fully expands the key-code with
+  \meta{definition} as its argument in |\expanded|. The \prefix\ |new|
+  means that there should be no \Nkey\ of that name yet.
+\end{function}%
+\footnotetext{For those familiar with \TeX-coding: This uses a
+\cs[no-index]{romannumeral}-expansion}
+\begin{example}
+    {Setting a default value for a \Vkey\ with the \texttt{default} \type}
+  We later decide that the above behaviour isn't what we need any more and
+  instead redefine the \Nkey\ |foo| to pass some default value to the \Vkey\
+  |foo|.
+  \begin{enverb}
+        ,default foo = {Some creative default text}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{initial,oinitial,finitial,einitial}
+  \begin{syntax}
+    initial \key\ = \marg{value} \prefixes3333
+    initial \key
+  \end{syntax}
+  With |initial| you can set an initial \val\ for an already defined \key. It'll
+  just call the \key\ and pass it \val. The |einitial| variant will expand \val\
+  using |\expanded| prior to passing it to the \key\ and the |oinitial|
+  variant will expand the first token in \val\ once. |finitial| will expand
+  \val\ until a non-expandable token or a space is found, a space would be
+  gobbled.\footnotemark
+
+  If you don't provide a \val\ (and no equals sign) the \Nkey\ of the same name
+  is called once (or, if you specified a |default| for a \Vkey\ that would be
+  used).
+\end{function}%
+\footnotetext{Again using \cs[no-index]{romannumeral}}
+\begin{example}{Specifying initial values with the \texttt{initial} \type}
+  We want to get a defined initial behaviour for our |foo|. So we count
+  0~tokens.
+  \begin{enverb}
+        ,initial foo = {}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{bool,gbool,boolTF,gboolTF}
+  \begin{syntax}
+    bool \key\ = \meta{cs} \prefixes2223
+  \end{syntax}
+  \singlecs{iffoo}
+  This will define \key\ to be a boolean key, which only takes the values |true|
+  or |false| and will throw an error for other values. If the \key\ is used as
+  a \Nkey\ it'll have the same effect as if you use |true|. |bool| and |gbool|
+  will behave like \TeX-ifs, so either be \cs[no-index]{iftrue} or
+  \cs[no-index]{iffalse}. The \meta{cs} in the |boolTF| and |gboolTF| variants
+  will take two arguments and if true the first will be used else the second, so
+  they are always either |\@firstoftwo| or |\@secondoftwo|. The variants with a
+  leading |g| will set the \meta{cs} globally, the other locally. If \meta{cs}
+  is not yet defined it'll be initialised as the |false| version. Note that the
+  initialisation is \emph{not} done with |\newif|, so you will not be able to do
+  |\footrue| outside of the \kv\ interface, but you could use |\newif| yourself.
+  Even if the \key\ will not be |\protected| the commands which execute the
+  |true| or |false| choice will be, so the usage should be safe in an expansion
+  context (\emph{e.g.}, you can use \texttt{edefault \key\ = false} without an
+  issue to change the default behaviour to execute the |false| choice).
+  Internally a |bool| is the same as a |choice| \type\ which is set up to handle
+  |true| and |false| as choices. |new| will assert that neither the \Vkey\ nor
+  the \Nkey\ are already defined.
+\end{function}
+\begin{example}{Defining Boolean keys with the \texttt{bool} \type}
+  Also we want to have a direct way to set our \cs[no-index]{iffoo}, now that
+  the \Nkey\ doesn't toggle it any longer.
+  \begin{enverb}
+        ,bool dofoo = \iffoo
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{invbool,ginvbool,invboolTF,ginvboolTF}
+  \begin{syntax}
+    invbool \key\ = \meta{cs} \prefixes2223
+  \end{syntax}
+  These are inverse boolean keys, they behave like |bool| and friends but set
+  the opposite meaning to the macro \meta{cs} in each case. So if |key=true| is
+  used |invbool| will set \meta{cs} to \cs[no-index]{iffalse} and vice versa.
+\end{function}
+\begin{example}
+    {Inversing the logic of a Boolean with the \texttt{invbool} \type}
+  And since traditional interfaces lacked \kv\ support for packages, often a
+  negated boolean key was used as well.
+  \begin{enverb}
+        ,invbool nofoo = \iffoo
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{boolpair,gboolpair,boolpairTF,gboolpairTF}
+  \begin{syntax}
+    boolpair \key\ = \meta{cs_1}\meta{cs_2} \prefixes2223
+  \end{syntax}
+  The |boolpair| \type\ behaves like both |bool| and |invbool|, the \meta{cs_1}
+  will be set to the meaning according to the rules of |bool|, and \meta{cs_2}
+  will be set to the opposite.
+\end{function}
+
+\begin{function}[module=expkv-def type]{store,estore,gstore,xstore}
+  \begin{syntax}
+    store \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  This will define a \Vkey\ to store \val\ inside of the control sequence. If
+  \meta{cs} isn't yet defined it will be initialised as empty. The variants
+  behave similarly to their |\def|, |\edef|, |\gdef|, and |\xdef| counterparts,
+  but will allow you to store macro parameters inside them without needing to
+  double them. So |estore foo = \foo, initial foo = #1| will not result in a low
+  level \TeX\ error.
+\end{function}
+\begin{example}
+    {Also store the \val\ of an existing \key\ in a macro using the
+    \texttt{also} \prefix\ and the \texttt{store} \type}
+  Not only do we want to count the tokens handed to |foo|, but we want to also
+  store them inside of a macro (and we don't need to specify |long| here, since
+  |foo| is already |\long| from our |code| definition above).
+  \begin{enverb}
+        ,also store foo = \examplefoostore
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{data,edata,gdata,xdata}
+  \begin{syntax}
+    data \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  This will define a \Vkey\ to store \val\ inside of the control sequence. But
+  unlike the |store| \type\ the macro \meta{cs} will be a switch at the same
+  time, it'll take two arguments and if \meta{key} was used expands to the first
+  argument followed by \val\ in braces, if \key\ was not used \meta{cs} will
+  expand to the second argument (so behave like |\@secondoftwo|). The idea is
+  that with this type you can define a key which should be typeset formatted.
+  The |edata| and |xdata| variants will fully expand \val, the |gdata| and
+  |xdata| variants will store \val\ inside \meta{cs} globally. Just like with
+  |store| you can use macro parameters without having to double them. The
+  \prefixes\ only affect the key-macro, \meta{cs} will always be expandable and
+  |\long|.
+\end{function}
+\begin{example}{Define a key using the \texttt{data} \type}
+  Next we start to define other keys, now that our |foo| is pretty much
+  exhausted. The following defines a key |bar| to be a |data| key.
+  \begin{enverb}
+        ,data bar = \examplebar
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{dataT,edataT,gdataT,xdataT}
+  \begin{syntax}
+    dataT \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  Just like |data|, but instead of \meta{cs} grabbing two arguments it'll only
+  grab one, so by default it'll behave like |\@gobble|, and if \val\ was given
+  to \key\ the \meta{cs} will behave like |\@firstofone| appended by
+  \marg{value}.
+\end{function}
+\begin{example}{Define a key using the \texttt{dataT} \type}
+  Another key we want to use is |baz|.
+  \begin{enverb}
+        ,dataT baz = \examplebaz
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{int,eint,gint,xint}
+  \begin{syntax}
+    int \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  An |int| key will be a \Vkey\ setting a \TeX\ count register. If \meta{cs}
+  isn't defined yet, |\newcount| will be used to initialise it. The |eint| and
+  |xint| variants will use |\numexpr| to allow basic computations in their \val.
+  The |gint| and |xint| variants set the register globally.
+\end{function}
+
+\begin{function}[module=expkv-def type]{dimen,edimen,gdimen,xdimen}
+  \begin{syntax}
+    dimen \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  This is just like |int| but uses a dimen register, |\newdimen|, and |\dimexpr|
+  instead.
+\end{function}
+
+\begin{function}[module=expkv-def type]{skip,eskip,gskip,xskip}
+  \begin{syntax}
+    skip \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  This is just like |int| but uses a skip register, |\newskip|, and |\glueexpr|
+  instead.
+\end{function}
+\begin{example}
+    {Define keys that use \TeX\ registers, here a skip with the \texttt{eskip}
+    \type}
+  Exemplary for the different register keys, the following defines |distance| so
+  that we can store some distance.
+  \begin{enverb}
+        ,eskip distance = \exampledistance
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{toks,gtoks,apptoks,gapptoks,pretoks,gpretoks}
+  \begin{syntax}
+    toks \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  Store \val\ inside of a toks-register. The |g| variants use |\global|, the
+  |app| variants append \val\ to the contents of that register, the |pre|
+  variants will prepend \val. If \meta{cs} is not yet defined it will be
+  initialised with |\newtoks|.
+\end{function}
+
+\begin{function}[module=expkv-def type]{box,gbox}
+  \begin{syntax}
+    box \key\ = \meta{cs} \prefixes2212
+  \end{syntax}
+  \singlecs{foo}
+  Typesets \val\ into a |\hbox| and stores the result in a box register. The
+  boxes are colour safe. \expkvd\ currently doesn't provide a |vbox| type.
+\end{function}
+
+\begin{function}[module=expkv-def type]{meta}
+  \begin{syntax}
+    meta \key\ = \kvarg \prefixes2222
+  \end{syntax}
+  This key \type\ can set other keys, you can access the \val\ given to the
+  created \Vkey\ inside the \kv\ list using |#1|. This works by injecting the
+  \kv\ list into the currently parsed list, so behaves just as if the \kv\ list
+  was directly used instead of \key.
+\end{function}
+\begin{example}
+    {Define a \Vkey\ as a shortcut to set multiple other keys with the
+    \texttt{meta} \type}
+  And we want to set a full set of keys with just this single one called |all|.
+  \begin{enverb}
+        ,meta all =
+          {distance=5pt,baz=cheese cake,bar=cocktail bar,foo={#1}}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{nmeta}
+  \begin{syntax}
+    nmeta \key\ = \kvarg \prefixes2223
+  \end{syntax}
+  This \type\ sets other keys, but unlike |meta| this defines a \Nkey, so the
+  \kv\ list is static.
+\end{function}
+\begin{example}
+    {Set multiple other keys from a \Nkey\ with the \texttt{nmeta} \type}
+  and if |all| is set without a value we want to do something about it as well.
+  \begin{enverb}
+        ,nmeta all =
+          {distance=10pt,baz=nothing,bar=Waikiki bar,foo}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{smeta}
+  \begin{syntax}
+    smeta \key\ = \marg{set}\kvarg \prefixes2222
+  \end{syntax}
+  Yet another |meta| variant. |smeta| will define a \Vkey, you can access the
+  given \val\ in the provided \kv\ list using |#1|. Unlike |meta| this will
+  process that \kv\ list inside of \meta{set} using a nested |\ekvset| call, so
+  this is equal to \texttt{\cs[no-index]{ekvset}\marg{set}\kvarg}. As a
+  result you can't use |\ekvsneak| using keys or similar macros in the way you
+  normally could.
+\end{function}
+
+\begin{function}[module=expkv-def type]{snmeta}
+  \begin{syntax}
+    snmeta \key\ = \marg{set}\kvarg \prefixes2223
+  \end{syntax}
+  And the last |meta| variant. |snmeta| combines |smeta| and |nmeta|, so parses
+  the \kv\ list inside of \meta{set} and defines a \Nkey\ with a static list.
+\end{function}
+
+\begin{function}[module=expkv-def type]{alias}
+  \begin{syntax}
+    alias \key\ = \meta{key_2} \prefixes2333
+  \end{syntax}
+  Copy the definition of \meta{key_2} to \key. \key\ will inherit being |long|
+  or |protected| from \meta{key_2} as well. If a \Vkey\ named \meta{key_2}
+  exists its definition is copied, and if an accordingly named \Nkey\ exists its
+  definition is copied to the new name as well. At least one of the two keys
+  must exist or else this throws an error. If \meta{key_2} is later redefined
+  the definition of \key\ will stay the same.
+\end{function}
+
+\begin{function}[module=expkv-def type]{set}
+  \begin{syntax}
+    set \key\ = \marg{set} \prefixes2233
+    set \key
+  \end{syntax}
+  This will define a \Nkey\ that will change the current set to \meta{set}. If
+  you give no value to this definition (omit |= |\marg{set}) the set name will
+  be the same as \key\ so
+  |set |\key\
+  is equivalent to
+  |set |\key| = |\marg{key}.
+  Note that just like in \expkv\ it'll not be checked whether \meta{set} is
+  defined and you'll get a low-level \TeX\ error if you use an undefined
+  \meta{set}.
+\end{function}
+
+\begin{function}[module=expkv-def type]{choice}
+  \begin{syntax}
+    choice \key\ = \{\val=\meta{definition}, \ldots\} \prefixes2223
+  \end{syntax}
+  |choice| defines a \Vkey\ that will only accept a limited set of values. You
+  should define each possible \meta{value} inside of the \val=\meta{definition}
+  list. If a defined \meta{value} is passed to \meta{key} the \meta{definition}
+  will be left in the input stream. You can make individual values |protected|
+  inside the \val=\meta{definition} list by using that \prefix. To also allow
+  choices that shouldn't be |\protected| but which start with the word
+  |protected| you can also use |unprotected| as a special \prefix. By default a
+  |choice| key and all its choices are expandable, an undefined \meta{value}
+  will throw an error in an expandable way. You can add additional choices after
+  the \meta{key} was created by using |choice| again for the same \key,
+  redefining choices is possible the same way, but there is no interface to
+  remove certain choices. To change the behaviour of unknown choices see also
+  the |unknown-choice| \type.
+\end{function}
+\begin{example}
+    {Define a choice with arbitrary code using the \texttt{choice} \type}
+  We give the users a few choices.
+  \begin{enverb}
+        ,choice choose =
+          {
+             protected lemonade = \def\exampledrink{something sour}
+            ,protected water = \def\exampledrink{something boring}
+          }
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{choice-store}
+  \begin{syntax}
+    choice-store \key\ = \meta{cs}\{\val=\meta{definition}, \ldots\} \prefixes2223
+  \end{syntax}
+  \singlecs{foo}
+  This is a special \type\ of the |choice| \type\ that'll store the given choice
+  inside the macro \meta{cs}. Since storing inside a macro can't be done
+  expandably every choice-code is |\protected|, and you might define the
+  |choice-store| key itself as |\protected| as well if you want. Inside the
+  \val|=|\meta{definition} list the |=|\meta{definition} part is optional, if
+  you omit it the \val\ will be stored as given during define-time inside of
+  \meta{cs} (during use-time the \val\ needs to be matched |\detokenize|d), and
+  if you specify |=|\meta{definition} that \meta{definition} will be stored
+  inside of \meta{cs} instead. If \meta{cs} doesn't yet exist it's initialised
+  as empty.
+\end{function}
+\begin{example}
+    {Show the equivalent setup for a \texttt{choice} \type\ to mimic a
+    \texttt{choice-store} \type}
+  The following keys |key1| and |key2| are equivalent at use time (this doesn't
+  continue the |\ekvdefinekeys|-call for the set |example| above):
+  \begin{enverb}[no-store,no-tcb]
+    \newcommand*\mya{}% initialise \mya
+    \ekvdefinekeys{choice-store-example}
+      {
+         choice key1 =
+          {
+             protected a = \def\mya{a}
+            ,protected b = \def\mya{b}
+            ,protected c = \def\mya{c}
+            ,protected d = \def\mya{FOO}
+          }
+        ,choice-store key2 = \myb{a,b,c,d=FOO}
+      }
+  \end{enverb}
+\end{example}
+\begin{example}
+    {Store the user's choices in a macro with the \texttt{choice-store} \type}
+  (this continues the |\ekvdefinekeys|-call for the set |example| from above)
+  After the above drinks we define a few more choices which are directly stored.
+  \begin{enverb}
+        ,choice-store choose = \exampledrink{beer,wine}
+  \end{enverb}
+  One might notice that the entire setup of the |choose| key could've been done
+  using only |choice-store|.
+\end{example}
+
+\begin{function}[module=expkv-def type]{choice-enum}
+  \begin{syntax}
+    choice-enum \key\ = \meta{cs}\{\val, \ldots\} \prefixes2223
+  \end{syntax}
+  \singlecs{foo}
+  This is similar to |choice-store|, the differences are: \meta{cs} should be a
+  count register or is initialised as such using |\newcount|; instead of the
+  \val\ itself being stored its position in the list of choices is stored
+  (zero-based). It is not possible to specify a \meta{definition} to store
+  something else than the numerical position inside the list.
+\end{function}
+\begin{example}
+    {Show the equivalent setup for a \texttt{choice} \type\ to mimic a
+    \texttt{choice-enum} \type}
+  The following keys |key1| and |key2| are equivalent at use time (another
+  example not using the |example| set of above's |\ekvdefinekeys|):
+  \begin{enverb}[no-store,no-tcb]
+    \newcount\myc
+    \ekvdefinekeys{choice-enum-example}
+      {
+         choice key1 =
+          {
+             protected a={\myc=0 }
+            ,protected b={\myc=1 }
+            ,protected c={\myc=2 }
+          }
+        ,choice-enum key2 = \myd{a,b,c}
+      }
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{unknown-choice}
+  \begin{syntax}
+    unknown-choice \key\ = \marg{definition} \prefixes2323
+  \end{syntax}
+  By default an unknown \val\ passed to a |choice| or |bool| \type\ (and all
+  their variants) will throw an error. However, with this prefix you can define
+  an alternative action which should be executed if \key\ received an unknown
+  choice. In \meta{definition} you can refer to the given invalid choice with
+  |#1|.
+\end{function}
+\begin{example}
+    {Handle unknown choices without throwing an error with the
+    \texttt{unknown-choice} \type}
+  If a drink was chosen with |choose| that's not defined we don't want to throw
+  an error, but store something else instead.
+  \begin{enverb}
+        ,protected unknown-choice choose =
+          \def\exampledrink{something unavailable}
+      }% closing brace for \ekvdefinekeys
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{choice-aliases}
+  \begin{syntax}
+    choice-aliases \key\ = \{\meta{new}=\meta{old}, \ldots\} \prefixes2333
+  \end{syntax}
+  Copy the definition of the choice \meta{old} of \key\ to a \meta{new} choice
+  for the same \key. The \key\ must be an existing |choice| key. Inside the
+  \meta{new}=\meta{old} list all elements must get a value. If used the
+  |new|-prefix will apply to each individual \meta{new} choice name (so if any
+  already exists it'll throw an error, and the current element will be ignored).
+  The \meta{new} choice will inherit being |protected| from the \meta{old} one.
+  The \meta{old} choice must be defined obviously.
+
+  This works for a |choice| or |bool| \type\ as well as all their variants. If
+  something redefines some of the choices later on the aliases will keep the
+  original definition.
+\end{function}
+\begin{example}
+    {Create shortcuts for choices using the \texttt{choice-aliases} \type}
+  With the following we create a key that accepts some choices, and since our
+  keyboard is only designed to handle a finite number of keystrokes we also
+  allow for shorter names of those choices. (This is not part of the ongoing
+  example using the |example| set above.)
+  \begin{enverb}[no-store,no-tcb]
+    \ekvdefinekeys{choice-alias-example}
+      {
+         choice-store   key = { long-name, short-name }
+        ,choice-aliases key = { ln = long-name, sn = short-name }
+      }
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-def type]{unknown code}
+  \begin{syntax}
+    unknown code = \marg{definition} \prefixes2322
+  \end{syntax}
+  By default \expkv\ throws errors when it encounters unknown keys in a set.
+  With the |unknown| \type\ you can define handlers that deal with undefined
+  keys, instead of a \key\ name you have to specify a subtype for this, here the
+  subtype is |code|.
+
+  With |unknown code| the \meta{definition} is used for unknown keys which were
+  provided a value (so corresponds to |\ekvdefunknown|), you can access the
+  unknown \key\ name with |#1| (|\detokenize|d), the given \val\ with |#2|, and
+  the unprocessed \key\ name with |#3| (in case you want to further expand
+  it).\footnotemark
+\end{function}%
+\footnotetext{There is some trickery involved to get this more intuitive
+argument order without any performance hit if you compare this to
+\cs[no-index]{ekvdefunknown} directly}
+
+\begin{function}[module=expkv-def type]{unknown noval}
+  \begin{syntax}
+    unknown noval = \marg{definition} \prefixes2323
+  \end{syntax}
+  This is like |unknown code| but uses \meta{definition} for unknown keys to
+  which no value was passed (so corresponds to |\ekvdefunknownNoVal|). You can
+  access the |\detokenize|d \key\ name with |#1| and the unprocessed one with
+  |#2|.
+\end{function}
+
+\begin{function}[module=expkv-def type]{unknown redirect-code}
+  \begin{syntax}
+    unknown redirect-code = \marg{set-list} \prefixes2331
+  \end{syntax}
+  This uses a predefined action for |unknown code|. Instead of throwing an
+  error, it is tried to find the \meta{key} in each \meta{set} in the comma
+  separated \meta{set-list}. The first found match will be used and the
+  remaining options from the list discarded. If the \meta{key} isn't found in
+  any \meta{set} an expandable error will be thrown eventually. Internally
+  \expkv's |\ekvredirectunknown| will be used.
+\end{function}
+
+\begin{function}[module=expkv-def type]{unknown redirect-noval}
+  \begin{syntax}
+    unknown redirect-noval = \marg{set-list} \prefixes2333
+  \end{syntax}
+  This behaves just like |unknown redirect-code| but will set up means to
+  forward keys for |unknown noval|. Internally \expkv's
+  |\ekvredirectunknownNoVal| will be used.
+\end{function}
+
+\begin{function}[module=expkv-def type]{unknown redirect}
+  \begin{syntax}
+    unknown redirect = \marg{set-list} \prefixes2333
+  \end{syntax}
+  This is a short cut to apply both, |unknown redirect-code| and
+  |unknown redirect-noval|, as a result you might get doubled error messages,
+  one from each.
+\end{function}
+
+\bigskip
+Time to use all those keys defined in the different examples as part of the
+|example| set!
+% undo the global no-tcb setting
+\ekvset{enverb}{no-store,undo-no-tcb}%
+\begin{enverb}[restore,below,inter=Which results in three paragraphs of text:]
+  \newcommand\defexample[1][]
+    {%
+      \begingroup % keep the values set local to this call
+        \ekvset{example}{#1}%
+        After walking \the\exampledistance\space we finally reached
+        \examplebar{\emph}{no particular place}.
+        There I ordered
+        \iffoo
+          a drink called \examplefoostore\space (that has
+          \the\examplefoocount\space tokens in it)%
+        \else
+          nothing of particular interest%
+        \fi
+        \examplebaz{ and ate \emph}.
+        Then a friend of mine also chose \exampledrink.
+        \par
+      \endgroup
+    }
+  \defexample[nofoo]
+  \defexample[all,choose=lemonade]
+  \defexample
+    [all=wheat beer,bar=Biergarten,baz=pretzel,choose=champagne]
+\end{enverb}
+
+\subsection{Another Example}
+
+This picks up the standard use case from \autoref{sec:expkv:standard}, but
+defines the keys using |\ekvdefinekeys|.
+
+\begin{enverb}
+  \makeatletter
+  \ekvdefinekeys{myrule}
+    {
+       store   ht    = \myrule@ht
+      ,initial ht    = 1ex
+      ,store   wd    = \myrule@wd
+      ,initial wd    = 0.1em
+      ,store   raise = \myrule@raise
+      ,initial raise = \z@
+      ,meta    lower = {raise={-#1}}
+    }
+  \ekvsetdef\myruleset{myrule}
+  \newcommand*\myrule[1][]
+    {%
+      \begingroup
+        \myruleset{#1}%
+        \rule[\myrule@raise]{\myrule@wd}{\myrule@ht}%
+      \endgroup
+    }
+  \makeatother
+  a\myrule\par
+  a\myrule[ht=2ex,lower=.5ex]\par
+  \myruleset{wd=5pt}
+  a\myrule
+\end{enverb}

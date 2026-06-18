@@ -1,0 +1,62 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 68 Row aggregate actions
+% Label: "ex:rowaggregates"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+
+\usepackage{datatool}
+
+
+% Load data from studentmarks.csv file:
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv} 
+\begin{document}
+Map data: 
+
+\DTLmapdata[name=marks]{
+ \DTLmapget{key=Forename} \DTLmapget{key=Surname} average marks:
+ \DTLaction[
+  columns={4-},
+  options={mean}
+  ]{row aggregate}
+ \DTLuse{mean}. 
+
+} 
+
+For each: 
+
+\DTLforeach{marks}{\Forename=Forename,\Surname=Surname}{
+ \Forename\ \Surname\ 
+ average mark:
+ \DTLaction[
+  columns={4-},
+  options={mean}
+  ]{current row aggregate}
+ \DTLuse{mean}. 
+
+} 
+
+Row selection: 
+
+\dtlgetrowforvalue{marks}{\dtlcolumnindex{marks}{StudentNo}}{105987}
+Student 105987 average mark:
+\DTLaction[
+ columns={4-},
+ options={mean}
+]{current row aggregate}
+\DTLuse{mean}. 
+\end{document}

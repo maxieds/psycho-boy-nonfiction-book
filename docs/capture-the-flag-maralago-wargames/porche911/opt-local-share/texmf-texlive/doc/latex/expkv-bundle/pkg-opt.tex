@@ -1,0 +1,229 @@
+\latexekv\expkvo{-opt}
+
+\expkvo\ allows to parse \LaTeXe\ class and package options as \kv\ lists using
+sets of \expkv.
+
+With the 2021-05-01 release of \LaTeXe\ there were some very interesting changes
+to the package and class options code. It is now possible to use braces inside
+the options, and we can access options without them being preprocessed. As a
+result, some but not all restrictions were lifted from the possible option
+usage. What will still fail is things that aren't save from an |\edef| expansion
+(luckily, the \expnotation\ can be used to get around that as well). One feature
+of \expkvo\ that doesn't work any more is the possibility to parse the unused
+option list, because that one doesn't contain the full information any more.
+\expkvo\ will fall back to v0.1 if the kernel is older than 2021-05-01.
+
+Another very interesting change in \LaTeXe\ was the addition of \pkg{ltkeys} and
+its |\ProcessKeyOptions| with the possibility to parse future options with it
+instead of getting the dreaded |Option clash| error. The idea is brilliant and
+changes made in the 2022-10-22 version allow us to provide the same feature
+without having to hack any kernel internals, so starting with kernel version
+2022-11-01 \expkvo\ supports this as well.
+
+\expkvo\ shouldn't place any restrictions on the keys, historic shortcomings of
+the kernel cannot be helped though, so the supported things vary with the kernel
+version (see above). The one thing that \expkvo\ doesn't support, which \expkv\
+alone would, is active commas or equals signs. But there is no good reason why
+any of the two should be active in the preamble.
+
+You can use \LaTeXe's rollback support, so to load v0.1 explicitly use:
+\begin{enverb}[no-tcb]
+  \usepackage{expkv-opt}[=v0.1]
+\end{enverb}
+which will load the last version of \expkvo\ that doesn't use the raw option
+lists (this shouldn't be done by a package author, but only by a user on a
+single-document basis if there are some incompatibilities, which is unlikely).
+
+
+\subsection{Macros\label{sec:o:macros}}
+
+\subsubsection{Option Processors\label{sec:o:processors}}
+
+\expkvo's behaviour if it encounters a defined or an undefined \key\ depends on
+which list is being parsed and whether the current file is a class or not. Of
+course in every case a defined \key's callback will be invoked  but an
+additional action might be executed. For this reason the rule set of every macro
+will be given below the short description which list it will parse.
+
+During each of the processing macros the current list element (not processed in
+any way) is stored within the macro |\CurrentOption|.
+
+\begin{function}{\ekvoProcessOptions}
+  \begin{syntax}
+    \cs{ekvoProcessOptions}\marg{set}
+  \end{syntax}
+  This runs |\ekvoProcessGlobalOptions|, then |\ekvoProcessLocalOptions|, and
+  finally |\ekvoProcessFutureOptions|. If you're using |\ekvoUseUnknownHandlers|
+  it'll affect all three option processors. Else the respective default
+  unknown-rules are used.
+\end{function}
+
+\begin{function}{\ekvoProcessLocalOptions}
+  \begin{syntax}
+    \cs{ekvoProcessLocalOptions}\marg{set}
+  \end{syntax}
+  This parses the options which are directly passed to the current class or
+  package for an \expkv\ \set.
+\end{function}
+\expkvorules
+  {%
+     cd = {remove the option from the list of unused global options if the local
+       option list matches the option list of the main class and the unused
+       global options list is not empty; else \emph{nothing}}
+    ,cu = add the key to the list of unused global options (if the local option
+      list matches the option list of the main class)
+    ,pu = throw an error
+  }
+
+\begin{function}{\ekvoProcessGlobalOptions}
+  \begin{syntax}
+    \cs{ekvoProcessGlobalOptions}\marg{set}
+  \end{syntax}
+  In \LaTeXe\ the options given to |\documentclass| are global options. This
+  macro processes the global options for an \expkv\ \set.
+\end{function}
+\expkvorules{d = remove the option from the list of unused global options}
+
+\begin{function}{\ekvoProcessFutureOptions}
+  \begin{syntax}
+    \cs{ekvoProcessFutureOptions}\marg{set}
+  \end{syntax}
+  This parses the option list of every future call of the package with
+  |\usepackage| or similar with an \expkv\ \set, circumventing the
+  |Option clash| error that'd be thrown by \LaTeXe. It is only available for
+  kernel versions starting with 2022-11-01. It is mutually exclusive with
+  \LaTeXe's |\ProcessKeyOptions| (which ever comes last defines how future
+  options are parsed).
+\end{function}
+\expkvorules{u = throw an error}
+
+\begin{function}{\ekvoProcessOptionsList}
+  \begin{syntax}
+    \cs{ekvoProcessOptionsList}\meta{list}\marg{set}
+  \end{syntax}
+  Process the \kv\ list stored in the macro \meta{list}.
+\end{function}
+\expkvorules{}
+
+
+\subsubsection{Other Macros\label{sec:o:others}}
+
+\begin{function}{\ekvoUseUnknownHandlers}
+  \begin{syntax}
+    \cs{ekvoUseUnknownHandlers}\meta{cs_1}\meta{cs_2}\quad{\normalfont\itshape or}
+    \cs{ekvoUseUnknownHandlers}*
+  \end{syntax}
+  With this macro you can change the action \expkvo\ executes if it encounters
+  an undefined \key\ for the next (and only the next) list processing macro. The
+  macro \meta{cs_1} will be called if an undefined \Nkey\ is encountered and get
+  one argument being the \key\ (without being |\detokenize|d). Analogous the
+  macro \meta{cs_2} will be called if an undefined \Vkey\ was parsed and get two
+  arguments, the first being the \key\ (without being |\detokenize|d) and the
+  second the \val.
+  \par
+  If you use the starred variant, it'll not take further arguments. In this case
+  the undefined handlers defined via |\ekvdefunknown| and |\ekvdefunknownNoVal|
+  in the parsing set get used, and if those aren't available they'll simply do
+  nothing.
+\end{function}
+
+\begin{function}{\ekvoVersion,\ekvoDate}
+  These two macros store the version and date of the package.
+\end{function}
+
+
+\subsection{Examples}
+
+\begin{example}{A package using \expkvo}
+  Let's say we want to create a package that changes the way footnotes are
+  displayed in \LaTeX. For this it will essentially just redefine |\thefootnote|
+  and we'll call this package \pkg{ex-footnote}. First we report back which
+  package we are:
+  \begin{enverb}[no-tcb]
+    \ProvidesPackage{ex-footnote}[2020-02-02 v1 change footnotes]
+  \end{enverb}
+  Next we'll need to provide the options we want the package to have.
+  \begin{enverb}[no-tcb]
+    \RequirePackage{color}
+    \RequirePackage{expkv-opt}% also loads expkv
+    \ekvdef{ex-footnote}{color}{\def\exfn@color{#1}}
+    \ekvdef{ex-footnote}{format}{\def\exfn@format{#1}}
+  \end{enverb}
+  We can provide initial values just by defining the two macros storing the
+  value.
+  \begin{enverb}[no-tcb]
+    \newcommand*\exfn@color{}
+    \newcommand*\exfn@format{arabic}
+  \end{enverb}
+  Next we need to process the options given to the package. The package should
+  only obey options directly passed to it, so we're using
+  |\ekvoProcessLocalOptions| and |\ekvoProcessFutureOptions|:
+  \begin{enverb}[no-tcb]
+    \ekvoProcessLocalOptions {ex-footnote}
+    \ekvoProcessFutureOptions{ex-footnote}
+  \end{enverb}
+  Now everything that's still missing is actually changing the way footnotes
+  appear:
+  \begin{enverb}[no-tcb]
+    \renewcommand*\thefootnote
+      {%
+        \ifx\exfn@color\@empty
+          \csname\exfn@format\endcsname{footnote}%
+        \else
+          \textcolor{\exfn@color}{\csname\exfn@format\endcsname{footnote}}%
+        \fi
+      }
+  \end{enverb}
+  So the complete code of the package would look like this:
+  \begin{enverb}[no-tcb]
+    \ProvidesPackage{ex-footnote}[2020-02-02 v1 change footnotes]
+
+    \RequirePackage{color}
+    \RequirePackage{expkv-opt}% also loads expkv
+
+    \ekvdef{ex-footnote}{color}{\def\exfn@color{#1}}
+    \ekvdef{ex-footnote}{format}{\def\exfn@format{#1}}
+    \newcommand*\exfn@color{}
+    \newcommand*\exfn@format{arabic}
+
+    \ekvoProcessLocalOptions {ex-footnote}
+    \ekvoProcessFutureOptions{ex-footnote}
+
+    \renewcommand*\thefootnote
+      {%
+        \ifx\exfn@color\@empty
+          \csname\exfn@format\endcsname{footnote}%
+        \else
+          \textcolor{\exfn@color}{\csname\exfn@format\endcsname{footnote}}%
+        \fi
+      }
+  \end{enverb}
+  And it could be used with one (or thanks to |\ekvoProcessFutureOptions| all)
+  of the following lines:
+  \begin{enverb}[no-tcb]
+    \usepackage{ex-footnote}
+    \usepackage[format=fnsymbol]{ex-footnote}
+    \usepackage[color=green]{ex-footnote}
+    \usepackage[color=red,format=roman]{ex-footnote}
+  \end{enverb}
+\end{example}
+
+\begin{example}{Parsing the global options}
+  This document was compiled with the global options
+  \texttt{[\detokenize\expandafter\expandafter\expandafter{\csname @raw@classoptionslist\endcsname]}}
+  in use. If we define the following keys
+  \begin{enverb}[store,no-tcb]
+    \ekvdef{optexample}{exfoo}
+      {Global option \texttt{exfoo} got \texttt{\detokenize{#1}}.\par}
+    \ekvdefNoVal{optexample}{exbar}
+      {Global option \texttt{exbar} set.\par}
+  \end{enverb}
+  we can use those options to control the result of the following:
+  \begin{enverb}[restore,same-line=.55]
+    \ekvoProcessGlobalOptions{optexample}
+  \end{enverb}
+  Please note that under normal conditions
+  \cs[no-index]{ekvoProcessGlobalOptions} is only useable in the preamble; this
+  example is only for academic purposes, you'll not be able to reproduce this
+  with the exact code shown above.
+\end{example}

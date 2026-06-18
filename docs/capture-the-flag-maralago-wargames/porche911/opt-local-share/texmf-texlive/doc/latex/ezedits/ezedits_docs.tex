@@ -1,0 +1,178 @@
+\documentclass{article}
+
+\usepackage[arrows]{ezedits}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\newcommand{\macroexample}[1]{\begin{center}
+    \fcolorbox{black}{black!6}{\parbox{.9\linewidth}{\ttfamily #1}}
+\end{center}}
+
+
+\title{\texttt{ezedits.sty} documentation}
+\author{Joseph A. Smiga $\langle$\href{mailto:joseph.smiga@rochester.edu?subject=[ezedits]\%20}{joseph.smiga@rochester.edu}$\rangle$}
+\date{Package: November 13, 2024 (v1.1)\\
+Documentation: November 13, 2024
+}
+
+\defineEdit{ABC}{\color{red}}{\color{blue}}
+\defineEdit{XYZ}{\color{gray}\textit}{\textbf}
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+The \texttt{ezedits} package is designed to make it easier to edit \LaTeX{} documents with multiple people, while keeping track of what changed. 
+
+Changes signified with this package with raise warnings. This makes it easier to keep track of changes and keep the document clean. 
+
+Note that, in this document, the package is included as:
+\macroexample{\textbackslash{}usepackage[arrows]\{ezedits\}}
+with the \texttt{xcolor} package included. 
+
+\section{Dependencies}
+The following packages may be required:
+\begin{itemize}
+    \item \href{https://ctan.org/pkg/ulem}{\texttt{ulem}}: used for strikethrough (\texttt{\textbackslash{sout}}). This is required by default, unless the \hyperlink{opt_nosout}{\texttt{nosout}} option is used. 
+    
+    \item \href{https://ctan.org/pkg/xcolor}{\texttt{xcolor}}: used for coloring text. If included (i.e., \texttt{\textbackslash{textcolor}} is defined), \hyperlink{cmd_draftnote}{\texttt{\textbackslash{draftnote}}} is colored red by default.
+
+    \item \href{https://ctan.org/pkg/pdfcomment}{\texttt{pdfcomment}}: needed when \hyperlink{opt_pdfcomment}{\texttt{pdfcomment}} option is used.
+\end{itemize}
+
+
+\section{Package options}
+The following options can be used with \verb+\usepackage[...]{ezedits}+:
+\begin{itemize}
+    \item \hypertarget{opt_arrows}{\texttt{arrows}} add arrows ``$\Longleftarrow$'' pointing to edits in margins (in captions, a pair of arrows are added, instead; $\Longrightarrow$Like this$\Longleftarrow$). These arrows are styled based on the edit.
+
+    \item \hypertarget{opt_accept}{\texttt{accept}} accept all edits (arrows still appear if \texttt{arrows} option is used).
+
+    \item \hypertarget{opt_pdfcomment}{\texttt{pdfcomment}} write edits as pdf annotations (arrows still appear if \texttt{arrows} option is used).
+
+    \item \hypertarget{opt_nosout}{\texttt{nosout}} do not strikeout delete text (by default). If this option is set, the \texttt{ulem} package is not required.
+\end{itemize}
+
+
+\section{Commands}
+
+\noindent\hypertarget{cmd_draftnote}{\texttt{\textbackslash{draftnote}\{...\}}}
+
+This will generate a note in the text. Text is placed in square brackets and stylized to make it distinct from the rest of the text.
+
+\draftnote{Here is an example note}
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+\noindent\hypertarget{cmd_defineEdit}{\texttt{\textbackslash{defineEdit}\{ABC\}\{$\langle$styleA$\rangle$\}\{$\langle$styleB$\rangle$\}}}
+
+This will generate a set of commands with the prefix \texttt{ABC} for editing where \texttt{$\langle$styleA$\rangle$} is used for omitted text and \texttt{$\langle$styleB$\rangle$} is used for added text.
+
+The following commands are generated:
+\begin{itemize}
+    \item \verb+\ABCEdit{del}{ins}+ Used to replace \verb+del+ with \verb+ins+.
+    
+    For example: \ABCEdit{old}{new}.
+
+    \item \verb+\ABCIns{ins}+ Used to insert \verb+ins+.
+    
+    For example: \ABCIns{new}.
+
+    \item \verb+\ABCDel{del}+ Used to delete \verb+del+.
+    
+    For example: \ABCDel{old}.
+\end{itemize}
+
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+\noindent\hypertarget{cmd_setnotestyle}{\texttt{\textbackslash{setnotestyle}}\{$\langle$style$\rangle$\}}
+
+Redefine how \hyperlink{cmd_draftnote}{\texttt{\textbackslash{draftnote}}} appears. Here, $\langle$style$\rangle$ is a macro that takes one argument and returns a styled version of that text.
+
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+\noindent\hypertarget{cmd_makeeditreport}{\texttt{\textbackslash{makeeditreport}}}
+
+Creates a summary of which page edits appear on (at the point that the command is called). The output is a \texttt{tabular} environment.
+
+
+\section{Examples}
+Here, we use the following command to define the edit commands:
+
+\macroexample{\textbackslash{}defineEdit\{ABC\}\{\textbackslash{}color\{red\}\}\{\textbackslash{}color\{blue\}\}}
+
+Here, the first argument \verb+{ABC}+ is the prefix for the edit commands. The second argument \verb+{\color{red}}+ describes how to style deleted text (the text is always crossed-out). Finally, the third argument \verb+{\color{blue}}+ describes what to do with added text. Note that, if the \hyperlink{opt_arrows}{\texttt{arrows}} option is used, it will be styled according to the latter argument. 
+
+A simple example of editing a sentence:
+\macroexample{This \textbackslash{}ABCIns\{sentence\} contains some \textbackslash{}ABCDel\{major\} errors, but that is \textbackslash{}ABCEdit\{ok\}\{not a big deal\}. \textbackslash{}draftnote\{Remember to clean up the document\}}
+
+\begin{center}
+    \fbox{\parbox{.9\linewidth}{This \ABCIns{sentence} contains some \ABCDel{major} errors, but that is \ABCEdit{ok}{not a big deal}. \draftnote{Remember to clean up the document}}}
+\end{center}
+
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+The styling options are fairly flexible. For example, one can define their own macro \verb+\style{...}+ that takes one argument and stylizes it. 
+For example, an alternative styling:
+\macroexample{\textbackslash{}defineEdit\{XYZ\}\{\textbackslash{}color\{gray\}\textbackslash{}textit\}\}\{\textbackslash{}textbf\}}
+So deleted text \XYZDel{will look like this} while added text \XYZIns{will look like this}.
+
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+One can also include edits in (floating) figures. However, if \hyperlink{opt_arrows}{\texttt{arrows}} package option is used, the arrows will appear around the edit, instead of in the margin.
+
+\begin{figure}[ht]
+    \centering
+    {\rule{1cm}{1cm}}
+    \caption{This is just a \ABCIns{black} box. \draftnote{This is a placeholder figure}}
+    \label{fig:blackbox}
+\end{figure}
+
+
+\vspace{5mm}\hrule\vspace{2mm}
+
+After making edits, one can generate a summary of edits using \verb+\makeeditreport+ (only includes edits/notes from before this command is called):
+
+\macroexample{
+\textbackslash{}begin\{table\}[h]\par
+~~~~\textbackslash{}centering\par
+~~~~\textbackslash{}makeeditreport\par
+\textbackslash{}end\{table\}
+}
+
+\begin{table}[h]
+    \centering
+    \makeeditreport
+\end{table}
+
+Note that warnings will also be raised for each edit/note at their location. 
+
+\section{Possible issues}
+\begin{itemize}
+\item There are times where the page number used in \hyperlink{cmd_makeeditreport}{\texttt{\textbackslash{makeeditreport}}} may not be exactly correct, especially when in floating environments whose location can be difficult for \LaTeX{} to locate.
+
+\item In some cases, the edit warnings can appear doubled in captions. This will also appear as ``?'' pages in \hyperlink{cmd_makeeditreport}{\texttt{\textbackslash{makeeditreport}}}.
+
+\emph{Technical explanation:} Under typical implementation (e.g., in the \texttt{article} class), the caption will ``run'' its entries once or twice depending on the length of the caption. First, the caption is generated in a \verb+\sbox+. If the text can fit in a single line, it is displayed centered, otherwise, the text is ``run'' again (displayed across multiple lines). See \verb+\@makecaption+ in the respective class file for the exact implementation. 
+
+\item There are certain cases in which the ``strikeout'' styling does not play nicely. For example, there may be issues when crossing-out citations (c.f., \href{https://tex.stackexchange.com/q/98222}{this Stack Exchange}). To resolve this, \texttt{ezedits} modifies the \verb+\sout+ command to put \verb+\cite{...}+ within an \verb+\mbox+. This results in the minor inconvenience of not letting citations cross multiple lines. 
+
+\item Also, issues can arise when command covers many paragraphs --- the simple resolution to this would be to repeat the command per paragraph.
+\end{itemize}
+
+
+\section{Acknowledgements}
+JAS would like to thank Abhay Hegde for suggesting the \hyperlink{cmd_makeeditreport}{\texttt{\textbackslash{makeeditreport}}} macro.
+
+
+\end{document}

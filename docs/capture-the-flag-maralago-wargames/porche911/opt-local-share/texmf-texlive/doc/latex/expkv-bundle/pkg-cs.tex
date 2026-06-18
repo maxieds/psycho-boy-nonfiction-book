@@ -1,0 +1,957 @@
+\genericekv\expkvc{-cs}
+
+\expkvc\ aids in creating fully expandable macros that take a \kv\ argument. It
+implements somewhat efficient solutions to expandable \kv\ parsing without the
+user having to worry too much about the details.
+
+The package supports two main approaches for this. The first is splitting the
+keys up into individual arguments, the second preparses the \kv\ list into a
+single argument in which accessing the value of individual keys is fast. The
+behaviour of the second type is similar to a hash table, so we call that variant
+|Hash|, the first type is called |Split|. Both these variants support a number
+of so called \emph{primary keys} (a primary key matches an argument, roughly
+speaking).
+
+In addition to these methods there is a structured way to define additional keys
+which might build upon the primary keys but not directly relate to an argument.
+These keys are called \emph{secondary keys}. Primary and secondary keys belong
+to a specific macro (the macro name serves as the \emph{set}).
+
+A word of advice you should consider: Macros defined with \expkvc\ are simple to
+create, and there might be good use cases for them (for instance since they
+don't work by assignments but only by argument forwarding logic they have no
+issues with implicit or explicit groups whatsoever). But they don't scale as
+well as established \kv\ interfaces (think of the idiomatic key definitions with
+\pkg{keyval}, or \pkg{l3keys}, or \expkv\ with or without \expkvd), and they are
+slower than idiomatic key definitions in packages with fast \kv\ parsing.
+
+
+\subsection{Defining Macros and Primary Keys}
+
+All macros defined with \expkvc\ have to be previously undefined (or have the
+|\meaning| of |\relax|). There is no way to automatically undefine keys once
+they are set up -- so to make sure there are no conflicts only new definitions
+are allowed. The \emph{set} name (as used by \cs[no-index]{ekvset}) will be
+\cs[no-index]{string}\cs[no-index]{\meta{macro}}.
+
+
+\subsubsection{Primary Keys\label{sec:c:primary}}
+
+The notion of primary keys needs a bit of explanation, or better, the input
+syntax for the argument \meta{primary keys} in the following explanations. The
+\meta{primary keys} argument should be a \kv\ list in which each \key\ will be
+one primary key and \val\ the initial value of said \key\ (and that value is
+mandatory, even if you leave it blank that's fine, but you have to explicitly
+state it). By default all keys are defined short, but you can define |\long|
+keys by prefixing \key\ with |long| (\emph{e.g.},
+|long name=Jonathan P. Spratte| to define a |\long| key called |name|). Due to
+some internal implementations it's worth noting that |\long| keys are a
+microscopic grain faster. The \meta{cs} will only be defined |\long| if at least
+one of the keys was |\long|. For obvious reasons there is no interface in place
+to define something as |\protected|.
+
+To allow keys to start with the word |long| even if you don't want them to be
+|\long| you can also prefix them with |short|. The first found prefix of the two
+will stop the parsing for prefixes and what remains becomes the \key.
+
+These rules culminate in the following:
+
+\begin{enverb}[no-tcb]
+  \ekvcSplit\foo
+    {
+       long short = abc\par
+      ,short long = def
+    }
+    {#1#2}
+\end{enverb}
+will define a macro |\foo| that knows two primary keys, |short| which is defined
+|\long| (so will accept explicit |\par| tokens inside its value at use time),
+and |long| which doesn't accept explicit |\par| tokens (leading to a low level
+\TeX\ error). The description of |\ekvcSplit| follows shortly.
+
+There is one exception to the rule that each \key\ in \meta{primary keys} needs
+to get a value: If you include a key named |...| without a value this will be a
+primary key in which every unknown key will be collected -- and \meta{cs} will
+be defined |\long|. The unknown keys will be stored in a way that \emph{most}
+\kv\ parsers will parse them correctly (but this is no general guarantee, for
+instance \pkg{pgfkeys} can accidentally strip multiple sets of braces at the
+wrong moment). See some examples in \autoref{sec:c:unknown}.
+
+At the moment \expkvc\ doesn't require any internal keys, but I can't foresee
+whether this will be the case in the future as well, as it might turn out that
+some features I deem useful can't be implemented without such internal keys.
+Because of this, please don't use key names starting with "EKVC|" as that
+should be the private name space.
+
+
+\subsubsection{Split\label{sec:c:split}}
+
+The split variants will provide the key values as separate arguments. This
+limits the number of keys for which this is truly useful.
+
+\begin{function}{\ekvcSplit}
+  \begin{syntax}
+    \cs{ekvcSplit}\meta{cs}\marg{primary keys}\marg{definition}
+  \end{syntax}
+  This defines \meta{cs} to be a macro taking one mandatory argument which
+  should contain a \kv\ list. The \meta{primary keys} will be defined for this
+  macro (see \autoref{sec:c:primary}). The \meta{definition} is the code that
+  will be executed. You can access the \val\ of a \key\ by using a macro
+  parameter from |#1| to |#9|. The order of the macro parameters will be the
+  order provided in the \meta{primary keys} list (so |#1| is the \val\ of the
+  \key\ defined first). With \cs{ekvcSplit} you can define macros using at most
+  nine primary keys.
+\end{function}
+\begin{example}{Simple macro with \cs[no-index]{ekvcSplit}}
+  The following defines a macro |\foo| that takes the keys |a| and |b|
+  and outputs their values in a textual form:
+  \begin{enverb}
+    \ekvcSplit\foo{a=a,b=b}{a is #1.\par b is #2.\par}
+    \foo{}
+    \foo{b=e}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcSplitAndForward}
+  \begin{syntax}
+    \cs{ekvcSplitAndForward}\meta{cs}\marg{after}\marg{primary keys}
+  \end{syntax}
+  This defines \meta{cs} to be a macro taking one mandatory argument which
+  should contain a \kv\ list. You can use as many primary keys as you want with
+  this. The primary keys will be forwarded to \meta{after} as braced arguments
+  (as many as necessary for your primary keys). The order of the braced
+  arguments will be the order of your primary key definitions. In \meta{after}
+  you can use just a single control sequence, or some arbitrary stuff which will
+  be left in the input stream before your braced values (with one set of braces
+  stripped from \meta{after}), so both of the following would be fine:
+  \begin{enverb}[no-tcb]
+    \ekvcSplitAndForward\foo\foo@aux{keyA = A, keyB = B}
+    \ekvcSplitAndForward\foo{\foo@aux{more args}}{keyA = A, keyB = B}
+  \end{enverb}
+\end{function}
+\noindent
+In the first case |\foo@aux| should take at least two arguments (|keyA| and
+|keyB|), in the second case at least three (|more args|, |keyA|, and |keyB|).
+
+\begin{function}{\ekvcSplitAndUse}
+  \begin{syntax}
+    \cs{ekvcSplitAndUse}\meta{cs}\marg{primary keys}
+  \end{syntax}
+  This will roughly do the same as \cs{ekvcSplitAndForward}, but instead of
+  specifying what will be used after splitting the keys, \meta{cs} will use what
+  follows the \kv\ list. So its syntax will be
+\end{function}
+\begin{quote}
+  \ttfamily
+  \meta{cs}\kvarg\marg{after}
+\end{quote}
+and the code in |after| should expect at least as many arguments as the number
+of keys defined for \meta{cs}.
+
+
+\subsubsection{Hash\label{sec:c:hash}}
+
+The hash variants will provide the key values as a single argument in which you
+can access specific values using a special macro. The implementation might be
+more convenient and scale better, \emph{but} it is slower (for a rudimentary
+macro with a single key benchmarking was almost 1.7~times slower, the root of
+which being the key access with \cs{ekvcValue}, not the parsing, and for a key
+access using \cs{ekvcValueFast} it was still about 1.2~times slower). Still to
+be future proof, considering the hash variants is a good idea, and to get best
+performance but less maintainable code you can resort to the split approach.
+
+\begin{function}{\ekvcHash}
+  \begin{syntax}
+    \cs{ekvcHash}\meta{cs}\marg{primary keys}\marg{definition}
+  \end{syntax}
+  This defines \meta{cs} to be a macro taking one mandatory argument which
+  should contain a \kv\ list. You can use as many primary keys as you want. The
+  primary keys will be forwarded as a single argument containing every key to
+  the underlying macro. The underlying macro is defined as \meta{definition}, in
+  which you can access the \val\ of a \key\ by using
+  \cs{ekvcValue}\marg{key}|{#1}| (or similar).
+\end{function}
+\begin{example}{Simple macro with \cs[no-index]{ekvcHash}}
+  This defines an equivalent macro to the |\foo| defined with \cs{ekvcSplit}
+  earlier:
+  \begin{enverb}
+    \ekvcHash\foo{a=a,b=b}{a is \ekvcValue{a}{#1}.\par
+                           b is \ekvcValue{b}{#1}.\par}
+    \foo{}
+    \foo{b=e}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcHashAndForward}
+  \begin{syntax}
+    \cs{ekvcHashAndForward}\meta{cs}\marg{after}\marg{primary keys}
+  \end{syntax}
+  This defines \meta{cs} to be a macro taking one mandatory argument which
+  should contain a \kv\ list. You can use as many primary keys as you want. The
+  primary keys will be forwarded as a single argument containing every key to
+  \meta{after}. You can use a single macro for \meta{after} or use some
+  arbitrary stuff, which will be left in the input stream before the hashed \kv\
+  list with one set of braces stripped. In the macro called in \meta{after} you
+  can access the \val\ of a \key\ by using \cs{ekvcValue}\marg{key}|{#1}| (or
+  whichever argument the hashed \kv\ list will be in).
+\end{function}
+\begin{example}{Using \cs[no-index]{ekvcHashAndForward}}
+  This defines a macro |\foo| processing two keys, and passing the result to
+  |\foobar|:
+  \begin{enverb}
+    \ekvcHashAndForward\foo\foobar{a=a,b=b}
+    \newcommand*\foobar[1]{a is \ekvcValue{a}{#1}.\par
+                           b is \ekvcValue{b}{#1}.\par}
+    \foo{}
+    \foo{b=e}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcHashAndUse}
+  \begin{syntax}
+    \cs{ekvcHashAndUse}\meta{cs}\marg{primary keys}
+  \end{syntax}
+  This will roughly do the same as \cs{ekvcHashAndForward}, but instead of
+  specifying what will be used after hashing the keys during the definition,
+  \meta{cs} will use what follows the \kv\ list. So its syntax will be
+  \begin{quote}
+    \ttfamily
+    \meta{cs}\kvarg\marg{after}
+  \end{quote}
+\end{function}
+
+\begin{function}{\ekvcValue}
+  \begin{syntax}
+    \cs{ekvcValue}\marg{key}\marg{key list}
+  \end{syntax}
+  This is a safe way to access your keys in a hash variant. \key\ is the key
+  which's \val\ you want to use out of the \meta{key list}. \meta{key list}
+  should be the key list argument forwarded to your underlying macro by
+  \cs{ekvcHash}, \cs{ekvcHashAndForward}, or \cs{ekvcHashAndUse}. It will be
+  tested whether the hash function to access that \key\ exists, the \key\
+  argument is not empty, and that the \meta{key list} really contains a \val\ of
+  that \key. This macro needs exactly two steps of expansion and if used inside
+  of an |\edef| or |\expanded| context will protect the \val\ from further
+  expanding.
+\end{function}
+
+\begin{function}{\ekvcValueFast}
+  \begin{syntax}
+    \cs{ekvcValueFast}\marg{key}\marg{key list}
+  \end{syntax}
+  This behaves similar to \cs{ekvcValue}, but \emph{without any} safefy tests.
+  As a result this is about 1.4~times faster \emph{but} will throw low level
+  \TeX\ errors eventually if the hash function isn't defined or the \key\ isn't
+  part of the \meta{key list} (\emph{e.g.}, because it was defined as a key for
+  another macro -- all macros share the same hash function per \meta{key} name).
+  Note that this will not only throw low level errors but result in undefined
+  behaviour as well! This macro needs exactly three steps of expansion in the
+  no-error case.
+\end{function}
+
+\begin{function}{\ekvcValueSplit}
+  \begin{syntax}
+    \cs{ekvcValueSplit}\marg{key}\marg{key list}\marg{next}
+  \end{syntax}
+  If you need a specific \key\ from a \meta{key list} more than once, it'll be a
+  good idea to only extract it once and from then on keep it as a separate
+  argument (or if you want to forward this value to another macro). Hence the
+  macro \cs{ekvcValueSplit} will extract one specific \key's \val\ from the list
+  and forward it as an argument to \meta{next}, so the result of this will be
+  \meta{next}\marg{value}. This is roughly as fast as \cs{ekvcValue} and runs
+  the same tests.
+\end{function}
+\begin{example}
+    {Splitting of a key from a hash list using \cs[no-index]{ekvcValueSplit}}
+  The following defines a macro |\foo| which will take three keys. Since the
+  next parsing step will need the value of one of the keys multiple times we
+  split that key off the list (in this example the next step doesn't use the key
+  multiple times for simplicity though), and the entire list is forwarded as the
+  second argument:
+  \begin{enverb}
+    \ekvcHash\foo{a=a,b=b,c=c}
+      {\ekvcValueSplit{a}{#1}\foobar{#1}}
+    \newcommand*\foobar[2]{a is #1.\par
+                           b is \ekvcValue{b}{#2}.\par
+                           c is \ekvcValue{c}{#2}.\par}
+    \foo{}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcValueSplitFast}
+  \begin{syntax}
+    \cs{ekvcValueSplitFast}\marg{key}\marg{key list}\marg{next}
+  \end{syntax}
+  This behaves just like \cs{ekvcValueSplit}, but it won't run the safety tests,
+  hence it is faster but more error prone, just like the relation between
+  \cs{ekvcValue} and \cs{ekvcValueFast}.
+\end{function}
+
+
+\subsection{Secondary Keys\label{sec:c:secondary}}
+
+To lift some limitations of each primary key matching one argument or hash
+entry, you can define secondary keys. Those have to be defined for each macro
+individually but it doesn't matter whether that macro was set up as a split or
+hash variant.
+
+Secondary keys can have a \prefix\ (|long|), and must have a \type\
+(like |meta|). Some \types\ might require some \prefix\ while other
+\types\ might forbid the usage of a specific \prefix.
+
+Please keep in mind that key names shouldn't start with "EKVC|".
+
+\begin{function}{\ekvcSecondaryKeys}
+  \begin{syntax}
+    \cs{ekvcSecondaryKeys}\meta{cs}\kvarg
+  \end{syntax}
+  This is the front facing macro to define secondary keys. For the macro
+  \meta{cs} define \key\ to have definition \val. The general syntax for \key\
+  should be
+  \begin{quote}\ttfamily
+    \meta{prefix} \meta{name}
+  \end{quote}
+  Where \meta{prefix} is a space separated list of optional \prefixes\
+  followed by one \type. The syntax of \meta{value} is dependent on the
+  used \type.
+\end{function}
+
+
+\subsubsection{\textit{Prefixes}}
+
+Currently there is only one \prefix\ available, which is
+\begin{function}[module=expkv-cs prefix]{long}
+  The following key will be defined |\long|.
+\end{function}
+
+
+\subsubsection{\textit{Types}\label{sec:c:secondarytypes}}
+
+Compared to \expkvd\ you might notice that the \types\ here are much fewer.
+Unfortunately the expansion only concept doesn't allow for great variety in the
+common key \types.
+
+The syntax examples of the \types\ will show which \prefix\ will be
+automatically used by printing those black (\texttt{\enfprefix{long}}), which
+will be available in grey (\texttt{\allprefix{long}}), and which will be
+disallowed in red (\texttt{\notprefix{long}}). This will be put flush right next
+to the syntax line.
+
+If a secondary key references another key it doesn't matter whether that other
+key is a primary or secondary key (unless explicitly stated otherwise).
+
+\begin{function}[module=expkv-cs type]{meta}
+  \begin{syntax}
+    meta \key\ = \kvarg \prefixes2
+  \end{syntax}
+  With a |meta| key you can set other keys. Whenever \meta{key} is used the keys
+  in the \kv\ list will be set to the values given there. You can use the \val\
+  given to \key\ by using |#1| in the \kv\ list.
+\end{function}
+
+\begin{function}[module=expkv-cs type]{nmeta}
+  \begin{syntax}
+    nmeta \key\ = \kvarg \prefixes3
+  \end{syntax}
+  An |nmeta| key is like a |meta| key, but it doesn't take a value at use time,
+  so the \kv\ list is static.
+\end{function}
+
+\begin{function}[module=expkv-cs type]{alias}
+  \begin{syntax}
+    alias \meta{key} = \marg{key_2} \prefixes3
+  \end{syntax}
+  This assigns the definition of \meta{key_2} to \key. As a result \key\ is an
+  alias for \meta{key_2} behaving just the same. Both the \Vkey\ and the \Nkey\
+  will be copied if they are defined when |alias| is used. Of course,
+  \meta{key_2} has to be defined as at least one of \Nkey\ or \Vkey.
+\end{function}
+
+\begin{function}[module=expkv-cs type]{default}
+  \begin{syntax}
+    default \key\ = \marg{default} \prefixes3
+  \end{syntax}
+  If \key\ is defined as a \Vkey\ you can define a \Nkey\ version with this. The
+  \Nkey\ will behave as if \key\ was given \meta{default} as its \val. Note that
+  this doesn't change the initial values of primary keys set at definition time
+  (see \cs{ekvcChange} in \autoref{sec:c:change} for this). If \key\ isn't yet
+  defined this results in an error.
+\end{function}
+
+\begin{function}[module=expkv-cs type]{enum}
+  \begin{syntax}
+    enum \key\ = \marg{key_2}\{\val, \ldots\} \prefixes2
+  \end{syntax}
+  This defines \key\ to only accept the values given in the list of the second
+  argument of its definition. It forwards the position of \val\ in that list to
+  \meta{key_2} (zero-based) as a string of digits (so as |0|, |1|, \ldots). The
+  \meta{key_2} has to already be defined by the time an |enum| key is set up.
+  Each \val\ in the list (and at use time) is |\detokenize|d, so no expansion
+  takes place here.
+
+  If you use |enum| twice on the same \key\ the new values will again start at
+  zero (so it is possible to define multiple values with the same outcome),
+  however since you can't skip values you'll have to use the same as in the
+  first call for values with just a single variant (or use the |choice| \type\
+  as an |enum| is just a specialised |choice| and the two use the same internal
+  structure). There is no interface to delete existing values.
+\end{function}
+\begin{example}{Enumerating choices with the \texttt{enum} \type}
+  First a small example that might give you an idea of what the description
+  above could mean:
+  \begin{enverb}
+    \ekvcSplit\foo{k-internal=-1}{#1}
+    \ekvcSecondaryKeys\foo
+      {enum k = {k-internal}{a,b,c}}
+    \foo{}\foo{k=a}\foo{k=b}\foo{k=c}
+  \end{enverb}
+\end{example}
+\begin{example}{A slightly more complicated usage of the \texttt{enum} \type}
+  We can define a choice setup that might do different things based on the
+  choice encountered, and the numeric value is easy to parse using
+  \cs[no-index]{ifcase}:
+  \begin{enverb}
+    \ekvcSplit\foo{k-internal=-1}
+      {%
+        \ifcase#1
+          is\or
+          This\or
+          easy%
+        \else
+          .%
+        \fi
+      }
+    \ekvcSecondaryKeys\foo
+      {enum k = {k-internal}{a,b,c}}
+    \foo{k=b} \foo{k=a} \foo{k=c}\foo{}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-cs type]{choice}
+  \begin{syntax}
+    choice \key\ = \marg{key_2}\kvarg \prefixes2
+  \end{syntax}
+  This is pretty similar to an |enum|, but unlike with |enum| the forwarded
+  \val\ will not be numeric, instead the \val\ as given during the definition
+  time will be forwarded (inside the \kv\ list argument if you omit \val\ the
+  same as the \key\ will be used). While the user input has to match in a
+  |\detokenize|d form, the \val\ might still expand further during your macro's
+  expansion.
+\end{function}
+\begin{example}{Filtering possible values with the \texttt{choice} \type}
+  We could use this to filter out the possible vertical placements of a \LaTeXe\
+  |tabular|:
+  \begin{enverb}
+    \ekvcSplit\foo{v-internal=c,a=t,b=c,c=b}
+      {%
+        \begin{tabular}[#1]{@{} c @{:} c @{}}
+          a & #2\\
+          b & #3\\
+          c & #4\\
+        \end{tabular}%
+      }
+    \ekvcSecondaryKeys\foo
+      {choice v = {v-internal}{t,c,b}}
+    \foo{} \foo{v=t} \foo{v=c} \foo{v=b}
+  \end{enverb}
+\end{example}
+\begin{example}{Setting up a Boolean key with the \texttt{choice} \type}
+  We could also set up a Boolean key with a |choice| key by forwarding
+  |\@firstoftwo| or |\@secondoftwo|:
+  \begin{enverb}
+    \makeatletter
+    \ekvcSplit\foo{bool-internal=\@secondoftwo}
+      {bool was #1{true}{false}.\par}
+    \ekvcSecondaryKeys\foo
+      {
+         choice bool = {bool-internal}
+          {true=\@firstoftwo, false=\@secondoftwo}
+        ,nmeta  bool = {bool-internal=\@firstoftwo}
+      }
+    \foo{}\foo{bool}\foo{bool=false}\foo{bool=true}
+    \makeatother
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-cs type]{aggregate,e-aggregate}
+  \begin{syntax}
+    aggregate \key\ = \marg{primary}\marg{definition} \prefixes3
+  \end{syntax}
+  While other key \types\ replace the current value of the associated
+  primary key, with |aggregate| you can create keys that append or prepend (or
+  whatever you like) the new value to the current one. Your definition of an
+  |aggregate| key must be exactly two \TeX\ arguments, where \meta{primary}
+  should be the name of a primary key, and \meta{definition} the way you want to
+  store the current and the new value. Inside \meta{definition} you can use |#1|
+  for the current, and |#2| for the new value. The \meta{definition} will not
+  expand any further during the entire parsing for |aggregate|, whereas in
+  |e-aggregate| everything that ends up in \meta{definition} (so whatever you
+  provide including the values in |#1| and |#2|) will be fully expanded (using
+  the |\expanded| primitive), so use |\noexpand| and |\unexpanded| to protect
+  what shouldn't be expanded.
+  The resulting \meta{key} will inherit being either |short| or |long| from the
+  \meta{primary} key.
+\end{function}
+\begin{example}{Building a list with the \texttt{aggregate} \type}
+  The following defines an internal key (|k-internal|), which is used to build a
+  comma separated list from each call of the user facing key (|k|):
+  \begin{enverb}
+    \ekvcSplit\foo
+      {k-internal=0,color=red}
+      {\textcolor{#2}{#1}}
+    \ekvcSecondaryKeys\foo
+      {aggregate k = {k-internal}{#1,#2}}
+    \foo{}\par
+    \foo{k=1,k=2,k=3,k=4}
+  \end{enverb}
+\end{example}
+\begin{example}{Building a convoluted list with the \texttt{aggregate} \type}
+  But also more strange stuff could end there, like macros or using the same
+  value multiple times:
+  \begin{enverb}[no-tcb]
+    \ekvcSecondaryKeys\foo
+      {aggregate k = {k-internal}{\old{#1}\new{#2\old{#1}}}}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-cs type]{flag-bool}
+  \begin{syntax}
+    flag-bool \key\ = \meta{cs} \prefixes3
+  \end{syntax}
+  This is a secondary \type\ that doesn't involve any of the primary or other
+  secondary keys. This defines \key\ to take a value, which should be either
+  |true| or |false|, and set the flag called \meta{cs} accordingly as a boolean.
+  If \meta{cs} isn't defined yet it will be initialised as a flag. Note that the
+  flag will not be set to a specific state automatically so a flag set in one
+  macro might affect every other macro in the current scope. Please also read
+  \autoref{sec:c:flags}.
+\end{function}
+\begin{example}{Using a Boolean flag with the \texttt{flag-bool} \type}
+  Provide a key |bold| to turn the output of our macro bold if the associated
+  flag is |true|.
+  \begin{enverb}
+    \ekvcSplit\foo{a=a,b=b}
+      {%
+        \ekvcFlagIf\fooFlag
+          {\textbf{a is #1 and b is #2}\par}
+          {a is #1 and b is #2\par}%
+      }
+    \ekvcSecondaryKeys\foo{flag-bool bold = \fooFlag}
+    \foo{}\foo{bold=true}\foo{}\foo{bold=false}\foo{}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=expkv-cs type]{flag-true,flag-false}
+  \begin{syntax}
+    flag-true \key\ = \meta{cs} \prefixes3
+  \end{syntax}
+  This is similar to |flag-bool|, but the \meta{key} will be a \Nkey\ and if
+  used will set the flag to either |true| or |false|. If \meta{cs} isn't defined
+  yet it will be initialised as a flag. Note that the flag will not be set to a
+  specific state automatically. Please also read \autoref{sec:c:flags}.
+\end{function}
+
+\begin{function}[module=expkv-cs type]{flag-raise}
+  \begin{syntax}
+    flag-raise \key\ = \meta{cs} \prefixes3
+  \end{syntax}
+  This defines \key\ to be a \Nkey\ that will raise the flag called \meta{cs} on
+  usage. If \meta{cs} isn't defined yet it will be initialised as a flag. Note
+  that the flag will not be set to a specific state automatically. Please also
+  read \autoref{sec:c:flags}.
+\end{function}
+
+
+\subsection{Changing the Initial Values\label{sec:c:change}}
+
+\begin{function}{\ekvcChange}
+  \begin{syntax}
+    \cs{ekvcChange}\meta{cs}\kvarg
+  \end{syntax}
+  This processes the \kv\ list for the macro \meta{cs} to set new defaults for
+  it (meaning the initial values used if you don't provide anything at use time,
+  not those specified with the |default| \type). \meta{cs} should be defined
+  with \expkvc\ (but it doesn't matter if it's a split or hash variant). Inside
+  the \kv\ list both primary and secondary keys can be used. If \meta{cs} was
+  defined |\long| earlier it will still be |\long|, every other \TeX\ prefix
+  will be stripped (but \expkvc\ doesn't support them anywhere else so that
+  should be fine). The resulting new defaults will be stored inside the
+  \meta{cs} locally (just as the original initial values were). If there was an
+  unknown key forwarding added to \meta{cs} (see \autoref{sec:c:unknown}) any
+  unknown key will be stored inside the list of unknown keys as well.
+  \cs{ekvcChange} is not expandable!
+\end{function}
+\begin{example}
+    {Changing the values for future calls using \cs[no-index]{ekvcChange}}
+  With \cs{ekvcChange} we can now do the following:
+  \begin{enverb}
+    \ekvcSplit\foo{a=a,b=b}{a is #1.\par b is #2.\par}
+    \begingroup
+      \ekvcChange\foo{b=B}
+      \foo{}
+      \ekvcSecondaryKeys\foo{meta c={a={#1},b={#1}}}
+      \ekvcChange\foo{c=c}
+      \foo{}
+    \endgroup
+    \foo{}
+  \end{enverb}
+\end{example}
+\begin{example}{A typical setup macro for \expkvc\ macros}
+  As a result with this the typical setup macro could be implemented:
+  \begin{enverb}[no-tcb]
+    \ekvcHashAndUse\fooKV{keyA=a,keyB=b}
+    \def\fooA#1{\fooKV{#1}\fooAinternal}
+    \def\fooB#1{\fooKV{#1}\fooBinternal}
+    \protected\def\foosetup{\ekvcChange\fooKV}
+  \end{enverb}
+  Of course the usage is limited to a single macro |\fooKV|, hence this might
+  not be as powerful as similar macros used with other \kv\ interfaces. But at
+  least a few similar macros could be grouped using the same key parsing macro
+  internally like |\fooA| and |\fooB| do in this example.
+\end{example}
+
+
+\subsection{Handling Unknown Keys\label{sec:c:unknown}}
+
+If your macro should handle unknown keys without directly throwing an error you
+can use the special |...| marker in the \meta{primary keys} list. Since those
+keys will be processed once by \expkv\ they will be forwarded normalised: The
+\key\ and the \val\ will be forwarded with one set of surrounding spaces and
+braces, so a \kv\ pair will result in \texttt{\vissp{ \marg{key} = \marg{val} }}
+and a \Nkey\ is forwarded as \texttt{\vissp{ \marg{key} }} (this way most other
+\kv\ implementations should parse the correct input).
+
+The exact behaviour differs slightly between the two variants (as all primary
+keys do). The behaviour inside the split variants will be similar to normal
+primary keys, the $n$-th argument (corresponding to the position of |...| inside
+the primary keys list) will contain any unknown key encountered while parsing
+the argument. And inside the split variant you can use a primary key named |...|
+at the same time (since only the position in the list determines the argument,
+not the name).
+\begin{example}{Using unknown key handlers to wrap another \kv\ enabled macro}
+  The following will forward any unknown key to |\includegraphics| to control
+  the appearance while processing its own keys:
+  \begin{enverb}[same-line=0.6]
+    \newcommand*\foo{\ekvoptarg\fooKV{}}
+    \ekvcSplitAndForward\fooKV\fooOUT
+      {
+         a=a
+        ,...
+        ,b=b
+        ,...={}
+      }
+    \newcommand\fooOUT[5]
+      {%
+        a is #1 and b is #3.\par
+        \includegraphics[{#2}]{#5}\par
+        \texttt{...} is #4.\par
+      }
+    \foo[width=.5\linewidth, b=c,
+         ...={a stupid key name, but works}]
+        {example-image-duck}
+  \end{enverb}
+\end{example}
+
+Inside the hash variants the unknown keys list will be put inside the hash named
+|...| (we have to use some name, and this one seems reasonable). As a
+consequence a primary key named |...| would clash with the unknown key handler.
+If you still used such a key it would remove any unknown key stored there until
+that point and replace the list with its value.
+\begin{example}{Wrapping an existing macro, but with a hash variant}
+  The following is more or less equivalent to the above example, but with the
+  hash variant, and it will not contain the primary |...| key. We have to make
+  sure that |\includegraphics| sees the \kv\ list, so need to expand
+  |\ekvcValue{...}{#1}| before |\includegraphics| parses it.
+  \begin{enverb}[same-line=0.76]
+    \newcommand*\foo{\ekvoptarg\fooKV{}}
+    \ekvcHashAndForward\fooKV\fooOUT
+      {a=a, b=b, ...}
+    \newcommand\fooOUT[2]
+      {%
+        a is \ekvcValue{a}{#1} and
+        b is \ekvcValue{b}{#1}.\par
+        \ekvcValueSplit{...}{#1}{\includegraphics[}]%
+          {#2}\par
+      }
+    \foo[width=\linewidth, b=c]
+        {example-image-duck-portrait}
+  \end{enverb}
+\end{example}
+
+
+\subsection{Flags\label{sec:c:flags}}
+
+The idea of flags is taken from \pkg{expl3}. They provide a way to store
+numerical information expandably, however only incrementing and accessing works
+expandably, decrementing is unexpandable. A flag has a height, which is a
+numerical value, and which can be raised by 1. Flags come at a high
+computational cost (accessing them is slow and they require more memory than
+normal \TeX\ data types like registers, both issues getting linearly worse with
+the height), so don't use them if not necessary.
+
+The state of flags is always changed locally to the current group, but not to
+the current macro, so if you're using one of the \types\ involving flags
+bear in mind that they can affect other macros using the same flags at the
+current scope!
+
+\expkvc\ provides some macros to access, alter, and use flags. Flags of \expkvc\
+don't share a name space with the flags of \pkg{expl3}.
+
+\begin{function}{\ekvcFlagNew}
+  \begin{syntax}
+    \cs{ekvcFlagNew}\meta{flag}
+  \end{syntax}
+  This initialises the macro \meta{flag} as a new flag. It isn't checked whether
+  the macro \meta{flag} is currently undefined. A \meta{flag} will expand to the
+  flag's current height with a trailing space (so you can use it directly with
+  \cs[no-index]{ifnum} for example and it will terminate the number scanning on
+  its own).
+
+  All other macros dealing with flags take as a parameter a macro defined as a
+  \meta{flag} with \cs{ekvcFlagNew}.
+\end{function}
+
+\begin{function}{\ekvcFlagHeight}
+  \begin{syntax}
+    \cs{ekvcFlagHeight}\meta{flag}
+  \end{syntax}
+  This expands to the current height of \meta{flag} in a single step of
+  expansion (without a trailing space).
+\end{function}
+
+\begin{function}{\ekvcFlagRaise}
+  \begin{syntax}
+    \cs{ekvcFlagRaise}\meta{flag}
+  \end{syntax}
+  This expandably raises the height of \meta{flag} by 1.
+\end{function}
+
+\begin{function}{\ekvcFlagSetTrue,\ekvcFlagSetFalse}
+  \begin{syntax}
+    \cs{ekvcFlagSetTrue}\meta{flag}
+  \end{syntax}
+  By interpreting an even value as false and an odd value as true we can use a
+  flag as a boolean. This expandably sets \meta{flag} to true or false,
+  respectively, by raising it if necessary.
+\end{function}
+
+\begin{function}{\ekvcFlagIf}
+  \begin{syntax}
+    \cs{ekvcFlagIf}\meta{flag}\marg{true}\marg{false}
+  \end{syntax}
+  This interprets a \meta{flag} as a boolean and expands to either \meta{true}
+  or \meta{false}.
+\end{function}
+
+\begin{function}{\ekvcFlagIfRaised}
+  \begin{syntax}
+    \cs{ekvcFlagIfRaised}\meta{flag}\marg{true}\marg{false}
+  \end{syntax}
+  This tests whether the \meta{flag} is raised, meaning it has a height greater
+  than zero, and if so expands to \meta{true} else to \meta{false}.
+\end{function}
+
+\begin{function}{\ekvcFlagReset,\ekvcFlagResetGlobal}
+  \begin{syntax}
+    \cs{ekvcFlagReset}\meta{flag}
+  \end{syntax}
+  This resets a flag (so restores its height to 0). This operation is \emph{not}
+  expandable and done locally for \cs{ekvcFlagReset} and globally for
+  \cs{ekvcFlagResetGlobal}. If you really intend to use flags you can reset them
+  every now and then to keep the performance hit low.
+\end{function}
+
+\begin{function}{\ekvcFlagGetHeight}
+  \begin{syntax}
+    \cs{ekvcFlagGetHeight}\meta{flag}\marg{next}
+  \end{syntax}
+  This retrieves the current height of the \meta{flag} and provides it as a
+  braced argument to \meta{next}, leaving \meta{next}\marg{height} in the input
+  stream.
+\end{function}
+
+\begin{function}{\ekvcFlagGetHeights}
+  \begin{syntax}
+    \cs{ekvcFlagGetHeights}\marg{flag-list}\marg{next}
+  \end{syntax}
+  This retrieves the current height of each \meta{flag} in the \meta{flag-list}
+  and provides them as a single argument to \meta{next}. Inside that argument
+  each height is enclosed in a set of braces individually. The \meta{flag-list}
+  is just a single argument containing the \meta{flag}s. So a usage like
+  |\ekvcFlagGetHeights{\myflagA\myflagB}{\stuff}| will expand to
+  |\stuff{|\marg{height-A}\marg{height-B}|}|.
+\end{function}
+
+
+\subsection{Further Examples}
+
+\begin{example}{Defining an expandable \kv\ macro with an optional argument}
+  Using \cs[no-index]{NewExpandableDocumentCommand} or \expkv's \cs{ekvoptarg}
+  or \cs{ekvoptargTF} and forwarding arguments one can easily define \kv\ macros
+  with actual optional and mandatory arguments as well. A small nonsense
+  example:
+  \begin{enverb}[below,inter=resulting in]
+    \makeatletter
+    \newcommand*\nonsense{\ekvoptarg\nonsense@a{}}
+    \ekvcHashAndForward\nonsense@a\nonsense@b
+      {
+        keyA = A,
+        keyB = B,
+        keyC = c,
+        keyD = d,
+      }
+    \newcommand*\nonsense@b[2]
+      {%
+        \begin{tabular}{lll|}
+          key & A & \ekvcValue{keyA}{#1} \\
+              & B & \ekvcValue{keyB}{#1} \\
+              & C & \ekvcValue{keyC}{#1} \\
+              & D & \ekvcValue{keyD}{#1} \\
+          \multicolumn{2}{l}{mandatory} & #2 \\
+        \end{tabular}%
+      }
+    \makeatother
+    \nonsense{} % do nonsense
+    \nonsense[keyA=hihi]{haha}
+    \nonsense[keyA=hihi, keyB=A]{hehe}
+    \nonsense[keyC=huhu, keyA=hihi, keyB=A]{haha}
+  \end{enverb}
+\end{example}
+
+\begin{example}{The \cs[no-index]{sine} example revisited}
+  In \autoref{sec:expkv:sneak} I presented an expandable macro to calculate the
+  sine of some user input with a few keys, and there I hinted to \expkvc, so
+  here's the same function implemented with |\ekvcSplitAndForward|. There is a
+  small difference here, we need to use an internal key to store whether degrees
+  or radians will be used, but we don't need to use an internal key to collect
+  the values of our individual keys in the correct order.
+  \begin{enverb}
+    \makeatletter
+    \newcommand\sine{\ekvoptarg\sine@kv{}}
+    \ekvcSplitAndForward\sine@kv\sine@do
+      {
+         f        = sin
+        ,internal = d
+        ,round    = 3
+      }
+    \ekvcSecondaryKeys\sine@kv
+      {
+         nmeta degree = internal=d
+        ,nmeta radian = internal={}
+      }
+    \newcommand*\sine@do[4]{\fpeval{round(#1#2(#4),#3)}}
+    \makeatother
+    \sine{60}\par
+    \sine[round=10]{60}\par
+    \sine[f=cos,radian]{pi}\par
+    \edef\myval{\sine[f=tan]{1}}\texttt{\meaning\myval}
+  \end{enverb}
+\end{example}
+
+
+\subsection{Freedom for Keys!}
+
+If this had been the \TeX{}book this subsection would have had a double bend
+sign. Not because it is overly complicated, but because it shows things which
+could break \expkvc's expandability and its alignment safety. This is for
+experienced users wanting to get the most flexibility and knowing what they are
+doing.
+
+In case you're wondering, it is possible to define other keys than the primaries
+and the secondary key \types\ listed in \autoref{sec:c:secondary} for a
+macro defined with \expkvc\ by using the low-level interface of \expkv\ or even
+the interface provided by \expkvd. The set name used for \expkvc's keys is the
+macro name, including the leading backslash, or more precisely the result of
+|\string|\meta{cs} is used. This can be exploited to define additional keys with
+arbitrary code. Consider the following \emph{bad} example:
+\begin{enverb}[no-tcb]
+  \ekvcSplit\foo{a=A,b=B}{a is #1.\par b is #2.\par}
+  \protected\ekvdef{\string\foo}{c}{\def\fooC{#1}}
+\end{enverb}
+This would define a key named |c| that will store its \val\ inside a macro. The
+issue with this is that this can't be done expandably. As a result, the macro
+|\foo| isn't always expandable any more (not that bad if this was never
+required; killjoy if it was) and as soon as the key |c| is used it is also no
+longer alignment safe\footnote{This means that the \kv\ list can't contain
+  alignment markers that are not inside an additional set of braces if used
+  inside a \TeX\ alignment}
+(might be bad depending on the usage).
+
+So why do I show you this? Because we could as well do something useful like
+creating a key that pre-parses the input and after that passes the parsed value
+on. This parsing would have to be completely expandable though (and we could
+perhaps also implement this using the |e-aggregate| \type). For the
+pass-on part we can use the following function:
+
+\begin{function}{\ekvcPass}
+  \begin{syntax}
+    \cs{ekvcPass}\meta{cs}\marg{key}\marg{value}
+  \end{syntax}
+  This passes \val\ on to \key\ for the \expkvc-macro \meta{cs}. It should be
+  used inside the key parsing of a macro defined with \expkvc, else this most
+  likely results in a low level \TeX\ error. You can't forward anything to the
+  special unknown key handler |...| as that is no defined key.
+\end{function}
+\begin{example}
+    {Forwarding pre-parsed keys to an \expkvc\ key with \cs[no-index]{ekvcPass}}
+  With this we could for example split the value of a key at a hyphen and pass
+  the parts to different keys:
+  \begin{enverb}
+    \ekvcSplit\foo{a=A,b=B}{a is #1.\par b is #2.\par}
+    \ekvdef{\string\foo}{c}{\fooSplit#1\par}
+    \def\fooSplit#1-#2\par
+      {\ekvcPass\foo{a}{#1}\ekvcPass\foo{b}{#2}}
+    \foo{}
+    \foo{c=1-2}
+  \end{enverb}
+\end{example}
+
+Additionally, there is a more general version of the |aggregate| secondary key
+type, namely the |process| key type:
+
+\begin{function}[module=expkv-cs type]{process}
+  \begin{syntax}
+    process \key\ = \marg{primary}\marg{definition} \prefixes2
+  \end{syntax}
+  This will grab the current value of a \meta{primary} key as |#1| (without
+  changing the current value) and the new value as |#2| and leave all the
+  processing to \meta{definition}. You should use \cs{ekvcPass} to forward the
+  values afterwards. Unlike |aggregate| you can specify whether the \meta{key}
+  should be long or not, this isn't inherited from the \meta{primary} key. Keep
+  in mind that you could easily break things here if your code does not work by
+  expansion.
+\end{function}
+\begin{example}{Filtering out values with the \texttt{process} \type} 
+  We could define a key that only accepts values greater than the current value
+  with this:
+  \begin{enverb}
+    \ekvcSplit\foo{internal=5}{a is #1.\par}
+    \ekvcSecondaryKeys\foo
+      {
+        process a={internal}
+          {\ifnum#1<#2 \ekvcPass\foo{internal}{#2}\fi}
+      }
+    \foo{a=1}
+    \foo{a=5}
+    \foo{a=9}
+  \end{enverb}
+\end{example}
+\begin{example}{Filtering out values with the \texttt{e-aggregate} \type}
+  The same is possible with an |e-aggregate| key as well though:
+  \begin{enverb}[no-tcb]
+    \ekvcSplit\foo{internal=5}{a is #1.\par}
+    \ekvcSecondaryKeys\foo
+      {
+        e-aggregate a={internal}
+          {\ifnum#1<#2 \unexpanded{#2}\else\unexpanded{#1}\fi}
+      }
+  \end{enverb}
+\end{example}
+
+\subsection{Useless Macros}
+
+These macros are most likely of little to no interest to users.
+
+\begin{function}{\ekvcDate,\ekvcVersion}
+  These two macros store the version and date of the package/generic code.
+\end{function}

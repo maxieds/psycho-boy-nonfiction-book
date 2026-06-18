@@ -1,0 +1,112 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 69 Automatically Formatting Values Calculated by Actions
+% Label: "ex:actiondatum"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{datatool}
+% custom expandable command:
+\newcommand{\limiteded}{limited edition}
+% define a database with the name 'pricelist':
+\DTLsetup{store-datum,default-name=pricelist}
+\DTLaction{new}% create the default database
+% 1st row:
+\DTLaction[
+ assign={
+  Product = {The Adventures of Duck and Goose},
+  Quantity = {1,452}, Price = {\$1.99}
+ }
+]{new row}
+% 2nd row:
+\DTLaction[
+ assign={
+  Product = {Duck and Goose on Holiday},
+  Quantity = {94}, Price = {\$2.99}
+ }
+]{new row}
+% the next value needs to be expanded:
+\DTLaction[
+key={Notes}, expand-value={\limiteded} ]{new entry}
+% 3rd row:
+\DTLaction[
+ assign={
+  Product = {The Return of Sir Quackalot},
+  Quantity = {3}, Price = {\$4.99}
+ }
+]{new row} 
+\begin{document}
+ \section{Default datum=false} 
+
+\DTLaction[
+ key=Quantity,
+ key2=Price,
+ options={sd,min,max}
+]{aggregate} 
+
+Quantity column index: \DTLuse{column}.
+Total quantity: \DTLuse{sum}.
+Average quantity: \DTLuse{mean}.
+Quantity standard deviation: \DTLuse{sd}.
+Minimum quantity: \DTLuse{min}.
+Maximum quantity: \DTLuse{max}. 
+
+Price column index: \DTLuse{column2}.
+Total price: \DTLuse{sum2}.
+Average price: \DTLuse{mean2}.
+Price standard deviation: \DTLuse{sd2}.
+Minimum price: \DTLuse{min2}.
+Maximum price: \DTLuse{max2}. 
+
+\section{datum=\{round=2\}} 
+
+\DTLaction[
+ datum={round=2},
+ key=Quantity,
+ key2=Price,
+ options={sd,min,max}
+]{aggregate} 
+
+Quantity column index: \DTLuse{column}.
+Total quantity: \DTLuse{sum}
+(\DTLget[sum]{\theTotal}\DTLdatumvalue{\theTotal}).
+Average quantity: \DTLuse{mean}.
+Quantity standard deviation: \DTLuse{sd}.
+Minimum quantity: \DTLuse{min}
+(\DTLget[min]{\theMin}\DTLdatumvalue{\theMin}).
+Maximum quantity: \DTLuse{max}
+(\DTLget[max]{\theMax}\DTLdatumvalue{\theMax}). 
+
+Price column index: \DTLuse{column2}.
+Total price: \DTLuse{sum2}.
+Average price: \DTLuse{mean2}.
+Price standard deviation: \DTLuse{sd2}.
+Minimum price: \DTLuse{min2}.
+Maximum price: \DTLuse{max2}. 
+
+\section{datum=\{round=2,currency\}} (All aggregate values become currency!) 
+
+\DTLaction[
+ datum={round=2,currency},
+ key=Quantity,
+ key2=Price,
+ options={sd,min,max}
+]{aggregate} 
+
+Quantity column index: \DTLuse{column}.
+Total quantity: \DTLuse{sum}
+(\DTLget[sum]{\theTotal}\DTLdatumvalue{\theTotal}).
+Average quantity: \DTLuse{mean}.
+Quantity standard deviation: \DTLuse{sd}.
+Minimum quantity: \DTLuse{min}
+(\DTLget[min]{\theMin}\DTLdatumvalue{\theMin}).
+Maximum quantity: \DTLuse{max}
+(\DTLget[max]{\theMax}\DTLdatumvalue{\theMax}). 
+
+Price column index: \DTLuse{column2}.
+Total price: \DTLuse{sum2}.
+Average price: \DTLuse{mean2}.
+Price standard deviation: \DTLuse{sd2}.
+Minimum price: \DTLuse{min2}.
+Maximum price: \DTLuse{max2}. 
+\end{document}

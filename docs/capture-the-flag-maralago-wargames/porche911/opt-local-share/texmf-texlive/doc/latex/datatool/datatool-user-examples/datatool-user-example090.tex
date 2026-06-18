@@ -1,0 +1,62 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 90 Displaying Data with Row Numbers Using \DTLforeach
+% Label: "ex:foreachinsertcol"
+% arara: pdflatex
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+ \begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+\usepackage{datatool}
+\DTLsetup{default-name=marks}
+\DTLread{studentmarks.csv}
+
+\begin{document}
+\begin{tabular}{rllrrrr}
+\bfseries Row &
+\bfseries Surname &
+\bfseries Forename &
+\bfseries StudentNo &
+\bfseries Assign1 &
+\bfseries Assign2 &
+\bfseries Assign3% 
+\DTLforeach*{marks}
+{\Surname=Surname, \Forename=Forename, \StudentNo=StudentNo,
+\AssignI=Assign1, \AssignII=Assign2, \AssignIII=Assign3}
+{% 
+ \label{\StudentNo}
+ \\ \theDTLrowi &
+ \Surname &
+ \Forename &
+ \StudentNo &
+ \AssignI &
+ \AssignII &
+ \AssignIII
+}% 
+\end{tabular} 
+
+\DTLaction[
+ assign={
+  \Surname=Surname,
+  \Forename=Forename,
+  \StudentNo=StudentNo
+ },
+ options={
+  inline={% 
+  \DTLifstringeq{\Surname}{Brown}
+  {\DTLifstringeq{\Forename}{Andy}{#1}{}}{}% 
+  }
+ }
+]{find}
+Row \ref{\StudentNo} shows the details for Andy Brown. 
+\end{document}

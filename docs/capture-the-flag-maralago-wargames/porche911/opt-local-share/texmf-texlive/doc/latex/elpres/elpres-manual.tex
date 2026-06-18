@@ -1,0 +1,1641 @@
+\documentclass[11pt,a4paper]{article}
+
+% to be compiled with lualatex
+
+%% begin comment out for tth
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+%% end comment out for tth
+
+\usepackage{parskip}
+\usepackage[a4paper,hmargin=2.4cm,bottom=3.2cm]{geometry}
+\usepackage{makeidx}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage[x11names,svgnames]{xcolor}
+\usepackage{enumitem}
+%% \usepackage[para,ragged]{footmisc}
+
+\usepackage{microtype}
+% it may be necessary to comment out `microtype' with polyglossia loaded
+
+% \usepackage{luaotfload}
+% \usepackage{fontspec}
+% \usepackage[default]{fontsetup}
+\usepackage[olddefault]{fontsetup}
+% \usepackage[times]{fontsetup}
+
+\makeindex
+
+%%  * for a run of tth (generate .html): 
+%% - comment out "noitemsep" temporarily !!
+%% - comment out \usepackage{polyglossia} and \setdefaultlanguage{english}
+%% 
+
+
+% Commands for indication changes in updated versions:
+% changed, inserted
+% \newcommand{\changedbegin}[1]{\textcolor{blue}{\fbox{\texttt{#1$>$}}}}
+% \newcommand{\changedend}[1]{\textcolor{blue}{\fbox{\texttt{$<$#1}}}}
+% \newcommand{\changedbeginA}[1]{\textcolor{DarkGreen}{\fbox{\texttt{#1$>$}}}}
+% \newcommand{\changedendA}[1]{\textcolor{DarkGreen}{\fbox{\texttt{$<$#1}}}}
+
+
+\usepackage[%
+  bookmarksnumbered=true,
+  colorlinks=true%
+]{hyperref}
+
+\usepackage[nottoc]{tocbibind}
+
+\title{\textsf{elpres} --- electronic presentations \\ with (pdf/Lua)\LaTeX}
+\author{Volker Kiefel\thanks{volker dot kiefel at freenet dot de, 
+       \url{http://vkiefel.de/elpres.html}}}
+\date{v1.1 \\[1.8ex]
+  May 29, 2024%
+  % --- \textcolor{DarkGreen}{update of this manual:
+  %   September 27, 2020}
+}
+
+
+
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\tableofcontents
+
+
+% \section*{A note on this updated version of the \texttt{elpres} manual}
+
+% \begin{sloppypar}
+% In this updated version of the manual
+% paragraphs or sentences with changes until August 19, 2020
+% (compared to the ``official''
+% manual for v0.6) are marked
+% \changedbegin{changed} changed content \changedend{changed}
+% and new text is marked \changedbegin{inserted} new content
+% \changedend{inserted}. Additional changes until September 27, 2020:
+% \changedbeginA{inserted} new text \changedendA{inserted},
+% \changedbeginA{changed} modified text \changedendA{changed}.
+% \end{sloppypar}
+
+\section{Introduction}
+
+\label{sec:Introduction}
+
+The \texttt{elpres} class is intended to be used for
+presentations on a computer screen, a
+beamer or a projector. It is derived from \LaTeX's \texttt{article} class and
+may be used with \LaTeX{}, pdf\LaTeX{} (and Lua\LaTeX ).
+The default ``virtual paper size'' of slides produced by this class:
+width=128mm, height=96mm which corresponds to a 4:3 (width:height) aspect
+ratio.
+\index{aspect ratio|see{screen aspect ratio}}%
+\index{screen aspect ratio}%
+Other aspect ratios for widescreen monitors may be selected by class
+options.
+The \texttt{elpres} class requires that the \texttt{ifthen},
+\texttt{fancyhdr},
+\texttt{hyperref},
+\texttt{graphicx},
+\texttt{xcolor}
+and \texttt{geometry} packages are available on the \TeX{} system: these
+packages are loaded automatically by the \texttt{elpres} class.
+Enhancements to \texttt{elpres} are easily made available by other packages,
+these include overlay support for incremental slides (package
+\texttt{overlays})  and slides
+with a background from a bitmap (\texttt{wallpaper}, \texttt{eso-pic}
+packages). Predefined color/layout schemes for \texttt{elpres} presentations
+can be acitivated with
+\verb+\usepackage+ (details can be found in
+in section~\ref{sec:pres-scheme})
+
+This manual is intended to support the user with ``recipes''.  Use of
+\texttt{elpres} with its default settings should be simple, additional aspects
+including overlay functions, use of colors, graphics files, ``handout
+documents'' are described in section \ref{secEnhancements}. Many code snippets
+have been included in this manual.
+They can be used in users' presentation files.
+
+Some extensions described in this manual work only with \texttt{pdf}-files
+which should preferrably be compiled with pdf\LaTeX\ or Lua\LaTeX.
+\index{Lualatex@Lua\LaTeX}
+\index{pdflatex@pdf\LaTeX}
+
+\section{Installation}
+
+\label{sec:installation}
+
+
+\begin{sloppypar}
+
+  \index{installation|(}
+  If the \texttt{elpres} package has already been
+  installed with the \TeX-system nothing needs to be done.  If an updated
+  version shall be installed (or if the preinstalled \texttt{elpres} version
+  does not work properly\footnote{for details see the description on checking the
+    \texttt{elpres}-installation in section
+    \ref{sec:CheckInstallation}}),
+  \texttt{elpres.cls}, all \texttt{*.sty},
+  \texttt{*.png} and \texttt{*.eps} files should be copied into a directory,
+  where the \TeX-system can find it: if an old \texttt{elpres} version of the
+  existing \TeX\ system shall be replaced by the current version, please copy
+  these into the appropriate position in the ``local'' \texttt{texmf}
+  directory tree (e.\,g. \verb+~/texmf/tex/latex/elpres+) and this manual
+  (\texttt{elpres-manual.pdf}) to \verb+~/texmf/doc/latex/elpres+, where
+  \texttt{~/texmf} may be \texttt{~/texmf-local} or an
+  analogous directory.
+
+Then, the files database should be updated by entering (in case of a \TeX~Live
+installation) the command:
+
+\end{sloppypar}
+
+\begin{verbatim}
+   mktexlsr ~/texmf-local
+\end{verbatim}
+
+or you may enter \verb+texhash ~/texmf-local+\footnote{The location
+  for the ``local'', manually updated class and package files may be different,
+  depending on the \TeX\ system and the OS.}.
+Other \TeX-distributions e.\,g.\ MiK\TeX\ have
+their own package updating mechanisms. The elpres manual file should be
+accessible with the command ``\mbox{\texttt{texdoc elpres}}''. If this
+still calls the old version of the manual, the command ``\texttt{texdoc -l elpres}''
+will prompt you to select either the old or the new version of the manual.
+\index{installation|)}
+
+\section{Usage}
+\label{secUsage}
+
+\subsection{Class options, commands and environments}
+\label{sec:EpOptCmdEnv}
+
+The class is used with 
+\begin{verbatim}
+   \documentclass[options]{elpres}
+\end{verbatim}
+
+Slides are written with the \texttt{psli} and \texttt{rsli} environments.
+This section lists all \texttt{elpres}-specific options, commands and
+environments.
+
+\subsubsection*{\texttt{Elpres}-specific options}
+
+\index{elpres@\texttt{elpres}!options}
+For font selection (\LaTeX, pdf\LaTeX):
+ ``\texttt{tmrfont}'' (Times Roman), ``\texttt{helvetfont}''
+(Helvetica), ``\texttt{cmfont}'' (Computer Modern) and ``\texttt{sansfont}''  
+(Sans Serif: default) may be used. The option ``\texttt{nofonts}'' 
+(no font selection) 
+is intended for use of \texttt{elpres} with Lua\LaTeX\
+\index{Lualatex@Lua\LaTeX}
+with its own font selection mechanisms, an example is described in
+section \ref{sec:MiniExample}.
+
+\index{slide dimensions}
+Options for different screen aspect ratios are 
+``\texttt{4x3}'' (default),\footnote{slide size \texttt{128\,x\,92\,mm}} 
+``\texttt{16x9}'',\footnote{slide size \texttt{176\,x\,99\,mm}} 
+``\texttt{16x10}''.\footnote{slide size \texttt{160\,x\,100\,mm}} 
+\index{bulletsymb class option@\texttt{bulletsymb} class option}
+The option ``\texttt{bulletsymb}'' selects \verb+$\bullet$+ symbols (closed
+circles)
+instead of the default \texttt{itemize}-environ\-ment
+symbols in all four levels,
+``\texttt{ballsymb}'' is effective together with the presentation
+schemes (section \ref{sec:pres-scheme})
+and inserts small images of colored \emph{balls} as alternative 
+symbols for the \texttt{itemize} environment. 
+%
+The option ``\texttt{navisymb}''
+adds a small field with symbols for navigation to the right
+bottom area of slides (section \ref{sec:NavigationSymbols}). 
+Options of the \texttt{article} class are also available for
+\texttt{elpres} presentations,
+e.\,g.  \texttt{10pt}, \texttt{11pt}, \texttt{12pt} for
+selection of font size. 
+
+\subsubsection*{\texttt{Elpres}-specific commands}
+
+{ \sloppy
+\index{elpres@\texttt{elpres}!commands}
+The command
+``\verb+\distance+''
+supports the user to vertically adjust lines and/or pragaraphs on a 
+slide. (details are described in section 
+section~\ref{sec:EssentialElements}).
+The ``\verb+\auvimm+''\footnote{for \textbf{au}dio \textbf{vi}deo 
+  \textbf{m}edia}
+command inserts a link to an external audio or video file 
+(section~\ref{sec:MultimediaContent}).
+Two commands: ``\verb+\fromlinktext+'' and ``\verb+\totargettext+''%
+\index{fromlinktext@\verb+\fromlinktext+}
+\index{totargettext@\verb+\totargettext+}
+can be used for internal links within a presentation 
+(section~\ref{secHypertext}). 
+With ``\verb+\slidetitlecolor+'', the text color of the title of slides 
+(\texttt{psli}) can be changed (section \ref{sec:footerlayout}).
+With the command ``\verb+\pagenrconst+'', the page number of
+the current slide can be set back to the page number of the previous slide
+(section \ref{secOverlay}, last paragraph). 
+\par}
+
+\subsubsection*{\texttt{Elpres}-specific environments}
+
+\index{elpres@\texttt{elpres}!environments}
+The environments ``\texttt{psli}'' and ``\texttt{rsli}'' define 
+\emph{slides} in \texttt{elpres} (section \ref{sec:EssentialElements}); 
+``\texttt{citemize}'',``\texttt{cenumerate}''
+ and ``\texttt{cdescription}'' provide vertically compressed lists
+(section \ref{sec:CompressedLists}).
+\index{slides in elpres@slides in \texttt{elpres}}
+
+\subsection{A minimalistic example presentation}
+
+\label{sec:MiniExample}
+
+The following code (\texttt{minimal.tex})
+may be used for first ``experiments'' by adding
+features described in later sections.
+
+\index{minimalistic example, presentation}
+\index{simple example, presentation|see{minimalistic example, presentation}}
+
+\begin{verbatim}
+   \documentclass[12pt,pdftex,4x3]{elpres}
+   \usepackage[utf8]{inputenc}
+   \usepackage[document]{ragged2e}
+
+   % \usepackage{elpreswhitebluescheme}
+   % \usepackage{elpresbluelightgrayscheme}
+   % \usepackage{elpresgrayscheme}
+   % \usepackage{elpreswhiteredscheme}
+   \usepackage{elpreswhitetealscheme}
+
+   \begin{document}
+   \begin{titlepage}
+   \centering
+   \distance{1}
+   {
+   \Huge \bfseries \textcolor{eptitlecolor}{Title of the presentation} \par
+   }
+   \vspace{1.3ex} \large
+   Author\\[2ex]Institution
+   \distance{2}
+   \end{titlepage}
+
+   \begin{psli}[Title of Page]
+   The first page: \texttt{psli} environment
+
+   \begin{itemize}
+   \item first line in an itemized list
+   \item second line in an itemized list
+   \end{itemize}
+   \end{psli}
+
+   \begin{rsli}
+   The second page: \texttt{rsli} environment
+
+   \begin{enumerate}
+   \item no title
+   \item not centered vertically
+
+   \end{enumerate}
+
+   \end{rsli}
+   \end{document}
+\end{verbatim}
+
+
+
+
+The preamble of the same presentation for Lua\LaTeX\ would read:
+
+\begin{verbatim}
+   % LuaLaTeX: Please use utf-8 encoding!
+   \documentclass[12pt,nofonts,4x3]{elpres}
+   \usepackage[document]{ragged2e}
+   \usepackage{fontspec}
+   
+   \setmonofont{TeX Gyre Cursor}              %% based on 'Courier'
+   \setsansfont[Scale=0.92]{Tex Gyre Heros}   %% similar to 'Helvetica'
+   \setmainfont{TeX Gyre Termes}              %% 'Roman' style serif font
+   \renewcommand{\familydefault}{\sfdefault}
+   
+   % \usepackage{elpreswhitebluescheme}
+   \usepackage{elpreswhitetealscheme}
+   % \usepackage{elpresbluelightgrayscheme}
+   % \usepackage{elpresgrayscheme}
+   % \usepackage{elpreswhiteredscheme}
+   
+   \begin{document}
+   % ...
+   \end{document}
+\end{verbatim}
+
+\index{Lualatex@Lua\LaTeX}
+The use of Lua\LaTeX\ with \texttt{elpres} is heavily recommended
+due to the superior font selection mechanisms.
+%% You may copy the code examples from this manual more easily from the
+%% \texttt{.html} version of this manual available at
+%% \url{http://vkiefel.de/elpres/elpres-manual.html}.
+
+\subsection{Testing of the \texttt{elpres} installation}
+
+\label{sec:CheckInstallation}
+
+\begin{sloppypar}
+With this example you may check, if \texttt{elpres} has been installed
+correctly in your \TeX -system: copy the listing of \texttt{minimal.tex} into
+a file, add the class option \texttt{ballsymb}:
+
+\begin{verbatim}
+   \documentclass[12pt,pdftex,4x3,ballsymp]{elpres}
+   ...
+\end{verbatim}
+
+
+
+and process it with \texttt{pdflatex}. The line
+\verb+\usepackage{elpreswhitetealscheme}+ should not be commented out,
+i.\,e. the package \texttt{elpreswhitetealscheme} should be active.
+If processing of \texttt{minimal.tex} results in a message like
+\end{sloppypar}
+
+\begin{verbatim}
+  ... `ep-ball-04' not found ...
+\end{verbatim}
+
+
+the \TeX -system does not find the file \texttt{ep-ball-04.png} in the
+appropriate place. In such a situation it is recommended 
+
+\begin{enumerate}
+  \item either to install the current version of \texttt{elpres} in the
+    correct subdirectories of the ``local'' \texttt{texmf}-directory, details
+    are described in section \ref{sec:installation}
+  \item or to copy the small elpres graphics files \texttt{ep-ball-nn.eps} 
+    \texttt{ep-ball-nn.png} into a directory of the \texttt{tex}-branch of the
+    local  \texttt{texmf}-directoty tree (followed by an update
+    see of \TeX s files database, for details see section 
+    \ref{sec:installation}). The files may be obtained
+    from the \texttt{elpres} project page 
+    \url{http://vkiefel.de/elpres.html}%
+    \footnote{\url{http://vkiefel.de/elpres/elpres-ball-image-files.zip}}
+   \item or to copy the required image file into the current project
+   directory.
+\end{enumerate}
+
+The problem sometimes arises as soon as \TeX-distributions do not install
+\texttt{elpres} correctly. For details see \texttt{README.md} in the archive
+\texttt{elpres.zip}, which may be obtained from \texttt{ctan.org}.
+
+\subsection{Essential elements of an \texttt{elpres} presentation}
+\label{sec:EssentialElements}
+
+\index{title page}
+The \textbf{title page} slide can be created with
+the \texttt{titlepage}  environment (or \texttt{rsli}, see below), \LaTeX's 
+\verb+\maketitle+ command is not available.
+\index{psli environment@\texttt{psli} environment}
+\textbf{Slides} may be created with the
+\texttt{psli}-environment\footnote{\texttt{psli}: \textbf{p}lain
+  \textbf{sli}de}, you may add
+the title of the slide with the optional parameter. 
+The contents of the slide are centered vertically:
+
+\begin{verbatim}
+   \begin{psli}[Slide title]
+      Contents of slide
+   \end{psli}
+\end{verbatim}
+
+\index{rsli environment@\texttt{rsli} environment}
+Another environment generating a \textbf{slide} is
+\texttt{rsli}\footnote{\texttt{rsli}: \textbf{r}aw \textbf{sli}de}:
+slides are written 
+without title, contents are not centered vertically:
+
+\begin{verbatim}
+   \begin{rsli}
+      Contents of slide
+   \end{rsli}
+\end{verbatim}
+
+\index{distance@\verb+\distance+}
+The \verb+\distance{number}+ command allows to introduce vertical space into
+slides constructed with the \texttt{rsli} and \texttt{titlepage} environments.
+You may use of \verb+\distance{number}+ commands with numbers indicating
+the relative height of empty spaces between lines
+and/or paragraphs, see the title page in the example above (section
+\ref{sec:MiniExample}).
+
+The use of footnotes on slides is often problematic, if they cannot be
+avoided, the \texttt{footmisc} package is recommended: the \texttt{perpage}
+option resets numbering for each new slide. For a presentation, the
+\texttt{symbol} option allows to use symbols instead of numbers\footnote{
+ The use of the \texttt{footmisc} package may produce the \LaTeX\ error 
+   message ``\texttt{Counter too large}''.
+   Therefore it is preferred to use the \texttt{symbol*} and \texttt{perpage}
+   options, details are described in the manual of the \texttt{footmisc}
+   package.}.  
+After inserting a new footnote, numbers or symbols are correctly
+inserted only after a second run of \LaTeX.
+
+\subsection{Alternatives to \TeX's justified paragraphs}
+
+By default, \LaTeX\ produces justified paragraphs with lines of equal length,
+this will often not be appropriate for the usually very short lines of text
+in presentations. The \LaTeX\ \verb+\raggedright+ command
+\index{raggedright@\verb+\raggedright+}
+has its own
+deficiencies: by inhibiting hypenation in texts with rather short lines,
+the right margin will often look too
+ragged. A solution is to use the \verb+\RaggedRight+ command of the
+\texttt{ragged2e} package. 
+
+If authors of presentations wish to suppress both justification and
+hyphenation within the complete presentation document, the following
+package parameters:
+
+\begin{verbatim}
+   \usepackage[document,originalparameters]{ragged2e}
+\end{verbatim}
+
+can be selected. As hypenated words are not favorable for quick reading of
+slides by the audience this is the preferred use of \texttt{ragged2e} for
+the author of this package.
+
+\subsection{Vertically compressed lists}
+\label{sec:CompressedLists}
+
+As the spaces between lines may be too great with the \texttt{itemize}
+environment,
+the \texttt{elpres} package provides a ``vertically compressed''
+\texttt{citemize}-environment:
+\index{citemize environment@\texttt{citemize} environment}
+
+\begin{verbatim}
+   \begin{citemize}
+     \item  one
+     \item  two
+   \end{citemize}
+\end{verbatim}
+
+Similarly, a \texttt{cenumerate} and a \texttt{cdescription} environment may
+be used.
+\index{cenumerate environment@\texttt{cenumerate} environment}
+\index{cdescription environment@\texttt{cdescription} environment}
+
+Another solution for the customization of \texttt{itemize}
+environments is given by the \texttt{enumitem} package. Therefore
+
+\begin{verbatim}
+   \usepackage{enumitem}
+\end{verbatim}
+
+should be added to the preamble, and  a comma-sperated list of parameters
+parameters can be added in the format:
+
+\begin{verbatim}
+   \begin{itemize}[parameter-list] 
+      ... 
+   \end{itemize} 
+\end{verbatim}
+
+The ``vertically compressed'' list can then be obtained with
+
+\begin{verbatim}
+   \begin{itemize}[nosep]
+     \item  one
+     \item  two
+   \end{itemize}
+\end{verbatim}
+
+Similarly, the \texttt{enumitem} package is also able to modify the
+\texttt{enumerate} and description \texttt{environments}.
+
+
+
+\subsection{Slide layout: changes in slide title, footer, page numbers}
+
+\label{sec:footerlayout}
+
+By default, the \textbf{text color of the titles} of
+\texttt{psli}-slides is black,
+\index{slidetitlecolor@\verb+\slidetitlecolor+}
+\index{title, text color}
+it may be changed by redefining the ``value'' of the \verb+\slidetitlecolor{}+
+command like
+\index{slidetitlecolor@\verb+\slidetitlecolor+}
+
+\begin{verbatim}
+   \slidetitlecolor{blue}
+\end{verbatim}
+
+in the preamble. Of course, you may also use the named colors of the
+\texttt{xcolor} package (see section \ref{sec:use-colors}).
+
+\index{page number}
+By default the \textbf{page number} appears at the right bottom of the slide
+(in the ``footer'' in the terminology of the \texttt{fancyhdr} package)
+this position can be addressed by the \verb+\rfoot{}+ command: the
+\verb+\rfoot{}+, \verb+\cfoot{}+ and \verb+\lfoot{}+ commands can be used
+by the author of a presentaton.
+
+\begin{sloppypar}
+However, access to the header fields defined by \texttt{fancyhdr}
+is blocked: if you enter
+  \verb+\rhead{}+, \verb+\chead{}+
+  or \verb+\lhead{}+, \texttt{elpres} will issue
+  an error message. Use of the header fields will generate unwanted effects
+  on page layout due to \texttt{fancyhdr}. 
+If you wish to change the position of the page number in the footer,
+you can overwrite the default page number with an ``empty'' \verb+\rfoot{}+
+command and put it to the center or the left margin of the footer
+(\verb+\cfoot{\footnotesize \thepage}+ or 
+\verb+\lfoot{\footnotesize \thepage}+). These ``footer fields''
+\index{footer fields on slides}
+are also suitable to enter a \textbf{logo}
+\index{logo graphics file}
+visible on all pages (in form of a graphics file using
+\verb+\includegraphics[]{}+) or text with the name of the speaker's
+institution.
+\end{sloppypar}
+
+The user may also use predefined \textbf{presentation schemes} with defined
+colors and layout elements (e.\,g. symbols used in list envoronments), details
+are described in section \ref{sec:pres-scheme}.
+
+
+
+\section{Enhancements to \texttt{elpres}}
+
+\label{secEnhancements}
+
+Enhancements described here make use of other \LaTeX\ packages which should
+be available in \TeX\ distributions like \TeX~Live or MiK\TeX.
+
+\subsection{Use named colors of the \texttt{xcolor} package}
+\label{sec:use-colors}
+
+The \texttt{elpres} class automatically loads the \texttt{xcolor} package.
+Therefore, color names defined by the \texttt{xcolor} may be used. They are
+however only accessible in groups (\texttt{dvipsnames}, \texttt{svgnames},
+\texttt{x11names}, details can be found in the \texttt{xcolor} manual). As
+an example, the color \texttt{Indigo} is available in the \texttt{svgnames}
+goup.  If you wish to use it you will have to enter \texttt{svgnames}
+as \texttt{elpres} class option:
+
+\begin{verbatim}
+   \documentclass[11pt,16x9,svgnames]{elpres}
+\end{verbatim}
+
+This option is then automatically ``handed over'' to the \texttt{xcolor}
+package loaded by \texttt{elpres}. The complete lists of named colors
+are found in the \texttt{xcolor} manual.
+
+
+\subsection{Include graphics files}
+\label{secUsageGraph}
+
+\index{graphics files}
+\index{includegraphics@\texttt{\textbackslash includegraphics}}
+Graphics files/pictures can be included with the
+\texttt{includegraphics}-command of the \texttt{graphicx}-package. Please be
+aware that the dimensions of the pages are \mbox{128mm x 96mm} and
+therefore included graphics are scaled appropriately. A typical example
+of a 
+page with a picture could be (\texttt{pict.png} is the name of the
+graphics file): 
+
+
+\begin{verbatim}
+   \usepackage[pdftex]{graphicx} % (in preamble) 
+   ...
+   \begin{rsli}
+     \centering
+     \distance{1}
+     \includegraphics[width=0.9\textwidth,%
+                      height=0.9\textheight,%
+                      keepaspectratio=true]{pict.png}
+     \distance{1}
+   \end{rsli}
+\end{verbatim}
+
+
+The \verb+\includegraphics[]{}+ comannd requires to select the correct device
+driver related option (e.\,g. \texttt{pdftex} or \texttt{dvips})
+(documentclass).
+
+
+% \label{secInclGraphicsFiles}
+
+
+\subsection{Arrange text and pictures in two (or more) columns}
+
+\label{secTwoColumns}
+
+\index{columns}
+\index{minipage environment@\texttt{minipage} environment}
+Text and graphics may be arranged in two or more columns with
+\texttt{minipage} environments:
+
+\begin{verbatim}
+   \begin{minipage}[b][0.8\textheight][t]{0.5\textwidth}
+     \colorbox{white}{%
+       \includegraphics[width=0.9\textwidth]{graphics-file.png}}
+   \end{minipage}
+   \begin{minipage}[b][0.8\textheight][t]{0.48\textwidth}
+   \footnotesize
+   \begin{citemize}
+      \item ...
+      \item ...
+      ...
+   \end{citemize}
+   \end{minipage}
+\end{verbatim}
+
+Details on the minipage environment may be found in the \LaTeX{}
+documentation\footnote{A good reference is \url{https://latexref.xyz/}}.
+
+
+\subsection{Add incremental slides (overlays) to a presentation}
+
+\label{secOverlay}
+
+\index{incremental slides|see{overlays}}
+\index{overlays|(}
+If the contents of slides are to be made visible step
+by step this can be achieved by a series of output PDF or (PS) pages (carrying
+the same page number) usually called \emph{overlays}. It may also be of
+interest to change a highlighting color in a series of overlays. This is most
+easily done by using the excellent \texttt{overlays} package written by
+Andreas Nolda. 
+
+To generate a series of four overlays sequentially showing four lines of a
+list:
+
+\begin{enumerate}
+  \item load the \texttt{overlays} package in the preamble
+  \item put a \texttt{psli} or \texttt{rsli} slide environment into an
+  \texttt{overlays} (or \texttt{fragileoverlays}) environment 
+  \item enter the number of overlays as the first parameter to the 
+  \texttt{overlays} environment  
+  \item enter text contents with the \texttt{visible} command with the range
+    of overlays showing this text content
+\end{enumerate}
+
+A simple example:
+
+\begin{verbatim}
+   % to be added in preamble
+   \usepackage{overlays}
+   ...
+   \begin{overlays}{4}
+   \begin{psli}[Title of slide]
+   \begin{itemize}
+     \visible{1-4}{\item first item of list} 
+     \visible{2-4}{\item second list item}
+     \visible{3-4}{\item 3rd list item}
+     \visible{4}{\item final list item}
+   \end{itemize}
+   \end{psli}
+   \end{overlays}
+   ... 
+\end{verbatim}
+
+The following example uses the \texttt{alert} command to highlight lines
+sequentially:
+
+\begin{verbatim}
+   \begin{overlays}{4}
+   \begin{psli}[Title of slide]
+   \begin{itemize}
+     \alert{1}{\item first item of list} 
+     \alert{2}{\item second list item}
+     \alert{3}{\item 3rd list item}
+     \alert{4}{\item final list item}
+   \end{itemize}
+   \end{psli}
+   \end{overlays}
+\end{verbatim}
+
+The last example shows short text fragments which are shown sequentially using
+the \texttt{only} command:
+
+\begin{verbatim}
+   \begin{overlays}{4}
+     \begin{rsli}
+       \only{1}{a short text, which will be replaced \ldots } 
+       \only{2}{\dots by a second \ldots}
+       \only{3}{\ldots and a third \ldots}
+       \only{4}{\ldots and a final text.}
+     \end{rsli}
+   \end{overlays}
+\end{verbatim}
+
+
+The ``hidden'' text contents are written by \texttt{overlays} in the same
+color as the background, default is white. If you use a different background
+color, you have to change the color of the hidden text as well by assigning the
+background color to the color name \texttt{background} (understood by the
+\texttt{overlays} package).  In the following example you define a light
+yellow as background:
+
+\begin{verbatim}
+   % (in the preamble)
+   \definecolor{myyellow}{rgb}{0.96,0.98,0.72} % define color
+   \definecolor{background}{named}{myyellow}   % color assigned to 
+                                               % hidden text
+   \pagecolor{myyellow}                        % color of slide background
+\end{verbatim}
+
+
+
+If you use one of the \emph{presentation schemes} described in section
+\ref{sec:pres-scheme}, the necessary adjustments
+for the background color will be made automatically.
+For more details on \texttt{overlays}, see the documentation of the package.
+\index{overlays|)}
+
+%% hypertarget
+
+Sometimes it is desirable to prepare \textbf{two or more consecutive
+slides with the same page
+number} independent
+of the overlays package  (``manual overlays slides''). Therefore,
+the page number of the current slide
+can be set to the page number of the previous slide/page
+with the command \verb+\pagenrconst+.
+\index{pagenrconst@\verb+\pagenrconst+}
+
+% \pagenrconst
+
+\subsection{Add navigation symbols to slides}
+\label{sec:NavigationSymbols}
+
+\index{navigation symbols panel|(}
+With the \texttt{navisymb} option of \texttt{elpres} a panel with navigation
+symbols appears
+in the right lower corner of pages:
+
+
+{ \setlength{\parindent}{2em}
+  \indent
+    \texttt{$\ll$ $<$ $>$ $\gg$ $\leftarrow$ $\rightarrow$ [n]}
+}
+
+These commands ($\ll$: jump to the first page,
+$<$: go to the previous page, $>$: go to the next page,
+$\gg$: jump to the last page, $\leftarrow$:
+go back in history, $\rightarrow$: go forward in history,
+\texttt{[n]}: prompt for a
+page number)
+work with Adobe Acrobat Reader (Windows), and 
+with \texttt{Okular} (Linux).
+Some of these functions also work in presentation-mode
+of the ``internal'' PDF-viewer in recent versions of the
+\texttt{Firefox}-browser (Linux, Windows).
+\index{navigation symbols panel|)}
+
+
+
+\subsection{Add multimedia content to a presentation}
+\label{sec:MultimediaContent}
+
+
+% https://tex.stackexchange.com/questions/345431/how-to-include-multimedia-files-in-beamer
+
+\index{multimedia files|(}
+\index{audio files|see{multimedia files}}
+\index{video files|see{multimedia files}}
+This section describes inclusion of (links to) video and audio files in a 
+presentation. With the
+\verb+\auvimm{}{}+
+\index{auvimm@\verb+\auvimm+}
+command described below it is possible 
+to lauch an external application for playing the video or audio
+file. This will work in many situations for video and audio files
+on Windows (Adobe Acrobat) and Linux (e.\,g. using
+\index{Acrobat pdf viewer}%
+\texttt{evince}%
+\index{evince pdf file viewer@\texttt{evince} pdf file viewer})
+systems in fullscreen mode.
+Under certain conditions it is possible to define a ``poster area'' on a
+slide and the pdf viewer starts (after clicking with the mouse pointer into
+this area) the
+presentation of the video within this frame.
+The advantage of this technique is that it avoids starting
+a window with the external application.
+On Linux systems the \texttt{pdfpc}
+\index{pdfpc viewer@\texttt{pdfpc} viewer}
+viewer allows this, a detailed description
+is shown below. In both situations, however, the multimedia file is not
+incorprated into the pdf-file and must be available on the computer
+at the time of the presentation, ideally in the same directory as the
+\texttt{.pdf}-file.
+
+The command \verb+\auvimm{text}{media-file}+ inserts \texttt{text} with a link
+(``poster''), which allows to start the external default application for an
+audio or video media file (\texttt{media-file}).  This worked flawlessly on
+the computers of the author of this manual with Adobe Acrobat Reader (Windows)
+and with \texttt{evince} (Linux).\footnote{The
+  \texttt{\textbackslash auvimm} command uses the \texttt{\textbackslash href}
+  command of the \texttt{hyperref} package}
+An example for using this command:
+
+\begin{verbatim}
+   \auvimm{[sound-file]}{./audiofile.mp3}
+\end{verbatim}
+
+This produces the (text-based) ``button'' or ``poster'' \texttt{[sound-file]}.
+You may also insert an image file as a poster with a graphics file using
+\verb+\includegraphics+:
+
+\begin{verbatim}
+   \auvimm{\includegraphics{/path/to/poster.png}}{./audiofile.mp3}
+\end{verbatim}
+
+If you hit the poster area with the mouse pointer, it will launch the
+default application for audio files in a separate window. This should
+be possible even if the pdf-viewer works if fullscreen-mode at the time
+of presentation.  If this does not work, it may be necessary to insert as
+``launch'' command:
+
+\begin{verbatim}
+   \auvimm{[video-file]}{run:./videofile.mp4}
+\end{verbatim}
+
+This approach requires that you keep the presentation file
+together with the multimedia files in the same folder, \textbf{also at
+  the time of
+  the presentation}. On an unknown computer system (where you have to show
+your presentation) you should test this aspect of your presentation. Sometimes
+a call to an external program might be blocked due security reasons in Acrobat
+Reader.
+
+%% begin comment out for tth  
+   \fbox{\parbox{0.985\textwidth}{
+%% end comment out for tth  
+The \texttt{\textbackslash auvimm{}}-command in the current version
+of \texttt{elpres} should be considered 
+experimental.
+Its behavior largely depends on the \texttt{pdf}-viewer and the software
+used for playing audio/video files.
+%% begin comment out for tth  
+  }}
+%% end comment out for tth  
+
+
+On Linux systems, the \texttt{pdfpc}
+\texttt{pdf}-viewer\footnote{\url{https://pdfpc.github.io/}: 
+\texttt{pdfpc} --- A presenter console with multi-monitor support for PDF files} allows
+presentation of a video embedded into a ``poster area''\footnote{e.\,g. defined
+by a bitmap image with the same aspect ratio as the video}
+on a slide
+without starting the external viewer in a separate window. This is supported
+with the \verb+\pdfpcmovie{}{}+-command from the
+\texttt{pdfpc-movie}-package and with \verb+\auvimm{}{}+
+using the ``\texttt{run:./video-file}'' launch-command. An example
+with \verb+\auvimm{}{}+:
+
+\begin{verbatim}
+   \auvimm{\includegraphics[width=0.4\textwidth]{poster.png}}{run:./video.mp4}
+\end{verbatim}
+
+This \texttt{pdfpc}-specific extension seems to work only for video files,
+but not for audio files. A possible solution is to convert an audio file into
+a ``video format'', e.\,g. with the \texttt{ffmpeg} program.
+\index{multimedia files|)}
+
+
+\subsection{Prepare a ``handout'' from a presentation}
+
+\label{secHandout}
+
+In advance of a lecture it is often expected that you provide a ``handout''
+of your presentation with more than one pages on a printed page. Therefore
+you have several options, three of
+them are described here.
+If a presentation contains overlay-slides generated with the \texttt{overlays}
+package as described in section \ref{secOverlay}, it should be recompiled
+with the commands described in section \ref{sec:inact-overl-comm}
+added to the preamble
+in order to inactivate the overlays-specific commands.
+
+
+\subsubsection{\LaTeX\ article document handout with a series of single-page pdf-files included}
+
+One solution to this problem is (1) to generate a series of single-page
+pdf-files and (2) to create a pdf\LaTeX\ document with the single
+pages included.
+
+\textbf{(1)} can be done with \texttt{gs} (the \texttt{ghostscript} program):
+\index{ghostscript@\texttt{ghostscript}}
+
+\begin{verbatim}
+   gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite  -sOutputFile=page_%03d.pdf in.pdf
+\end{verbatim}
+
+with \texttt{in.pdf} as the initial presentation.  The syntax of \texttt{gs}
+is described in detail on the ghostscript
+website\footnote{\url{https://ghostscript.readthedocs.io/en/latest/Use.html}}.
+On Windows systems the name of the ghostscript command may be
+\texttt{gswin32c.exe} or  \texttt{gswin64c.exe}.
+An alternative to \texttt{gs} is the \texttt{pdftk} command line tool:%
+\index{pdftk@\texttt{pdftk}}%
+\footnote{\url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/}}
+
+\begin{verbatim}
+    pdftk in.pdf  burst output  page_%03d.pdf
+\end{verbatim}
+
+The syntax of \texttt{pdftk} is explained in the documentation
+(\texttt{pdftk~--help}).
+
+\textbf{(2)} an example for a \LaTeX\ document which can serve as handout:
+
+\begin{verbatim}
+   \documentclass[12pt]{article}
+   \usepackage[pdftex]{graphicx}
+   \usepackage[latin1]{inputenc}
+   \usepackage[a4paper,hmargin=2.4cm,top=24mm,bottom=28mm]{geometry}
+   \newcommand{\PictScaleFact}{0.45}
+
+   \begin{document}
+   \centering
+   \fbox{\includegraphics[width=\PictScaleFact\textwidth]{page_001.pdf}}
+   \hspace{5mm}
+   \fbox{\includegraphics[width=\PictScaleFact\textwidth]{page_002.pdf}}
+   \\[2ex]
+   \fbox{\includegraphics[width=\PictScaleFact\textwidth]{page_003.pdf}}
+   \hspace{5mm}
+   % ...
+   \fbox{\includegraphics[width=\PictScaleFact\textwidth]{page_008.pdf}}
+   % ...
+   \end{document}
+\end{verbatim}
+
+
+\subsubsection{Create handout with the \texttt{pdfpages} package}
+
+\label{sec:handout-pdfpages}
+
+\index{handout|(}
+Another, more comfortable option is to use the \texttt{pdfpages} package.
+Here, it is not necessary to split up the presentation into single pages.
+An example (in ``portait format'') which generates pages with 2x4 slides
+(all slides except slide 2) using the
+\verb+\includepdf[]{}+ command:
+
+\begin{verbatim}
+   \documentclass[12pt]{article}
+   \usepackage[a4paper,hmargin=2cm,bottom=3.2cm]{geometry}
+   \usepackage{pdfpages}
+   \begin{document}
+   \includepdf[pages={1,3-last},nup=2x4,frame=true,%
+   scale=0.78,%
+   pagecommand={\thispagestyle{plain}}]{presentation.pdf}
+   \end{document}
+\end{verbatim}
+
+Details on the optional parameters of \verb+\includepdf+ can
+be found in the documentation of the \texttt{pdfpages} package. This code:
+
+\begin{verbatim}
+   \documentclass[12pt,landscape]{article}
+   \usepackage[a4paper,hmargin=2cm,bottom=3.2cm]{geometry}
+   \usepackage{pdfpages}
+   \begin{document}
+   \includepdf[pages={1,3-last},nup=3x2,frame=true,%
+   scale=0.78,%
+   pagecommand={\thispagestyle{plain}}]{presentation.pdf}
+   \end{document}
+\end{verbatim}
+
+generates pages in ``landscape format'' with 3x2 slides.
+
+\subsubsection{Convert presentation pdf-file directly into handout file with \texttt{pdfjam}}
+
+With the following command:
+
+\begin{verbatim}
+   pdfjam --nup 2x4 --frame true --scale 0.9 -o new.pdf in.pdf '1-4,6-22'   
+\end{verbatim}
+
+\begin{sloppypar}
+\texttt{pdfjam}\footnote{which regerettably is only available on
+  Linux or other Unix-like systems,
+  on Windows systems, the procedure described
+  above in section \ref{sec:handout-pdfpages} can be used as alternative}
+creates a ``handout'' PDF document (\texttt{new.pdf}) fom
+\texttt{in.pdf} with the slides nr. 1-4,6-22
+arranged in  two columns and four rows.
+With the additional option ``\texttt{--frame~true}'',
+\texttt{pdfjam} draws a box
+around each slide. More details can be found in the \texttt{pdfjam}
+man page and the project
+website\footnote{\url{https://github.com/DavidFirth/pdfjam/blob/master/README.md}}. 
+\end{sloppypar}
+\index{handout|)}
+
+
+
+\subsection{Create presentations with hypertext elements}
+
+\label{secHypertext}
+
+\index{hypertext elements|(}
+You may use two commands \verb+\fromlinktext{}{}+ and 
+\verb+\totargettext{}{}+ for ``hypertext features''.  
+As an example: as you normally will not 
+insert \verb+\section{}+-like commands and therefore do not generate a ``
+table of contents''-like page or a menu in \texttt{elpres}-presentations, 
+you are able define links with:
+
+\begin{verbatim}
+   \totargettext{text}{link-label}
+\end{verbatim}
+% \hypertarget{target-name}{text}
+
+
+which can be addressed by
+
+\begin{verbatim}
+   \fromlinktext{text}{link-label}
+\end{verbatim}
+
+% \hyperlink{target-name}{text}
+
+If you use these commands to generate a \textbf{menu page} (as a hyperlinked
+table of contents) with items pointing to
+specific slides: 
+\texttt{link-label} acts as label, \texttt{text} in the
+\verb+\fromlinktext+ command is converted to a link (e.\,g. on a menu-page).
+If you click on this text ``button'', you jump to
+the \texttt{text} labelled with
+\verb+\totargettext+; \texttt{link-label} has to be identical in a
+\verb+\fromlinktext+ and \verb+\totargettext+ pair,
+\texttt{text} in the link
+and the target, of course need not to be identical.
+
+The default for the link border color is red, it may be changed with
+\verb+\hypersetup{}+, a command from the \texttt{hyperref}
+package\footnote{both, \texttt{\textbackslash totargettext} and
+\texttt{\textbackslash fromlinktext} are
+are redefinitions of commands from the \texttt{hyperref} package}.
+The option for the color of the frame around the link is
+\texttt{linkbordercolor},
+colors must be defined whith three figures \texttt{[0..1]} according to the RGB
+color model:
+
+\begin{verbatim}
+   \hypersetup{linkbordercolor={0.6 0.6 0.6}}
+\end{verbatim}
+
+This defines a light gray color for the link border, more details on
+\verb+\hypersetup{}+ are
+described in the documentation of the \texttt{hyperref} package.
+\index{hypertext elements|)}
+
+
+\subsection{Fill background of a presentation with bitmaps}
+
+\label{secBackgroundWallpaper}
+
+\subsubsection{\texttt{Wallpaper} package}
+
+\index{wallpaper background|(}
+To create a slide background with a graphical wallpaper 
+background using bitmap files you may use the \texttt{wallpaper}
+package\footnote{written by Michael H.F. Wilkinson and available on CTAN}. 
+Load the \texttt{wallpaper} package with
+
+\begin{verbatim}
+   \usepackage{wallpaper}
+\end{verbatim}
+
+\begin{sloppypar}
+in the preamble. In order to generate a background based on bitmap
+file \texttt{background.png}, enter 
+\end{sloppypar}
+
+\begin{verbatim}
+   \CenterWallPaper{1}{background.png}
+\end{verbatim}
+
+before the contents of the presentation\footnote{i.\,e. following
+\textbackslash begin\{document\}}. 
+This works best with bitmaps with an appropriate aspect ratio, in the case of
+an 4x3 screen format a bitmap picture of 640x480 pixel would fit perfectly. 
+Moreover bitmap files may be
+used as tiles as described in the \texttt{wallpaper} documentation like
+
+\begin{verbatim}
+   \TileSquareWallPaper{4}{background.png}
+\end{verbatim}
+
+More details on this topic may be found in the \texttt{wallpaper}
+documentation.
+
+\subsubsection{\texttt{Eso-pic} package}
+\label{secBackgroundEsopic}
+
+Another package which allows you to paint the background with a picture is
+\texttt{eso-pic}\footnote{written by Rolf Niepraschk and available on CTAN}:
+
+\begin{verbatim}
+   \usepackage{eso-pic}
+   
+   ...
+
+   \AddToShipoutPictureBG*{
+      \includegraphics[height=\paperheight]{background.png}
+   }
+\end{verbatim}
+
+\verb+\AddToShipoutPictureBG{}+ puts the picture on every page, 
+\verb+\AddToShipoutPictureBG*{}+ puts it on to the current page,
+\verb+\ClearShipoutPictureBG+ clears the background beginning with the current
+page.
+Details of \texttt{eso-pic}'s commands can be found in the documentation.
+\index{wallpaper background|)}
+
+
+\subsection{Put color to your presentation: presentation schemes}
+\label{sec:pres-scheme}
+
+\index{presentation schemes|(}
+\index{color schemes|see{presentation schemes}}
+\index{schemes, color|see{presentation schemes}}
+
+\texttt{Elpres} provides predefined \textbf{presentation schemes}: color and
+layout schemes which are applied to a presentation with
+\verb+\usepackage{}+. Their naming follows the convention
+\mbox{\texttt{elpres...scheme}}, an example is
+\texttt{elpreswhiteredscheme}.\footnote{the name of the corresponding style
+or package file is \texttt{elpreswhiteredscheme.sty}} These
+\texttt{elpres}-schemes also support incremental slides with the
+\texttt{overlays} package. With an activated presentation scheme, the elpres
+class option \texttt{ballsymb} changes default itemize symbols to
+appropriately colored ``ball'' symbols. Moreover, these schemes define color
+names which may be used by the author of a presentation:\footnote{Color
+names for use by the presentation author start with \texttt{ep...}}
+
+\begin{description}%[noitemsep]
+\item[\texttt{eptextcolor}] ``normal text color'' (default values for
+  documents without
+  presentation scheme included in \texttt{elpres.cls}: black)
+\item[\texttt{ephighlightcolor}] color, which may be used for highlighting
+  text (default: dark red)
+\item[\texttt{eptitlecolor}] color of the title of slides, may be used to
+  highlight the title in the title slide (default: dark red)
+\end{description}
+
+These presentation schemes available in the current version of \texttt{elpres}:
+
+\begin{sloppypar}
+
+\begin{description}%[noitemsep]
+
+% \item[\texttt{elpresplainscheme}] ..
+
+\item[\texttt{elpresbluelightgrayscheme}] dark blue background of slides;
+  \texttt{eptextcolor}: light gray;
+  \texttt{eptitlecolor}: turquoise;
+  \texttt{ephighlightcolor}: yellow;
+  symbols in \emph{itemize} environment: pale blue bullets;
+  highlighted elements in \emph{enumerate} and \emph{description}
+  environments: pale blue
+  
+\item [\texttt{elpresgrayscheme}] gray background of slides;
+  \texttt{eptextcolor}: dark gray;
+  \texttt{eptitlecolor}:
+  dark green; \texttt{ephighlightcolor}: dark red;
+  symbols in \emph{itemize} environment: gray bullets; highlighted elements
+  in \emph{enumerate} and \emph{description} environments: dark green
+
+\item [\texttt{elpreswhitebluescheme}] white background of slides;
+  \texttt{eptextcolor}: blue-black;
+  \texttt{eptitlecolor}: blue;
+  \texttt{ephighlightcolor}: dark red;
+  symbols in \emph{itemize} environment: blue bullets; highlighted elements
+  in \emph{enumerate} and \emph{description} environments: blue
+
+\item [\texttt{elpreswhiteredscheme}] white background of slides;
+  \texttt{eptextcolor}: red/brown-black;
+  \texttt{eptitlecolor}: dark red;
+  \texttt{ephighlightcolor}: dark blue;
+  symbols in \emph{itemize} environment: red bullets;
+  highlighted elements in \emph{enumerate} and \emph{description}
+  environments: red
+
+\item [\texttt{elpreswhitetealscheme}] white background of slides;
+  \texttt{eptextcolor}: black-teal;
+  \texttt{eptitlecolor}: teal;
+  \texttt{ephighlightcolor}: dark red;
+  symbols in \emph{itemize} environment: blue bullets; highlighted elements
+  in \emph{enumerate} and \emph{description} environments: dark teal
+  
+\end{description}
+\end{sloppypar}
+
+In all of these schemes, the colors of borders for internal and external
+links have been adjusted.
+\index{presentation schemes|)}
+
+
+% Die Farben in LibreOffice / rgb (266) / rgb (1)
+% ----------------------------------------------
+% Tango himmelblau 1 / 114 159 207 /
+% Rot 5 / 153 0 102 /
+% Grau 6 / 128 128 128 /
+
+\section{Recipes for use of \texttt{elpres}}
+\label{sec:elpres-recipes}
+
+\index{recipes for elpres presentations@recipes for \texttt{elpres} presentations}
+
+\subsection{Colored text boxes}
+\label{sec:colored-text-boxes}
+
+\index{text boxes, colored}
+Colored text boxes often help the presentation author to highlight small text
+fragments and to make slides more ``readable'' and more attractive.
+
+\subsubsection{Text boxes with \texttt{colorbox}, \texttt{fcolorbox}}
+\label{sec:simple-text-boxes}
+
+
+A simple method for colored text boxes uses the \texttt{minipage} environment
+and the \texttt{colorbox} or \texttt{fcolorbox}
+commands (\texttt{xcolor} package):
+
+\begin{verbatim}
+   \begin{psli}[Slide with a textbox]
+   \begin{center}
+     \colorbox{eptitlecolor}{\begin{minipage}{0.85\textwidth}
+        \centering \color{white} \vspace{2ex}
+        {\Large
+        Text centered in a colorbox
+        } \par
+       \vspace{2ex}
+     \end{minipage}}
+   \end{center}
+   \end{psli}
+\end{verbatim}
+
+The advantage of these simple colored text boxes: they  are compatible
+with incremental slides using the \texttt{overlays} package.
+
+\subsubsection{Text boxes with the \texttt{tcolorbox} package}
+\label{sec:tcolorbox-boxes}
+
+The \texttt{tcolorbox} package provides great support for colored boxes. A
+minimal example:
+
+\begin{verbatim}
+   \begin{psli}[Slide with a textbox]
+    \begin{tcolorbox}[colframe=eptitlecolor!95!black]
+     \textcolor{eptitlecolor}{This is a textbox generated with the
+       \texttt{tcolorbox} package}
+     \tcblower This the lower part of the tcolorbox
+    \end{tcolorbox}  
+   \end{psli}
+\end{verbatim}
+
+An example with a titled colored textbox:
+
+\begin{verbatim}
+   \begin{psli}[Slide with a textbox]
+    \begin{tcolorbox}[colback=eptitlecolor!10!white,%
+       colframe=eptitlecolor!95!black,%
+       title=Heading of a textbox]
+       This is another \textbf{tcolorbox}.
+     \tcblower
+        Here, the lower part of the box.
+      \end{tcolorbox}
+   \end{psli}
+   
+\end{verbatim}
+
+The manual of the \texttt{tcolorbox} provides detailed instructions for the 
+use of this package.  
+However, incremental slides using the \texttt{overlays} package may not
+work with color boxes generated by the \texttt{tcolorbox} package.  These
+problems are avoided with the colored text boxes  described in section
+\ref{sec:simple-text-boxes}.
+
+\subsection{Alternative format for footnotes on slides}
+\label{sec:AltFootnoteFormat}
+
+
+Footnotes on slides may be inserted with \LaTeX's \verb+\footnote{}+
+command.
+However, the layout of footnotes generated by \verb+\footnote{}+ 
+is not adequate
+for small comments or additions to the main text on slides.
+The following definition of an alternative footnote command 
+(\verb+\altfnarea{}+)%  
+\index{alternative footnote command}
+\index{footnote command, alternative}
+\index{altnfarea@\verb+\altfnarea+}
+requires that the 
+\texttt{eso-pic} package is loaded:
+
+\begin{verbatim}
+   \usepackage{eso-pic}
+
+   \newcommand{\altfnarea}[1]{%
+   \AddToShipoutPictureFG*{
+   \setlength{\unitlength}{1mm}
+       \put(1.2,1.2){\parbox[b]{0.9\paperwidth}%
+       {\scriptsize \textcolor{darkgray}{#1}}}}}
+   
+\end{verbatim}
+
+The definition of \verb+\altfnarea+ is currently not included in
+\texttt{elpres.cls}, so you should copy this definition of the command
+into the preample of your presentation document. Please take care to
+include the \texttt{eso-pic} package before the \texttt{altfnarea}
+definition. You may experiment with different values in this
+\verb+\newcommand{}{}+ definition.  The command can be used within
+the code of a slide the following way:
+
+   \begin{verbatim}
+   \begin{psli}[Title of a slide demonstrating alternative 
+      footnotes\textsuperscript{1}]
+   \begin{itemize}
+   \item first itemized line\textsuperscript{2}
+   \item second itemized line
+   \end{itemize}
+   \altfnarea{\textsuperscript{1}Addition to the title, 
+      \textsuperscript{2}Explanation of the first line}
+   \end{psli}
+   \end{verbatim}
+
+Very often it will be advisable \emph{not} to use footnotes in slides.
+However, speakers participating in scientific conferences usually are
+expected to include sources of figures, tables etc. on their slides.
+
+
+\subsection{Inactivate \texttt{overlays} commands}
+\label{sec:inact-overl-comm}
+
+\begin{sloppypar}
+If a pesentation has been prepared with overlay slides (using the
+\texttt{overlays}) package, the \LaTeX{} source code will contain
+\verb+\visible+, \verb+\only+ and \verb+\alert+ commands and
+\texttt{overlays} and \texttt{fragileoverlays} environments.
+
+Sometimes, it is desirable to generate a version of such a presentation
+without overlays effects, for example for preparation of a printed handout
+(see section \ref{secHandout}).
+The effect of these overlay-specific instuctions can be
+inactivated with these commands:
+\end{sloppypar} 
+
+
+\begin{verbatim}
+   \overlaysoff
+   \alertsoff
+\end{verbatim}
+
+which should be written into the preamble following
+\verb+\usepackage{overlays}+.  This works with v2.12 (and probably later
+versions) of \texttt{overlays}.  With earlier versions you may copy the
+commands
+
+\begin{verbatim}
+   \renewenvironment{overlays}[1]{}{}%
+   \renewenvironment{fragileoverlays}[1]{}{}%
+   \renewcommand{\visible}[2]{#2}%
+   \renewcommand{\only}[2]{#2}%
+   \renewcommand{\alert}[2]{#2}%
+\end{verbatim}
+
+into the preamble following \verb+\usepackage{overlays}+, however,
+inactivation of \verb+\only+ by this method
+has a different effect, so it is recommended to
+update the \texttt{overlays} package.
+
+\subsection{Convert an \texttt{elpres}-presentation (PDF) into an Impress (LibreOffice) or Powerpoint presentation}
+\label{sec:convert-into-libreoff}
+
+\subsubsection{PDF \ldots\ PNG \ldots\ Impress/Powerpoint}
+
+\index{Powerpoint presentation} \index{Impress (LibreOffice) presentation}
+Sometimes it is unclear, if organizers of a (scientific) meeting allow
+presentations with \texttt{.pdf}-files or if they insist on files in Powerpoint
+format. This is an unpleasant situation for a lecturer, but in such a situation
+it is better, to be prepared.
+
+There is no elegant way for a reliable solution.  First, you may use one
+of the free or commercial online conversion tools (intended to convert
+\texttt{.pdf} into \texttt{.ppt} or \texttt{.pptx}-files). Results are
+often not satisfactory.
+
+An alternative, more reliable way preferred
+by the author of this manual:
+
+
+\begin{enumerate}
+\item convert the \texttt{.pdf}-file of the presentation into a series of bitmap
+  image files, (e.\,g. in \texttt{.png} format)
+\item import these image \texttt{.png} files into ``empty'' slides
+  of an Impress
+  (LibreOffice or OpenOffice) presentation and save the presentation in
+  \texttt{.odp}, \texttt{.ppt} or \texttt{.pptx}-Format
+\end{enumerate}
+
+\textbf{Details on step 1 --- generate \texttt{.png} images:}
+
+Please copy the following two
+commands (please ignore the line-breaks in the lines
+beginning with ``\texttt{gs}'')\footnote{\i.\,e. ``\texttt{gs ... input.pdf}'' should
+  be entered as one line and ``\texttt{gs ... temp.pdf}'' should be entered as a
+  second line of a shell script.}
+into a short shell
+script (Windows: a \texttt{.bat} or \texttt{.cmd} script) and ``run'' or
+execute the shell script:
+
+
+
+\begin{verbatim}
+   gs -dNOPAUSE  -dBATCH -sDEVICE=pdfwrite  -dDEVICEWIDTHPOINTS=793.7 
+      -dDEVICEHEIGHTPOINTS=595.3 -dPDFFitPage -sOutputFile=temp.pdf input.pdf
+
+   gs -dNOPAUSE -dBATCH -sDEVICE=png256 -r300 -dTextAlphaBits=4 
+      -sOutputFile=page_%03d.png temp.pdf
+\end{verbatim}
+
+\begin{sloppypar}
+  Please do not forget to adjust the name of the input file
+  (\texttt{input.pdf} in the script above).
+  The first command adjusts the page size of the \texttt{.pdf}-file to
+  \texttt{28~x~21~cm} which is written into the temporary file
+  \texttt{temp.pdf}:
+  this format avoids the necessity to resize of the images in LibreOffice 
+  (for other slide formats see the footnote below\footnote{%
+     The values assigned to \texttt{-dDEVICEWIDTHPOINTS} and 
+     \texttt{-dDEVICEHEIGHTPOINTS}
+     are valid for a width:height aspect ratio of 4:3 assuming a
+     presentation page size (LibreOffice) of \texttt{28cm~x~21cm}:
+     \texttt{(28/2.54)*72=793.7pt},
+     \texttt{(21/2.54)*72=595.3pt}. Values for width:height aspect ratios of
+     16:9 \texttt{(28cm~x~15.75cm)} are \texttt{793.7/446.46} and for a ratio
+     of 16:10 \texttt{(28cm~x~17.5cm)}:  \texttt{793.7/496.1}.
+  }).
+  The second command generates a series of \texttt{.png}-files:
+  \texttt{page\_001.png}, \texttt{page\_002.png} ... \texttt{page\_0nn.png}.
+  Instead of the \texttt{png256} driver, \texttt{png16m} can be used.
+  On Windows systems the name of the ghostscript command is
+  \texttt{gswin32c} or \texttt{gswin64c} (instead of \texttt{gs}).
+\end{sloppypar}
+
+If you wish a higher resolution of the \texttt{.png} images,
+change \texttt{-r300} to
+\texttt{-r600}.
+% \begin{verbatim}
+%    gs -dNOPAUSE -dBATCH -sDEVICE=png256 -r600 
+%            -dTextAlphaBits=4 -sOutputFile=page_%03d.png input.pdf
+% \end{verbatim}
+The option  \mbox{\texttt{-dTextAlphaBits=4}} improves font
+antialiasing.\footnote{Details can be found in the documentation of 
+\texttt{gs}  \url{https://ghostscript.readthedocs.io/en/latest/Use.html}}
+
+\textbf{Details on step 2 --- Import \texttt{.png} images:}
+
+Open an empty presentation with LibreOffice Impress, adjust the appropriate
+slide format (e.\,g. 4:3), import the \texttt{.png} files with
+\emph{Insert~/ Image}
+% , then adjust the size of the included image with
+% \emph{Format~/ Object~and~Shape~/ Position~and~Size (F4)} in the
+% \emph{Position~and~Size} dialog box please enter: \emph{Postion~X}:
+% \texttt{0.0cm}, \emph{Postion~Y}: \texttt{0.0cm}, \emph{Width}:
+% \texttt{28.0cm}, activate the checkbox \emph{Keep~ratio}
+into consecutive empty slides.\footnote{Menu
+  structure of LibreOffice v6.4, v7.3}. The presentation can now be saved
+in the format of Impresss (\texttt{.odp}) or
+one of the Microsoft Powerpoint formats (\texttt{.ppt} or \texttt{.pptx}).
+
+\subsubsection{PDF \ldots\ SVG \ldots\ Impress/Powerpoint}
+
+\label{sec:PdfSvgImpress}
+
+An alternative way to make a Powerpoint/Impress presentation from the
+.pdf-file is to convert it into a series of \textbf{.pdf}-pages, convert
+these into \texttt{.svg} format and to import the \texttt{.svg}-files into
+the Impress/Powerpoint presentation. The first step:%
+\footnote{The command in a Windows terminal should be:
+  \texttt{pdftk input.pdf burst output p\_\%\%02d.pdf}}
+
+\begin{verbatim}
+   pdftk input.pdf burst output p_%02d.pdf
+\end{verbatim}
+
+converts the file \texttt{input.pdf} into a series of files
+\texttt{p\_01.pdf}, \texttt{p\_02.pdf}, \texttt{p\_03.pdf}, \ldots, which
+can then be converted with the command \texttt{pdftocairo}:%
+\footnote{Available in the \texttt{poppler-utils} package, a Windows version
+may be obtained at: \url{https://github.com/oschwartz10612/poppler-windows}}
+
+
+\begin{verbatim}
+   pdftocairo -svg p_01.pdf p_01.svg 
+   pdftocairo -svg p_02.pdf p_02.svg
+   pdftocairo -svg p_03.pdf p_03.svg
+   ...
+\end{verbatim}
+
+This series of commands is best executed from a shell script. The resulting 
+\texttt{.svg} files are then imported into an Impress/Powerpoint presentation.
+ 
+\subsection{The \texttt{pdfpc}-viewer: add notes}
+
+\index{pdfpc viewer@\texttt{pdfpc} viewer}
+\index{notes for slides, pdfpc viewer@notes for slides, \texttt{pdfpc} viewer}
+The pdf-vierwer \texttt{pdfpc} for
+Linux\footnote{\url{https://pdfpc.github.io/}}
+(see section \ref{sec:MultimediaContent})
+is a comfortable program which
+allows output of presentations to two monitors or a monitor and a
+beamer/projector.  The normal presentation window is assigned to the
+beamer/projector, the other output for the presenter shows the actual slide,
+the next slide and an area for notes. As you are viewing a certain slide,
+press \texttt{n} to start editing a note. The editing mode is stopped with
+\texttt{Esc}.  The text of these notes is stored in the file
+\texttt{filename.pdfpc}.  Further information can be found in the \texttt{man}
+page. 
+
+
+\section{License}
+
+This class is distributed under the \textsl{\LaTeX{} Project Public License}
+(LPPL) which may be downloaded from
+\url{http://www.latex-project.org/lppl.txt}. No warranty is provided for this
+work (as stated in the LPPL).
+
+
+
+\section{Version history}
+
+\textbf{v0.1} (19.6.2004): initial version.  \textbf{v0.2} (1.9.2004): page
+numbers now changed to footnotesize, left and right margins slightly changed,
+\texttt{cenumerate} and \texttt{cdescription} environments added.
+\textbf{v0.2a} (19.9.2004): Section ``License'' added to the documentation.
+\textbf{v0.2b} (17.10.2004): Documentation completed: description of the
+\verb+\distance{}+ command included.  \textbf{v0.2c} (28.11.2004):
+Documentation completed (section \ref{secHypertext} added).  \textbf{v0.2d}
+(25.12.2004): Documentation completed (section \ref{secBackgroundWallpaper}
+added).  \textbf{v0.2e} (15.04.2005): Documentation completed (sections
+\ref{secBackgroundEsopic} and \ref{secHandout} added).  \textbf{v0.3}
+(12.08.2005): new (class) options for font selection: \texttt{tmrfont} (Times
+Roman), \texttt{helvetfont} (Helvetica), \texttt{cmfont} (Computer Modern),
+\texttt{sansfont} (Sans Serif: default).  Documentation updated, sections
+\ref{secUsageGraph} and \ref{secTwoColumns} added.  \textbf{v0.4}
+(20.01.2018): New class options for different screen aspect ratios
+\texttt{4x3}, \texttt{16x9}, \texttt{16x10}; ``compressed'' list environments
+modified; documentation completed: packages for use with \texttt{elpres}:
+\texttt{enumitem} (alternative list environments), \texttt{overlays} (overlay
+support: incremental slides); section \ref{secHandout} was completely
+rewritten.  \textbf{v0.4a} (24.01.2018): Documentation completed.
+\textbf{v0.5} (12.07.2020): New class options: \texttt{nofonts} (no font
+selection) and \texttt{navisymb} (inserts a panel of symbols for navigation),
+new commands: \verb+auvimm+ (generates a link to external audio, video files),
+\verb+\fromlinktext+ and \verb+\totargettext+ (create links within a
+presentation).  Documentation has been partly rewritten.  \textbf{v0.6}
+(19.08.2020): Access to the \texttt{fancyhdr} ``header fields''
+(\verb+\lhead{}+, \verb+\chead{}+ and \verb+\rhead{}+) is now explicitly
+blocked.  New command \verb+\slidetitlecolor{}+ for the text color of titles
+in \texttt{psli}-slides.  New: style files for presentation schemes added.
+Documentation has been significantly completed: sections
+\ref{sec:footerlayout}, \ref{sec:use-colors}, \ref{sec:pres-scheme} and
+\ref{sec:elpres-recipes} added, section \ref{sec:installation} on installation
+rewritten.  \textbf{v0.7} (20.02.2021): parts of the manual (this file) have
+been rewritten and an index has been included. The command \verb+\pagenrconst+
+has been added.  \textbf{v0.8} (28.02.2021): Installation instructions have
+been updated in section \ref{sec:Introduction} and detailed instructions were
+added to \texttt{README.md}. Section \ref{sec:inact-overl-comm} was updated. A
+bug in the  \texttt{elpres...scheme.sty} files was fixed (incorrect value for
+\verb+\labelitemiv+).
+\textbf{v0.9} (01.08.2021): New class option \texttt{bulletsymb} added, an
+archive \texttt{elpres.tds.zip} is added for \texttt{ctan.org} upload.
+\textbf{v1.0}: Class option \texttt{ballsymb} added, manual updated.
+\textbf{v1.0.1}: Corrected upload to \texttt{ctan.org} 
+\textbf{v1.1} (28.05.2024): Fixes and corrections in \texttt{elpres.cls};
+manual: parts of section \ref{secUsage} have been rewritten,
+section \ref{sec:convert-into-libreoff} has been completed: new section
+\ref{sec:PdfSvgImpress}.
+Definition of a an alternative command for footnotes (\verb+\altfnarea+) 
+has been added to the manual (section \ref{sec:AltFootnoteFormat}).
+
+
+\printindex
+
+\end{document}
+

@@ -1,0 +1,79 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 163 Scatter Plot with the Same Line Colour for Each Stream in a Given Database (Two Databases, Multiple Sets of Data)
+% Label: "ex:growthscatter6col2dbgroupstyles"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{scontents}% to write test file with TABs preserved
+\begin{scontents}[write-out={growth.tsv},overwrite]
+Experiment 1		Experiment 2	
+Time	Log Count	Time	Log Count
+0	2.9	0	3.31
+15	3.14	10	3.45
+30	3.26	25	3.61
+45	4.01	40	3.76
+60	4.2	55	3.89
+\end{scontents}
+
+\begin{scontents}[write-out={growth2.tsv},overwrite]
+Experiment 1		Experiment 2		Experiment 3	
+Time	Log Count	Time	Log Count	Time	Log Count
+0	3.21	0	3.39	0	3.28
+15	3.43	10	3.51	10	3.45
+30	3.68	25	3.65	20	3.57
+45	4.4	40	3.84	30	3.64
+60	4.8	55	3.92	40	3.95
+\end{scontents}
+
+\usepackage{dataplot}
+\usepackage{siunitx}
+\DTLsetup{store-datum}
+\DTLread[
+ name=growthdata, format=tsv,csv-skip-lines=1,
+ keys={Exp1Time,Exp1Count,Exp2Time,Exp2Count}
+]{growth}% growth.tsv
+ \DTLread[
+ name=growthdata2, format=tsv,csv-skip-lines=1,
+ keys={Exp1Time,Exp1Count,Exp2Time,Exp2Count,Exp3Time,Exp3Count}
+]{growth2}% growth2.tsv
+ 
+
+\DTLplotlegendsetname{growthdata}{\qty{6}{\degreeCelsius}}
+\DTLplotlegendsetname{growthdata2}{\qty{8}{\degreeCelsius}}
+\DTLplotlegendsetxlabel{Exp1Time}{$t_1$}
+\DTLplotlegendsetxlabel{Exp2Time}{$t_2$}
+\DTLplotlegendsetxlabel{Exp3Time}{$t_3$}
+\DTLplotlegendsetylabel{Exp1Count}{$N_1$}
+\DTLplotlegendsetylabel{Exp2Count}{$N_2$}
+\DTLplotlegendsetylabel{Exp3Count}{$N_3$} \RenewDocumentCommand \DTLplotlegendxy { O{0} m O{0} m O{0} m }
+{% 
+ (\DTLplotlegendx[#1]{#2}[#3]{#4}, 
+ \DTLplotlegendy[#1]{#2}[#5]{#6})% 
+ } 
+\begin{document}
+\DTLplot{growthdata,growthdata2}{
+ style=both, group-styles={line-color},
+ line-colors={brown,blue,lime,black,orange},
+ mark-colors={magenta,teal,green,violet,cyan},
+ lines={
+  \pgfsetdash{}{0pt},% solid line
+  \pgfsetdash{{1pt}{3pt}}{0pt},
+  \pgfsetdash{{5pt}{5pt}{1pt}{5pt}}{0pt},
+  \pgfsetdash{{4pt}{2pt}}{0pt},
+  \pgfsetdash{{1pt}{1pt}{2pt}{2pt}{2pt}{1pt}}{0pt}
+ },
+ marks={
+  \pgfuseplotmark{o},
+  \pgfuseplotmark{square},
+  \pgfuseplotmark{diamond},
+  \pgfuseplotmark{asterisk},
+  \pgfuseplotmark{star}
+ },
+ x={Exp1Time,Exp2Time,Exp3Time},
+ y={Exp1Count,Exp2Count,Exp3Count},
+ x-label={Time ($t$)},y-label={Log Count},
+ legend, legend-offset={-10pt,0pt},
+ width=2.5in,height=2.5in
+} 
+\end{document}

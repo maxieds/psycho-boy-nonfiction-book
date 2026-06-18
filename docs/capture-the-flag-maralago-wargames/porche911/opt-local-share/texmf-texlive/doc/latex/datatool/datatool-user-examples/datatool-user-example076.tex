@@ -1,0 +1,55 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 76 Referencing Rows from Displayed Data
+% Label: "ex:displayrowref"
+% arara: pdflatex
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+ \begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+\usepackage{datatool}
+\DTLsetup{default-name=marks}
+\DTLread{studentmarks.csv}
+\ExplSyntaxOn
+\RenewDocumentCommand \DTLdisplaydbAddItem 
+ { m m m m m m m m }
+{
+ \int_compare:nNnT { #7 } = { \c_one_int }
+ {
+  \DTLaction[ return={ \StudentNo = StudentNo } ]
+  { current ~ row ~ values }
+  \tl_put_right:Nn #1 { \DTLrowincr \label }
+  \tl_put_right:Nx #1 { { \StudentNo } }
+ }
+ \tl_put_right:Nn #1 { #3 { #2 } }
+}
+\ExplSyntaxOff 
+\begin{document}
+\DTLrowreset
+\DTLaction{display} 
+
+\DTLaction[
+ assign={
+  \Surname=Surname,
+  \Forename=Forename,
+  \StudentNo=StudentNo
+ },
+ options={
+  inline={% 
+  \DTLifstringeq{\Surname}{Brown}
+  {\DTLifstringeq{\Forename}{Andy}{#1}{}}{}% 
+  }
+ }
+]{find}
+Row \ref{\StudentNo} shows the details for Andy Brown. 
+\end{document}

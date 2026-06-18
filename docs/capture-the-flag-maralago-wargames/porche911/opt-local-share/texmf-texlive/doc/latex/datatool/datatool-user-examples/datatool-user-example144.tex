@@ -1,0 +1,55 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 144 Multi Bar Chart With a Legend
+% Label: "ex:barchartgrouplegend"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+
+\usepackage{databar}
+% Load data from studentmarks.csv file:
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv} 
+\begin{document}
+\DTLmultibarchart
+{
+ init={
+  \renewcommand{\DTLbaratendtikz}{% 
+    \node[at={(\DTLbarchartwidth,0pt)},anchor=south west] 
+    {\begin{tabular}{l}
+      {\DTLdobarcolor{1}\rule{\DTLbarwidth}{\DTLbarwidth}}
+      Assignment 1\\
+      {\DTLdobarcolor{2}\rule{\DTLbarwidth}{\DTLbarwidth}}
+      Assignment 2\\
+      {\DTLdobarcolor{3}\rule{\DTLbarwidth}{\DTLbarwidth}}
+      Assignment 3
+      \end{tabular}};
+    }
+  },
+ variables={\assignI,\assignII,\assignIII},
+ bar-width=12pt,
+ group-label-align={center,top},
+ bar-label={\xDTLinitials{\Forename}\xDTLinitials{\Surname}},
+ y-ticks,axes=both
+}
+{marks}% database name
+{
+ \assignI=Assign1,
+ \assignII=Assign2,
+ \assignIII=Assign3,
+ \Surname=Surname,
+ \Forename=Forename
+} 
+\end{document}

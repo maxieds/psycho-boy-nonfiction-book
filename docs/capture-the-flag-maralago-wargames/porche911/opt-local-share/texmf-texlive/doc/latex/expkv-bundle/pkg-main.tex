@@ -1,0 +1,1097 @@
+\genericekv\expkv{}
+
+This package supports two different front ends to parse a \kv\ list. The first
+(|\ekvset|) is similar to \pkg{keyval}'s |\setkeys|, it parses the list and
+executes defined actions based on the encountered \key{}s. The second
+(|\ekvparse|) is more versatile, it only splits the list into \key{}s and
+\val{}s and then runs user-provided code on the result.
+
+The first is described in subsections~\ref{sec:expkv:setup}
+to~\ref{sec:expkv:set}, the latter is described in \autoref{sec:expkv:parse}.
+
+Unlike the other packages in the bundle, if you load \expkv\ as a \LaTeXe\
+package there is a single option available:
+\begin{function}{all}
+  \begin{syntax}
+    \cs[no-index]{usepackage}[all]\{expkv\}
+  \end{syntax}
+  Loads all the packages of \expkvbundle.
+\end{function}
+
+\subsection{General Parsing Rules}
+
+\expkv\ parses a \kv\ list by first splitting the elements on commas (active or
+other), then looking for an equals sign (active or other). If there is one the
+\kv\ pair will be split at the first. From both \key\ and \val\ (if there was a
+\val) one set of outer spaces is stripped, and afterwards one set of outer
+braces (meaning braces which are around the complete remainder after space
+stripping if there are any).
+
+So the syntax looks something like the following pseudo-input:
+\begin{syntaxexample}
+  \vissp{ \marg{key} = \marg{value} }
+\end{syntaxexample}
+with the displayed spaces and braces being optional and removed if found. Note
+that if you want either \key\ or \val\ to include a comma the braces become
+mandatory, the same is true if \key\ should contain an equals sign.
+
+\subsubsection{Expansion Control\label{sec:expkv:expansion}}
+
+\expkv\ provides a mechanism to specify expansions of a \key\ and/or \val. For
+those familiar with \pkg{pgfkeys} this is similar to its |.expand once| or
+|.expanded| handlers. This concept will be called \expnotation\ or \expansion\
+throughout this documentation.
+
+The syntax for this notation is a leading list of \expansion-rules followed by a
+colon that is immediately followed by a space. Also the \expansion-rules must
+not contain any spaces outside of braces, and the remainder on the right hand
+side of the colon must not be blank, else it is not considered an \expnotation\
+but just a weirdly formed \key-name.
+
+The entire syntax of a \kv\ pair is
+\begin{syntaxexample}
+  \vissp{ \{\expansion: \asciispace\marg{key} \} = \marg{value} }
+\end{syntaxexample}
+Note that the \expansion\ prefix is right delimited by \verb*|: | so the space
+after the colon is only optional in the sense that the entire \expansion\ prefix
+is optional. Else all displayed spaces and braces are optional, the inner set of
+spaces and braces around \key\ only being optional if the optional \expansion\
+prefix (\expansion\verb*|: |) was present. If that part was present the list of
+\expansion-rules will be executed, which might change the contents of both \key\
+and \val. For |\ekvparse| this is always true, however in |\ekvset| it is only
+parsed for the \expnotation\ if there is no \key\ matching the given input (so
+this notation doesn't impose a restriction on key names, though \key-names
+actually containing what would otherwise be an \expansion\ prefix should be
+pretty rare in practice).
+
+All packages in \expkvbundle\ support this notation (most of them internally use
+|\ekvset| or |\ekvparse|). Please note however that while \expkvo\ fully
+supports them, reinsertion via the |\r| \expansion-rule might affect the unused
+global options list if used in the class options.
+
+An \expansion-rule consists of a single token. In a \Vkey\ they work on the
+\val\ (but you can use the |\key| rule to also affect the \key\ there) while in
+a \Nkey\ they work on the \key. The following rules are available (those
+familiar with \pkg{expl3} will notice that the first six are identical to its
+argument types):
+
+\begingroup
+\let\bigskip\medskip
+\begin{function}[module=Expansion]{o}
+  Expands the first token once.
+\end{function}
+
+\begin{function}[module=Expansion]{e}
+  Expands the entire \val\ inside of |\expanded|.
+\end{function}
+
+\begin{function}[module=Expansion]{c}
+  Builds a |\csname| from the contents.
+\end{function}
+
+\begin{function}[module=Expansion]{f}
+  Expands the contents until a space or an unexpandable token is found (the
+  space would be removed).
+\end{function}
+
+\begin{function}[module=Expansion]{V}
+  The \val\ should be a single token, either defined as a parameterless macro or
+  as a register (via |\newcount| etc.). This expands to the value of the
+  register or the macro's replacement text. If the token in \val\ has the
+  |\meaning| of |\relax| an error is thrown and the result is empty.
+\end{function}
+
+\begin{function}[module=Expansion]{v}
+  This is a combination of |c| and |V|, meaning the \val\ is turned into a
+  single control sequence via |\csname|, and then expanded to its value. The
+  control sequence will only be built if it's defined.
+\end{function}
+\begin{example}{The difference between \texttt{co} and \texttt{v} expansion}
+  Say we want to hand the contents of a macro as the value to our key, but the
+  actual macro name depends on user input. For this we have two options which
+  behave slightly different. One is to use |v| the other is to combine the |co|
+  \expansion-rules. The following demonstrates both (I modified the way errors
+  are thrown to instead output them in red for this; you'll learn about
+  |\ekvparse| in a few pages, for now just stick with me):
+  \expkvdocPrintErrors
+  \makeatletter
+  \begin{enverb}[below]
+    \newcommand\mypair[2]{Arg: `\detokenize{#2}'. }%
+    \newcommand\myvalue{Value}%
+    \ekvparse\@firstofone\mypair
+      {
+         co: key = myvalue, v: key = myvalue, \par
+        ,co: key = myValue, v: key = myValue, \par
+      }
+  \end{enverb}
+  The difference is that in |co| the variable is implicitly initialised as
+  |\relax| by |c| if it doesn't exist and then doesn't expand in |o|. On the
+  other hand |v| will check whether the variable would exist and throw an error
+  if it doesn't (and will not set it to |\relax| by blindly using |\csname|).
+\end{example}
+
+\begin{function}[module=Expansion]{s}
+  Strips one set of outer spaces and outer braces.
+\end{function}
+
+\begin{function}[module=Expansion]{b}
+  Adds one set of outer braces.
+\end{function}
+
+\begin{function}[module=Expansion]{p}
+  \begin{syntax}
+    p\marg{contents}
+  \end{syntax}
+  Places \meta{contents} before the \val.
+\end{function}
+
+\begin{function}[module=Expansion]{P}
+  \begin{syntax}
+    P\marg{contents}
+  \end{syntax}
+  Places \meta{contents} after the \val.
+\end{function}
+
+\begin{function}[module=Expansion]{g}
+  Gobbles the first token or balanced group on the left (leads to a low-level
+  \TeX-error if the \val\ is empty).
+\end{function}
+
+\begin{function}[module=Expansion]{\r}
+  In a \Vkey\ reinserts the contents of \val\ after all the \expansion-rules
+  were executed (the \key-name needs to be empty). In a \Nkey\ the contents of
+  \key\ are reinserted after all the \expansion-rules were executed (the \val\
+  needs to be empty, which is an easy to fulfil rule as there was no \val).
+  Normal \kv\ parsing is aborted afterwards for the current \kv\ list element.
+\end{function}
+\begin{example}{Parse the contents of a macro as additional \kv\ input}
+  Say we want to store a list of common settings in a macro, then we want to
+  parse a few keys, insert the contents of the macro, and parse a few more keys.
+  The following does exactly that (|\ekvset| is analogue to |\setkeys| of the
+  \pkg{keyval} package if you're familiar with it, else you'll learn about
+  |\ekvset| a few pages down the road so be patient):
+  \begin{enverb}[no-tcb]
+    \newcommand*\mykeylist{color=red,height=5cm}
+    \ekvset{mypkg}{key=value, o\r: \mykeylist, other key=other value}
+  \end{enverb}
+  You could also use the following with the same outcome, but this looks more
+  complicated so the other form should be preferred:
+  \begin{enverb}[no-tcb]
+    \ekvset{mypkg}{key=value, o\r: {}=\mykeylist, other key=other value}
+  \end{enverb}
+\end{example}
+
+\begin{function}[module=Expansion]{\key}
+  \begin{syntax}
+    \cs[module=Expansion]{key}\marg{expansion}
+  \end{syntax}
+  This is the only supported way to change the contents of \key\ for a \Vkey\ in
+  the \expnotation. All the rules in \expansion\ are applied to \key\ instead of
+  \val.
+\end{function}
+
+\begin{function}[module=Expansion]{R}
+  This is the same as if you used |V\r|. So it expects a single token, retrieves
+  its value, and reinserts this as additional \kv\ input.
+\end{function}
+
+\begin{function}[module=Expansion]{r}
+  This is the same as if you used |v\r|. So it builds a |\csname| if that is
+  defined, retrieves its value, and reinserts this as additional \kv\ input.
+\end{function}
+\begin{example}
+  {Parse the contents of a macro as additional \kv\ input (revisited)}
+  Now that we also know the |R| and |r| rule, the example above can be input
+  even simpler:
+  \begin{enverb}[no-tcb]
+    \ekvset{mypkg}{key=value, R: \mykeylist, other key=other value}
+  \end{enverb}
+  or
+  \begin{enverb}[no-tcb]
+    \ekvset{mypkg}{key=value, r: mykeylist, other key=other value}
+  \end{enverb}
+\end{example}
+\endgroup
+
+\subsection{Setting up Keys\label{sec:expkv:setup}}
+
+\expkv\ provides a rather simple approach to setting up keys, similar to
+\pkg{keyval}. If you're looking for a more sophisticated interface similar to
+those of \pkg{l3keys} or \pkg{pgfkeys} take a look at \expkvd\ described in
+\autoref{sec:expkv-def} or for a simple interface that defines expandable macros
+at \expkvc\ described in \autoref{sec:expkv-cs}.
+
+Keys in \expkv\ (as in many other \kv\ implementations) belong to a \emph{set},
+so that different sets can contain keys of the same name. Unlike many other
+implementations \expkv\ doesn't provide means to set a default value, instead we
+have keys that take a value (we call those \Vkey) and keys that don't (which are
+called \Nkey\ by \expkv), but both can share the same name on the user level,
+the only difference for the user is whether =\val\ was used or not.
+
+The following macros are available to define new keys. Those macros containing
+\enquote{\texttt{def}} in their name can be prefixed by anything allowed to
+prefix |\def| (but \emph{don't} use |\outer|, keys defined with it won't ever be
+usable). And prefixes allowed for |\let| can prefix those macros with
+\enquote{\texttt{let}} in their name, accordingly. Neither \set\ nor \key\ are
+allowed to be empty for new keys. \set\ will be used as is inside of
+|\csname ...\endcsname| and \key\ will get |\detokenize|d. Also \set\ should not
+contain an explicit |\par| token.
+
+\begin{function}{\ekvdef}
+  \begin{syntax}
+    \cs{ekvdef}\marg{set}\marg{key}\marg{code}
+  \end{syntax}
+  Defines a \Vkey\ in a \set\ to expand to \meta{code}. In \meta{code} you can
+  use |#1| to refer to the given \val.
+\end{function}
+\begin{example}{Define a single \Vkey}
+  Define |text| in |foo| to store the \val\ inside |\foo@text|:
+  \begin{enverb}[no-tcb]
+    \protected\long\ekvdef{foo}{text}{\def\foo@text{#1}}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvdefNoVal}
+  \begin{syntax}
+    \cs{ekvdefNoVal}\marg{set}\marg{key}\marg{code}
+  \end{syntax}
+  Defines a \Nkey\ in \set\ to expand to \meta{code}.
+\end{function}
+\begin{example}{Define a single \Nkey}
+  Define |bool| in |foo| to set |\iffoo@bool| to |true|:
+  \begin{enverb}[no-tcb]
+    \protected\ekvdefNoVal{foo}{bool}{\foo@booltrue}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvlet}
+  \begin{syntax}
+    \cs{ekvlet}\marg{set}\marg{key}\meta{cs}
+  \end{syntax}
+  Let the \Vkey\ in \set\ to \meta{cs}. There are no checks on \meta{cs}
+  enforced, but the code should expect the \val\ as a single braced argument
+  directly following it.
+\end{function}
+\begin{example}{Copy a macro to define a \Vkey}
+  Let |cmd| in |foo| do the same as |\foo@cmd|:
+  \begin{enverb}[no-tcb]
+    \ekvlet{foo}{cmd}\foo@cmd
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvletNoVal}
+  \begin{syntax}
+    \cs{ekvletNoVal} \marg{set} \marg{key} \meta{cs}
+  \end{syntax}
+  Let the \Nkey\ in \set\ to \meta{cs}. Again no checks on \meta{cs} are done.
+  It shouldn't expect any provided argument.
+\end{function}
+\begin{example}{Copy a macro to define a \Nkey}
+  See above.
+\end{example}
+
+\begin{function}{\ekvletkv}
+  \begin{syntax}
+    \cs{ekvletkv}\marg{set}\marg{key}\marg{set2}\marg{key2}
+  \end{syntax}
+  Copies the definition such that \Vkey\ in \set\ behaves like \meta{key2} of
+  \meta{set2}. It is not checked whether that second key exists!
+\end{function}
+\begin{example}{Copy an existing \Vkey}
+  Let |B| in |bar| do the same as |A| in |foo|:
+  \begin{enverb}[no-tcb]
+    \ekvletkv{bar}{B}{foo}{A}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvletkvNoVal}
+  \begin{syntax}
+    \cs{ekvletkvNoVal}\marg{set}\marg{key}\marg{set2}\marg{key2}
+  \end{syntax}
+  And this lets the \Nkey\ in \set\ to the definition of the |NoVal|-\meta{key2}
+  in \meta{set2}. Again, it is not checked whether the second key exists.
+\end{function}
+\begin{example}{Copy an existing \Nkey}
+  See above.
+\end{example}
+
+\subsection{Handle Unknown Keys}
+
+By default \expkv\ throws an error message if it encounters an undefined \key.
+You can change this behaviour with the macros listed here. Just like in the
+section above, prefixes for |\def| are allowed if the macro has |def| in its
+name, and |\let| prefixes are allowed if the macro is named something with
+|let|.
+
+\begin{function}{\ekvdefunknown}
+  \begin{syntax}
+    \cs{ekvdefunknown}\marg{set}\marg{code}
+  \end{syntax}
+  Execute \meta{code} if an undefined \Vkey\ is encountered while parsing in
+  \set. You can refer to the given \val\ with |#1|, the unknown \key's name
+  with |#2| (will be |\detokenize|d), and to the \key's name without
+  |\detokenize| applied with |#3| in \meta{code} (this order is chosen for
+  performance reasons).
+
+  \cs{ekvdefunknown} and \cs{ekvredirectunknown} are mutually exclusive, you
+  can't use both.
+\end{function}
+\begin{example}{Search undefined \Vkey{}s in another \set}
+  Also search |bar| for undefined keys of set |foo| (and use the not yet
+  |\detokenize|d \key's name in case the undefined key handler of |bar| needs
+  that):
+  \begin{enverb}[no-tcb]
+    \long\ekvdefunknown{foo}{\ekvset{bar}{{#3}={#1}}}
+  \end{enverb}
+  This example differs from using |\ekvredirectunknown{foo}{bar}| (see below) in
+  that also the unknown-key handler of the |bar| set will be triggered, error
+  messages for undefined keys will look different, and this is slower than using
+  \cs{ekvredirectunknown}.
+\end{example}
+
+\begin{function}{\ekvdefunknownNoVal}
+  \begin{syntax}
+    \cs{ekvdefunknownNoVal}\marg{set}\marg{code}
+  \end{syntax}
+  With this you can let \expkv\ execute \meta{code} if an unknown \Nkey\ was
+  encountered. You can refer to the given \key\ with |#1| (will be
+  |\detokenize|d), and to the not |\detokenize|d \key's name with |#2|.
+
+  \cs{ekvdefunknownNoVal} and \cs{ekvredirectunknownNoVal}
+  are mutually exclusive, you can't use both.
+\end{function}
+\begin{example}{Search undefined \Nkey{}s in another \set}
+  Adding to the above also handling of \Nkey{}s in |foo|:
+  \begin{enverb}[no-tcb]
+    \ekvdefunknownNoVal{foo}{\ekvset{bar}{{#2}}}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvredirectunknown}
+  \begin{syntax}
+    \cs{ekvredirectunknown}\marg{set}\marg{set-list}
+  \end{syntax}
+  This is a short cut to set up a special \cs{ekvdefunknown}-rule for \set\ that
+  will check each set in the comma separated \meta{set-list} for an unknown
+  \Vkey. The resulting unknown-key handler will always be |\long| and \emph{not}
+  |\protected|. The first set in \meta{set-list} has highest priority, once the
+  \Vkey\ is found in one of the sets the remainder of the list is discarded. If
+  \meta{key} isn't found in any of the sets an error will be thrown eventually.
+  Note that the error message looks different than a normal key-not-found error,
+  in particular no unwanted-value message can be thrown (it will not be checked
+  if a \Nkey\ of the same name does exist), and the error message will contain
+  all sets.
+
+  \cs{ekvdefunknown} and \cs{ekvredirectunknown}
+  are mutually exclusive, you can't use both.
+\end{function}
+\begin{example}{Search an undefined \Vkey\ in a list of other \set{}s}
+  For every undefined \Vkey\ in |foo| also search the sets |bar| and |baz|:
+  \begin{enverb}[no-tcb]
+    \ekvredirectunknown{foo}{bar, baz}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvredirectunknownNoVal}
+  \begin{syntax}
+    \cs{ekvredirectunknownNoVal}\marg{set}\marg{set-list}
+  \end{syntax}
+  This behaves just like \cs{ekvredirectunknown}, it does the same but for
+  \Nkey{}s. Again no prefixes are supported (the result will neither be |\long|
+  nor |\protected|). Note that the error messages will not check whether a
+  missing-value error should be thrown.
+
+  \cs{ekvdefunknownNoVal} and \cs{ekvredirectunknownNoVal}
+  are mutually exclusive, you can't use both.
+\end{function}
+\begin{example}{Search an undefined \Nkey\ in a list of other \set{}s}
+  See above.
+\end{example}
+
+\begin{function}{\ekvletunknown}
+  \begin{syntax}
+    \cs{ekvletunknown}\marg{set}\meta{cs}
+  \end{syntax}
+  This lets the handler for unknown \Vkey{}s to \meta{cs}. \meta{cs} should
+  expect three arguments, the first will be the \val\ the second the
+  |\detokenize|d \key-name, the third the unprocessed \key-name. No conditions
+  on \meta{cs} are enforced.
+\end{function}
+\begin{example}
+    {Do the same as an already defined macro if an unknown \Vkey\ is found}
+  Let the set |foo| do the same as the macro |\foo@unknown| whenever an unknown
+  \Vkey\ is encountered:
+  \begin{enverb}[no-tcb]
+    \ekvletunknown{foo}\foo@unknown
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvletunknownNoVal}
+  \begin{syntax}
+    \cs{ekvletunknownNoVal}\marg{set}\meta{cs}
+  \end{syntax}
+  This does the same as \cs{ekvletunknown} but for \Nkey{}s. The \meta{cs}
+  should expect two arguments, namely the |\detokenize|d \key\ and the
+  unprocessed \key.
+\end{function}
+\begin{example}{Silently ignore unknown \Nkey{}s}
+  Let the set |foo| ignore unknown \Nkey{}s by gobbling the \key-name:
+  \begin{enverb}[no-tcb]
+    \ekvletunknownNoVal{foo}\@gobbletwo
+  \end{enverb}
+\end{example}
+
+\subsection{Helpers in Actions}
+
+\begin{function}{\ekvifdefined,\ekvifdefinedNoVal}
+  \begin{syntax}
+    \cs{ekvifdefined}\marg{set}\marg{key}\marg{true}\marg{false}
+    \cs{ekvifdefinedNoVal}\marg{set}\marg{key}\marg{true}\marg{false}
+  \end{syntax}
+  These two macros test whether there is a \key\ in \set. It is false if either
+  a hash table entry doesn't exist for that key or its meaning is |\relax|.
+\end{function}
+\begin{example}{Check if a \Vkey\ is already defined}
+  Check whether the key |special| is already defined in set |foo|, if it isn't
+  input a file that contains more key definitions:
+  \begin{enverb}[no-tcb]
+    \ekvifdefined{foo}{special}{}{\input{foo.morekeys.tex}}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvifdefinedset}
+  \begin{syntax}
+    \cs{ekvifdefinedset}\marg{set}\marg{true}\marg{false}
+  \end{syntax}
+  This macro tests whether \set\ is defined (which it is if at least one key was
+  defined for it). If it is \meta{true} will be run, else \meta{false}.
+\end{function}
+\begin{example}{Check if a \set\ is already defined}
+  Check whether the set |VeRyUnLiKeLy| is already defined, if so throw an error,
+  else do nothing:
+  \begin{enverb}[no-tcb]
+    \ekvifdefinedset{VeRyUnLiKeLy}
+      {\errmessage{VeRyUnLiKeLy already defined}}{}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvsneak,\ekvsneakPre}
+  \begin{syntax}
+    \cs{ekvsneak}\marg{after}
+  \end{syntax}
+  Puts \meta{after} after the effects of \cs{ekvset} (without cancelling the
+  current \cs{ekvset} call). The first variant will put \meta{after} after any
+  other tokens which might have been sneaked before, while \cs{ekvsneakPre} will
+  put \meta{after} before other smuggled stuff. After \cs{ekvset} has parsed the
+  entire \kv\ list everything that has been \cs{ekvsneak}ed will be left in the
+  input stream.
+\end{function}
+\begin{example}{Execute code after \cs[no-index]{ekvset} if a \Nkey\ was used}
+  Define a key |secret| in the set |foo| that will sneak out
+  |\foo@secretly@sneaked|:
+  \begin{enverb}[no-tcb]
+    \ekvdefNoVal{foo}{secret}{\ekvsneak{\foo@secretly@sneaked}}
+  \end{enverb}
+\end{example}
+A more elaborate usage example is shown in \autoref{sec:expkv:sneak}.
+
+\begin{function}{\ekvbreak,\ekvbreakPreSneak,\ekvbreakPostSneak}
+  \begin{syntax}
+    \cs{ekvbreak}\marg{after}
+  \end{syntax}
+  Gobbles the remainder of the current \cs{ekvset} call and its argument list
+  and inserts \meta{after}. So this can be used to break out of \cs{ekvset}. The
+  first variant will also gobble anything that has been sneaked out using
+  \cs{ekvsneak} or \cs{ekvsneakPre}, while \cs{ekvbreakPreSneak} will put
+  \meta{after} before anything that has been smuggled and \cs{ekvbreakPostSneak}
+  will put \meta{after} after the stuff that has been sneaked out.
+\end{function}
+\begin{example}{Stop parsing a \kv\ list if a specific \Nkey\ was used}
+  Define a key |abort| that will stop key parsing inside the set |foo| and
+  execute |\foo@aborted|, or if it got a value |\foo@aborted@with|:
+  \begin{enverb}[no-tcb]
+    \ekvdefNoVal{foo}{abort}{\ekvbreak{\foo@aborted}}
+    \ekvdef{foo}{abort}{\ekvbreak{\foo@aborted@with{#1}}}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvmorekv}
+  \begin{syntax}
+    \cs{ekvmorekv}\kvarg
+  \end{syntax}
+  Adds the contents of the \kv\ list to the list processed by the current call
+  of |\ekvset|.
+\end{function}
+\begin{example}{Use one \key\ to set multiple other keys}
+  Define a \Nkey\ |style| that sets the keys |border|, |width|, and |height| as
+  a shortcut:
+  \begin{enverb}[no-tcb]
+    \ekvdefNoVal{foo}{style}{\ekvmorekv{border, width=2cm, height=1.5ex}}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvchangeset}
+  \begin{syntax}
+    \cs{ekvchangeset}\marg{new-set}
+  \end{syntax}
+  Replaces the current \set\ with \meta{new-set}, so for the rest of the current
+  \cs{ekvset} call that call behaves as if it was called with
+  \cs{ekvset}\marg{new-set}. It is comparable to using \key|/.cd| in
+  \pkg{pgfkeys}.
+\end{function}
+\begin{example}{Change the current \set}
+  Define a key |cd| in set |foo| that will change to another set as specified in
+  the \val. If the set is undefined it'll stop the parsing and throw an error as
+  defined in the macro |\foo@cd@error|:
+  \begin{enverb}[no-tcb]
+    \ekvdef{foo}{cd}
+      {\ekvifdefinedset{#1}{\ekvchangeset{#1}}{\ekvbreak{\foo@cd@error}}}
+  \end{enverb}
+\end{example}
+
+\subsection{Parsing Keys in Sets}\label{sec:expkv:set}
+
+\begin{function}{\ekvset}
+  \begin{syntax}
+    \cs{ekvset}\marg{set}\kvarg
+  \end{syntax}
+  This macro parses the \kv\ list and checks for defined \key{}s that are in
+  \set. Unlike the generic \cs{ekvparse} this macro uses |\detokenize| on the
+  \key\ before checking whether it is a defined key.
+
+  \cs{ekvset} is nestable, and fully expandable. But it is \emph{not} alignment
+  safe. As a result \key\ names and \val{}s that contain an |&| must be wrapped
+  in braces if \cs{ekvset} is used inside an alignment (like \LaTeXe's |tabular|
+  environment) or alternatively you have to create a wrapper that ensurs an
+  alignment safe context.
+\end{function}
+\begin{example}{Set defined keys using \cs[no-index]{ekvset}}
+  Parse |key=arg, key| in set |foo|:
+  \begin{enverb}[no-tcb]
+    \ekvset{foo}{key=arg, key}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvsetSneaked}
+  \begin{syntax}
+    \cs{ekvsetSneaked}\marg{set}\marg{sneak}\kvarg
+  \end{syntax}
+  This behaves like \cs{ekvset} in which \cs{ekvsneak} was immediately called.
+\end{function}
+\begin{example}
+    {Set defined keys and execute code afterwards using
+    \cs[no-index]{ekvsetSneaked}}
+  Parse |key=arg, key| in the set |foo| with |\afterwards| sneaked out:
+  \begin{enverb}[no-tcb]
+    \ekvsetSneaked{foo}{\afterwards}{key=arg, key}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvsetdef}
+  \begin{syntax}
+    \cs{ekvsetdef}\meta{cs}\marg{set}
+  \end{syntax}
+  Defines the macro \meta{cs} to be a shortcut for \cs{ekvset}\marg{set}. You
+  can use any \TeX-prefix allowed to prefix |\def| for \cs{ekvsetdef} (so
+  |\long|, |\protected|, or |\global| -- don't use |\outer|).
+  The resulting macro is faster than but else equivalent to the idiomatic
+  definition:\par
+  |\def|\meta{cs}|#1{|\cs{ekvset}\marg{set}|{#1}}|
+\end{function}
+\begin{example}
+    {Define a setup command for a defined \set\ using \cs[no-index]{ekvsetdef}}
+  Define the macro |\foosetup| to parse keys in the set |foo| and use it to
+  parse |key=arg, key|:
+  \begin{enverb}[no-tcb]
+    \ekvsetdef\foosetup{foo}
+    \foosetup{key=arg, key}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvsetSneakeddef}
+  \begin{syntax}
+    \cs{ekvsetSneakeddef}\meta{cs}\marg{set}
+  \end{syntax}
+  Just like \cs{ekvsetdef} this defines a shorthand macro \meta{cs}, but this
+  will make it a shorthand for \cs{ekvsetSneaked}, meaning \meta{cs} will take
+  two arguments (first the \cs{ekvsneak} argument, then the \kv\ list). Hence
+  the result is a faster version of:\par
+  |\long\def|\meta{cs}|#1#2{|\cs{ekvsetSneaked}\marg{set}|{#1}{#2}}|
+\end{function}
+\begin{example}
+    {Define a setup command that will also require code to execute after all
+    keys were processed using \cs[no-index]{ekvsetSneakeddef}}
+  Define the macro |\foothings| to parse keys in the set |foo| and accept a
+  sneaked argument, then use it to parse |key=arg, key| and sneak |\afterwards|:
+  \begin{enverb}[no-tcb]
+    \ekvsetSneakeddef\foothings{foo}
+    \foothings{\afterwards}{key=arg, key}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvsetdefSneaked}
+  \begin{syntax}
+    \cs{ekvsetdefSneaked}\meta{cs}\marg{set}\marg{sneaked}
+  \end{syntax}
+  This macro behaves like \cs{ekvsetSneakeddef}, but with a fixed \meta{sneaked}
+  argument. So the resulting macro is faster than but else equivalent to\par
+  |\long\def|\meta{cs}|#1{|\cs{ekvsetSneaked}\marg{set}\marg{sneaked}|{#1}}|
+\end{function}
+\begin{example}
+    {Define a setup command that will execute codes after all keys were
+    processed using \cs[no-index]{ekvsetdefSneaked}}
+  Define the macro |\barthing| to parse keys in the set |bar| and always execute
+  |\afterwards| afterwards, then use it to parse |key=arg, key|:
+  \begin{enverb}[no-tcb]
+    \ekvsetdefSneaked\barthing{bar}{\afterwards}
+    \barthing{key=arg, key}
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcompile}
+  \begin{syntax}
+    \cs{ekvcompile}\meta{*}\meta{cs}\meta{parameters}\marg{set}\kvarg
+  \end{syntax}
+  This macro defines \meta{cs} to be a \emph{fast} way to set the given \kv\
+  list in \meta{set}. The meaning of the keys is frozen if you don't give the
+  optional |*| (if the star is present the stored content will be the key-macros
+  and later redefinitions of keys will affect them, otherwise the key-macros are
+  expanded once, hence the key-code is stored). This does support the unknown
+  key handlers set up with |\ekvdefunknown| and |\ekvdefunknownNoVal| and also
+  the redirection of unknown keys (the latter will not be expanded exhaustively
+  though, so the key-search is done on every later call of \meta{cs}). Any
+  prefix allowed for |\def| might prefix \cs{ekvcompile}. The list is not
+  entirely fixed, as you might use \meta{parameters} in a \val\ (this is not a
+  single token but a parameter text as you'd use it with |\def|). They can not
+  be part of a \key-name (the names are indeed fixed). If you need a |#| in a
+  \val\ you'll need to double it just as you'd do in |\def|. Internally
+  \cs{ekvcompile} uses |\ekvparse| and no |\ekvset| variant, because of this the
+  \expnotation\ is handled slightly differently; in case you're using a
+  \key-name that starts with something that looks like \expnotation\ you'll have
+  to explicitly add an empty \expansion\ prefix.
+\end{function}
+\begin{example}
+    {Compile a \kv\ list into a macro that will quickly set that list}
+  Define the macro |\foo| to set some keys in the set |foo|. Since one key has a
+  strange name we need to add an empty \expansion\ prefix. Also we'd like |\foo|
+  to take one parameter which is part of the \val\ of |bar| (since the list is
+  parsed now and not when |\foo| is used we don't need to put braces around that
+  value, even if at use time |#1| contains commas):
+  \begin{enverb}[no-tcb]
+    \ekvcompile\foo#1{foo}
+      {
+         bar = #1baz
+        ,: part-of-key: name = strange
+        ,NoVal
+      }
+  \end{enverb}
+  After this using |\foo{VAL}| will be the same as but faster than
+  \begin{enverb}[no-tcb]
+    \ekvset{foo}{bar={VALbaz},part-of-key: name=strange,NoVal}
+  \end{enverb}
+\end{example}
+
+\subsection{Generic Key Parsing}\label{sec:expkv:parse}
+
+\begin{function}{\ekvparse}
+  \begin{syntax}
+    \cs{ekvparse}\marg{code1}\marg{code2}\kvarg
+  \end{syntax}
+  This macro parses the \kv\ list and provides \Nkey{}s to \meta{code1} as a
+  single argument and \Vkey{}s with their corresponding \val\ as two arguments
+  to \meta{code2}.
+
+  \cs{ekvparse} is fully expandable and alignment safe, meaning that you don't
+  have to take any extra precautions if it is used inside an alignment context
+  (like \LaTeXe's |tabular| environment) and any \key\ or \val\ can contain an
+  |&|. \cs{ekvparse} expands in exactly two steps, the result is provided inside
+  |\unexpanded| (so doesn't expand further in an |\edef| or |\expanded|
+  context).
+
+  \cs{ekvbreak}, \cs{ekvsneak}, \cs{ekvmorekv}, \emph{etc.}\ don't work
+  in \cs{ekvparse}. \cs{ekvparse} does not throw an error if multiple
+  unprotected equals signs are found (it just splits at the first), and doesn't
+  throw an error if a \key\ is empty. If something looks like \expnotation\ (has
+  a colon followed but not preceded by a space and with non-blank material
+  following it) it'll be parsed as such (which might throw errors due to
+  undefined \expansion-rules if that wasn't the intended input). If you for some
+  reason need to input a \key-name that would match that pattern you'll need to
+  precede it by \verb*|: | (an empty \expansion\ prefix).
+\end{function}
+\begin{example}
+    {Parse a \kv\ list and execute arbitrary code for each element using
+    \cs[no-index]{ekvparse}}
+  \begin{enverb}[no-tcb]
+    \ekvparse{\handlekey{S}}{\handlekeyval{S}}{foo = bar, key, baz={zzz}}
+  \end{enverb}
+  would be equivalent to
+  \begin{enverb}[no-tcb]
+    \handlekeyval{S}{foo}{bar}\handlekey{S}{key}\handlekeyval{S}{baz}{zzz}
+  \end{enverb}
+  and afterwards |\handlekey| and |\handlekeyval| would have to further handle
+  the keys. No such macros are contained in \expkv, but I hope you get the idea.
+  Because it expands in two steps and doesn't expand any further both
+  \begin{enverb}[no-tcb]
+    \expandafter\parse\expanded{\ekvparse\k\kv{foo = bar, key, baz={zzz}}}
+  \end{enverb}
+  and
+  \begin{enverb}[no-tcb]
+    \expandafter\expandafter\expandafter
+    \parse\ekvparse\k\kv{foo={bar}, key, baz = zzz}
+  \end{enverb}
+  expand to
+  \begin{enverb}[no-tcb]
+    \parse\kv{foo}{bar}\k{key}\kv{baz}{zzz}
+  \end{enverb}
+\end{example}
+
+\subsection{Other Useful Macros}
+
+\begin{function}{\ekvoptarg}
+  \begin{syntax}
+    \cs{ekvoptarg}\marg{next}\marg{default}
+  \end{syntax}
+  This macro will expandably check for a following optional argument in brackets
+  (|[]|). After the optional argument there has to be a mandatory one (or else
+  this might have unwanted side effects). The code in \meta{next} should expect
+  two arguments (or more), namely the processed optional argument and the
+  mandatory one that followed it. If there was an optional argument the result
+  will be \meta{next}\marg{optional}\meta{mandatory} (so the optional argument
+  will be wrapped in braces, the mandatory argument will be untouched). If there
+  was no optional argument the result will be
+  \meta{next}\marg{default}\marg{mandatory} (so the default will be used and the
+  mandatory argument will be wrapped in braces after it was read once -- if it
+  was already wrapped it is effectively unchanged).
+
+  \cs{ekvoptarg} expands in exactly two steps, grabs all the arguments only at
+  the second expansion step, and is alignment safe. It has its limitations
+  however. It can't tell the difference between |[| and |{[}|, so it doesn't
+  work if the mandatory argument is a single bracket. Also if the optional
+  argument should contain a nested closing bracket it has to be nested in braces
+  like so: |[{arg[u]ment}]| (or else the result would be |arg[u| with a trailing
+  |ment]|).
+\end{function}
+\begin{example}{Expandably search for an optional argument with a default value}
+  Say we have a macro that should take an optional argument defaulting to |1|,
+  we could program it like this:
+  \makeatletter
+  \begin{enverb}
+    \newcommand\foo{\ekvoptarg\@foo{1}}
+    \newcommand\@foo[2]{Mandatory: #2\par Optional: #1}
+    \foo{5}\par
+    \foo[4]{5}\par
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvoptargTF}
+  \begin{syntax}
+    \cs{ekvoptargTF}\marg{true}\marg{false}
+  \end{syntax}
+  This macro is similar to \cs{ekvoptarg} but will result in
+  \meta{true}\marg{optional}\meta{mandatory} or \meta{false}\marg{mandatory}
+  instead of placing a default value.
+
+  \cs{ekvoptargTF} expands in exactly two steps, grabs all the arguments only at
+  the second expansion step, and is alignment safe. It has the same limitations
+  as \cs{ekvoptarg}.
+\end{function}
+\begin{example}
+    {Expandably search for an optional argument and behave differently if it's
+    found or not}
+  Say we have a macro that should behave differently depending on whether there
+  was an optional argument or not. This could be done with:
+  \makeatletter
+  \begin{enverb}
+    \newcommand\foo{\ekvoptargTF\foo@a\foo@b}
+    \newcommand\foo@a[2]{Mandatory: #2\par Optional: #1}
+    \newcommand\foo@b[1]{Mandatory: #1\par No optional.}
+    \foo{5}\par
+    \foo[4]{5}\par
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekvcsvloop}
+  \begin{syntax}
+    \cs{ekvcsvloop}\marg{code}\marg{csv-list}
+  \end{syntax}
+  This loops over the comma separated items in \meta{csv-list} and, after
+  stripping spaces from either end of \meta{item} and removing at most one set
+  of outer braces, leaves |\unexpanded{|\meta{code}\marg{item}|}| for each list
+  item in the input stream. Blank elements are ignored (if you need a blank
+  element it should be given as \verb*|{ }|). It supports both active commas and
+  commas of category other. \cs{ekvcsvloop} is not alignment safe, but you could
+  make it so by nesting it in |\expanded| (since the braces around the argument
+  of |\expanded| will hide alignment characters from \TeX's parsing).
+\end{function}
+\begin{example}
+    {Loop over a comma separated list and execute arbitrary code for each
+    element}
+  The following splits a comma separated list and prints it in a typewriter font
+  with parentheses around each element:
+  \begin{enverb}
+    \newcommand*\myprocessor[1]{\texttt{(#1)}}
+    \ekvcsvloop\myprocessor{abc,def,ghi}\par
+    \ekvcsvloop\myprocessor{1,,2,,3,,4}\par
+  \end{enverb}
+\end{example}
+
+\begin{function}{\ekverr}
+  \begin{syntax}
+    \cs{ekverr}\marg{package}\marg{message}
+  \end{syntax}
+  This macro will throw an error fully expandably.\footnotemark\ The error
+  length is limited to a total length of 69~characters, and since ten characters
+  will be added for the formatting (\verb*|! | and \verb*| Error: |) that leaves
+  us with a total length of \meta{package} plus \meta{message} of 59~characters.
+  If the message gets longer \TeX\ will only display the first 69~characters and
+  append |\ETC.| to the end.
+
+  Neither \meta{package} nor \meta{message} expand any further. Also
+  \meta{package} must not contain an explicit |\par| token or the token
+  |\thanks@jfbu|. No such restriction applies to \meta{message}.
+
+  If |^^J| is set up as the |\newlinechar| (which is the case in \LaTeXe\ but
+  not in \hologo{plainTeX} by default) you can use that to introduce line breaks
+  in your error message. However that doesn't change the message length limit.
+\end{function}
+\footnotetext{The used mechanism was to the best of my knowledge first
+implemented by Jean-François Burnol.}
+After your own error message some further text will be placed. The formatting
+of that text will look good if |^^J| is the |\newlinechar|, else not so much.
+That text will read:
+\begin{verbatim}
+  ! Paragraph ended before \<an-expandable-macro>
+  completed due to above exception.  If the error
+  summary is  not comprehensible  see the package
+  documentation.
+  I will try to recover now.  If you're in inter-
+  active mode hit <return>  at the ? prompt and I
+  continue hoping recovery was complete.
+\end{verbatim}
+Any clean up has to be done by you, |\ekverr| will expand to nothing after
+throwing the error message.
+
+In \ConTeXt\ this macro works differently. While still being fully expandable,
+it doesn't have the character count limitation and doesn't impose restrictions
+on \meta{package}. It will not display the additional text and adding line
+breaks is not possible.
+\begin{example}{Expandably throw error messages using \cs[no-index]{ekverr}}
+  Say we set up a macro that takes as mandatory argument a simple equation which
+  must not be empty and if it's not empty it displays it and calculates the
+  result:
+  \begin{enverb}[no-tcb]
+    \newcommand*\mycalc[1]
+      {%
+        \the\numexpr
+        \if\relax\detokenize{#1}\relax
+          \ekverr{my}{Empty equation not allowed, leaving -2147483647}%
+          -2147483647%
+        \else
+          #1%
+        \fi
+        \relax
+      }
+    Using \mycalc{} wrong.
+  \end{enverb}
+  If that code gets executed the following will be the terminal output
+  \begin{verbatim}
+    Runaway argument?
+    ! my Error: Empty equation not allowed, leaving -2147483647
+    ! Paragraph ended before \<an-expandable-macro>
+    completed due to above exception.  If the error
+    summary is  not comprehensible  see the package
+    documentation.
+    I will try to recover now.  If you're in inter-
+    active mode hit <return>  at the ? prompt and I
+    continue hoping recovery was complete.
+    <to be read again>
+                       \par
+    l.17 Using \mycalc{}
+                         wrong.
+    ? 
+  \end{verbatim}
+  and the output would contain
+  \exres{Using -2147483647 wrong}
+  if we continued the \TeX\ run at the prompt.
+\end{example}
+
+
+\subsection{Other Macros}
+
+\begin{variable}{\ekvDate,\ekvVersion}
+  These two macros store \expkv's date and version.
+\end{variable}
+
+\begin{function}{\ekv@name,\ekv@name@set,\ekv@name@key}
+  \begin{syntax}
+    \cs{ekv@name}\marg{set}\marg{key}
+    \cs{ekv@name@set}\marg{set}
+    \cs{ekv@name@key}\marg{key}
+  \end{syntax}
+  The names of the macros storing the code of \Vkey{}s are built with these
+  macros. The name is built from two blocks, one that is formatting the \set\
+  name, and on for formatting the \key\ name. To get the actual name the
+  argument to \cs{ekv@name@key} must be |\detokenize|d. Both blocks are put
+  together (with the necessary |\detokenize|) by \cs{ekv@name}. For \Nkey{}s an
+  additional |N| gets appended, so their name is
+  \cs{ekv@name}\marg{set}\marg{key}|N|.
+
+  You can use these macros to implement additional functionality or access
+  key-macros outside of \expkv, but \emph{don't} change them! \expkv\ relies on
+  their exact definitions internally.
+\end{function}
+\begin{example}{Directly call key code without parsing a \kv\ list}
+  Execute the key-macro of the \Nkey\ named |bar| in set |foo|:
+  \begin{enverb}[no-tcb]
+    \csname\ekv@name{foo}{bar}N\endcsname
+  \end{enverb}
+\end{example}
+
+
+\subsection{Examples}
+\subsubsection{Standard Use-Case\label{sec:expkv:standard}}
+
+\begin{example}{A \kv\ based replacement for \LaTeXe's \cs[no-index]{rule}}
+  Because I keep forgetting the correct order of \LaTeXe's |\rule| command I
+  want to create a \kv\ interface to it. For this I define the keys |ht| to
+  specify the rule's height, |wd| to specify its width, and to give a
+  displacement I use two keys (because who can remember whether the rule is
+  moved upwards or downwards?).
+
+  First the internals storing the values are initialised
+  \begin{enverb}[no-tcb,store]
+    \makeatletter
+    \newcommand*\myrule@ht{1ex}
+    \newcommand*\myrule@wd{0.1em}
+    \newcommand*\myrule@raise{\z@}
+  \end{enverb}
+  then the keys are defined. We could use |\dimen| registers instead of defining
+  macros, but macros have the advantage that the font dependent dimensions are
+  evaluated at use time.
+  \begin{enverb}[no-tcb,store]
+    \protected\ekvdef{myrule}{ht}{\def\myrule@ht{#1}}
+    \protected\ekvdef{myrule}{wd}{\def\myrule@wd{#1}}
+    \protected\ekvdef{myrule}{raise}{\def\myrule@raise{#1}}
+    \protected\ekvdef{myrule}{lower}{\def\myrule@raise{-#1}}
+  \end{enverb}
+  We also want a way to change the initial values without outputting a rule
+  (since there are unexpandable keys involved it's a good idea to define this
+  |\protected|)
+  \begin{enverb}[no-tcb,store]
+    \protected\ekvsetdef\myruleset{myrule}
+  \end{enverb}
+  and we need an actual frontend that does the job:
+  \begin{enverb}[no-tcb,store]
+    \newcommand*\myrule[1][]
+      {%
+        \begingroup
+          \myruleset{#1}%
+          \rule[\myrule@raise]{\myrule@wd}{\myrule@ht}%
+        \endgroup
+      }
+    \makeatother
+  \end{enverb}
+  Now we can use it:
+  \begin{enverb}[same-line=0.5,restore]
+    a\myrule\par
+    a\myrule[ht=2ex,lower=.5ex]\par
+    \myruleset{wd=5cm}
+    a\myrule
+  \end{enverb}
+\end{example}
+
+
+\subsubsection{An Expandable \kv\ Macro Using
+  \cs[no-index]{ekvsneak}\label{sec:expkv:sneak}}
+
+\begin{example}{An expandable \kv\ macro using \cs[no-index]{ekvsneak}}
+  Let's set up an expandable macro that uses a \kv\ interface. The problems
+  we'll face for this are:
+  \begin{enumerate}
+    \item ignoring duplicate keys
+    \item default values for keys which weren't used
+    \item providing the values as the correct argument to a macro (ordered)
+  \end{enumerate}
+
+  First we need to decide which \kv\ parsing macro we want to do this with,
+  \cs{ekvset} or \cs{ekvparse}. For this example we also want to show the usage
+  of \cs{ekvsneak}, hence we'll choose \cs{ekvset}. And we'll have to use
+  \cs{ekvset} such that it builds a parsable list for our macro internals. To
+  gain back control after \cs{ekvset} is done we have to put an internal of our
+  macro at the start of that list, so we use an internal key that uses
+  \cs{ekvsneakPre} after any user input.
+
+  To ignore duplicates will be easy if the value of the key used last will be
+  put first in the list, so we'll use \cs{ekvsneakPre} for the real values as
+  well. If for some reason we wanted a key for which the first usage was the
+  binding one we'd use \cs{ekvsneak} for that one.
+
+  Providing default values can be done in different ways. We'll use a simple
+  approach in which we'll just put the outcome of our keys if they were used
+  with default values before our end marker.
+
+  Ordering the keys can be done simply by searching for a specific token for
+  each argument (that token acts as a flag), so our sneaked out values will
+  include these specific tokens acting as markers.
+
+  Now we got an answer to each of our initial problems. Everything that's left
+  is deciding what our macro should actually do. For this example we'll define a
+  macro that calculates the sine of a number rounded to a specified precision.
+  The macro should also understand input in radian and degree, and we could also
+  decide to evaluate a different function. For the real hard part of this
+  (expandably calculating trigonometric functions) we'll use \pkg{xfp}.
+
+  First we set up our keys according to our earlier considerations and set up
+  the user facing macro |\sine|. The end marker of the parsing list will be a
+  |\sine@stop| token (which we don't need to define) and we put our default
+  values right before it. The user macro |\sine| uses |\ekvoptargTF| to check
+  for the optional argument short cutting a bit if no optional argument was
+  found. If you'd so prefer you could use \pkg{ltcmd}'s
+  |\NewExpandableDocumentCommand| to expandably get an optional argument as
+  well.
+  \begin{enverb}[no-tcb,store]
+    \RequirePackage{xfp}
+    \makeatletter
+    \ekvdef{sine}{f}{\ekvsneakPre{\f{#1}}}
+    \ekvdef{sine}{round}{\ekvsneakPre{\rnd{#1}}}
+    \ekvdefNoVal{sine}{degree}{\ekvsneakPre{\deg{d}}}
+    \ekvdefNoVal{sine}{radian}{\ekvsneakPre{\deg{}}}
+    \ekvdefNoVal{sine}{internal}{\ekvsneakPre{\sine@rnd}}
+    \newcommand*\sine{\ekvoptargTF\sine@args{\sine@final{sin}{d}{3}}}
+    \newcommand*\sine@args[2]
+      {\ekvset{sine}{#1,internal}\rnd{3}\deg{d}\f{sin}\sine@stop{#2}}
+  \end{enverb}
+
+  Now we need to define some internal macros to extract the value of each key's
+  last usage (remember that this will be the argument after the first matching
+  flag). For that we use one delimited macro per key.
+  \begin{enverb}[no-tcb,store]
+    \def\sine@rnd#1\rnd#2#3\sine@stop{\sine@deg#1#3\sine@stop{#2}}
+    \def\sine@deg#1\deg#2#3\sine@stop{\sine@f#1#3\sine@stop{#2}}
+    \def\sine@f#1\f#2#3\sine@stop{\sine@final{#2}}
+  \end{enverb}
+  After the macros |\sine@rnd|, |\sine@deg|, and |\sine@f| the macro
+  |\sine@final| will see
+  |\sine@final|\marg{f}\marg{degree/radian}\marg{round}\marg{num}. Now
+  |\sine@final| has to expandably deal with those arguments such that the
+  |\fpeval| macro of \pkg{xfp} gets the correct input. Luckily this part is
+  pretty easy after the build up we've done until now. In |\fpeval| the
+  trigonometric functions have names such as |sin| or |cos|, and the degree
+  taking alternatives just have an appended |d| (so |sind| or |cosd|). So
+  putting \meta{f} and \meta{degree/radian} together will form the correct
+  names.
+  \begin{enverb}[no-tcb,store]
+    \newcommand*\sine@final[4]{\fpeval{round(#1#2(#4),#3)}}
+    \makeatother
+  \end{enverb}
+  Let's give our macro a test:
+  \begin{enverb}[restore,inter=\def\RequirePackage#1{}]
+    \sine{60}\par
+    \sine[round=10]{60}\par
+    \sine[f=cos,radian]{pi}\par
+    \edef\myval{\sine[f=tan]{1}}\texttt{\meaning\myval}
+  \end{enverb}
+\end{example}
+
+Please note that setting this up a lot more user friendly is easily possible by
+utilizing \expkvc\ (see \autoref{sec:expkv-cs}).

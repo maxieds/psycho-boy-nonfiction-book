@@ -1,0 +1,183 @@
+\subsection{Examples}
+
+The following preamble should work for all of the examples in this section
+(except for the last one, which can be placed as is in the preamble since it
+loads all the packages it needs).
+\begin{ex}[no-tcb]
+  \documentclass{article}
+
+  \usepackage{enverb}
+  \usepackage{color}
+  \usepackage{multicol}
+  \usepackage{listings}
+\end{ex}
+
+\subsubsection{A Boxed Verbatim Display}
+Defining a boxed verbatim macro is pretty simple, we just need to set up the
+|bol| and |eol| hooks such that line breaks are respected, the rest of the setup
+already works with \LaTeX's default definition for active spaces (and tabs).
+\begin{ex}[store,no-tcb]
+  \newenvironment{myenv}
+    {\enverb{bol=\strut, eol=\strut\par}}
+    {%
+      \par
+      \medskip
+      \noindent
+      \fbox
+        {%
+          \parbox
+            {\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+            {%
+              \raggedright\frenchspacing\ttfamily
+              \enverbBody
+            }%
+        }%
+      \par
+      \medskip
+    }
+\end{ex}
+The probably most complicated part there is the calculation of the |\parbox|'s
+width, which is just a line width compensated by the space taken up by |\fbox|.
+
+If we now use this environment we get a nice display of our verbatim contents
+(you might want to play with this and see what happens if your input lines are
+longer than a |\linewidth|; also note that the spaces after |\begin| and |\end|
+are optional just like within the normal category code regime, \envlogo\ will
+still find the end of its scope).
+\begin{ex}[restore]
+  \begin {myenv}
+    \This is a%
+    \begin{environment}
+    that looks \good
+  \end {myenv}
+\end{ex}
+
+\subsubsection{A Page-Breakable Boxed Verbatim Display}
+The previous example was boxed, lets put that to the next level. We can also
+achieve page- (and column-)breakable boxed verbatim environments. The simple
+minded trick here is to draw only line segments at the start and end of each
+line using the |\vrule| primitive. As a result this will look horribly wrong for
+lines longer than a single output line, but that would require too much hassle
+(we just pay attention on our input formatting).
+
+As an added bonus this should have line counters at the start of each line. For
+that we first define a little helper.
+\begin{ex}[store,no-tcb]
+  \newcount\myline
+  \newcommand\linecounting
+    {%
+      \advance\myline1
+      \textcolor[gray]{.7}{\footnotesize\the\myline}%
+      \quad
+    }
+\end{ex}
+Next we can define our environment. The |bol| and |eol| hooks look similar to
+the previous example, but this time they got some added contents for the
+additional formatting. Also, we borrow some code from \LaTeX's starred
+\env{verbatim} to make spaces visible (since they are active in |\enverb| this
+is also pretty straight forward).
+\begin{ex}[store,no-tcb]
+  \newenvironment{myenv}
+    {%
+      \enverb
+        {
+           bol=\noindent\strut\vrule\hskip\fboxsep\linecounting
+          ,eol=\hfill\hskip\fboxsep\vrule\strut\par
+        }%
+    }
+    {%
+      \medskip
+      \hrule
+      \ttfamily\frenchspacing
+      \UseName{@setupverbvisiblespace}\UseName{@vobeyspaces}%
+      \enverbBody
+      \hrule
+      \medskip
+    }
+\end{ex}
+The entire result can then be used with ease.
+\begin{ex}[restore,same-line=.38]
+  \begin{multicols}{2}
+    Text above
+    \begin{myenv}
+      This \is
+      {an} $example$
+      ^of verbatim_
+      input\, being
+      displayed boxed.
+    \end{myenv}
+    Text below
+  \end{multicols}
+\end{ex}
+
+\subsubsection{The Real Deal -- Using the Body Twice}
+All of the above is just pretty playthings that are easily possible with
+\envlogo\ (and with relative few lines of code) though most likely better done
+by more full fledged packages like \pkg{listings} or similar. The original
+reason for all this was to gain control over both the listing and typeset result
+for code documentation. A simple example could be the following:
+\begin{ex}[store,no-tcb]
+  \newenvironment{myenv}
+    {\enverb{}}
+    {%
+      \par\noindent
+      \begin{minipage}{0.48\linewidth}
+        \enverbListing{lstlisting}{}
+      \end{minipage}%
+      \hfill
+      \colorbox{yellow}
+        {%
+          \begin{minipage}{\dimexpr0.48\linewidth-2\fboxsep\relax}
+            \enverbExecute
+          \end{minipage}%
+        }%
+      \par
+    }
+\end{ex}
+Which if used looks like the following (admittedly not that pretty):
+\begin{ex}[restore]
+  \begin{myenv}
+    This%
+    is%
+    great.%
+  \end{myenv}
+\end{ex}
+
+\subsubsection{\envlogo's Style}
+And if you wondered, you guessed it, all examples in this documentation are
+typeset using an \envlogo\ derived environment with a few bells and whistles
+more (for instance collecting material, typesetting the verbatim listing, but
+executing it together with a later code block).
+
+The following is a complete listing of everything that sets up the looks of this
+documentation's example blocks. Note that the macros starting with |\enverb@ex@|
+are not internals of \envlogo\ but exclusive to the code formatting the
+examples.
+\begin{exwrap}{breakable}
+  \footnotesize
+  \lstinputlisting{preamble-examples.tex}
+\end{exwrap}
+
+And if we use that we can do all sorts of interesting things:
+\begingroup
+  \NewEnvironmentCopy{ex2}{ex}
+  \begin{ex2}[same-line=.45]
+    We define a helper:
+    \begin{ex}[store,no-tcb]
+      \newcommand\foo{bar}
+    \end{ex}
+    And then can use it:
+    \begin{ex}[restore]
+      This is \foo
+    \end{ex}
+    A wider example:
+    \begin{ex}[below]
+      This is a wider example.
+    \end{ex}
+    An example with wide code
+    but small output:
+    \begin{ex}[same-line=.9]
+      \textcolor{red}{\bfseries.}
+    \end{ex}
+  \end{ex2}
+\endgroup

@@ -1,0 +1,64 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 160 Scatter Plot with Custom Legend (Two Databases, Multiple Sets of Data)
+% Label: "ex:growthscatter6col2dbmap2customlegend"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{scontents}% to write test file with TABs preserved
+\begin{scontents}[write-out={growth.tsv},overwrite]
+Experiment 1		Experiment 2	
+Time	Log Count	Time	Log Count
+0	2.9	0	3.31
+15	3.14	10	3.45
+30	3.26	25	3.61
+45	4.01	40	3.76
+60	4.2	55	3.89
+\end{scontents}
+
+\begin{scontents}[write-out={growth2.tsv},overwrite]
+Experiment 1		Experiment 2		Experiment 3	
+Time	Log Count	Time	Log Count	Time	Log Count
+0	3.21	0	3.39	0	3.28
+15	3.43	10	3.51	10	3.45
+30	3.68	25	3.65	20	3.57
+45	4.4	40	3.84	30	3.64
+60	4.8	55	3.92	40	3.95
+\end{scontents}
+
+\usepackage{dataplot}
+\usetikzlibrary{shapes.callouts}
+\DTLsetup{store-datum}
+\DTLread[
+ name=growthdata, format=tsv,csv-skip-lines=1,
+ keys={Exp1Time,Exp1Count,Exp2Time,Exp2Count}
+]{growth}% growth.tsv
+ \DTLread[
+ name=growthdata2, format=tsv,csv-skip-lines=1,
+ keys={Exp1Time,Exp1Count,Exp2Time,Exp2Count,Exp3Time,Exp3Count}
+]{growth2}% growth2.tsv
+ 
+
+\RenewDocumentCommand \DTLplotlegendxy { O{0} m O{0} m O{0} m }
+{% 
+ \DTLplotlegendy[#1]{#2}[#5]{#6}% 
+}
+\DTLplotlegendsetname{growthdata}{$T=6$}
+\DTLplotlegendsetname{growthdata2}{$T=8$}
+\RenewDocumentCommand \DTLplotlegendy { O{0} m O{0} m }{Experiment #3} % for the custom legend:
+ \renewcommand{\DTLcustomlegend}[1]{% 
+ \node
+ [rectangle callout,fill=green!10,anchor=west,outer sep=10pt,
+ callout relative pointer={(-40pt,10pt)}
+ ] at (\DTLplotwidth,0.25\DTLplotheight)
+ {#1} ;
+} 
+\begin{document}
+\DTLplot{growthdata,growthdata2}{
+ x={Exp1Time,Exp2Time,Exp3Time},
+ y={Exp1Count,Exp2Count,Exp3Count},
+ x-label={Time ($t$)},y-label={Log Count},
+ legend=custom,
+ width=2.5in,height=2.5in
+} 
+\end{document}

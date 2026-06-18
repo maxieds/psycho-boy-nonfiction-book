@@ -1,0 +1,1128 @@
+% !TeX root = ../easyfloats.tex
+
+\section{Documentation}
+\label{documentation}
+
+This section contains the documentation on how to use this package.
+
+\Cref{options} gives general information on options which environments and commands defined by this package may take.
+The options themselves are explained in \cref{environments,commands} where the environments and commands defined by this package are explained.
+
+\Cref{initialization} describes what is happening when loading this package.
+\Cref{package-options} describes the options which can be passed to `\usepackage` when loading this package.
+
+\Cref{help} explains a few features which may help you to get a better understanding about what is going on.
+This might be useful if you run into unexpected errors or this package behaves different than you expected.
+
+
+\subsection{Options}
+\label{options}
+
+The environments and commands defined by this package take options (implemented with the \pkg{pgfkeys} package).
+Options are a comma separated list of `<key>`s or `<key>=<value>` pairs.
+
+Which keys are allowed for which environment\slash command and which values are allowed for which key is specified in \cref{environments,commands} where the environments and commands are documented.
+This section gives general information about these options.
+
+This section does *not* apply to the package options which are explained in \cref{package-options}.
+
+
+\subsubsection{Initial vs default values}
+\label{initial-vs-default-values}
+
+I am using the words *initial value* and *default value* like they are used in the \mycite{tikz}.
+
+The *initial* value of an option is the value which is used if the key is *not* given.
+
+The *default* value of an option is the value which is used if the key is given without a value.
+Most keys don't have a default value, i.e.\ if you use the key you must explicitly give it a value.
+
+\subsubsection{Options scope}
+\label{options-scope}
+
+Setting an option always applies until the end of the current group.
+For the argument of an environment this is the corresponding `\end` command.
+For the argument of the \cmd{\includegraphicobject} command this is the end of this command.
+For the argument of \cmd{\objectset} this may be the end of the document.
+
+If you are not familiar with the concept of groups in \TeX\ \mycite[chapter~10]{texbytopic} is one possible place to read up on it.
+
+\subsubsection{Special characters in options}
+\label{special-characters-in-options}
+
+If a value contains a comma or an equals sign it must be wrapped in curly braces.
+
+Spaces before and after a comma (separating an option) and before or after an equals sign (separating key and value) are ignored.
+However, a space after the opening brace is *not* ignored.
+So if you put the first key on the next line make sure to comment out the linebreak.
+If a leading or trailing space in a value is desired wrap the value in curly braces.
+
+`\par` (aka an empty line) is forbidden in keys but allowed in values.
+
+\subsubsection{Key patterns}
+\label{key-patterns}
+
+Sometimes I am talking about entire groups of keys instead of individual keys.
+I specify those groups with a pattern which matches the keys that I am referring to.
+In these patterns parenthesis stand for something optional and angular brackets for wildcards.
+
+For example the pattern `(<env>) arg(s)` matches the keys `tabular* arg` and `args` (and many more)
+but not `env arg` because `env` is not an existing environment.
+
+If a key has a version which ends on a `+` to append a value instead of replacing it the space in front of the `+` is optional.
+
+\subsubsection{Key name vs key path}
+\label{key-name-vs-key-path}
+
+\pkg{pgfkeys} organizes all keys \textcquote[page~954]{tikz}{in a large tree that is reminiscent of the Unix file tree.}
+The keys of this package are located in the three paths `/object`, `/subobject` and `/graphicobject`.
+
+In error messages thrown by the \pkg{pgfkeys} package the full path of a key is shown.
+
+When setting keys, however, you need not and should not specify the full path.
+The commands and environments of this package set the path automatically.
+Using full paths does not directly cause an error or a warning but trying to set options for a style or style group with \cmd{\objectset} causes undefined behavior.
+
+Therefore, error messages thrown directly by this package omit the path and show the name of the key only.
+
+\subsubsection{Key types}
+\label{key-types}
+
+In \pkg{pgfkeys} there are different types of keys.
+Which type a key belongs to is relevant for debugging if you want to check the value of a key, see \cref{help}.
+
+\keytypedoc{storing key}
+  Keys of this type are like a variable.
+  They store the given value.
+  This value can be showed using the `.show value` handler (see \cref{help}).
+
+\keytypedoc{executed key}
+  Keys of this type are like a function.
+  They execute some predefined code and possibly take a value as argument.
+
+\keytypedoc{boolean key}
+  is a special case of an executed key which sets a plain \TeX\ if command.
+  This if command and it's meaning can be showed with the `.show boolean` handler (which is *not* contained in \pkg{pgfkeys}, I have defined it in this package).
+
+  The allowed values for a key of this type are `true` and `false`.
+  The default value (i.e.\ the value which is assumed if the key is given without a value) is `true`.
+
+\keytypedoc{forwarding key}
+  is a special case of an executed key which calls another key.
+
+\keytypedoc{handler}
+  Keys defined in the path `/handlers`.
+  They can be applied to other keys by appending them to the path.
+  For users of this package they can be helpful for debugging.
+  For example `\objectset{env/.show value}` shows the value of the key `env`.
+
+  The \pkg{pgfkeys} package also defines handlers which expand the value.
+  I haven't come up with an example where this might be useful in the context of this package but e.g.\ `tabular arg/.expand once=\colspec,` works as expected.
+
+\keytypedoc{unknown key handler}
+  is a special key which is called if a given key does not exist and it's name is not a handler.
+  I am using this to implement key patterns.
+\endkeytypedoc
+
+\subsubsection{Styles}
+\label{styles}
+\DescribeMeta{style}
+\DescribeMeta{styles}
+
+This package defines two styles, one for figures and one for tables.
+
+You can think of these styles as an extension of the \pkg{float} package's float styles.
+
+These styles are somewhat inspired by the \pkg{pgfkeys} styles but are different.
+They are neither set nor applied in the same way.
+
+A style is a list of options which is not set immediately but locally for each object belonging to that style.
+
+The options of a style can be set by passing the name of the style as an optional argument to the \cmd{\objectset} command,
+e.g.\ `\objectset[figure]{<options>}` or `\objectset[table]{<options>}`.
+
+A style is applied by using the corresponding environment (e.g.\ \env{figureobject} or \env{tableobject})
+or `\graphicobjectstyle{<style>}` for \cmd{\includegraphicobject}.
+
+New styles can be defined with `\NewObjectStyle` as explained in \cref{new-object-styles-and-types}.
+
+\subsubsection{Style groups}
+\label{style-groups}
+\DescribeMeta{group}
+
+This package defines one group of styles called `all` which contains all defined styles.
+
+When setting options one can use a group name instead of a style name.
+In that case the options are set for all styles in the group.
+
+\subsubsection{Options processing order}
+\label{options-processing-order}
+
+\begin{enumerate}
+\item Options set with `\objectset{<options>}` have the lowest priority.
+\item Options set for a specific style with `\objectset[<styles>]{<options>}` take precedence because they are set later (at the object, not the `\objectset` command).
+\item Options passed directly to the object have the highest priority.
+\end{enumerate}
+
+For example:
+
+\begin{examplecode}
+\objectset[figure]{placement=p}
+\objectset{placement=H}
+\objectset[table]{placement=htbp}
+\end{examplecode}
+
+Given the above preamble both figure- and tableobjects are floating.
+Tableobjects are allowed to be placed where they are specified in the source code.
+Figureobjects are put on a separate float page.
+The second line (which would disable floating) has no effect (unless you define a custom style) because it is overridden not only by the third but also the first line.
+
+
+\subsection{Environments}
+\label{environments}
+
+This package defines the following environments.
+Each of them takes exactly one mandatory argument,
+options as a comma separated key=value list.
+
+\subsubsection{`object` environment}
+\label{object-environment}
+\begingroup
+\keydocpath{/object}
+\DescribeEnv{object}
+The `object` environment is used internally by \env{figureobject} and \env{tableobject}.
+Don't use this directly.
+You can define more environments like `figureobject` or `tableobject` with \cmd{\NewObjectStyle} if needed.
+
+This environment redefines the `\caption` and `\label` commands to set the \key{caption}\slash `label` option so that you can use them as usual except you cannot create several labels.
+If you really need several labels for the same object put the additional `\label` command(s) inside of the caption argument, there `\label` has it's original meaning.
+The location or the order of `\caption` and `\label` inside of the object environment is not relevant.
+Nevertheless I recommend to always put the `\label` after the `\caption` as it is usually required in order to get the references right (if you choose to use these commands instead of the options).
+Where the caption is typeset (above or below the object) is determined by the float style.
+
+This environment takes the following options:
+\keydoc{type = <type>}{storing key}
+\DescribeMeta{type}
+   The floating environment to use, e.g.\ `figure` or \env{table}.
+\keydoc[initial value=empty]{float style = plain | plaintop | ruled | boxed | <empty>}{storing key}
+   How the object is supposed to look like,
+   most importantly whether the caption is supposed to be above or below the object.
+   See the \pkg{float} package for more information.
+
+   If the value is empty the float type is *not* restyled before the\slash each object.
+   However, this package restyles \env{table} to `plaintop` and `figure` to `plain` when it is loaded.
+   The reasoning is explained in~\autocite{texexchange_caption_position}.
+
+\keydoc{caption = <text>}{storing key}
+   The caption to place above or below the float.
+
+   The appearance of the caption can be configured using `\captionsetup` defined by the \pkg{caption} package.
+   The \pkg{caption} package is loaded automatically by this package.
+   If you want to change the horizontal alignment of the caption take a look at the options `justification` and `singlelinecheck`.
+\keydoc{list caption = <text>}{storing key}
+   The caption to place in the list of `<type>`s.
+   If this is not given, the value of \key{caption} is used instead.
+\keydoc{details = <text>}{storing key}
+   This is appended to the caption which is placed above or below the object but not to the list of `<type>`s.
+   \begin{examplecodekey}
+   	caption=CTAN lion drawing by Duane Bibby,
+   	details=Thanks to \url{www.ctan.org}.
+   \end{examplecodekey}
+   is equivalent to
+   \begin{examplecodekey\starred}{\ExamplecodeEscapeinside $ $}
+   	list caption=CTAN lion drawing by Duane Bibby,
+   	caption=CTAN lion drawing by Duane Bibby.$\\$ Thanks to \url{www.ctan.org}.
+   \end{examplecodekey\starred}
+\keydoc[initial value=a full stop followed by a space]{details sep = <text>}{storing key}
+   The separator to be placed between caption and details if details are given.
+\keydoc{label = <label>}{storing key}
+   Defines a label to reference this object.
+\keydoc{add label = <label>}{storing key}
+   Defines an additional label which can be used synonymously to label.
+   If this key is given several times, only the last one will have an effect.
+\keydoc[initial value=empty]{placement = [htbp]+!? | H | I | <empty>}{storing key}
+   The optional argument passed to the floating environment.
+   Allowed values:
+   \begin{itemize}
+   \item any combination of the letters `htbp` (where no letter is occurring more than once), optionally combined with an exclamation mark.
+     This means that the object will be a floating object.
+     The order of the letters makes no difference.
+     They have the following meanings:
+     \begin{itemize}
+     \item `h`: \LaTeX\ is allowed to place the object `h`ere, where it is defined.
+     \item `t`: \LaTeX\ is allowed to place the object at the `t`op of a page.
+     \item `b`: \LaTeX\ is allowed to place the object at the `b`ottom of a page.
+     \item `p`: \LaTeX\ is allowed to place the object on a separate `p`age only for floats.
+     \item `!`: \textcquote[page~27]{latex2e}{\LaTeX\ ignores the restrictions on both the number of floats that can appear and the relative amounts of float and non-float text on the page.}
+     \end{itemize}
+   \item \valdoc{H}: \LaTeX\ places the object exactly here, no matter how unfitting that may be.
+      In contrast to a single `h` or `h!` where the object is still a floating object which may float somewhere else if it does not fit here,
+      `H` means here and nowhere else.
+      `H` is defined by the \pkg{float} package which is loaded by this package automatically.
+   \item \valdoc{I}: \LaTeX\ places the object exactly here, considering the current line width and indentation.
+      `H` uses the full `\columnwidth`, just like a real float which floats here.
+      `I` respects the indentation of an `itemize`, shrinking the max used width to `\linewidth`.
+      This is a new placement defined by this package, using the code of `H` with two small changes.
+      `I` can only be used with the environments and commands defined by this package, it cannot be passed to a normal floating environment directly.
+   \item empty: do *not* pass the optional argument.
+     In this case the placement of the float can be changed using the `\floatplacement` command of the \pkg{float} package.
+     I have defined this key instead of advertising `\floatplacement` because `\floatplacement` does not allow the value~`H`.
+   \end{itemize}
+
+\keydoc[initial value=`\centering`]{align = <code>}{storing key}
+  \TeX\ code which is inserted at the beginning of the `<type>` environment.
+\keydoc[initial value=empty]{exec = <code>}{storing key} /
+\keydoc{exec += <code>}{executed key}
+  \TeX\ code which is inserted at the beginning of the `<type>` environment before align.
+  Can be used to define a command for this object, see \cref{local-definitions-in-tables}.
+\keydoc{graphic <option> = <value>}{unknown key handler}
+\keylinktarget{graphic width}
+\keylinktarget{graphic keepaspectratio}
+  Is applied to \cmd{\includegraphicobject} and \cmd{\includegraphicsubobject}.
+  Is ignored for other objects.
+
+  `<option>` can be any key which is unique to one of these two commands and any key allowed by the `\includegraphics` command (see \pkg{graphicx}\slash \pkg{graphbox} package).
+  Unlike `\setkeys{Gin}{<options>}` this works with all keys (compare \pkg{graphicx} documentation~\autocite[section~4.6]{graphicx}, unfortunately it's not getting more specific than \enquote{Most of the keyval keys}).
+
+  I am checking if the key is existing immediately but I cannot check the value (only whether it is required).
+  Therefore if you pass a wrong value the error message will not appear where you set this option but at the object where it is applied.
+
+  If you set `graphic width` globally and want to override it locally you can use `graphic width=!`.
+  This is a feature of the graphicx package but it is not well documented in it's documentation~\autocite{graphicx}.
+  (Which is why I am mentioning it here.)
+  The exclamation mark is mentioned for the `\resizebox` command.
+
+\bigpar
+
+\keydoc[initial value=empty]{env = <env>}{storing key}
+  The name of an additional inner environment in which the body is wrapped, e.g.\ `tabular`, \env{tabularx}, `tikzpicture`.
+  If empty the body is *not* wrapped in another environment (additional to object).
+
+  Please note that using this option can lead to difficult to find errors with confusing error messages
+  if you forget that you used it or it has a different value than you think it has.
+  In this case `show env args` may help you.
+
+  Please note that due to the way how environments are implemented in \LaTeX2 (this will change in \LaTeX3~\autocite{ltx3env})
+  it is not possible to check whether a given name is an environment or a command.
+  But if you pass something that is *not* defined you will get an error.
+
+  If you have loaded the \pkg{longtable} package (either with the package option \pkgoptn{longtable} or with a `\usepackage{longtable}`)
+  you can set the value of this key to \val{longtable}.
+  In that case the necessary changes are performed
+  so that the content of this object environment is set in a \env{longtable} environment
+  and does *not* float but can span across page breaks.
+  In this case `type`, `placement` and `align` are ignored.
+
+\keydoc{<env> arg = <value>}{unknown key handler}
+\keylinktarget{(<env>) arg(s) (+)}
+\keylinktarget{(<env>) arg(s)}
+\keylinktarget{tabularx arg+}
+\keylinktarget{tabularx arg}
+\keylinktarget{\detokenize{tabular* arg}}
+\keylinktarget{tabular arg}
+\NoDescribeKey{env arg}
+  The value is wrapped in braces and passed as argument to the additional inner environment if the value of `env` is not empty and `<env>` equals the value of `env`.
+  Arguments to this environment can be given as an argument to the `*object` environment as well but this key provides the possibility to pass arguments on a global level (or to override a globally passed argument).
+  For example this can be used to give all tabularx-tables a consistent width:
+
+  \begin{examplecode}
+  % in preamble
+  \objectset[table]{tabularx arg=.8\linewidth}
+
+  % in document
+  \begin{tableobject}{caption=Test Table, label=tab1, env=tabularx}{XX}
+      ...
+  \end{tableobject}
+  \end{examplecode}
+
+\keydoc{<env> args = <value>}{unknown key handler}
+  Same like `<env> arg` except that the value is *not* wrapped in braces.
+  This can be used to pass several arguments or an optional argument.
+  Please not that this key cannot be used to pass exactly one undelimited argument consisting of more (or less) than one token because `\pgfkeys` (which I am using internally) strips several levels of braces.
+\keydoc{arg = <value>}{unknown key handler}
+  If `env` has a non-empty value this is an abbreviation of `<env> arg` where `<env>` is the value of `env`.
+
+  Please note that because this key depends on the value of another key the order in which these two keys are given is important.
+
+  The value of `env` is considered when this key is evaluated.
+  If you use `\objectset[<styles>]{<options>}` (with it's optional argument) the processing of the keys is delayed but it makes some basic error handling already so that the line numbers are as fitting as possible.
+  For this error handling only the options passed to this call of the command are considered.
+  (Trying to consider previously set values correctly would make things more difficult because you might be applying these options to several styles at once where one might have `env` set and another not.)
+  Therefore the following causes an error message:
+
+  \begin{examplecode}
+  \objectset[table]{env=tabularx}
+  \objectset[table]{arg=.8\linewidth}
+  \end{examplecode}
+
+  While this would not:
+
+  \begin{examplecode}
+  \objectset{env=tabularx}
+  \objectset{arg=.8\linewidth}
+  \end{examplecode}
+
+  Anyway, I recommend to always use this option directly after `env` (if you intend to use it).
+  `env` and it's `args` belong together:
+
+  \begin{examplecode}
+  \objectset{env=tabularx, arg=.8\linewidth}
+  \end{examplecode}
+
+\keydoc{args = <value>}{unknown key handler}
+  If `env` has a non-empty value this is an abbreviation of `<env> args` where `<env>` is the value of `env`.
+  The notes on error handling of the `arg` key apply to this key as well.
+\keydoc{(<env>) arg(s) += <value>}{unknown key handler}
+  A plus sign can be appended to the key (patterns) `<env> arg`, `<env> args`, `args` and `arg`.
+  In that case a possibly previously passed argument is not overridden but this value is appended to it.
+  For example the following pattern allows to easily switch between tabular and tabularx tables on a global level:
+
+  \begin{examplecode}
+  % in preamble
+  \objectset[table]{tabularx arg=.8\linewidth, env=tabularx}
+  \newcolumntype{Y}{>{\raggedleft\arraybackslash}X}
+
+  % in document
+  \begin{tableobject}{caption=Test Table, label=tab1, tabular arg=lr, tabularx arg+=XY}
+      ...
+  \end{tableobject}
+  \end{examplecode}
+
+\bigpar
+
+\keydoc{first head = <code>}{storing key}
+  Is inserted at the beginning of the object (if `env` is non-empty: inside of the inner environment and after possibly specified `(<env>) arg(s)`).
+  If this is not given, `head` is used instead.
+\keydoc{last foot = <code>}{storing key}
+  Is inserted at the end of the object (if `env` is non-empty: inside of the inner environment).
+  If this is not given, `foot` is used instead.
+\keydoc[initial value=empty]{head = <code>}{storing key}
+  This value is used for `first head` if `first head` is not given.
+  If `env=longtable` this is the head after a pagebreak inside of the table.
+\keydoc[initial value=empty]{foot}{storing key}
+  This value is used for `last foot` if `last foot` is not given.
+  If `env=longtable` this is the foot before a pagebreak inside of the table.
+\keydoc{table head = <code>}{executed key}
+  This is a convenience key which sets `first head`, `last foot`, `head` and `foot`.
+  The value is the column headers without rules\slash lines and without the trailing `\\`.
+\keydoc[initial value=`(to be continued)`]{table break text = <text>}{executed key}
+  A text put in the `foot` by `table head`.
+\keydoc{table head style = <code>}{executed key}
+  Defines how `table head` fills out `first head`, `last foot`, `head` and `foot`.
+
+  Initial value:
+
+  \begin{examplecode}
+  {%
+      first head =
+          \toprule
+          #1 \\
+          \midrule,
+      head =
+          #1 \\
+          \midrule,
+      foot =
+          \midrule
+          \ifx\object@tableBreakText\@empty
+          \else
+              \multicolumn{\the\LT@cols}{r@\relax}{\object@tableBreakText}%
+          \fi,
+      last foot =
+          \bottomrule,
+  }
+  \end{examplecode}
+
+  (Note the curly braces which are required because the value contains commas and equal signs, see \cref{special-characters-in-options}.
+   `\the\LT@cols` is the number of columns of the longtable and `\object@tableBreakText` is the value of `table break text`.
+   Commands containing an @ in their name are internal commands and can only be used between `\makeatletter` and `\makeatother`, see also \autocite{texexchange_make_at}.)
+
+\bigpar
+
+\keydoc[initial value=`false`, default value=`true`]{show env args =? true | false}{boolean key}
+  Show the code which is assembled from the `env` and `(<env>) arg(s) (+)` keys before executing it.
+  See \cref{help}.
+  Please note that arguments may be given as additional arguments and not as `(<env>) arg(s) (+)` like in `\begin{tableobject}{env=tabular}{cl}`.
+  Such arguments are *not* shown by this key.
+  This key applies to subobjects as well.
+
+\keydoc[initial value=`true`, default value=`true`]{warn no caption =? true | false}{boolean key}
+  Give a warning if \key{caption} is *not* given.
+\keydoc[initial value=`true`, default value=`true`]{warn no label =? true | false}{boolean key}
+  Give a warning if `label` is *not* given.
+\keydoc[initial value=`false`, default value=`true`]{warn other env =? true | false}{boolean key}
+  Give a warning when `<env> args` is given if `env` does not have the value `<env>` and the value of `env` is not empty.
+  This applies to subobjects as well.
+
+  The \cmd{\objectset} command if used with it's optional argument does not set the options immediately but stores them in different macros for different object styles.
+  Therefore if you change this value for certain styles this change does not affect following `\objectset` commands.
+  Without the optional style argument, however, the change takes effect immediately.
+
+  In order to avoid duplicates this warning is printed only where the key is passed by the user
+  and *not* where it is applied implicitly because of a previous `\objectset[<styles>]{<options>}`.
+
+\keydoc[initial value=`false`, default value=`true`]{contains subobjects =? true | false}{boolean key} /
+\keydoc{sub =? true | false}{forwarding key}
+  Specifies that this object contains subobjects, see \cref{subobject-environment}.
+  Is relevant only if `env` is set.
+  The value of `env` is applied to the subobjects instead of this object.
+  This is not executed immediately but only after all options have been processed so that you do not need to pay special attention to pass `env` before `contains subobjects`.
+
+  If this is *not* given (or more precisely: if this is false)
+  and the value of `env` is *not* empty I look ahead whether the object contains a subobject.
+  If I find a subobject I pretend you had passed this option and print a warning.
+  I insist on you explicitly passing this option because the lookahead does not work in all situations.
+  It ignores space and `\par` tokens but if there is any other token before the subobject,
+  for example a `\small` to fit two tables side by side which are a little too wide
+  (which may not be the best solution but an easy quick fix)
+  or a `\typeout` for debugging,
+  the lookahead does not find the subobject (possibly) resulting in unpredictable errors.
+  For example if you set `env=tabular` it will most likely complain about an \errormessage{Illegal pream-token}
+  or about a \errormessage{Missing number, treated as zero} with `env=tabular*` because the required arguments are missing.
+\endkeydoc
+
+
+All `(<env>) arg(s) (+)` options apply to subobjects as well.
+
+Additionally the following options are passed through to the corresponding options of all subobjects inside of this object, they are all \keytype[forwarding key]{forwarding keys}.
+\newcommand{\TargetKey}[2]{/subobject/\stripsubobject #2\relax}%
+\def\stripsubobject subobject #1\relax{\stripoptplus{#1}}%
+See \env{subobject} environment.
+\forwardingkeydoc{subobject linewidth = <dimen>}
+\forwardingkeydoc{subobject sep = <code>}
+\forwardingkeydoc{subobject hor =? <code>}
+\forwardingkeydoc{subobject hor sep (+)= <code>}
+\forwardingkeydoc{subobject ver =? <code>}
+\forwardingkeydoc{subobject ver sep (+)= <code>}
+\forwardingkeydoc{subobject exec (+)= <code>}
+\forwardingkeydoc{subobject env = <env>}
+\forwardingkeydoc[target=/subobject/subcaptionbox]{subcaptionbox}
+\forwardingkeydoc[target=/subobject/subcaptionbox inner pos]{subcaptionbox inner pos = c | l | r | s | <empty>}
+\forwardingkeydoc[target=/subobject/subpage]{subpage}
+\forwardingkeydoc[target=/subobject/subpage outer pos]{subpage outer pos = c | t | b | T | B | auto | Auto | auto-inverted | Auto-inverted | <empty>}
+\forwardingkeydoc[target=/subobject/subpage height]{subpage height = <dimen>}
+\forwardingkeydoc[target=/subobject/subpage inner pos]{subpage inner pos = c | t | b | s | <empty>}
+\forwardingkeydoc[target=/subobject/subpage align]{subpage align = <code>}
+
+\forwardingkeydoc{subobject warn no caption =? true | false}
+\forwardingkeydoc{subobject warn no label =? true | false}
+\endkeydoc
+\endgroup
+
+You can also define your own options as shown in \cref{custom-options}.
+
+
+\subsubsection{`figureobject` environment}
+\label{figureobject-environment}
+\DescribeEnv{figureobject}
+Is used for inserting figures.
+Takes the same options like the \env{object} environment.
+It differs in the following initial values:
+\begin{itemize}
+\item `type=figure`
+\end{itemize}
+
+\subsubsection{`tableobject` environment}
+\label{tableobject-environment}
+\DescribeEnv{tableobject}
+Is used for inserting tables.
+Takes the same options like the \env{object} environment.
+It differs in the following initial values:
+\begin{itemize}
+\item `type=table`
+\end{itemize}
+
+
+\subsubsection{`subobject` environment}
+\label{subobject-environment}
+\begingroup
+\keydocpath{/subobject}
+\DescribeEnv{subobject}
+To be used inside of an `*object` environment if you want to place several images\slash tables\slash whatever together.
+See also \cmd{\includegraphicsubobject}.
+
+I recommend to *not* put anything between the subobjects manually so that you can control their positioning with the `hor` and `ver` options.
+(Spaces after a subobject are ignored but empty lines are not.)
+
+Unlike the `object` environment, `\caption` and `\label` *cannot* be used inside of the subobject environment.
+Use the \key{caption} and `label` options instead.
+
+There are two different backends available, both provided by the \pkg{subcaption} package.
+See the `subcaptionbox` and `subpage` keys.
+
+The `subobject` environment has exactly one mandatory argument, a comma separated list of the following options.
+
+
+The following options correspond to those of an `object`.
+See \cref{object-environment}.
+\newcommand{\TargetKey}[2]{/object/#2}%
+\correspondingkeydoc{label = <label>}{storing key}
+
+\correspondingkeydoc{caption = <text>}{storing key}
+
+\correspondingkeydoc{list caption = <text>}{storing key}
+
+  (The \pkg{subcaption} package disables subcaptions in the list of figures\slash tables\slash whatever by default.
+   To enable them use `\captionsetup[sub]{list=true}`.)
+\correspondingkeydoc{details = <text>}{storing key}
+
+\correspondingkeydoc{details sep = <text>}{storing key}
+
+\correspondingkeydoc{exec = <code>}{storing key} /
+\correspondingkeydoc{exec += <code>}{executed key}
+
+\correspondingkeydoc{graphic <option> = <value>}{unknown key handler}
+
+  (This key is completely useless.
+   It only has a meaning in the context of \cmd{\includegraphicsubobject} but there these options can be used directly without the prefix `graphic`.
+   I am allowing it anyway in order to support the same key like in \cmd{\objectset} which is supported by \cmd{\includegraphicobject} as well.)
+\correspondingkeydoc{env = <env>}{storing key}
+
+  (See also the `contains subobjects` option of the \env{object} environment.)
+\correspondingkeydoc{(<env>) arg(s) (+) = <value>}{unknown key handler}
+
+  (All values passed to the corresponding keys of the \env{object} environment apply to this option, too.)
+
+\correspondingkeydoc{warn no caption =? true | false}{boolean key}
+
+\correspondingkeydoc{warn no label =? true | false}{boolean key}
+
+\forwardingkeydoc[target=/object]{warn other env =? true | false}
+
+\forwardingkeydoc[target=/object]{show env args =? true | false}
+
+\endkeydoc
+
+The following options are unique for the `subobject` environment:
+\keydoc[initial value=`.5\linewidth`]{linewidth = <dimen>}{storing key}
+  The horizontal space available for the subobject.
+  The content of the subobject is centered within this width.
+  If two subobjects displayed side by side have a small width they may appear too far apart from each other with the initial value.
+  Then you can decrease this value so that they come closer together.
+  (With `subcaptionbox` this value may be empty.
+   In that case the subobject takes as much space as it needs
+   and `\linewidth` inside of the subobject is the same like in the parent object.)
+
+  If you want to place more than two subobjects side by side you must decrease this value accordingly.
+  Keep in mind that you need to consider the width of `hor sep` as well if you changed it.
+
+  Dimensions can be given relative to other dimensions or in numbers.
+  Aside from absolute units like `pt` or `cm` \TeX\ also recognizes units relative to the current font size: `em` and `ex`.
+  For more information on dimensions see \mycite[chapter~10]{texbook} or \mycite[chapter~8]{texbytopic}.
+
+\keydoc{sep = <code>}{storing key}
+  A separator which is inserted before each subobject except for the first subobject inside of the current parent object.
+
+\keydoc[default value=empty]{hor =? <code>}{executed key}
+  Set the value of `sep` to the value of `hor sep` so that the subobjects are placed side by side.
+  If you pass a value the value will be appended to `sep` after setting it to `hor sep`.
+
+  Please note that options are only valid until the end of a group.
+  Therefore if you use this inside of a subobject it does *not* apply for the following subobject.
+  Instead use `subobject hor` on the parent object.
+
+\keydoc[initial value=empty]{hor sep = <code>}{storing key} /
+\keydoc{hor sep += <code>}{executed key}
+  The separator to be used if the subobjects are suppossed to be placed side by side.
+
+  Please note that `hor` must be used *after* setting this key, otherwise this option will not take effect.
+
+\keydoc[default value=empty]{ver =? <code>}{executed key}
+  Set the value of `sep` to the value of `ver sep` so that the subobjects are placed below each other.
+  If you pass a value the value will be appended to `sep` after setting it to `ver sep`.
+
+  Please note that options are only valid until the end of a group.
+  Therefore if you use this inside of a subobject it does *not* apply for the following subobject.
+  Instead use `subobject ver` on the parent object.
+
+\keydoc[initial value=`\par\bigskip`]{ver sep = <code>}{storing key} /
+\keydoc{ver sep += <code>}{executed key}
+  The separator to be used if the subobjects are suppossed to be placed below each other.
+
+  Please note that `ver` must be used *after* setting this key, otherwise this option will not take effect.
+
+\bigpar
+
+\keydoc{subcaptionbox}{executed key}
+  The \pkg{subcaption} package provides several possibilities to insert subobjects.
+  This option tells the subobject environment to use the `\subcaptionbox` command instead of the `subfigure` or `subtable` environment, see option `subpage`.
+  (This key does *not* take a value.)
+
+  This option allows to pass an empty value to `linewidth`.
+  It can be useful if you have subobjects with a small width
+  so that you don't need to try different `subobject linewidth`s.
+  The example in \cref{subobjects-2} could be rewritten as following:
+
+  \inputexamplecode{../test/exp-subcaptionbox}
+
+  Note that this works only if the subobject captions are very short.
+  If they are wider than the content the line breaks which looks ugly.
+
+  If you want to use this option with `env=tabular` (or similar) you must pass the column specification with the option `arg=lr` (instead of as a separate argument).
+  Otherwise you will get the error message \errormessage{Package array Error: Illegal pream-token (\BODY): `c' used.}
+
+  This option is *not* compatible with `env=tabularx` and does *not* allow verbatim content inside of the subobject.
+  You can try to work around the verbatim limitation
+  (1)~by saving the problematic content in a macro before hand using commands such as `\urldef` from the \pkg{url} package,
+  (2)~by using commands which replace tokens such as `\mintinline` from the \pkg{minted} package (does not work with catcodes which do not produce tokens -- most importantly the comment character \formatchar\%),
+  (3)~by changing the problematic catcodes before the `subobject` (but you still need \emph{some} escape, begin group and end group characters in order to start and end the subobject -- but which do not need to be the default characters \formatchar\\, \formatchar\{ and \formatchar\}),
+  (4)~by defining a macro before hand under what ever catcode regime you want, you can even append contents from yet another catcode regime using the `\gappto` command from the \pkg{etoolbox} if you want.
+  If you want to learn more about catcodes (category codes) see \mycite[chapter~7]{texbook} or \mycite[chapter~2]{texbytopic}.
+  But the easier way is probably to use `subpage` instead -- that's why it's the initial backend.
+
+  \MakeLinkTarget{}
+  \label{exp:subcaptionbox-limitations}
+  \inputexamplecode{../test/exp-subcaptionbox-defverb}
+
+  `\NewDocumentCommand` is documented in~\autocite{usrguide}.
+
+\keydoc{subcaptionbox inner pos = c | l | r | s | <empty>}{storing key}
+  The horizontal position of the content in the box.
+  Also allowed is any justification defined with `\DeclareCaptionJustification`
+  (see the \pkg{caption} package documentation).
+  An empty value means that this optional argument is
+  *not* passed to the `\subcaptionbox` command.
+  This option has no effect if `linewidth` is empty.
+  I discourage using this option because it destroys
+  the alignment of (sub)object and (sub)caption.
+
+\bigpar
+
+\keydoc{subpage}{executed key}
+  This is (after `subcaptionbox`) the second and initial backend for the `subobject` environment.
+  It uses the `subfigure`\slash `subtable` environment defined by the \pkg{subcaption} package.
+  (Since version 1.5 the \pkg{subcaption} package also provides the more generic `subcaptionblock` environment but this package still uses the old `subfigure` and `subtable` environments.
+   `subfigure` and `subtable` are nowadays specialized versions of `subcaptionblock` which have no other difference than that they produce if a warning if they are used with a different main object type.)
+  (This key does *not* take a value.)
+
+  The `subfigure` and `subtable` environments are minipages and take the same arguments
+  which can be set with `linewidth`, `subpage outer pos`, `subpage height` and `subpage inner pos`.
+  Both the content and the caption go inside of the minipage.
+
+  If the subobjects are placed next to each other this option requires that either the contents or the captions of the subobjects have the same height and that `subpage outer pos` is set accordingly.
+  Otherwise the captions will not be aligned.
+
+\keydoc[initial value=`auto`]{subpage outer pos = c | t | b | T | B | auto | Auto | auto-inverted | Auto-inverted | <empty>}{storing key}
+  The vertical position of the minipage (containing both content and caption) on the baseline.
+
+  Additionally to the values `t`, `c` and `b` supported by the minipage environment
+  the \pkg{subcaption} package v1.2 adds the allowed values `T` and `B`
+  and this key also allows the values `auto`, `Auto`, `auto-inverted`, `Auto-inverted` and empty.
+
+  While `t` and `b` align the top\slash bottom *baseline* of the content
+  `T` and `B` align the very top\slash bottom of the content.
+
+  `c` aligns the center of the content.
+
+  `auto` means `t` if the caption is displayed at the top
+  or `b` if the caption is displayed at the bottom
+  so that the captions are aligned if the \emph{captions} have the same height.
+
+  `auto-inverted` means `b` if the caption is displayed at the top
+  or `t` if the caption is displayed at the bottom
+  so that the captions are aligned if the \emph{contents} have the same height
+  (although the height of the top most row does not count in this regard so `auto-inverted` is also good for graphics with different heights).
+
+  `Auto` and `Auto-inverted` behave like their lower case versions but use `T`/`B` instead of `t`/`b`.
+
+  If content and captions have different heights `auto-inverted` gives good results for `\includegraphicsubobject`.
+  For tables `subcaptionbox` is required to align the caption (but note the limitations regarding verbatim content).
+  If `subcaptionbox` does not work for you you can try `subpage outer pos = c` or giving the shorter caption the same height with `\\~` and then using `subpage outer pos = auto`.
+
+  If a subobject has neither caption nor label `auto` may not work as expected.
+  Instead `Auto` can be used which is based on `T` and `B` instead of `t` and `b`.
+  Note that `Auto` requires version 1.2 or newer of the \pkg{subcaption} package.
+
+  Empty is equivalent to `c`.
+
+  Except for the values which are added by this package (e.g.\ `auto` and `auto-inverted`)
+  all other values are passed through to the `subfigure`/`subtable` environment which silently ignores invalid values.
+
+
+\keydoc[initial value=empty]{subpage height = <dimen>}{storing key}
+  The height of the minipage.
+  An empty value means that this optional argument is
+  *not* passed to the `subfigure`\slash `subtable` environment.
+
+  Dimensions can be given relative to other dimensions or in numbers.
+  Aside from absolute units like `pt` or `cm` \TeX\ also recognizes units relative to the current font size: `em` and `ex`.
+  For more information on dimensions see \mycite[chapter~10]{texbook} or \mycite[chapter~8]{texbytopic}.
+
+\keydoc[initial value=empty]{subpage inner pos = c | t | b | s | <empty>}{storing key}
+  The vertical position of the content on the minipage.
+  Empty means that this optional argument is
+  *not* passed to the `subfigure`\slash `subtable` environment.
+  This option has no effect if `subpage height` is empty.
+
+\keydoc[initial value=`\centering`]{subpage align = <code>}{storing key}
+
+  \TeX\ code which is inserted at the beginning of the `subfigure`\slash `subtable` environment.
+\endkeydoc
+
+If you want to change the numbering of subobjects please refer to the \pkg{subcaption} package documentation~\autocite[section~5 \sectionname{The `\DeclareCaptionSubType` command}]{subcaption}.
+The \pkg{subcaption} package is loaded automatically by this package.
+\endgroup
+
+
+\subsection{Commands}
+\label{commands}
+
+In this section I am describing the commands defined by this package.
+
+
+\subsubsection{`\includegraphicobject` command}
+\label{includegraphicobject-command}
+\begingroup
+\keydocpath{/graphicobject}
+\DescribeMacro{\includegraphicobject}
+`\includegraphicobject{<filename>}` \\
+`\includegraphicobject[<options>]{<filename>}` \\
+`\includegraphicobject[<style>][<options>]{<filename>}`
+
+Is used for inserting graphics from a different file.
+It is very similar to \pkg{graphicx}' `\includegraphics` command, except that the graphic is automatically set in a \env{figureobject} environment.
+You can change this by setting the object style with \cmd{\graphicobjectstyle} or an additional optional argument given *before* the usual optional argument.
+The mandatory argument is the same: The name of the graphics file to include *without* the file extension.
+The optional argument accepts---aside from all the options defined by \pkg{graphicx}\slash \pkg{graphbox}---also all options of the \env{figureobject} environment.
+Additionally there are the following unique options:
+\keydoc[initial value=`true`, default value=`true`]{auto caption =? true | false}{boolean key}
+   If no \key{caption} is given the file name is used as caption.
+   All underscores in the file name are replaced by `\textunderscore`.
+   This option is intended to be used on a global level but works in the optional argument of this command as well.
+\keydoc[initial value=`false`, default value=`true`]{auto caption strip path =? true | false}{boolean key}
+   If `auto caption` is true and the file name is used as caption
+   a possibly leading path is stripped (everything before and including the last slash in `<filename>`).
+   This is initially false because I am assuming that in most cases where the path should not be displayed `\graphicspath{{path/}}` would be used.
+\keydoc[initial value=`true`, default value=`true`]{auto label =? true | false}{boolean key}
+\keylinktarget{/object/graphic auto label}
+   If no `label` is given the file name is used as label.
+   This option is intended to be used on a global level but works in the optional argument of this command as well.
+\keydoc[initial value=`false`, default value=`true`]{auto label strip path =? true | false}{boolean key}
+   If `auto label` is true and the file name is used as label
+   a possibly leading path is stripped (everything before and including the last slash in `<filename>`).
+   This is initially false because I am assuming that in most cases where the filename without path is unique `\graphicspath{{path/}}` would be used.
+\keydoc[initial value=`<empty>`]{auto label prefix = <prefix>}{storing key}
+\keylinktarget{/object/graphic auto label prefix}
+   If `auto label` is true and the file name is used as label
+   prepend `<prefix>` to the label.
+\keydoc[initial value=`true`, default value=`true`]{warn env =? true | false}{boolean key}
+   Give a warning if `env` is not empty.
+\keydoc[initial value=`true`, default value=`true`]{no env =? true | false}{boolean key}
+   Reset `env` to an empty value.
+   This happens after evaluating `warn env`.
+\keydoc[initial value=`<empty>`]{before graphic = <code>}{storing key}
+   Arbitrary \TeX\ code to be inserted before the `\includegraphics`.
+\keydoc[initial value=`<empty>`]{after graphic = <code>}{storing key}
+   Arbitrary \TeX\ code to be inserted after the `\includegraphics`.
+\endkeydoc
+
+You may not use this command inside of an `*object` environment.
+Otherwise you will get an \errormessage{object environment may not be nested} error.
+See also \cmd{\includegraphicsubobject}.
+\endgroup
+
+\subsubsection{`\includegraphicsubobject` command}
+\label{includegraphicsubobject-command}
+\DescribeMacro{\includegraphicsubobject}
+`\includegraphicsubobject{<filename>}` \\
+`\includegraphicsubobject[<options>]{<filename>}`
+
+To be used if you want to place several graphics from different files in one object.
+
+It takes the same options like \cmd{\includegraphicobject} except that it takes options for the \env{subobject} environment instead of options for the `object` environment.
+Also it does *not* take the optional `<style>` argument.
+
+You may not use this command outside of an `*object` environment.
+Otherwise you will get a \errormessage{subobject environment may not be used outside of an object} error.
+See also \cmd{\includegraphicobject}.
+
+
+\subsubsection{`\splitobject` command}
+\label{splitobject-command}
+\DescribeMacro{\splitobject}
+`\splitobject`
+
+This can be used inside of an `object` environment which is too big to fit on one page.
+It splits an object so that it can be broken across pages.
+This command must be used directly inside of the object,
+it cannot be used inside of subgroups/environments inside of the object.
+It uses the `\ContinuedFloat` command defined by the \pkg{caption} package.
+See the example in \cref{split-object-example}.
+
+The `label` is placed on the first part of the object.
+If you want to specify the second part of the object you can use the `\label{<second-label>}` command after `\splitobject`.
+
+
+\subsubsection{Setting options globally}
+\label{setting-options-globally}
+
+\DescribeMacro{\objectset}
+`\objectset{<options>}` \\
+`\objectset[<styles>]{<options>}`
+
+Sets the passed options for all following objects until the end of the current group.
+All options of the \env{object} environment are allowed.
+
+A comma separated list of styles or style groups can be given in an optional argument.
+In that case the options are not set immediately but appended to the specified style(s).
+The options are set locally for any following object of the specified style(s) in the same group.
+Although setting the options is delayed the options are checked immediately so that error messages and warnings point to the line where the option is specified in the code, not where it is technically set.
+(In order for that to work properly it is important that options are specified with the key name only and not with the full path, see \cref{key-name-vs-key-path}.)
+However, the value can usually *not* be checked immediately, only whether it is required or not.
+Therefore if you pass a wrong value the error message will not appear where you set this option but at the object where it is applied.
+An exception is the key `env` where the value is checked immediately for plausibility whether it might be the name of an environment.
+
+If `<styles>` is empty or an empty group the options are not applied.
+No error or warning is printed.
+
+There is a style group called `all` which all styles belong to.
+`\objectset{<options>}` and `\objectset[all]{<options>}` are mostly equivalent
+except that the former (without optional argument) is more efficient because it sets the options immediately
+and the latter (with the optional argument given) is able to override options set for a style.
+
+
+\DescribeMacro{\graphicobjectstyle}
+`\graphicobjectstyle{<style>}` can be used to change the object style used by \cmd{\includegraphicobject}.
+For example, if you have a single table in a file called \filename{catcodes.pdf} you can insert it as following.
+Alternatively, you can use the optional `<style>` argument.
+
+\begin{examplecode}
+\begingroup
+\graphicobjectstyle{table}
+\includegraphicobject[caption=Catcodes]{catcodes}
+\endgroup
+\end{examplecode}
+
+
+\DescribeMacro{\graphicspath}
+`\graphicspath{{path/}}`: see \pkg{graphicx} package documentation~\autocite[section~4.5]{graphicx}.
+
+
+\subsubsection{New object styles and types}
+\label{new-object-styles-and-types}
+
+This section explains how to define a new object `<style>` in the sense of \cref{styles}.
+It is *not* about how to define a new `<floatstyle>` which can be used as value for the `float style` key.
+Examples are given in \cref{new-object-style-tikzobject} and \cref{exp:new-object-type}.
+
+\DescribeMacro{\NewObjectStyle}
+`\NewObjectStyle{<style>}{<options>}`
+defines a new environment called `<style>object` analogous to `figureobject` and `tableobject`.
+`<options>` are set for the new object style as if you had used `\objectset[<style>]{<options>}`.
+You must always specify the `type`.
+If this package is loaded without `allowstandardfloats`
+the float environment which is passed to `type` is redefined to issue a warning that `<style>object` should be used instead.
+This warning should not influence the environment's usual behavior.
+If the float environment was already passed as `type` to a previous call of `\NewObjectStyle` it is not redefined again but `<style>object` is appended to the list of replacement suggestions.
+
+If you define a new object style you may also want to define a new float type.
+The \pkg{float} package (which is automatically loaded by this package) defines the following command for doing so:
+
+\DescribeMacro{\newfloat}
+`\newfloat{<type>}{<placement>}{<ext>}[<within>]`
+\begin{itemize}
+\item `<type>` is the floating environment to be defined.
+  This value is also used as the float name which is displayed in front of the caption, therefore it should be capitalized.
+  Alternatively the name can be changed using `\floatname{<type>}{<name>}`.
+\item `<placement>` is the value to be used if the `placement` key is not given (or has an empty value).
+  This is initially `tbp` for the standard float types.
+\item `<ext>` is the extension of a file used to save the list of `<type>`s.
+  This is `lof` (list of figures) for `type=figure` and `lot` (list of tables) for `type=table`.
+  This file extension should be unique.
+\item `<within>` is a counter whose value is prepended to the `<type>` counter. The `<type>` counter is reset every time the `<within>` counter is incremented.
+\item Make sure an appropriate default float style is active when using `\newfloat`.
+  The default float style can be activated using `\floatstyle{<floatstyle>}`, see the \pkg{float} package documentation~\autocite{float}.
+  It should be `plain` for something like an image or `plaintop` for something like a table.
+  The reasoning is explained in~\autocite{texexchange_caption_position}.
+  Alternatively you can specify the float style using the `float style` key in the `<options>` of `\NewObjectStyle`.
+\end{itemize}
+
+\DescribeMacro{\crefname}
+\DescribeMacro{\Crefname}
+If you are using the \pkg{cleveref} package (which I recommend you do) you also need to tell it how to reference the new float type with `\crefname{<type>}{<singular>}{<plural>}`.
+If you want an abbreviation in the middle of a sentence but the full word at the beginning of the sentence you specify the beginning of the sentence with `\Crefname` and the middle of the sentence with `\crefname`.
+
+`\NewObjectStyle` automatically defines the corresponding environment needed for `subobject` if possible, i.e.\ if the \pkg{caption} package is new enough.
+If the \pkg{caption} package is older than August~30, 2020 and you want to use subobjects you need to define the subtype manually by putting the following line *before* loading this package \autocite{texexchange_subtype_workaround}:
+\begin{examplecode}
+\AtBeginDocument{\DeclareCaptionSubType{<type>}}
+\end{examplecode}
+
+\DescribeMacro{\trivfloat}
+The \pkg{trivfloat} package provides the `\trivfloat{<type>}` command which is an easier alternative to `\newfloat`.
+If you use it you should be aware that it does not define the new float type environment immediately but at `\begin{document}`.
+This does *not* affect `\NewObjectStyle` (you can still use it directly afterwards)
+but it means that the float style active at `\begin{document}` is applied and not the float style active at `\trivfloat`.
+Therefore I recommend to pass the `float style` option to `\NewObjectStyle`,
+then it does not matter which float style was active when the float type was defined because it is restyled before each use of an object where this option applies.
+`\trivfloat` must be used before `\AtBeginDocument{\DeclareCaptionSubType{<type>}}`.
+
+\DescribeMacro{\DeclareFloatingEnvironment}
+The \pkg{newfloat} package provides the `\DeclareFloatingEnvironment[<options>]{<type>}` command which is a newer alternative to `\newfloat` and `\trivfloat`.
+With it's key=value options it is more intuitive than `\newfloat` and more flexible than `\trivfloat`.
+Unlike `\newfloat` and `\trivfloat` it automatically capitalizes `<type>` before using it as float name.
+It seems to ignore `\floatstyle` so you need to specify that in the options.
+The \pkg{newfloat} package is written by the same author like the \pkg{subcaption} package so you don't need to worry about defining subtypes manually.
+
+
+\subsubsection{New object style groups}
+\label{new-object-style-groups}
+
+Several object styles can be combined to a group.
+You can set options for all styles contained in a group using `\objectset[<group>]{<options>}`.
+
+\DescribeMacro{\NewObjectStyleGroup}
+`\NewObjectStyleGroup{<group>}{<styles*>}`
+defines a new style group consisting of the styles `<styles*>`.
+`<styles*>` is a comma separated list of styles.
+In contrast to `<styles>` it may *not* contain style groups.
+
+\DescribeMacro{\AddObjectStyleToGroup}
+`\AddObjectStyleToGroup{<group>}{<style>}`
+adds an existing style to an existing group.
+
+
+\subsubsection{Hooks}
+\label{hooks}
+
+This package provides several commands similar to `\AtBeginDocument`
+which take one argument, \TeX\ code which is executed at a later point in time.
+
+
+\DescribeMacro{\AtBeginObject}
+`\AtBeginObject{<code>}`
+  runs `<code>` every time at the begin of an \env{object} environment
+  (including \env{figureobject}, \env{tableobject} and \cmd{\includegraphicobject}).
+  This hook is inside of the group but before any options are processed.
+
+\DescribeMacro{\AtBeginSubobject}
+`\AtBeginSubobject{<code>}`
+  runs `<code>` every time at the begin of a \env{subobject} environment
+  (including \cmd{\includegraphicsubobject}).
+  This hook is inside of the group but before any options are processed.
+
+\DescribeMacro{\AtBeginGraphicObject}
+`\AtBeginGraphicObject{<code>}`
+  runs `<code>` every time in \cmd{\includegraphicobject} and \cmd{\includegraphicsubobject}.
+  This hook is after the object\slash subobject hook but before any options are processed.
+
+\DescribeMacro{\AtEndObject}
+`\AtEndObject{<code>}`
+  runs `<code>` every time at the end of an \env{object} environment
+  (including \env{figureobject}, \env{tableobject} and \cmd{\includegraphicobject}).
+  This hook is after a potential `env` has been closed but before the caption and label are processed.
+  (Yes, caption and label are always processed in `\end` even if the caption is displayed above the float.
+   The \pkg{float} package is responsible for putting the caption where it belongs.)
+
+
+\subsection{Initialization}
+\label{initialization}
+
+This package uses the \pkg{float} package to restyle \env{table} to `plaintop` and `figure` to `plain`
+so that captions of tables appear always above the table and captions of figures always below the figure.
+The reasoning is explained in~\autocite{texexchange_caption_position}.
+If you really want to place captions differently you can do that with `\restylefloat` (see \pkg{float} package documentation~\autocite{float}) or by setting the `float style` option.
+However, I would advice to rethink why you would want to do that.
+
+Unless this package is loaded with the \pkgoptn{allowstandardfloats} option
+it redefines the \env{table} and `figure` environments to issue a warning if they are used directly.
+This warning should not influence their usual behavior, though.
+Instead of \env{table}\slash `figure` you should use \env{tableobject}\slash \env{figureobject} or \cmd{\includegraphicobject},
+otherwise this package cannot help you.
+
+Unless this package is loaded with the \pkgoptn{nographic} option
+it loads the \pkg{graphicx} package in order to include graphics.
+This also guarantees that the paper size of the generated pdf matches \LaTeX' point of view (instead of depending on the system settings).~\autocite{texexchange_papersize}
+
+Unless this package is loaded with the \pkgoptn{noarray} option
+it loads the \pkg{array} package which defines additional column specification features like `>{<prefix>}`, `<{<suffix>}` and `!{<addcolsep>}`
+and the `\newcolumntype{<col>}[<args>]{<spec>}` command.
+It also changes the implementation of how lines (rules) are drawn
+but that is irrelevant if you use the recommendations given in the \pkg{booktabs} package documentation~\autocite[section~2 \sectionname{The layout of formal tables}]{booktabs}.
+Loading the \pkg{array} package is merely for convenience. This package does not use any of it's features.
+
+Unless this package is loaded with the \pkgoptn{nobooktabs} option
+it loads the \pkg{booktabs} package which defines commands for formatting tables, most importantly `\toprule`, `\midrule` and `\bottomrule`.
+These are used by the `table head` key unless you redefine it using `table head style`.
+
+Other packages loaded by this package are listed in \cref{used-packages}.
+
+
+\subsection{Package options}
+\label{package-options}
+
+The package options are implemented using the standard \LaTeX\ package options handling functionality as described in~\autocite{clsguide}.
+Therefore they do *not* take any values but consist of keys only.
+Instead I usually provide two separate keys, one which enables an option and another which disables the option.
+The keys with a~\radioon\ are active by default and the keys with a~\radiooff\ are inactive by default.
+
+\pkgoptndoc*{graphicx} use the \pkg{graphicx} package as backend for \cmd{\includegraphicobject}.
+\pkgoptndoc{graphbox} use the \pkg{graphbox} package as backend for \cmd{\includegraphicobject}.
+\pkgoptndoc{nographic} do not load \pkg{graphicx} or \pkg{graphbox}.
+   If you use this option the commands \cmd{\includegraphicobject} and \cmd{\includegraphicsubobject} are not defined.
+
+   Warning: Without driver specific packages like \pkg{graphicx}, \pkg{geometry} or \pkg{hyperref} the paper size of the resulting pdf depends on the system settings, independent of what you set in \LaTeX. \autocite{texexchange_papersize}
+
+\pkgoptndoc*{array} load the \pkg{array} package.
+  There is no difference between using this package option or a separate `\usepackage{array}`.
+\pkgoptndoc{noarray} do *not* load the \pkg{array} package.
+
+\pkgoptndoc*{booktabs} load the \pkg{booktabs} package.
+  There is no difference between using this package option or a separate `\usepackage{booktabs}`.
+\pkgoptndoc{nobooktabs} do *not* load the \pkg{booktabs} package.
+  Please note that the `table head` key initially relies on the booktabs package.
+  If you want to use it with this package option you need to redefine it with `table head style`.
+  Please read sections 1 and~2 of the \pkg{booktabs} documentation~\autocite{booktabs} before deciding against \pkg{booktabs}.
+
+\pkgoptndoc{longtable} load the \pkg{longtable} package.
+  There is no difference between using this package option or a separate `\usepackage{longtable}`.
+\pkgoptndoc*{nolongtable} do *not* load the \pkg{longtable} package.
+
+\pkgoptndoc{allowstandardfloats} do not redefine the \env{table} and `figure` environments.
+  Without this option they are redefined to issue a warning if they are used directly.
+  This warning should not influence their usual behavior.
+  Instead of \env{table}\slash `figure` you should use \env{tableobject}\slash \env{figureobject} or the command \cmd{\includegraphicobject},
+  otherwise this package cannot help you.
+\endpkgoptndoc
+
+
+\subsection{Help}
+\label{help}
+
+If you get an error message and don't understand where it comes from
+or the output is different from what you expected
+the following features may give you a better understanding of what this package is doing.
+These features are based on the \TeX\ primitive `\show`.
+
+\DescribeMacro{\show}
+`\show` shows (among other information) the parameter text and the replacement text of a macro on the terminal and in the log file.
+If you use one of the following features you most likely want to know the replacement text which is the part between `->` and the last `.` on the line.
+In errorstopmode mode (i.e.\ without `--interaction=nonstopmode` which most IDEs pass by default) \TeX\ stops after `\show` and waits until you confirm that you have read the information and it may proceed by pressing enter.
+For more information see \mycite[section~34.1]{texbytopic}.
+
+\DescribeHandler{.show value}
+The `.show value` handler can be used to show the value of a \keytype{storing key}
+(see \pkg{pgfkeys} documentation~\autocite[section~87.4.9 \sectionname{Handlers for Key Inspection}]{tikz}).
+For example:
+
+\begin{examplecode}
+\includegraphicsubobject[sep/.show value]{<filename>}
+\end{examplecode}
+
+\DescribeHandler{.show boolean}
+This package also defines a new handler called `.show boolean` which can be used to show the value of a \keytype{boolean key}.
+For example:
+
+\begin{examplecode}
+\objectset{warn other env/.show boolean}
+\end{examplecode}
+
+\DescribeMacro{\ShowObjectStylesInGroup}
+`\ShowObjectStylesInGroup{<group>}` shows all object styles which are contained in the given group.
+The styles are wrapped in curly braces so that I can iterate over them with the \LaTeX\ command `\@tfor`.
+
+\DescribeMacro{\ShowObjectStyleOptions}
+`\ShowObjectStyleOptions{<style>}` shows the options set for a specific style.
+Please note that this does *not* show directly set options (i.e.\ options set by `\objectset` without the optional argument and options in the options argument of the object).
+
+\DescribeKey{show env args}
+See also the `show env args` key of the \env{object} and \env{subobject} environments.
