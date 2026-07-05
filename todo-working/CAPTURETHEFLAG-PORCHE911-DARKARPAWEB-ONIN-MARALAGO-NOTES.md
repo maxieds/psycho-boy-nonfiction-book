@@ -10,6 +10,8 @@
 4. LinkedIn misuse + spoffed contacts with graffiti-like-tagged date stamps of revenge dates (also logs and death threats later) + who is in the circles of their friends really + remaining single inaccurate Jason Zych profile notes on LinkedIn (get them from other notesets) / also Twitter references and Jan6 organization tip reports due to arrogance and proximity (3.3M figure clarification on CNN) + Don Jr. in Pensacola + similar abnormal rape rituals from McDonald's wedding in NOLA 2015 
 * Insistence on terminology of "deep web" versus "dark web", which is a dead giveaway to these schemes on ROKU TV during COVID in Atlanta (Matt Damon invest in crypto currency ads) + original uses of this (initially, pre-Trump stupidity) tight, closed-loop and heavily encrypted network that (as far as I have heard legally) was tied/used to organize the terrorist attacks on 9/11/2001 (Trump talking points - enumerate later) + ISIS, Stuxnet-type (e.g., from 2013) power grid bridge references under guided federal surveillence in Hyde Park this month 
 * USB mouse purchased off of Amazon with the non-standard refurbished MacBook hardware: Has Bluetooth and 2.4Ghz RF modes, each of which are observed to give a so-termed "wifi" access point to abusers 
+* Drive new AI links: Interpretations + "square/portrait/landscape" (others) references from AGO phone (2023)
+* Drive new AI links: What is really meant by the OPM "tech force" under Trump: AI tech supremacy (explain, as above)
 
 ## How this happened 
 
