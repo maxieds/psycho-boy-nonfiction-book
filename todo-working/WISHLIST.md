@@ -12,6 +12,7 @@ Clips to add to my [Youtube topical / misc playlist](https://www.youtube.com/wat
 * Katie Couric on NBC confronting Trump about involvement in 9/11/2001 funding, essentially daring him to come on to deny the allegations
   (she went through something similar from a stalker in her high school - not a coincidence - cover up your webcam is a weak man's version
   of the retaliation:() 
+* CNN live Florida election coverage in 2016 (what was said watching it in my mom's house and what happened shortly afterwards - plus interpretations about Trump's personality)
 * HBH@Sheridan: Bad Trump era tweets (personal video recording)
 * Wierd Al: Oreo (as in, Apple and Oreo the snack cookie)
 * Green Day: She (live in Chiago, 1994)

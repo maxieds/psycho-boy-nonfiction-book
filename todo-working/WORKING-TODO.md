@@ -24,8 +24,8 @@
 * Github photos (especially screenshots and annotations of points on why I snapped them)
 * Google Drive folders to resume: Blackcat special ops and the "big night(s) out" files, especially the South Shore utility room, Anthony/personal UPS shipping labels + instructions for how to clean the shower to bury me underneath my bathtub (what happened thant night, and why did Snoop/FoxNews show up at the library the next day over Stormy Daniels and CaliWeed?)
 * Finish sorting through the TODO folders on the MacBook desktop
+* Add CPS Chromebook screenshots with Google changing at the end of 2024 with Anthony/X screwing with basic reality
 * 
-
 
 ## Links
 
