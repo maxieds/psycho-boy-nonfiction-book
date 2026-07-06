@@ -1,4 +1,4 @@
-# Trumps 2025-2026 Maralago Mastadon - Abuses and offenses in the English language - It boils down to being about the bullsh-t
+ Trumps 2025-2026 Maralago Mastadon - Abuses and offenses in the English language - It boils down to being about the bullsh-t
 
 ## Trump's Mastadon configuration on/in Maralago
 
@@ -32,7 +32,9 @@
 #### Project ideas 
 
 Include at least the following: 
-* Encrypted SIM reuse and/or recovery of encoded (personal) data it contains. Idea is to allow these SIM/EMV chip/cards on arbitrary consumer hardware (like say, COTS Moto/Samsung or especially older/saner iOS-based iPhones) - Personal opinions that follow are attitude back about these schemes: And then, perhaps sooner rather than later, there can be made funding to provide government subsidized ("flaming rainbow" - note context) *rubber duckies* to locate/track/tag all of their little "thingies" (Bluetooth/BLE mesh technical term - language), e.g., *come out, come out whereever you are* AT minimally ``MS/FB/SpaceX/Google-Android|AWS`` (remind me to flesh out these points with examples more fully later)! 
+* Encrypted SIM reuse and/or recovery of encoded (personal) data it contains. Idea is to allow these SIM/EMV chip/cards on arbitrary consumer hardware (like say, COTS Moto/Samsung or especially older/saner iOS-based iPhones) - Personal opinions that follow are attitude back about these schemes: And then, perhaps sooner rather than later, there can be made funding to provide government subsidized ("flaming rainbow" - note context) *rubber duckies* to locate/track/tag all of their little "thingies" (Bluetooth/BLE mesh technical term - language), e.g., *come out, come out whereever you are* AT minimally ``MS/FB/SpaceX/Google-Android|AWS 
+1. Remind me to flesh out these points with examples more fully later!
+2. Get some of the AWS/FB/GoogleAPI/etc data of the first generation ipad from SEA/ATL and include those images here.
 * Reuse/repurpose/recover the SSDs that are included as "batteries" with these devices - other variants than Android, too. Cf., the AndroidGo image returned by Google from Google about the "platform" (OS) used to support legacy hardware (legacy devices) for the "billions!!" (A-SSHOLE(s)!) Note that at least one of these government issued phones (that I paid for, but some do not feel they should have to) I took more apart after it got FUBARed over capture the flag on Maralago (links - references, briefly) has more of the NFC/RFID sticker tape wrapped around it with directly worded instructions for recipients on how to repackage it and then claim the QR (bar)code printed on the inner outside "battery" case so that it can be reused - Cf. references from Maralago/MacBook (2026) about options for "apps" (sex traffickng victims) including how to share them (if you choose to opt out of that behavior pattern at all) - get specific references and screenshots to demonstrate the screwed up language and heinous attitudes of vile little sea slugs like this. 
 
 #### Subtopics related to this phone breed
