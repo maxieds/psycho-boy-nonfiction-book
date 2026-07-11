@@ -1,0 +1,2 @@
+// For license information, see `https://assets.adobedtm.com/0170f43a527f/4ab3f67bbee5/cb8b8dcdc627/RCb0cf46d39b1b486abfdba65e37a73f62-source.js`.
+_satellite.__registerScript('https://assets.adobedtm.com/0170f43a527f/4ab3f67bbee5/cb8b8dcdc627/RCb0cf46d39b1b486abfdba65e37a73f62-source.min.js', "_satellite.setVar(\"incm_product_rule\",\"sv_dl_plp_list_products\");");

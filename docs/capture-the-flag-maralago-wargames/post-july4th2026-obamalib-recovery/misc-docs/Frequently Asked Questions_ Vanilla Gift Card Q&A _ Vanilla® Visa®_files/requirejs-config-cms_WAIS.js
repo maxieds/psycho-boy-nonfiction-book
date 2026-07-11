@@ -1,0 +1,1 @@
+requirejs.config({bundles:{'magepack/bundle-cms':['Magento_Cms/js/leaving-site','Magento_Cms/js/scroll-to-anchor','InComm_PageBuilderExtendProducts/js/content-type/button-item/appearance/default/widget','Magento_PageBuilder/js/events','Magento_PageBuilder/js/content-type/buttons/appearance/inline/widget']}});
