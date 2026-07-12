@@ -58,6 +58,13 @@ Clips to add to my [Youtube topical / misc playlist](https://www.youtube.com/wat
 * Accurate CNN vault recordings of the live cell phone streaming video around Trump in the early morning of January 7th, 2021 - as witnessed in midtown Atlanta due to new fiberoptic feeds from CNN headquarters nearby to parts of the city. 
 * The eulogy of congressman and civil rights hero, John Lewis: Hillary Clinton doing Trump's job by speaking for him after (in sequence) every other living president regardless of political party affiliation: Bill Clinton, George W. Bush, Barack Obama, and then the live CNN broadcast is cut off with President Clinton herself taking the podium right before she the completion of the first word of her speech. The once or twice a month that things like this were allowed to appear on CNN is the reason I used to believe that CNN was an independent news source worthy of keeping on at all times in the background. 
 
+## Github repository links
+
+* [https://github.com/maxieds/ChameleonUltraDocs](https://github.com/maxieds/ChameleonUltraDocs): On topics of SDK (JavaScript interface), protocol (formatting of packets), mtoolsble (dump formats and specific versions being used in practice)
+* [https://github.com/maxieds/ChameleonBLEAPI](https://github.com/maxieds/ChameleonBLEAPI)
+* [https://github.com/maxieds/ChameleonCryptoModFirmware](https://github.com/maxieds/ChameleonCryptoModFirmware)
+* [https://github.com/maxieds/openssl](https://github.com/maxieds/openssl)
+* [https://github.com/maxieds/arduinolibs](https://github.com/maxieds/arduinolibs): See algorithms used and other details at [https://rweather.github.io/arduinolibs/crypto.html](https://rweather.github.io/arduinolibs/crypto.html) 
 
 
 
