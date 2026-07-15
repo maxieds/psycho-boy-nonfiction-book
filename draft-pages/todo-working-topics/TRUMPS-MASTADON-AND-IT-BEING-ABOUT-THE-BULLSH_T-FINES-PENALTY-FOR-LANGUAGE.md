@@ -50,7 +50,7 @@ Include at least the following:
 * Screenshots with annotation 
 * Noteworthy configuration files spelled out and broken down
 * YouTube links to longer screen recordings with highlights for each video 
-
+* See the thinly indirect language choices in the docs for Mozilla/Web/Browser dev pages (like Google/Android docs pages circe 2023): [https://developer.mozilla.org/en-US/docs/Web](https://developer.mozilla.org/en-US/docs/Web)
 
 
 
