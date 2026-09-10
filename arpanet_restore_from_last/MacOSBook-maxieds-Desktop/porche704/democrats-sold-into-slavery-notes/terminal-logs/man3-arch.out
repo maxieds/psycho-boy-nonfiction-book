@@ -1,0 +1,196 @@
+ARCH(3)                     Library Functions Manual                     ARCH(3)
+
+NNAAMMEE
+     NNXXGGeettAAllllAArrcchhIInnffooss, NNXXGGeettLLooccaallAArrcchhIInnffoo, NNXXGGeettAArrcchhIInnffooFFrroommNNaammee,
+     NNXXGGeettAArrcchhIInnffooFFrroommCCppuuTTyyppee, NNXXFFrreeeeAArrcchhIInnffoo, NNXXFFiinnddBBeessttFFaattAArrcchh,
+     NNXXCCoommbbiinneeCCppuuSSuubbttyyppeess – get architecture information
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<mmaacchh--oo//aarrcchh..hh>>
+
+     _e_x_t_e_r_n _c_o_n_s_t _N_X_A_r_c_h_I_n_f_o _*
+     NNXXGGeettAAllllAArrcchhIInnffooss(_v_o_i_d);
+
+     _e_x_t_e_r_n _c_o_n_s_t _N_X_A_r_c_h_I_n_f_o _*
+     NNXXGGeettLLooccaallAArrcchhIInnffoo(_v_o_i_d);
+
+     _e_x_t_e_r_n _c_o_n_s_t _N_X_A_r_c_h_I_n_f_o _*
+     NNXXGGeettAArrcchhIInnffooFFrroommNNaammee(_c_o_n_s_t _c_h_a_r _*_n_a_m_e);
+
+     _e_x_t_e_r_n _c_o_n_s_t _N_X_A_r_c_h_I_n_f_o _*
+     NNXXGGeettAArrcchhIInnffooFFrroommCCppuuTTyyppee(_c_p_u___t_y_p_e___t _c_p_u_t_y_p_e, _c_p_u___s_u_b_t_y_p_e___t _c_p_u_s_u_b_t_y_p_e);
+
+     _e_x_t_e_r_n _v_o_i_d
+     NNXXFFrreeeeAArrcchhIInnffoo(_N_X_A_r_c_h_I_n_f_o _*_x);
+
+     _e_x_t_e_r_n _s_t_r_u_c_t _f_a_t___a_r_c_h _*
+     NNXXFFiinnddBBeessttFFaattAArrcchh(_c_p_u___t_y_p_e___t _c_p_u_t_y_p_e, _c_p_u___s_u_b_t_y_p_e___t _c_p_u_s_u_b_t_y_p_e,
+         _s_t_r_u_c_t _f_a_t___a_r_c_h _*_f_a_t___a_r_c_h_s, _u_i_n_t_3_2___t _n_f_a_t___a_r_c_h_s);
+
+     _e_x_t_e_r_n _s_t_r_u_c_t _f_a_t___a_r_c_h___6_4 _*
+     NNXXFFiinnddBBeessttFFaattAArrcchh__6644(_c_p_u___t_y_p_e___t _c_p_u_t_y_p_e, _c_p_u___s_u_b_t_y_p_e___t _c_p_u_s_u_b_t_y_p_e,
+         _s_t_r_u_c_t _f_a_t___a_r_c_h___6_4 _*_f_a_t___a_r_c_h_s_6_4, _u_i_n_t_3_2___t _n_f_a_t___a_r_c_h_s);
+
+     _e_x_t_e_r_n _c_p_u___s_u_b_t_y_p_e___t
+     NNXXCCoommbbiinneeCCppuuSSuubbttyyppeess(_c_p_u___t_y_p_e___t _c_p_u_t_y_p_e, _c_p_u___s_u_b_t_y_p_e___t _c_p_u_s_u_b_t_y_p_e_1,
+         _c_p_u___s_u_b_t_y_p_e___t _c_p_u_s_u_b_t_y_p_e_2);
+
+DDEESSCCRRIIPPTTIIOONN
+     These functions are intended for use in programs that have to deal with
+     universal files or programs that can target multiple architectures.
+     Typically, a program will use a command-line argument that starts with
+     “-arch nnaammee”, where this specifies an architecture.  These functions and
+     data structures provide some help for processing architecture flags and
+     then processing the contents of a universal file.
+
+     The structure _N_X_A_r_c_h_I_n_f_o is defined in ⟨_m_a_c_h_-_o_/_a_r_c_h_._h⟩:
+
+                   typedef struct {
+                           const char *name;
+                           cpu_type_t cputype;
+                           cpu_subtype_t cpusubtype;
+                           enum NXByteOrder byteorder;
+                           const char *description;
+                   } NXArchInfo;
+     It is used to hold the name of the architecture and the corresponding CPU
+     type and CPU subtype, together with the architecture's byte order and a
+     brief description string.
+
+     The currently known architectures are:
+
+     _N_a_m_e          _C_P_U _T_y_p_e              _C_P_U _S_u_b_t_y_p_e                 _D_e_s_c_r_i_p_t_i_o_n
+     x86_64        CPU_TYPE_X86_64       CPU_SUBTYPE_X86_64_ALL      Intel
+                                                                     x86-64
+     i386          CPU_TYPE_I386         CPU_SUBTYPE_I386_ALL        Intel 80x86
+     arm           CPU_TYPE_ARM          CPU_SUBTYPE_ARM_ALL         ARM
+     arm64         CPU_TYPE_ARM64        CPU_SUBTYPE_ARM64_ALL       ARM64
+     arm64e        CPU_TYPE_ARM64        CPU_SUBTYPE_ARM64E          ARM64E
+     arm64_32      CPU_TYPE_ARM64_32     CPU_SUBTYPE_ARM64_32_V8     ARM64_32
+     ppc           CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_ALL     PowerPC
+     ppc64         CPU_TYPE_POWERPC64    CPU_SUBTYPE_POWERPC64_ALL   PowerPC
+                                                                     64-bit
+     m68k          CPU_TYPE_MC680x0      CPU_SUBTYPE_MC680x0_ALL     Motorola
+                                                                     68K
+     hppa          CPU_TYPE_HPPA         CPU_SUBTYPE_HPPA_ALL        HP-PA
+     i860          CPU_TYPE_I860         CPU_SUBTYPE_I860_ALL        Intel 860
+     m88k          CPU_TYPE_MC88000      CPU_SUBTYPE_MC88000_ALL     Motorola
+                                                                     88K
+     sparc         CPU_TYPE_SPARC        CPU_SUBTYPE_SPARC_ALL       SPARC
+     i486          CPU_TYPE_I386         CPU_SUBTYPE_486             Intel 486
+     i486SX        CPU_TYPE_I386         CPU_SUBTYPE_486SX           Intel 486SX
+     pentium       CPU_TYPE_I386         CPU_SUBTYPE_PENT            Intel
+                                                                     Pentium
+     i586          CPU_TYPE_I386         CPU_SUBTYPE_586             Intel 586
+     pentpro       CPU_TYPE_I386         CPU_SUBTYPE_PENTPRO         Intel
+                                                                     Pentium Pro
+     i686          CPU_TYPE_I386         CPU_SUBTYPE_PENTPRO         Intel
+                                                                     Pentium Pro
+     pentIIm3      CPU_TYPE_I386         CPU_SUBTYPE_PENTII_M3       Intel
+                                                                     Pentium II
+                                                                     Model 3
+     pentIIm5      CPU_TYPE_I386         CPU_SUBTYPE_PENTII_M5       Intel
+                                                                     Pentium II
+                                                                     Model 5
+     pentium4      CPU_TYPE_I386         CPU_SUBTYPE_PENTIUM_4       Intel
+                                                                     Pentium 4
+     armv4t        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V4T         arm v4t
+     armv5         CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V5TEJ       arm v5
+     xscale        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_XSCALE      arm xscale
+     armv6         CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V6          arm v6
+     armv6m        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V6M         arm v6m
+     armv7         CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7          arm v7
+     armv7f        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7F         arm v7f
+     armv7s        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7S         arm v7s
+     armv7k        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7K         arm v7k
+     armv7m        CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7M         arm v7m
+     armv7em       CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V7EM        arm v7em
+     armv8         CPU_TYPE_ARM          CPU_SUBTYPE_ARM_V8          arm v8
+     arm64         CPU_TYPE_ARM64        CPU_SUBTYPE_ARM64_V8        arm64 v8
+     ppc601        CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_601     PowerPC 601
+     ppc603        CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_603     PowerPC 603
+     ppc604        CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_604     PowerPC 604
+     ppc604e       CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_604e    PowerPC
+                                                                     604e
+     ppc750        CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_750     PowerPC 750
+     ppc7400       CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_7400    PowerPC
+                                                                     7400
+     ppc7450       CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_7450    PowerPC
+                                                                     7450
+     ppc970        CPU_TYPE_POWERPC      CPU_SUBTYPE_POWERPC_970     PowerPC 970
+     m68030        CPU_TYPE_MC680x0      CPU_SUBTYPE_MC68030_ONLY    Motorola
+                                                                     68030
+     m68040        CPU_TYPE_MC680x0      CPU_SUBTYPE_MC68040         Motorola
+                                                                     68040
+     hppa7100LC    CPU_TYPE_HPPA         CPU_SUBTYPE_HPPA_7100LC     HP-PA
+                                                                     7100LC
+
+     The first set of entries are used for the architecture family.  The second
+     set of entries are used for a specific architecture, when more than one
+     specific architecture is supported in a family of architectures.
+
+     NNXXGGeettAAllllAArrcchhIInnffooss() returns a pointer to an array of all known NXArchInfo
+     structures.  The last NXArchInfo is marked by a NULL name.
+
+     NNXXGGeettLLooccaallAArrcchhIInnffoo() returns the NXArchInfo for the local host, or NULL if
+     none is known.
+
+     NNXXGGeettAArrcchhIInnffooFFrroommNNaammee() and NNXXGGeettAArrcchhIInnffooFFrroommCCppuuTTyyppee() return the
+     NXArchInfo from the architecture's name or CPU type/CPU subtype
+     combination.  A CPU subtype of CPU_SUBTYPE_MULTIPLE can be used to request
+     the most general NXArchInfo known for the given CPU type.  NULL is returned
+     if no matching NXArchInfo can be found.
+
+     NNXXFFrreeeeAArrcchhIInnffoo() is passed a pointer to an NXArchInfo returned by the above
+     interfaces and if not in the array returned in NNXXGGeettAAllllAArrcchhIInnffooss() will
+     free(3) the description field and then the NXArchInfo pointer.
+
+     The above interfaces that return pointers to NXArchInfo structs in normal
+     cases returns a pointer from the array returned in NNXXGGeettAAllllAArrcchhIInnffooss().  In
+     some cases when the cputype is CPU_TYPE_I386 or CPU_TYPE_POWERPC it will
+     return a malloc(3)'ed NXArchInfo struct which contains a string in the
+     description field also a malloc(3)'ed pointer.  To allow programs not to
+     leak memory they can call NNXXFFrreeeeAArrcchhIInnffoo() on pointers returned from the
+     above interfaces.  Since this is a new API on older systems can use the
+     code below.  Going forward the above interfaces will only return pointers
+     from the array returned in NNXXGGeettAAllllAArrcchhIInnffooss().
+
+           static void NXFreeArchInfo(
+           const NXArchInfo *x)
+           {
+                   const NXArchInfo *p;
+
+                   p = NXGetAllArchInfos();
+                   while(p->name != NULL){
+                           if(x == p)
+                                   return;
+                           p++;
+                   }
+                   free((char *)x->description);
+                   free((NXArchInfo *)x);
+           }
+
+     NNXXFFiinnddBBeessttFFaattAArrcchh() is passed a CPU type and CPU subtype and a set of
+     fat_arch structs.  It selects the best one that matches (if any), and
+     returns a pointer to that fat_arch struct (or NULL).  The fat_arch structs
+     must be in the host byte order and correct such that fat_archs really
+     points to enough memory for nfat_archs structs.  It is possible that this
+     routine could fail if new CPU types or CPU subtypes are added and an old
+     version of this routine is used.  But if there is an exact match between
+     the CPU type and CPU subtype and one of the fat_arch structs, this routine
+     will always succeed.
+
+     NNXXFFiinnddBBeessttFFaattAArrcchh__6644() is the same as NNXXFFiinnddBBeessttFFaattAArrcchh() but returns and
+     takes fat_arch_64 structs.
+
+     NNXXCCoommbbiinneeCCppuuSSuubbttyyppeess() returns the resulting CPU subtype when combining two
+     different CPU subtypes for the specified CPU type.  If the two CPU subtypes
+     can't be combined (the specific subtypes are mutually exclusive), -1 is
+     returned, indicating it is an error to combine them.  This can also fail
+     and return -1 if new CPU types or CPU subtypes are added and an old version
+     of this routine is used.  But if the CPU subtypes are the same, they can
+     always be combined and this routine will return the CPU subtype passed in.
+
+SSEEEE AALLSSOO
+     arch(1)
+
+                                  June 8, 2016
