@@ -1,0 +1,2 @@
+// For license information, see `https://assets.adobedtm.com/0170f43a527f/4ab3f67bbee5/cb8b8dcdc627/RCf8b5f099214040218d2d2fab41375e48-source.js`.
+_satellite.__registerScript('https://assets.adobedtm.com/0170f43a527f/4ab3f67bbee5/cb8b8dcdc627/RCf8b5f099214040218d2d2fab41375e48-source.min.js', "var navElms=document.querySelectorAll(\".section-item-content li a\");navElms.forEach((function(t){t.addEventListener(\"click\",(function(){var t=this;_satellite.track(\"navigationLinkClicks\",{navigation:{text:t.textContent.trim()}})}))}));");
