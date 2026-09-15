@@ -1,0 +1,100 @@
+.\" fsmcluster.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2014-2017. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH FSMCLUSTER 4 "June 2017" "Xsan File System"
+.SH NAME
+fsmcluster \- Xsan File System cluster configuration
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/fsmcluster
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fP
+\fIfsmcluster\fP file describes
+cluster configuration information for
+the
+.BR fsmpm (8)
+daemon and
+.BR mount_acfs (8)
+command.
+It is a list of keywords with values.
+.SH OVERVIEW
+Traditionally, Xsan volumes have been grouped into
+clusters which share a common name service providing visibility to
+clients. The clients would typically be able to mount these
+volumes using either direct SAN connections to the data LUNs
+or proxy access using the distributed LAN client connection to a
+Xsan gateway server. If a set of clients require access to
+a volume in a different cluster, an
+.BR fsforeignservers (4)
+may be configured.
+.PP
+The Xsan cluster and administrative domain feature allows more
+flexible configurations where sharing access between clusters is desired.
+Conversely, this feature may also be used to separate large clusters into multiple
+smaller clusters where sets of volumes may be grouped with
+clients that access only those volumes.
+.PP
+Multiple volumes with the same name may coexist, provided they
+reside in separate clusters.
+.SH SYNTAX
+.IP "\fBdefault_cluster\fP \fIcluster\fP"
+Specify the default cluster name for this machine.
+If not specified, it will default to \fB_cluster0\fP.
+.IP "\fBdefault_addom\fP \fIadmin_domain\fP"
+Specify the default administrative domain name for this machine.
+An administrative domain is a group of named clusters.
+If not specified, it will default to \fB_addom0\fP.
+.PP
+Lines that contain white space only or that contain the comment token
+as the first non-white space character are ignored.
+.PP
+The default administrative domain name and default cluster names are
+used when an fsm name is specified without a cluster name or administrative
+domain name, such as when mounting a Xsan Volume
+.SH Changing the Cluster or Administrative Domain Name
+Changing the cluster name on an MDC node affects the location of the
+file systems running on that node. Changing the cluster name on a
+coordinator node affects the services that are being advertised by
+that coordinator. All clients must unmount the
+file systems that are to be affected by the change.
+Services must be stopped on the MDC and coordinator nodes,
+including both primary and secondary nodes of an HA pair.
+The \fIfsmcluster\fP file may then be updated on all affected nodes
+including both nodes of an HA pair.
+Start the services on the coordinator nodes first if these nodes
+are different than the MDC nodes.
+Start the services on the MDC nodes next.
+The file systems are now available for client mounts at
+their new cluster location.
+.PP
+When converting a system to HA, if the first node has an
+\fIfsmcluster\fP file, the second node must have one as well,
+prior to attempting the conversion.
+.SH FILES
+.I /Library/Preferences/Xsan/fsmcluster
+.SH "SEE ALSO"
+.BR cvadmin (8),
+.BR fsforeignservers (4),
+.BR fsnameservers (4),
+.BR fsmpm (8),
+.BR mount_acfs (8)

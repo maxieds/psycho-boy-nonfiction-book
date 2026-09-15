@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Copyright 2016. Quantum Corporation. All Rights Reserved.
+# StorNext is either a trademark or registered trademark of
+# Quantum Corporation in the US and/or other countries.
+#
+
+RASMAIL_RECIPIENT="root@yourdomain.com"
+RASMAIL_SKIPEVENTS="SL_EVT_LUN_CHANGE|SL_EVT_FAIL_OVER"
+
+eval "case $1 in
+	$RASMAIL_SKIPEVENTS)
+		exit 0	# skip this event
+		;;
+
+	*)	: # all others, fall through 
+		;;
+esac"
+
+(
+cat -
+echo ""
+echo "See snfs_ras(4) for suggested actions for $1 events"
+) | /bin/mail -s "SNFS RAS Event: $1" $RASMAIL_RECIPIENT
+
+exit 0

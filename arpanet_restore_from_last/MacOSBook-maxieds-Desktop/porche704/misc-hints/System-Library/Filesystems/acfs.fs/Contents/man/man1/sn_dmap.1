@@ -1,0 +1,228 @@
+.\" sn_dmap.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2012-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH sn_dmap 1 "January 2021" "StorNext File System"
+.SH NAME
+sn_dmap \- Disk map utility
+.SH SYNOPSIS
+.na
+.nh
+.B sn_dmap
+.RI [ options ]
+.I devname
+.ad
+.hy
+.SH DESCRIPTION
+\fBsn_dmap\fR is a utility that can be used to manage disk
+volumes that are thin-provisioned.  Typically these volumes remap logical
+block addresses (LBAs) and allocate space as needed. Space is allocated
+when a block is first written and can only be freed by issuing a SCSI
+unmap command.
+
+\fBsn_dmap\fR operates on one device at a time specified by the \fBdevname\fR
+parameter.  The \fBdevname\fR parameter can either be a full path to the
+device like /dev/mapper/mpathai or the StorNext volume label.
+By default \fBsn_dmap\fR will print summary mapping information about the
+volume.  More detailed information may be displayed using the -v option.
+Detailed output is also available in JSON format.
+
+.SH OPTIONS
+.IP \fB-?\fR
+Display usage and exit.
+.IP \fB-c\fR
+Clear.  Unmap all the blocks on the volume except the StorNext label.
+This option should be used only to clean up a volume before a cvmkfs operation.
+This will effectively clear all the blocks on the volume except the
+StorNext label and cannot be undone.
+.IP \fB-C\fR
+Clear.  Unmap all the blocks on the volume including the StorNext label.
+This option should be used only to clean up a volume before a cvlabel and a
+cvmkfs operation.  This will effectively clear all the blocks on
+the volume including the StorNext label and cannot be undone.
+.IP \fB-d\fR[\fBdddd\fR]
+Run in debug mode. The more "d's" specified, the more debug
+information is printed.
+.IP \fB-f\fR
+Force the clear or unmap operation without an warning message.
+.IP \fB-h\fR
+Help. Display usage and exit.
+.IP "\fB-l\fP \fILBA\fP"
+The starting logical block address.  Optional when the \fB-v\fR
+option is specified and required for an unmap operation. See \fB-u\fR.
+.IP "\fB-n\fP \fInblks\fP"
+Specify the number of blocks. This option is required for an
+unmap operation. See \fB-u\fR.
+.IP "\fB-o\fP \fInsegments\fP"
+Specify the number of segments to display. This option is valid with the
+\fB-v\fR option and limits the number of segments displayed to the specified
+value.
+.IP "\fB-j\fP
+Write detailed information to standard output in JSON format.
+.IP "\fB-P\fP
+Write detailed information to standard output in compact JSON format.
+This minimizes the size of the output and is intended to be
+machine readable only.
+.IP "\fB-q\fP
+Used with -t. Only return status 0 if the device is
+in the list of Quantum-branded disks supporting UNMAP/TRIM.
+.IP "\fB-t\fR
+Report whether or not the device is thin provisioned and exit
+with status 0 if thin and status 1 if not thin.
+.IP "\fB-u\fR
+Unmap the range specified by the -l and -n options.
+.IP \fB-v\fR
+Verbose.  Display information about all the segments.  The \fB-l\fP option
+can be specified to display segments starting with the specified \fBLBA\fR.
+The \fB-o\fR may be specified to limit the output to the specified number
+of segments.
+.IP \fB-x\fR
+Display segment information in hexadecimal.  This option is available only
+with the \fB-v\fR option.
+.SH "EXAMPLES"
+Display general mapping information about the given volume:
+.Cs
+per1-# sn_dmap  /dev/mapper/mpathal
+/dev/mapper/mpathal {
+
+                   segments         blocks
+      mapped              4        2277376    1.09 GiBytes
+    unmapped              6    15818022912    7.37 TiBytes
+       total             10    15820300288    7.37 TiBytes
+
+} snfs_meta_qx3_L23
+.Ce
+.PP
+Display verbose information about each segment of the given volume.
+Note that we used the StorNext volume name as the device name in this example:
+.Cs
+per1-# sn_dmap -v snfs_meta_qx3_L23
+/dev/mapper/mpathal {
+
+   Segment                      LBA       NBlocks      Status
+         0                        0          8192      mapped    4.00 MiBytes
+         1                     8192       7806976    unmapped    3.72 GiBytes
+         2                  7815168       2088960      mapped   1020.00 MiBytes
+         3                  9904128       5718016    unmapped    2.73 GiBytes
+         4                 15622144        172032      mapped   84.00 MiBytes
+         5                 15794176    4294959104    unmapped    2.00 TiBytes
+         6               4310753280    4294959104    unmapped    2.00 TiBytes
+         7               8605712384    4294959104    unmapped    2.00 TiBytes
+         8              12900671488    2919620608    unmapped    1.36 TiBytes
+         9              15820292096          8192      mapped    4.00 MiBytes
+
+} snfs_meta_qx3_L23
+.Ce
+.PP
+Unmap a segment with the force option (no warning):
+.Cs
+per1-# sn_dmap -f -u -l 7815168 -n 2088960 snfs_meta_qx3_L23
+.Ce
+.PP
+Verify that the segment is now unmapped:
+.Cs
+per1-# sn_dmap -v snfs_meta_qx3_L23
+/dev/mapper/mpathal {
+
+   Segment                      LBA       NBlocks      Status
+         0                        0          8192      mapped    4.00 MiBytes
+         1                     8192      15613952    unmapped    7.45 GiBytes
+         2                 15622144        172032      mapped   84.00 MiBytes
+         3                 15794176    4294959104    unmapped    2.00 TiBytes
+         4               4310753280    4294959104    unmapped    2.00 TiBytes
+         5               8605712384    4294959104    unmapped    2.00 TiBytes
+         6              12900671488    2919620608    unmapped    1.36 TiBytes
+         7              15820292096          8192      mapped    4.00 MiBytes
+
+} snfs_meta_qx3_L23
+.Ce
+.PP
+Clear all mapped segments except those containing the StorNext label:
+.Cs
+per1-# sn_dmap -c snfs_meta_qx3_L23
+
+sn_dmap: *WARNING WARNING WARNING*
+
+          You are about to unmap all the blocks on the device /dev/mapper/mpathal.
+          This will destroy all data on the StorNext volume snfs_meta_qx3_L23
+          except the StorNext label. This operation can not be undone.
+
+          Do you want to proceed? (y / n) -> y
+.Ce
+.PP
+Verify all is unmapped except the StorNext label (first and last segments):
+.Cs
+per1-# sn_dmap -v snfs_meta_qx3_L23
+/dev/mapper/mpathal {
+
+   Segment                      LBA       NBlocks      Status
+         0                        0          8192      mapped    4.00 MiBytes
+         1                     8192    4294959104    unmapped    2.00 TiBytes
+         2               4294967296    4294959104    unmapped    2.00 TiBytes
+         3               8589926400    4294959104    unmapped    2.00 TiBytes
+         4              12884885504    2935406592    unmapped    1.37 TiBytes
+         5              15820292096          8192      mapped    4.00 MiBytes
+
+} snfs_meta_qx3_L23
+.Ce
+.PP
+Generate detailed output in JSON format:
+.Cs
+[root@dev-snc-daiquiri-n1 ~]# sn_dmap -j snfs_data_dev-sncqx24ss-1_1_L7
+{
+    "raw device": "/dev/mapper/mpathab",
+    "mappings": [
+        {
+            "lba": 0,
+            "nblocks": 163840,
+            "status": "mapped"
+        },
+        {
+            "lba": 163840,
+            "nblocks": 1998848,
+            "status": "unmapped"
+        },
+(additional mappings...)
+        {
+            "lba": 1953112064,
+            "nblocks": 8192,
+            "status": "mapped"
+        }
+    ],
+    "mapped segments": 597,
+    "mapped blocks": 8077312,
+    "mapped bytes": 4135583744,
+    "unmapped segments": 596,
+    "unmapped blocks": 1945042944,
+    "unmapped bytes": 995861987328,
+    "total segments": 1193,
+    "total blocks": 1953120256,
+    "total bytes": 999997571072
+}
+.Ce
+.SH "NOTES"
+The unmap option (-u) is most likely useful only for development purposes.
+.PP
+\fBsn_dmap\fR execs the cvlabel command (/usr/cvfs/bin/cvlabel) to match
+the StorNext volume name to the device.
+.PP
+\fBsn_dmap\fR is currently supported only on Linux.
+
+.SH FILES
+.I /System/Library/Filesystems/acfs.fs/Contents/bin/sn_dmap
+.SH "SEE ALSO"
+.BR cvlabel (8)

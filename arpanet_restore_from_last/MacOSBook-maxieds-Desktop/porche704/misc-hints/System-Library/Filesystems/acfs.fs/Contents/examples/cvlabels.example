@@ -1,0 +1,89 @@
+#
+# Copyright 2016-2017. Quantum Corporation. All Rights Reserved.
+# StorNext is either a trademark or registered trademark of
+# Quantum Corporation in the US and/or other countries.
+#
+#
+# StorNext Disk Labels File Example
+#
+# This file describes the StorNext File System volume names for the
+# storage area network disk devices. It is used by the "cvlabel" program.
+#
+# The labeling process need only be done once by one client that has full
+# storage network access before activating the StorNext File System. It 
+# is not necessary to do this procedure on all of the client systems.
+#
+# Disk Label Names can be of [A-Z][a-Z][0-9] hyphen (-) and a under-bar (_).
+#
+# The comment character (#) may start anywhere and persists to the end of line.
+#
+# The device name must conform to the operating system naming conventions.
+#
+# Each line decribes a disk device and the volume label name, as follows:
+#
+# <CVFS_label_name> <operating_system_device_name> [<sectors> [<type>]]
+#
+# Where:
+#
+# - <CVFS_label_name> is the name of the disk as described in the FSM config-
+#   uration file in the [Disk <CVFS_label_name> entries.
+#
+# - <operating_system_device_name> is the device name of the complete disk
+#   device.
+#
+#   NOTE: operating system device names may  change  after  reboots  and
+#   will differ per system. Always configure SNFS label files, and label
+#   devices in the same session.
+#
+#   On Windows systems, the devices start as "PhysicalDrive0" and increment
+#   up to the number of drives configured.
+#
+# - <sectors> is the size in 512-byte blocks that matches the "[DiskType]" 
+#   configuration in the FSM configuration file. This is required for disks 
+#   that must be configured smaller than their actual size. For example, 
+#   MPIRE video disks must be under-configured to eliminate using 
+#   the last zone of the disk. If <sectors> is not specified or is specified
+#   as -, then the "cvlabel" program will use the entire available volume.
+#
+# - The <type> parameter is used to override the default label type. The
+#   value must be EFI. VTOC labels are no longer supported.
+#
+# ** WARNING ** ** WARNING **
+# Use the "List disk device volumes" (Windows) program to see what labels
+# are on the disk devices. It is important that you do not use this program
+# on operating system disks. This will cause your system to become inoperable
+# and may require drastic recovery measures, such as a full re-install of
+# the system disks. USE EXTREME CARE!!
+#
+# Linux Example
+#
+# Note that this example has Linux system disk at /dev/sda and uses the
+# Linux DM_Multipath for all other devices.
+#   Output from "cvlabel -c"
+CvfsDisk_UNKNOWN /dev/sda    # host 0 lun 0 sectors 487307231 sector_size 512 inquiry [Dell    Virtual Disk    1028] serial 600508E000000000EE2CDEDEEA2B6101
+m440_snfs1_0001 /dev/mapper/mpath94 1951153375 EFI    # host 4 lun 4 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903506AC5303000000
+m440_snfs1_0002 /dev/mapper/mpath95 1951153375 EFI    # host 4 lun 5 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903606AC5301000000
+m440_snfs1_0003 /dev/mapper/mpath96 1951153375 EFI    # host 4 lun 6 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903606AC5302000000
+m440_snfs1_0004 /dev/mapper/mpath97 1951153375 EFI    # host 4 lun 7 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903706AC5301000000
+m440_snfs2_0001 /dev/mapper/mpath99 1951153375 EFI    # host 4 lun 9 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903706AC5303000000
+m440_snfs2_0002 /dev/mapper/mpath100 1951153375 EFI    # host 4 lun 10 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903806AC5301000000
+m440_snms_0001 /dev/mapper/mpath101 1951153375 EFI    # host 4 lun 11 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903806AC5302000000
+m440_snms_0002 /dev/mapper/mpath102 1951153375 EFI    # host 5 lun 12 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903806AC5303000000
+m440_sdisk_0001 /dev/mapper/mpath103 1951153375 EFI    # host 5 lun 13 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903906AC5301000000
+m440_sdisk_0002 /dev/mapper/mpath104 1951153375 EFI    # host 5 lun 14 sectors 1951153375 sector_size 512 inquiry [Quantum StorNext QX     H205] serial 600C0FF00015BC903906AC5302000000
+#
+# Windows Example
+#
+# Note that this example has Windows system disks C:, therefore the
+# Fibre Channel SAN disks will start at PhysicalDrive1.
+#
+# CvfsDisk_UNKNOWN PhysicalDrive0    # host 2 lun 0 sectors 134199263 sector_size 512 inquiry [VMware  Virtual disk    1.0 ] serial unknown
+# CvfsDisk8 PhysicalDrive1 8589916127 EFI 0    # host 3 lun 0 sectors 8589916127 sector_size 512 inquiry [SCST_FIOsjfwin000        220] serial 3030303136663030
+# CvfsDisk9 PhysicalDrive2 8589916127 EFI 0    # host 3 lun 1 sectors 8589916127 sector_size 512 inquiry [SCST_FIOsjfwin001        220] serial 3030303136663031
+# CvfsDisk10 PhysicalDrive3 8589916127 EFI 0    # host 3 lun 2 sectors 8589916127 sector_size 512 inquiry [SCST_FIOsjfwin002        220] serial 3030303136663032
+# CvfsDisk11 PhysicalDrive4 8589916127 EFI 0    # host 3 lun 3 sectors 8589916127 sector_size 512 inquiry [SCST_FIOsjfwin003        220] serial 3030303136663033
+# CvfsDisk0 PhysicalDrive5 4294948831 EFI 0    # host 3 lun 4 sectors 4294948831 sector_size 512 inquiry [SCST_FIOsjfwin004        220] serial 3030303136663034
+# CvfsDisk1 PhysicalDrive6 4294948831 EFI 0    # host 3 lun 5 sectors 4294948831 sector_size 512 inquiry [SCST_FIOsjfwin005        220] serial 3030303136663035
+# CvfsDisk2 PhysicalDrive7 4294948831 EFI 0    # host 3 lun 6 sectors 4294948831 sector_size 512 inquiry [SCST_FIOsjfwin006        220] serial 3030303136663036
+# CvfsDisk3 PhysicalDrive8 4294948831 EFI 0    # host 3 lun 7 sectors 4294948831 sector_size 512 inquiry [SCST_FIOsjfwin007        220] serial 3030303136663037
+#

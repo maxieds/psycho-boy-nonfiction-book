@@ -1,0 +1,83 @@
+.\" qos_config.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2008-2014. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH QOS 4 "June 2014" "Xsan File System"
+.SH NAME
+qos \- Xsan File System FSM QoS Central Config File
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/*_rvio.opt
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fBqos\fR config file 
+defines the bandwidth reservation for non-rtio (rvio) on certain clients from
+a central place, i.e. the fsm server. The allocated rvio bandwidth is used for non-rtio IOs on the client. The config file has the name of the designated volume's name appended by "_rvio.opt". So if the volume is "default", the QoS config file will be "default_rvio.opt". If this file does not exist, there 
+will be no rvio bandwidth reservation for any client.
+.PP
+non-rtio reservation (rvio) provides a second priority bandwidth reservation mechanism for certain clients, while rtio request has the highest priority and will be satisfied first. All rvio requests share the remaining bandwidth after rtio requests are satisfied. If all rvio requests cannot be satisfied, then each rvio client is allocated the bandwidth directly proportional to its request amount. With dynamic changes of rtio requests, the allocated rvio bandwidths for clients are dynamically adjusted.
+.SH SYNTAX
+A QoS central config file has multiple lines, each line defines the rvio
+reservation for a client. If a client has multiple IP addresses, the rvio 
+reservation should be defined for each ip address.
+.PP
+The format of an line in QoS central config file is:
+.Cs
+<host> <bw-type> <sg=yy>[,sg=yy]
+.Ce
+.PP
+\fB<host>\fR is the client host name. This can be the IP address (either V4 or V6), host name or FQDN of the client. Note: the host name should be able to be resolved (converted to a valid IP address) by the fsm server.
+.PP
+The \fB<bw-type>\fR is the type of bandwidth to be specified. Two types exists:
+.Cs
+qosios		the bandwidth unit is IOs per second 
+qosmb		the bandwidth unit is mega bytes per second
+.Ce
+.PP
+If "qosios" is used, you may also append multiplier suffix to the amount of bandwidth:
+.Cs
+Suffix    Name    Multiplier
+------    ----    ----------
+  K       kilo    1,024
+  M       mega    1,048,576
+.Ce
+.PP
+The \fB<sg=yy>\fR defines the bandwidth on the designated storage pool. \fBsg\fR is the designated storage pool, \fByy\fR is the reserved bandwidth. You can only reserve bandwidth on storage pools whose QoS parameters have been configured in the volume config file. There are three ways to specify a storage pool:
+.Cs
+*       the wildcard for storage pool, applies to all storage pool
+sgname  the name of a storage pool
+sgnum   the number of a storage pool, storage pool starts from 0.
+.Ce 
+.PP
+Lines that contain white space only or that contain the comment token 
+as the first non-white space character are ignored. An example on how to
+configure QoS central config file can be found:
+.Cs
+.I /System/Library/Filesystems/acfs.fs/Contents/examples/rvio.example
+.Ce
+.SH FILES
+.I /Library/Preferences/Xsan/*_rvio.opt
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5),
+.BR fsm (8),
+.BR mount (8)

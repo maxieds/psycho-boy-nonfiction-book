@@ -1,0 +1,133 @@
+.\" cvgather.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2003-2019. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVGATHER 8 "September 2019" "Xsan File System"
+.SH NAME
+cvgather \- Compile debugging information for a Xsan File System
+.PP
+(The Windows version of cvgather contains different features and options.
+See the StorNext Windows "Gather Debugging Info (cvgather.exe)" help
+page for more information.)
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B cvgather
+.BI -f \ VolName
+.RB [ -sukxr ]
+.RB [ -o \ \fIOutputFile\fP]
+.RB [ -n \ \fINumberOfCvlogs\fP]
+.RB [ -U \ \fIUserCore\fP]
+.RB [ -K \ \fIKernelCore\fP]
+.RB [ -p \ \fISnfsPath\fP]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBcvgather\fR program is used to collect debug information from a 
+volume. 
+This creates a tar file of the system's \fIXsan File System\fR
+debug logs, configuration, version information and disk devices.
+.PP
+The \fBcvgather\fR program will collect client debug information on client machines
+and server information on server machines, as well as portmapper information
+from all machines. System log files as well as Xsan log files are included. 
+At the users option, \fBcvgather\fR also collects core files from user space 
+utilities, such as the fsm, and also from the operating system kernel, 
+when available.
+.SH USAGE
+When the operator encounters an error using Xsan and wishes to send debugging
+information to Apple technical support, the \fBcvgather\fR utility may be run.
+The following command arguments and options affect the behavior of 
+\fBcvgather\fR.
+.sp
+.in -0.5i
+.IP "\fB-f\fP \fIVolName\fP"
+Specify the name of the volume for which 
+debugging information should be collected. Some information is universal to 
+all installed volumes, while some is unique to each file system. 
+.IP \fB-k\fR
+Collect the core file from the operating system kernel. This 
+option is not supported on Linux. The \fB-k\fR option collects the kernel core
+from the default location for the machine's operating system. To collect the
+kernel core from another location use \fB-K\fR.
+.IP "\fB-K\fP \fIKernelCore\fP"
+Collect the kernel core file from any file. You 
+must specify the full filename as well as the path.
+.IP "\fB-n\fP \fINumberOfCvlogs\fP"
+Specify the number of cvlog files to include in the
+tarball. If this option is not selected, 4 will be used. This is the default 
+number of cvlogs used by the fsm. 
+.IP "\fB-o\fP \fIOutputFile\fP"
+Specify the name of the output file. This name
+is appended with a _timestamp and the suffix '.tgz'. The timestamp is appended
+to the filename to allow for the existence of multiple tar files. If this option
+is not selected, the name of the volume will be used as a default.
+.IP "\fB-p\fP \fISnfsPath\fP"
+Specify the file path to the Xsan install directory.
+If this option is not selected, the path \fI/System/Library/Filesystems/acfs.fs/Contents\fR will be used as a default.
+.IP \fB-s\fR
+Gather symbol information without core files.
+.IP \fB-u\fR 
+Collect the core file from user executables, such as the fsm. 
+By default, if they exist, cvgather will pick up a file named "core" and the 
+the most recently modified "core.*" file on systems that support core file 
+names with extensions.  
+The \fB-u\fR option collects core files from the 'debug' directory in 
+the Xsan directory.  
+To collect user core files from
+another location or core files with with non-standard names 
+use \fB-U\fR.
+.IP "\fB-U\fP \fIUserCore\fP"
+Collect the user core file from any file. You must 
+specify the full filename as well as the path. 
+.IP \fB\-r\fR
+Show numerical addresses instead of trying to determine symbolic host
+.IP \fB-x\fR
+Exclude files that are collected by pse_snapshot. Note that this option is
+intended to be used by pse_snapshot only and not for general use. The behavior
+of this option may change without warning.
+.PP 
+When \fBcvgather\fR is run it will create a tar file, that can be simply 
+e-mailed to Apple technical support for evaluation. It is recommended that 
+the tar file be compressed into a standard compression format such as 
+compress, gzip, or bzip2. 
+.SH NOTES
+IMPORTANT: \fBcvgather\fR creates a number of temporary files, thus must have 
+write privileges for the directory in which it is run. These files, as well as
+the output tar file can be very large, especially when the kernel core file is
+included, thus adequate disk space must be available.
+.PP
+Several important log files are only accessible by the root user, thus it is 
+important that \fBcvgather\fR be run with root privileges to gather the entire
+range of useful information. 
+.SH FILES
+.I /Library/Preferences/Xsan/*.cfg
+.br
+.I /Library/Logs/Xsan/debug/cvfsd.out
+.br
+.I /Library/Logs/Xsan/debug/nssdbg.out
+.br
+.I /Library/Logs/Xsan/debug/fsmpm.out
+.br
+.IR /Library/Logs/Xsan/data/ <volume_name> /log/cvlog*
+.SH "SEE ALSO"
+.BR cvdb (8),
+.BR cvversions (1),
+.BR cvfsid (8)
+.BR cvlabel (8)

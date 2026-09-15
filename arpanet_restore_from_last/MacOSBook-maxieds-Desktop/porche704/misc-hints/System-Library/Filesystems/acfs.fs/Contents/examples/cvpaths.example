@@ -1,0 +1,203 @@
+
+#
+# Copyright 2007-2020. Quantum Corporation. All Rights Reserved.
+# StorNext is either a trademark or registered trademark of
+# Quantum Corporation in the US and/or other countries.
+#
+# 'cvpaths' is an optional configuration file used to control and/or override
+# the normal SNFS behavior of scanning system standard directory locations
+# during the 'disk discovery' phase that occurs during a "cvlabel" run, or
+# from the "fsmpm" at boot/initialization time.
+#
+# Normally, the directories scanned are:
+#
+#	Irix		/dev/rdsk
+#	Solaris		/dev/rdsk
+#	Linux		/dev		(only /dev/sd[a-z] /dev/sd[a-z][a-z])
+#	AIX		/dev		(looking for 'rhdisk*')
+#
+# If a 'cvpaths' file exists in /usr/cvfs/config, then the contents of the
+# 'cvpaths' file will explicitly control which devices and/or directories
+# will be evaluated during disk discovery.
+#
+# Any line beginning with "#" is considered a comment line.
+#
+# Any token beginning with "#" is considered to be a comment up to the end
+# of the line.
+#
+# Blank/empty lines are ignored.
+#
+# A keyword=value syntax is used.
+#
+# Groups of related keyword phrases can span multiple lines.
+#
+# Note, the parser capability is limited, and does not allow for any
+#	white space around the equal ("=") operator, although white
+#	space, and commas, are tolerated in all other places.
+#
+# There are seven (7) keywords:
+#
+#	directory=
+#	wildcard=
+#	device=
+#	usage=
+#	hba=
+#	lun=
+#	verify=
+#
+# The "directory=path" and "wildcard=pattern" directives do not require
+# any of the other keywords.
+#
+# The directory specified by the "directory=path" directive will be traversed
+# in a manner similar to the default "disk discovery" scan mechanism.
+# 
+# The following one-line example would describe the normal default behavior
+# on an Irix or Solaris system:
+#
+#	directory=/dev/rdsk
+#
+# The "wildcard=pattern" directive specifies a glob pattern, see glob(7),
+# to match and scan for devices. One pattern per line is permitted, multiple
+# lines can be specified. The directory directive is not supported on Windows.
+# The wildcard directive is not supported on Windows or Apple platforms.
+#
+# On linux, the default disk discovery mechanism is to scan paths
+# which match /dev/sd[a-z] /dev/sd[a-z][a-z]
+#
+# The following example would add EMC powerpath devices to the linux
+# device scan:
+#
+#	wildcard=/dev/sd[a-z]
+#	wildcard=/dev/sd[a-z][a-z]
+#	wildcard=/dev/emcpower*
+#
+# A "device=path" directive begins a "group" of keywords related to the device
+# located at "path".
+#
+# for example:
+#
+#	device=/dev/rdsk/c2t39d0s2
+#
+# would describe exactly one disk/raid device to be scanned during disk
+# discovery.
+#
+#
+#
+# NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE!
+#
+# 	enumerating specific device paths presumes that the same disk/raid
+#	will always appear in the host system's hardware/device graph with
+#	the same exact name.
+#
+#	In most cases, this can only be accomplished by utilizing
+#	"persistent binding" methods related to the specific
+#	disk driver package..
+#
+# NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE! NOTE!
+#
+#
+# A "verify=labelname" keyword may be used to verify that the device
+# located at "path" contains the SNFS label "labelname", for example:
+#
+#	device=/dev/rdsk/c2t39d0s2 verify=CvfsDisk9
+#
+# The device "path" is the "character special" device name.
+#
+# The device named must describe a device path that describes the entire disk.
+#
+# For example, on Solaris systems, it must describe 'slice 2', which means
+# the final component of the path would end with 's2'.
+#
+# On Linux systems, you should use "/dev/sdc" rather than "/dev/sdc1".
+#
+# On AIX systems, you should use the "/dev/rhdisk.." name.
+#
+# On Irix systems, you should use a path name that includes all of
+# the necessary sub-directories needed to describe the controller
+# and port, for example:
+#
+#	device=/dev/rdsk/20000004cf7331aa/lun0vol/c2p1
+# -or-
+#	directory=/dev/rdsk/20000004cf7331aa
+#
+# Normally, SNFS determines from the raid controller whether a path should
+# be considered "Active", or "Passive".
+#
+# The 'usage=[Active|Passive]' keyword may be used to override the normal
+# determination of "Active" or "Passive" path usage.  The default mode is
+# "Active".
+#
+# Certain device drivers use non-conventional names, or, do not support
+# standard methods of HBA & LUN identification.
+#
+# If the device driver name, (i.e. /dev/rdsk/emcpowera1) does not follow
+# the host system's convention of providing HBA & LUN information, then
+# the "hba=#" and "lun=#" keywords may be used to provide that information.
+#
+# For example:
+#
+# device=/dev/emcpower3 verify=CvfsDisk_30 usage=Active hba=6 lun=2
+#
+# would configure a Linux device driver path externalized as
+# "/dev/emcpower3", assigning the HBA id of 6, and LUN # 2.
+#
+# This line could also be written as:
+#
+# device=/dev/emcpower3, verify=CvfsDisk_30, usage=Active, hba=6, lun=2
+#
+# -or-
+#
+# device=/dev/emcpower3
+#			verify=CvfsDisk_30,
+#			usage=Active,
+#			hba=6,
+#			lun=2
+#
+# The HBA id is used by the multi-path code to collect devices
+# together according to which host HBA is used for access.
+#
+# The actual value of the number is not critical, what is important
+# is that all disks/raids configured through a specific host HBA should
+# be assigned a consistent number that is unique to that host HBA path.
+#
+# The LUN number is important if the raid controller is one of the
+# controllers recognized by SNFS as capable of Automatic Volume Transfer,
+# and Active/Passive path declaration.  The LUN # is used to index into
+# specific raid controller mode pages.
+#
+#
+# A Solaris example, forcing certain paths to be held back for 'Standby' usage:
+#
+# device=/dev/rdsk/c2t39d0s2	usage=Active	verify=CvfsDisk_30
+# device=/dev/rdsk/c2t40d0s2	usage=Passive	verify=CvfsDisk_31
+#
+#
+# A Solaris example, restricting the search to a non-standard directory
+#
+# directory=/dev/rdcs				# DataCore
+#
+#
+# A Linux example, providing HBA & LUN information:
+#
+# device=/dev/emcpowerf	hba=4	lun=2	verify=CvfsDisk_30
+# device=/dev/emcpowerg	hba=4	lun=3	verify=CvfsDisk_31
+#
+#
+# An Irix example, used to simply limit the number of LUN's to scan
+# during disk discovery:
+#
+# device=/dev/rdsk/20000004cf7331e6/lun0vol/c2p1
+# device=/dev/rdsk/20000004cf732ff0/lun0vol/c2p2
+#
+# -or-
+#
+# directory=/dev/rdsk/20000004cf7331e6
+# directory=/dev/rdsk/20000004cf732ff0
+#
+# Note that the Irix hardware graph syntax for naming a path to a SAN disk
+# contains the WWNN expressed as a 16 character hexidecimal string in the
+# path name.  Since the WWNN is unique to a raid/drive no matter where it
+# may be physically, it should not be necessary to use "persistent binding"
+# on Irix systems.
+#
+

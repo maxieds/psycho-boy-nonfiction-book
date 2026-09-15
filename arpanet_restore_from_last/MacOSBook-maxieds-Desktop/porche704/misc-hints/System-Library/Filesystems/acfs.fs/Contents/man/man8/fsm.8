@@ -1,0 +1,113 @@
+.\" fsm.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 1997-2015. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH FSM 8 "July 2015" "Xsan File System"
+.SH NAME
+fsm \- Xsan File System Manager
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B fsm
+.RI [ volume_name \ [ cluster_admin]\ [ host_name ]]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBfsm\fR is the server daemon that manages a Xsan Volume
+The File System Manager (FSM) manages the 
+volume's name space, allocations,
+and metadata coherency. It is also used for I/O bandwidth and storage pool management 
+functions. The default Xsan volume name is \fIdefault\fR, and the default 
+host name is the system's hostname as found by the
+.BR gethostname (2)
+library call.
+.PP
+The optional \fIcluster_admin\fP argument has the syntax:
+.IP
+.BI @ cluster_name / admin_domain
+.PP
+The \fB@\fP distinguishes
+the \fIcluster_admin\fP argument from the \fIhost_name\fP argument.
+.PP
+Multiple FSM processes may co-exist on one system, as long as they have
+unique volume names. The volume name is used by the
+.BR mount (8)
+command, along with the hostname separated by a colon (:). For example, if
+an FSM process was started on host \fIfsmhost\fR and the volume name
+was declared \fIprojecta\fR and the mount point was \fI/usr/clips\fR, then 
+the mount command would be:
+.PP
+.Cs
+ mount -t acfs fsmhost:projecta /usr/clips
+.Ce
+.PP
+This process runs in the background and is started at boot time. It is 
+enabled or disabled via
+.BR chkconfig (8)
+or
+.BR init.d (7)
+using the \fIcvfs\fR 
+key word. 
+.PP
+To start multiple FSM daemons (therefore multiple volumes) on a single
+system the \fBfsmlist\fR file must be created to describe which FSM daemons 
+to start. See
+.BR fsmpm (8)
+and
+.BR fsmlist (4)
+for details.
+.SH ENVIRONMENT
+.IP FSM_KEEP_ALIVE_TIME
+This variable can be used to change the rate that the FSM process
+sends a keep alive message to each connected client.
+The value is in seconds, with a default of 5 seconds.
+It can be set between 1 and 7200 seconds (2 hours).
+.RS
+.IP Note:
+This variable is not intended for general use,
+and should only be used when recommended by Apple Support.
+.RE
+.IP FSM_KEEP_ALIVE_TIMEOUT
+This variable can be used to change the timeout value that the FSM
+process uses after sending a keep alive to a client.
+The value is in seconds, with a default of 3 seconds.
+It can be set between 1 and 30 seconds.
+Note that there are other factors that are also considered
+by the FSM process before timing out a client,
+so the actual timeout may be somewhat longer.
+.RS
+.IP Note:
+This variable is not intended for general use,
+and should only be used when recommended by Apple Support.
+.RE
+.SH FILES
+.I /Library/Preferences/Xsan/*.cfg
+.br
+.I /Library/Preferences/Xsan/fsmlist
+.br
+.I /Library/Preferences/Xsan/license.dat
+.br
+.IR /Library/Logs/Xsan/data/ <volume_name> /config_history/*.cfg. <TIMESTAMP>
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5),
+.BR fsmlist (4),
+.BR fsmpm (8),
+.BR fstab (5),
+.BR mount (8)

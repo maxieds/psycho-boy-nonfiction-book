@@ -1,0 +1,559 @@
+.\" snfsdefrag.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2002-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNFSDEFRAG 1 "February 2020" "Xsan File System"
+.SH NAME
+snfsdefrag \- Xsan File System File Defrag Utility
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B snfsdefrag 
+.RB [ -ADdFPqsv ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP\fP]
+.RB [ -k \ \fIkey\fP]
+.RB [ -g \ \fIgroup\fP]
+.RB [ -m \ \fIcount\fP]
+.RB [ -r ]
+.RB [ -S \ \fIfile\fP]
+.IR Target \ [ Target ...]
+.HP
+.B snfsdefrag -e
+.RB [ -v ]
+.RB [ -b ]
+.RB [ -F ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP\fP]
+.RB [ -r ]
+.RB [ -t ]
+.RB [ -L ]
+.RB [ -S \ \fIfile\fP]
+.IR Target \ [ Target ...]
+.HP
+.B snfsdefrag -E
+.RB [ -v ]
+.RB [ -b ]
+.RB [ -F ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP\fP]
+.RB [ -r ]
+.RB [ -t ]
+.RB [ -L ]
+.RB [ -S \ \fIfile\fP]
+.IR Target \ [ Target ...]
+.HP
+.B snfsdefrag -c
+.RB [ -v ]
+.RB [ -F ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP]
+.RB [ -r ]
+.RB [ -t ]
+.RB [ -T ]
+.RB [ -S \ \fIfile\fP]
+.RB [ -A ]
+.IR Target \ [ Target ...]
+.HP
+.B snfsdefrag -p
+.RB [ -DPqv ]
+.RB [ -F ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP\fP]
+.RB [ -r ]
+.RB [ -S \ \fIfile\fP]
+.RB [ -A ]
+.IR Target \ [ Target ...]
+.HP
+.B snfsdefrag -l
+.RB [ -Dv ]
+.RB [ -F ]
+.RB [ -G \ \fIgroup\fP]
+.RB [ -K \ \fIkey\fP]
+.RB [ -m \ \fIcount\fP]
+.RB [ -r ]
+.RB [ -S \ \fIfile\fP]
+.RB [ -A ]
+.IR Target \ [ Target ...]
+.ad
+.hy
+.SH DESCRIPTION
+\fBsnfsdefrag\fR is a utility for defragmenting files on a Xsan
+volume by relocating the data in a file to a smaller set of
+extents.  Reducing the number of extents in a file improves performance
+by minimizing disk head movement when performing I/O.  In addition, 
+with fewer extents, Xsan File System Manager (FSM) overhead 
+is reduced.
+.PP
+\fBsnfsdefrag\fR can be used to migrate files off of an existing stripe 
+group and on to other storage pools by using the \fB-G\fR option and 
+setting the \fB-m\fR option to 0. If affinities are associated with a 
+file that is being defragmented, new extents are created using the 
+existing file affinity, unless being overridden by the \fB-k\fR option. 
+If the \fB-k\fR option is specified, the files are moved to a stripe 
+group with the specified affinity. Without \fB-k\fR, files are moved 
+to any available stripe group. This migration capability can be
+especially useful when a storage pool is going out of service.
+See the use of the \fB-G\fR option in the EXAMPLES section below.
+.PP
+In addition to defragmenting and migrating files, 
+\fBsnfsdefrag\fR can be used to list the extents in a file 
+(see the \fB-e\fR option) or to prune away unused space that has 
+been preallocated for the file (see the \fB-p\fR option).
+.sp
+Note: Free space in a storage pool can also become fragmented.
+To address this issue, see the \fBsgdefrag\fR command.
+.sp
+Note: The \fBsnfsdefrag\fR utility is no longer the preferred tool
+to prepare a storage pool for retirement.
+Use the \fBsgoffload\fR utility instead.
+.SH OPTIONS
+.IP \fB-A\fR
+Do not attempt to temporarily stop I/O on an open file by setting the
+administrative lock on the file.
+.IP \fB-b\fR
+Show extent size in blocks instead of kilobytes.  Only useful
+with the \fB-e\fR and \fB-E\fR (list extents) options.
+.IP \fB-c\fR
+This option causes \fBsnfsdefrag\fR to just display an extent
+count instead of defragmenting files.
+See also the \fB-t\fP and \fB-T\fP options.
+.IP \fB-D\fR
+Turns on debug messages.
+.IP \fB-d\fR
+Causes \fBsnfsdefrag\fR to operate on files containing extents that have
+depths that are different than the current depth for the extent's
+storage pool.  This option is useful for reclaiming disk space
+that has become "shadowed" after cvupdatefs has been run for stripe group 
+expansion.  Note that when \fB-d\fR is used, a file may be 
+defragmented due to the stripe depth in one or more of its extents 
+OR due to the file's extent count.
+.IP \fB-e\fR
+This option causes \fBsnfsdefrag\fR to not actually attempt the defragmentation,
+but instead report the list of extents contained in the file.  The extent
+information includes the starting file relative offset, starting and ending
+storage pool block addresses, the size of the extent, the depth of the
+extent, and the storage pool number.
+See also the \fB-t\fP option.
+.IP \fB-E\fR
+This option has the same effect as the \fB\-e\fR option except that 
+file relative offsets and starting and ending stripe group block addresses that 
+are stripe-aligned are highlighted with an asterisk (*).  Also, starting 
+storage pool addresses that are equally misaligned with the file relative 
+offset are highlighted with a plus sign (+).
+See also the \fB-t\fP option.
+.IP \fB-F\fR
+This option causes \fBsnfsdefrag\fR to skip resource forks for file
+systems on which the namedStreams option is enabled.
+
+.IP "\fB-G\fP \fIstoragepool\fP"
+This option causes \fBsnfsdefrag\fR to only operate on files having
+at least one extent in \fIstoragepool\fP, which is the stripe group
+index. Use \fB"sgmanage --list"\fP to see the stripe group index.
+Note that multiple \fB-G\fR options can be specified to match files
+with an extent in at least one of the specified storage pools.
+.IP "\fB-K\fP \fIkey\fP"
+This option causes \fBsnfsdefrag\fR to only operate on source 
+files that have the supplied affinity \fIkey\fR.
+If \fIkey\fR is preceded by '!' then \fBsnfsdefrag\fR will only
+operate on source files that do \fBnot\fR have the 
+affinity \fIkey\fR.  See EXAMPLES below.
+.IP "\fB-k\fP \fIkey\fP"
+Forces the new extent for the file to be created on the storage pool
+specified by \fIkey\fR.
+This option has the side effect of changing or creating the affinity
+on the affected files. If this is not desired, the \fBcvaffinity\fR
+command can be used to change or delete the affinity or the
+\fI-g\fP option can used instead.
+.IP "\fB-g\fP \fIstoragepool\fP"
+Places the new extent on the storage pool corresponding to the
+specified index \fIstoragepool\fP.
+Unlike the \fIkey\fR option, the file's affinity is not affected.
+Use \fB"sgmanage --list"\fP to see the stripe group index.
+.IP \fB-l\fR
+This option causes \fBsnfsdefrag\fR to just list candidate files.
+.IP \fB-L\fR
+When used with the \fB-e\fP or \fB-E\fP option,
+this option causes \fBsnfsdefrag\fR to also print out the
+physical location of each extent on disk.
+.IP "\fB-m\fP \fIcount\fP"
+This option tells \fBsnfsdefrag\fR to only operate on files containing
+more than \fIcount\fR extents. By default, the value of \fIcount\fR is 1.
+A value of zero can be specified to operate on all files with at least one
+extent. This is useful for moving files off a stripe group.
+.IP \fB-p\fR
+Causes \fBsnfsdefrag\fR to perform a prune operation instead of defragmenting
+the file.  During a prune operation, blocks beyond EOF that have been 
+preallocated either explicitly or as part of inode expansion are freed, 
+thereby reducing disk usage.  Files are otherwise unmodified. Note: While prune
+operations reclaim unused disk space, performing them regularly can lead to free
+space fragmentation.
+.IP \fB-P\fR
+Lists skipped files.
+.IP \fB-q\fR
+Causes \fBsnfsdefrag\fR to be quiet.
+.IP \fB-r\fR
+This option instructs \fBsnfsdefrag\fR to recurse through the
+Target and attempt to defragment each fragmented file that it finds.
+If Target is not specified, the current directory is assumed.
+.IP \fB-s\fR
+Causes snfsdefrag to perform allocations that are block-aligned. 
+This can help performance in situations where the I/O size 
+perfectly spans the width of the storage pool's disks.
+.IP "\fB-S\fP \fIfile\fP"
+Writes status monitoring information in the supplied file.
+This is used internally by Xsan and the format
+of this file may change.
+.IP \fB-t\fR
+This option adds totals to the output of the \fB\-c\fR, \fB\-e\fR, or \fB\-E\fR
+options.
+Output at the end indicates how many regular files were visited, how many
+total extents were found from all files, and the average # of extents
+per file. Also shown are the number of files with one extent, the number of
+files with more than one extent, and the largest number of extents in a single
+file.
+.IP \fB-T\fR
+This option acts like -t, except that with -c, only the summary output
+is presented. No information is provided for individual files.
+.IP \fB-v\fR
+Causes \fBsnfsdefrag\fR to be verbose.
+.SH "EXAMPLES"
+Count the extents in the file foo.
+.Cs
+rock% snfsdefrag -c foo
+.Ce
+.PP
+Starting in directory, dir1, recursively count all the files and their
+extents and then print the grand total and average number of extents per file.
+.Cs
+rock% snfsdefrag -r -c -t dir1
+.Ce
+.PP
+List the extents in the file foo.
+.Cs
+rock% snfsdefrag -e foo
+.Ce
+.PP
+Defragment the file foo.
+.Cs
+rock% snfsdefrag foo
+.Ce
+.PP
+Defragment the file foo if it contains more than 2 extents.  Otherwise,
+do nothing.
+.Cs
+rock% snfsdefrag -m 2 foo
+.Ce
+.PP
+Traverse the directory abc and its sub-directories and
+defragment every file found containing more than one extent.
+.Cs
+rock% snfsdefrag -r abc
+.Ce
+.PP
+Traverse the directory abc and its sub-directories and
+defragment every file found having one or more extents 
+whose depth differs from the current depth of extent's 
+storage pool OR having more than one extent.
+.Cs
+rock% snfsdefrag -rd abc
+.Ce
+.PP
+Traverse the directory abc and its sub-directories and
+only defragment files having one or more extents whose 
+depth differs from the current depth of extent's storage pool.
+This situation would arise after cvupdatefs has been used
+to expand the depth of a stripe group. The high value for
+-m ensures that only extents with different depth values
+are defragmented.
+.Cs
+rock% snfsdefrag -m 9999999999 -rd abc
+.Ce
+.PP
+Traverse the directory abc and recover unused preallocated
+disk space in every file visited.
+.Cs
+rock% snfsdefrag -rp abc
+.Ce
+.PP
+Force the file foo to be relocated to the storage pool with the affinity key "fast"
+.Cs
+rock% snfsdefrag -k fast -m 0 foo
+.Ce
+.PP
+If the file foo has the affinity \fBfast\fR, then move its
+data to a storage pool with the affinity \fBslow\fR.
+.Cs
+rock% snfsdefrag -K fast -k slow -m 0 foo
+.Ce
+.PP
+If the file foo does NOT have the affinity \fBslow\fR, then move its
+data to a storage pool with the affinity \fBslow\fR.
+.Cs
+rock% snfsdefrag -K '!slow' -k slow -m 0 foo
+.Ce
+.PP
+Traverse the directory abc and migrate any files containing 
+at least one extent in storage pool 2 to any non-exclusive
+storage pool.
+.Cs
+rock% snfsdefrag -r -G 2 -m 0 abc
+.Ce
+.PP
+Traverse the directory abc and migrate any files containing 
+at least one extent in storage pool 2 to storage pools with
+the affinity \fBslow\fR. It is advised that allocations to the
+source stripe group  be disabled
+before running the following command, if you
+wish to retire the source stripe group.
+On systems with Linux MDCs, use \fBsgmanage\fR to disable allocations.
+On Windows MDCs, edit the config file, insert \fB"Alloc Disabled"\fR
+in the stripe group section, and restart the FSM.
+.Cs
+rock% snfsdefrag -r -G 2 -k slow -m 0 abc
+.Ce
+.PP
+Traverse the directory abc list any files that have the
+affinity \fBfast\fR and having at least one extent in storage pool 2.
+It is advised that allocations to the source stripe group be disabled
+before running the following command, if you wish to retire the source stripe
+group. 
+On systems with Linux MDCs, use \fBsgmanage\fR to disable allocations.
+On Windows MDCs, edit the config file, insert \fB"Alloc Disabled"\fR
+in the stripe group section, and restart the FSM.
+.Cs
+rock% snfsdefrag -r -G 2 -k fast -l -m 0 abc
+.Ce
+.SH "NOTES"
+Only
+the owner of a file or superuser is allowed to 
+defragment a file.  (To act as superuser on a Xsan volume, in 
+addition to becoming the user \fBroot\fR, the configuration option 
+GlobalSuperUser must be enabled.  See \fBsnfs_config(5)\fR for 
+more information.)
+.PP
+\fBsnfsdefrag\fR attempts to set an administrative lock on a file
+before attempting the defrag operation, unless overridden by the
+\fB-A\fR option.
+This will stop I/O related operations on an open file and allow the defrag
+operation to proceed. When the defrag is complete, the client will
+refresh its view of the file such that an application will not be
+aware that the file's physical location on disk may have changed.
+If the administrative lock cannot be obtained and the file is open,
+\fBsnfsdefrag\fR will skip the file.
+.PP
+\fBsnfsdefrag\fR will not operate on files that have been
+modified in the past 10 seconds and files with modification times
+in the future. If a file is modified while defragmentation is in 
+progress, \fBsnfsdefrag\fR will abort and the file will be skipped.
+.PP
+\fBsnfsdefrag\fR skips special files and files containing holes.
+.PP
+\fBsnfsdefrag\fR does not follow symbolic links.
+.PP
+When operating on a file marked for PerfectFit allocations,
+\fBsnfsdefrag\fR will "do the right thing" and preserve the
+PerfectFit attribute.
+.PP
+While performing defragmentation, \fBsnfsdefrag\fR creates a temporary file 
+named \fITargetFile\fB__defragtmp\fR.  If the command is interrupted,
+\fBsnfsdefrag\fR will attempt to remove this file.  However, if
+\fBsnfsdefrag\fR is killed or a power failure occurs, the temporary file
+may be left behind.  If snfsdefrag is subsequently re-run and attempts 
+defragmentation, it will clean up any stale temporary files encountered.
+But if snfsdefrag is not run again, it will be necessary to find and
+remove the temporary file as it will continue to consume space.
+Note that user files having the \fB__defragtmp\fR extension should not
+be created if \fBsnfsdefrag\fR is to be run. 
+.PP
+\fBsnfsdefrag\fR will fail if it cannot locate a set of
+extents that would reduce the current extent count on a file.
+.PP
+When files being defragmented reside in a managed file system with stub files
+enabled and CLASS_STUB_READ_AHEAD is set in the fs_sysparams file, the operation
+could cause file retrieval.
+.PP
+By default, when using the \fB-r\fB option, \fBsnfsdefrag\fR will
+sort directory entries before operating on them unless the size
+of the directory exceeds 1GiB. This threshold can be adjusted using
+the environment variable DEFRAG_MAX_DIR_SORT_SIZE.
+.PP
+When 
+a file contains a resource fork and resides
+on a file system where the namedStreams feature is enabled, by default,
+\fBsnfsdefrag\fR will attempt to operate on the resource fork as well
+as the main file. When this occurs, the resource fork will be displayed
+having the same name as the original file with the "/..namedfork/rsrc"
+suffix. For example, if the original file has the name "/stornext/snfs1/myfile",
+\fBsnfsdefrag\fR will show "/stornext/snfs1/myfile/..namedfork/rsrc"
+to represent the resource fork "named stream." The -F option can be
+used to prevent \fBsnfsdefrag\fR from operating on these named streams.
+.PP
+.SH "ADVANCED FRAGMENTATION ANALYSIS"
+There are two major types of fragmentation to note: file 
+fragmentation and free space fragmentation. File fragmentation is measured by 
+the number of file extents used to store a file. A file extent is a contiguous 
+allocation unit within a file. When a large enough contiguous space cannot be 
+found to allocate to a file, multiple smaller  file extents are created. Each 
+extent represents a different physical spot in a storage pool. Requiring 
+multiple
+extents to address file data impacts performance in a number of ways. First,
+the file system must do more work looking up locations for a file's data. 
+Also, having file data spread across many different locations in the file system 
+requires the storage hardware to do more work while reading a file. On a disk 
+there will be increased head movements, as the drive seeks around to read in 
+each data extent. Many disks also attempt to optimize I/O performance, for 
+example, by attempting to predict upcoming read locations. When a file's data 
+is contiguous these optimizations work well. However, with a fragmented file 
+the drive optimizations are not nearly as efficient.
+.PP
+A file's fragmentation should be viewed more as a percentage than as a hard
+number. While it's true that a file of nearly any size with 50000 fragments
+is extremely fragmented and should be defragmented, a file that has 500
+fragments that are mostly one or two file system blocks (4096 bytes) in length 
+is also very fragmented. Keeping files to under 10% fragmentation is the ideal, 
+and how close you come to that ideal is a compromise based on real-world 
+factors (file system use, file sizes and their life span, opportunities to 
+run \fBsnfsdefrag\fR, etc.).
+.PP
+In an attempt to reduce fragmentation (file and free space), Administrators can
+try using the Allocation Session Reservation feature.
+This feature is managed using the GUI or by modifying
+the \fBallocSessionReservationSize\fR parameter, see
+.BR snfs_config (5).
+See also the Xsan Tuning Guide.
+.PP
+Some common causes of fragmentation are having very full stripe groups (possibly
+because of affinities), a file system that has a lot of fragmented free space
+(deleting a fragmented file produces fragmented free space), heavy use of CIFS
+or NFS which typically use out-of-order allocations resulting in unoptimized
+(uncoalesced) allocations, or an application that writes files in a random
+order.
+.PP
+\fBsnfsdefrag\fR is designed to detect files which contain file fragmentation
+and coalesce that data onto a minimal number of file extents. The efficiency 
+of \fBsnfsdefrag\fR is dependent on the  state of the file system's free data 
+blocks, or free space.
+.PP
+The second type of fragmentation is free space fragmentation. The file system's 
+free space is the pool of unallocated data blocks. Space allocation for new 
+files, as well as allocations for extending existing files, comes from the file
+system's free space. Free space fragmentation is measured by the number of 
+fragments of contiguous free blocks. 
+Fragmentation in the file system's free space affects the file system's
+ability to allocate large extents. A file can only have an extent as
+large as the largest contiguous block of free space. Thus free space 
+fragmentation can lead to file fragmentation in larger files. As 
+\fBsnfsdefrag\fR processes fragmented
+files it attempts to use large enough free space fragments to create a new 
+defragmented file space. If free space is too fragmented \fBsnfsdefrag\fR may 
+not be 
+able to allocate a large enough extent for the file's data. In the case that 
+\fBsnfsdefrag\fR must use multiple extents in the defragmented file, it will 
+only
+proceed if the processed file will have fewer extents than the original.
+Otherwise \fBsnfsdefrag\fR will abort that file's defrag process and move on
+to remaining defrag requests.  
+.SH "FRAGMENTATION ANALYSIS EXAMPLES"
+The following examples include reporting from \fBsnfsdefrag\fR as well as 
+\fBcvfsck\fR. Some
+examples require additional tools such as \fBawk\fR and \fBsort\fR.
+.PP
+Reporting a specific file's fragmentation (extent count).
+.Cs
+    # snfsdefrag -c <filename>
+.Ce
+.PP
+Report all files, their extents, the total # of files and extents, and the
+average number of extents per files. Beware that this command walks the entire
+file system so it can take a while and cause the performance of applications to
+degrade while running.
+.Cs
+    # snfsdefrag -r -c -t <mount point>
+.Ce
+.PP
+The following command will create a report showing each file's path, followed 
+by extent count, with the report sorted by extent count. Files with the 
+greatest number of extents will show up at the top of the list.
+.PP
+Replace <fsname> in the following example with the name of your Xsan
+file system. The report is written to stdout and should be redirected to a file.
+.Cs
+    # cvfsck -x <fsname> | awk -F, \N'39'{if (NF == 14) \\ 
+      print($6", "$7)}\N'39' | sort -uk1 -t, | sort -nrk2 -t,
+.Ce
+.PP
+This next command will display all files with at least 10 extents and with a
+size of at least 1MB. Replace <fsname> in the following example with the name 
+of your Xsan file system. The report is written to stdout and can be 
+redirected to a file.
+.Cs
+    # echo "#extents  file size  av. extent size  filename"; \\
+      cvfsck -r <fsname> | awk \N'39'{if (NF == 8 && $03 > 1048576 && \\
+      $05 > 10) printf("%8d %10d %16d %10s\\n", $5, $3, $03/$05, $8)}\N'39' \\ 
+      | sort -nr
+.Ce
+.PP
+The next command displays a report of free space fragmentation. This allows 
+an administrator to see if free space fragmentation may affect future 
+allocation fragmentation. See
+.BR cvfsck (8)
+man page for description of 
+report output.
+.Cs
+    # cvfsck -a -t -f <fsname>
+.Ce
+.PP
+The fragmentation detected RAS warning message may sometimes refer to an
+inode number instead of a file name.  To find the file name associated with
+the inode number on non-Windows clients, fill the file system mount point 
+and the decimal inum from the RAS message into the following find command.  
+The file name can then be used to defragment the file.  There may be more
+than one file that matches the 32-bit inode number.
+.Cs
+    # find <mount_point> -inum <decimal_inum>
+
+    # snfsdefrag <filename>
+.Ce
+.PP
+For Windows clients:  
+
+Using a DOS shell, CD to the directory containing the StorNext binaries
+and run the cvstat command as follows:  The <fname> parameter is the drive
+letter:/mount point and the <inum> parameter has either the decimal or 
+hexadecimal 64-bit inode number from the RAS message.  For example:
+.Cs
+    c:\\> cd c:\\Program Files\\StorNext\\bin
+
+    c:\\> cvstat fname=j:\\ inum=0x1c0000004183da
+.Ce
+.PP
+.SH FILES
+.I /Library/Preferences/Xsan/*.cfg
+.SH "SEE ALSO"
+.BR cvfsck (8),
+.BR cvcp (1),
+.BR cvmkfile (1),
+.BR snfs_config (5),
+.BR snfs.cfgx (5),
+.BR snfs.cfg (5),
+.BR cvaffinity (1),
+.BR sgdefrag (8),
+.BR sgoffload (8),
+.BR sgmanage (8)

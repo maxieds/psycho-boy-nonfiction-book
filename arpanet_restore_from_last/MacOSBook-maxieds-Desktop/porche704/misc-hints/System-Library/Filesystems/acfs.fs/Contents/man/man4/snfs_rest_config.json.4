@@ -1,0 +1,211 @@
+.\" snfs_rest_config.json.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2018-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNFS_REST_CONFIG 4 "March 2020" "Xsan File System"
+.SH NAME
+snfs_rest_config.json \- Xsan File System REST Configuration file
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/snfs_rest_config.json
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fIsnfs_rest_config.json\fP file
+is a JSON formatted configuration file used to control the behavior of REST services on
+REST capable versions of Xsan  and to manage the behavior of REST
+services in
+processes.
+.PP
+The REST interface is for internal Xsan use only, thus there is no
+support or documentation of the REST interface itself.
+.PP
+A version of the file is installed with the software and does not need to be
+changed under typical operating conditions.
+.PP
+The \fIminport\fP\ and \fImaxport\fP may be useful in a fire walled environment.
+The data timeout may be useful for long running requests.
+.PP
+Process specific definitions are applied to specific commands and daemons.
+The process name is the json object identifier which encapsulates the
+command or process specific options.
+.PP
+Process names currently supported are:
+.nf
+fsm
+fsmpm
+qbmanage
+sgmanage
+snhistory
+snrecover
+snquota
+SM_metadb
+fsrestd
+sntierd
+.fi
+.PP
+The process name sgmanage includes sgdefrag and sgoffload commands.
+All processes support the keywords data_timeout and conn_timeout.
+The process fsmpm supports the enable_server and rest_job_keep_days
+keywords.
+The process fsm supports the enable_rest keyword.
+The processes fsm and fsmpm support enable_proxy.
+.SH SYNTAX
+The \fIsnfs_rest_config.json\fP file follows the JSON schema. Each of the
+attribute-value pairs occupies one line and is terminated by
+a comma, save for the final attribute-value pair.
+Items used for processes appear in a process specific section identified by
+the process name.
+No comments of any kind are allowed.
+Refer to this man page's \fBEXAMPLE\fP section for a visual
+representation of the described format.
+.PP
+General keywords are:
+.IP "\[lq]\fBconn_timeout\fP\[rq]: \fItime\fP"
+Specifies the number of milliseconds before a connect request will timeout.
+\fIconn_timeout\fP defaults to 5000 (5 seconds).
+.IP "\[lq]\fBdata_timeout\fP\[rq]: \fItime\fP"
+Specifies the number of milliseconds before a connection will timeout.
+\fIdata_timeout\fP defaults to 10000 (10 seconds), except for
+the fsm process, which has a default of 900000 (900 seconds).
+.IP "\[lq]\fBenable_proxy\fP\[rq]: \fItrue|false\fP"
+Currently unsupported.  Enables use of a proxy interface.
+\fIenable_proxy\fP defaults to false.
+.IP "\[lq]\fBenable_rest\fP\[rq]: \fItrue|false\fP"
+Enables use of the REST interface.
+\fIenable_rest\fP must be included as true for use of any services. Default
+value is false, but is specified as true in the installed file.
+.IP "\[lq]\fBenable_server\fP\[rq]: \fItrue|false\fP"
+Currently unsupported.  Enable rest control over some file system admin features.
+\fIenable_server\fP defaults to false, but is specified as true in the installed
+file.
+.IP "\[lq]\fBmaxport\fP\[rq]: \fIport_value\fP"
+Specifies the top number for the range of allowed ports.
+Use in conjunction with \fIminport\fP.
+\fImaxport\fP defaults to 0 (no range).
+.IP "\[lq]\fBminport\fP\[rq]: \fIport_value\fP"
+Specifies the bottom number for the range of allowed ports.
+Use in conjunction with \fImaxport\fP.
+\fIminport\fP defaults to 0 (no range).
+.IP "\[lq]\fBport\fP\[rq]: \fIport\fP"
+Controls the port used for http communication.
+\fIport\fP is process specific only.  The default value is unspecified.
+.IP "\[lq]\fBproxy_admin\fP\[rq]: \[lq]\fIproxy_admin\fP\[rq]"
+Deprecated, see the snrest(8) command.
+If a proxy web server is used, URL of server to which to connect.
+However, this value is ignored if an api gateway is configured
+with the snrest(8) command.
+\fIproxy_admin\fP defaults to null.
+.IP "\[lq]\fBproxy_gw\fP\[rq]: \[lq]\fIproxy_gw\fP\[rq]"
+Deprecated, see the snrest(8) command.
+If a proxy web server is used, URL for incoming requests to that server.
+However, this value is ignored if an api gateway is configured
+with the snrest(8) command.
+\fIproxy_gw\fP defaults to null.
+.IP "\[lq]\fBregistration_name\fP\[rq]: \[lq]\fIregistration_name\fP\[rq]"
+Overrides the use of hostname for a url published by the system. This is
+expected to be a name which can be mapped to the location of the SNFS host
+from external locations. For use in environments where the host name does not
+resolve to a routable address.
+The \fIregistration_name\fP defaults to null.
+.IP "\[lq]\fBssl\fP\[rq]: \[lq]\fIssl\fP\[rq]"
+Controls the use of secure socket negotiation parameters. In particular
+the minimum TLS version which will be allowed and the set of ciphers allowed.
+\fIssl\fP has default values, but values are specified in the installed file
+for use.
+.IP "\[lq]\fBssl_port\fP\[rq]: \fIssl_port\fP"
+Controls the port used for https communication.
+\fIssl_port\fP is process specific only and defaults to unspecified.
+.IP "\[lq]\fBrest_job_keep_days\fP\[rq]: \fIdays\fP"
+Specifies how long a background job's log and state are to be retained.
+A background job can be submitted for certain potentially long-running
+tasks such as file system check.
+.IP "\[lq]\fBproxy_retry_seconds\fP\[rq]: \fIseconds\fP"
+Specifies how long to wait between retries when registration with the proxy
+web server fails.  The default value is 300 (5 minutes).
+
+.SH EXAMPLE
+The following is the installed
+.B snfs_rest_config.json
+file.  This file should not need modification.
+.PP
+.Cs
+{
+    "enable_rest"   : true,
+    "enable_server" : true,
+    "ssl" : {
+        "ssl_enabled"  : true,
+        "min_tls"      : "1.0",
+        "ciphers"      : "HIGH:!aNULL:!MD5:!RC4:!3DES",
+        "pemfile"      : "/usr/cvfs/config/certs/server.crt",
+        "keyfile"      : "/usr/cvfs/config/certs/server.key",
+        "ssl_timeout"  : 124800,
+        "verify_peer"  : false,
+        "verify_depth" : 100,
+        "cafile"       : "",
+        "capath"       : ""
+    },
+    "rest_job_keep_days" : 120,
+    "proxy_retry_seconds" : 300,
+    "fsm" : {
+        "data_timeout" : 900000,
+        "conn_timeout" : 5000
+    },
+    "fsmpm" : {
+        "data_timeout" : 10000,
+        "conn_timeout" : 5000
+    },
+    "qbmanage" : {
+        "data_timeout" : 10000,
+        "conn_timeout" : 5000
+    },
+    "SM_metadb" : {
+        "data_timeout" : 300000,
+        "conn_timeout" : 5000
+    },
+    "fsrestd" : {
+        "data_timeout" : 300000,
+        "conn_timeout" : 5000
+    },
+    "sgmanage" : {
+        "data_timeout" : 60000,
+        "conn_timeout" : 5000
+    },
+    "snhistory" : {
+        "data_timeout" : 300000,
+        "conn_timeout" : 5000
+    },
+    "sntierd" : {
+        "data_timeout" : 300000,
+        "conn_timeout" : 5000
+    }
+}
+.Ce
+.SH FILES
+.I /Library/Preferences/Xsan/snfs_rest_config.json
+.SH "SEE ALSO"
+.BR fsm (8),
+.BR fsmpm (8),
+.BR qbmanage (8),
+.BR sgdefrag (8),
+.BR sgmanage (8),
+.BR sgoffload (8),
+.BR snhistory (8)

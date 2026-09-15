@@ -1,0 +1,81 @@
+.\" vip_control.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2009-2019. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH VIP_CONTROL 8 "November 2019" "Xsan File System"
+.SH NAME
+vip_control \- manipulate virtual IP information for Xsan
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /System/Library/Filesystems/acfs.fs/Contents/bin/vip_control
+.I option
+.ad
+.hy
+.SH DESCRIPTION
+\fBvip_control\fR provides a mechanism for editing, listing,
+activating and deactivating virtual IPs (VIPs) for the Xsan
+system.  Virtual IPs may be helpful for applications needing access
+to the primary MDC when running in an HA configuration.
+Changes made to VIPs
+are not automatically copied over to an MDC's HA peer.  As such, any
+changes that are made to the VIP configuration need to be done
+on both HA MDCs.  \fBvip_control\fR does not update firewall rules.
+Changes to VIP configurations may require additional changes to the
+firewall rules of the system.
+.SH OPTIONS
+.IP \fB-h\fR
+Display help
+.IP \fB-a\fR
+Activate all configured VIPs
+.IP \fB-d\fR
+Deactivate all configured VIPs
+.IP \fB-i\fR
+Show VIP status along with physical NIC status
+.IP \fB-l\fR
+Show configured VIPs in a compact format
+.IP "\fB-u\fP \fIvip_str\fP"
+Update the VIP configuration with the \fIvip_str\fR string.  This replaces the contents of the VIP configuration file.  The format of \fIvip_str\fR is as follows:
+.Cs
+MAC address, IPV4 VIP, netmask, IPV6 VIP, prefix length
+.Ce
+.PP
+Each field in a VIP entry is separated by a comma, and each VIP entry
+can be separated by either a newline or a semicolon.  Typically, the
+semicolon is used.
+.PP
+The following is an example of setting up two VIPs:
+.Cs
+# vip_control -u "0030482D38F6,10.0.0.2,255.255.255.0,,;0030482d38f7,10.1.0.2,255.255.255.0,,;"
+.Ce
+.SH NOTES
+When changing the \fIha_vip.txt\fR on Quantum Appliance you also need to make sure that the \fIiptables\fR rules
+are updated to reflect the new information. You can use the following command to reset the VIP
+.Cs
+# /opt/DXi/scripts/netcfg.sh --reset_snvip
+.Ce
+.SH FILES
+.I /Library/Preferences/Xsan/ha_vip.txt
+.I /opt/DXi/scripts/netcfg.sh
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5),
+.BR cnvt2ha.sh (8),
+.BR iptables (8)
+.br

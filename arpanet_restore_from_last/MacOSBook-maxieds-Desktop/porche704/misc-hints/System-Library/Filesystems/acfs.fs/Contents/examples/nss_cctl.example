@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright 2016. Quantum Corporation. All Rights Reserved.           -->
+<!-- StorNext is either a trademark or registered trademark of           -->
+<!-- Quantum Corporation in the US and/or other countries.               -->
+
+<!-- 		Cluster-Wide Central Control File			 -->
+
+<!-- The nss_cctl.xml file provides a way to restrict the behavior of	 -->
+<!-- SNFS cluster nodes (fsm, file system client, cvadmin client) from	 -->
+<!-- a central place, i.e on nss server. As for SNFS 3.5, we support	 -->
+<!-- the following controls:						 -->
+<!-- 1. Whether a client is allowed to mount as a proxy client		 -->
+<!-- 2. Whether a client is allowed to mount as read/write or read-only. -->
+<!-- 3. Whether a user especially local admin on windows is allowed to	 -->
+<!--    take ownership of file or directory on a Stornext file system.	 -->
+<!-- 4. Whether cvadmin running on certain client is allowed to have	 -->
+<!--    super admin privilege to run destructive commands such as	 -->
+<!--    start/stop file system, refresh disks, and change quota setting, -->
+<!--	etc.								 -->
+<!-- 5. whether cvadmin running on certain client is allowed to connect	 -->
+<!--    to other fsm via "-H" option.					 -->
+<!-- 6. whether an executable file on the file system can be executed. 	 -->
+<!-- 7. whether to allow set-user-identifier bit to take effect.	 -->
+
+<!-- The control file is in xml format and has hierarchical structure.	 -->
+<!-- The top level element is "snfsControl", it contains control element -->
+<!-- "securityControl" for certain file system. If you have different	 -->
+<!-- controls for different file systems, then each file system should	 -->
+<!-- has its own control definition. A special virtual file system 	 -->
+<!-- "#SNFS_ALL#" is used as the default control for file systems not	 -->
+<!-- defined in this control file. It is also the required file system   -->
+<!-- name when configuring the snfsAdmin and snfsAdminControl options.   -->
+<!-- Note: you cannot have a real file system named as "#SNFS_ALL#".    -->
+
+<!-- Each file system related control element (securityControl) has a	 -->
+<!-- list of "controlEntry", each "controlEntry" defines the client and	 -->
+<!-- the controls. The simplest and preferred way of defining a client   -->
+<!-- is by specifying its IP address (or hostname) by itself, or followed-->
+<!-- by a netmask length separated by a slash (e.g "192.0.2.0/24")       -->
+<!-- if one would like to specify a subnet. Both IPv4 and IPv6 are       -->
+<!-- supported. For backwards compatibility, we support two other ways   -->
+<!-- of defining a client wherein we explicitly specify its type: "host" -->
+<!-- or "netgrp". A "host" can be an IP address or host name. "netgrp"   -->
+<!-- specifies a group of consecutive IP addresses. It has a network IP  -->
+<!-- address (either IPv4 or IPv6) and netmask length. In the case of    -->
+<!-- overlap between client IP addresses, the controls which correspond  -->
+<!-- to the IP address with the longest netmask length will take         -->
+<!-- precedence.                                                         -->
+
+<!-- Currently there are eight controls supported:			 -->
+<!-- 1. mountReadOnly: control whether a client should mount as		 -->
+<!--    readonly. The default is read/write.				 -->
+<!-- 2. mountDlanClient: control whether a client can mount as proxy 	 -->
+<!--    client, the default is "mount not allowed".			 -->
+<!-- 3. takeOwnership: control whether users on a windows client is 	 -->
+<!--    allowed to take ownership of file or directory of a stornext	 -->
+<!--    file system. The default is "take ownership not allowed".	 -->
+<!-- 4. snfsAdmin: whether cvadmin running on a host is allowed to have	 -->
+<!--    super admin privilege to run privileged commands such as 	 -->
+<!--    start/stop fs. The default is that super admin privilege is not	 -->
+<!--    honored.							 -->
+<!-- 5. snfsAdminConnect: whether cvadmin running on a client is allowed -->
+<!--    to connect to other fsm via "-H" option. The default is "-H" is	 -->
+<!--    not allowed.							 -->
+<!-- 6. exec: whether binary files on the file system is allowed to	 -->
+<!--    be executed. 							 -->
+<!-- 7. suid: whether set-user-identifier bit is allowed to take effect. -->
+<!-- 8. denyRetrieves: whether the client is allowed to trigger      -->
+<!--    dmapi read events and retrieve offline files by reading then -->
+<!--    default to false, set to true to deny retrieves. The client  -->
+<!--    will get permission denied errors when reading a truncated file. -->
+
+<!-- If no match is found for a given client's IP address, then the	 -->
+<!-- client has no privilege to access a SNFS cluster. If a file system	 -->
+<!-- has been defined but the client is not defined in that file 	 -->
+<!-- system's control (securityControl), then the client has no access	 -->
+<!-- privilege to the specified file system.				 -->
+
+<!-- The element "nonVotingCluster" can be included (on the same level as-->
+<!-- the "securityControl" element) to set the default client behavior   -->
+<!-- (voting or non-voting) within the cluster during the election that  -->
+<!-- will choose the host on which a specific file system manager will   -->
+<!-- run. The cluster to which this control is applied will be the one   -->
+<!-- specified in the filename. If no cluster is specified in the        -->
+<!-- filename, please refer to the beginning of the DESCRIPTION section  -->
+<!-- of the nss_cctl man page for more information on which cluster this -->
+<!-- control will take effect.                                           -->
+
+<!-- NOTE: There always needs to be voting clients within the cluster so -->
+<!-- that a decision can be derived from the election. Therefore, when   -->
+<!-- the "nonVotingCluster" element is set to true, it should be used in -->
+<!-- conjunction with the "votingClients" element (described in the      -->
+<!-- following paragraphs) which allows one to specify an explicit list  -->
+<!-- of voting clients.                                                  -->
+
+<!-- It is also possible to specify a group of non-voting clients within -->
+<!-- a cluster by creating a list of client addresses with the element   -->
+<!-- "nonVotingClients" (also used on the same level as that of the      -->
+<!-- "securityControl" element). The format of the client addresses      -->
+<!-- within the "nonVotingClients" element is the same as that used in   -->
+<!-- defining a client in the simplest and preferred way within a        -->
+<!-- "controlEntry". And there must be at least one address in the list. -->
+<!-- To specify a group of voting clients, the same format is used but   -->
+<!-- replacing "nonVotingClients" with "votingClients".                  -->
+
+<!-- All three elements (i.e. "nonVotingCluster", "nonVotingClients" and -->
+<!-- "votingClients") may be in the nss_cctl(4) man page at the same     -->
+<!-- time. The "votingClients" and "nonVotingClients" elements will take -->
+<!-- precedence over the "nonVotingCluster" element. When a client IP    -->
+<!-- address matches elements in both "nonVotingClients" and             -->
+<!-- "votingClients", the element with the longest netmask will take     -->
+<!-- precedence; if there is a tie, the "votingClients" element will be  -->
+<!-- used.                                                               -->
+
+<!-- Currently only Linux platform is supported to be a nss server	 -->
+<!-- capable of parsing this xml file.					 -->
+
+<!-- The following is an example to define the nss_cctl.xml. It defines	 -->
+<!-- the control of file system "snfs", and also the special virtual	 -->
+<!-- file system "#SNFS_ALL#".  					 -->
+
+<snfsControl xmlns="http://www.quantum.com/snfs/cctl/v1.0">
+    <nonVotingCluster value="true"/>
+    <votingClients>
+        <address value="192.0.2.108/24"/>
+        <address value="198.51.100.215"/>
+    </votingClients>
+    <securityControl fileSystem="snfs">
+        <controlEntry>
+	    <client>
+		<address value="192.0.2.108"/>
+                <address value="198.51.100.215"/>
+	    </client>
+	    <controls>
+		<mountReadOnly value="false"/>
+		<mountDlanClient value="false"/>
+		<takeOwnership value="false"/>
+		<exec value="true"/>
+		<suid value="false"/>
+	    </controls>
+	</controlEntry>
+	<controlEntry>
+	    <client type="host">
+		<hostName value="192.0.2.132"/>
+	    </client>
+	    <controls>
+		<mountReadOnly value="true"/>
+		<mountDlanClient value="true"/>
+		<takeOwnership value="false"/>
+                <denyRetrieves value="true"/>
+		<exec value="true"/>
+		<suid value="false"/>
+	    </controls>
+	</controlEntry>
+	<controlEntry>
+	    <client type="netgrp">
+		<network value="192.0.2.0"/>
+		<maskbits value="24"/>
+	    </client>
+	    <controls>
+		<takeOwnership value="true"/>
+		<mountReadOnly value="true"/>
+                <denyRetrieves value="true"/>
+	    </controls>
+	</controlEntry>
+    </securityControl>
+    <securityControl fileSystem="#SNFS_ALL#">
+	<controlEntry>
+	    <client type="host">
+		<hostName value="linux_ludev"/>
+	    </client>
+	    <controls>
+		<snfsAdmin value="true"/>
+		<snfsAdminConnect value="true"/>
+	    </controls>
+	</controlEntry>
+    </securityControl>
+</snfsControl>

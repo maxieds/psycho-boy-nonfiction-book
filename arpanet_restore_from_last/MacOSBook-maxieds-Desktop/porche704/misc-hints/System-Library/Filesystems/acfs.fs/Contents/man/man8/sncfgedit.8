@@ -1,0 +1,77 @@
+.\" sncfgedit.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2009-2017. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCFGEDIT 8 "May 2017" "Xsan File System"
+.SH NAME
+sncfgedit \- Edit Xsan Volume configuration file
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sncfgedit -n
+.I VolName
+.RB [ -f \ \fIFailedTemporaryConfigFile\fP]
+.HP
+.B sncfgedit -h
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsncfgedit\fR program provides convenient method to edit the
+Xsan file system configuration file for the named file system
+and validate the new configuration file before overwriting the old
+one.  To do so, \fBsncfgedit\fR creates a temporary copy of the
+configuration file, and then opens it in an editor.
+.PP
+\fBsncfgedit\fR uses the the EDITOR environment variable to choose the
+program used to edit the configuration file, or \fBvi\fR if EDITOR is
+not set.
+.PP
+Validation includes standalone validation of the new configuration
+file as well as validation of changes between original configuration
+file and edited file if a configuration file previously existed.
+If no previous configuration file exists, a template will be loaded
+into the editor using default settings for all values.
+.PP
+Before an existing configuration file is overwritten, it is copied to
+.I /Library/Logs/Xsan/data/\fRVolName\fP/config_history/
+for future reference.  A
+timestamp is appended to the filename to allow for the existence of
+multiple backup copies.
+.SH OPTIONS
+.IP \fB\-h\fR
+Display usage.
+.IP "\fB\-n \fIVolName\fR"
+Required. The name of the file system whose config is to be edited or created.
+.IP "\fB\-f \fIFailedTemporaryConfigFile\fR"
+Specify the path to the temporary config file from a previous run
+where the proposed changes were disallowed. This gives you another
+chance without throwing away all of the previous changes.
+.SH EXIT VALUES
+\fBsncfgedit\fR will return 0 on success and non-zero on failure.
+.SH ENVIRONMENT VARIABLES
+.TP
+.B EDITOR
+Allows the user to choose which editor is used to modify the
+configuration file.  (default: vi)
+.SH FILES
+.I /Library/Logs/Xsan/data/\fRVolName\fP/config_history/*
+.SH "SEE ALSO"
+.BR snfs_config (5),
+.BR snfs.cfgx (5),
+.BR snfs.cfg (5)

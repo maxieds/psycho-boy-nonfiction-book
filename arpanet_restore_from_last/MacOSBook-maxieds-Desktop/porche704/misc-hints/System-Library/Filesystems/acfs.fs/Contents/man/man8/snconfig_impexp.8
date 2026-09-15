@@ -1,0 +1,128 @@
+.\" snconfig_impexp.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2017. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCONFIG_IMPEXP 8 "May 2017" "Xsan File System"
+.SH NAME
+snconfig_impexp \- Xsan Configuration Import/Export Tool
+.SH SYNOPSIS
+.na
+.nh
+.B snconfig_impexp
+.I action
+.RI [ options ]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsnconfig_impexp\fR command allows machine configuration of some
+of the various configuration files that Xsan uses.  Current
+values can be returned in JSON format via stdout.  A JSON object can
+be passed to stdin to cause the tool to update the configuration.  All
+this is done as directed by the actions described below.
+.PP
+In almost all cases, a JSON object is written to stdout.  It will have
+keys describing the success or failure of the requested action.  The
+\fBreturn_code\fR key is zero if the action succeeded or one if the
+action failed.  If the action failed, an \fBerror\fR key will be
+present describing the problem.  On a non-fatal error, a
+\fBwarnings\fR key will be present.  These keys will be ignored in a
+JSON object passed to \fBsnconfig_impexp\fR.
+.PP
+When \fBsnconfig_impexp\fR modifies files, it first places backup-ups
+of the files into the /System/Library/Filesystems/acfs.fs/Contents/config_history directory.
+.PP
+.SH ACTIONS
+.IP \fB-R\fR
+This action causes \fBsnconfig_impexp\fR to read various Xsan
+configuration files and return their contents in a JSON object written
+to stdout.
+.IP \fB-W\fR
+This action takes a JSON object read from stdin, parses it, and writes
+its contents into the appropriate configuration files.  The format of
+the JSON object is the same as that returned by the \fB-R\fR action.
+All top-level keys (other than the \fBsnconfig_impexp_version\fR key),
+are optional.  If a top-level key is present, the key's values are
+written to the appropriate configuration files, replacing anything
+that was there.  If a top-level key is not present, then no changes
+are made to the configuration represent by the key.  After all
+configuration changes are made, the current state is returned exactly
+as if \fB-R\fR was specified.
+.SH OPTIONS
+.IP \fB-h\fR
+This option causes \fBsnconfig_impexp\fR to print a friendly help
+message and exit.  This is the only output which is not in JSON
+format.
+.IP \fB-v\fR
+Format JSON output in a human-readable fashion.
+.SH EXIT VALUES
+\fBsnconfig_impexp\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+A fully-populated output of \fBsnconfig_impexp\fR looks like:
+.Cs
+# snconfig_impexp -vR
+{
+    "snconfig_impexp_version": 1,
+    "nss_coordinators": [
+        {
+            "ip": "10.11.12.13"
+        },
+        {
+            "ip": "10.11.12.14",
+            "cluster": "cluster12",
+            "addom": "my_addom"
+        },
+        {
+            "ip": "192.168.20.5",
+            "masklen": 29
+        }
+    ],
+    "cluster": {
+        "default_cluster": "cluster12",
+        "default_addom": "my_addom"
+    },
+    "fsms": [
+        {
+            "fsname": "snfs1"
+        },
+        {
+            "fsname": "snfs2"
+        },
+        {
+            "fsname": "snfs3",
+            "cluster": "cluster12",
+            "addom": "my_addom",
+            "priority": 100
+        }
+    ],
+    "return_code": 0
+}
+.Ce
+.PP
+An unsuccessful run (because it was run as a non-privileged user) looks like:
+.Cs
+# snconfig_impexp -R | snconfig_impexp -vW
+{
+    "snconfig_impexp_version": 1,
+    "return_code": 1,
+    "error": "nss_coordinators: error opening file '/usr/cvfs/config/fsnameservers-15229-1494358067': Permission denied"
+}
+.Ce
+.SH "SEE ALSO"
+.BR fsmcluster (4),
+.BR fsmlist (4),
+.BR fsnameservers (4)

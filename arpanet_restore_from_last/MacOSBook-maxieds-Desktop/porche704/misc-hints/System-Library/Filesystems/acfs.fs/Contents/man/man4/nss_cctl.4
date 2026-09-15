@@ -1,0 +1,371 @@
+.\" nss_cctl.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2009-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH NSS_CCTL 4 "May 2020" "Xsan File System"
+.SH NAME
+nss_cctl \- Xsan Cluster-Wide Central Control File
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/nss_cctl.xml
+.ad
+.hy
+.SH DESCRIPTION
+The \fBXsan File System\fP supports cluster-wide central
+control to restrict the behavior of Xsan cluster nodes (fsm server,
+volume client and administrative commands such as cvadmin)
+from a central place. A central
+control file
+.I nss_cctl.xml
+is used to specify the desired controls on the
+cluster nodes. This file resides under
+.I /Library/Preferences/Xsan
+on an
+.B nss coordinator server.
+The filename of the nss_cctl file follows the format:
+.IP
+.IR nss_cctl.xml
+.PP
+\fINOTE\fP: The recommended way to get started with the central
+control facility is to first use the
+.BR nss_cctl_template (8)
+commmand to generate a file that can then be edited to form your
+.I nss_cctl.xml
+file.
+The addresses of hosts and names of filesystems
+will be those that are currently in use and mounted
+in the cluster in which you are running the template command.
+.PP
+This control file is in \fBxml\fP format and has hierarchical structure.
+The top level element is \fBsnfsControl\fP. It contains control element
+\fBsecurityControl\fP for certain volumes. If you have different
+controls for different volumes, then each volume should
+have its own control definition. A special virtual volume
+\fB#SNFS_ALL#\fP is used as the default control for volumes not
+defined in this control file. It is also the required file system name when
+configuring the \fBsnfsAdmin\fP and \fBsnfsAdminControl\fP options.
+\fINOTE\fP: You cannot have a real volume named as \fB#SNFS_ALL#\fP.
+.PP
+Each volume related control element (i.e. \fBsecurityControl\fP) has
+a list of \fBcontrolEntry\fP. Each \fBcontrolEntry\fP defines the client
+and the intended controls. The simplest and preferred way of defining a
+client within the \fBcontrolEntry\fP is in the following manner:
+.IP
+.PD 0
+.B <client>
+.RS
+.IP "" 0.4i
+.B <address value="\fIvalue\fP"/>
+.RE
+.IP
+.B </client>
+.PD
+.PP
+where \fIvalue\fP can either be an IP address (or hostname) by itself, or
+followed by a netmask length separated by a slash (e.g "192.0.2.0/24")
+if one would like to specify a subnet. An IP address by itself is equivalent
+to the same IP address followed by the maximum netmask length of the IP
+version in use (e.g. "192.0.2.10" is equivalent to "192.0.2.10/32").
+Both IPv4 and IPv6 are supported. There may be multiple \fBaddress\fP entries
+within the \fBclient\fP element if the specified addresses will be sharing the
+same controls within the \fBcontrolEntry\fP.
+.PP
+A value which matches any client can be specified by using a zero length netmask,
+for example "0.0.0.0/0".
+.PP
+Another way of defining a client is supported for backwards compatibility,
+wherein its type is explicitly defined: \fBhost\fP or \fBnetgrp\fP. For
+type \fBhost\fP, the client is defined in the following format below, where
+\fIvalue\fP may be either an IP address or hostname:
+.IP
+.PD 0
+.B <client type="host">
+.RS
+.IP "" 0.4i
+.B <hostname value="\fIvalue\fP"/>
+.RE
+.IP
+.B </client>
+.PD
+.PP
+For type \fBnetgrp\fP, two sub-elements \fBnetwork\fP, which defines
+the IP address of the subnet, and \fBmaskbits\fP, which defines the netmask
+length of the subnet, need to be included as follows:
+.IP
+.PD 0
+.nf
+.B <client type="netgrp">
+.RS
+.IP "" 0.4i
+.B <network value="\fIvalue\fP"/>
+.B <maskbits value="\fIvalue\fP"/>
+.RE
+.IP
+.B </client>
+.fi
+.PD
+.PP
+\fINOTE\fP: When there is overlap between client IP addresses, the controls
+which correspond to the IP address with the longest netmask length will
+take precedence.
+.PP
+.SS Controls
+Currently eight controls are supported. Each control has this format:
+.IP
+.B <\fIcontrol\fP value="\fIvalue\fP"/>
+.PP
+The \fIvalue\fP can be either \fBtrue\fP or \fBfalse\fP. The \fIcontrol\fP
+is one of the following controls:
+.PP
+.IP \fBmountReadOnly\fP
+Controls whether the client should mount the given volume as
+readonly. Value \fBtrue\fP(\fBfalse\fP) means the volume is mounted
+as readonly (read/write). If this control is not specified, the default is
+read/write.
+.IP \fBmountDlanClient\fP
+Controls whether the client can mount the given volume via proxy
+client. Value \fBtrue\fP(\fBfalse\fP) means the volume is (not)
+allowed to mount via proxy client. The default is "mount via proxy client
+not allowed".
+.IP \fBtakeOwnership\fP
+Controls whether users on a windows client are allowed to take ownership of
+file or directory of a stornext volume.
+Value \fBtrue\fP(\fBfalse\fP) means
+that taking ownership is (not) allowed. The default is that "take
+ownership is not allowed". \fINote\fP: this control only applies to the clients
+running on Windows platforms.
+.IP \fBsnfsAdmin\fP
+Controls whether
+.BR cvadmin (8),
+.BR sgmanage (8),
+and
+.BR snquota (1)
+running on a host are allowed to have \fBsuper-admin\fP privilege to run
+\fBprivileged\fP commands such as start/stop a volume,
+manipulate storage pools or change quota settings.
+Value \fBtrue\fP(\fBfalse\fP)
+means users with \fBsuperadmin\fP privilege is (not) allowed to run privileged
+commands. The default value is "false". This option can only be defined under
+the \fB#SNFS_ALL#\fP file system name.
+.IP \fBsnfsAdminConnect\fP
+Controls whether
+.BR cvadmin (8)
+running on a client is allowed to connect to other fsm host via \fB-H\fP option.
+Value \fBtrue\fP(\fBfalse\fP) means
+.BR cvadmin (8)
+is (not) allowed to connect to other fsm host via \fB-H\fP option. The default
+value is \fBfalse\fP. This option can only be defined under the
+\fB#SNFS_ALL#\fP file system name.
+.IP \fBexec\fP
+Controls whether binary executable files on the volume are allowed to
+be executed. Value \fBtrue\fP(\fBfalse\fP) means binary executable files
+are (not) allowed to be executed. The default value is \fBtrue\fP, i.e. the
+execution is allowed.
+.IP \fBsuid\fP
+Controls whether setuid bit is allowed to take effect.
+Value \fBtrue\fP(\fBfalse\fP) means setuid bit is (not) allowed to
+take effect. The default value is \fBtrue\fP.
+.IP \fBdenyRetrieves\fP
+Controls whether a client is permitted to retrieve offline files by reading
+them.
+This only applies to managed file systems.
+When a file is offline, storage manager is responsible for retrieving its
+contents, this can usually be triggered by a file read.
+If read based retrieve is disabled then an fsretrieve command must be used,
+either directly, or via a web services call.
+Value \fBtrue\fP(\fBfalse\fP) means that the client cannot (can) initiate retrieves. The default value is \fBfalse\fP.
+.IP \fBglobalSuperUser\fP
+Controls whether a client can override the file system configuration for
+global super user. This nss_cctl variable only has meaning when the file
+system configuration variable
+\fBglobalSuperUser\fP
+has been set to \fBfalse\fP, disabling global super user for clients.
+When this nss_cctl variable is set to \fBtrue\fP for a set of clients,
+these clients behave as if the configuration variable had been set
+to \fBtrue\fP. See the
+.BR snfs_config (5)
+man page for a complete description of this privilege.
+The default value is \fBfalse\fP.
+Apple Xsan clients do not honor the setting of \fBglobalSuperUser\fP.
+.PP
+\fINOTE\fP: If no match is found for a given client's IP address, then the
+client has no privilege to access a Xsan cluster. If a volume
+has been defined but the client is not defined in that volume's control
+(securityControl), then the client has no access privilege to the specified
+volume.
+.PP
+.SS Non-voting and Voting client configuration
+.PP
+The element \fBnonVotingCluster\fP can be included (on the same level as the
+\fBsecurityControl\fP element) to set the default client behavior (voting or
+non-voting) within the cluster during the election that will choose the host
+on which a specific file system manager will run. The cluster to which this
+control is applied will be the one specified by the nss_cctl filename.
+\fINOTE\fP: If no cluster is specified in the filename, please refer to the
+beginning of this man page's \fBDESCRIPTION\fP section for more information
+on which cluster this control will take effect.
+.PP
+The element \fBnonVotingCluster\fP has the following format:
+.IP
+.B <nonVotingCluster value="\fIvalue\fP"/>
+.PP
+where \fIvalue\fP can either be \fBtrue\fP or \fBfalse\fP. If \fIvalue\fP is
+\fBtrue\fP, the default behavior of all clients within the cluster will be
+to abstain from voting in the election. In effect, unnecessary NSS message
+traffic may be greatly reduced. If the \fBnonVotingCluster\fP is not included
+in the xml file, client behavior will be the same as if its value were set to
+\fBfalse\fP (i.e. all clients within the cluster will be voting in the
+election).
+.PP
+Note that clients running versions of StorNext prior to StorNext 6.0 use
+an older version of the NSS protocol (NSS1), which does not honor the
+non-voting cluster configuration options specified in this file.
+.PP
+\fINOTE\fP: There always needs to be voting clients within the cluster so
+that a decision can be derived from the election. Therefore, when the
+\fBnonVotingCluster\fP element is set to \fBtrue\fP, it should be used in
+conjunction with the \fBvotingClients\fP element (described in the following
+paragraphs) which allows one to specify an explicit list of voting clients.
+.PP
+It is also possible to specify a group of non-voting clients within a cluster
+by creating a list of client addresses with the \fBnonVotingClients\fP
+element (also used on the same level as that of the \fBsecurityControl\fP
+element). The \fBnonVotingClients\fP element has the following format:
+.IP
+.PD 0
+.nf
+.B <nonVotingClients>
+.RS
+.IP "" 0.4i
+.B <address value="\fIvalue\fP"/>
+.B <address value="\fIvalue\fP"/>
+ .
+ .
+ .
+.B <address value="\fIvalue\fP"/>
+.RE
+.IP
+.B </nonVotingClients>
+.fi
+.PD
+.PP
+where each \fBaddress\fP element is the same element used when specifying a
+client within a \fBcontrolEntry\fP, and there must be at least one
+\fBaddress\fP element. To specify a group of voting clients, the same format
+is used but replacing \fBnonVotingClients\fP with \fBvotingClients\fP.
+.PP
+\fINOTE\fP: For more information on the \fBaddress\fP element and its allowed
+values, please refer to the beginning of this man page's \fBDESCRIPTION\fP
+section.
+.PP
+\fINOTE\fP: All three elements (i.e. \fBnonVotingCluster\fP,
+\fBnonVotingClients\fP and \fBvotingClients\fP) may be in the
+\fInss_cctl.xml\fP file at the same time. The \fBvotingClients\fP and
+\fBnonVotingClients\fP elements will take precedence over the
+\fBnonVotingCluster\fP element. When a client IP address matches elements
+in both \fBnonVotingClients\fP and \fBvotingClients\fP, the element with
+the longest netmask will take precedence; if there is a tie,
+the \fBvotingClients\fP element will be used.
+.PP
+.SH LIMITATIONS
+Only the \fBLinux\fP platform is supported to be a nss coordinator server
+capable of parsing this xml file.
+.SH EXAMPLE
+The following is an example of
+.I nss_cctl.xml
+file. It defines
+the control of volume \fBxsan1\fP, and also the special virtual
+volume \fB#SNFS_ALL#\fP.
+.PP
+\fINOTE\fP: As stated earlier, instead of using this example,
+you can generate a starting point
+.I nss_cctl.xml
+file using the
+.BR nss_cctl_template (8)
+command.
+.PP
+.Cs
+<snfsControl xmlns="http://www.quantum.com/snfs/cctl/v1.0">
+    <nonVotingCluster value="true"/>
+    <votingClients>
+        <address value="192.0.2.108/24"/>
+        <address value="198.51.100.215"/>
+    </votingClients>
+    <securityControl fileSystem="xsan1">
+       <controlEntry>
+            <client>
+                <address value="192.0.2.108"/>
+                <address value="198.51.100.215"/>
+            </client>
+            <controls>
+                <mountReadOnly value="false"/>
+                <mountDlanClient value="false"/>
+                <takeOwnership value="false"/>
+                <exec value="true"/>
+                <suid value="false"/>
+            </controls>
+        </controlEntry>
+	<controlEntry>
+	    <client type="host">
+		<hostName value="192.0.2.132"/>
+	    </client>
+	    <controls>
+		<mountReadOnly value="true"/>
+		<mountDlanClient value="true"/>
+		<takeOwnership value="false"/>
+		<exec value="true"/>
+		<suid value="false"/>
+	    </controls>
+	</controlEntry>
+	<controlEntry>
+	    <client type="netgrp">
+		<network value="192.0.2.0"/>
+		<maskbits value="24"/>
+	    </client>
+	    <controls>
+		<takeOwnership value="true"/>
+		<mountReadOnly value="true"/>
+	    </controls>
+	</controlEntry>
+    </securityControl>
+    <securityControl fileSystem="#SNFS_ALL#">
+	<controlEntry>
+	    <client type="host">
+		<hostName value="linux_ludev"/>
+	    </client>
+	    <controls>
+		<snfsAdmin value="true"/>
+		<snfsAdminConnect value="true"/>
+	    </controls>
+	</controlEntry>
+    </securityControl>
+</snfsControl>
+.Ce
+.SH FILES
+.I /Library/Preferences/Xsan/nss_cctl.xml
+.br
+.I /System/Library/Filesystems/acfs.fs/Contents/examples/nss_cctl.example
+.SH SEE ALSO
+.BR cvadmin (8),
+.BR fsnameservers (4),
+.BR nss_cctl_template (8),
+.BR sgmanage (8),
+.BR snfs_config (5),
+.BR snquota (1)

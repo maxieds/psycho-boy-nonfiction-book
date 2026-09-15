@@ -1,0 +1,169 @@
+#! /bin/sh
+#
+# Copyright 2015-2020. Quantum Corporation. All Rights Reserved.
+# StorNext is either a trademark or registered trademark of
+# Quantum Corporation in the US and/or other countries.
+#
+
+# uncomment for debugging
+# set -x
+
+# just in case the user doesn't have EDITOR defined...
+EDITOR=${EDITOR:=vi}
+
+# Set the correct binary, config dir paths and commands for macOS
+OSNAME=`uname`
+if [ "$OSNAME" == "Darwin" ]; then
+    PATH=${PATH}:/System/Library/Filesystems/acfs.fs/Contents/bin
+    CONFIG_DIR=/Library/Preferences/Xsan
+    STAT_CMD="stat -f %m"
+    MD5_CMD=md5
+else
+    PATH=${PATH}:/usr/cvfs/bin
+    CONFIG_DIR=/usr/cvfs/config
+    STAT_CMD="stat -c %Y"
+    MD5_CMD=md5sum
+fi
+
+
+usage()
+{
+    echo "Usage: $0 -n <fsname> [-f <tmpfile>]"
+    echo "  -n    Name of file system to edit"
+    echo "  -f    Location of temporary file (in case of failed edit)"
+    echo "  -h    This usage"
+}
+
+while getopts "n:f:h" c; do
+  case $c in
+      "n")
+	  fsname=$OPTARG
+	  ;;
+      "f")
+	  TMPFILE=$OPTARG
+	  # We don't want to delete the tmpfile if it's specified
+	  NODELTMP=1
+	  CWD=`pwd`
+	  DIRNAME=`dirname "$TMPFILE"`
+	  if [[ "$DIRNAME" =~ "^/" ]]; then
+	      if [ "$DIRNAME" = "$CONFIG_DIR" ]; then
+		  INPLACE=1
+	      fi
+	  elif [ "$CWD/$DIRNAME/" = "$CONFIG_DIR/" ]; then
+	      INPLACE=1
+	  fi
+	 
+	  if [ "$INPLACE" = "1" ]; then
+	      echo "You cannot edit a config file in-place with sncfgedit."
+	      echo "To edit the exiting config, simply specify the fsname."
+	      exit 1
+	  fi
+	  ;;
+      "h")
+	  usage
+	  exit 0
+	  ;;
+  esac
+done
+
+if [ -z "$fsname" ]; then
+    usage
+    exit 1
+fi
+
+if [ -z "$TMPFILE" ]; then    
+
+    TMPFILE=`mktemp -t tmp_${fsname}_cfg-XXXXX` || exit 1
+
+    echo "Attempting to get ${fsname}'s config file"
+    sncfgquery -n ${fsname} -d > $TMPFILE
+    ret=$?
+    # we don't exit on ENOENT either
+    if [ $ret -ne 0 -a $ret -ne 2 ]; then
+        # relying on stderr output from sncfgquery for message
+	exit $ret
+    fi
+
+    if [ $ret -eq 2 ]; then
+        createnew=0
+        while true
+        do
+            /bin/echo -n "No config file for ${fsname} exists. Do you want to create one? (y/n) "
+            read line
+            firstchar=`echo $line | cut -b1`
+            if [ "$firstchar" = "n" ]; then
+                break;
+            fi
+            if [ "$firstchar" = "y" ]; then
+                createnew=1;
+                break;
+            fi
+        done
+        if [ $createnew -eq 0 ]; then
+            if [ -z "$NODELTMP" ]; then
+                rm -f $TMPFILE
+            fi
+            echo "Exiting." 1>&2
+            exit 1
+        fi
+	sncfgtemplate -n $fsname > $TMPFILE || exit $ret
+	NEW_FILE=1
+    fi
+fi
+
+TMPMTIME1=`${STAT_CMD} $TMPFILE` || exit 1
+MD5SUM1=`${MD5_CMD} $TMPFILE`
+
+while true
+do
+    $EDITOR $TMPFILE || exit 1
+
+    TMPMTIME2=`${STAT_CMD} $TMPFILE` || exit 1
+    MD5SUM2=`${MD5_CMD} $TMPFILE`
+
+    if [ "${TMPMTIME1}" = "${TMPMTIME2}" -a "${MD5SUM1}" = "${MD5SUM2}" ]; then
+        if [ -n "$NEW_FILE" ]; then
+            echo "File unchanged - not installing"
+        else
+            echo "New config not installed"
+        fi
+        if [ -z "$NODELTMP" ]; then
+            rm -f $TMPFILE
+        fi
+        exit 0
+    fi
+
+    if ! sncfgvalidate -f $TMPFILE -n $fsname; then
+        echo "Error validating new config." 1>&2
+
+        editagain=0
+        while true
+        do
+            /bin/echo -n "Do you want to (q)uit and leave behind temporary file or (r)e-enter editor? "
+            read line
+            firstchar=`echo $line | cut -b1`
+            if [ "$firstchar" = "q" ]; then
+                break;
+            fi
+            if [ "$firstchar" = "r" ]; then
+                editagain=1;
+                break;
+            fi
+        done
+        if [ $editagain -eq 0 ]; then
+            echo "Leaving temporary file at $TMPFILE" 1>&2
+            exit 1
+        fi
+    else
+        break
+    fi
+done
+
+# sncfginstall automatically backs up the original file if it exits
+echo "Installing new config for $fsname"
+if ! sncfginstall -f $TMPFILE -n $fsname; then
+    echo "Error writing out new config - leaving temporary file at $TMPFILE" 1>&2
+    exit 1
+fi
+
+echo "File successfully updated"

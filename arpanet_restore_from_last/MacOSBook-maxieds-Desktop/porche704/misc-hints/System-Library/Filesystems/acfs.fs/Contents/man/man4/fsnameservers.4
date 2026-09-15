@@ -1,0 +1,222 @@
+.\" fsnameservers.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2003-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH FSNAMESERVERS 4 "November 2018" "Xsan File System"
+.SH NAME
+fsnameservers \- Xsan File System Name Server List
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/fsnameservers
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fIfsnameservers\fR file describes
+to the
+.BR fsmpm (8)
+daemon which machines are serving as \fIFile System Name
+Server\fR coordinator(s) for the  Xsan cluster.
+The volume name coordinators are a critical
+component of the Xsan File System Services (\fIFSS\fR). One of the principal
+functions of the coordinator is to manage failover voting in a high availability
+configuration. Therefore it is crucial to choose highly reliable systems as the
+coordinators. Redundancy is provided by listing multiple entries in the
+.I fsnameservers
+file, one entry per line.
+When Xsan services are started on a host, the
+.B fsmpm
+daemon sends a heartbeat to each coordinator in the list. The first response
+received determines the primary coordinator for that client in a given cluster.
+The remaining
+coordinators are backup coordinators and will be used if the
+primary is lost.  It is
+recommended to configure at least two systems per cluster to utilize this
+redundancy benefit.
+The systems chosen may also be configured for the File System Manager
+(\fIFSM\fR) services but this is not required.
+.PP
+The
+.I fsnameservers
+files on the coordinator hosts should include the host names or IP addresses
+of all of the coordinators including its own. The
+.I fsnameservers
+files on the client and MDC hosts normally contain all these addresses
+as well, but these hosts will function normally with the address of at least
+one active coordinator.
+.PP
+If you are configuring multiple clusters, it is best practices to
+include the
+.I cluster
+and the
+.I administrative_domain
+on the same line as the IP address of each coordinator
+(see below).
+.PP
+See the
+.BR fsmcluster (4)
+man page for a discussion on Xsan clusters and administrative
+domains.
+.PP
+If \fIfsnameservers\fR does not exist then the system will operate as a "local"
+filesystem representing both client and server. It will not communicate with any
+other \fIXsan\fR product on the network unless an
+.BR fsforeignservers (4)
+file is configured.
+A local filesystem may be desired when no SAN sharing is required.
+.PP
+The \fIfsnameservers\fR file is also used to specify the preferred metadata
+network(s) used for Xsan.
+That is, if an address in the \fIfsnameservers\fR file is on IP network \fIx\fR,
+then network \fIx\fR will be used to carry Xsan metadata traffic,
+if possible. Networks available over other interfaces will be used if
+there is no connectivity from a client to the FSM on a preferred network.
+A network other than preferred will also be selected if this network
+is directly connected (on the same subnet) and none of the preferred
+networks are directly connected.
+Multiple, redundant metadata networks can be created by using additional
+network interfaces on every system; each coordinator is then specified
+in \fIfsnameservers\fR multiple times, once for each of its metadata-network
+addresses.
+.PP
+It is possible to filter the networks or IP addresses that are advertised
+to clients using
+the \fIsnfs_metadata_network_filter.json\fR configuration file. See the
+.BR snfs_metadata_network_filter.json (5)
+man page for details.
+This capability is only offerred on Linux systems.
+.PP
+Proxy coordinators can be configured by specifying a masklength
+along with the IP address.
+A proxy coordinator acts as a coordinator for other
+clients on the same subnet, relaying information between
+the clients and the real coordinators.
+For a group of clients on the same
+subnet, this will keep the underlying heartbeat traffic
+localized to the subnet, and only the proxies
+will communicate with the real coordinators.
+When configured, clients on the same subnet as the proxy
+will prefer to use the proxy coordinator for their
+primary coordinator.
+If the proxy coordinators are non-responsive, clients
+will fall back to using the normal coordinators.
+.SH UPDATING fsnameservers
+\fINOTE\fR The following applies to Xsan
+coordinators, clients and MDCs that have been updated to
+a level that supports this procedure. Verify that this text
+is present in this man page on these nodes before proceeding.
+.PP
+If a set of coordinators for a cluster is being replaced, the
+old coordinators should remain active through the transition.
+The first step is to synchronize the new and old coordinators.
+Populate the \fIfsnameservers\fR file on all coordinators with
+the IP addresses of all the coordinators. Then start or restart
+services on all coordinators.
+Once this is done, all clients and MDCs will dynamically learn
+the location of the new coordinators through the NSS protocol.
+This can be verified with the
+.B coord
+subcommand of the
+.B cvadmin
+utility. You should see entries for the old and new coordinators.
+Next, update all of the clients and MDCs \fIfsnameservers\fR
+files to contain only the addresses of just the new coordinators.
+There is no urgency to update the clients and MDCs as long as at
+least one of the old coordinators remains active.
+When all the client and MDC \fIfsnameservers\fR files have been updated,
+the old coordinators can be taken off line. The
+clients and MDCs will now switch over to the new coordinators
+for primary and secondary.
+The \fIfsnameservers\fR
+file on the new coordinators should now be updated to contain only the new
+coordinator names or addresses. There is no need to restart services on
+any of the clients or MDCs.
+.PP
+The process is similar if only a subset of the coordinators is being replaced.
+If, for example, a coordinator node failed, a new coordinator node can be
+brought on line with the new coordinator configuration in its
+.I fsnameservers
+file. Next, the existing coordinators should have their
+.I fsnameservers
+files updated. Start or restart services on all coordinators.
+Then, as above, update all the client and MDC \fIfsnameservers\fR files.
+.PP
+.SH SYNTAX
+The format for the \fIfsnameservers\fR is simple. It contains the
+IP address or the hostname to use as either a primary or a secondary
+coordinator. The use of IP addresses is preferred to avoid problems
+associated with lookup system (eg., DNS or NIS) failures. The format of an
+\fIfsnameservers\fR line is:
+.IP
+.IR host [ \fB/\fPmasklength ][\ ][\fB@\fP[ cluster [\fB/\fP admin_domain ]]]
+.RS
+.PP
+The \fIhost\fP is a host name or IP address of a host that can
+coordinate queries and failover votes for the File System Services.
+The optional \fIcluster\fP and \fIadmin_domain\fP fields specify
+the name of the cluster and administrative domain to which the
+coordinator belongs.  To specify that \fIhost\fP is a coordinator for more
+than one cluster, there must be a line for each cluster.
+.PP
+If only \fIhost\fP is specified, the system will attempt to
+identify the cluster based on responses from the \fIhost\fP.
+If it responds as an NSS1.X coordinator, it will be added to the
+default cluster, \fB@_cluster0/_addom0\fP.
+If it responds as an NSS2 coordinator, the coordinator will give the
+client its list of clusters and all the coordinators for each
+of those clusters.
+If you are running a multi-cluster configuration,
+it is highly recommended that you specify the cluster
+for each coordinator in the \fIfsnameservers\fR file.
+.PP
+If \fIadmin_domain\fP is not specified, it will
+use the default name from
+.BR fsmcluster (4).
+.PP
+If \fIcluster\fP is not specified, but the \fB@\fP is present, i. e.,
+.IP
+.IB host @
+.br
+.IB host\  @
+.PP
+it will use the default name from
+.BR fsmcluster (4).
+.PP
+The optional
+.BI / masklength
+configures
+.I host
+as a proxy coordinator for the specified subnet.
+.RE
+.PP
+Lines that contain white space only or that contain the comment token
+as the first non-white space character are ignored.
+.SH FILES
+.I /Library/Preferences/Xsan/fsnameservers
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR cvadmin (8),
+.BR snfs_config (5),
+.BR snfs_metadata_network_filter.json (5),
+.BR fsforeignservers (4),
+.BR fsm (8),
+.BR fsmpm (8),
+.BR fsmcluster (4),
+.BR mount_acfs (8)

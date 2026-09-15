@@ -1,0 +1,72 @@
+.\" domainsid.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2015-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH DOMAINSID 4 "January 2018" "Xsan File System"
+.SH NAME
+domainsid \- Xsan File System Domain SID File
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/domainsid
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fIdomainsid\fP file
+is an optional MDC configuration file used to set the domain SID
+to be used with ACLs when the Security Model is set to "acl" in
+a file system configuration file and Unix Identity Mapping is
+set to "algorithmic"
+
+Note that this file should only be deployed in very specific use
+cases.  For example, if an environment uses Open Directory,
+the \fIdomainsid\fP file should contain the assigned Domain SID.
+This can be determined by running the following command on a Mac:
+
+.nf
+$ dsmemberutil getsid -U \fIusername\fR
+.fi
+
+where \fIusername\fR is the name of any regular user account in Open Directory.
+This will return a string such as the following:
+
+
+.nf
+S-1-5-21-2553502104-2799725507-638401443-3106
+.fi
+
+The Domain SID is the string without the trailing RID so in this example, it has
+the value \fBS-1-5-21-2553502104-2799725507-638401443\fR  The following command
+may be run on the MDC to set this domain SID.
+
+.nf
+mdc# echo S-1-5-21-2553502104-2799725507-638401443 > /Library/Preferences/Xsan/domainsid
+.fi
+
+After configuring the \fIdomainsid\fP, file systems must be restarted on the FSM
+to have it take effect.
+
+Note: Improper configuration of this file may lead to files having invalid
+ACLs and permissions not being enforced properly.
+.SH FILES
+.I /Library/Preferences/Xsan/domainsid
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5),

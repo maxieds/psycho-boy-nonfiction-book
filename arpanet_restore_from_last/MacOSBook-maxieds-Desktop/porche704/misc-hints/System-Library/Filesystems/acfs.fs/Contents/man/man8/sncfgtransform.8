@@ -1,0 +1,163 @@
+.\" sncfgtransform.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2012-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCFGTRANSFORM 8 "May 2020" "Xsan File System"
+.SH NAME
+sncfgtransform \- Check two Xsan Volume configuration files for a valid transformation
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sncfgtransform [-h] -n
+.I VolName
+.I caller
+.I file1
+.I file2
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsncfgtransform\fR program will validate the transformation
+between two Xsan file
+system configuration files for the given "caller" and file system.
+.PP
+The valid \fIcaller\fP values are:
+.IP fsm
+The transform is checked for a file system manager (fsm) restart.
+This is the usual transform that administrators are looking for since a change
+in the config file is usually followed by a file system restart.
+.IP cvupdatefs
+The transform is checked for a run of the cvupdatefs command.
+This can be used when adding a stripe group or for stripe group expansion.
+.IP updatefs
+Same as cvupdatefs.
+.IP cvfsck
+The transform is checked for a run of cvfsck.
+.IP dbg
+The transform is checked for the cvfsdb command.
+.IP cvntfscfg
+The transform is checked with config files in ASCII format,
+typically used only on Windows MDCs.
+.IP snadmin
+The transform is checked with callers of the snadmin library API.
+.IP cvmkfs
+The transform is checked for the cvmkfs command.
+.IP cvmkfsr
+The transform is checked for the cvmkfs command with the -r option
+which means that the file system meta data is being restored
+from a database created because the restore journal was configured.
+.IP convert
+The transform is checked for the sncfgconvert command.
+.IP fsmpm
+The transform is checked for the fsmpm utility.
+.IP mdarchive
+The transform is checked for the snhistory and snaudit commands
+and other logic that interacts with the metadata archive.
+.IP cfggen
+The transform is checked for the sncfggen command.
+.IP dcap
+The transform is checked for the disk capacity license logic.
+.IP sgmanage
+The transform is checked for sgmanage and other stripe
+group management commands.
+.IP validate
+The transform is checked for the sncfgvalidate command.
+.PP
+Two configurations files must be given and the transformation is assumed to be
+from
+.I file1
+to
+.I file2.
+.PP
+Each configuration file is parsed and may fail.
+If they both succeed parsing, the transformation is checked with any
+errors being displayed.
+.SH OPTIONS
+.IP \fB\-h\fR
+Display usage.
+.IP "\fB\-n \fIVolName\fR"
+Required. The name of the file system whose config files are given.
+.SH EXIT VALUES
+\fBsncfgtransform\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+List usage:
+.Cs
+# sncfgtransform -h
+Usage: sncfgtransform [-h] -n <fsname> <caller> <file1> <file2>
+  -h        This usage
+  -n        Name of file system to validate
+  caller
+        fsm
+        cvfsck
+        cvmkfs
+        cvmkfsr
+        dbg
+        cvntfscfg
+        snadmin
+        sncfgconvert
+        fsmpm
+        cvupdatefs
+        updatefs
+        mdarchive
+        cfggen
+        dcap
+        sgmange
+        validate
+  file1     current configuration file
+  file2     proposed configuration file
+.Ce
+.PP
+Check a new config file under consideration for snfs1 with a copy in /tmp (OK):
+.Cs
+# sncfgtransform -n snfs1 fsm /tmp/snfs1.cfgx /tmp/snfs1.new.cfgx
+\(aqsnfs1\(aq transformation OK
+.Ce
+.PP
+Check a new config file under consideration for cvupdatefs of snfs1 (OK):
+.Cs
+# sncfgtransform -n snfs1 updatefs /tmp/snfs1.cfgx /tmp/snfs1.new.cfgx
+\(aqsnfs1\(aq transformation OK
+.Ce
+.PP
+Check a modified config against the installed config (with a valid change
+for cvupdatefs))
+.Cs
+.Cs
+# sncfgtransform -n snfs1 updatefs /Library/Preferences/Xsan/snfs1.cfgx /tmp/cfgx
+\(aqsnfs1\(aq transformation OK
+.Ce
+.PP
+Check a modified config against the installed config (with an invalid change)
+.Cs
+# sncfgtransform -n snfs1 fsm /tmp/snfs1.cfgx /tmp/snfs1.new.cfgx
+transformation failed for /tmp/snfs1.cfgx -> /tmp/snfs1.new.cfgx with -1
+transformation for /tmp/snfs1.cfgx -> /tmp/snfs1.new.cfgx -- error: Stripe group metadata field changed at index 2 - mkfs required
+
+\[char46]/sncfgtransform transformation failed
+.Ce
+.SH "SEE ALSO"
+.BR cvfsdb (8)
+.BR fsmpm (8)
+.BR snaudit (8)
+.BR snfs_config (5)
+.BR sncfgconvert (8)
+.BR sncfgtransform (8)
+.BR sncfgvalidate (8)
+.BR sncfggen (8)
+.BR sgmanage (8)
+.BR snhistory (8)

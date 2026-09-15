@@ -1,0 +1,51 @@
+# 
+# Qos Central Config File
+#
+# The QoS Central Config file offers a new feature for snfs admin to
+# define the bandwidth reservation for non-rtio IOs (rvio) on certain clients
+# from a central place, i.e. the fsm server. The configuration doesn't affect
+# the normal rtio requests, but it affects the bandwidth allocation to non-rtio
+# requests. Some of the characteristics of rvio are:
+# 1. rtio has higher priority, it is satisfied first. rvio will use whatever
+#    bandwidth is left.
+# 2. rvio reservation is not guaranteed. Instead, it is adjusted dynamically. 
+#    When there are new rvio or rtio requests, the bandwidth reserved for 
+#    clients with previous rvio requests is readjusted. Each rvio client will 
+#    get the rvio bandwidth reserved proportional to its request amount.
+# 3. The rvio bandwidth allocated for a client is the total bandwidth for 
+#    non-rtio requests on the client. The bandwidth (token) will not return as 
+#    normal non-rtio client does if it's been idle for a hold time. non-rtio 
+#    requests on clients with rvio reservation is subject to the same 
+#    throttling mechanism as non-rtio requests on normal clients.
+# 4. Other active non-rtio clients equally share the bandwidth left over after
+#    the possible rtio and rvio allocations. If no bandwidth is left, the 
+#    minimal reserved bandwidth (defined in stripe group section of file system
+#    config file) is used.
+#
+# The central config file has the file system name with suffix "_rvio.opt"
+# as its file name and is located under /usr/cvfs/config on the fsm server.
+# For example, if the file system is "default", then the central config file
+# for the file system has the file name "default_rvio.opt".
+#
+# A central config file has multiple entries, each entry defines the rvio
+# reservation for a client. The fields of an entry are:
+# 	host bw-type sg=yy,[sg=yy]
+# "host" is the host name, ip address (either V4 or V6), or FQDN, etc. of the 
+# client. Note: the host name should be able to be resolved (converted to an 
+# valid IP address) by the fsm server. 
+# "bw-type" is the type of bandwidth to be specified. Two options exist:
+# "qosmb" dicates that the subsequent value for bandwidth reservation uses mb 
+# (mega byte per second) as the unit. "qosios" means the subsequent value uses 
+# "ios/s" as the unit.
+# sg stands for stripe group. You may specify a stripe group by the sg name,
+# or by stripe group number starting from 0 for the first stripe group. In
+# addition, if you'd like to specify the same rvio bandwidth reservation for 
+# all stripe groups, you can use "*=yy" form.
+#
+# In the config file, any line starts with "#" is considered as comment line 
+# and is ignored.
+#
+# examples:
+# box1.xyz.com	qosios 2=200,4=50,sg5=45
+# 10.10.1.8	qosmb *=60
+

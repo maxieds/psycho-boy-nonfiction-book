@@ -1,0 +1,126 @@
+.\" vidiomap.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2011-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH vidio 1 "April 2018" "StorNext File System"
+.SH NAME
+vidiomap \- Video frame allocation inspector and resequencer
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B vidiomap
+.RI [ options ]
+.I target_dir
+.RI [ target_dir ...]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBvidiomap\fR utility can be used to determine how the \fBStorNext\fR
+file system has allocated the files within a given directory.
+Optionally, \fBvidiomap\fR can be used to "defragment" and "resequence" those files.
+Optionally, multiple target directories may be specified.
+.PP
+The \fBvidiomap\fR utility is intended to be used primarily on video frame 
+files within a directory.  It is not indented for use as a general 
+purpose file system allocation analysis or "defragmentation" utility.  
+See
+.BR snfsdefrag (1).  
+.PP
+Without options, \fBvidiomap\fR will print a summary analysis of the allocation
+of files in the target directory, including the number of regular
+files, the total number of extents, and space consumed.  Also printed is
+information relating to the total number and average size of the gaps between 
+the extents.
+.PP
+The \fB-v\fR option may be used to provide detailed information about
+file allocation on a per extent basis.  The actual file system block numbers
+consumed are printed along with the gaps between extents.  Notice that gaps 
+can be negative, indicating the subsequent allocation was to a lesser file system
+block number than the current allocation.
+.PP
+To analyze the allocation of files within a directory, the desired file order 
+first must be determined.  By default, \fBvidiomap\fR will sort all the files in the
+target directory alpha-numerically by file name.  Optionally, file names may
+be filtered by file prefix and file suffix.  See the \fB-p\fR and \fB-s\fR
+options.  Optionally, a list of file names may be provided.  See the \fB-f\fR
+option.
+.PP
+The "resequencing" and "defragmentation" of files is a multi-step process
+that makes heavy use of the \fBStorNext\fR file System Application Programming Interface, 
+\fBSNAPI\fR.  The steps are a follows:
+.Cs
+1.  Determine the file order.
+
+2.  For each file, a "shadow file" is created and blocks are preallocated.
+
+3.  The data is copied from the original file, to the shadow file.
+
+4.  The newly allocated extents are swapped into the original file inode.
+
+5.  The "shadow files" are removed.
+.Ce
+.PP
+Shadow files are named \fIfilename\fP\fB_shadow\fP and are created in the
+target directory.
+.PP
+As stated previously, \fBvidiomap\fR is not a general purpose file system 
+"defragmentor".  An older file system or a file system nearing capacity may
+have a fragmented free space pool. Using \fBvidiomap\fR to resequence
+files may not help in this case and could make fragmentation worse.  
+Consider using \fBsnfsdefrag\fR before resequencing files with \fBvidiomap\fR.
+.PP
+The resequencing option is intended to work with the StorNext \fBAllocation 
+Session Reservation\fR feature.  This feature is managed using the GUI or 
+by modifying the \fBallocSessionReservationSize\fR parameter, see
+.BR snfs_config (5).
+.PP
+Because resequencing copies the data to the newly allocated space, consider
+the performance impact of resequencing files on a production system.  Resequencing
+a large number of files can take some time, depending on the size of the files,
+the performance of the underlying storage, and other file system activity.
+.SH OPTIONS
+.IP \fB-?\fR
+Display usage.
+.IP \fB-d\fR[\fBdd\fR]
+Run in debug mode. The more "d's" specified, the more debug
+information is printed.
+.IP "\fB-f\fP \fIfile_list\fP"
+Get the list of target files from the specified file instead of the
+the target directory.  The files will be processed in the order listed.
+The format for this file is one file name per line.
+.IP "\fB-p\fP \fIprefix\fP" 
+Target only files with the specified \fIprefix\fR.  If the prefix option
+is specified along with the suffix option, both must be true to
+target a given file.
+.IP \fB-r\fR
+Resequence and "defragment" the target files.
+.IP "\fB-s\fP \fIsuffix\fP" 
+Target only files with the specified \fIsuffix\fR.  If the prefix option
+is specified along with the suffix option, both must be true to
+target a given file.
+.IP \fB-v\fR 
+Be verbose.  Print each extent of each target file showing the
+file system blocks consumed and gaps between the extents.
+.SH FILES
+.I /System/Library/Filesystems/acfs.fs/Contents/bin/vidiomap
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfsdefrag (1),
+.BR snfs_config (5),
+.BR vidio (1)

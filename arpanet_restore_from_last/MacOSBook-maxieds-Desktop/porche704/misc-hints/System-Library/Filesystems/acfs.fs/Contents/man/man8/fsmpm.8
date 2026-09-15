@@ -1,0 +1,218 @@
+.\" fsmpm.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 1999-2019. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH FSMPM 8 "February 2019" "Xsan File System"
+.SH NAME
+fsmpm \- Xsan File System Port Mapper daemon
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B fsmpm
+.RB [ -nc ]
+.RI [ host-ip \ [ debug \ [ sync \ [ diskscan \ [ extHA ]]]]]
+.SH DESCRIPTION
+The \fIFSM Portmapper\fR is a server daemon residing on each
+Xsan File System client and server. It registers an RPC identifier to
+the system's \fIportmap\fR daemon. The \fBfsmpm\fR publishes a well
+known port where the Xsan File System Manager (FSM) daemons can 
+register their volume name and port access number. All clients then 
+talk to their local FSS port mapper to discover access information for 
+their associated service. 
+This process runs in the background and is started at boot time. It is 
+enabled or disabled (along with the volume) via
+.BR chkconfig (8)
+or
+\fBinit.d\fR using the
+\fBacfs\fR
+key word.
+.SH OPTIONS
+\fBApple Internal Use Only\fR - contact support before adding or modifying
+command line arguments to \fBfsmpm\fR.  Changes from the defaults may
+result in intermittent or total failure of Xsan.
+Options may change abruptly between releases.
+.IP \fB-n\fP
+Don't send a SIGQUIT signal to fsm processes that appear to be hung;
+normally if an fsm process doesn't exit within 60 seconds after breaking
+the connection to the fsmpm, the fsmpm sends a SIGQUIT signal
+to the fsm.
+.IP \fB-c\fP
+Assume the client kernel module has not been loaded and skip
+any operations related to it.
+.IP \fIhost-ip\fR
+The IP address used to access this host.  The default is to try to
+resolve the system's hostname to an address. If set to 127.1, no
+nameserver will be used and no heartbeats will be sent.
+(default: no hostname)
+.IP \fIdebug\fR
+Bitmask specifying which debug messages to print. (default: 0)
+.IP \fIsync\fR
+The name of a file whose creation is used to detect when the fsmpm has
+successfully started.  (default: no file)
+.IP \fIdiskscan\fR
+How often (in seconds) to rescan for changed paths.  0 disables the disk scan.
+(default: 0)
+.IP \fIextHA\fR
+External HA mode prevents the fsmpm
+from automatically starting FSMs in the fsmlist, as well as disabling
+calls for elections.  1 enables external HA mode; 0 disables it.  
+(default: 0)
+.PP
+\fBNOTE:\fR Defaults specified with '--'.
+.SH FSNAMESERVERS
+The \fBfsmpm\fR reads the file
+.I /Library/Preferences/Xsan/fsnameservers
+to establish file system name servers for the 
+Xsan file system services. This list is used to coordinate the 
+whereabouts of Xsan file system servers.
+.PP
+A name server list must be established on each client that has Xsan
+installed so that all clients can discover the location of the Xsan FSM 
+servers. It is important that this list is consistent across the SAN. Inconsistent 
+\fIfsnameservers\fR configuration may result in the inability for some clients to find a file 
+system service. See
+.BR fsnameservers (4)
+for specifics of the file format.
+.SH FSMLIST
+The \fBfsmpm\fR is responsible for launching the FSM daemon(s). If
+.I /Library/Preferences/Xsan/fsmlist
+exists then the
+\fBfsmpm\fR reads from the list file and starts the FSM daemons
+that are specified. If no
+.I /Library/Preferences/Xsan/fsmlist
+file exists then the 
+\fBfsmpm\fR tries to launch the FSM daemon for the volume
+named \fBdefault\fR. See
+.BR fsmlist (4)
+for specifics of the file format.
+.SH Unique Identifier (UUID)
+The \fBfsmpm\fR creates or accesses the
+.I /Library/Preferences/Xsan/snfs_uuid
+file. This contains a Xsan unique identifier (UUID) for this host.
+The file should not initially exist on a host that deploys StorNext.
+If configuration information is copied from one host to another, this
+file should either not be copied or be deleted on the new host.
+.SH ENVIRONMENT
+\fBThese variables are for use by Apple support personnel only.\fR
+.IP FSMPM_MAX_LOGFILES +0.3i
+Controls the number of old \fBnssdbg.out\fR log files that will be saved by
+\fBfsmpm\fR when the current log file reaches its maximum size.
+The default is 4.
+.IP FSMPM_MAX_LOGSIZE +0.3i
+Controls the maximum size that the \fBnssdbg.out\fR file can grow to before
+a new log file will be started.
+The value is a number followed by an optional suffix (\fBK\fR for Kilobytes,
+\fBM\fR for Megabytes, \fBG\fR for Gigabytes), or the string \fBunlimited\fR,
+indicating that the file can grow without bound.
+The default is 1M and the minimum is 64K.
+.IP FSMPM_ACTIVE_FSM_CLIENT_TIMEOUT +0.3i
+Adjusts the logic that determines when an FSM should be considered lost and
+an election started to determine a new active FSM. The value is specified in
+seconds.
+.SH DEBUG
+Debugging traces are written to the file
+.IR /Library/Logs/Xsan/debug/nssdbg.out .
+The amount of debug information is controlled by the
+.I /Library/Logs/Xsan/debug/verbose
+file.  This file contains the list of debug traces to turn on.
+If the file does not exist, none of the optional debug traces are enabled.
+Blank lines and comments that begin with a \fB#\fP are ignored.
+Everything else is treated as a name for what debug traces to turn on.
+Names are separated by whitespace or commas, and may be listed
+on multiple lines.  Unknown names are silently ignored.
+.IP \fBgeneral\fP
+Print general trace information.
+This include information about
+acquiring port numbers for coordinators,
+listing FSMs,
+mapping IDs hostnames, disk requests,
+portmap inquiries, device event handlers,
+and other events.
+.IP \fBinput\fP
+Print a trace for every NSS packet received.
+.IP \fBoutput\fP
+Print a trace for every NSS packet sent.
+.IP \fBmbr\fP
+Print traces about Heartbeat Membership changes.
+.IP \fBvote\fP
+Print traces about FSM elections.
+.IP \fBldap_cred\fP
+Print traces for LDAP credential processing.
+.IP \fBproxy\fP
+Print traces about proxy processing (Distributed LAN client).
+.IP \fBcctl\fP
+Print traces about the cluster-wide central control (nss_cctl).
+.IP \fBhamon_reset\fP
+Print traces for HAMON resets.
+.IP \fBhelper\fP
+Print traces about starting and stopping helper processes.
+.IP \fBahb\fP
+Print traces about NSS accelerated heartbeats.
+.IP \fBprotobuf\fP
+Print details of all NSS2 packets as they are created and parsed.
+.IP \fBall\fP
+Enable all debug tracing
+.PP
+Numeric values are also recognized
+as specific debug bits to set.  This is mainly for backwards compatibility.
+A value of \fB-1\fP or \fB0xffffffff\fP is the same as specifying \fBall\fP.
+.PP
+If there are no recognized names or numeric values
+in the \fIverbose\fP file,
+e.g. if it exists but is empty, then the \fBmbr\fP and \fBvote\fP
+traces will be enabled.
+.PP
+An example of a \fIverbose\fP file:
+.Cs
+# Comments are ignored
+vote, mbr # Turn on the vote and membership traces
+   general
+foo bar # Unknown items are silently ignored
+
+# These are very noisy
+#input
+#output
+
+0x1000 # turn on an undefined bit
+.Ce
+.SH FILES
+.I /Library/Preferences/Xsan/fsnameservers
+.br
+.I /Library/Preferences/Xsan/fsforeignservers
+.br
+.I /Library/Preferences/Xsan/fsmlist
+.br
+.I /Library/Preferences/Xsan/nss_cctl\fR*\fP.xml
+.br
+.I /Library/Logs/Xsan/debug/nssdbg.out
+.br
+.I /Library/Logs/Xsan/debug/snfs_uuid
+.br
+.I /Library/Logs/Xsan/debug/verbose
+.SH NOTES
+When a \fBSIGHUP\fP signal is received, the configuration files will
+be re-read.
+This allows, for example, the FSM list to be modified, or debugging levels to be changed.
+.SH "SEE ALSO"
+.BR fsm (8),
+.BR fsnameservers (4),
+.BR fsmlist (4),
+.BR nss_cctl (4),
+.BR portmap (8),
+.BR rpcinfo (8)

@@ -1,0 +1,135 @@
+.\" cvfs.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2000-2014. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVFS 8 "October 2014" "Xsan File System"
+.SH NAME
+/etc/init.d/cvfs \- Initialization script for Xsan File System components
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B service cvfs
+.RB { start | stop | restart | fullstop }
+.sp
+.ad
+.hy
+.SH DESCRIPTION
+.PP
+The Xsan File System
+can be controlled by the system
+.BR init (8)
+mechanism. For more information on the init.d services reference the 
+.BR init (8)
+and
+.BR chkconfig (8)
+man pages.
+.PP
+This initialization script responds to the normal \fBstart\fR,
+\fBstop\fR and \fBrestart\fR commands.
+This allows the Xsan File System to be started 
+and stopped at any time, and the \fBfullstop\fR option unloads CVFS kernel modules.
+.PP
+\fBNote:\fR Take care not to trigger an HA reset
+action on a server when it has been configured for High Availability (HA).
+For more information about HA reference the
+.BR snhamgr (8)
+man page.
+.PP
+See the
+.BR init (8)
+or
+.BR chkconfig (8)
+man pages for additional startup 
+and shutdown options.
+.PP
+On Solaris clients, StorNext File System Services have been integrated into the Solaris
+service management facility, \fBsmf\fR.  The \fBcvfs\fR script is located in
+.IR /System/Library/Filesystems/acfs.fs/Contents/bin .
+.SH Starting Xsan Services
+The
+.B service cvfs start
+command should be executed 
+only after local file systems are mounted and the network is initialized.
+The following steps are executed:
+.in +5m
+.br
+.ti -2m
+\(em
+CVFS kernel modules are loaded.
+.br
+.ti -2m
+\(em
+Base Xsan services are started.
+This includes the Xsan portmapper service and any needed HBA drivers.
+.br
+.ti -2m
+\(em
+Any Xsan metadata servers included in the
+.BR fsmlist (4)
+file are started 
+automatically.
+.br
+.ti -2m
+\(em
+Xsan volumes included in the systems
+.BR fstab (5)
+or
+.BR vfstab (4)
+file are mounted.
+.br
+.ti -2m
+\(em
+Xsan Storage Manager (SNSM) components are started if they are installed.
+.in -5m
+.PP
+.SH Stopping Xsan Services
+.PP
+The
+.B service cvfs stop
+command should be executed before the network is 
+brought down and before the local filesystems are unmounted.
+The following steps are executed:
+.in +5m
+.br
+.ti -2m
+\(em
+SNSM components are stopped.
+.br
+.ti -2m
+\(em
+All Xsan volumes are unmounted. 
+.br
+.ti -2m
+\(em
+All Xsan server components are shut down.
+.in -5m
+.PP
+The kernel modules are not unloaded unless the \fBfullstop\fR
+option is used.
+.PP
+.SH FILES
+.I /etc/init.d/cvfs
+.SH "SEE ALSO"
+.BR mount (8),
+.BR snhamgr (8),
+.BR fsmlist (4),
+.BR vfstab (4),
+.BR fstab (5),
+.BR init.d (7),
+.BR chkconfig (8)

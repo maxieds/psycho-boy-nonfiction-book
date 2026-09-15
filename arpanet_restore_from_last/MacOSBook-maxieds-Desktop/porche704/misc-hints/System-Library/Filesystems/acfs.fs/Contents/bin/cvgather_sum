@@ -1,0 +1,333 @@
+#!/bin/sh
+#
+# Copyright 2011-2019. Quantum Corporation. All Rights Reserved.
+# StorNext is either a trademark or registered trademark of
+# Quantum Corporation in the US and/or other countries.
+#
+# A script for collecting system information for bug reporting.
+#
+
+# allow each command to run for 30 seconds before timing it out
+timer=30
+
+# this gives us an incremented number for each section
+header_counter=1
+
+
+##########
+#
+# Establish path to executables
+#
+##########
+
+os=`uname`
+left_paren="("
+right_paren=")"
+
+if [ "${os}" = "Darwin" ] ; then
+    cvdirpath=/System/Library/Filesystems/acfs.fs/Contents/bin
+    cvconfpath=/Library/Preferences/Xsan
+else
+    cvdirpath=/usr/cvfs/bin
+    cvconfpath=/usr/cvfs/config
+fi
+
+##########
+#
+# Header macro - 1 argument, the string to print
+#
+##########
+
+header() {
+	echo "##########"
+	echo "#"
+	echo "# ${1}"
+	echo "#"
+	echo "##########"
+	echo
+}
+
+
+##########
+#
+# Footer macro - no arguments
+#
+##########
+
+footer() {
+	echo
+	echo
+}
+
+
+##########
+#
+# Timeout macro - 2 arguments, the timeout in seconds and the command(s)
+#
+##########
+
+timeout2() {
+	watchit $1&			# start the timeout
+	a=$!				# capture the process id (PID) of the task
+	shift				# first param was timeout for sleep
+	trap "cleanup" ALRM INT		# cleanup after timeout
+	"$@"& wait $!; RET=$?		# start the job wait for it and save its return value
+	kill -ALRM $a			# send ALRM signal to watchit
+	wait $a				# wait for watchit to finish cleanup
+	return $RET			# return the value
+}
+
+
+##########
+#
+# Cleanup macro - no arguments
+#
+##########
+
+cleanup() {
+	trap - ALRM			# reset handler to default
+	kill -ALRM $a 2>/dev/null	# stop timer subshell if running
+	kill $! 2>/dev/null &&		# kill last job
+	return 124			# exit with 124 if it was running
+}
+
+
+##########
+#
+# Watchit macro - 1 argument, the timeout in seconds
+#
+##########
+
+watchit() {
+	trap "cleanup" ALRM
+	sleep $1& wait
+	kill -ALRM $$
+}
+
+
+##########
+#
+# Date and time this summary was done
+#
+##########
+
+header "${header_counter}${right_paren} Date and time cvsummary was run"
+	date +%Y-%m-%d_%H:%M:%S
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Hostname
+#
+##########
+
+header "${header_counter}${right_paren} Hostname"
+	uname -n
+        if [ "${os}" = "Linux" ]; then
+            hostname -f
+        fi
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Operating system (OS)
+#
+##########
+
+header "${header_counter}${right_paren} Operating System"
+	uname
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Stornext system ID and IP address
+#
+##########
+
+header "${header_counter}${right_paren} StorNext system ID and IP address"
+	timeout2 ${timer} $cvdirpath/cvfsid -l
+	rc=$?
+	if [ ${rc} -ne 0 ] ; then
+		echo "cvfsid command timed out"
+	fi
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Stornext version numbers - server and client
+#
+##########
+
+header "${header_counter}${right_paren} StorNext version numbers"
+	timeout2 ${timer} $cvdirpath/cvversions
+	rc=$?
+	if [ ${rc} -ne 0 ] ; then
+		echo "cvversions command timed out"
+	fi
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Stornext license information
+#
+##########
+
+header "${header_counter}${right_paren} StorNext licenses"
+	if [ -f ${cvconfpath}/license.dat ] ; then
+		cat ${cvconfpath}/license.dat
+	else
+                if [ ! -f /usr/cvfs/bin/fsm ]; then
+                    echo "No license file found but it also does not look like an MDC"
+                else
+                    echo "Error: file ${cvconfpath}/license.dat does not exist"
+                fi
+	fi
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# FSM summary and detail
+#
+##########
+
+header "${header_counter}${right_paren} FSM summary and detail"
+    FSM_ARG=""
+    if [ ! -f ${cvconfpath}/fsmlist ];
+    then
+        FSM_ARG="-A"
+    fi
+    if [ "${DNS_OFF}" ]
+    then
+       FSM_ARG="${FSM_ARG} -n"
+    fi
+
+    $cvdirpath/cvgather_fsm ${FSM_ARG}
+footer
+header_counter=`expr ${header_counter} + 1`
+
+##########
+#
+# HA (high availability) information
+#
+##########
+
+header "${header_counter}${right_paren} High Availability"
+	for file in ${cvconfpath}/*.cfgx; do
+	    if  [ -f $file ] ; then
+		# remove .cfgx extension
+		filesystem=`basename $file | cut -f 1 -d .`
+		state=`$cvdirpath/sncfgquery -q -n ${filesystem} -s globals -k hafstype`
+		echo "${filesystem} - ${state}"
+	    fi
+	done
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Up time
+#
+##########
+
+header "${header_counter}${right_paren} Uptime"
+	uptime
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Contents of some /etc/ files (*release, dfs/dfstab, exports, fstab, hosts, vfstab)
+#
+##########
+
+filesystems_file=""
+if [ "$os" = "AIX" ]; then
+	filesystems_file="/etc/filesystems"
+fi
+header "${header_counter}${right_paren} Contents of some /etc/ files ${left_paren}*release, dfs/dfstab, exports, fstab, hosts, vfstab ${filesystems_file}${right_paren}"
+	counter=1
+        for file in /etc/*release /etc/dfs/dfstab /etc/exports /etc/fstab /etc/hosts /etc/vfstab ${filesystems_file}; do
+		# file could be a file or a directory, only output files
+		header "${header_counter}.$counter) Contents of ${file}"
+			if [ -f ${file} ] ; then
+				cat ${file}
+			fi
+		footer
+		counter=`expr $counter + 1`
+	done
+footer
+header_counter=`expr ${header_counter} + 1`
+
+
+##########
+#
+# Contents of some /proc/ files (cpuinfo, filesystems, meminfo, modules, mounts, partitions, scsi/scsi, slabinfo, swaps, version)
+#
+##########
+
+if [ "${os}" = "Linux" ]; then
+    header "${header_counter}${right_paren} Contents of some /proc/ files ${left_paren}cpuinfo, filesystems, meminfo, modules, mounts, partitions, scsi/scsi, slabinfo, swaps, version${right_paren}"
+            counter=1
+            for file in /proc/cpuinfo  /proc/filesystems /proc/meminfo /proc/modules /proc/mounts /proc/partitions /proc/scsi/scsi /proc/slabinfo /proc/swaps /proc/version ; do
+                    # file could be a file or a directory, only output files
+                    header "${header_counter}.$counter) Contents of ${file}"
+                            if [ -f ${file} ] ; then
+                                    cat ${file}
+                            fi
+                    footer
+                    counter=`expr $counter + 1`
+            done
+    footer
+    header_counter=`expr ${header_counter} + 1`
+fi
+
+
+##########
+#
+# Contents of all /proc/net/ files
+#
+##########
+
+if [ -f /proc/net ] ; then
+	# /proc/net is a file, output it
+	header "${header_counter}${right_paren} Contents of /proc/net"
+		cat /proc/net
+	footer
+elif [ -d /proc/net ] ; then
+	# /proc/net is a directory, output each file in the directory
+	counter=1
+	
+	header "${header_counter}${right_paren} Contents of all /proc/net/ files"
+	
+	for file in /proc/net/* ; do
+		# file could be a file or a directory, only output files
+		if [ -f ${file} ] ; then
+			# ignore some cryptic files
+			case ${file} in
+				/proc/net/rt_acct) continue;;
+			esac
+			
+			header "${header_counter}.$counter) Contents of ${file}"
+				cat ${file}
+			footer
+			counter=`expr $counter + 1`
+		fi
+	done
+fi
+footer
+
+header "End of Summary"

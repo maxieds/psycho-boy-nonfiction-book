@@ -1,0 +1,101 @@
+.\" cvmkfile.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 1999-2019. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVMKFILE 1 "December 2019" "Xsan File System"
+.SH NAME
+cvmkfile \- Create a pre-allocated file
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B cvmkfile
+.RB [ -eprswz ]
+.RB [ \-k \ \fIkey\fP]
+.BR \fIsize\fP [ k | m | g | t ]
+.I filename
+.ad
+.hy
+.SH DESCRIPTION
+\fBcvmkfile\fR can be used to pre-allocate a file on 
+the Xsan volume. 
+This is useful and preferable when preparing a file for use in 
+a real-time or streaming environment as the entire file is represented in
+only one file system extent. Additionally, a file can be placed onto a 
+specific storage pool by specifying the \fIkey\fR value, which is used
+as the affinity locator. See
+.BR snfs_config (5)
+for more details
+about affinities.
+.PP
+\fBWARNING:\fR This will destroy all existing data for
+the specified file unless the \fB\-e\fR option is used.
+.SH OPTIONS
+.IP \fB\-e\fR
+The \fB\-e\fR option tells cvmkfile not to clobber an existing file, just 
+expand or verify the requested space.  The default behavior is to unlink 
+and re-create an existing file (see \fBWARNING\fR above).
+.IP "\fB\-k\fP \fIkey\fP"
+The \fB\-k\fP \fIkey\fP optionally tells the file system where to place the
+data file.  If an Affinity Key is specified, the file is
+placed on storage pools that are specified to support
+this key. If there is no storage pool with the key
+specified, then the file is placed in non-exclusive
+data pools. If there are no non-exclusive data pools,
+then ENOSPC (no space) is returned.
+.IP \fB\-p\fR
+The \fB\-p\fR option forces the allocation and any subsequent expansions to
+be fitted "perfectly" as multiples of the \fBPerfectFitSize\fR configuration
+parameter. The allocation extent will always line up on and be a perfect
+multiple of the number of blocks specified in \fBPerfectFitSize\fR.
+.IP \fB\-r\fR
+The \fB\-r\fR option causes the file to be written with pseudo-random data. This can
+take a significant amount of time.
+.IP \fB\-s\fR
+The \fB\-s\fR option forces the allocation to line up on the beginning block
+modulus of the storage pool. This can help performance in situations where
+the I/O size perfectly spans the width of the storage pool's disks.
+.IP \fB\-w\fR
+The \fB\-w\fR option sets the file size to be equal to \fIsize\fR.
+Without this option the blocks are allocated but the size is set to zero.
+\fBNOTE:\fR Unless the -z option is used, the new file will contain undefined data.
+Using the -w option is not recommended unless absolutely needed, and beware that
+it could cause some write operations to become read-modify-write operations.
+.IP \fB\-z\fR
+The \fB\-z\fR option causes the file to be physically zeroed out. This can
+take a significant amount of time.
+.TP
+.RB \fIsize\fP[ k | m | g | t ]
+The \fIsize\fR argument specifies the number of bytes, kilobytes(\fBk\fR), 
+megabytes(\fBm\fR), gigabytes(\fBg\fR), terabytes(\fBt\fR) to allocate for the file.
+Multiple extents will be allocated if there is insufficient contiguous available 
+space to satisfy the requested amount.
+In the event that there is not enough space to satisfy the request,
+the file size will still reflect the requested \fIsize\fR value
+if the \fB\-w\fR option is specified.
+.IP \fIfilename\fR
+The file to be created.
+.SH EXAMPLES
+Make a file of one gigabyte with zero length. Allocate it on a storage pool
+that has specified the affinity key \fB6100_n8\fR.
+.Cs
+rock # cvmkfile -k 6100_n8 1g foobar
+.Ce
+.SH "SEE ALSO"
+.BR snfs_config (5),
+.BR cvmkdir (1)

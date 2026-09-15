@@ -1,0 +1,166 @@
+.\" cvmkfs.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 1998-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVMKFS 8 "January 2018" "Xsan File System"
+.SH NAME
+cvmkfs \- Initialize a Xsan Volume
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B cvmkfs
+.RB [ -GF ]
+.RB [ -a \ \fIkey\fP]
+.RB [ -n \ \fIninode\fP[ k | m | g ]]
+.RB [ -r [ -e ] [ -m ]]
+.RB [ -Q ]
+.RB [ -R \ \fI[date:]time\fP]
+.RB [ -X]
+.RI [ volume_name ]
+.ad
+.hy
+.SH DESCRIPTION
+\fBcvmkfs\fR will initialize a \fIXsan\fR 
+volume
+optionally using \fIvolume_name\fR as the name. If no name is supplied,
+a list of volumes configured will be presented. Active file
+systems may not be re\-initialized. The user will be prompted for a confirmation
+before initializing the volume.
+.PP
+\fBWARNING:\fR This will destroy \fBANY\fR existing volume data for
+the named \fIXsan\fR volume!
+.SH OPTIONS
+.IP "\fB-a\fP \fIkey\fP"
+Set the affinity of the root directory to \fIkey\fR.
+.IP \fB-e\fR
+When remaking a managed file system in preparation for restoring all
+metadata from a metadata archive, the -e option specifies that the FSM
+should restore all user file extents. When this option is not specified,
+files are truncated which results in them being restored from backup.
+Use this option when the metadata disks must be restored but all disks
+containing user data are intact. This option can only be used in conjunction
+with the -r option and is ignored when restoring unmanaged file systems.
+.IP
+This option also causes thin provision unmapping work to be skipped
+for all stripegroups that can contain user data.
+.IP \fB-G\fR
+Bypass "Press return to continue..." type prompts.
+These prompts are useful on Windows systems to give the user a chance
+to read the error message before the window disappears.
+.IP \fB-F\fR
+Force. This option has been deprecated and replaced with \fB-X\fR.
+It will cause the same action as that option.
+.IP \fB-f\fR
+Failure mode - do not fail if there is a configuration mismatch or
+other serious abnormal condition detected.
+Note:  This option is \fBnot\fR intended for general use.  Use only if
+instructed by Apple support. Incorrect use may result in an unusable
+file system.
+.IP \fB-m\fR
+When using the -r option to remake a file system in preparation for a
+metadata restore from the metadata archive, cvmkfs will issue an error
+message and exit without modifying the file system if the stripe groups
+are defined to hold both metadata and user data. It does this because it
+is possible for the restore procedure to inadvertently allocate disk space
+for metadata that conflicts with user data, resulting in file corruption.
+The -m option can be used in conjunction with the -r option to override
+this behavior and force cvmkfs to remake the file system despite the risk
+of corruption. Use this option only if instructed by Quantum support.
+.TP
+.BR -n " \fIninode\fP[" k | m | g ]]
+Pre-allocate \fIninode\fR inodes.
+.br
+\fINOTE:\fR This option has been deprecated.
+.IP \fB\-Q\fR
+This option causes cvmkfs to print qustat statistics just before exiting.
+.TP
+.BR -R " \fB[date:]time\fP"
+Remake the file system in preparation for restoring all metadata as it existed
+at the given date and time. The format for the date:time argument is
+yyyy-mm-dd:hh:mm:ss, for example, "-R 2016-08-24:08:00:00". If the date is
+not specified, then today is assumed. This option is
+only valid for managed file systems when \fImetadataArchiveDays\fR is set to
+a non-zero value in the configuration file and it cannot be used with the
+-e option to restore file extents. This "historical" restore will truncate
+all files, forcing all data to be restored from backup.
+.IP
+\fBWARNING: It is highly recommended that Quantum Technical Support be
+contacted before using this option. If used improperly, data could be lost.\fR
+.IP \fB-r\fR
+Remake the file system in preparation for restoring all metadata from a
+metadata archive.
+This option can only be used when \fImetadataArchive\fR is set to true in
+the configuration file and a metadata archive exists that is current as of
+the last time the corresponding FSM was stopped.
+.IP
+The remake option can be useful for disaster recovery or for metadata and
+journal stripe group reconfiguration.
+.IP
+For a managed file system, the default behavior is
+to truncate all of the user data files with the expectation that they have
+been backed up to another media such as tape. The files will be reloaded when
+next accessed or through other storage manager actions. It is possible to
+override this behavior by specifying -e on a managed file system. In this case
+the same cautions as specified below for unmanaged file systems apply.
+.IP
+For an unmanaged file system, there is no backup copy of the user data.
+The -e option can be specified, but it is ignored and is forced on.
+The metadata that is restored contains the disk addresses
+of the user data.
+This means that all stripe groups that contain user data must be
+left completely intact.
+Therefore, all thin provision unmap work is skipped for all stripegroups
+that can contain user data.
+.IP
+The following statements apply to both managed and unmanaged file systems.
+The metadata and journal stripe groups are remade from scratch.
+This allows the underlying storage on
+these stripe groups to be replaced and stripe group attributes to be changed.
+Metadata stripe groups can be converted to data stripe groups.
+New stripe groups can be added. The journal stripe group can change.
+.IP
+\fBWARNING: It is highly recommended that Quantum Technical Support be
+contacted before using this option. If used improperly, data could be lost
+or corrupted.\fR
+.IP \fB-T\fR
+Normally on linux, \fBcvmkfs\fP opens all devices in the configuration file
+to check for thin provisioned devices.
+This is done to unmap/trim any prior mappings on those devices
+that are eliminated by this cvmkfs command.
+This "thin provision work" can be bypassed using the \fB-T\fP option.
+.IP \fB-U\fR
+Do a check for disks that are included in the file system that is being
+made to see if they are currently in use in another file system that is
+visible to the cluster. In some configurations, this may take a long time.
+If there are disks in use, the operation is aborted.
+.IP \fB-X\fR
+Use expert mode to automatically answer all prompts for verification.
+This is useful for running cvmkfs as part of a script or automated test.
+The failure option can be used instead, but with the failure option
+no configuration transformation validation is done and is therefore
+not recommended.
+With the \fI-X\fR option,
+all of the normal checks are performed and if an error is detected, the
+command exits with appropriate message and status.
+.TP
+.SH FILES
+.I /Library/Logs/Xsan/data/*
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5)

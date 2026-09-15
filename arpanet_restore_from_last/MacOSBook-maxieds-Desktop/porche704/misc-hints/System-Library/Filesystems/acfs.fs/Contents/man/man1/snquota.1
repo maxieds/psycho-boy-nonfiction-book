@@ -1,0 +1,465 @@
+.\" snquota.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2011-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNQUOTA 1 "March 2020" "Xsan File System"
+.SH NAME
+snquota \- Xsan Quota Configuration Utility
+.SH SYNOPSIS
+.na
+.nh
+.B snquota
+.RI {\fB-F\fP \ volume_name |\fB-P\fP \ path }
+.I action
+.RI [ options ]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsnquota\fR command manipulates the quota system in the
+\fIXsan volume\fR.
+.PP
+The quota system provides a means for limiting the amount of disk storage
+consumed on a per user or per group basis across an entire file system or 
+within a designated directory hierarchy.
+Quota limits apply to the space consumed by disk-block allocations for a user 
+or group, which is not equal to the sum of their file sizes.  
+Disk-block allocations can be less than the file size if the file is sparse,
+or more if the file system has allocated extra sequential blocks for the
+efficiency of anticipated future writes.
+.PP
+There are three types of quotas:
+user quotas, group quotas, and directory quotas.
+User and group quotas limit the number of volume blocks that can be 
+allocated
+by the user or group on which the limit is placed.  When quotas are
+on, the total allocated volume space of all users and groups that own
+files in the volume are automatically kept.
+.PP
+Directory quotas are a little different.  The system does not
+automatically keep track of the usage for each directory.  The
+\fBsnquota\fR command allows directories to be turned into the root of
+a \fBDirectory Quota Name Space (DQNS)\fR.  Then, the number and size
+of all files in the directory and all its subdirectories are tracked
+and (optionally) limited.
+.PP
+For all quota types, limits and usage values only apply to regular
+files, not directories, symlinks, or special device files
+.PP
+Each quota entity has two limits associated with it.  These are the
+hard limit and the soft limit.
+.PP
+The hard limit is the absolute limit which volume space usage should 
+not exceed.  Any time the total allocated space is at or over the hard limit,
+all further allocations or write requests by the offending user or group 
+will be denied.
+.PP
+The soft limit is a lesser limit.
+When the user exceeds this limit (but not the
+hard limit), allocations are still permitted for a while, but a
+warning message will be written to the logs.  (View the messages with
+\fBConsole.app\fR or the \fBdmesg\fR command.)
+When the soft limit has been overrun for longer than the grace period,
+the soft limit becomes a hard limit and any further allocations or
+write requests are denied.  When the usage again falls below the soft
+limit, allocation requests will again be serviced.
+.PP
+Previous versions of \fBsnquota\fR required all three of the limit
+values (hard, soft, and grace) to be set or all three to be unset.
+This version relaxes that somewhat.  It is now possible to specify
+just a hard limit without a soft and grace limit.  It's also possible
+to set a soft limit and grace period without a hard limit.  It's also
+possible to specify a soft limit without any grace period (such a
+limit warns periodically, but never prevents allocation).  It's still
+not possible to specify a grace period without a soft limit. Although
+all three values (\fB-h\fR, \fB-s\fR, \fB-t\fR) still need to be on
+the command line, you can set the limits that should not be
+enforced to zero.
+.PP
+For performance reasons related to the distributed nature of Xsan,
+quota overruns are not only possible but likely.  The overrun size
+depends upon a number of factors including the size of the 
+allocation request(s) at the time of the quota overrun.
+.PP
+Some versions of \fBsnquota\fR support setting default limits for the
+various types of quotas.  For example, you can set a default hard
+limit, soft limit, and grace period for all users.  After doing that,
+any new user created will inherit those limits.  Note that setting
+default limits will not change the limits of existing quota entities.
+Use the \fB-0\fR option and either "\fB-u default\fR", "\fB-g
+default\fR", "\fB-d default\fR", or "\fB-fd default\fR".  See the
+examples section.
+.PP
+When working with Directory Quotas, the specified volume must
+be mounted on the node running \fBsnquota\fR.
+.PP
+Limits are not enforced against super-user accounts.
+.SH DIRECTORY QUOTA NAME SPACES
+DQNSs are created by either of two actions, \fB-C\fR or \fB-M\fR.
+They have different performance trade-offs and which one to use
+depends on the situation at hand.
+.PP
+The \fB-C\fR action creates a DQNS whose usage values (the amount of
+disk space and the number of files) are already initialized to the
+correct value.  In order to initialize them, \fBsnquota\fR must walk
+the directory tree under the root of the DQNS and tally up how much
+disk space is used.  For big directory trees, this process can take a
+long time.  Any modifications to the files and directories in the DQNS
+will be stalled until this walk is complete.
+.PP
+The \fB-M\fR action quickly creates a DQNS whose usage values are
+zero.  As files are created in the DQNS, the usage value will
+increase, but will never count the files that were present in the
+directory when it was created.  In order to initialize the DQNS
+so the values are correct, the quota database must be rebuild using
+the \fB-R\fR action.  A rebuild runs much faster than a file-tree walk
+on a per-inode basis, but it must look at \fBall\fR of the inodes in
+the volume.  When the rebuild is running, modifications to
+the volume will be stalled until the rebuild is complete.
+.PP
+So, when creating a DQNS that is believed to contain only a small
+percentage of the inodes in the volume, use \fB-C\fR.  When
+creating a DQNS (or many DQNSs) that use a large percentage of the
+files, use \fB-M\fR.
+.PP
+A typical situation where \fB-M\fR would be useful is converting an
+existing volume to use directory quotas.  First every
+directory which needs to be a DQNS root is marked with a call to
+"snquota \fB-M\fR".  Then, all of the DQNSs are initialized with
+one call to "snquota \fB-R\fR".
+.PP
+When in doubt, use \fB-C\fR.
+.PP
+Nesting of DQNSs is not allowed.  This means that a DQNS may not be a
+subdirectory of another DQNS.
+.PP
+Directories can not be renamed across DQNS boundaries.  Also, all
+hard links to an inode must be within the same DQNS.  Attempts to
+rename directories/files or create hard links that would violate this
+rule will result in a EXDEV being returned.
+.PP
+If a directory tree contains inodes with hard links outside of the
+tree, an attempt to convert the tree into a DQNS via the \fB-C\fR
+action on the tree will result in an error.  An attempt to convert the
+tree into a DQNS via the \fB-M\fR and \fB-R\fR actions will result in
+an error during the \fB-R\fR action.
+.SH QUOTAS IN MIXED OS ENVIRONMENTS
+.PP
+The user and groups names specified in \fB-u\fR and \fB-g\fR represent
+underlying identifiers that are determined by the OS type of the MDC.
+.PP
+On a Linux or Xsan MDC, those
+identifiers are the classic UNIX User IDentifier (UID) and Group
+IDentifier (GID).  When a UNIX client (Linux, MacOS, Solaris, etc)
+creates a file, it passes the user's UID and GID to the MDC.  Those
+IDs are attached to the file and are used by the quota subsystem.
+When a Windows client creates a file, it passes a UID and GID it gets
+from one of three places:
+.PP
+.IP 1.
+If the Active Directory entry for the user has UNIX IDs associated
+with it, those are used.  The behavior at this point is just like UNIX
+client.  The administrator can set the IDs for a user via the AD
+configuration tool under the "UNIX Attributes" tab.  This tab is part
+of the "Identity Management for UNIX" subsystem.
+.IP 2.
+If the user doesn't have UNIX attributes, then the user and group
+"nobody" IDs from the file system configuration file are used.
+.IP 3.
+If the process's SID is a special "Root SID", the UID/GID passed will
+be 0/0 (i.e. root).  The "root SID" is S-1-5-18.
+.PP
+The Windows client can associate a NTSD with a file, but it's ignored
+by the quota subsystem. (It's only used for access control by the
+client at that point.)
+.PP
+On a Windows MDC, the favored identifiers are user and group SIDs
+derived from the NTSD which owns the file.  If there is no NTSD
+associated with the file, the UID/GID values associated with the inode
+are used.  So, when a Windows client creates a file, it passes in a
+NTSD.  That NTSD broken into SIDs and used as file's owner identifiers
+as far as the quota subsystem is concerned.  When a UNIX client
+creates a file, it passes the usual UID/GID pair, not a NTSD.  This is
+used by the quota system.  If that file is accessed from a on Windows
+client, it gets assigned an NTSD.  At that point the quota will be
+wrong.  Subsequent allocations of that file will be charged to the SD
+and not the UID/GID.
+.PP
+So, the preferred method of running quotas with a mixture of UNIX and
+Windows clients is to run with a Linux MDC with UNIX user/group
+mappings for Active Directory users.  That way, a user who logs into
+clients of either OS will have a single quota (which will be based on
+the UID).
+.PP
+Another option is to just use Directory Quotas.  They are much more
+straight-forward to share between OS types.
+.SH UNITS
+Usage and Limits are printed in a human-readable form, suffixed with
+"K", "M", "G", "T","P", or "E" for kibibytes, mebibyte, gibibyte,
+tebibyte, pebibytes, or exbibytes, respectively.  These are base-2 values
+(i.e. 1K = 1024).  A value without a suffix is in bytes.
+.PP
+File count values are also printed with these suffixes, but they are
+base-10 values (i.e. 1K = 1000).
+.PP
+Time values are printed with the suffixes "m", "h", "d", "w", "M" and "y" for
+minutes, hours, days, weeks, months, and years, respectively.
+.PP
+If the \fB-e\fR option is used, the suffixes are disabled and exact
+values are printed. Time units are in minutes.
+.PP
+These suffixes can also be used when specifying limits with the \fB-h\fR,
+\fB-s\fR, and \fB-t\fR options.  Decimal values may be used (e.g -h
+1.5g).
+.PP
+For the most part, the case of the suffix doesn't matter.  The only
+exception to that is the time suffixes "m" and "M", meaning "minutes"
+and "months", respectively.
+.SH FILE SYSTEM SPECIFICATION
+.IP "\fB-F\fP \fIVolumeName\fP"
+Specify VolumeName as the volume to manipulate.
+VolumeName may be qualified with cluster and administrative
+domain, if other than the default cluster in which the command is
+being run. The syntax is VolumeName@<cluster>[/<addom>].
+.IP "\fB-P\fP \fIPath\fP"
+Specify the volume containing \fIPath\fP as the
+volume to manipulate.
+.SH ACTIONS
+.IP \fB-C\fR
+This action creates an initialized DQNS on the directory specified by
+the \fB-d\fR argument.  After this command is run, disk space usage
+and file counts will be tracked in the directory and all its
+subdirectories.  Later, limits may be set on the DQNS using the
+\fB-S\fR action.  Note that since this operation creates \fIand
+initializes\fR the DQNS, the directory tree contained by the new DQNS
+will be walked to total up the current usage values.  This may take
+some time.  Modifications to the files and directories in the DQNS
+will be stalled until this walk is complete.
+.IP \fB-D\fR
+This action destroys the DQNS specified by the \fB-d\fR argument.
+Disk space and file count usage values will no longer be tracked.
+Limits will no longer be enforced.  Note that this does not modify or
+destroy the files and directories in the DQNS in any way.
+.IP \fB-G\fR
+This action returns the quota limits and values for the user, group,
+or directory specified by the \fB-u\fR, \fB-g\fR, or \fB-d\fR option,
+respectively.
+.IP \fB-L\fR
+This action lists the current quota limits and values for all user,
+group, and directory quotas.
+.IP \fB-M\fR
+This action creates (marks) an uninitialized DQNS on the directory
+specified by the \fB-d\fR argument.  After this command is run, disk
+space usage and file counts will be tracked in the directory and all
+its subdirectories.  Later, limits may be set on the DQNS using the
+\fB-S\fR option.  Note that since this operation creates \fI(but does
+not initialize)\fR the DQNS, the usage values for the DQNS will start
+out at zero.  The user should later use the \fB-R\fR action to
+initialize the usage values.  See the \fBDIRECTORY QUOTA NAME
+SPACES\fR section above for a discussion on when to use \fB-M\fR and
+when to use \fB-C\fR.  When in doubt, don't use this action.  Use
+\fB-C\fR instead.
+.IP \fB-R\fR
+This action rebuilds the quota database.  It is most useful when used
+after \fBsnquota\fR has been used a number of times with the \fB-M\fR
+action.  See the \fBDIRECTORY QUOTA NAME SPACES\fR section above.
+Note that this action can take a long time.  The volume will
+be unresponsive during this time.  The action cannot be canceled after
+it is started.  A prompt will be displayed confirming the intent to
+run the action unless the \fB-Y\fR option is specified. A rebuild
+preserves limits and DQNSs.
+.IP \fB-S\fR
+This action sets the quota limits for the user, group, or directory
+specified by the \fB-u\fR, \fB-g\fR, or \fB-d\fR option,
+respectively.  The limits must be specified by the \fB-h\fR,
+\fB-s\fR, and \fB-t\fR, options.  All three must be present, but
+some/all may be zero.
+.IP \fB-X\fR
+This action generates quota reports for all users and groups.  There
+are three files placed in \fI/Library/Logs/Xsan/data/\fP<volume_name>:
+    1. quota_report.txt - a "pretty" text file report.
+    2. quota_report.csv - a comma delimited report suitable
+       for Excel spreadsheets.  Fields that can have commas,
+       newlines, and other strange characters are escaped with
+       double quotes.  This is the case with DQNSs path fields.
+    3. quota_regen.in - a list of snquota commands that can be
+       used to set up an identical quota database on another
+       \fIXsan volume\fR. Passing this file to
+       the shell executes it as a script.
+.IP \fB-Z\fR
+This action completely destroys all quota configuration
+and then rebuilds the quota database as in the \fB-R\fR
+option above. Unlike the  \fB-R\fR action,  \fB-Z\fR clears the limits and
+directory quota name spaces.
+It is recommended that the quota_regen.in file be generated using the
+\fB-X\fR option to save the quota configuration prior to using
+\fB-Z\fR.
+.SH OPTIONS
+.IP \fB-0\fR
+List, read, and set default limits.  When specified with the \fB-L\fR
+action, the default limits are included in the list (if they are
+non-zero).  When specified with the \fB-G\fR or \fB-S\fR actions, the
+default limits for the specified type of quota are read or written.
+When using \fB-0\fR, the argument for \fB-u\fR, \fB-g\fR, \fB-d\fR, or
+\fB-fd\fR should be "default".
+.IP \fB-a\fR
+When this option is used, directory quota paths printed by the
+\fB-L\fR and \fB-G\fR options will be absolute paths.  Paths supplied
+to the \fB-d\fR option are also absolute paths (or relative to the
+CWD).  When this option is absent, all paths are relative to the root
+of the specified volume.
+.IP "\fB-d\fP \fIDirectory\fP"
+This option specifies a DQNS on a \fIXsan volume\fR
+to be used with the \fB-C\fR, \fB-D\fR, \fB-G\fR, \fB-M\fR, or
+\fB-S\fR options.  The directory supplied is the root directory of the
+DQNS.  The directory path is relative to the root of the specified
+volume, unless the \fB-a\fR option is used.
+.IP \fB-e\fR
+When used with the \fB-G\fR or \fB-L\fR actions, numbers will be
+printed as \fIexact\fR values.  Usage and Limits which represent disk
+space are printed in bytes.  Times are printed in minutes.  For
+example, with this option, a one megabyte hard limit will be printed
+as "1048576", not "1M".  A one day grace period will be printed as
+"1440", not "1d".
+.IP \fB-f\fR
+The \fB-f\fR option is only useful with the \fB-G\fR and \fB-S\fR
+actions and the \fB-d\fR option.  When the \fB-f\fR option is present,
+limits and values represent the number of regular files contained in
+the DQNS.  If the \fB-f\fR option is not present, limits and values
+represent the disk space contained in the DQNS.
+.IP "\fB-g\fP \fIGroupName\fP"
+This option specifies the name of a group to get or set with the
+\fB-G\fR or \fB-S\fR action.  The group name may also be of the form
+"G:id", where "id" is a number that represents a group's GID.
+.IP "\fB-H\fP \fIHostName\fP"
+Use a hostname in a Xsan cluster that is different from the
+cluster the command is being run on.  This option in rarely needed.
+.IP "\fB-h\fP \fIHardLimit\fP"
+This option specifies a hard limit to set when used with the \fB-S\fR
+action.  See the \fBUNITS\fR section above.  The maximum hard limit
+value is 16 exbibytes - 1 fsBlockSize (the file system configured block
+size.) If the fsBlockSize is 4096, the maximum hard limit value is
+18,446,744,073,709,547,520 bytes.  (Note:
+commas were added for readability; commas are not allowed in values.)
+.IP \fB-h\fR
+This option causes \fBsnquota\fR to print a friendly help message and
+exit.  It only works when used by itself.  If there are other options
+present, it is assumed that a hard limit is being specified.
+.IP "\fB-o\fP {\fBtext\fP|\fBxml\fP|\fBjson\fP}"
+Print output in \fBtext\fR, \fBxml\fR, or \fBjson\fR.
+The default is \fBtext\fR.
+.IP "\fB-s\fP \fISoftLimit\fP"
+This option specifies a soft limit to set when used with the \fB-S\fR
+action.  See the \fBUNITS\fR section above. The maximum soft limit
+value is 16 exbibytes - 1 fsBlockSize (the file system configured block
+size.) If the fsBlockSize is 4096, the maximum soft limit value is
+18,446,744,073,709,547,520 bytes.  (Note:
+commas were added for readability; commas are not allowed in values.)
+.IP "\fB-t\fP \fIGracePeriod\fP"
+This option specifies a grace period to set when used with the
+\fB-S\fR action.  See the \fBUNITS\fR section above.
+.IP "\fB-u\fP \fIUserName\fP"
+This option specifies the name of a user to get or set with the
+\fB-G\fR or \fB-S\fR action.  The user name may also be of the form
+"U:id", where "id" is a number that represents a user's UID.
+.IP \fB-Y\fR
+When used with the \fB-R\fR or \fB-Z\fR actions, this option prevents
+\fBsnquota\fR from asking for confirmation.
+.IP \fB-z\fR
+This option is the same as specifying "-h 0 -s 0 -t 0".  It's only
+useful with the \fB-S\fR action.
+.SH EXIT VALUES
+\fBsnquota\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+List all the quota limits and values on a volume named
+"data".
+.Cs
+snquota -F data -L
+.Ce
+.PP
+List all the quota limits and values on a volume named
+"data", but in cluster "cluster1".
+.Cs
+snquota -F data@cluster1 -L
+.Ce
+.PP
+Specify a hard limit of ten gigabytes, a soft limit of nine gigabytes,
+and a grace period of one week on user "lisa" in a volume
+named "data".
+.Cs
+snquota -F data -S -u lisa -h 10g -s 9g -t 1w
+.Ce
+.PP
+Turn off quota limits for user "lisa" in a volume named "data".
+.Cs
+snquota -F data -S -u lisa -z
+.Ce
+.PP
+Get the quota values for a group named "simpsons" on a volume
+mounted on "/stornext/data".
+.Cs
+snquota -P /stornext/data -G -g simpsons
+.Ce
+.PP
+Create a \fBDQNS\fR on the directory
+"/lisa/saxophone_music" in a volume mounted on "/stornext/data".
+.Cs
+snquota -P /stornext/data -C -d /lisa/saxophone_music
+.Ce
+.PP
+Specify a hard limit of one gigabyte, a soft limit of nine hundred
+megabytes, and a grace period of one day on pre-existing DQNS
+"/lisa/saxophone_music" in a volume named "data".
+.Cs
+snquota -F data -S -d /lisa/saxophone_music -h 1g -s 900m -t 1d
+.Ce
+.PP
+Create a number of DQNSs using \fB-M\fR and \fB-R\fR.  This is faster
+than using \fB-C\fR if these directories take up most of the space in
+the volume.
+.Cs
+snquota -F data -M -d /bart/comics
+snquota -F data -M -d /bart/pranks
+snquota -F data -M -d /bart/itchy_and_scratchy
+snquota -F data -R
+.Ce
+.PP
+Create the same DQNSs using \fB-C\fR.  This is faster than using
+\fB-M\fR and \fB-R\fR if the directories are small.
+.Cs
+snquota -F data -C -d /bart/comics
+snquota -F data -C -d /bart/pranks
+snquota -F data -C -d /bart/itchy_and_scratchy
+.Ce
+.PP
+Specify a hard limit of one thousand files, a soft limit of nine
+hundred files, and a grace period of one week on pre-existing DQNS
+"/bart/pranks" in a volume named "data".
+.Cs
+snquota -F data -S -d /bart/pranks -f -h 1k -s 900 -t 1w
+.Ce
+.PP
+Set default hard limits limits for all newly created DQNSs.  The first
+line set defaults for disk space and the second line sets defaults for
+files.
+.Cs
+snquota -F data -S -0d default -h 1t -s 0 -t 0
+snquota -F data -S -0fd default -h 1m -s 0 -t 0
+.Ce
+.SH "SEE ALSO"
+.BR snfs_config (5),
+.BR snfs_rest_config.json (4)

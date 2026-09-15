@@ -1,0 +1,89 @@
+.\" sn_scsi_resize.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2012-2017. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH sn_scsi_resize 1 "March 2017" "StorNext File System"
+.SH NAME
+sn_scsi_resize \- Utility to resize a virtual volume
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sn_scsi_resize
+.RI [ options ]
+.I [devname1 devname3 devname3...]
+.ad
+.hy
+.SH DESCRIPTION
+\fBsn_scsi_resize\fR is a utility that can be used to tell the
+disk driver infrastructure in the Linux operating system
+to get the size of a volume.
+The size of a volume may have increased, particularly in the case
+of a thin provisioned volume.  The Linux device driver stack does
+not automatically detect size changes.
+
+If no devnames are specified, \fBsn_scsi_resize\fR will rescan all
+multipath devices and their slaves.
+
+Devnames may be specified as absolute paths like /sys/block/dm-3, /sys/block/dm*,
+/sys/block/sdg, or shorthand like mpatha, mpathb representing /dev/mapper files.
+
+\fBsn_scsi_resize\fR will execute a StorNext disk refresh after the SCSI devices have been resized.
+
+.SH OPTIONS
+.IP \fB-?\fR
+Display usage and exit.
+.IP \fB-h\fR
+Help. Display usage and exit.
+.IP \fB-l\fR
+List.  This option will list the device sizes.  No size rescan is done.
+.IP \fB-v\fR
+Verbose.  Display the sizes of the devices.  Similar to the list option
+but works during resize.
+.SH "EXAMPLES"
+.PP
+Rescan all multipath devices and their slaves:
+.Cs
+    sn_scsi_resize
+
+.Ce
+Rescan the multipath device dm-3 and its slaves:
+.Cs
+    sn_scsi_resize /sys/block/dm-3
+
+.Ce
+Rescan the multipath device /dev/mapper/mpatha and /dev/mapper/mpathb  and their slaves:
+.Cs
+    sn_scsi_resize mpatha mpathb
+.Ce
+
+List the sizes of all device and their slaves:
+.Cs
+    sn_scsi_resize -l
+.Ce
+
+.Cs
+.SH "NOTES"
+.PP
+\fBsn_scsi_resize\fR is currently supported only on Linux.
+.PP
+Devices representing partitions cannot be resized.  Error messages
+are suppressed unless the -v option is specified.
+.PP
+.SH FILES
+.I /System/Library/Filesystems/acfs.fs/Contents/bin/sn_scsi_resize

@@ -1,0 +1,91 @@
+#
+# Autostart file
+#
+# List the primary and backup Stornext File System Services that 
+# should be started at boot time.
+#
+# If the service is marked backup it will be launched in a standby mode
+# and will only take control if the primary service is down other than
+# by the "stop" command.
+#
+# If this file is changed, it will only be re-scanned if the CVFS Services
+# Port Mapper (fsmpm) is notified. This is accomplished as follows:
+#
+# kill -USR1 `cat /usr/cvfs/bin/fsmpm.pid`
+#
+# This will force the port mapper to re-scan this file.
+#
+# 
+# File Format:
+# 
+# Spaces and tabs may be used liberally.
+# A comment is designated by a pound (#) sign in the first character of a line.
+#
+# Line format is (without the first pound sign):
+#
+#<fsname> [ . <priority>]
+#
+# where:
+#
+#    <fsname> is the name of the FSM file system. This must match
+#       the configuration's file name, (<file_system_name>.cfg).
+#       This name is Storage Area Network (SAN) wide and must be
+#       unique across all the interconnected SAN machines.
+#
+#    [.] is required if the <priority> field is specified. It takes the
+#	place of a deprecated parameter and is required for compatibility
+#	with old fsmlist files.
+#
+#    [<priority>] is a number assigned to FSS services to give more
+#	determinism to which service can take over a failed service. 
+# 	The lower the value the higher the priority. If there is no priority
+#	assigned to a service, it defaults to priority 0.
+#	FSS Services with equal priority will not have deterministic fail
+#	over characteristics.
+#
+#
+# Below are some example file system service configuration lines.
+#
+#
+# Example #1.
+#
+# This file system is named "default". The host name defaults to the same
+# one the fsm port mapper uses. It is the only service for this file
+# system.
+#
+#default
+#
+# Example #2.
+#
+# This file system service is named "example".
+#
+#example
+#
+# Example #3.
+#
+# Here is a list of services, some which are primary and some which are
+# backup.
+#
+# File system default on the default host as a high priority service.
+#
+#default . 0
+#
+# File system "bar" on the default local host as a tertiary service.
+#
+#bar . 2
+#
+# File system "zup" on the default local host as a secondary service.
+#
+#zup . 1
+#
+# File system "zup" on the default local host with a second backup as well.
+# Each backup can be assigned a different priority. This configuration 
+# typically makes more sense on two different machines where one machine 
+# should take priority over another in a fail-over situation.
+#
+#zup . 0
+#zup . 1
+#
+#
+# end
+#

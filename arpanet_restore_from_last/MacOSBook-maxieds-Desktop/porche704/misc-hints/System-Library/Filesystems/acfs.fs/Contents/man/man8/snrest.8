@@ -1,0 +1,215 @@
+.\" snrest.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2019-2021. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNREST 8 "March 2021" "Xsan File System"
+.SH NAME
+snrest \- Administer Xsan Volume REST API access
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B snrest
+.B gateway
+.B admin-url
+.I url
+.HP
+.B snrest
+.B gateway
+.B import
+.I filename
+.HP
+.B snrest
+.B gateway
+.B show
+.HP
+.B snrest
+.B gateway
+.B remove
+.RI [ \fIurl\fP ]
+.HP
+.B snrest
+.B gateway
+.B register
+.RI [ \fIurl\fP ]
+.HP
+.B snrest
+.B gateway
+.B unregister
+.RI [ \fIurl\fP ]
+.HP
+.B snrest
+.B gateway
+.B status
+.RI [ \-d ]
+.HP
+.B snrest
+.B gateway
+.B ping
+.RI [ \fIurl\fP ]
+.HP
+.B snrest
+.B gateway
+.B ping
+.RI [ \-f \ \fIfilename\fP ]
+.HP
+.B snrest
+.B config
+.B set
+.RI [ \fIname=value\fP ... ]
+.HP
+.B snrest
+.B config
+.B clear
+.RI [ \fIname\fP ... ]
+.HP
+.B snrest
+.B config
+.B show
+.ad
+.hy
+.SH DESCRIPTION
+The
+.B snrest
+program supports control and status display for REST API
+access to the Xsan Volume.
+.PP
+The \fBsnrest gateway\fP commands support configuration and control
+of StorNext interactions with a single or multiple Quantum API Gateways.
+.PP
+Commands with a <url> parameter may specify the \fIurl\fP using only the hostname
+ of the API Gateway.
+If the \fIprotocol\fP is not
+specified it defaults to \fBhttps\fP and if the port is not specified
+it defaults to 8443.  This allows the caller to only specify the \fIhostname\fP,
+as in the following example:
+.Cs
+snrest gateway admin-url <hostname>
+.Ce
+.sp
+which is the same as explicitly specifying the following:
+.Cs
+snrest gateway admin-url https://<hostname>:8443
+.Ce
+.PP
+The \fBsnrest gateway import\fP command imports configuration
+information from a Quantum API Gateway.
+This command takes a single argument which is a filename containing
+contact and authentication information and must be obtained from
+a Quantum API Gateway.
+.PP
+Alternatively, the \fBsnrest gateway admin-url\fP command is a simpler form
+for configuring access to the API Gateway.  Use this command only if your
+site has not configured site-specific authentication for gateway registration
+(in which case you must use \fBsnrest gateway import\fP instead).
+.PP
+With \fBsnrest gateway admin-url\fP simply specify the URL of the
+API Gateway as a command line argument.
+.PP
+The \fBsnrest gateway show\fP command displays the API Gateway configuration.
+.PP
+The \fBsnrest gateway remove [ <url> ]\fP command unregisters with the API
+Gateway and removes the API Gateway from the configuration. If the \fIurl\fP is
+specified, only the specified API Gateway is unregistered and removed.
+.PP
+The \fBsnrest gateway register [ <url> ]\fP command registers all the configured API
+Gateways.
+API Gateways that are registered will continue to periodically
+retry until the registration succeeds.
+This needs to be called if you use \fBsnrest gateway import\fP or
+\fBsnrest gateway admin-url\fP commands to add an API Gateway
+configuration to the configuration.
+.PP
+An optional URL parameter may be specified to \fBsnrest gateway register\fP.
+The following command:
+.Cs
+snrest gateway register <url>
+.Ce
+.sp
+results in the same actions as if the following commands were issued:
+.Cs
+snrest gateway admin-url <url>
+snrest gateway register
+.Ce
+.sp
+This allows the caller to configure the \fIurl\fP and register with the API Gateway
+in a single command.  If the specified API Gateway has already been configured,
+the command performs only the registration.
+.PP
+The \fBsnrest gateway unregister\fP command unregisters with the currently
+registered API Gateways.  If the \fIurl\fP is
+specified, only that API Gateway is unregistered.
+.PP
+The \fBsnrest gateway status\fP command displays the current status of the
+StorNext registrations with a Quantum API Gateway.
+This typically reports that either all or none of the internal endpoints
+in StorNext are registered with a particular API Gateway..
+But there is also the possibility, especially in transitory states or when
+connectivity to the API Gateway is problematic, that only a subset of the
+internal endpoints are registered.
+If any endpoints are not currently registered the system will continue to
+try to register those endpoints until successful.
+.PP
+There is an additional option to get extra detail on the registration status
+with the \fB-d\fP option.
+This provides a detailed display of individual internal endpoints
+that register with the API Gateway and thus is primarily intended for use
+by Quantum Support.
+.PP
+The \fBsnrest gateway ping\fP command tests connectivity to the API Gateway.
+If the API Gateway cannot be contacted an error message is displayed and
+the command exits with a non-zero exit status.
+By default, the following will ping the currently configured API Gateway:
+.Cs
+snrest gateway ping
+.Ce
+.sp
+Alternatively, you can ping a specific URL with:
+.Cs
+snrest gateway ping <url>
+.Ce
+.sp
+or use a file with the gateway configuration with the \fB-f\fP option:
+.Cs
+snrest gateway ping -f <filename>
+.Ce
+.sp
+In this latter case the file specified would be of the same form used with
+\fBsnrest gateway import\fP.
+.PP
+The \fBsnrest config\fP commands support setting values in the
+\fB/Library/Preferences/Xsan/snfs_rest_config.json\fP file.
+These values should only be changed in consultation with Apple support.
+The names are hierachical value separated by spaces.  For example, to change
+the \fBssl_enabled\fP value under the \fBssl\fP json object to \fBtrue\fP:
+.Cs
+snrest config set ssl.ssl_enabled=true
+.Ce
+.PP
+To remove the ssl_enabled value:
+.Cs
+snrest config clear ssl.ssl_enabled
+.Ce
+.PP
+Changes to the \fBsnrest config\fP values will take effect the next time
+that StorNext is restarted.
+.PP
+The \fBsnrest config show\fP command displays the current values
+of the Xsan REST configuration.
+.SH EXIT VALUES
+\fBsnrest\fR will return 0 on success and non-zero on failure.

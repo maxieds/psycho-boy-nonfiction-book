@@ -1,0 +1,280 @@
+'\" t
+'\" See man(1) (e.g., on Solaris) about man page preprocessing
+.\" qustat.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2011-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH QUSTAT 8 "December 2020" "Xsan File System"
+.SH NAME
+qustat \- Xsan Statistics Utility
+.SH SYNOPSIS
+.nh
+.na
+.B qustat
+.I command
+.RI [ "Object_Identifiers" ]
+.RI [ Formatting ]
+.PP
+Manage and View StorNext Statistics
+.PP
+Commands using a group or module name will require the group, module or both
+names.
+.TS
+tab(|);
+l l.
+Print:|\fBqustat [-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP] [\fB-h\fP \fIhost\fP] [\fB-t\fP \fItbl\fP] [\fB-F\fP \fIopt\fP]
+Print Hourly:|\fBqustat -T\fP [\fB-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP] [\fB-h\fP \fIhost\fP] [\fB-t\fP \fItbl\fP] [\fB-F\fP \fIopt\fP]
+Print CSV File:|\fBqustat -c\fP \fIcsv_file\fP
+Print + Reset:|\fBqustat -P -R\fP [\fB-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP] [\fIPrint_Options\fP]
+Reset:|\fBqustat -R\fP [\fB-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP]
+Reset Hourly Min/Max:|\fBqustat -M\fP [\fB-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP]
+Interval:|\fBqustat -I\fP \fIinterval\fP
+Version:|\fBqustat -V\fR
+Description:|\fBqustat\fP [\fB-g\fP \fIgroup_name\fP] [\fB-m\fP \fImodule_name\fP] [\fB-h\fP \fIhost\fP] [\fB-t\fP \fItbl\fP] \fB-D\fP \fISearch_String\fP
+Help:|\fBqustat -H\fR
+.TE
+.PP
+Commands 
+.PP
+.TS
+tab(|);
+lb l.
+-P, --print|Print tables (default command)
+-T, --time_hourly|Print hourly time tables
+-I, --interval|Set collection interval
+-A, --archive|Forward stats to central archive
+-R, --reset|Reset table or group if no table
+-M, --reset min/max|Reset hourly minimum and maximum for table or group if no table
+-S, --selftest|Run Self Test
+-V, --version|Print qustat version information
+-H, --help|Print qustat help information
+-D, --description \fIstr\fP|Print table or stat description
+.TE
+.PP
+Object Identifiers
+.PP
+.TS
+tab(|);
+lb l.
+-c, --csv \fIfile\fP|Specify a .csv file to load
+-h, --host \fIopt\fP|Host name or IP address
+-m, --module \fIopt\fP|Module name
+-g, --group \fIopt\fP|Group name
+-t, --table \fIopt\fP|Table Number
+-f, --fs \fIopt\fP|File system name (same as -g)
+.TE
+.PP
+Statistics are identified by a group and module name.  Example group,module
+identifiers are \fIFS_name\fP,FSM; kernel,client; FSMPM,FSMPM.  The default
+module name is FSM.  If the module name is unique, the group name may be
+optional.
+.PP
+Formatting
+.PP
+.TS
+tab(|);
+lb l.
+-F, --format all|Show all records (including zeros)
+-F, --format csv|Output in .csv format
+-F, --format xml|Output in XML format (with -D only)
+-F, --format graphite|Output graphite format data
+-F, --format protobuf|Output protobuf format data (with -A only)
+.TE
+.PP
+.ad
+.hy
+.SH COMMANDS
+.IP "\fB-P, --print\fR"
+This is the default command if no other commands are specified.
+To use the print command, you must also supply a group (file system)
+name with the \fB-g\fR option.
+.IP
+The \fBprint\fR command fetches the statistics table(s) from the
+specified \fBgroup\fR (e.g. the FSM) and prints them to standard
+output.  The output is described below.
+.IP "\fB-T, --time_hourly\fR"
+Hourly statistics are kept and written to CSV files.  This prints
+the hourly statistics.
+To use the print command, you must also supply a group (file system)
+name with the \fB-g\fR option.
+.IP "\fB-I, --interval\fR"
+The \fBinterval\fR command controls the rate at which statistics
+are forwarded from running processes to the snstatd process.  The
+interval parameter is in seconds.
+The value must be -1 (turn off) or between 5 and 2147483 inclusive.
+.IP "\fB-A, --archive\fR"
+The \fBarchive\fR command specifies the location that the snstatd
+process should periodically send statistics to.  The target is in
+terms of a hostname and tcp port number. A TCP/IP connection is
+opened ever \fBinterval\fR seconds and any new statistics are send
+in graphite format down the connection. The connection is then
+closed.  Use -F with this command to switch between graphite
+and protobuf output.
+.IP "\fB-R, --reset\fR"
+
+WARNING! Resetting statistics affects hourly reports and anybody
+         else using qustats, including connect.
+Note:  Using the -R and -P option together is not atomic.  First the
+current values are collected and then the reset command is processed.  Any
+statistics updated between the collection and reset are lost.
+
+This command resets the internal statistics tables for the 
+specified \fBObject Identifier\fR.
+.IP "\fB-M, --minmax\fR"
+
+WARNING! Resetting minimum and maximum affects the hourly report for that time
+period.
+
+This command resets only the hourly minimum and maximum values for the
+specified \fBObject Identifier\fR.
+
+.IP "\fB-S, --selftest\fR"
+Runs self-test to verify that internal functions are working 
+properly.  If your system is busy, it may be normal for the 
+timing tests to fail.
+.IP "\fB-V, --version\fR"
+Display version information for the qustat command.
+.IP "\fB-D, --description\fR"
+Use the -D command to find the description for tables and stats.
+The -D search string may contain the wildcard '*'.  Note that strings
+with an asterisk should be quoted to avoid globbing.  You must
+provide object identifiers for at least one table.
+.IP
+Search Examples:
+
+    qustat -g myFileSys -D "*"
+    qustat -g myFileSys -D "VOP Lookup"
+    qustat -g myFileSys -t 1 -D "VOP Lookup"
+    qustat -g myFileSys -t 1 -D "VOP *"
+    qustat -g myFileSys -t 1 -D "*"
+
+.IP "\fB-H, --help\fR"
+Displays help information.
+.SH OBJECT IDENTIFIERS
+.IP "\fB-c\fP \fIcsv_file\fP, \fB--csv\fP \fIcsv_file\fP"
+Specify a .csv file to load.
+.IP "\fB-h\fP \fIhost\fP, \fB--host\fP \fIhost\fP"
+The host or IP address where the \fBModule\fR (e.g. FSM) is located.
+This option is normally not needed when displaying 
+FSM statistics if your computer is joined to the cluster.
+.IP "\fB-m\fP \fImodule\fP, \fB--module\fP \fImodule\fP"
+Specifies the module (process or service) from which to extract
+statistics.  The module specifier \fBall\fP can be used to select
+all types of modules.
+.IP
+The default module is \fBFSM\fP if not specified.
+.IP "\fB-g\fP \fIgroup\fP, \fB--group\fP \fIgroup\fP"
+Identifies the group of tables.  For \fBFSM\fP modules,
+the \fBgroup\fR specifies the file system name.
+.IP
+This is the same as the \fB-f\fR option.
+.IP "\fB-t\fP \fItable_number\fP, \fB--table\fP \fItable_number\fP"
+Use \fB-t\fR to print a single table.  If you print all statistics,
+the table numbers are displayed in the table header.  See \fBTABLES\fR
+below.
+.IP
+If you do not specify a table, all tables for the group are displayed.
+.IP "\fB-f\fP \fIfile_system\fP, \fB--fs\fP \fIfile_system\fP"
+This is the same as the \fB-g\fR option.
+.SH FORMATTING
+.IP "\fB-F\fP \fIoption\fP, \fB--format\fP \fIoption\fP"
+You may specify the \fB-F\fR option multiple times. The \fBall\fR
+option will print all statistics including those with all zero values.
+The \fBcsv\fR option will display output in comma-separated-values
+format.  The \fBxml\fR option will display output in XML format.
+.SH OUTPUT
+The Group header includes revision, host, module, group and time
+recorded.  The time_t value is the output of the
+.BR time (2)
+function call.
+.PP
+Columns include:
+.TS
+tab(:);
+l l.
+\fINAME\fR:The name of the statistic being gathered.
+\fITYP\fR:The type of statistic. 
+CNT:The number of times something occurred.
+LVL:The current \fIlevel\fP of something (e.g. number of free buffers).
+SUM:The accumulated sum such as the amount of data written.
+TIM:The amount of time consumed (in microseconds).
+\fICOUNT\fR:Number of times the operation was performed.
+\fIMIN/MAX\fR:Minimum and maximum values.
+\fITOT/LVL\fR:Total or current level (depending on TYP)
+\fIAVG\fR:The average (TOT divided by COUNT)
+.TE
+.SH TABLES
+A \fBGroup\fR is normally split into multiple tables. Each table
+is identified by a unique \fItable number\fR.
+.PP
+Table numbers are guaranteed to identify a single unique object 
+throughout the lifespan of the given group, but not across 
+reboots/restarts for the group.
+.PP
+For the FSM, the main table numbers will remain consistent across
+restarts, but the per-client statistics will vary depending on 
+connection order.
+.SH ACCURACY
+Statistics are not guaranteed to be 100% accurate.  
+.PP
+For performance reasons, the implementation does not explicitly lock 
+the code when gathering statistics.  However most operations are 
+already protected by other multi-thread locking and therefore 
+inaccuracies should be minimal.
+.PP
+In addition, operations are not halted or locked when resetting or 
+gathering statistics.  It is possible to have a statistic dropped
+during a reset or snap of statistics.
+.SH CVLOG HOURLY STATISTICS DUMPS
+In prior releases, the FSM dumped statistics on an hourly basis
+to the cvlogs which were located under the data directory. These 
+statistics dumps have been moved to a separate directory called
+\fBqustats\fR.  The format has also been changed to .csv files
+which can be opened in most spreadsheets and databases. They 
+can also be easily parsed by most programming languages and utilities.
+.SH EXAMPLES
+.PP
+.Ce
+Print the FSM statistics for file system snfs1.
+.Cs
+rock # qustat -g xsan1
+.PP
+.Ce
+Print the kernel client statistics.
+.Cs
+rock # qustat -g kernel -m client
+.PP
+.Ce
+Print the statistic for the client table 2 statistics.
+.Cs
+rock # qustat -m client -t 2
+.PP
+.Ce
+Print the statistic descriptions for client definitions.
+.Cs
+rock # qustat -g kernel -m client -D "*"
+.PP
+.Ce
+Print the statistic descriptions for client definitions.
+.Cs
+rock # qustat -g FSMPM -m FSMPM -D "*"
+.PP
+.Ce
+Print the statistic descriptions for the fsm VOP statistics
+.Cs
+rock # qustat -g xsan1 -D "VOP"

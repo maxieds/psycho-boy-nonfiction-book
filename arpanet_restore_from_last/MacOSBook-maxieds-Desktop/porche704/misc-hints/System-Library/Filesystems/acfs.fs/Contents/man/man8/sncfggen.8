@@ -1,0 +1,148 @@
+.\" sncfggen.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2014. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCFGGEN 8 "October 2014" "Xsan File System"
+.SH NAME
+sncfggen \- Generate a Xsan Volume configuration file
+from a reference configuration and a json input file
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sncfggen
+.BI -f \ json_file
+.BI -n \ VolName
+.BI -r \ refconfig
+.BI -p \ refpath
+.RB [ -d ]
+.HP
+.B sncfggen -h
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsncfggen\fR program will generate a Xsan file
+system configuration file from a reference configuration file
+system and a json input file.
+The json file is written in JSON which is an open standard
+light weight data exchange language.
+.PP
+The json file is required to contain a
+.B fileSystems
+section which contains an entry with a name that
+matches the file system name.
+Global variables are specified as key/value pairs.
+These will replace the settings of those variables in
+the reference configuration.
+The json file must also contain a
+.B stripeGroups
+section.
+The
+.B stripeGroups
+array contains one entry for
+each stripe group and must contain the name of the stripe group.
+In each stripe group the
+.B sgDisks
+array of disk
+labels must be present.
+\fBSncfggen\fR will generate a configuration file with the file
+system name filled in, changes made to global variables and
+disk labels updated for the disks in the stripe groups.
+.PP
+The new config file will be written to
+.I /Library/Preferences/Xsan.
+.SH OPTIONS
+.IP \fB\-h\fR
+Display usage.
+.IP "\fB\-f \fIjson_file\fR"
+Required. Specify the json input file.
+.IP "\fB\-r \fIrefconfig\fR"
+Required. Specify the fs name of the reference configuration file system.
+.IP "\fB\-p \fIrefpath\fR"
+Required. Specify the file path to reference configuration file system.
+.IP "\fB\-n \fIVolName\fR"
+Required. The name of the file system whose config is to be generated.
+.IP "\fB-d\fR
+Optional. Turn on debug mode.
+.SH EXIT VALUES
+\fBsncfggen\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+List usage:
+.Cs
+# sncfggen -h
+usage sncfggen -h
+      sncfggen -f json file -r refconfig -p refpath -n fsname -d
+                -h              # display usage
+                -f json_file    # json file to load
+                -r refconfig    # refconfig fs name
+                -p refpath      # refconfig file path
+                -n fsname       # new file system name
+                -d              # turn on debug mode
+#
+.Ce
+.PP
+Generate
+.I /Library/Preferences/Xsan/sl1.cfgx
+from
+.I /tmp/refconfig.cfgx
+and json input file
+.I json_file.
+.Cs
+# sncfggen -f /tmp/json_file -r refconfig -p /tmp/refconfig.cfgx -n sl1
+Successfully generated configuration file /Library/Preferences/Xsan/sl1.cfgx.
+#
+.Ce
+.PP
+Example json file.
+.Cs
+# cat json_file
+{
+    "fileSystems": [
+        {
+            "name": "sl1",
+            "bufferCacheSize": 4294967296,
+            "fileLocks": false,
+            "quotas": true,
+            "stripeGroups": [
+                {
+                    "sgName": "sg0",
+                    "sgDisks": [
+                        "sl_0005"
+                    ]
+                },
+                {
+                    "sgName": "sg1",
+                    "sgDisks": [
+                        "sl_0006"
+                    ]
+                },
+                {
+                    "sgName": "sg2",
+                    "sgDisks": [
+                        "sl_0007",
+                        "sl_0008"
+                    ]
+                }
+            ]
+    }
+    ]
+}
+#
+.Ce
+.SH "SEE ALSO"
+.BR snfs_config (5)

@@ -1,0 +1,88 @@
+.\" sndiskmove.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2006-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNDISKMOVE 8 "May 2020" "Xsan File System"
+.SH NAME
+sndiskmove \- Xsan File System Disk Mover Utility
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sndiskmove 
+.RB [ -fqv ]
+.RB [ -s \ \fIsuffix\fP]
+.RB [ -b \ \fIbufMB\fP]
+.RB [ -S \ \fIfile\fP]
+.I SourceVolume\ DestinationVolume
+.ad
+.hy
+.SH DESCRIPTION
+\fBsndiskmove\fR is a utility for migrating the contents of a disk to
+a new disk.  This is accomplished by copying the data from the disk
+and relabeling the destination disk with the name of the
+source disk.  The source disk is also relabeled with its original
+name with a suffix added (this is ".old" by default but this can be
+changed with the \fB-s\fR option.
+.PP
+\fBWARNING:\fR Using this command incorrectly can cause loss of data.
+Please ensure that you understand the procedures to safely execute this
+command completely.  Also, this command is not supported for filesystem
+disks that contain data, it must be used for Exclusive Metadata or
+Journal disks only.
+.PP
+Attempting to run this command on a disk that is being used on an
+actively running filesystem will cause data corruption.
+All referencing filesystems must be stopped
+and remain stopped during the processing of this command.
+.PP
+If successful, the command will cause the local \fBfsmpm\fR process
+to rescan the disks on the host where the command is executed.
+If there are any \fBFSMs\fR configured on other hosts, it is critical
+to request a rescan of the disks before reenabling
+the \fBFSM\fR on those servers by invoking
+.br
+.Cs
+\fBcvadmin -e 'disks refresh'\fR
+.Ce
+.PP
+on those hosts.
+.SH OPTIONS
+.IP \fB-f\fR
+Forces the disk data to be moved without confirmation from the user.
+\fBWARNING: Use this flag with extreme caution!\fR
+.IP \fB-q\fR
+Run in quiet mode.  This disables the progress display.
+.IP \fB-v\fR
+Causes \fBsndiskmove\fR to be verbose.
+.IP "\fB-s\fP \fIsuffix\fP"
+Uses the supplied \fIsuffix\fR to relabel the source disk.
+.IP "\fB-b\fP \fIbufsizeMB\fP"
+Specifies the buffer size to use for the copying of disk data (in megabytes).
+The default value is 4MB.
+.IP "\fB-S\fP \fIfile\fP"
+Writes status monitoring information in the supplied file.
+This is used internally by Xsan and the format
+of this file may change.
+.SH NOTES
+The source and destination disks must contain EFI labels. VTOC labels are
+not supported. Also, the sector sizes used by the source and destination
+disks must be the same.
+.SH "SEE ALSO"
+.BR cvadmin (8),
+.BR cvlabel (8)

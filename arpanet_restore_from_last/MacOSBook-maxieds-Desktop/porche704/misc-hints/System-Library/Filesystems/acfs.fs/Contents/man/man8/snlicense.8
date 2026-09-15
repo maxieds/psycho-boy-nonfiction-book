@@ -1,0 +1,251 @@
+.\" snlicense.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2009-2021. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNLICENSE 8 "September 2021" "Xsan File System"
+.br
+.SH NAME
+snlicense \- Report Xsan license status 
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B snlicense
+.RB [ -v | -m | -n | -h | -p ]
+.RB [ -f \ \fIlicense-file\fP ]
+.RB [ -i \ \fIfile\fP ]
+.RB [ -r \ json|ascii ]
+.RB [ -s \ \fIsystem-id\fP ]
+.I license_type
+.RB [ nocap ]
+.ad
+.hy
+
+.SH DESCRIPTION
+\fBsnlicense\fP imports new licenses and reports on the
+current license status.
+.PP
+Reports include information such as license status, capacities and expirations.
+The currently supported license types can be displayed
+by typing \fBsnlicense -h\fR.
+.PP
+The optional \fBnocap\fP argument is for internal use only to prevent a
+hang when certain components are not fully initialized.
+
+.SH OPTIONS
+.IP "\fB-f\fP \fIlicense-file\fP"
+Will use an alternative license file.
+The default license file is \fI/Library/Preferences/Xsan/license.dat\fP.
+.IP \fB-h\fP
+Display help
+.IP "\fB-i\fP \fIfile\fP"
+Import licenses from the specified file
+.IP \fB-m\fP
+Will cause the output to be printed in a machine readable format
+.IP \fB-n\fP
+No RAS messages for license warnings and errors
+.IP \fB-p\fP
+Shows whether a product key is needed and if so, whether it exists and is valid
+.IP "\fB-P\fP \fIcvfsid\fP"
+Validates the product key for both MDCs of an HA pair
+.IP "\fB-s\fP \fIsystem-id\fP"
+Check the license entry for the specified system-identifier
+.IP "\fB-r\fP json|ascii\fP"
+Report on license service usage.
+.IP \fB-v\fP
+Will cause more license info to be reported
+
+.SH USAGE
+
+Use this command with the -i option to import licenses from the command
+line or without the -i option to check the current status of a particular license.
+To check the status,
+execute the program with the desired license type. See examples below
+for more info.
+
+.SH IMPORTING LICENSES
+
+The \fB-i file_to_import\fP option can be used to import licenses
+from the downloaded license file into the local license file.
+
+NOTE:  The licenses are only imported to the local computer.  For
+High Availability (HA) systems, the license file must be imported on
+both computers.
+
+.SH LICENSE EXPIRATION
+
+Some licenses are cross-checked for expiration such that if one license
+expires, all cross-checked licenses are considered expired.
+.PP
+The \fB-v\fP option
+can be used to determine the expiration date of the feature and the expiration
+date of the feature with cross-checking.
+
+.IP \[bu] 2
+The "Actual expiration" is when the feature itself expires.
+.IP \[bu]
+"License expiration" is when the feature
+will become unusable due to one or more cross-checked licenses expiring.
+
+.PP
+\fBNote\fP: In some cases it is invalid to mix expiring licenses with
+non-expiring licenses.  One notable exception is the \fBmaintenance\fP
+license (which typically has an expiration).
+.PP
+The \fB-v\fP option will display a warning if there is mixed-expiration
+error on the specified license.
+
+.SH LICENSE SERVICE REPORT
+
+The -r option reports on the license service usage.  The license service
+is only used with 'san_client' and 'file_system' licenses.
+
+.SH EXAMPLES FOR CHECKING LICENSE STATUS
+When the command is run, the license info for the indicated Xsan
+feature is reported. Note that if license status cannot be determined
+for a feature it is treated as NOT licensed. Also note some features have an
+associated capacity and some do not.
+
+.PP
+Examples:
+.PP
+Properly licensed with capacity available:
+.PP
+.in +0.5i
+.nf
+% snlicense proxy
+- The proxy license status is: Good
+
+% snlicense -v proxy
+- Found existing license: proxy
+- License expiration:     None
+- Actual expiration:      None
+- Licensed capacity:      65535 connections
+- Current used capacity:  NA
+- The proxy license status is: Good
+.fi
+.in -0.5i
+
+.PP
+Properly licensed (non-capacity license):
+.PP
+.in +0.5i
+.nf
+% snlicense maintenance
+- The maintenance license status is: Good
+
+% snlicense -v maintenance
+- Found existing license: maintenance
+- License expiration:     None
+- Actual expiration:      None
+- The maintenance license status is: Good
+.fi
+.in -0.5i
+
+.PP
+Unlicensed feature:
+.PP
+.in +0.5i
+.nf
+% snlicense failover
+- The failover license status is: License Missing
+
+% snlicense -v failover
+- The failover license status is: License Missing
+.fi
+.in -0.5i
+
+.PP
+A valid temporary license:
+.PP
+.in +0.5i
+.nf
+% snlicense -v failover
+- Found existing license: failover
+- License expiration:     Thu Nov  1 23:59:59 2012
+- Actual expiration:      Thu Nov  1 23:59:59 2012
+- The failover license status is: Good
+.fi
+.in -0.5i
+
+.PP
+Expired license:
+.PP
+.in +0.5i
+.nf
+% snlicense failover
+- The failover license status is: Expired
+
+% snlicense -v failover
+- Found existing license: failover
+- License expiration:     Thu Jan  1 23:59:59 2009
+- Actual expiration:      Thu Jan  1 23:59:59 2009
+- The failover license status is: Expired
+.fi
+.in -0.5i
+.PP
+Mixed permanent and expiring licenses:
+.PP
+.in +0.5i
+.nf
+% snlicense server
+- Having both permanent and temporary licenses is not allowed
+  (except for 'maintenance' and DLAN 'proxy' licenses).
+
+% snlicense -v server
+- Found existing license: server
+- License expiration:     Jan  1 23:59:59 2009
+- Actual expiration:      None
+- Licensed capacity:      10 connections
+- Current used capacity:  NA
+- Having both permanent and temporary licenses is not allowed
+  (except for 'maintenance' and DLAN 'proxy' licenses).
+.fi
+.in -0.5i
+.PP
+.in +0.5i
+.nf
+% snlicense failover
+- Having both permanent and temporary licenses is not allowed
+  (except for 'maintenance' and DLAN 'proxy' licenses). 
+
+% snlicense -v failover
+- Found existing license: failover
+- License expiration:     Jan  1 23:59:59 2009
+- Actual expiration:      Jan  1 23:59:59 2009
+- Having both permanent and temporary licenses is not allowed
+  (except for 'maintenance' and DLAN 'proxy' licenses).
+.fi
+.in -0.5i
+
+.SH EXIT VALUES
+snlicense will return one of the following upon exit.
+.Cs
+0 - No error, feature licensed and usable
+1 - Feature not licensed but not in use
+2 - Current feature capacity undetermined but feature not in use
+3 - Feature has no license string in the license file
+4 - Feature has a license but the expiration date has been reached
+5 - Feature has a license but the capacity has been reached
+6 - Feature has a license but the current capacity could not be determined
+7 - Feature license status could not be determined
+8 - Invalid mixture of temporary and permanent licenses detected
+.Ce
+
+
+

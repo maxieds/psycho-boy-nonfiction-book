@@ -1,0 +1,52 @@
+.\" snlatency.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2011-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNLATENCY 8 "January 2018" "Xsan File System"
+.SH NAME
+snlatency \- Measure Xsan Volume network latency
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B snlatency
+.I pathname
+.RI [ repeat ]
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsnlatency\fR program allows measuring the round trip latency from the
+Xsan client to  the FSM process on the MDC host.
+The file system to measure is selected via the \fIpathname\fR parameter.
+.PP
+\fBsnlatency\fR uses a special RPC to the MDC in a loop to measure
+the time to send the message, the time for the FSM process to service
+the request,
+and the time to send the response back up to the system call level.
+The average of \fIrepeat\fR calls is averaged and the latencies printed
+out in micro seconds.
+.PP
+If the MDC is not local, then the NTP clock algorithm is used to adjust for
+the difference between the two host's clocks before calculating the results,
+it is not used when the MDC the same host.
+The reason for this is that the NTP algorithm assumes the latency in both
+directions is the same and in effect averages them out.
+Comparing the latencies seen between the client local to the MDC and remote
+clients will show how much of the latency is caused by network infrastructure.
+.SH EXIT VALUES
+\fBsnlatency\fR will return 0 on success and non-zero on failure.

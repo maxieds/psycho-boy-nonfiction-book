@@ -1,0 +1,218 @@
+.\" cvcp.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 1998-2021. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVCP 1 "May 2021" "Xsan File System"
+.SH NAME
+cvcp \- Xsan Copy Utility
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B cvcp
+.RI [ options ]
+.I Source
+.I Destination
+.ad
+.hy
+.SH DESCRIPTION
+.B cvcp
+provides a high speed, multi-threaded copy mechanism for
+copying directories onto and off of
+an Xsan volume. The utility uses IO strategies
+and multi-threading techniques that exploit the Xsan IO model.
+.PP
+.B cvcp
+can work in many modes; 
+.TP
+.B "Directory-to-directory copies of regular files."
+.PD 0
+.TP
+.B "Directory copy of regular files to a Vtape virtual sub-directory."
+.TP
+.B "Single File-to-File copy."
+.PD
+.PP
+In terms of functionality for regular files, \fBcvcp\fR is much like the 
+.BR tar (1)
+utility. However, when copying a directory 
+to a \fBVtape\fR virtual directory, \fBcvcp\fR can rename and 
+renumber the source images as they are being transferred. The files in 
+the \fISource\fR directory must have a decipherable numeric sequence 
+embedded in their names.
+.PP
+The \fBcvcp\fP utility was written to provide high performance data movement,
+therefore, unlike utilities such as rsync, it does not write data to temporary
+files or manipulate the target files' modification times to allow recovery of
+partially-copied files when interrupted.
+Because of this, \fBcvcp\fP may leave partially-copied files if interrupted by
+signals such as SIGINT, SIGTERM, or SIGHUP.
+Partially-copied target files will be of the same size as source files;
+however, the data will be only partially copied into them.
+.SH OPTIONS
+The \fISource\fR parameter determines whether to copy a single file  or
+use a directory scan. 
+\fISource\fR must be a directory or file name.
+.PP
+Using \fBcvcp\fR for directory copies is best accomplished by \fBcd\fR'ing to
+the \fISource\fR directory and using the dot (.) as the \fISource\fR. This
+has been shown to improve performance since fewer paths are searched in the 
+directory tree scan.
+.PP
+The \fIDestination\fR parameter determines the target file or directory.
+.SH USAGE
+.IP "\fB-a\fR"
+Archive mode. Preserve the original permissions, owner/group, modification
+times and links. This is the same as options w, x, y and z.
+.IP "\fB-A\fR"
+If specified, will \fBturn off\fR the pre-allocation feature. This feature 
+looks at the size of the source file and then makes an ALLOCSPACE call to
+the file 
+system. This pre-allocation is a performance advantage as the file will only 
+contain a single extent. It also promotes volume space savings since 
+files that are dynamically expanded do so in a  more coarse manner. Up 
+to 30% savings in physical disk space can be seen using the pre-allocation 
+feature. \fBNOTE:\fR Non-Xsan file systems that do not support pre-allocation 
+will turn pre-allocation off when writing. The default is to have the pre-allocation 
+feature \fBon\fR.
+.IP "\fB-b\fP \fIbuffers\fP"
+Set the number of IO buffers to \fIbuffers\fR. The default is two times 
+the number of copy threads started(see the \fB-t\fR option). Experimenting with other 
+values between 1 and 2 times the number of copy threads may yield performance 
+improvements. 
+.IP "\fB-B\fR"
+When specified, this option disables the bulk create optimization.  
+By default, this optimization is used in certain cases to improve 
+performance.  In some circumstances, the use of bulk create can 
+cause cvcp to return errors if the destination file system is 
+StorNext and the FSM process exits ungracefully while a copy is 
+in progress.  The use of the \fB-B\fR option avoids this 
+potentiality at the cost of performance.  The effect on performance
+will depend on whether bulk create is being disabled for other
+reasons as well as the size of the files with the impact being 
+more observable when small files are copied.
+.IP "\fB-c\fR"
+When specified, if \fBcvcp\fR fails to copy a file it reports an error
+and continues.
+.IP "\fB-d\fR"
+Changes directory-to-directory mode to work more like \fBcp -R\fR.
+Without \fB-d\fR, \fBcvcp\fR copies the files and sub-directories under
+\fISource\fR to the \fIDestination\fR directory.
+With \fB-d\fR, \fBcvcp\fR first creates a sub-directory called \fISource\fR
+in the \fIDestination\fR directory, then copies the files and sub-directories
+under \fISource\fR to that new sub-directory.
+.IP "\fB-k\fP \fIbuffer_size\fP"
+Set the IO buffer size to \fIbuffer_size\fP bytes.
+The default buffer size is 4MB. 
+.IP "\fB-l\fR"
+If set, when in directory to directory mode, follow
+symbolic links instead of copying the symbolic link.
+.IP "\fB-n\fR"
+If set, do not recurse into any sub-directories.
+.IP "\fB-p\fP \fIsource_prefix\fP"
+If set, only copy files whose beginning file name characters match 
+\fIsource_prefix\fP. The matching test only checks starting at character one.
+.IP "\fB-s\fR"
+The \fB\-s\fR option forces allocations to line up on the beginning block
+modulus of the storage pool. This can help performance in situations where
+the I/O size perfectly spans the width of the storage pool's disks.
+.IP "\fB-t\fP \fInum_threads\fP"
+Set the number of copy threads to \fInum_threads\fP. The default is 4 copy threads.
+This option may have a significant impact on speed and resource consumption. 
+The total copy buffer pool size is calculated by multiplying the number of 
+buffers(\fB-b\fR) by the buffer size(\fB-k\fR). Experimenting with the \fB-t\fR
+option along with the \fB-b\fR and \fB-k\fR options are encouraged.
+.IP "\fB-u\fR"
+Update only. If set, copies only when the source file is
+newer than the destination file or the destination file does not exist.
+The file modification time check uses a granularity of one second on Windows
+and microseconds on other platforms.
+This makes it possible for a slightly newer source file to
+not be copied over an older destination
+file even though \fB-u\fR is used. \fB-u\fR cannot be used with tar files.
+.IP "\fB-v\fR"
+Be verbose about the files being copied. May be specified twice for extreme
+verbosity.
+.IP "\fB-w\fR"
+If set, when in file to file mode, copy a symbolic
+link instead of following the link.
+.IP "\fB-x\fR"
+If set, ignore
+.BR umask (1)
+and retain original permissions from the source 
+file. If the super-user, set sticky and setuid/gid bits as well.
+.IP "\fB-y\fR"
+If set, preserve ownership and group information if possible.
+.IP "\fB-z\fR"
+If set, retain original modification times.
+.SH "EXAMPLES"
+Copy directory \fIabc\fR and its sub-directories to directory 
+\fI/usr/clips/foo\fR. This copy will use the default number of copy threads
+and buffers. The total buffer pool size will total 32MB (8 buffers @ 4MB each).
+.PP
+Retain all permissions and ownerships. Show all files being copied.
+.Cs
+rock% cvcp -vxy abc /usr/clips/foo
+.Ce
+.PP
+Copy the same directory the same way, but only those files that start with 
+\fBmumblypeg\fR.
+.Cs
+rock# cvcp -vxy -p mumblypeg abc /usr/clips/foo
+.Ce
+.PP
+Copy a single file \fIdef\fR to the directory \fI/usr/clips/foo/\fR
+.Cs
+rock# cvcp def /usr/clips/foo
+.Ce
+.PP
+
+.PP
+Copy a file sequence in the current directory prefixed with \fBsecta\fR.
+Place the files into the \fBVtape\fR \fI/usr/clips/n8\fR \fIyuv\fR sub-directory.
+Use the verbose option.
+.Cs
+rock% cvcp -v -p secta . /usr/clips/n8/yuv
+.Ce
+
+.SH CVCP TUNING
+\fBcvcp\fR can be tuned to improve performance and resource utilization. By 
+adjusting the \fB-t\fR, \fB-k\fR and \fB-b\fR options cvcp can be optimized 
+for any number of different environments.
+.IP "\fB-t\fP \fInum_threads\fP"
+Increasing the number of copy threads will increase the number of concurrent 
+copies. This option is useful when copying large directory structures. Single 
+file copies are not affected by the number of copy threads.
+.IP "\fB-b\fP \fIbuffers\fP"
+The number of copy buffer should be set to a number between 1 and 3 times the 
+number of copy threads. Increasing the number of copy buffers increases the 
+amount of work that is queued up waiting for an available copy thread, but 
+also increases resource consumption.
+.IP "\fB-k\fP \fIbuffer_size\fP"
+The size of the copy buffer may be tuned to fit the I/O characteristics of
+a copy. If files smaller than 4MB are being copied performance may be 
+improved by reducing the size of copy buffers to more closely match the 
+source file sizes.
+.PP
+\fBNOTE:\fR It is important to ensure that the resource consumption of
+\fBcvcp\fR is tuned to minimize the effects of system memory pressure. On 
+systems with limited available physical memory, performance may be increased 
+by reducing the resource consumption of \fBcvcp\fR.
+.SH "SEE ALSO"
+.BR cvfs (8)
+

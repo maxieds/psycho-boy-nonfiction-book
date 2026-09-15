@@ -1,0 +1,98 @@
+.\" fsforeignservers.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2008-2017. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH FSFOREIGNSERVERS 4 "March 2017" "Xsan File System"
+.SH NAME
+fsforeignservers \- Xsan File System Foreign Server List
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/fsforeignservers
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fBfsforeignservers\fR file contains a list of systems acting as \fIFile System Foreign
+Server(s)\fR.  The volume \fIForeign Servers\fR provide Xsan File System
+Services (\fIFSS\fR) to computers that do not belong to the \fIXsan\fR 
+cluster of the nodes acting as \fIForeign Servers\fR.
+A \fBfsforeignservers\fR file is not required,
+and can be used in place of or in addition to the \fBfsnameservers\fR file.
+A \fIForeign Server\fR will present only those file
+systems that are hosted locally on the \fIForeign Server\fR.
+.PP
+\fBNote: \fR
+Instead of using \fBfsforeignservers\fR, you may now configure multiple clusters.
+This is a more efficient and flexible way of configuring groups of file systems.
+Clients can now configure access to multiple clusters by putting the addresses
+and cluster names of the NSS coordinators for all clusters into
+the \fBfsnameservers\fR file.  See the man page for \fBfsnameservers\fR.
+.PP
+A \fIForeign Client\fR is a computer that is accessing a Xsan File System
+via a Foreign Server.  Foreign Clients do not belong to the \fIXsan\fR
+cluster per se, meaning that they cannot activate a file system or vote in
+elections.
+.PP
+Typically, a \fBfsforeignservers\fR file entry is created on the client to provide the
+client computer access to a specific Xsan File System on a specific host.  This
+connection is limited to the Xsan File Systems local to that host.  If 
+additional \fIXsan\fR access is desired, an entry for the machine(s) hosting the 
+desired file system must be added to the \fBfsforeignservers\fR file.  For failover
+configurations, both primary and secondary systems must be specified.  This file
+is needed only on the \fIForeign Client\fR, it is not needed on the \fIForeign
+Server\fR.  To determine what \fIXsan\fR services are available, use the
+.BR cvadmin (8)
+command with the \fB-H\fP \fIhost\fP
+option to view active file systems for each host specified 
+in the \fBfsforeignservers\fR file.
+.PP
+The \fIForeign Client\fR will use the IP address of the node that returns the address of
+the active FSM as the address to connect to for meta data traffic for that file
+system.
+.SH SYNTAX
+The format for the \fBfsforeignservers\fR is simple.  A \fBfsforeignservers\fR file
+contains one entry per line.  It contains the IP address or hostname
+to use as a \fIForeign Server\fR.  The use of IP addresses is preferred to avoid
+problems associated with lookup system (eg., DNS or NIS) failures. The format of an
+\fBfsforeignservers\fR line is:
+.Cs
+IP address
+.PP
+or
+.Cs
+HostName
+.Ce
+.PP
+Where \fIHostName\fR is a host name or \fIIP address\fR of a host that can
+service queries for File System Services for file systems hosted directly
+on that host.
+.PP
+Lines that contain white space only or that contain the comment token 
+as the first non-white space character are ignored.
+.SH FILES
+.I /Library/Preferences/Xsan/fsforeignservers
+.SH "SEE ALSO"
+.BR cvadmin (8),
+.BR cvfs (8),
+.BR dpserver (4),
+.BR fsm (8),
+.BR fsmpm (8),
+.BR fsnameservers (4),
+.BR mount_acfs (8)

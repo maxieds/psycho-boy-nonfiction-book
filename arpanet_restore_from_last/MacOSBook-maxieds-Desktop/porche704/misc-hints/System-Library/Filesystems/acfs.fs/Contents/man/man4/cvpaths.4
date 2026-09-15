@@ -1,0 +1,242 @@
+.\" cvpaths.4: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2003-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH CVPATHS 4 "March 2020" "Xsan File System"
+.SH NAME
+cvpaths \- Xsan File System Disk Discovery Filter
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /Library/Preferences/Xsan/cvpaths
+.ad
+.hy
+.SH DESCRIPTION
+The \fIXsan File System\fR
+\fIcvpaths\fP file
+is an optional configuration file used to control and/or override
+the normal 
+behavior of scanning system standard directory locations
+during the \fIdisk discovery\fR phase that occurs during a \fBcvlabel\fR run, or
+from the \fBfsmpm\fR at boot/initialization time.
+.PP
+Normally, the directories scanned
+look like /dev/disk2, for example.
+.PP
+If a \fIcvpaths\fP file exists in \fI/Library/Preferences/Xsan\fP, then the contents of the
+\fIcvpaths\fP file will explicitly control which devices and/or directories
+will be evaluated during disk discovery.
+If
+the \fIcvpaths\fP file is executable, then it will be
+executed expecting it to be a shell script that will produce the \fIcvpaths\fP
+syntax on standard output, otherwise it will simply be read as input.
+.SH SYNTAX
+The format rules for a line in the \fIcvpaths\fP file is:
+.IP "" 0.3i
+Any line beginning with "#" is considered a comment line.
+.sp
+Any token beginning with "#" is considered to be a comment up to the end
+of the line.
+.sp
+Blank/empty lines are ignored.
+.sp
+A keyword=value syntax is used.
+.sp
+Groups of related keyword phrases can span multiple lines.
+.PP
+Note, the parser capability is limited, and does not allow for any
+white space around the equal ("=") operator, although white
+space, and commas, are tolerated in all other places.
+.PP
+There are several keywords:
+.Cs
+	directory=
+	device=
+	usage=
+	hba=
+	lun=
+	capacity=
+	geometry=
+	verify=
+	blockdev
+.Ce
+.PP
+The \fBdirectory=\fP\fIpath\fP
+directives do not require any of the other keywords.
+.PP
+The directory specified by the \fBdirectory=\fP\fIpath\fP directive will be traversed
+in a manner similar to the default \fBdisk discovery\fR scan mechanism.
+
+
+A \fBdevice=\fP\fIpath\fP directive begins a group of keywords related to the
+device located at \fBpath\fR.
+
+for example:
+
+	device=/dev/rdsk/c2t39d0s2
+
+would describe exactly one disk/raid device to be scanned during disk discovery.
+
+The device \fBpath\fR is the \fBcharacter special\fR device name.
+
+The following example describes the normal default behavior on a
+Windows system:
+.Cs
+	device=PhysicalDrive0
+	...
+	device=PhysicalDriveN
+.Ce
+
+Where N is the number of the last physical drive accessible by the
+Windows system.
+
+.TP
+.BI NOTE!
+Enumerating specific device paths presumes that the same disk/raid will always
+appear in the host system's hardware/device graph with the same exact name.
+
+In most cases, this can only be accomplished by utilizing
+\fBpersistent binding\fR methods related to the specific disk driver package.
+.PP
+A \fBverify=\fP\fIlabelname\fP keyword may be used to verify that the device
+located at \fBpath\fR contains the Xsan label \fIlabelname\fR, for example:
+
+	device=/dev/rdsk/c2t39d0s2 verify=CvfsDisk9
+
+The device named must describe a device path that describes the entire disk.
+
+For example, on
+Linux systems, you should use \fB/dev/sdc\fR rather than \fB/dev/sdc1\fR.
+
+.PP
+Normally, Xsan determines from the raid controller whether a path should
+be considered \fBActive\fR, or \fBPassive\fR.
+
+The
+.BR usage= [ Active | Passive ]
+keyword may be used to override the normal
+determination of \fBActive\fR or \fBPassive\fR path usage.  The default mode is
+\fBActive\fR.
+
+.PP
+The \fBcapacity=\fP\fIsectors\fP keyword may be used to override the normal
+determination of the number of sectors supported by the device.
+
+.PP
+The \fBgeometry=\fP\fIcyl/tpc/spt/bps\fP keyword may be used to override
+the normal determination of the physical geometry of the device where:
+
+.Cs
+    cyl		is the total # of cylinders
+    tpc		is the # of tracks per cylinder
+    spt		is the # of sectors per track
+    bps		is the # of bytes per sector
+.Ce
+
+Certain device drivers use non-conventional names, or, do not support
+standard methods of HBA & LUN identification.
+
+If the device driver name, (e.g. /dev/rdsk/emcpowera1) does not follow
+the host system's convention of providing HBA & LUN information, then
+the \fBhba=\fP\fI#\fP and \fBlun=\fP\fI#\fP keywords may be used to provide that
+information.
+
+For example:
+
+device=/dev/emcpower3 verify=CvfsDisk_30 usage=Active hba=6 lun=2
+
+would configure a Linux device driver path externalized as
+\fB/dev/emcpower3\fR, assigning the HBA id of 6, and LUN # 2.
+
+This line could also be written as:
+
+.Cs
+device=/dev/emcpower3, verify=CvfsDisk_30, usage=Active, hba=6, lun=2
+
+-or-
+
+device=/dev/emcpower3
+			verify=CvfsDisk_30,
+			usage=Active,
+			hba=6,
+			lun=2
+.Ce
+.PP
+The HBA id is used by the multi-path code to collect devices
+together according to which host HBA is used for access.
+.PP
+The actual value of the number is not critical, what is important
+is that all disks/raids configured through a specific host HBA should
+be assigned a consistent number that is unique to that host HBA path.
+.PP
+The LUN number is important if the raid controller is one of the
+controllers recognized by Xsan as capable of Automatic Volume Transfer,
+and Active/Passive path declaration.  The LUN # is used to index into
+specific raid controller mode pages.
+A Linux example, providing HBA & LUN information:
+.PP
+.Cs
+device=/dev/emcpowerf	hba=4	lun=2	verify=CvfsDisk_30
+device=/dev/emcpowerg	hba=4	lun=3	verify=CvfsDisk_31
+.Ce
+.PP
+Generally, a SCSI interface is required for StorNext.  On linux, however, some devices
+with only a block device interface can be used.  The keyword \fBblockdev\fP can be added to
+a line to force the block device interface to be used instead of the raw SCSI interface.
+.Cs
+device=/dev/vgca0_vha1 blockdev
+.Ce
+.PP
+For linux, StorNext also supports ram disk devices.  Ram disk devices use the block interface
+but have additional special handling requirements.  A linux ram disk device can only be used
+as a local disk.  Because it cannot be shared, a linux ram disk device may only be useful as
+a metadata device.  Because the data in a ramdisk is not persistent across boots, a linux
+ram disk may only have practical application for development.
+.PP
+A linux ram disk is identified by its path name starting with \fB/dev/ram\fP.  The following
+example shows two ways to configure a linux ram disk.
+.Cs
+device=/dev/ram0
+
+-or-
+
+wildcard=/dev/ram*
+.Ce
+.PP
+Linux also supports Ceph Rados block devices and XEN virtual disks,
+XEN virtual disks are the presentation used by Amazon Elastic Block Storage
+(EBS).
+Note that EBS volumes are not shareable and can only be accessed from a single
+EC2 instance at once.
+Ceph Rados block devices can in theory be shared between hosts if configured
+without caching.
+.PP
+Ceph devices are recognized based on the device special file starting with
+\fB/dev/rdb\fP.
+XEN virtual disks are recognized by the name \fB/dev/xvd\fP.
+As with ram devices the device or wildcard specifiers can be used to include them in the device scan.
+.SH FILES
+.I /Library/Preferences/Xsan/cvpaths
+.br
+.I /System/Library/Filesystems/acfs.fs/Contents/examples/cvpaths.example
+.SH "SEE ALSO"
+.BR cvfs (8),
+.BR snfs_config (5),
+.BR fsm (8),
+.BR fsmpm (8)

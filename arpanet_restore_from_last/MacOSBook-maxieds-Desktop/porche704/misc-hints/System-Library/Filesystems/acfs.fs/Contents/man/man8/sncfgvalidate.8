@@ -1,0 +1,90 @@
+.\" sncfgvalidate.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2010-2014. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCFGVALIDATE 8 "June 2014" "Xsan File System"
+.SH NAME
+sncfgvalidate \- Validate a Xsan Volume configuration file
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sncfgvalidate -n
+.I VolName
+.RB [ -f \ \fIconfig_file\fP]
+.RB [ -M \ \fImsg_format\fP]
+.HP
+.B sncfgvalidate -h
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsncfgvalidate\fR program will validate a Xsan file
+system configuration file.
+.PP
+If only an \fIVolName\fR is specified, \fBsncfgvalidate\fR looks for an
+already installed configuration file for the named file system, and
+validates its syntax if it exists.
+.PP
+If an \fIVolName\fR and a \fIconfig_file\fR are specified,
+the specified config
+file's internal syntax is validated, and it is compared against the
+currently installed configuration file for the named file system (if
+it exists).
+.SH OPTIONS
+.IP \fB\-h\fR
+Display usage.
+.IP "\fB\-n \fIVolName\fR"
+Required. The name of the file system whose config is to be validated.
+.IP "\fB\-f \fIconfig_file\fR"
+Specify the config file to validate.
+.IP "\fB\-M \fImsg_format\fR"
+Specify \fIXML\fR if you want messages to come back in XML format.
+This defaults to ASCII.
+.SH EXIT VALUES
+\fBsncfgvalidate\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+List usage:
+.Cs
+# sncfgvalidate -h
+Usage: sncfgvalidate -n <fs_name> [-f <config_path>] [-M <fmt>]
+  -f            Path to file to validate
+  -n            Name of file system to validate
+  -M            Message format: ASCII, XML (default ASCII)
+  -h            This usage
+.Ce
+.PP
+validate an installed config:
+.Cs
+# sncfgvalidate -n snfs1
+\(aqsnfs1\(aq validated
+.Ce
+.PP
+validate a new config
+.Cs
+# sncfgvalidate -n snfs2 -f /tmp/mysnfs2
+\(aqsnfs\(aq validated
+.Ce
+.PP
+validate a modified config against the installed config (with an invalid change)
+.Cs
+# sncfgvalidate -n snfs1 -f /tmp/mysnfs1
+warning: Journal Size of 16M is less than recommended minimum value; It must be at least 32M for mkfs to succeed with an fs blocksize of 32K
+warning: new fsBlockSize (32768) does not match existing fsBlockSize (16384), file system must be remade
+.Ce
+.SH "SEE ALSO"
+.BR snfs_config (5)

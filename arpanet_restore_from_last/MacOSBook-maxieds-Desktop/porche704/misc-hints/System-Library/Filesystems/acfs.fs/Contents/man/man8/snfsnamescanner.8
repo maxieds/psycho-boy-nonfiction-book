@@ -1,0 +1,169 @@
+.\" snfsnamescanner.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2019-2020. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNFSNAMESCANNER 8 "February 2020" "Xsan File System"
+.SH NAME
+SNFSNAMESCANNER \- Scan for unusual names in a Xsan Volume
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B /System/Library/Filesystems/acfs.fs/Contents/lib/snfsnamescanner
+.BR -ipu
+.RB [ -L \ 1 ]
+.RB "\fIpathname\fP"
+.BR | -h
+.ad
+.hy
+.SH DESCRIPTION
+\fBsnfsnamescanner\fR scans the Xsan file system starting
+at the specified \fIpathname\fP for file and directory names that are:
+.IP \(em 2
+Illegal Windows names.  Names that do not conform to the
+Windows naming convention.
+.IP \(em
+Names with Unicode Private User Area (PUA) code points.  Illegal
+Windows names that are created by Mac and Linux SMB clients.
+.IP \(em
+Names with invalid UTF-8 values.  Names created by StorNext Linux
+and Mac clients using invalid UTF-8 hex sequences.
+.PP
+If \fBsnfsnamescanner\fR finds a name with one of the specified
+problems, it creates a script which can be used to change the
+name of the file.
+.PP
+\fIpathname\fP is the path to the root directory of a mount Xsan
+file system.
+
+\fBSnfsnamescanner\fR can only be run on a Linux system.  You may need to
+become user \fBroot\fR to access all the files and directories in the file
+system.  Run \fBsnfsnamescanner\fR on the active MDC for the fastest
+scan times.
+.SH OPTIONS
+.IP \fB-i\fR
+Scan the specified file system for illegal Windows file names.  The
+file names with illegal file names are placed in the file
+\fIillegalFileNames.sh\fP.
+This file can be used for changing the file name to a legal Windows file name.
+.IP \fB-p\fR
+Scan the specified file system for file names with PUA code points in the name.
+The file names with PUA code points are put in the file \fIpuaFileNames.sh\fP.
+This file can be used for changing the file name to an equivalent name with
+ASCII characters.
+.IP \fB-u\fR
+Scan the specified file system for file names with invalid UTF-8 values in the
+name.  The file names with invalid UTF-8 values are put in the file
+\fIutf8FileNames.sh\fP.
+.IP \fB\-L\ 1\fR
+Convert Latin-1 characters to UTF-8.  Use in conjunction with the \fB-u\fR option.
+Treat any invalid UTF-8 byte sequence as a Latin-1 character.
+Translate each Latin-1 character to a valid UTF-8 sequence.  Use this
+option only if you are sure the character encoding is Latin-1.
+.IP \fB-h\fR
+Display help
+.PP
+You can specify one or more of the -i, -p or -u options at the same time.
+Specifying more than one option is more efficient than running
+\fBsnfsnamescanner\fR multiple times.
+.IP
+.SH Examples:
+.PP
+To scan for illegal Windows file names:
+.Cs
+\fBsnfsnamescanner\fR -i /stornext/snfs1
+.Ce
+.PP
+The list of illegal file names is written to \fI./illegalFileNames.sh\fP.
+Each line in \fIilllegalFileNames.sh\fP will have identical source and
+target file names.  You will have to decide on how to change the
+target file name to a legal Windows file name.
+.PP
+To scan for PUA code points in file system names:
+.Cs
+\fBsnfsnamescanner\fR -p /stornext/snfs1
+.Ce
+.PP
+The list of file names with PUA code points is written to
+\fI./puaFileNames.sh\fP.
+This script can be used without modification.  Run this script on the
+same system it was created since it uses the mount point to
+the file system.  This script will replace each PUA code point
+in a file or directory name with the equivalent PUA code point
+ASCII character.
+.PP
+To scan for file names with invalid UTF-8 values:
+.Cs
+\fBsnfsnamescanner\fR -u /stornext/snfs1
+.Ce
+.PP
+The list of file names with invalid UTF-8 values is written to
+\fI./utf8FileNames.sh\fP.
+If the -L option is not used, each line in \fIutf8FileNames.sh\fP will
+have identical source and target file names.  You will have to
+decide on how to change the invalid UTF-8 values to valid UTF-8
+values.
+.PP
+The target names in the \fIilllegalFileNames.sh\fP file, and possibly the
+\fIutf8FileNames.sh\fP file, will need to be changed before running the
+script.  There are many ways to do this.  Here is an example on how
+to use the Linux sed(1) command to change the target file names in the
+\fIilllegalFileNames.sh\fP file.
+
+To change the target file names in the \fI./illegalFileNames.sh\fP file,
+run the following command.
+.Cs
+    sed -i -f sedscript ./illegalFileNames.sh
+.Ce
+.PP
+Where the contents of the sedscript should looks something like this:
+.Cs
+    s-\\(\\t'/stornext/snfs1/.*\\)<-\\1#-
+    s-\\(\\t'/stornext/snfs1/.*\\)>-\\1@-
+    s-\\(\\t'/stornext/snfs1/.*\\):-\\1!-
+    s-\\(\\t'/stornext/snfs1/.*\\)"-\\1%-
+    s-\\(\\t'/stornext/snfs1/.*\\)|-\\1+-
+    s-\\(\\t'/stornext/snfs1/.*\\)?-\\1~-
+    s-\\(\\t'/stornext/snfs1/.*\\)\\*-\\1A-
+    s-\\(\\t'/stornext/snfs1/.*\\) '$-\\1_'-
+    s-\\(\\t'/stornext/snfs1/.*\\)\\.'$-\\1p'-
+.Ce
+.PP
+Change the string "/stornext/snfs1" to match the mount point in the
+\fI./illegalFileNames.sh\fP file.  The substitution characters are just an
+example.  You can change the sed substitution characters to any set of
+characters you like, although it would be best if each substitution is
+unique.  You may need to run this sed script multiple times.  Each pass will
+only change a single occurance of the character on a line.  You may want to
+grep the \fI./illegalFileNames.sh\fP file to see which Windows reserved
+characters are present in the file and modify the sed script
+accordingly.
+.PP
+.SH FILES
+.I /usr/cvfs/lib/snfsnamescanner
+.br
+.I ./illegalFileNames.sh
+.br
+.I ./puaFileNames.sh
+.br
+.I ./utf8FileNames.sh
+.SH "SEE ALSO"
+For more information about illegal Windows file name and Unicode Private
+User Area code points, see the "StorNext File Name Considerations"
+section in the StorNext User's Guide.
+

@@ -1,0 +1,186 @@
+.\" mdt.1: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2012-2018. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH mdt 1 "January 2018" "StorNext File System"
+.SH NAME
+mdt \- Metadata performance test
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B mdt
+.RI [ options ]
+.I path
+.RI [ path ...]
+.ad
+.hy
+.SH DESCRIPTION
+\fBmdt\fR is a utility that can be used to measure the relative metadata
+performance of a given file system(s).  By default, \fBmdt\fR measures
+creates/second and removes/second.  Optionally \fBmdt\fR will also measure
+the per second rates for stat, chmod, and move (rename) operations.
+
+Each path specified on the command line corresponds to a mount point for a
+file system to be tested.  By default, \fBmdt\fR will start 8 pthreads.
+Each pthread will make a directory and create 16384 files in the directory.
+The number of pthreads (directories) can be specified via the -n option,
+and the number of file per directory can be specified via the -f option.
+
+\fBmdt\fR is a metadata only test and no writes or reads are done.  By default
+files are zero length.  For a StorNext file system, space may be allocated to
+the file via the -b option which performs a StorNext API CvApi_VerifyAlloc
+call.  Be aware that allocating space to files in this manner is not reflected
+in the file size.
+
+On completion, \fBmdt\fR will print the number of files and rates for the
+specified metadata requests in the form of operations/second.  The -v option
+will expand output listing per stream detail.
+
+Unless the -R option is specified, \fBmdt\fR will remove all created files and
+directories in the remove test section.
+
+For StorNext file systems, \fBmdt\fR will unmount and then mount the target
+file systems between test sections in order to clear the client metadata cache.
+Targeted file systems should not be busy as to prevent remounting.  The -U
+option will cause \fBmdt\fR to bypass remounting between test sections.
+.SH OPTIONS
+.IP \fB-?\fR
+Display usage.
+.IP \fB-a\fR
+Run all test sections.  In addition to create and remove, rates for stat,
+chmod, move (rename) are also measured.
+.IP "\fB-b\fP \fIprealloc_size_in_bytes\fP"
+Specify the size in bytes to preallocate after creating a file.
+The default is 0 bytes and no preallocate.
+
+Optionally, a single letter suffix can represent bytes in units.  \fBmdt\fR
+single letter unit suffixes are as follows.
+.Cs
+k	KB	10^3		        1,000
+m	MB	10^6		    1,000,000
+b	GB	10^9		1,000,000,000
+K	KiB	2^10		        1,024
+M	MiB	2^20		    1,048,576
+B	GiB	2^30		1,073,741,824
+.Ce
+
+.IP \fB-C\fR
+Do not create files.  This option requires that a create run was done at some
+previous time and the files were not removed.  See the -R option.
+.IP \fB-c\fR
+Run the chmod test section.
+.IP \fB-d\fR[\fBdd\fR]
+Run in debug mode. The more "d's" specified, the more debug
+information is printed.
+.IP "\fB-E\fP \fIcsv_file\fP"
+Create and write results to the specified .csv file. A .csv file, (comma
+separated value) is a file that can be consumed by a spreadsheet application
+like Microsoft Excel.
+.IP "\fB-e\fP \fIcsv_file\fP"
+Write results to the specified .csv file; one that can be read by Microsoft
+Excel or other spreadsheet application. Data is appended to the specified
+csv file which must exist.  See the -E option.
+.IP "\fB-f \fInumber_of_files\fP"
+Specify the number of files per directory.  Optionally a single letter suffix
+can be provided.  See the -b option for suffix detail.
+.IP "\fB-F \fIfsname\fP"
+Specify the name of the file system to use on the remount. The file system
+name returned by the mount command varies by operating system. If you have
+trouble with remounts, you may have to specify the file system name.
+.IP \fB-m\fR
+Run the move/rename test section.  Files are renamed in within their parent
+directories.
+.IP "\fB-n \fInumber_of_directories\fP"
+The specified number of directories are created.  Each will contain the number
+of files specified by the -f option.  A pthread is created for each directory
+to execute the designated operations.
+.IP \fB-R\fR
+Skip the remove section and leave the files in place.
+.IP \fB-s\fR
+Run the stat test section.  This section will execute readdir operations
+and stat each file in each directory; the equivalent of an ls -l command.
+.IP "\fB-T\fP \fItag_string\fP"
+Write the specified tag string to the standard output and to the csv file
+if the option to write a csv file is selected.  This can be used to stamp
+results with a name identifying a given test scenario.
+.IP \fB-U\fR
+Do not unmount and remount the file system between test sections.
+.IP \fB-v\fR
+Print verbose output.  The result for each stream is reported.
+.IP \fB-V\fR
+Print the \fBmdt\fR version information and exit.
+.SH "EXAMPLES"
+.PP
+Run the create and remove test sections on a single file system:
+.Cs
+per1-# mdt /jhb10
+mdt: Timing metadata ops/second on 8 streams of 16384 files on 1 file system(s)
+    mount point        #files    creates  removes
+    /jhb10             131072      18441    23792
+.Ce
+.PP
+Run the create and remove test sections on four file systems:
+.Cs
+per1-# mdt /jhb10 /jhb11 /jhb12 /jhb13
+mdt: Timing metadata ops/second on 8 streams of 16384 files on 4 file system(s)
+    mount point        #files    creates  removes
+    /jhb10             131072      13818    12134
+    /jhb11             131072      13772    11821
+    /jhb12             131072      13839    12117
+    /jhb13             131072      13726    12098
+mdt: Aggregate:        524288      54901    47283
+.Ce
+.PP
+Run all test sections on four file systems:
+.Cs
+per1-# mdt -a /jhb10 /jhb11 /jhb12 /jhb13
+mdt: Timing metadata ops/second on 8 streams of 16384 files on 4 file system(s)
+    mount point        #files    creates    stats   chmods    moves  removes
+    /jhb10             131072      14105    32904    16721     8366    12072
+    /jhb11             131072      14135    32912    16616     8375    11969
+    /jhb12             131072      14175    32883    16659     8436    11895
+    /jhb13             131072      14003    33917    17092     8411    12131
+mdt: Aggregate:        524288      56005   131510    66462    33465    47578
+.Ce
+.PP
+Run the create and remove test sections on four file systems.  Create 32
+directories using 32 threads with 8192 files in each.
+.Cs
+per1-# mdt -f8K -n32 /jhb10 /jhb11 /jhb12 /jhb13
+mdt: Timing metadata ops/second on 32 streams of 8192 files on 4 file system(s)
+    mount point        #files    creates  removes
+    /jhb10             262144      12149    10683
+    /jhb11             262144      12292    10730
+    /jhb12             262144      11859    10780
+    /jhb13             262144      11782    10806
+mdt: Aggregate:       1048576      47123    42732
+.Ce
+.SH "NOTES"
+.PP
+The number of files (-f) and directories (-n) are per file system.
+.PP
+The number of pthreads (streams) that are run in each file systems corresponds
+to the number of directories specified.
+.PP
+Other than #files, the output values represent metadata operations/second.
+.PP
+.SH FILES
+.I /System/Library/Filesystems/acfs.fs/Contents/bin/mdt
+.SH "SEE ALSO"
+.BR cvfs (8)

@@ -1,0 +1,112 @@
+.\" sncfgconvert.8: auto-generated, DO NOT EDIT
+.\"
+.\" Copyright 2009-2014. Quantum Corporation. All Rights Reserved.
+.\" StorNext is either a trademark or registered trademark of
+.\" Quantum Corporation in the US and/or other countries.
+.\"
+.\" Code start macro
+.de Cs
+.sp
+.ft C
+.in +0.3i
+.nf
+..
+.\" Code end macro
+.de Ce
+.fi
+.in -0.3i
+.ft R
+..
+.TH SNCFGCONVERT 8 "June 2014" "Xsan File System"
+.SH NAME
+sncfgconvert \- Convert Xsan Volume configuration file format
+.SH SYNOPSIS
+.na
+.nh
+.HP
+.B sncfgconvert
+.BI -n \ fsname
+.RB [ -F \ \fIoutput_format\fP]
+.RB [ -v ]
+.BI -f \ ConfigFile
+.HP
+.B sncfgconvert
+.BI -n \ fsname
+.RB [ -F \ \fIoutput_format\fP]
+.RB [ -v ]
+.I ConfigFile
+.HP
+.B sncfgconvert -h
+.ad
+.hy
+.SH DESCRIPTION
+The \fBsncfgconvert\fR program will convert a Xsan file system
+configuration file between the old pre-4.0 config and the new XML
+config file formats (on supported platforms). 
+.PP
+The input file need not have a .cfg or .cfgx suffix - the converter
+will automatically figure out the format of the input file. Converted
+output is displayed on stdout.
+.PP
+Old format output files should have the .cfg suffix and XML formatted
+files should have the .cfgx suffix when writing them to the
+.I /Library/Preferences/Xsan
+directory.  See
+.BR snfs_config (5)
+for more information.
+.SH OPTIONS
+.IP "\fB\-F \fIoutput_format\fR"
+The format to convert to.  See \fB-h\fR for applicable formats.  This
+can also be used to "convert" from one format to the same format.
+Defaults to the latest format available for the system.
+.IP \fB\-h\fR
+Display usage, including available formats to convert to.
+.IP "\fB\-n \fIfsname\fR"
+Required. The name of the file system whose config is to be converted.
+.IP "\fB\-f \fIConfigFile\fR"
+Specify the config file.
+.IP \fB\-v\fR
+Increase verbosity of messages from conversion process
+.SH EXIT VALUES
+\fBsncfgconvert\fR will return 0 on success and non-zero on failure.
+.SH EXAMPLES
+List usage:
+.Cs
+# sncfgconvert -h
+Usage: sncfgconvert -n <fsname> [-F <output_format>] ([-f <filename>] | <filename>)
+  -F <output_format>    Valid formats:
+                        XML (default)
+                        ASCII
+  -f <filename> Config file to convert
+  -n <fsname>   File system name
+  -v            increase verbosity (specify multiple -v's for more verbosity)
+.Ce
+This also displays that the default format is XML.
+.PP
+Convert a config in a temporary location to XML and write it to a
+different tempfile (see
+.BR sncfginstall (8)
+for details on
+installing the config to the proper location.
+.Cs
+# sncfgconvert -F XML -n snfs1 -f /tmp/fs1.copy > /tmp/fs1.xml
+.Ce
+.PP
+Convert a config in a temporary location to the old ASCII format and
+display it on stdout:
+.Cs
+# sncfgconvert -F ASCII -n test /tmp/test.cfgx
+# Globals
+
+AllocationStrategy Round
+HaFsType HaUnmonitored
+FileLocks No
+BrlResyncTimeout 20
+ ...
+RtTokenTimeout 0
+MultiPathMethod Rotate
+Node CvfsDisk_jbod0203 0
+.Ce
+.SH "SEE ALSO"
+.BR sncfginstall (8),
+.BR snfs_config (5)
