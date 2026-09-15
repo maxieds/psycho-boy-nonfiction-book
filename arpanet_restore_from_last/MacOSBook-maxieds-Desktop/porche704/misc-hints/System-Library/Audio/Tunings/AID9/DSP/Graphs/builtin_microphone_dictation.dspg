@@ -1,0 +1,113 @@
+; =========================================================================
+; Input DSP input graph -- 3 mics, 0 speaker references
+; =========================================================================
+
+graphName "builtin_microphone_dictation"
+
+; Uncomment the fs definition below if you want to process the graph offline
+;[def fs 48000]
+
+; -------------------------------------------------------------------------
+; Definitions
+; -------------------------------------------------------------------------
+
+[def procSampleRate 16000]
+[def blockSize 512]
+
+[def numBeams 12]
+[def numMics 3]
+
+; ports
+in in
+out out
+
+; -------------------------------------------------------------------------
+; Siri boxes and audio units
+; -------------------------------------------------------------------------
+
+; Mic alignment workaround
+box micAlignmentRefSplitter split 1 [numMics]
+box micAlignmentDelay0 (aufx sdly appl) 1 1
+box micAlignmentDelay1 (aufx sdly appl) 1 1
+box micAlignmentDelay2 (aufx sdly appl) 1 1
+box extMicJoiner join [numMics] 1
+
+; Input conditioning
+box extMicTrim0 gain 1 1 ; mic sensitivity trim
+box extMicTrim1 gain 1 1
+box extMicTrim2 gain 1 1
+box extMicGain gain 1 1
+box extMicHPFilter (aufx nbeq appl) 1 1
+
+; Constant source box for ECLEE (zero)
+box zeroECLEE constant 0 1
+
+; Multi-mic processing units
+box ANALY fft 1 1
+box MCLP  (aufx drev appl) 2 2
+box PMWF  (aufx dnos appl) 2 2
+box BF    (aufx bmfd appl) 2 4
+box NNSPP (aufx nnsp appl) 3 1
+box SYNTH_bfOut fft 1 1
+
+; Multiplexing and splitting
+box BFDeadEnd dead 3 0
+box NNSPPDeadEnd dead 1 0
+
+box dictInputSRC src 1 1
+box dictOutputSRC src 1 1
+
+; -------------------------------------------------------------------------
+; Microphones alignment
+; -------------------------------------------------------------------------
+
+; Mic alignment workaround; apply mic trim
+wire in dictInputSRC ([fs] [numMics])
+wire dictInputSRC micAlignmentRefSplitter ([procSampleRate] [numMics] [blockSize])
+wire (micAlignmentRefSplitter 0) micAlignmentDelay0 ([procSampleRate] 1 [blockSize])
+wire (micAlignmentRefSplitter 1) micAlignmentDelay1 ([procSampleRate] 1 [blockSize])
+wire (micAlignmentRefSplitter 2) micAlignmentDelay2 ([procSampleRate] 1 [blockSize])
+wire micAlignmentDelay0	extMicTrim0 ([procSampleRate] 1 [blockSize])
+wire micAlignmentDelay1	extMicTrim1 ([procSampleRate] 1 [blockSize])
+wire micAlignmentDelay2	extMicTrim2 ([procSampleRate] 1 [blockSize])
+wire extMicTrim0 (extMicJoiner 0) ([procSampleRate] 1 [blockSize])
+wire extMicTrim1 (extMicJoiner 1) ([procSampleRate] 1 [blockSize])
+wire extMicTrim2 (extMicJoiner 2) ([procSampleRate] 1 [blockSize])
+
+; -------------------------------------------------------------------------
+; Siri DSP Graph topology
+; -------------------------------------------------------------------------
+
+; Filter to remove bass content
+wire extMicJoiner extMicGain ([procSampleRate] [numMics] [blockSize])
+wire extMicGain extMicHPFilter ([procSampleRate] [numMics] [blockSize])
+wire extMicHPFilter ANALY ([procSampleRate] [numMics] [blockSize])
+
+; Multi-mic processing
+; Dereverberation
+wire ANALY     (MCLP 0) (freq [procSampleRate] [numMics] [blockSize])
+wire zeroECLEE (MCLP 1) (freq [procSampleRate] [numMics] [blockSize])
+
+; Inject DNN SPP mask to PMWF
+wire (MCLP 0)  (NNSPP 0) (freq [procSampleRate] [numMics] [blockSize])
+wire zeroECLEE (NNSPP 1) (freq [procSampleRate] [numMics] [blockSize])
+wire ANALY     (NNSPP 2) (freq [procSampleRate] [numMics] [blockSize])
+wireProperty (NNSPP 3699)  (PMWF 3699)  true ; wire DNN SPP mask
+wireProperty (NNSPP 36999) (PMWF 36999) true ; wire post filter mask
+
+; Denoise
+wire (MCLP 0) (PMWF 0) (freq [procSampleRate] [numMics] [blockSize])
+wire (MCLP 1) (PMWF 1) (freq [procSampleRate] [numMics] [blockSize])
+wire (PMWF 0) (BF   0) (freq [procSampleRate] [numMics] [blockSize])
+wire (PMWF 1) (BF   1) (freq [procSampleRate] [numMics] [blockSize])
+
+; Connect deadends
+wire (NNSPP 0) NNSPPDeadEnd (freq [procSampleRate] [numMics] [blockSize])
+wire (BF 1) (BFDeadEnd 0) (freq [procSampleRate] 1 [blockSize])
+wire (BF 2) (BFDeadEnd 1) (freq [procSampleRate] [numBeams] [blockSize])
+wire (BF 3) (BFDeadEnd 2) (freq [procSampleRate] [numBeams] [blockSize])
+
+; Convert back to time-domain
+wire (BF 0) SYNTH_bfOut (freq [procSampleRate] 1 [blockSize])
+wire SYNTH_bfOut dictOutputSRC ([procSampleRate] 1 [blockSize])
+wire dictOutputSRC out ([fs] 1)

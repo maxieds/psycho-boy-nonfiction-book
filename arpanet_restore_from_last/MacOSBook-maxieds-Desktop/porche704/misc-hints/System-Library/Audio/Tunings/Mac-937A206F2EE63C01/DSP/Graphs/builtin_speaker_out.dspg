@@ -1,0 +1,124 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+; [def fs 48000]
+[def numChansIn 2]
+[def numChansOut 4] ; speaker out channel order: Left woofer, right woofer, Left tweeter, right tweeter
+[def numRefChans 4]
+
+; boxes
+in in
+out out
+out ref
+
+box join join 2 1
+box EQSplit split 1 2
+box EQJoinLF join 2 1
+box EQJoinHF join 2 1
+box freakJoin join 4 1
+box freakSplitLF split 1 2
+box freakSplitHF split 1 2
+box SpProtectSplit split 1 4
+box toneJoin join 4 1
+box toneSplit split 1 4
+box refJoin join 4 1
+
+box NFP nfnp 1 1 ; Non Finite Protection 
+box xtc (aufx axtc) 1 1
+box SpeakerProtect (aufx atsp) 1 1
+box Tone1 (aufx tmst) 1 1
+box UpComp (aufx mstk) 1 1
+box Comp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box VirtBass (aufx vben) 1 1
+box varEQ (aufx vrq2) 1 1
+box Tone3 (aufx tmst) 1 1
+box split split 1 2
+box leftGain dbgn 1 1
+box rightGain dbgn 1 1
+box leftBalance dbgn 1 1
+box rightBalance dbgn 1 1
+box Buzz (aufx buzk) 1 1
+box Delay (aufx cdly) 1 1
+box ControlFreakLF (aufx cfrk) 1 1
+box ControlFreakHF (aufx cfrk) 1 1
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+
+; wires
+wire in NFP ([fs] [numChansIn])
+wire NFP Tone1 ([fs] [numChansIn])
+wire Tone1 VirtBass ([fs] [numChansIn])
+wire VirtBass split ([fs] [numChansIn])
+
+wire (split 0) leftGain ([fs] 1)
+wire leftGain leftBalance ([fs] 1)
+wire leftBalance (join 0) ([fs] 1)
+
+wire (split 1) rightGain ([fs] 1)
+wire rightGain rightBalance ([fs] 1)
+wire rightBalance (join 1) ([fs] 1)
+
+wire join UpComp ([fs] [numChansIn])
+wire UpComp xtc ([fs] [numChansIn])
+wire xtc Tone2 ([fs] [numChansIn])
+wire Tone2 varEQ ([fs] [numChansIn])
+wire varEQ Comp ([fs] [numChansIn])
+wire Comp EQSplit ([fs] [numChansIn])
+
+wire (EQSplit 0) (toneJoin 0) ([fs] 1)
+wire (EQSplit 1) (toneJoin 1) ([fs] 1)
+wire (EQSplit 0) (toneJoin 2) ([fs] 1)
+wire (EQSplit 1) (toneJoin 3) ([fs] 1)
+
+wire toneJoin Tone3 ([fs] [numChansOut])
+wire Tone3 toneSplit ([fs] [numChansOut])
+
+wire (toneSplit 0) (EQJoinLF 0) ([fs] 1)
+wire (toneSplit 1) (EQJoinLF 1) ([fs] 1)
+wire (toneSplit 2) (EQJoinHF 0) ([fs] 1)
+wire (toneSplit 3) (EQJoinHF 1) ([fs] 1)
+
+wire EQJoinLF Buzz ([fs] 2)
+wire EQJoinHF Delay ([fs] 2)
+
+wire Buzz ControlFreakLF ([fs] 2)
+wire Delay ControlFreakHF ([fs] 2)
+
+wire ControlFreakLF freakSplitLF ([fs] 2)
+wire ControlFreakHF freakSplitHF ([fs] 2)
+
+wire (freakSplitLF 0) (freakJoin 0) ([fs] 1)
+wire (freakSplitLF 1) (freakJoin 1) ([fs] 1)
+
+wire (freakSplitHF 0) (freakJoin 2) ([fs] 1)
+wire (freakSplitHF 1) (freakJoin 3) ([fs] 1)
+
+wire freakJoin SpeakerProtect ([fs] [numChansOut])
+wire SpeakerProtect Ramp ([fs] [numChansOut])
+wire Ramp SpProtectSplit ([fs] [numChansOut])
+
+wire (SpProtectSplit 0) (refJoin 0) ([fs] 1) ; Left woofer
+wire (SpProtectSplit 2) (refJoin 1) ([fs] 1) ; Left tweeter
+wire (SpProtectSplit 1) (refJoin 2) ([fs] 1) ; Right woofer
+wire (SpProtectSplit 3) (refJoin 3) ([fs] 1) ; Right tweeter
+
+wire refJoin ref ([fs] [numRefChans])
+wire Ramp out ([fs] [numChansOut])
+
+; graph-level parameters
+param mvsc 0
+wireGraphParam mvsc (varEQ 5) ; 5 = currentGain
+param mvol 0
+wireGraphParam mvol (leftGain 0)
+wireGraphParam mvol (rightGain 0)
+param mmut 0
+wireGraphParam mmut (leftGain 1)
+wireGraphParam mmut (rightGain 1)
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+
+param lbal 0
+wireGraphParam lbal (leftBalance 0)
+param rbal 0
+wireGraphParam rbal (rightBalance 0)

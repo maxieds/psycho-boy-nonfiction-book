@@ -1,0 +1,157 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+;[def fs 48000] ; All products use 48kHz by default
+[def numChansIn 2]
+[def numChansOut 6] ; rdar://46105807; Mapping Ch 0 - Ch 5; Left woofer 1, left woofer 2, left tweeter, right woofer 1, right woofer 2, right tweeter as of 12/03/18
+[def numRefChans 3]
+
+; ports
+in in
+out out
+out ref
+
+; boxes 
+box SplitMain split 1 2
+box LeftGain dbgn 1 1
+box RightGain dbgn 1 1
+box LeftBalance dbgn 1 1
+box RightBalance dbgn 1 1
+box EQSplit split 1 2 
+box ToneSplit split 1 6
+box FreakSplitLF split 1 4
+box FreakSplitHF split 1 2
+box RefSplit split 1 6
+box ToneJoin join 6 1
+box EQJoinLF join 4 1
+box EQJoinHF join 2 1
+box FreakJoin join 6 1
+box Join join 2 1
+box RefSum sum 4 1
+box RefSumL sum 2 1
+box RefSumR sum 2 1
+box RefGain dbgn 1 1
+box refJoin join 3 1
+box Dead dead 2 1
+box NFP nfnp 1 1 ; Non Finite Protection 
+
+box XTC (aufx axtc) 1 1
+box SpeakerProtect (aufx atsp) 1 1
+box Tone1 (aufx tmst) 1 1
+box Norm (aufx ldnm) 1 1
+box Comp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box VirtBass (aufx vben) 1 1
+box VarEQ (aufx vrq2) 1 1
+box analytical (aufx tmst) 1 1
+box Buzz (aufx buzk) 1 1
+box Delay (aufx cdly) 1 1
+box ControlFreakLF (aufx cfrk) 1 1
+box ControlFreakHF (aufx cfrk) 1 1
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+
+; wires
+wire in NFP ([fs] [numChansIn])
+wire NFP Norm ([fs] [numChansIn])
+wire Norm VirtBass ([fs] [numChansIn])
+wire VirtBass Tone1 ([fs] [numChansIn])
+wire Tone1 SplitMain ([fs] [numChansIn])
+
+wire (SplitMain 0) LeftGain ([fs] 1)
+wire (SplitMain 1) RightGain ([fs] 1)
+
+wire LeftGain LeftBalance ([fs] 1)
+wire RightGain RightBalance ([fs] 1)
+
+wire LeftBalance (Join 0) ([fs] 1) 
+wire RightBalance (Join 1) ([fs] 1) 
+
+wire Join XTC	([fs] [numChansIn])
+wire XTC Tone2 ([fs] [numChansIn])
+wire Tone2 VarEQ ([fs] [numChansIn])
+wire VarEQ Comp ([fs] [numChansIn])
+wire Comp EQSplit ([fs] [numChansIn])
+
+wire (EQSplit 0) (ToneJoin 0) ([fs] 1) ;left woofer 1
+wire (EQSplit 0) (ToneJoin 1) ([fs] 1) ;left woofer 2
+wire (EQSplit 0) (ToneJoin 2) ([fs] 1) ;left tweeter 
+wire (EQSplit 1) (ToneJoin 3) ([fs] 1) ;right woofer 1
+wire (EQSplit 1) (ToneJoin 4) ([fs] 1) ;right woofer 2
+wire (EQSplit 1) (ToneJoin 5) ([fs] 1) ;right tweeter 
+
+wire ToneJoin analytical ([fs] [numChansOut])
+wire analytical ToneSplit ([fs] [numChansOut])
+
+wire (ToneSplit 0) (EQJoinLF 0) ([fs] 1)
+wire (ToneSplit 1) (EQJoinLF 1) ([fs] 1)
+wire (ToneSplit 3) (EQJoinLF 2) ([fs] 1)
+wire (ToneSplit 4) (EQJoinLF 3) ([fs] 1)
+wire (ToneSplit 2) (EQJoinHF 0) ([fs] 1)
+wire (ToneSplit 5) (EQJoinHF 1) ([fs] 1)
+
+wire EQJoinLF Buzz ([fs] 4)
+wire EQJoinHF Delay ([fs] 2)
+
+wire Buzz ControlFreakLF ([fs] 4)
+wire Delay ControlFreakHF ([fs] 2)
+
+wire ControlFreakLF FreakSplitLF ([fs] 4)
+wire ControlFreakHF FreakSplitHF ([fs] 2)
+
+wire (FreakSplitLF 0) (FreakJoin 0) ([fs] 1) ;left woofer 1
+wire (FreakSplitLF 1) (FreakJoin 1) ([fs] 1) ;left woofer 2
+wire (FreakSplitHF 0) (FreakJoin 2) ([fs] 1) ;left tweeter 
+wire (FreakSplitLF 2) (FreakJoin 3) ([fs] 1) ;right woofer 1
+wire (FreakSplitLF 3) (FreakJoin 4) ([fs] 1) ;right woofer 2
+wire (FreakSplitHF 1) (FreakJoin 5) ([fs] 1) ;right tweeter 
+
+wire FreakJoin SpeakerProtect ([fs] [numChansOut])
+
+wire SpeakerProtect Ramp ([fs] [numChansOut]) 
+wire Ramp RefGain ([fs] [numChansOut])
+wire RefGain RefSplit ([fs] [numChansOut])
+
+; when reverting to 2ch ref, use left ch as those speakers are closer to the mics and are better as reference
+wire (RefSplit 0) (RefSum 0) ([fs] 1) ; left woofer 1
+wire (RefSplit 1) (Dead 0) ([fs] 1) ; left woofer 2
+wire (RefSplit 2) (RefSum 1)  ([fs] 1) ; left tweeter
+wire (RefSplit 3) (RefSum 2) ([fs] 1) ; right woofer 1
+wire (RefSplit 4) (Dead 1) ([fs] 1) ; right woofer 2
+wire (RefSplit 5) (RefSum 3) ([fs] 1) ; right tweeter
+
+; New refs
+wire (RefSplit 0) (RefSumL 0) ([fs] 1) ; left woofer 1
+wire (RefSplit 2) (RefSumL 1)  ([fs] 1) ; left tweeter
+
+wire (RefSplit 3) (RefSumR 0) ([fs] 1) ; right woofer 1
+wire (RefSplit 5) (RefSumR 1) ([fs] 1) ; right tweeter
+
+; Join refs
+wire RefSum  (refJoin 0) ([fs] 1) ; existing ref
+wire RefSumL (refJoin 1) ([fs] 1) ; new L ref
+wire RefSumR (refJoin 2) ([fs] 1) ; new R ref
+
+wire refJoin ref ([fs] [numRefChans])
+wire Ramp out ([fs] [numChansOut])
+
+; graph-level parameters
+param mvsc 0
+wireGraphParam mvsc (VarEQ 5) ; 5 = currentGain
+param mvol 0
+wireGraphParam mvol (LeftGain 0)
+wireGraphParam mvol (RightGain 0)
+param mmut 0
+wireGraphParam mmut (LeftGain 1)
+wireGraphParam mmut (RightGain 1)
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+
+param lbal 0
+wireGraphParam lbal (LeftBalance 0)
+param rbal 0
+wireGraphParam rbal (RightBalance 0)
+param refg -3
+wireGraphParam refg (RefGain 0)
+
+

@@ -1,0 +1,171 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+;[def fs 48000]
+[def spp3FixedBlockSize 512]
+[def numChansIn 2]
+[def numChansOut 6]
+[def numRefChans 6]
+
+; boxes
+in in
+in telemetry 
+out out
+out ref
+box XTC (aufx axtc) 1 1
+box NFP nfnp 1 1 ; Non Finite Protection 
+box VirtBass (aufx vben) 1 1
+box SpeakerProtect (aufx spp3) 2 1
+box Tone1 (aufx tmst) 1 1
+box Norm (aufx ldnm) 1 1
+box Comp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box VarEQ (aufx vrq2) 1 1
+box split split 1 2
+box leftGain dbgn 1 1
+box rightGain dbgn 1 1
+box leftBalance dbgn 1 1
+box rightBalance dbgn 1 1
+box join join 2 1
+box EQSplit split 1 2
+box toneSplit split 1 6
+box Tone3 (aufx tmst) 1 1
+box toneJoin join 6 1
+box EQJoinLF join 4 1
+box EQJoinHF join 2 1
+box freakJoin join 6 1
+box ControlFreakLF (aufx cfrk) 1 1
+box ControlFreakHF (aufx cfrk) 1 1
+box freakSplitLF split 1 4
+box freakSplitHF split 1 2
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+box PreSpp3Reblocker reblocker 1 1
+box TelemetryReblocker reblocker 1 1
+box PostSpp3Reblocker reblocker 1 1 
+box DeinterleavedFC srlconverter 1 1 
+box InterleavedFC srlconverter 1 1 
+
+; format 
+format inputTelemetryFormatFixedChannelCount12Interleaved ( [fs] 12i )
+format inputTelemetryFormatFixedChannelCount12Deinterleaved  ([fs] 12)
+format inputTelemetryFormatFixedChannelCount12FixedBlockSizeInterleaved ([fs] 12i [spp3FixedBlockSize])
+format inputTelemetryFormatFixedChannelCount12FixedBlockSizeDeinterleaved ([fs] 12 [spp3FixedBlockSize])
+format spp3FormatFixedBlockSize ([fs] [numChansOut] [spp3FixedBlockSize])
+
+; wires
+wire in NFP ([fs] [numChansIn])
+wire NFP Norm ([fs] [numChansIn])
+wire Norm VirtBass ([fs] [numChansIn])
+wire VirtBass Tone1 ([fs] [numChansIn])
+wire Tone1 split ([fs] [numChansIn])
+
+wire (split 0) leftGain ([fs] 1)
+wire leftGain leftBalance ([fs] 1)
+wire leftBalance (join 0) ([fs] 1)
+
+wire (split 1) rightGain ([fs] 1)
+wire rightGain rightBalance ([fs] 1)
+wire rightBalance (join 1) ([fs] 1)
+
+wire join XTC ([fs] [numChansIn])
+wire XTC Tone2 ([fs] [numChansIn])
+wire Tone2 VarEQ ([fs] [numChansIn])
+wire VarEQ Comp ([fs] [numChansIn])
+wire Comp EQSplit ([fs] [numChansIn])
+
+wire (EQSplit 0) (toneJoin 0) ([fs] 1) ;left woofer 1
+wire (EQSplit 0) (toneJoin 1) ([fs] 1) ;left woofer 2
+wire (EQSplit 0) (toneJoin 2) ([fs] 1) ;left tweeter 
+wire (EQSplit 1) (toneJoin 3) ([fs] 1) ;right woofer 1
+wire (EQSplit 1) (toneJoin 4) ([fs] 1) ;right woofer 2
+wire (EQSplit 1) (toneJoin 5) ([fs] 1) ;right tweeter 
+
+wire toneJoin Tone3 ([fs] [numChansOut])
+wire Tone3 toneSplit ([fs] [numChansOut])
+
+wire (toneSplit 0) (EQJoinLF 0) ([fs] 1)
+wire (toneSplit 1) (EQJoinLF 1) ([fs] 1)
+wire (toneSplit 3) (EQJoinLF 2) ([fs] 1)
+wire (toneSplit 4) (EQJoinLF 3) ([fs] 1)
+wire (toneSplit 2) (EQJoinHF 0) ([fs] 1)
+wire (toneSplit 5) (EQJoinHF 1) ([fs] 1)
+
+wire EQJoinLF ControlFreakLF ([fs] 4)
+wire EQJoinHF ControlFreakHF ([fs] 2)
+
+wire ControlFreakLF freakSplitLF ([fs] 4)
+wire ControlFreakHF freakSplitHF ([fs] 2)
+
+wire (freakSplitLF 0) (freakJoin 0) ([fs] 1) ;left woofer 1
+wire (freakSplitLF 2) (freakJoin 1) ([fs] 1) ;right woofer 1
+wire (freakSplitLF 1) (freakJoin 2) ([fs] 1) ;left woofer 2
+wire (freakSplitLF 3) (freakJoin 3) ([fs] 1) ;right woofer 2
+wire (freakSplitHF 0) (freakJoin 4) ([fs] 1) ;left tweeter 
+wire (freakSplitHF 1) (freakJoin 5) ([fs] 1) ;right tweeter 
+
+wire freakJoin PreSpp3Reblocker ([fs] [numChansOut])
+wire PreSpp3Reblocker (SpeakerProtect 0) spp3FormatFixedBlockSize 
+wire telemetry DeinterleavedFC inputTelemetryFormatFixedChannelCount12Interleaved
+wire DeinterleavedFC TelemetryReblocker inputTelemetryFormatFixedChannelCount12Deinterleaved
+wire TelemetryReblocker InterleavedFC inputTelemetryFormatFixedChannelCount12FixedBlockSizeDeinterleaved
+wire InterleavedFC (SpeakerProtect 1) inputTelemetryFormatFixedChannelCount12FixedBlockSizeInterleaved
+
+wire SpeakerProtect PostSpp3Reblocker spp3FormatFixedBlockSize 
+wire PostSpp3Reblocker Ramp ([fs] [numChansOut]) 
+
+wire Ramp out ([fs] [numChansOut])
+wire Ramp ref ([fs] [numRefChans])
+
+; graph-level parameters
+param mvsc 1
+wireGraphParam mvsc (VarEQ 5) ; 5 = currentGain
+param mvol 0
+wireGraphParam mvol (leftGain 0)
+wireGraphParam mvol (rightGain 0)
+param mmut 0
+wireGraphParam mmut (leftGain 1)
+wireGraphParam mmut (rightGain 1)
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+
+;TMVarEQ
+wireGraphParam mvsc (Tone1 3)
+wireGraphParam mvsc (Tone2 3)
+wireGraphParam mvsc (Tone3 3)
+
+param lbal 0
+wireGraphParam lbal (leftBalance 0)
+param rbal 0
+wireGraphParam rbal (rightBalance 0)
+
+[def kGraphParameter_SpkMeasuredPwr mspw]
+[def kGraphParameter_SpkModelPwr mdpw]
+[def kAUSpeakerProtectionV3Param_SpkMeasuredPwr 16]
+[def kAUSpeakerProtectionV3Param_SpkModelPwr 15]
+
+param [kGraphParameter_SpkMeasuredPwr] 0 out
+wireGraphParam [kGraphParameter_SpkMeasuredPwr] (SpeakerProtect [kAUSpeakerProtectionV3Param_SpkMeasuredPwr] global 0) false
+
+param [kGraphParameter_SpkModelPwr] 0 out
+wireGraphParam [kGraphParameter_SpkModelPwr] (SpeakerProtect [kAUSpeakerProtectionV3Param_SpkModelPwr] global 0) false
+
+; Graph property 4CC definitions
+[def kAUSpeakerProtectionV3Property_SpeakerInputDataSourceOrder 64005]
+[def kAUSpeakerProtectionV3Property_TransducerCalibrationCF 64009]
+[def kAUSpeakerProtectionV3Property_TransducerCalibration 64001]
+[def kAUSpeakerProtectionV3Property_CPMSPowerBudget 64008]
+
+; Graph property connections
+property tdso in
+wireGraphProperty tdso (SpeakerProtect [kAUSpeakerProtectionV3Property_SpeakerInputDataSourceOrder] 0 0)
+
+property spts in
+wireGraphProperty spts (SpeakerProtect [kAUSpeakerProtectionV3Property_TransducerCalibrationCF] 0 0) 
+
+property spcl in
+wireGraphProperty spcl (SpeakerProtect [kAUSpeakerProtectionV3Property_TransducerCalibration] 0 0)  
+
+property cpms in
+wireGraphProperty cpms (SpeakerProtect [kAUSpeakerProtectionV3Property_CPMSPowerBudget] 0 0)  
+

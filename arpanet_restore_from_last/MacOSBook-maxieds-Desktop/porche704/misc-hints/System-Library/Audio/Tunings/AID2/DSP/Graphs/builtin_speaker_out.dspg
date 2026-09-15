@@ -1,0 +1,65 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+;[def fs 48000]
+[def numChansIn 2]
+[def numChansOut 1]
+[def numRefChans 1]
+
+; boxes
+in in
+out out
+out ref
+
+box sum sum 2 1
+box split split 1 2
+
+box NFP nfnp 1 1 ; Non Finite Protection 
+box Gain dbgn 1 1
+box UpComp (aufx mstk) 1 1
+box VirtBass (aufx vben) 1 1
+box Tone1 (aufx tmst) 1 1
+box MBComp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box VarEQ (aufx vrq2) 1 1
+box Buzz (aufx buzk) 1 1
+box ControlFreak (aufx cfrk) 1 1
+box SpeakerProtection (aufx atsp) 1 1
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+
+; wires
+wire in NFP ([fs] [numChansIn])
+wire NFP split ([fs] [numChansIn])
+;wire Gain split ([fs] [numChansIn])
+
+wire (split 0) (sum 0) ([fs] 1)
+wire (split 1) (sum 1) ([fs] 1)
+
+wire sum UpComp ([fs] 1)
+wire UpComp VirtBass ([fs] 1)
+wire VirtBass Gain ([fs] 1)
+wire Gain Tone1 
+wire Tone1 MBComp ([fs] 1)
+wire MBComp Tone2 ([fs] 1)
+wire Tone2 VarEQ ([fs] 1)
+wire VarEQ Buzz ([fs] 1)
+wire Buzz ControlFreak ([fs] 1)
+wire ControlFreak SpeakerProtection ([fs] 1)
+
+wire SpeakerProtection Ramp ([fs] [numRefChans])
+wire Ramp ref ([fs] [numRefChans])
+wire Ramp out ([fs] [numChansOut])
+
+; graph-level parameters
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+param mvol 0
+wireGraphParam mvol (Gain 0)
+param mmut 0
+wireGraphParam mmut (Gain 1)
+param mvsc 0
+wireGraphParam mvsc (VarEQ 5)
+param lbal 0
+param rbal 0
+

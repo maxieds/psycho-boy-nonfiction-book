@@ -1,0 +1,47 @@
+graphName builtin_microphone_general
+set sliceDuration 1024 48000
+set performADryRun 0
+param mmut 0.000000 in
+param mvol 12.000000 in
+box "ToneMeister" ( aufx tmst appl ) 1 1
+box "BFAllBeamsDeadEnd" dead 1 0
+box "BFEchoBeamDeadEnd" dead 1 0
+in "in"
+box "join" join 3 1
+box "dbgn_Mic1" dbgn 1 1
+box "dcBlocker" ( aufx dccb appl ) 1 1
+box "SYNTH_bfOut" fft 1 1
+box "userGain" dbgn 1 1
+box "ANALY_MIC" fft 1 1
+box "reblocker" reblocker 1 1
+box "dbgn_Mic2" dbgn 1 1
+box "BF" ( aufx bmfd appl ) 2 4
+out "out"
+box "split" split 1 3
+box "dbgn_Mic3" dbgn 1 1
+box "BFAllSelectionBeamsDeadEnd" dead 1 0
+box "micSense" ( aufx sens appl ) 1 1
+box "preDSPGain" gain 1 1
+wire ( "dcBlocker" 0 ) ( "reblocker" 0 ) ( 48000 3 1 )
+wire ( "BF" 1 ) ( "BFEchoBeamDeadEnd" 0 ) ( freq 48000 1 480 )
+wire ( "BF" 2 ) ( "BFAllBeamsDeadEnd" 0 ) ( freq 48000 1 480 )
+wire ( "SYNTH_bfOut" 0 ) ( "ToneMeister" 0 ) ( 48000 1 480 )
+wire ( "micSense" 0 ) ( "preDSPGain" 0 ) ( 48000 3 480 )
+wire ( "userGain" 0 ) ( "out" 0 ) ( 48000 1 480 )
+wire ( "in" 0 ) ( "dcBlocker" 0 ) ( 48000 3 1 )
+wire ( "ToneMeister" 0 ) ( "userGain" 0 ) ( 48000 1 480 )
+wire ( "BF" 3 ) ( "BFAllSelectionBeamsDeadEnd" 0 ) ( freq 48000 1 480 )
+wire ( "preDSPGain" 0 ) ( "ANALY_MIC" 0 ) ( 48000 3 480 )
+wire ( "ANALY_MIC" 0 ) ( "BF" 1 ) ( freq 48000 3 480 )
+wire ( "ANALY_MIC" 0 ) ( "BF" 0 ) ( freq 48000 3 480 )
+wire ( "BF" 0 ) ( "SYNTH_bfOut" 0 ) ( freq 48000 1 480 )
+wire ( "reblocker" 0 ) ( "split" 0 ) ( 48000 3 480 )
+wire ( "split" 0 ) ( "dbgn_Mic1" 0 ) ( 48000 1 480 )
+wire ( "split" 1 ) ( "dbgn_Mic2" 0 ) ( 48000 1 480 )
+wire ( "split" 2 ) ( "dbgn_Mic3" 0 ) ( 48000 1 480 )
+wire ( "dbgn_Mic1" 0 ) ( "join" 0 ) ( 48000 1 480 )
+wire ( "dbgn_Mic2" 0 ) ( "join" 1 ) ( 48000 1 480 )
+wire ( "dbgn_Mic3" 0 ) ( "join" 2 ) ( 48000 1 480 )
+wire ( "join" 0 ) ( "micSense" 0 ) ( 48000 3 480 )
+wireGraphParam mmut (userGain 1 0 0)
+wireGraphParam mvol (userGain 0 0 0)

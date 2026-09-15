@@ -1,0 +1,23 @@
+graphName "builtin_headphone_in_general"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+; [def fs 44100]
+[def numChans 1]
+
+in in
+out out
+
+box pregain dbgn 1 1
+box gain dbgn 1 1
+box DCBlocker (aufx dccb) 1 1
+
+wire in DCBlocker ([fs] [numChans])
+wire DCBlocker pregain ([fs] [numChans])
+wire pregain gain ([fs] [numChans])
+wire gain out ([fs] [numChans])
+
+param mvol 0
+wireGraphParam mvol (gain 0)
+param mmut 0
+wireGraphParam mmut (gain 1)

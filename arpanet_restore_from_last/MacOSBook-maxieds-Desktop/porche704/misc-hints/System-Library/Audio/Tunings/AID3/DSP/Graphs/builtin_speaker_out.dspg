@@ -1,0 +1,94 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+; [def fs 48000]
+[def numChansIn 2]
+[def numChansOut 4] ; upper left, upper right, lower left, lower right
+[def numRefChans 4]
+
+; ports
+in in
+out out
+out ref
+
+; boxes
+box XTC (aufx axtc) 1 1
+box NFP nfnp 1 1 ; Non Finite Protection 
+box VirtBass (aufx vben) 1 1
+box SpeakerProtect (aufx atsp) 1 1
+box Tone1 (aufx tmst) 1 1
+box Norm (aufx ldnm) 1 1
+box Comp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box VarEQ (aufx vrq2) 1 1
+box Split split 1 2
+box LeftGain dbgn 1 1
+box RightGain dbgn 1 1
+box LeftBalance dbgn 1 1
+box RightBalance dbgn 1 1
+box Join join 2 1
+box EQSplit split 1 2
+box Tone3 (aufx tmst) 1 1
+box ToneJoin join 4 1
+;box Buzz (aufx buzk) 1 1 ; BuzzKill unused, MSTK used to suppress buzz
+;box DelaySplit split 1 2	 
+;box DelayJoin join 2 1
+;box Delay (aufx cdly) 1 1
+box ControlFreak (aufx cfrk) 1 1
+;box BuzzSplit split 1 4
+;box BuzzJoin join 4 1
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+  
+; wires 
+wire in NFP ([fs] [numChansIn])
+wire NFP Tone1 ([fs] [numChansIn])
+wire Tone1 Norm ([fs] [numChansIn])
+wire Norm VirtBass ([fs] [numChansIn])
+wire VirtBass Tone2 ([fs] [numChansIn])
+wire Tone2 VarEQ ([fs] [numChansIn])
+wire VarEQ Split ([fs] [numChansIn])
+
+wire (Split 0) LeftGain ([fs] 1)
+wire LeftGain LeftBalance ([fs] 1)
+wire LeftBalance (Join 0) ([fs] 1)
+
+wire (Split 1) RightGain ([fs] 1)
+wire RightGain RightBalance ([fs] 1)
+wire RightBalance (Join 1) ([fs] 1)
+
+wire Join XTC ([fs] [numChansIn])
+wire XTC Comp ([fs] [numChansIn])
+wire Comp EQSplit ([fs] 2)
+
+wire (EQSplit 0) (ToneJoin 0) ([fs] 1) 
+wire (EQSplit 0) (ToneJoin 2) ([fs] 1) 
+wire (EQSplit 1) (ToneJoin 1) ([fs] 1)
+wire (EQSplit 1) (ToneJoin 3) ([fs] 1)
+
+wire ToneJoin Tone3 ([fs] [numChansOut])
+
+wire Tone3 ControlFreak ([fs] [numChansOut])
+
+wire ControlFreak SpeakerProtect ([fs] [numChansOut])
+wire SpeakerProtect Ramp ([fs] [numChansOut]) 
+
+wire Ramp ref ([fs] [numRefChans])
+wire Ramp out ([fs] [numChansOut])
+
+; graph-level parameters
+param mvsc 1
+wireGraphParam mvsc (VarEQ 5) ; 5 = currentGain
+param mvol 0
+wireGraphParam mvol (LeftGain 0)
+wireGraphParam mvol (RightGain 0)
+param mmut 0
+wireGraphParam mmut (LeftGain 1)
+wireGraphParam mmut (RightGain 1)
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+
+param lbal 0
+wireGraphParam lbal (LeftBalance 0)
+param rbal 0
+wireGraphParam rbal (RightBalance 0) 

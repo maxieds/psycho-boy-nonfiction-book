@@ -1,0 +1,76 @@
+graphName "builtin_speaker_out"
+
+; macros
+; Uncomment the fs definition below if you want to process the graph offline
+; [def fs 44100]
+[def numChansIn 2]
+[def numChansOut 2]
+[def numRefChans 2]
+
+; boxes
+in in
+out out
+out ref
+box VirtBass (aufx vben) 1 1
+box Tone1 (aufx tmst) 1 1
+box UpComp (aufx ldnm) 1 1
+box Comp (aufx mstk) 1 1
+box Tone2 (aufx tmst) 1 1
+box varEQ (aufx vrq2) 1 1
+box split split 1 2
+box leftGain dbgn 1 1
+box rightGain dbgn 1 1
+box leftBalance dbgn 1 1
+box rightBalance dbgn 1 1
+box join join 2 1
+box Tone3 (aufx tmst) 1 1
+box Buzz (aufx buzk) 1 1
+box ControlFreak (aufx cfrk) 1 1
+box SpeakerProtect (aufx atsp) 1 1
+box XTC (aufx axtc) 1 1
+box NFP nfnp 1 1 ; Non Finite Protection 
+box Ramp dbgn 1 1; For ramping at start/stop to avoid pop
+
+; wires
+wire in NFP ([fs] [numChansIn])
+wire NFP VirtBass ([fs] [numChansIn])
+wire VirtBass Tone1 ([fs] [numChansIn])
+wire Tone1 UpComp ([fs] [numChansIn])
+wire UpComp Tone2 ([fs] [numChansIn])
+wire Tone2 varEQ ([fs] [numChansIn])
+wire varEQ split ([fs] [numChansIn])
+wire (split 0) leftGain ([fs] 1)
+wire leftGain leftBalance ([fs] 1)
+wire leftBalance (join 0) ([fs] 1)
+
+wire (split 1) rightGain ([fs] 1)
+wire rightGain rightBalance ([fs] 1)
+wire rightBalance (join 1) ([fs] 1)
+
+wire join XTC ([fs] [numChansIn])
+wire XTC Comp ([fs] [numChansIn])
+wire Comp Tone3 ([fs] [numChansIn])
+wire Tone3 Buzz ([fs] 2)
+wire Buzz ControlFreak ([fs] 2)
+wire ControlFreak SpeakerProtect ([fs] 2)
+
+wire SpeakerProtect Ramp ([fs] [numChansOut])
+wire Ramp ref ([fs] [numRefChans])
+wire Ramp out ([fs] [numChansOut])
+
+; graph-level parameters
+param mvsc 0
+wireGraphParam mvsc (varEQ 5) ; 5 = currentGain
+param mvol 0
+wireGraphParam mvol (leftGain 0)
+wireGraphParam mvol (rightGain 0)
+param mmut 0
+wireGraphParam mmut (leftGain 1)
+wireGraphParam mmut (rightGain 1)
+param rpss 0
+wireGraphParam rpss (Ramp 1)
+
+param lbal 0
+wireGraphParam lbal (leftBalance 0)
+param rbal 0
+wireGraphParam rbal (rightBalance 0)

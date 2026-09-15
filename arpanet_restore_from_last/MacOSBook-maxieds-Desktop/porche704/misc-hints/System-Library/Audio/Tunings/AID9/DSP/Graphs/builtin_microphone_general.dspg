@@ -1,0 +1,68 @@
+graphName "builtin_microphone_general"
+
+; Uncomment the fs definition below if you want to process the graph offline
+; [def fs 48000]
+[def blockSize 480]
+[def numChansIn 3]
+[def numChansOut 1]
+[def numBeams 1]
+
+; ports
+in in
+out out
+
+;Gain
+box preDSPGain gain 1 1
+box userGain dbgn 1 1
+
+;fft
+box ANALY_MIC fft 1 1
+box SYNTH_bfOut fft 1 1
+
+;Reblocker
+box reblocker reblocker 1 1
+
+;DCBlocker
+box dcBlocker (aufx dccb appl) 1 1
+
+; Beamformer
+box BF (aufx bmfd appl) 2 4
+box BFEchoBeamDeadEnd dead 1 0
+box BFAllBeamsDeadEnd dead 1 0
+box BFAllSelectionBeamsDeadEnd dead 1 0
+
+; Noise Reduction
+box internalNoiseSuppressor (aufx ocns appl) 1 1
+box ambientNoiseSuppressor (aufx ocns appl) 1 1
+box micSense (aufx sens appl) 1 1
+
+; EQ
+box ToneMeister (aufx tmst appl) 1 1
+
+;-------------------------------------
+; DSP
+;-------------------------------------
+wire in dcBlocker ([fs] [numChansIn])
+wire dcBlocker reblocker ([fs] [numChansIn])
+wire reblocker micSense ([fs] [numChansIn] [blockSize])
+wire micSense preDSPGain ([fs] [numChansIn] [blockSize])
+wire preDSPGain ANALY_MIC ([fs] [numChansIn] [blockSize])
+
+wire ANALY_MIC (BF 0) (freq [fs] [numChansIn] [blockSize])
+;BeamItFD expects two input buses, thus we feed the same analytic mic data into its second bus. The EC beam output is not used, so there is no harm.
+;Ideally we should be allowed to configure the BeamItFD with single intput bus count. See <rdar://problem/34558167>
+wire ANALY_MIC (BF 1) (freq [fs] [numChansIn] [blockSize])
+wire (BF 0) internalNoiseSuppressor (freq [fs] [numChansOut] [blockSize])
+wire (BF 1) BFEchoBeamDeadEnd (freq [fs] 1 [blockSize])
+wire (BF 2) BFAllBeamsDeadEnd (freq [fs] [numBeams] [blockSize])
+wire (BF 3) BFAllSelectionBeamsDeadEnd (freq [fs] [numBeams] [blockSize])
+wire internalNoiseSuppressor  ambientNoiseSuppressor (freq [fs] [numChansOut] [blockSize])
+wire ambientNoiseSuppressor  SYNTH_bfOut (freq [fs] [numChansOut] [blockSize])
+wire SYNTH_bfOut ToneMeister ([fs] [numChansOut] [blockSize])
+wire ToneMeister userGain ([fs] [numChansOut] [blockSize])
+wire userGain out ([fs] [numChansOut] [blockSize])
+
+param mvol 0
+wireGraphParam mvol (userGain 0)
+param mmut 0
+wireGraphParam mmut (userGain 1)
