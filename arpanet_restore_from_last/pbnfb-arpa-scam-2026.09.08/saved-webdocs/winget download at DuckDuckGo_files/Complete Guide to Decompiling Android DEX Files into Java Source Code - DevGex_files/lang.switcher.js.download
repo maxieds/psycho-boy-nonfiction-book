@@ -1,0 +1,28 @@
+$(function () {
+  const $root = $('#langSwitcher');
+  const $btn  = $root.find('.lang-btn');
+
+  /* 1. 点击按钮展开/收起 */
+  $btn.on('click', function (e) {
+    e.stopPropagation();
+    $root.toggleClass('open');
+    $(this).attr('aria-expanded', $root.hasClass('open'));
+  });
+
+  /* 2. 选中语言：alert 语言缩写并关闭菜单 */
+  $root.on('click', '.lang-option', function () {
+    const $opt = $(this);
+    $btn.text($opt.text());                 // 更新按钮文字
+    $root.find('.lang-option').removeClass('active');
+    $opt.addClass('active');                // 高亮当前项
+    $root.removeClass('open');
+    $btn.attr('aria-expanded', 'false');
+    location.href = 'https://devgex.com/' + $opt.data('lang') + '/article/' + article_id;
+  });
+
+  /* 3. 点击外部关闭 */
+  $(document).on('click', function () {
+    $root.removeClass('open');
+    $btn.attr('aria-expanded', 'false');
+  });
+});

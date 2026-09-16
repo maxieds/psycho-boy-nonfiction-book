@@ -1,0 +1,61 @@
+// Handles sidebar toggling
+window.onload = () => {
+  // const wrapper = document.querySelector("#side-nav-menu-wrapper");
+
+  const backdrop = document.querySelector("#side-nav-menu-backdrop");
+  backdrop.style.display = "flex";
+  const openButton = document.querySelector(
+    "#side-nav-menu-wrapper > .open-side-nav-menu"
+  );
+
+  openButton.addEventListener("click", (e) => {
+    backdrop.classList.add(["open"]);
+    openButton.classList.add(["dispose"]);
+  });
+
+  backdrop.addEventListener("click", (e) => {
+    backdrop.classList.remove(["open"]);
+    openButton.classList.remove(["dispose"]);
+  });
+
+  const nav = document.querySelector("#side-nav-menu");
+  const currentPageParentItem = nav.querySelector(".current-menu-parent");
+  if (currentPageParentItem) {
+    currentPageParentItem.querySelector(".wrapper").classList.add(["open"]);
+    currentPageParentItem
+      .querySelector(".sibling-toggler")
+      .classList.add(["active"]);
+  }
+
+  const currentPageAccesstors = nav.querySelectorAll(".current-menu-ancestor");
+  console.log(currentPageAccesstors);
+  console.log("sdsds");
+  if (currentPageAccesstors.length > 0) {
+    currentPageAccesstors.forEach((accesstor) => {
+      accesstor.querySelector(".wrapper").classList.add(["open"]);
+      accesstor.querySelector(".sibling-toggler").classList.add(["active"]);
+    });
+  }
+
+  let siblingToggler;
+  if (nav) {
+    nav.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.tagName === "BUTTON" ||
+          event.target.closest("button")
+        ) {
+          if (event.target.tagName !== "SVG") {
+            siblingToggler = event.target.closest("button");
+            const sibling = siblingToggler.nextElementSibling;
+            sibling.classList.toggle("open");
+            siblingToggler.classList.toggle("active");
+          }
+          event.stopPropagation();
+        }
+      },
+      true
+    );
+  }
+};

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<!-- saved from url=(0086)https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/ -->
+<html lang="en" dir="ltr" class="2xl:text-[20px] motion-safe:scroll-smooth"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="sitemap" href="https://www.javathinking.com/sitemap.xml"><link rel="shortcut icon" href="https://www.javathinking.com/_astro/favicon.yLuvJuz6.ico"><link rel="apple-touch-icon" sizes="180x180" href="https://www.javathinking.com/_astro/apple-touch-icon.CYZDtdtq.png"><style>
+  :root {
+    --aw-font-sans: 'Inter Variable';
+    --aw-font-serif: 'Inter Variable';
+    --aw-font-heading: 'Inter Variable';
+
+    --aw-color-primary: rgb(1 97 239);
+    --aw-color-secondary: rgb(1 84 207);
+    --aw-color-accent: rgb(109 40 217);
+
+    --aw-color-text-heading: rgb(0 0 0);
+    --aw-color-text-default: rgb(16 16 16);
+    --aw-color-text-muted: rgb(16 16 16 / 66%);
+    --aw-color-bg-page: rgb(255 255 255);
+
+    --aw-color-bg-page-dark: rgb(3 6 32);
+
+    ::selection {
+      background-color: lavender;
+    }
+  }
+
+  .dark {
+    --aw-font-sans: 'Inter Variable';
+    --aw-font-serif: 'Inter Variable';
+    --aw-font-heading: 'Inter Variable';
+
+    --aw-color-primary: rgb(1 97 239);
+    --aw-color-secondary: rgb(1 84 207);
+    --aw-color-accent: rgb(109 40 217);
+
+    --aw-color-text-heading: rgb(247, 248, 248);
+    --aw-color-text-default: rgb(229 236 246);
+    --aw-color-text-muted: rgb(229 236 246 / 66%);
+    --aw-color-bg-page: rgb(3 6 32);
+
+    ::selection {
+      background-color: black;
+      color: snow;
+    }
+  }
+</style><script>(function(){const defaultTheme = "system";
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    const matches = document.querySelectorAll('[data-aw-toggle-color-scheme] > input');
+
+    if (matches && matches.length) {
+      matches.forEach((elem) => {
+        elem.checked = theme !== 'dark';
+      });
+    }
+  }
+
+  if ((defaultTheme && defaultTheme.endsWith(':only')) || (!localStorage.theme && defaultTheme !== 'system')) {
+    applyTheme(defaultTheme.replace(':only', ''));
+  } else if (
+    localStorage.theme === 'dark' ||
+    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  ) {
+    applyTheme('dark');
+  } else {
+    applyTheme('light');
+  }
+})();</script><title>How to Fix 'Filename too long' Error in Git Clone &amp; Resolve Permission Denied for core.longpaths — javathinking.com</title>
+<meta name="description" content="If you’ve ever tried to clone a Git repository and encountered the frustrating &quot;Filename too long&quot; error, you’re not alone. This issue is especially common on Windows systems due to historical limitations on file path lengths, but it can also surface on other operating systems in specific scenarios. Even more confusing: when you try to fix it by enabling Git’s `core.longpaths` setting, you might hit a &quot;Permission denied&quot; error.
+
+In this guide, we’ll demystify both problems. We’ll explain why the &quot;Filename too long&quot; error occurs, how Git’s `core.longpaths` setting helps, and step through solutions to resolve both the path length issue and the permission errors that may block you from enabling `core.longpaths`. By the end, you’ll be cloning repositories smoothly—even those with deeply nested files.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/">
+<meta property="og:title" content="How to Fix &#39;Filename too long&#39; Error in Git Clone &amp; Resolve Permission Denied for core.longpaths">
+<meta property="og:description" content="If you’ve ever tried to clone a Git repository and encountered the frustrating &quot;Filename too long&quot; error, you’re not alone. This issue is especially common on Windows systems due to historical limitations on file path lengths, but it can also surface on other operating systems in specific scenarios. Even more confusing: when you try to fix it by enabling Git’s `core.longpaths` setting, you might hit a &quot;Permission denied&quot; error.
+
+In this guide, we’ll demystify both problems. We’ll explain why the &quot;Filename too long&quot; error occurs, how Git’s `core.longpaths` setting helps, and step through solutions to resolve both the path length issue and the permission errors that may block you from enabling `core.longpaths`. By the end, you’ll be cloning repositories smoothly—even those with deeply nested files.">
+<meta property="og:url" content="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="javathinking">
+<meta property="og:article:published_time" content="2025-12-09T08:21:10.622Z">
+<meta property="og:article:modified_time" content="2026-07-24T08:21:21.718Z">
+<meta name="twitter:card" content="summary"><script async="" src="./How to Fix &#39;Filename too long&#39; Error in Git Clone &amp; Resolve Permission Denied for core.longpaths — javathinking.com_files/js"></script><script>(function(){const id = "G-XZJH3DDB1J";
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    window.dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", id);
+})();</script><script async="" src="./How to Fix &#39;Filename too long&#39; Error in Git Clone &amp; Resolve Permission Denied for core.longpaths — javathinking.com_files/f.txt" crossorigin="anonymous"></script><link rel="stylesheet" href="./How to Fix &#39;Filename too long&#39; Error in Git Clone &amp; Resolve Permission Denied for core.longpaths — javathinking.com_files/privacy.Bg6pidYh.css">
+<style>.prose pre code{display:grid;color:inherit;background:transparent}html:not(.dark) code[data-theme*=light] span{color:var(--shiki-light)}html.dark code[data-theme*=dark] span{color:var(--shiki-dark)}.prose pre{padding:1rem;border-radius:.5rem;box-shadow:0 1px 2px #0000000a;overflow-x:auto}html:not(.dark) pre[data-theme*=light]{background-color:var(--shiki-light-bg, #f6f8fa)}html.dark pre[data-theme*=dark]{background-color:var(--shiki-dark-bg, #0d1117)}.prose pre .line--highlighted{background-color:#ffdd571f;box-shadow:inset 2px 0 #ffdd57}
+</style></head> <body class="antialiased text-default bg-page tracking-tight">   <header class="sticky top-0 z-40 flex-none mx-auto w-full border-b border-gray-50/0 transition-[opacity] ease-in-out scroll" data-aw-sticky-header="true" id="header"> <div class="absolute inset-0"></div> <div class="relative text-default py-3 px-3 md:px-6 mx-auto w-full md:grid md:grid-cols-3 md:items-center max-w-7xl"> <div class="flex justify-between"> <a class="flex items-center" href="https://www.javathinking.com/"> <span class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-2xl md:text-xl font-bold text-gray-900 whitespace-nowrap dark:text-white"> JavaThinking.com </span> </a> <div class="flex items-center md:hidden"> <button type="button" class="flex flex-col h-12 w-12 rounded justify-center items-center cursor-pointer group" aria-label="Toggle Menu" data-aw-toggle-menu=""> <span class="sr-only">Toggle Menu</span>  <span aria-hidden="true" class="h-0.5 w-6 my-1 rounded-full bg-black dark:bg-white transition ease transform duration-200 opacity-80 group-[.expanded]:rotate-45 group-[.expanded]:translate-y-2.5"></span> <span aria-hidden="true" class="h-0.5 w-6 my-1 rounded-full bg-black dark:bg-white transition ease transform duration-200 opacity-80 group-[.expanded]:opacity-0"></span> <span aria-hidden="true" class="h-0.5 w-6 my-1 rounded-full bg-black dark:bg-white transition ease transform duration-200 opacity-80 group-[.expanded]:-rotate-45 group-[.expanded]:-translate-y-2.5"></span>  </button> </div> </div> <nav class="items-center w-full md:w-auto hidden md:flex md:mx-5 text-default overflow-y-auto overflow-x-hidden md:overflow-y-visible md:overflow-x-auto md:justify-self-center" aria-label="Main navigation"> <ul class="flex flex-col md:flex-row md:self-center w-full md:w-auto text-xl md:text-[0.9375rem] tracking-[0.01rem] font-medium md:justify-center"> <li class=""> <a class="hover:text-link dark:hover:text-white px-4 py-3 flex items-center whitespace-nowrap" href="https://www.javathinking.com/"> Home </a> </li><li class=""> <a class="hover:text-link dark:hover:text-white px-4 py-3 flex items-center whitespace-nowrap" href="https://www.javathinking.com/online-kotlin-compiler/"> Online Kotlin Compiler </a> </li><li class="dropdown">  <button type="button" class="hover:text-link dark:hover:text-white px-4 py-3 flex items-center whitespace-nowrap"> Tutorials  <svg width="1em" height="1em" class="w-3.5 h-3.5 ml-0.5 rtl:ml-0 rtl:mr-0.5 hidden md:inline" data-icon="tabler:chevron-down">   <symbol id="ai:tabler:chevron-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"></path></symbol><use href="#ai:tabler:chevron-down"></use>  </svg> </button> <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl"> <li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/spring-boot/"> Spring Boot </a> </li><li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/spring-cloud/"> Spring Cloud </a> </li><li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/spring-data/"> Spring Data </a> </li><li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/spring-mvc/"> Spring MVC </a> </li><li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/spring-security/"> Spring Security </a> </li> </ul>  </li><li class="dropdown">  <button type="button" class="hover:text-link dark:hover:text-white px-4 py-3 flex items-center whitespace-nowrap"> Blog  <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-3.5 h-3.5 ml-0.5 rtl:ml-0 rtl:mr-0.5 hidden md:inline" data-icon="tabler:chevron-down">   <use href="#ai:tabler:chevron-down"></use>  </svg> </button> <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl"> <li> <a class="first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap" href="https://www.javathinking.com/blog/"> All Posts </a> </li> </ul>  </li> </ul> </nav> <div class="hidden md:self-center md:flex items-center md:mb-0 fixed w-full md:w-auto md:static justify-end left-0 rtl:left-auto rtl:right-0 bottom-0 p-3 md:p-0 md:justify-self-end"> <div class="items-center flex justify-between w-full md:w-auto"> <div class="flex"> <button type="button" class="text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center" aria-label="Toggle between Dark and Light mode" data-aw-toggle-color-scheme=""><svg width="1em" height="1em" class="w-6 h-6 md:w-5 md:h-5 md:inline-block" data-icon="tabler:sun">   <symbol id="ai:tabler:sun" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0m-5 0h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7l-.7.7m0 11.4l.7.7m-12.1-.7l-.7.7"></path></symbol><use href="#ai:tabler:sun"></use>  </svg></button> </div>  </div> </div> </div> </header>  <main> <section class="py-8 sm:py-16 lg:py-20 mx-auto"><article><header class="intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade" data-animated="true" style="transition-delay: 0ms; animation-delay: 0ms;"><div class="flex justify-between flex-col sm:flex-row max-w-3xl mx-auto mt-0 mb-2 px-4 sm:px-6 sm:items-center"><p><span class="text-sm text-muted dark:text-gray-400">Last Updated:&nbsp;</span><time datetime="2026-07-24T08:21:21.718Z" class="inline-block">Jul 24, 2026</time></p></div><h1 class="px-4 sm:px-6 max-w-3xl mx-auto text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading">How to Fix 'Filename too long' Error in Git Clone &amp; Resolve Permission Denied for core.longpaths</h1><div class="mx-auto px-4 sm:px-6 max-w-3xl mt-4 mb-8 prose prose-lg dark:prose-invert prose-headings:font-heading prose-headings:font-semibold prose-headings:leading-tight prose-a:text-primary dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg prose-p:text-muted dark:prose-p:text-slate-300"><p>If you’ve ever tried to clone a Git repository and encountered the frustrating "Filename too long" error, you’re not alone. This issue is especially common on Windows systems due to historical limitations on file path lengths, but it can also surface on other operating systems in specific scenarios. Even more confusing: when you try to fix it by enabling Git’s <code>core.longpaths</code> setting, you might hit a "Permission denied" error.</p>
+<p>In this guide, we’ll demystify both problems. We’ll explain why the "Filename too long" error occurs, how Git’s <code>core.longpaths</code> setting helps, and step through solutions to resolve both the path length issue and the permission errors that may block you from enabling <code>core.longpaths</code>. By the end, you’ll be cloning repositories smoothly—even those with deeply nested files.</p></div><div class="max-w-3xl mx-auto px-4 sm:px-6"><div class="border-t dark:border-slate-700"></div></div></header><div class="mx-auto px-6 sm:px-6 max-w-3xl prose prose-md lg:prose-xl dark:prose-invert dark:prose-headings:text-slate-300 prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg mt-8 prose-headings:scroll-mt-[80px] prose-li:my-0"><h2 id="table-of-contents" class="group">Table of Contents<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#table-of-contents" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<ol>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#understanding-the-filename-too-long-error">Understanding the "Filename too long" Error</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#what-is-corelongpaths-in-git">What is <code>core.longpaths</code> in Git?</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#how-to-fix-filename-too-long-error">How to Fix "Filename too long" Error</a>
+<ul>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-1-enable-corelongpaths-in-git">Step 1: Enable <code>core.longpaths</code> in Git</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-2-address-windows-os-path-limitations-if-applicable">Step 2: Address Windows OS Path Limitations (If Applicable)</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-3-clone-the-repository-with-long-path-support">Step 3: Clone the Repository with Long Path Support</a></li>
+</ul>
+</li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#resolving-permission-denied-when-setting-corelongpaths">Resolving "Permission Denied" When Setting <code>core.longpaths</code></a>
+<ul>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#permission-denied-on-windows">Permission Denied on Windows</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#permission-denied-on-macoslinux">Permission Denied on macOS/Linux</a></li>
+</ul>
+</li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#alternative-solutions-if-corelongpaths-fails">Alternative Solutions If <code>core.longpaths</code> Fails</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#conclusion">Conclusion</a></li>
+<li><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#references">References</a></li>
+</ol>
+<h2 id="understanding-the-filename-too-long-error" class="group">Understanding the "Filename too long" Error<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#understanding-the-filename-too-long-error" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<p>The "Filename too long" error typically occurs when Git attempts to create a file or directory with a path that exceeds the maximum length allowed by the operating system or filesystem.</p>
+<h3 id="why-this-happens" class="group">Why This Happens:<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#why-this-happens" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<ul>
+<li><strong>Windows Systems</strong>: Historically, Windows imposed a <code>MAX_PATH</code> limit of 260 characters for file paths (e.g., <code>C:\Users\YourName\Documents\project\...\file.txt</code>). This includes the drive letter, colons, backslashes, and the filename itself.</li>
+<li><strong>macOS/Linux</strong>: These systems have much higher path limits (e.g., 4096 characters for Linux's <code>PATH_MAX</code>), so this error is rare but can still occur with extremely deep nesting or custom filesystem restrictions. Individual filenames on ext4 and most Linux filesystems are limited to 255 bytes.</li>
+<li><strong>Git’s Default Behavior</strong>: Git historically respected OS-level path limits to avoid compatibility issues, even if the OS could support longer paths.</li>
+</ul>
+<h2 id="what-is-core-longpaths-in-git" class="group">What is <code>core.longpaths</code> in Git?<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#what-is-core-longpaths-in-git" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<p>Git includes a configuration setting called <code>core.longpaths</code> to bypass OS-level path length restrictions. When enabled (<code>core.longpaths = true</code>), Git allows longer file paths during operations like <code>clone</code>, <code>fetch</code>, or <code>checkout</code>.</p>
+<ul>
+<li><strong>Default Value</strong>: <code>false</code> (Git enforces OS path limits).</li>
+<li><strong>Scope</strong>: Can be set globally (for all repositories), locally (for a single repository), or temporarily during a clone.</li>
+<li><strong>Caveat</strong>: <code>core.longpaths</code> only affects Git’s internal handling of paths. It does not override the underlying OS or filesystem limits (though modern OSes like Windows 10/11 can be configured to lift their own restrictions).</li>
+</ul>
+<h2 id="how-to-fix-filename-too-long-error" class="group">How to Fix "Filename too long" Error<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#how-to-fix-filename-too-long-error" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<h3 id="step-1-enable-core-longpaths-in-git" class="group">Step 1: Enable <code>core.longpaths</code> in Git<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-1-enable-core-longpaths-in-git" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>The first step is to enable <code>core.longpaths</code> to allow Git to handle longer paths. Here’s how to set it:</p>
+<h4 id="option-1-set-globally-all-repositories" class="group"><strong>Option 1: Set Globally (All Repositories)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#option-1-set-globally-all-repositories" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>Run this command in your terminal (Git Bash, Command Prompt, or Terminal) to enable long paths for all future Git operations:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> --global</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<h4 id="option-2-set-locally-single-repository" class="group"><strong>Option 2: Set Locally (Single Repository)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#option-2-set-locally-single-repository" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>If you only need long paths for a specific repository, clone it with <code>core.longpaths</code> enabled temporarily:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> clone</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> --config</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths=</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> https://github.com/username/long-path-repo.git</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<p>Or, after cloning (if the error occurs during checkout), navigate to the repo and set it locally:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> long-path-repo</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> checkout</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">branch-nam</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">e</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D">  # Retry checkout if needed  </span></span></code></pre></figure>
+<h3 id="step-2-address-windows-os-path-limitations-if-applicable" class="group">Step 2: Address Windows OS Path Limitations (If Applicable)<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-2-address-windows-os-path-limitations-if-applicable" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>If you’re on Windows and still see the error after enabling <code>core.longpaths</code>, the OS itself may still enforce the <code>MAX_PATH</code> limit. Modern Windows (10 1607+, 11) lets you disable this limit:</p>
+<h4 id="method-1-use-group-policy-editor-pro-enterprise-editions" class="group"><strong>Method 1: Use Group Policy Editor (Pro/Enterprise Editions)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#method-1-use-group-policy-editor-pro-enterprise-editions" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<ol>
+<li>Press <code>Win + R</code>, type <code>gpedit.msc</code>, and hit Enter to open the Local Group Policy Editor.</li>
+<li>Navigate to: <code>Computer Configuration &gt; Administrative Templates &gt; System &gt; Filesystem</code>.</li>
+<li>Double-click <strong>"Enable Win32 long paths"</strong>.</li>
+<li>Select <strong>"Enabled"</strong>, then click <strong>Apply &gt; OK</strong>.</li>
+</ol>
+<h4 id="method-2-edit-the-windows-registry-home-editions" class="group"><strong>Method 2: Edit the Windows Registry (Home Editions)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#method-2-edit-the-windows-registry-home-editions" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<ol>
+<li>Press <code>Win + R</code>, type <code>regedit</code>, and hit Enter to open the Registry Editor.</li>
+<li>Navigate to:
+<pre><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem  
+</code></pre>
+</li>
+<li>Find or create a DWORD value named <code>LongPathsEnabled</code> (right-click &gt; New &gt; DWORD (32-bit) Value).</li>
+<li>Set its value to <code>1</code> (double-click the entry, enter <code>1</code> in "Value data").</li>
+<li>Restart your computer for changes to take effect.</li>
+</ol>
+<p>Alternatively, you can set this via PowerShell (run as Administrator):</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="powershell" data-theme="github-light github-dark"><code data-language="powershell" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">New-ItemProperty</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> -</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">Path </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> `</span></span>
+<span data-line=""><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">Name </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">"LongPathsEnabled"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> -</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">Value </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">1</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> -</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">PropertyType DWORD </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">Force  </span></span></code></pre></figure>
+<h3 id="step-3-clone-the-repository-with-long-path-support" class="group">Step 3: Clone the Repository with Long Path Support<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#step-3-clone-the-repository-with-long-path-support" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>After enabling <code>core.longpaths</code> and (if on Windows) lifting OS restrictions, retry cloning the repository:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> clone</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> https://github.com/username/long-path-repo.git</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<p>For a one-time fix without changing your global config, pass the flag directly during cloning:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> clone</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> -c</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths=</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> https://github.com/username/long-path-repo.git</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<p>If the error persists, ensure you’re using a <strong>recent Git version</strong>. Older versions (pre-2.19) had bugs with <code>core.longpaths</code>. Update Git via <a href="https://gitforwindows.org/" rel="nofollow" target="_blank">Git for Windows</a> or your package manager.</p>
+<h2 id="resolving-permission-denied-when-setting-core-longpaths" class="group">Resolving "Permission Denied" When Setting <code>core.longpaths</code><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#resolving-permission-denied-when-setting-core-longpaths" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<p>If you encounter a "Permission denied" error when running <code>git config --global core.longpaths true</code>, it means Git lacks write access to its configuration files. Here’s how to fix it:</p>
+<h3 id="permission-denied-on-windows" class="group">Permission Denied on Windows<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#permission-denied-on-windows" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<h4 id="common-cause-gits-global-config-file-is-protected" class="group"><strong>Common Cause</strong>: Git’s Global Config File is Protected<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#common-cause-gits-global-config-file-is-protected" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>The global Git config file (<code>~/.gitconfig</code> or <code>C:\Users\&lt;YourName&gt;\.gitconfig</code>) may be read-only or owned by a user without write permissions (e.g., if Git was installed as Administrator).</p>
+<h4 id="fix-1-run-terminal-as-administrator" class="group"><strong>Fix 1: Run Terminal as Administrator</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#fix-1-run-terminal-as-administrator" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<ol>
+<li>Right-click your terminal (Git Bash, Command Prompt) and select "Run as administrator".</li>
+<li>Re-run the global config command:
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> --global</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+</li>
+</ol>
+<h4 id="fix-2-adjust-permissions-for-gitconfig" class="group"><strong>Fix 2: Adjust Permissions for <code>.gitconfig</code></strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#fix-2-adjust-permissions-for-gitconfig" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<ol>
+<li>Navigate to your user folder: <code>C:\Users\&lt;YourName&gt;</code>.</li>
+<li>Find <code>.gitconfig</code> (it may be hidden; enable "Hidden items" in File Explorer).</li>
+<li>Right-click <code>.gitconfig</code> &gt; <strong>Properties</strong> &gt; <strong>Security</strong> &gt; <strong>Edit</strong>.</li>
+<li>Select your user account under "Group or user names".</li>
+<li>Check "Write" under "Permissions for <yourname>".</yourname></li>
+<li>Click <strong>Apply</strong> &gt; <strong>OK</strong>.</li>
+</ol>
+<h3 id="permission-denied-on-macos-linux" class="group">Permission Denied on macOS/Linux<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#permission-denied-on-macos-linux" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<h4 id="common-cause-gitconfig-owned-by-root" class="group"><strong>Common Cause</strong>: <code>.gitconfig</code> Owned by Root<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#common-cause-gitconfig-owned-by-root" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>On Unix-based systems, if you previously ran Git commands with <code>sudo</code>, your global <code>.gitconfig</code> file (<code>~/.gitconfig</code>) may be owned by <code>root</code> instead of your user account, blocking writes.</p>
+<h4 id="fix-1-check-ownership-of-gitconfig" class="group"><strong>Fix 1: Check Ownership of <code>.gitconfig</code></strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#fix-1-check-ownership-of-gitconfig" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>Run this command to see who owns your global config file:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">ls</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> -la</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> ~/.gitconfig</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<p>If the owner is <code>root</code> (e.g., <code>-rw-r--r-- 1 root staff ...</code>), fix it with:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">sudo</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> chown</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> $USER </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">~/.gitconfig</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<h4 id="fix-2-avoid-sudo-for-git-config" class="group"><strong>Fix 2: Avoid <code>sudo</code> for Git Config</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#fix-2-avoid-sudo-for-git-config" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h4>
+<p>Never use <code>sudo</code> with <code>git config --global</code> (it writes to <code>root</code>’s <code>.gitconfig</code>, not yours). After fixing ownership, run the config command without <code>sudo</code>:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> --global</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> core.longpaths</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  </span></span></code></pre></figure>
+<h2 id="alternative-solutions-if-core-longpaths-fails" class="group">Alternative Solutions If <code>core.longpaths</code> Fails<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#alternative-solutions-if-core-longpaths-fails" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<p>If enabling <code>core.longpaths</code> doesn’t resolve the issue, try these workarounds:</p>
+<h3 id="1-clone-to-a-shorter-directory-path" class="group"><strong>1. Clone to a Shorter Directory Path</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#1-clone-to-a-shorter-directory-path" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>Use a shorter parent folder for cloning (e.g., <code>C:\repo</code> instead of <code>C:\Users\YourName\Documents\Projects\OpenSource\Repos\...</code>). Shorter base paths reduce the total length of nested files:</p>
+<figure data-rehype-pretty-code-figure=""><pre tabindex="0" data-language="bash" data-theme="github-light github-dark"><code data-language="bash" data-theme="github-light github-dark" style="display: grid;"><span data-line=""><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> clone</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> https://github.com/username/long-path-repo.git</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> C:</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">\r</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">epo</span><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D">  # Shorter target directory  </span></span></code></pre></figure>
+<h3 id="2-update-git-to-the-latest-version" class="group"><strong>2. Update Git to the Latest Version</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#2-update-git-to-the-latest-version" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>Older Git versions had bugs with <code>core.longpaths</code>. Keeping Git up to date ensures you have the latest fixes. Update Git using:</p>
+<ul>
+<li><strong>macOS</strong>: <code>brew install git</code> (or <code>brew upgrade git</code>).</li>
+<li><strong>Linux</strong>: <code>sudo apt update &amp;&amp; sudo apt install git</code> (Debian/Ubuntu) or <code>sudo dnf install git</code> (Fedora).</li>
+<li><strong>Windows</strong>: Download the latest <a href="https://gitforwindows.org/" rel="nofollow" target="_blank">Git for Windows</a>.</li>
+</ul>
+<h3 id="3-use-a-different-filesystem-advanced" class="group"><strong>3. Use a Different Filesystem (Advanced)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#3-use-a-different-filesystem-advanced" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>If you’re on a Linux system with a filesystem that enforces short paths (e.g., FAT32), reformat the drive with a modern filesystem like ext4 or XFS, which support longer paths.</p>
+<h3 id="4-use-wsl2-on-windows-advanced" class="group"><strong>4. Use WSL2 on Windows (Advanced)</strong><a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#4-use-wsl2-on-windows-advanced" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h3>
+<p>Windows Subsystem for Linux (WSL2) runs a real Linux kernel and does not have the 260-character <code>MAX_PATH</code> restriction. Clone and work with repositories inside the WSL2 filesystem to avoid Windows path limits entirely. Note: cloning into the Windows-mounted filesystem from WSL2 is still subject to Windows path limits.</p>
+<h2 id="conclusion" class="group">Conclusion<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#conclusion" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<p>The "Filename too long" error in Git is primarily a result of OS-level path restrictions, and Git’s <code>core.longpaths</code> setting is the primary fix. By enabling <code>core.longpaths</code> and adjusting OS or file permissions (if needed), you can clone even deeply nested repositories.</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Use <code>git config --global core.longpaths true</code> to enable long paths globally.</li>
+<li>On Windows, lift the <code>MAX_PATH</code> limit via Group Policy or Registry.</li>
+<li>Resolve "Permission denied" by running terminals as admin (Windows) or fixing <code>.gitconfig</code> ownership (macOS/Linux).</li>
+<li>For persistent issues, use shorter clone directories or update Git.</li>
+</ul>
+<h2 id="references" class="group">References<a href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#references" class="ml-2 no-underline opacity-0 group-hover:opacity-100 transition" aria-label="Link to section">#</a></h2>
+<ul>
+<li><a href="https://git-scm.com/docs/git-config#Documentation/git-config.txt-corelongpaths" rel="nofollow" target="_blank">Git Documentation: <code>core.longpaths</code></a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation" rel="nofollow" target="_blank">Microsoft Docs: Maximum Path Length Limitation</a></li>
+<li><a href="https://github.com/git-for-windows/git/releases" rel="nofollow" target="_blank">Git for Windows: Release Notes</a></li>
+<li><a href="https://docs.kernel.org/filesystems/ext4/directory.html" rel="nofollow" target="_blank">Linux ext4 Documentation: Directory Entries</a></li>
+</ul></div><div class="mx-auto px-6 sm:px-6 max-w-3xl mt-8"><a href="https://www.javathinking.com/tag/2025-12/" class="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition"><svg width="1em" height="1em" class="w-4 h-4" data-icon="tabler:tag">   <symbol id="ai:tabler:tag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0-2 0"></path><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592-5.592a2.41 2.41 0 0 0 0-3.408l-7.71-7.71A2 2 0 0 0 11.172 3H6a3 3 0 0 0-3 3"></path></g></symbol><use href="#ai:tabler:tag"></use>  </svg>2025-12</a></div></article></section> </main>  <footer class="relative border-t border-gray-200 dark:border-slate-800 not-prose"> <div class="dark:bg-dark absolute inset-0 pointer-events-none" aria-hidden="true"></div> <div class="relative max-w-7xl mx-auto px-4 sm:px-6 dark:text-slate-300 intersect-once intersect-quarter intercept-no-queue motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade" no-intersect=""> <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-8 md:py-12"> <div class="col-span-12 lg:col-span-4"> <div class="mb-2"> <a class="inline-block font-bold text-xl" href="https://www.javathinking.com/">JavaThinking.com</a> </div> <div class="text-sm text-muted flex gap-1"> <a class="text-muted hover:text-gray-700 dark:text-gray-400 hover:underline transition duration-150 ease-in-out" href="https://www.javathinking.com/terms/">Terms</a>  · <a class="text-muted hover:text-gray-700 dark:text-gray-400 hover:underline transition duration-150 ease-in-out" href="https://www.javathinking.com/privacy/">Privacy Policy</a>  </div> </div> <div class="col-span-6 md:col-span-3 lg:col-span-2"> <div class="dark:text-gray-300 font-medium mb-2">Company</div> <ul class="text-sm"> <li class="mb-2"> <a class="text-muted hover:text-gray-700 hover:underline dark:text-gray-400 transition duration-150 ease-in-out" href="https://www.javathinking.com/about/"> About </a> </li> </ul> </div> </div> <div class="md:flex md:items-center md:justify-between py-6 md:py-8"> <ul class="flex mb-4 md:order-1 -ml-2 md:ml-4 md:mb-0 rtl:ml-0 rtl:-mr-2 rtl:md:ml-0 rtl:md:mr-4"> <li> <a class="text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center" aria-label="X" href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#"> <svg width="1em" height="1em" class="w-5 h-5" data-icon="tabler:brand-x">   <symbol id="ai:tabler:brand-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 4l11.733 16H20L8.267 4zm0 16l6.768-6.768m2.46-2.46L20 4"></path></symbol><use href="#ai:tabler:brand-x"></use>  </svg>  </a> </li><li> <a class="text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center" aria-label="Instagram" href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#"> <svg width="1em" height="1em" class="w-5 h-5" data-icon="tabler:brand-instagram">   <symbol id="ai:tabler:brand-instagram" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"></path><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0m7.5-4.5v.01"></path></g></symbol><use href="#ai:tabler:brand-instagram"></use>  </svg>  </a> </li><li> <a class="text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center" aria-label="Facebook" href="https://www.javathinking.com/blog/how-to-fix-filename-too-long-error-during-git-clone/#"> <svg width="1em" height="1em" class="w-5 h-5" data-icon="tabler:brand-facebook">   <symbol id="ai:tabler:brand-facebook" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2z"></path></symbol><use href="#ai:tabler:brand-facebook"></use>  </svg>  </a> </li> </ul> <div class="text-sm mr-4 dark:text-muted"> 
+    © 2025 <a href="https://www.javathinking.com/" target="_blank" rel="noopener noreferrer">javathinking.com</a>
+    — tutorials, guides, and tools for developers. All rights reserved.
+   </div> </div> </div> </footer>   <script>(function(){const defaultTheme = "system";
+
+  if (window.basic_script) {
+    return;
+  }
+
+  window.basic_script = true;
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  const initTheme = function () {
+    if ((defaultTheme && defaultTheme.endsWith(':only')) || (!localStorage.theme && defaultTheme !== 'system')) {
+      applyTheme(defaultTheme.replace(':only', ''));
+    } else if (
+      localStorage.theme === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      applyTheme('dark');
+    } else {
+      applyTheme('light');
+    }
+  };
+  initTheme();
+
+  function attachEvent(selector, event, fn) {
+    const matches = typeof selector === 'string' ? document.querySelectorAll(selector) : selector;
+    if (matches && matches.length) {
+      matches.forEach((elem) => {
+        elem.addEventListener(event, (e) => fn(e, elem), false);
+      });
+    }
+  }
+
+  const onLoad = function () {
+    let lastKnownScrollPosition = window.scrollY;
+    let ticking = true;
+
+    attachEvent('#header nav', 'click', function () {
+      document.querySelector('[data-aw-toggle-menu]')?.classList.remove('expanded');
+      document.body.classList.remove('overflow-hidden');
+      document.getElementById('header')?.classList.remove('h-screen');
+      document.getElementById('header')?.classList.remove('expanded');
+      document.getElementById('header')?.classList.remove('bg-page');
+      document.querySelector('#header nav')?.classList.add('hidden');
+      document.querySelector('#header > div > div:last-child')?.classList.add('hidden');
+    });
+
+    attachEvent('[data-aw-toggle-menu]', 'click', function (_, elem) {
+      elem.classList.toggle('expanded');
+      document.body.classList.toggle('overflow-hidden');
+      document.getElementById('header')?.classList.toggle('h-screen');
+      document.getElementById('header')?.classList.toggle('expanded');
+      document.getElementById('header')?.classList.toggle('bg-page');
+      document.querySelector('#header nav')?.classList.toggle('hidden');
+      document.querySelector('#header > div > div:last-child')?.classList.toggle('hidden');
+    });
+
+    attachEvent('[data-aw-toggle-color-scheme]', 'click', function () {
+      if (defaultTheme.endsWith(':only')) {
+        return;
+      }
+      document.documentElement.classList.toggle('dark');
+      localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    });
+
+    attachEvent('[data-aw-social-share]', 'click', function (_, elem) {
+      const network = elem.getAttribute('data-aw-social-share');
+      const url = encodeURIComponent(elem.getAttribute('data-aw-url'));
+      const text = encodeURIComponent(elem.getAttribute('data-aw-text'));
+
+      let href;
+      switch (network) {
+        case 'facebook':
+          href = `https://www.facebook.com/sharer.php?u=${url}`;
+          break;
+        case 'twitter':
+          href = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+          break;
+        case 'linkedin':
+          href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${text}`;
+          break;
+        case 'whatsapp':
+          href = `https://wa.me/?text=${text}%20${url}`;
+          break;
+        case 'mail':
+          href = `mailto:?subject=%22${text}%22&body=${text}%20${url}`;
+          break;
+
+        default:
+          return;
+      }
+
+      const newlink = document.createElement('a');
+      newlink.target = '_blank';
+      newlink.href = href;
+      newlink.click();
+    });
+
+    const screenSize = window.matchMedia('(max-width: 767px)');
+    screenSize.addEventListener('change', function () {
+      document.querySelector('[data-aw-toggle-menu]')?.classList.remove('expanded');
+      document.body.classList.remove('overflow-hidden');
+      document.getElementById('header')?.classList.remove('h-screen');
+      document.getElementById('header')?.classList.remove('expanded');
+      document.getElementById('header')?.classList.remove('bg-page');
+      document.querySelector('#header nav')?.classList.add('hidden');
+      document.querySelector('#header > div > div:last-child')?.classList.add('hidden');
+    });
+
+    function applyHeaderStylesOnScroll() {
+      const header = document.querySelector('#header[data-aw-sticky-header]');
+      if (!header) return;
+      if (lastKnownScrollPosition > 60 && !header.classList.contains('scroll')) {
+        header.classList.add('scroll');
+      } else if (lastKnownScrollPosition <= 60 && header.classList.contains('scroll')) {
+        header.classList.remove('scroll');
+      }
+      ticking = false;
+    }
+    applyHeaderStylesOnScroll();
+
+    attachEvent([document], 'scroll', function () {
+      lastKnownScrollPosition = window.scrollY;
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          applyHeaderStylesOnScroll();
+        });
+        ticking = true;
+      }
+    });
+  };
+  const onPageShow = function () {
+    document.documentElement.classList.add('motion-safe:scroll-smooth');
+    const elem = document.querySelector('[data-aw-toggle-menu]');
+    if (elem) {
+      elem.classList.remove('expanded');
+    }
+    document.body.classList.remove('overflow-hidden');
+    document.getElementById('header')?.classList.remove('h-screen');
+    document.getElementById('header')?.classList.remove('expanded');
+    document.querySelector('#header nav')?.classList.add('hidden');
+  };
+
+  window.onload = onLoad;
+  window.onpageshow = onPageShow;
+
+  document.addEventListener('astro:after-swap', () => {
+    initTheme();
+    onLoad();
+    onPageShow();
+  });
+})();</script> <script>
+  /* Inspired by: https://github.com/heidkaemper/tailwindcss-intersect */
+  const Observer = {
+    observer: null,
+    delayBetweenAnimations: 100,
+    animationCounter: 0,
+
+    start() {
+      const selectors = [
+        '[class*=" intersect:"]',
+        '[class*=":intersect:"]',
+        '[class^="intersect:"]',
+        '[class="intersect"]',
+        '[class*=" intersect "]',
+        '[class^="intersect "]',
+        '[class$=" intersect"]',
+      ];
+
+      const elements = Array.from(document.querySelectorAll(selectors.join(',')));
+
+      const getThreshold = (element) => {
+        if (element.classList.contains('intersect-full')) return 0.99;
+        if (element.classList.contains('intersect-half')) return 0.5;
+        if (element.classList.contains('intersect-quarter')) return 0.25;
+        return 0;
+      };
+
+      elements.forEach((el) => {
+        el.setAttribute('no-intersect', '');
+        el._intersectionThreshold = getThreshold(el);
+      });
+
+      const callback = (entries) => {
+        entries.forEach((entry) => {
+          requestAnimationFrame(() => {
+            const target = entry.target;
+            const intersectionRatio = entry.intersectionRatio;
+            const threshold = target._intersectionThreshold;
+
+            if (target.classList.contains('intersect-no-queue')) {
+              if (entry.isIntersecting) {
+                target.removeAttribute('no-intersect');
+                if (target.classList.contains('intersect-once')) {
+                  this.observer.unobserve(target);
+                }
+              } else {
+                target.setAttribute('no-intersect', '');
+              }
+              return;
+            }
+
+            if (intersectionRatio >= threshold) {
+              if (!target.hasAttribute('data-animated')) {
+                target.removeAttribute('no-intersect');
+                target.setAttribute('data-animated', 'true');
+
+                const delay = this.animationCounter * this.delayBetweenAnimations;
+                this.animationCounter++;
+
+                target.style.transitionDelay = `${delay}ms`;
+                target.style.animationDelay = `${delay}ms`;
+
+                if (target.classList.contains('intersect-once')) {
+                  this.observer.unobserve(target);
+                }
+              }
+            } else {
+              target.setAttribute('no-intersect', '');
+              target.removeAttribute('data-animated');
+              target.style.transitionDelay = '';
+              target.style.animationDelay = '';
+
+              this.animationCounter = 0;
+            }
+          });
+        });
+      };
+
+      this.observer = new IntersectionObserver(callback.bind(this), { threshold: [0, 0.25, 0.5, 0.99] });
+
+      elements.forEach((el) => {
+        this.observer.observe(el);
+      });
+    },
+  };
+
+  Observer.start();
+
+  document.addEventListener('astro:after-swap', () => {
+    Observer.start();
+  });
+</script> <script type="module" src="./How to Fix &#39;Filename too long&#39; Error in Git Clone &amp; Resolve Permission Denied for core.longpaths — javathinking.com_files/v31edd6df95cf4e85bb4c19e7a9bdbcba178836298749" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;d94563839a43459da7bd1ee943b5f916&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+</body></html>

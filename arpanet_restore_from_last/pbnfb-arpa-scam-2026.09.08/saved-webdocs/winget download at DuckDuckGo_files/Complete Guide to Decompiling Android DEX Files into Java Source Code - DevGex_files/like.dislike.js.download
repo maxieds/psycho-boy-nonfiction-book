@@ -1,0 +1,45 @@
+// 喜欢 与 不喜欢
+function like_it(v, id, lang) {
+    $.ajax({
+        url: "/api/like",
+        type: "POST",
+        data: {
+            v: v,
+            id: id,
+            lang: lang,
+            _xsrf: _xsrf
+        },
+        success: function (res) {
+            alert(res);
+            console.log(res);
+        }
+    });
+}
+
+let hasClicked = false; // 与赞还是踩有关的全局变量，放在最外面
+
+$(document).ready(function() {
+    // 点赞按钮点击事件
+    $('header .btn.btn-accent.btn-lg').click(function() {
+        if (hasClicked) {
+            alert("already");
+            return;
+        }
+        
+        // 标记为已点击
+        hasClicked = true;
+        like_it("like", article_id, lang);
+    });
+    
+    // 点踩按钮点击事件
+    $('header .btn.btn-dislike.btn-lg').click(function() {
+        if (hasClicked) {
+            alert("already");
+            return;
+        }
+        
+        // 标记为已点击
+        hasClicked = true;
+        like_it("dislike", article_id, lang);
+    });
+});

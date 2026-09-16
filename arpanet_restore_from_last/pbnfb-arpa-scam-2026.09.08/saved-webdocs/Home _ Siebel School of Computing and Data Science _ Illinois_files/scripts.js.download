@@ -1,0 +1,256 @@
+
+
+
+$(document).ready(function () {
+
+	if($('#gradPhds').length){
+		let d = new Date();
+		let today_date = d.getFullYear() + "" + parseInt(d.getMonth()+1);
+		
+		$("#sortable .item.person").each(function(i) {
+			let graduation_date = $(this).attr("data-dept");
+			
+			if(graduation_date.length<6) {
+				graduation_date = graduation_date.substring(0,4) + "0" + graduation_date.substring(4);
+			}
+			
+			if(today_date.length<6) {
+				today_date = today_date.substring(0,4) + "0" + today_date.substring(4);
+			}
+			
+			if(graduation_date < today_date){
+				$(this).attr("data-dept", "Alumni");
+			} else {
+				$(this).attr("data-dept", "Graduating");    	
+			}
+				
+		});		
+		$('#sorts .dropdown-menu a.active').trigger("click");
+		console.log("tested");
+	}
+
+	// replace "website" link label with icon on course listing
+	$("td.website a").each(function () {
+		if ($(this).html() == "Website") {
+			$(this).html("<i class='fa fa-external-link-alt'></i>");
+		}
+	});
+
+
+	// remove directory listing header if no one is in the list
+	$("body.research.areas .directory-list").each(function (i) {
+		if ($(this).children().length == 0) {
+			$(this).prev().remove();
+		}
+	});
+
+
+	// remove calendar section if no events found
+	/*
+	$(".calendar-list").each(function (i) {
+		if ($(this).find(".item").length == 0) {
+			if ($(this).closest("section.tile").find(".item") == 0) {
+				$(this).closest("section.tile").addClass("d-none");
+			}
+		}
+	});
+	*/
+
+	if ($("#awards_list_container").length > 0) {
+		// get award title options
+		$.post("https://ws.dev.engr.illinois.edu/custom/cs-awards.asp", { action: "awards" }, function (data) {
+			var arrAwards = JSON.parse(data);
+			for (var i = 0; i < arrAwards.length; i++) {
+				$("#award_title").append('<option value="' + arrAwards[i] + '" title="' + arrAwards[i] + '">' + truncateString(arrAwards[i], 70) + '</option>');
+			}
+		});
+
+		// get award type options
+		$.post("https://ws.dev.engr.illinois.edu/custom/cs-awards.asp", { action: "types" }, function (data) {
+			var arrTypes = JSON.parse(data);
+			for (var i = 0; i < arrTypes.length; i++) {
+				$("#award_type").append('<option value="' + arrTypes[i] + '">' + arrTypes[i] + '</option>');
+			}
+		});
+
+		// get award type options
+		$.post("https://ws.dev.engr.illinois.edu/custom/cs-awards.asp", { action: "years" }, function (data) {
+			var arrYears = JSON.parse(data);
+			for (var i = 0; i < arrYears.length; i++) {
+				$("#award_year").append('<option value="' + arrYears[i] + '">' + arrYears[i] + '</option>');
+			}
+		});
+
+		// initialize datatables and load initial dataset
+		var awards = $("#awards_list").DataTable({
+			"processing": true,
+			"serverSide": true,
+			"order": [],
+			"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+			"pageLength": $("#pageLength").val(),
+			"bFilter": false,
+			"ajax": {
+				"url": "https://ws.dev.engr.illinois.edu/custom/cs-awards-winners.asp",
+				"type": "POST",
+				"data":
+					function (d) {
+						return $.extend({}, d, {
+							"award": $("#award_title").val(),
+							"type": $("#award_type").val(),
+							"category": $("#award_category").val(),
+							"year": $("#award_year").val(),
+							"q": $("#award_search").val()
+						});
+					}
+			},
+			"fnInitComplete": function () {
+				$(".table-responsive").removeClass("table-responsive");
+				$("#awards_list_container").removeClass("invisible");
+			}
+		});
+
+		$(window).on("keydown", function (e) {
+			if (e.ctrlKey && e.keyCode == 70) {
+				e.preventDefault();
+
+				var top_of_element = $("#award_search").parent().offset().top;
+				var bottom_of_element = $("#award_search").parent().offset().top + $("#award_search").parent().outerHeight();
+				var bottom_of_screen = $(window).scrollTop() + $(window).innerHeight();
+				var top_of_screen = $(window).scrollTop();
+				if ((bottom_of_screen > bottom_of_element) && (top_of_screen < top_of_element)) {
+					// the element is visible, do something
+				} else {
+					// the element is not visible, do something else
+					$(window).scrollTop(top_of_element - 25);
+				}
+				$("#award_search").focus();
+			}
+		});
+
+		// award title filter
+		$('#award_title').on('change', function () {
+			if (this.value != "") {
+				regExSearch = '^' + this.value + '\\s.';
+				awards.columns(0).search(regExSearch, true, false).draw();
+			}
+			else {
+				awards.columns(0).search("").draw();
+
+			}
+		});
+
+		// category filter
+		$('#award_type').on('change', function () {
+			if (this.value != "") {
+				awards.columns(3).search(this.value).draw();
+			}
+			else {
+				awards.columns(3).search("").draw();
+
+			}
+		});
+
+		// category filter
+		$('#award_category').on('change', function () {
+			if (this.value != "") {
+				regExSearch = '^' + this.value + '\\s.';
+				awards.columns(4).search(regExSearch, true, false).draw();
+			}
+			else {
+				awards.columns(4).search("").draw();
+
+			}
+		});
+
+		// award year filter
+		$('#award_year').on('change', function () {
+			if (this.value != "") {
+				awards.columns(5).search(this.value).draw();
+			}
+			else {
+				awards.columns(5).search("").draw();
+
+			}
+		});
+
+
+		// keyword search filter
+		$('#award_search').on('keyup', function () {
+			if (this.value != "") {
+				regExSearch = '^' + this.value + '\\s.';
+				//awards.search(regExSearch, true, false).draw();
+				awards.search(this.value).draw();
+			}
+			else {
+				awards.search("").draw();
+
+			}
+		});
+
+
+		$('#award_description').on('show.bs.modal', function (event) {
+			var button = $(event.relatedTarget) // Button that triggered the modal
+			var awardid = button.data('awardid') // Extract info from data-* attributes
+			// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+			// Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+			var modal = $(this)
+			$.post("https://ws.dev.engr.illinois.edu/custom/cs-awards-description.asp", { awardid: awardid }, function (data) {
+				modal.find('.modal-body').html(data);
+
+			});
+		})
+
+	}
+
+
+
+	if ($("#sorts").length > 0) {
+		// process sidebar filter toggles
+
+		$("#sidebarnav a[href^='/about/people/staff']").on("click", function (e) {
+			e.preventDefault();
+			let $this = $(this);
+			let q = $this.attr("href").replace("/about/people/staff#", "");
+			if (q == "/about/people/staff") {
+				q = "dept=";
+			}
+			else if (q == "/about/people/staff/faculty-support-contacts") {
+				window.location = q;
+			}
+			if (q.length > 0) {
+				let p = q.split('=');
+				let filterField = ".dropdown-menu[data-filter-on='" + p[0] + "']";
+				let filterVal = decodeURI(p[1]);
+				if ($(filterField).length == 1) {
+					$(filterField).find("a").removeClass("active");
+					$(filterField).find("a[data-filter='" + filterVal + "']").addClass("active");
+					$(filterField).find("a.active").trigger("click");
+					$("#sidebarnav a.active").removeClass("active");
+					$this.addClass("active");
+					window.scrollTo(0, 0);
+				}
+			}
+		});
+
+
+		$(".dropdown-menu[data-filter-on='dept'] a").on("click", function (e) {
+			let filterVal = $(this).attr("data-filter");
+			$("#sidebarnav a.active").removeClass("active");
+			$("#sidebarnav a[href='/about/people/staff#dept=" + filterVal).addClass("active");
+		});
+
+		let filterVal = $(".dropdown-menu[data-filter-on='dept'] a.active").attr("data-filter");
+		$("#sidebarnav a.active").removeClass("active");
+		$("#sidebarnav a[href='/about/people/staff#dept=" + filterVal).addClass("active");
+
+	}
+});
+
+
+
+function truncateString(str, num) {
+	if (str.length <= num) {
+		return str
+	}
+	return str.slice(0, num) + '...'
+}
