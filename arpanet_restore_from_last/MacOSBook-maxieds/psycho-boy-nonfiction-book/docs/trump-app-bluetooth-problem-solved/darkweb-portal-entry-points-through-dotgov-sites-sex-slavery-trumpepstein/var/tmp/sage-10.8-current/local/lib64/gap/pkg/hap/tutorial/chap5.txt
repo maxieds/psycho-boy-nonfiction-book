@@ -1,0 +1,829 @@
+  
+  [1X5 [33X[0;0YTopological data analysis[133X[101X
+  
+  
+  [1X5.1 [33X[0;0YPersistent homology[133X[101X
+  
+  [33X[0;0YPairwise  distances  between  [22X74[122X  points  from  some  metric space have been
+  recorded  and  stored  in a [22X74× 74[122X matrix [22XD[122X. The following commands load the
+  matrix,  construct a filtration of length [22X100[122X on the first two dimensions of
+  the assotiated clique complex (also known as the [13XVietoris-Rips Complex[113X), and
+  display  the  resulting  degree [22X0[122X persistent homology as a barcode. A single
+  bar  with  label  [22Xn[122X denotes [22Xn[122X bars with common starting point and common end
+  point.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("data253a.txt");;[127X[104X
+    [4X[25Xgap>[125X [27XRead(file);[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XG:=SymmetricMatrixToFilteredGraph(D,100);[127X[104X
+    [4X[28XFiltered graph on 74 vertices.[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XK:=FilteredRegularCWComplex(CliqueComplex(G,2));[127X[104X
+    [4X[28XFiltered regular CW-complex of dimension 2[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbers(K,0);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe first 54 terms in the filtration each have 74 path components -- one for
+  each  point  in the sample. During the next 9 filtration terms the number of
+  path components reduces, meaning that sample points begin to coalesce due to
+  the  formation  of  edges  in  the  simplicial  complexes.  Then,  two  path
+  components  persist  over  an  interval  of 18 filtration terms, before they
+  eventually coalesce.[133X
+  
+  [33X[0;0YThe  next  commands  display the resulting degree [22X1[122X persistent homology as a
+  barcode.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbers(K,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YInterpreting  short bars as noise, we see for instance that the [22X65[122Xth term in
+  the  filtration  could  be  regarded as noiseless and belonging to a "stable
+  interval"  in  the  filtration  with  regards  to  first and second homology
+  functors.  The following command displays (up to homotopy) the [22X1[122X skeleton of
+  the  simplicial  complex  arizing as the [22X65[122X-th term in the filtration on the
+  clique complex.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XY:=FiltrationTerm(K,65);[127X[104X
+    [4X[28XRegular CW-complex of dimension 1[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(HomotopyGraph(Y));[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThese  computations  suggest  that  the dataset contains two persistent path
+  components  (or  clusters),  and  that  each path component is in some sense
+  periodic. The final command displays one possible representation of the data
+  as points on two circles.[133X
+  
+  
+  [1X5.1-1 [33X[0;0YBackground to the data[133X[101X
+  
+  [33X[0;0YEach  point  in the dataset was an image consisting of [22X732× 761[122X pixels. This
+  point  was regarded as a vector in [22XR^557052= R^732× 761[122X and the matrix [22XD[122X was
+  constructed using the Euclidean metric. The images were the following:[133X
+  
+  
+  [1X5.2 [33X[0;0YMapper clustering[133X[101X
+  
+  [33X[0;0YThe  following  example  reads in a set [22XS[122X of vectors of rational numbers. It
+  uses  the  Euclidean  distance  [22Xd(u,v)[122X between vectors. It fixes some vector
+  [22Xu_0∈  S[122X  and  uses  the associated function [22Xf: D→ [0,b] ⊂ R, v↦ d(u_0,v)[122X. In
+  addition,  it  uses  an  open  cover of the interval [22X[0,b][122X consisting of [22X100[122X
+  uniformly  distributed overlapping open subintervals of radius [22Xr=29[122X. It also
+  uses a simple clustering algorithm implemented in the function [10Xcluster[110X.[133X
+  
+  [33X[0;0YThese  ingredients are input into the Mapper clustering procedure to produce
+  a simplicial complex [22XM[122X which is intended to be a representation of the data.
+  The  complex [22XM[122X is [22X1[122X-dimensional and the final command uses GraphViz software
+  to  visualize  the graph. The nodes of this simplicial complex are "buckets"
+  containing  data  points.  A  data  point may reside in several buckets. The
+  number  of  points  in the bucket determines the size of the node. Two nodes
+  are connected by an edge when they contain common data points.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("data134.txt");;[127X[104X
+    [4X[25Xgap>[125X [27XRead(file);[127X[104X
+    [4X[25Xgap>[125X [27Xdx:=EuclideanApproximatedMetric;;[127X[104X
+    [4X[25Xgap>[125X [27Xdz:=EuclideanApproximatedMetric;;[127X[104X
+    [4X[25Xgap>[125X [27XL:=List(S,x->Maximum(List(S,y->dx(x,y))));;[127X[104X
+    [4X[25Xgap>[125X [27Xn:=Position(L,Minimum(L));;[127X[104X
+    [4X[25Xgap>[125X [27Xf:=function(x); return [dx(S[n],x)]; end;;[127X[104X
+    [4X[25Xgap>[125X [27XP:=30*[0..100];; P:=List(P, i->[i]);;[127X[104X
+    [4X[25Xgap>[125X [27Xr:=29;;[127X[104X
+    [4X[25Xgap>[125X [27Xepsilon:=75;;[127X[104X
+    [4X[25Xgap>[125X [27X cluster:=function(S)[127X[104X
+    [4X[25X>[125X [27X  local Y, P, C;[127X[104X
+    [4X[25X>[125X [27X  if Length(S)=0 then return S; fi;[127X[104X
+    [4X[25X>[125X [27X  Y:=VectorsToOneSkeleton(S,epsilon,dx);[127X[104X
+    [4X[25X>[125X [27X  P:=PiZero(Y);[127X[104X
+    [4X[25X>[125X [27X  C:=Classify([1..Length(S)],P[2]);[127X[104X
+    [4X[25X>[125X [27X  return List(C,x->S{x});[127X[104X
+    [4X[25X>[125X [27X end;;[127X[104X
+    [4X[25Xgap>[125X [27XM:=Mapper(S,dx,f,dz,P,r,cluster);[127X[104X
+    [4X[28XSimplicial complex of dimension 1.[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(GraphOfSimplicialComplex(M));[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.2-1 [33X[0;0YBackground to the data[133X[101X
+  
+  [33X[0;0YThe  datacloud  [22XS[122X  consists  of  the  [22X400[122X  points  in the plane shown in the
+  following picture.[133X
+  
+  
+  [1X5.3 [33X[0;0YSome tools for handling pure complexes[133X[101X
+  
+  [33X[0;0YA CW-complex [22XX[122X is said to be [13Xpure[113X if all of its top-dimensional cells have a
+  common  dimension.  There  are  instances  where  such  a space [22XX[122X provides a
+  convenient  ambient  space whose subspaces can be used to model experimental
+  data.  For  instance,  the  plane  [22XX= R^2[122X admits a pure regular CW-structure
+  whose  [22X2[122X-cells  are  open  unit squares with integer coordinate vertices. An
+  alternative,  and sometimes preferrable, pure regular CW-structure on [22XR^2[122X is
+  one where the [22X2[122X-cells are all reguar hexagons with sides of unit length. Any
+  digital  image  can  be  thresholded to produce a black-white image and this
+  black-white  image  can  naturally  be  regared  as  a  finite pure cellular
+  subcomplex  of either of the two proposed CW-structures on [22XR^2[122X. Analogously,
+  thresholding  can  be  used  to  represent [22X3[122X-dimensional greyscale images as
+  finite  pure cellular subspaces of cubical or permutahedral CW-structures on
+  [22XR^3[122X,  and  to  represent RGB colour photographs as analogous subcomplexes of
+  [22XR^5[122X.[133X
+  
+  [33X[0;0YIn  this  section we list a few functions for performing basic operations on
+  [22Xn[122X-dimensional  pure  cubical and pure permutahedral finite subcomplexes [22XM[122X of
+  [22XX=R^n[122X.  We  refer  to  [22XM[122X simply as a [13Xpure complex[113X. In subsequent sections we
+  demonstrate  how  these  few  functions on pure complexes allow for in-depth
+  analysis of experimental data.[133X
+  
+  [33X[0;0Y([12XAside.[112X  The  basic  operations  could equally well be implemented for other
+  CW-decompositions of [22XX= R^n[122X such as the regular CW-decompositions arising as
+  the  tessellations  by  a fundamental domain of a Bieberbach group (=torsion
+  free  crytallographic  group).  Moreover, the basic operations could also be
+  implemented  for  other manifolds such as an [22Xn[122X-torus [22XX=S^1× S^1 × ⋯ × S^1[122X or
+  [22Xn[122X-sphere  [22XX=S^n[122X  or for [22XX[122X the universal cover of some interesting hyperbolic
+  [22X3[122X-manifold.  An example use of the ambient manifold [22XX=S^1× S^1× S^1[122X could be
+  for  the  construction of a cellular subspace recording the time of day, day
+  of week and week of the year of crimes committed in a population.)[133X
+  
+  [33X[0;0Y[12XBasic operations returning pure complexes.[112X ( Function descriptions available
+  here ([7X../doc/chap1_mj.html#X7FD50DF6782F00A0[107X).)[133X
+  
+  [30X    [33X[0;6Y[10XPureCubicalComplex(binary array)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPurePermutahedralComplex(binary array)[110X[133X
+  
+  [30X    [33X[0;6Y[10XReadImageAsPureCubicalComplex(file,threshold)[110X[133X
+  
+  [30X    [33X[0;6Y[10XReadImageSquenceAsPureCubicalComplex(file,threshold)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexBoundary(M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexComplement(M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexRandomCell(M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexThickened(M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XContractedComplex(M, optional subcomplex of M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XExpandedComplex(M, optional supercomplex of M)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexUnion(M,N)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexIntersection(M,N)[110X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexDifference(M,N)[110X[133X
+  
+  [30X    [33X[0;6Y[10XFiltrationTerm(F,n)[110X[133X
+  
+  [33X[0;0Y[12XBasic operations returning filtered pure complexes.[112X[133X
+  
+  [30X    [33X[0;6Y[10XPureComplexThickeningFiltration(M,length)[110X[133X
+  
+  [30X    [33X[0;6Y[10XReadImageAsFilteredPureCubicalComplex(file,length)[110X[133X
+  
+  
+  [1X5.4 [33X[0;0YDigital image analysis and persistent homology[133X[101X
+  
+  [33X[0;0YThe  following  example  reads in a digital image as a filtered pure cubical
+  complexex.  The  filtration  is  obtained  by  thresholding at a sequence of
+  uniformly  spaced  values on the greyscale range. The persistent homology of
+  this  filtered complex is calculated in degrees [22X0[122X and [22X1[122X and displayed as two
+  barcodes.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("image1.3.2.png");;[127X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,40);[127X[104X
+    [4X[28XFiltered pure cubical complex of dimension 2.[128X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbers(F,0);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbers(F,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe [22X20[122X persistent bars in the degree [22X0[122X barcode suggest that the image has [22X20[122X
+  objects.  The  degree  [22X1[122X barcode suggests that there are [22X14[122X (or possibly [22X17[122X)
+  holes in these [22X20[122X objects.[133X
+  
+  
+  [1X5.4-1 [33X[0;0YNaive example of image segmentation by automatic thresholding[133X[101X
+  
+  [33X[0;0YAssuming that short bars and isolated points in the barcodes represent noise
+  while  long  bars represent essential features, a "noiseless" representation
+  of  the image should correspond to a term in the filtration corresponding to
+  a column in the barcode incident with all the long bars but incident with no
+  short  bars  or  isolated  points.  There  is no noiseless term in the above
+  filtration  of  length 40. However (in conjunction with the next subsection)
+  the  following  commands  confirm  that  the  64th term in the filtration of
+  length 500 is such a term and display this term as a binary image.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,500);;[127X[104X
+    [4X[25Xgap>[125X [27XY:=FiltrationTerm(F,64);            [127X[104X
+    [4X[28XPure cubical complex of dimension 2.[128X[104X
+    [4X[25Xgap>[125X [27XBettiNumber(Y,0);[127X[104X
+    [4X[28X20[128X[104X
+    [4X[25Xgap>[125X [27XBettiNumber(Y,1);[127X[104X
+    [4X[28X14[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(Y);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.4-2 [33X[0;0YRefining the filtration[133X[101X
+  
+  [33X[0;0YThe first filtration for the image has 40 terms. One may wish to investigate
+  a  filtration with more terms, say 500 terms, with a view to analysing, say,
+  those  1-cycles  that  are  born  by  term 25 of the filtration and that die
+  between terms 50 and 60. The following commands produce the relevant barcode
+  showing that there is precisely one such 1-cycle.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,500);;[127X[104X
+    [4X[25Xgap>[125X [27XL:=[20,60,61,62,63,64,65,66,67,68,69,70];;          [127X[104X
+    [4X[25Xgap>[125X [27XT:=FiltrationTerms(F,L);;[127X[104X
+    [4X[25Xgap>[125X [27XP0:=PersistentBettiNumbers(T,0);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P0);[127X[104X
+    [4X[25Xgap>[125X [27XP1:=PersistentBettiNumbers(T,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P1);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0Y[22Xβ_0[122X:[133X
+  
+  [33X[0;0Y[22Xβ_1[122X:[133X
+  
+  
+  [1X5.4-3 [33X[0;0YBackground to the data[133X[101X
+  
+  [33X[0;0YThe following image was used in the example.[133X
+  
+  
+  [1X5.5 [33X[0;0YA second example of digital image segmentation[133X[101X
+  
+  [33X[0;0YIn order to automatically count the number of coins in this picture[133X
+  
+  [33X[0;0Ywe  can  load  the  image as a filtered pure cubical complex [22XF[122X of filtration
+  length  40  say,  and  observe  the  degree zero persistent Betti numbers to
+  establish  that the 28-th term or so of [22XF[122X seems to be 'noise free' in degree
+  zero.  We can then set [22XM[122X equal to the 28-th term of [22XF[122X and thicken [22XM[122X a couple
+  of times say to remove any tiny holes it may have. We can then construct the
+  complement  [22XC[122X  of  [22XM[122X.  Then  we  can  construct a 'neighbourhood thickening'
+  filtration  [22XT[122X  of  [22XC[122X  with  say  [22X50[122X  consecutive thickenings. The degree one
+  persistent  barcode  for  [22XT[122X  has  [22X24[122X long bars, suggesting that the original
+  picture consists of [22X24[122X coins.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex("my_coins.png",40);;[127X[104X
+    [4X[25Xgap>[125X [27XM:=FiltrationTerm(F,24);;  #Chosen after viewing degree 0 barcode for F[127X[104X
+    [4X[25Xgap>[125X [27XM:=PureComplexThickened(M);;[127X[104X
+    [4X[25Xgap>[125X [27XM:=PureComplexThickened(M);;[127X[104X
+    [4X[25Xgap>[125X [27XC:=PureComplexComplement(M);;[127X[104X
+    [4X[25Xgap>[125X [27XT:=ThickeningFiltration(C,50);;[127X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbers(T,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe  pure cubical complex [10XW:=PureComplexComplement(FiltrationTerm(T,25))[110X has
+  the  correct  number  of path components, namely [22X25[122X, but its path components
+  are  very  much  subsets of the regions in the image corresponding to coins.
+  The complex [22XW[122X can be thickened repeatedly, subject to no two path components
+  being  allowed  to  merge,  in  order  to  obtain  a  more  realistic  image
+  segmentation  with path components corresponding more closely to coins. This
+  is  done  in  the  follow  commands which use a makeshift function [10XBasins(L)[110X
+  available  here  ([7Xtutex/basins.g[107X).  The  commands  essentially  implement  a
+  standard watershed segmentation algorithm but do so by using the language of
+  filtered pure cubical complexes.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XW:=PureComplexComplement(FiltrationTerm(T,25));;[127X[104X
+    [4X[25Xgap>[125X [27XL:=[];;[127X[104X
+    [4X[25Xgap>[125X [27Xfor i in [1..PathComponentOfPureComplex(W,0)] do[127X[104X
+    [4X[25Xgap>[125X [27XP:=PathComponentOfPureComplex(W,i);;[127X[104X
+    [4X[25Xgap>[125X [27XQ:=ThickeningFiltration(P,50,M);;[127X[104X
+    [4X[25Xgap>[125X [27XAdd(L,Q);;[127X[104X
+    [4X[25Xgap>[125X [27Xod;;[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XB:=Basins(L);[127X[104X
+    [4X[25Xgap>[125X [27XDisplay(B);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.6 [33X[0;0YA third example of digital image segmentation[133X[101X
+  
+  [33X[0;0YThe  following  image  is  number  3096  in  the  BSDS500 database of images
+  ([7Xhttps://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/[107X) [MFTM01].[133X
+  
+  [33X[0;0YA  common  first  step  in  segmenting  such  an  image  is to appropriately
+  threshold the corresponding gradient image.[133X
+  
+  [33X[0;0YThe  following  commands  use  the  thresholded gradient image to produce an
+  outline  of  the  aeroplane.  The outline is a pure cubical complex with one
+  path component and with first Betti number equal to 1.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=Filename(DirectoriesPackageLibrary("HAP"),"../tutorial/images/3096b.jpg");;[127X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,30);;[127X[104X
+    [4X[25Xgap>[125X [27XF:=ComplementOfFilteredPureCubicalComplex(F);;[127X[104X
+    [4X[25Xgap>[125X [27XM:=FiltrationTerm(F,27);;  #Thickening chosen based on degree 0 barcode[127X[104X
+    [4X[25Xgap>[125X [27XDisplay(M);;[127X[104X
+    [4X[25Xgap>[125X [27XP:=List([1..BettiNumber(M,0)],n->PathComponentOfPureComplex(M,n));;[127X[104X
+    [4X[25Xgap>[125X [27XP:=Filtered(P,m->Size(m)>10);;[127X[104X
+    [4X[25Xgap>[125X [27XM:=P[1];;[127X[104X
+    [4X[25Xgap>[125X [27Xfor m in P do[127X[104X
+    [4X[25X>[125X [27XM:=PureComplexUnion(M,m);;[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[25Xgap>[125X [27XT:=ThickeningFiltration(M,50);;[127X[104X
+    [4X[25Xgap>[125X [27XBettiNumber(FiltrationTerm(T,11),0);[127X[104X
+    [4X[28X1[128X[104X
+    [4X[25Xgap>[125X [27XBettiNumber(FiltrationTerm(T,11),1);[127X[104X
+    [4X[28X1[128X[104X
+    [4X[25Xgap>[125X [27XBettiNumber(FiltrationTerm(T,12),1);[127X[104X
+    [4X[28X0[128X[104X
+    [4X[25Xgap>[125X [27X#Confirmation that 11-th filtration term has one hole and the 12-th term is contractible.[127X[104X
+    [4X[25Xgap>[125X [27XC:=FiltrationTerm(T,11);;[127X[104X
+    [4X[25Xgap>[125X [27Xfor n in Reversed([1..10]) do[127X[104X
+    [4X[25X>[125X [27XC:=ContractedComplex(C,FiltrationTerm(T,n));[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[25Xgap>[125X [27XC:=PureComplexBoundary(PureComplexThickened(C));;[127X[104X
+    [4X[25Xgap>[125X [27XH:=HomotopyEquivalentMinimalPureCubicalSubcomplex(FiltrationTerm(T,12),C);;[127X[104X
+    [4X[25Xgap>[125X [27XB:=ContractedComplex(PureComplexBoundary(H));;[127X[104X
+    [4X[25Xgap>[125X [27XDisplay(B);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.7 [33X[0;0YNaive example of digital image contour extraction[133X[101X
+  
+  [33X[0;0YThe  following  greyscale  image  is  available  from  the  online  appendix
+  ([7Xhttp://www.ipol.im/pub/art/2014/74/FrechetAndConnectedCompDemo.tgz[107X)  to the
+  paper [CKL14].[133X
+  
+  [33X[0;0YThe  following  commands produce a picture of contours from this image based
+  on greyscale values. They also produce a picture of just the closed contours
+  (the non-closed contours having been homotopy collapsed to points).[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=Filename(DirectoriesPackageLibrary("HAP"),"../tutorial/images/circularGradient.png");;[127X[104X
+    [4X[25Xgap>[125X [27XL:=[];;                                                          [127X[104X
+    [4X[25Xgap>[125X [27Xfor n in [1..15] do[127X[104X
+    [4X[25X>[125X [27XM:=ReadImageAsPureCubicalComplex(file,n*30000);[127X[104X
+    [4X[25X>[125X [27XM:=PureComplexBoundary(M);;[127X[104X
+    [4X[25X>[125X [27XAdd(L,M);[127X[104X
+    [4X[25X>[125X [27Xod;;[127X[104X
+    [4X[25Xgap>[125X [27XC:=L[1];;[127X[104X
+    [4X[25Xgap>[125X [27Xfor n in [2..Length(L)] do C:=PureComplexUnion(C,L[n]); od;[127X[104X
+    [4X[25Xgap>[125X [27XDisplay(C);[127X[104X
+    [4X[25Xgap>[125X [27XDisplay(ContractedComplex(C));[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YContours from the above greyscale image:[133X
+  
+  [33X[0;0YClosed contours from the above greyscale image:[133X
+  
+  [33X[0;0YVery   similar   results   are   obtained   when   applied   to   the   file
+  [10XcircularGradientNoise.png[110X,  containing  noise,  available  from  the  online
+  appendix
+  ([7Xhttp://www.ipol.im/pub/art/2014/74/FrechetAndConnectedCompDemo.tgz[107X)  to the
+  paper [CKL14].[133X
+  
+  [33X[0;0YThe  number  of  distinct  "light sources" in the image can be read from the
+  countours.  Alternatively, this number can be read directly from the barcode
+  produced by the following commands.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,20);;[127X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbersAlt(F,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe seventeen bars in the barcode correspond to seventeen light sources. The
+  length of a bar is a measure of the "persistence" of the corresponding light
+  source. A long bar may initially represent a cluster of several lights whose
+  members  may  eventually  be  distinguished  from each other as new bars (or
+  persistent homology classes) are created.[133X
+  
+  [33X[0;0YHere  the  command  [10XPersistentBettiNumbersAlt[110X has been used. This command is
+  explained in the following section.[133X
+  
+  [33X[0;0YThe  follwowing  commands  use  a  watershed method to partition the digital
+  image  into  regions,  one  region  per  light  source. A makeshift function
+  [10XBasins(L)[110X,  available  here  ([7Xtutex/basins.g[107X), is called. (The efficiency of
+  the  example  could  be  easily  improved.  For  simplicity  it uses generic
+  commands  which,  in  principle, can be applied to cubical or permutarhedral
+  complexes of higher dimensions.)[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=Filename(DirectoriesPackageLibrary("HAP"),"../tutorial/images/circularGradient.png");;[127X[104X
+    [4X[25Xgap>[125X [27XF:=ReadImageAsFilteredPureCubicalComplex(file,20);;[127X[104X
+    [4X[25Xgap>[125X [27XFF:=ComplementOfFilteredPureCubicalComplex(F);[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XW:=(FiltrationTerm(FF,3));[127X[104X
+    [4X[25Xgap>[125X [27Xfor n in [4..23] do[127X[104X
+    [4X[25X>[125X [27XL:=[];;[127X[104X
+    [4X[25X>[125X [27Xfor i in [1..PathComponentOfPureComplex(W,0)] do[127X[104X
+    [4X[25X>[125X [27X P:=PathComponentOfPureComplex(W,i);;[127X[104X
+    [4X[25X>[125X [27X Q:=ThickeningFiltration(P,150,FiltrationTerm(FF,n));;[127X[104X
+    [4X[25X>[125X [27X Add(L,Q);;[127X[104X
+    [4X[25X>[125X [27Xod;;[127X[104X
+    [4X[25X>[125X [27XW:=Basins(L);[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XC:=PureComplexComplement(W);;[127X[104X
+    [4X[25Xgap>[125X [27XT:=PureComplexThickened(C);; C:=ContractedComplex(T,C);;  [127X[104X
+    [4X[25Xgap>[125X [27XDisplay(C);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.8 [33X[0;0YAlternative approaches to computing persistent homology[133X[101X
+  
+  [33X[0;0YFrom any sequence [22XX_0 ⊂ X_1 ⊂ X_2 ⊂ ⋯ ⊂ X_T[122X of cellular spaces (such as pure
+  cubical complexes, or cubical complexes, or simplicial complexes, or regular
+  CW  complexes) we can construct a filtered chain complex [22XC_∗ X_0 ⊂ C_∗ X_1 ⊂
+  C_∗  X_2  ⊂  ⋯ C_∗ X_T[122X. The induced homology homomorphisms [22XH_n(C_∗ X_0, F) →
+  H_n(C_∗ X_1, F) → H_n(C_∗ X_2, F) → ⋯ → H_n(C_∗ X_T, F)[122X with coefficients in
+  a  field [22XF[122X can be computed by applying an appropriate sequence of elementary
+  row operations to the boundary matrices in the chain complex [22XC_∗ X_T⊗ F[122X; the
+  boundary  matrices  are  sparse  and  are  best represented as such; the row
+  operations  need  to  be  applied in a fashion that respects the filtration.
+  This method is used in the above examples of persistent homology. The method
+  is not practical when the number of cells in [22XX_T[122X is large.[133X
+  
+  [33X[0;0YAn  alternative approach is to construct an admissible discrete vector field
+  on  each  term  [22XX_k[122X  in  the  filtration.  For  each vector field there is a
+  non-regular  CW-complex  [22XY_k[122X whose cells correspond to the critical cells in
+  [22XX_k[122X  and  for which there is a homotopy equivalence [22XX_k≃ Y_k[122X. For each [22Xk[122X the
+  composite  homomorphism [22XH_n(C_∗ Y_k, F) stackrel≅→ H_n(C_∗ X_k, F) → H_n(C_∗
+  X_k+1,  F)  stackrel≅→  H_n(C_∗ Y_k+1, F)[122X can be computed and the persistent
+  homology  can  be  derived from these homology homomorphisms. This method is
+  implemented  in the function [10XPersistentBettiNUmbersAlt(X,n,p)[110X where [22Xp[122X is the
+  characteristic  of  the  field,  [22Xn[122X  is  the  homology degree, and [22XX[122X can be a
+  filtered  pure  cubical  complex,  or  a  filtered  simplicial complex, or a
+  filtered regular CW complex, or indeed a filtered chain complex (represented
+  in    sparse    form).    This    function    incorporates   the   functions
+  [10XContractedFilteredPureCubicalComplex(X)[110X                                  and
+  [10XContractedFilteredRegularComplex(X)[110X which respectively input a filtered pure
+  cubical  complex  and  filtered  regular  CW-complex  and  return a filtered
+  complex of the same data type in which each term of the output filtration is
+  a deformation retract of the corresponding term in the input filtration.[133X
+  
+  [33X[0;0YIn  this approach the vector fields on the various spaces [22XX_k[122X are completely
+  independent  and so the method lends itself to a degree of easy parallelism.
+  This is not incorporated into the current implementation.[133X
+  
+  [33X[0;0YAs  an  illustration  we  consider a synthetic data set [22XS[122X consisting of [22X3527[122X
+  points  sampled, with errors, from an `unknown' manifold [22XM[122X in [22XR^3[122X. From such
+  a  data set one can associate a [22X3[122X-dimensional cubical complex [22XX_0[122X consisting
+  of   one  unit  cube  centred  on  each  (suitably  scaled)  data  point.  A
+  visualization of [22XX_0[122X is shown below.[133X
+  
+  [33X[0;0YGiven  a  pure  cubical  complex  [22XX_s[122X  we  construct  [22XX_s+1 =X_s ∪ {overline
+  e^3_λ}_λ∈  Λ[122X  by  adding  to [22XX_s[122X each closed unit cube [22Xoverline e^3_λ[122X in [22XR^3[122X
+  that  intersects  non-trivially  with [22XX_s[122X. We construct the filtered cubical
+  complex  [22XX_∗ ={X_i}_0≤ i≤ 19[122X and compute the persistence matrices [22Xβ_d^∗∗[122X for
+  [22Xd=0,1,2[122X  and  for [22XZ_2[122X coefficients. The filtered complex [22XX_∗[122X is quite large.
+  In  particular,  the  final  space  [22XX_19[122X  in the filtration involves [22X1092727[122X
+  vertices,  [22X3246354[122X  edges, [22X3214836[122X faces of dimension [22X2[122X and [22X1061208[122X faces of
+  dimension  [22X3[122X.  The  usual  matrix reduction approach to computing persistent
+  Betti  numbers would involve an appropriate row reduction of sparse matrices
+  one of which has over 3 million rows and 3 million columns.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("data247.txt");;[127X[104X
+    [4X[25Xgap>[125X [27XRead(file);;[127X[104X
+    [4X[25Xgap>[125X [27XF:=ThickeningFiltration(T,20);;[127X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbersAlt(F,[0,1,2]);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe  barcodes  suggest  that  the data points might have been sampled from a
+  manifold with the homotopy type of a torus.[133X
+  
+  
+  [1X5.8-1 [33X[0;0YNon-trivial cup product[133X[101X
+  
+  [33X[0;0YOf  course,  a  wedge  [22XS^2∨ S^1∨ S^1[122X has the same homology as the torus [22XS^1×
+  S^1[122X.  By establishing that a 'noise free' model for our data points, say the
+  10-th  term  [22XX_10[122X  in  the  filtration,  has  a  non-trivial  cup product [22X∪:
+  H^1(X_10, Z) × H^1(X_10, Z) → H^2(X_10, Z)[122X we can eliminate [22XS^2∨ S^1∨ S^1[122X as
+  a candidate from which the data was sampled.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XX10:=RegularCWComplex(FiltrationTerm(F,10));;[127X[104X
+    [4X[25Xgap>[125X [27Xcup:=LowDimensionalCupProduct(X10);;[127X[104X
+    [4X[25Xgap>[125X [27Xcup([1,0],[0,1]);[127X[104X
+    [4X[28X[ 1 ][128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.8-2 [33X[0;0YExplicit homology generators[133X[101X
+  
+  [33X[0;0YIt  could  be desirable to obtain explicit representatives of the persistent
+  homology  generators  that  "persist"  through  a  significant  sequence  of
+  filtration  terms.  There  are  two such generators in degree [22X1[122X and one such
+  generator  in  degree  [22X2[122X.  The  explicit  representatives  in degree [22Xn[122X could
+  consist  of  an inclusion of pure cubical complexes [22XY_n ⊂ X_10[122X for which the
+  incuced  homology homomorphism [22XH_n(Y_n, Z) → H_n(X_10, Z)[122X is an isomorphism,
+  and  for which [22XY_n[122X is minimal in the sense that its homotopy type changes if
+  any  one or more of its top dimensional cells are removed. Ideally the space
+  [22XY_n[122X  should  be  "close to the original dataset" [22XX_0[122X. The following commands
+  first  construct an explicit degree [22X2[122X homology generator representative [22XY_2⊂
+  X_10[122X  where  [22XY_2[122X  is  homotopy  equivalent  to  [22XX_10[122X. They then construct an
+  explicit  degree [22X1[122X homology generators representative [22XY_1⊂ X_10[122X where [22XY_1[122X is
+  homotopy  equivalent  to  a wedge of two circles. The final command displays
+  the homology generators representative [22XY_1[122X.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XY2:=FiltrationTerm(F,10);;                   [127X[104X
+    [4X[25Xgap>[125X [27Xfor t in Reversed([1..9]) do[127X[104X
+    [4X[25X>[125X [27XY2:=ContractedComplex(Y2,FiltrationTerm(F,t));[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[25Xgap>[125X [27XY2:=ContractedComplex(Y2);;[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XSize(FiltrationTerm(F,10));[127X[104X
+    [4X[28X918881[128X[104X
+    [4X[25Xgap>[125X [27XSize(Y2);                  [127X[104X
+    [4X[28X61618[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XY1:=PureComplexDifference(Y2,PureComplexRandomCell(Y2));;[127X[104X
+    [4X[25Xgap>[125X [27XY1:=ContractedComplex(Y1);;[127X[104X
+    [4X[25Xgap>[125X [27XSize(Y1);[127X[104X
+    [4X[28X474[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(Y1);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.9 [33X[0;0YKnotted proteins[133X[101X
+  
+  [33X[0;0YThe  Protein  Data  Bank  ([7Xhttps://www.rcsb.org/[107X)  contains a wealth of data
+  which  can  be  investigated  with  respect to knottedness. Information on a
+  particular  protein  can be downloaded as a .pdb file. Each protein consists
+  of  one  or  more  chains  of  amino  acids and the file gives 3-dimensional
+  Euclidean  coordinates  of  the  atoms in amino acids. Each amino acid has a
+  unique  "alpha  carbon"  atom  (labelled  as "CA" in the pdb file). A simple
+  3-dimensional  curve,  the  [13Xprotein backbone[113X, can be constructed through the
+  sequence  of  alpha carbon atoms. Typically the ends of the protein backbone
+  lie near the "surface" of the protein and can be joined by a path outside of
+  the protein to obtain a simple closed curve in Euclidean 3-space.[133X
+  
+  [33X[0;0YThe  following  command  reads  in  the pdb file for the T.thermophilus 1V2X
+  protein, which consists of a single chain of amino acids, and uses Asymptote
+  software  to  produce  an  interactive visualization of its backbone. A path
+  joining the end vertices of the backbone is displayed in blue.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("data1V2X.pdb");;[127X[104X
+    [4X[25Xgap>[125X [27XDisplayPDBfile(file);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe  next  command reads in the pdb file for the T.thermophilus 1V2X protein
+  and represents it as a [22X3[122X-dimensional pure cubical complex [22XK[122X. A resolution of
+  [22Xr=5[122X  is  chosen and this results in a representation as a subcomplex [22XK[122X of an
+  ambient  rectangular  box  of  volume equal to [22X184× 186× 294[122X unit cubes. The
+  complex [22XK[122X should have the homotopy type of a circle and the protein backbone
+  is a 1-dimenional curve that should lie in [22XK[122X. The final command displays [22XK[122X.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xr:=5;;[127X[104X
+    [4X[25Xgap>[125X [27XK:=ReadPDBfileAsPureCubicalComplex(file,r);;      [127X[104X
+    [4X[25Xgap>[125X [27XK:=ContractedComplex(K);;[127X[104X
+    [4X[25Xgap>[125X [27XK!.properties;[127X[104X
+    [4X[28X[ [ "dimension", 3 ], [ "arraySize", [ 184, 186, 294 ] ] ][128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(K);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YNext  we  create a filtered pure cubical complex by repeatedly thickening [22XK[122X.
+  We  perform  [22X15[122X thickenings, each thickening being a term in the filtration.
+  The  [22Xβ_1[122X  barcode  for  the  filtration  is  displayed.  This  barcode  is a
+  descriptor for the geometry of the protein. For current purposes it suffices
+  to note that the first few terms of the filtration have first homology equal
+  to  that  of  a circle. This indicates that the Euclidean coordinates in the
+  pdb file robustly determine some knot.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XF:=ThickeningFiltration(K,15);;[127X[104X
+    [4X[25Xgap>[125X [27XF:=FilteredPureCubicalComplexToCubicalComplex(F);;[127X[104X
+    [4X[25Xgap>[125X [27XF:=FilteredCubicalComplexToFilteredRegularCWComplex(F);;[127X[104X
+    [4X[25Xgap>[125X [27XP:=PersistentBettiNumbersAlt(F,1);;[127X[104X
+    [4X[25Xgap>[125X [27XBarCodeCompactDisplay(P);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe next commands compute a presentation for the fundamental group [22Xπ_1( R^3∖
+  K)[122X  and  the  Alexander  polynomial for the knot. This is the same Alexander
+  polynomial as for the trefoil knot. Also, Tietze transformations can be used
+  to see that the fundamental group is the same as for the trefoil knot.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XC:=PureComplexComplement(K);;[127X[104X
+    [4X[25Xgap>[125X [27XC:=ContractedComplex(C);;[127X[104X
+    [4X[25Xgap>[125X [27XG:=FundamentalGroup(C);;[127X[104X
+    [4X[25Xgap>[125X [27XGeneratorsOfGroup(G);[127X[104X
+    [4X[28X[ f1, f2 ][128X[104X
+    [4X[25Xgap>[125X [27XRelatorsOfFpGroup(G);[127X[104X
+    [4X[28X[ f2*f1^-1*f2^-1*f1^-1*f2*f1 ][128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XAlexanderPolynomial(G);[127X[104X
+    [4X[28Xx_1^2-x_1+1[128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.10 [33X[0;0YRandom simplicial complexes[133X[101X
+  
+  [33X[0;0YFor  a  positive  integer  [22Xn[122X  and  probability  [22Xp[122X  we  denote  by [22XY(n,p)[122X the
+  [13XLinial-Meshulam  random simplicial 2-complex[113X. Its [22X1[122X-skeleton is the complete
+  graph  on [22Xn[122X vertices; each possible [22X2[122X-simplex is included independently with
+  probability [22Xp[122X.[133X
+  
+  [33X[0;0YThe  following  commands  first compute the number [22Xh_i[122X of non-trivial cyclic
+  summands  in  [22XH_i(Y(100,p),  Z)[122X for a range of probabilities [22Xp[122X and [22Xi=1,2[122X and
+  then  produce  a  plot of [22Xh_i[122X versus [22Xp[122X. The plot for [22Xh_1[122X is red and the plot
+  for  [22Xh_2[122X  is blue. A plot for the Euler characteristic [22X1-h_1+h_2[122X is shown in
+  green.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XL:=[];;M:=[];;[127X[104X
+    [4X[25Xgap>[125X [27Xfor p in [1..100] do[127X[104X
+    [4X[25X>[125X [27XK:=RegularCWComplex(RandomSimplicialTwoComplex(100,p/1000));;[127X[104X
+    [4X[25X>[125X [27Xh1:=Length(Homology(K,1));;[127X[104X
+    [4X[25X>[125X [27Xh2:=Length(Homology(K,2));;[127X[104X
+    [4X[25X>[125X [27XAdd(L, [1.0*(p/1000),h1,"red"]);[127X[104X
+    [4X[25X>[125X [27XAdd(L, [1.0*(p/1000),h2,"blue"]);[127X[104X
+    [4X[25X>[125X [27XAdd(M, [1.0*(p/1000),1-h1+h2,"green"]);[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[25Xgap>[125X [27XScatterPlot(L);[127X[104X
+    [4X[25Xgap>[125X [27XScatterPlot(M);[127X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YFrom  this  plot  it  seems that there is a [13Xphase change threshold[113X at around
+  [22Xp=0.025[122X.  An  inspection of the first homology groups [22XH_1(Y(100,p), Z)[122X shows
+  that  in  most cases there is no torsion. However, around the threshold some
+  of the complexes do have torsion in their first homology.[133X
+  
+  [33X[0;0YSimilar commands for [22XY(75,p)[122X suggest a phase transition at around [22Xp=0.035[122X in
+  this  case.  The  following  commands compute [22XH_1(Y(75,p), Z)[122X for [22X900[122X random
+  [22X2[122X-complexes  with [22Xp[122X in a small interval around [22X0.035[122X and, in each case where
+  there  is  torsion, the torsion coefficients are stored in a list. The final
+  command  prints  these  lists  --  all but one of which are of length [22X1[122X. For
+  example,  there is one [22X2[122X-dimensional simplicial complex on [22X75[122X vertices whose
+  first  homology contains the summand [22XZ_107879661870516800665161182578823128[122X.
+  The  largest  prime  factor  is  [22X80555235907994145009690263[122X  occuring in the
+  summand [22XZ_259837760616287294231081766978855[122X.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xtorsion:=function(n,p)[127X[104X
+    [4X[25X>[125X [27Xlocal H, Y;[127X[104X
+    [4X[25X>[125X [27XY:=RegularCWComplex(RandomSimplicialTwoComplex(n,p));[127X[104X
+    [4X[25X>[125X [27XH:=Homology(Y,1);[127X[104X
+    [4X[25X>[125X [27XH:=Filtered(H,x->not x=0);[127X[104X
+    [4X[25X>[125X [27Xreturn H;[127X[104X
+    [4X[25X>[125X [27Xend;[127X[104X
+    [4X[28Xfunction( n, p ) ... end[128X[104X
+    [4X[28X[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XL:=[];;for n in [73000..73900] do[127X[104X
+    [4X[25X>[125X [27Xt:=torsion(75,n/2000000);  [127X[104X
+    [4X[25X>[125X [27Xif not t=[] then Add(L,t); fi;[127X[104X
+    [4X[25X>[125X [27Xod;[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XDisplay(L);[127X[104X
+    [4X[28X[ [                                     2 ],[128X[104X
+    [4X[28X  [                                    26 ],[128X[104X
+    [4X[28X  [     259837760616287294231081766978855 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [                                     3 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [          2761642698060127444812143568 ],[128X[104X
+    [4X[28X  [       2626355281010974663776273381976 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [                                     3 ],[128X[104X
+    [4X[28X  [         33112382751264894819430785350 ],[128X[104X
+    [4X[28X  [                                    16 ],[128X[104X
+    [4X[28X  [                                     4 ],[128X[104X
+    [4X[28X  [                                     3 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [                                     3 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [      85234949999183888967763100590977 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [      24644196130785821107897718662022 ],[128X[104X
+    [4X[28X  [                                     2,                                     2 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [           416641662889025645492982468 ],[128X[104X
+    [4X[28X  [         41582773001875039168786970816 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [            75889883165411088431747730 ],[128X[104X
+    [4X[28X  [         33523474091636554792305315165 ],[128X[104X
+    [4X[28X  [  107879661870516800665161182578823128 ],[128X[104X
+    [4X[28X  [          5588265814409119568341729980 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [          5001457249224115878015053458 ],[128X[104X
+    [4X[28X  [                                    10 ],[128X[104X
+    [4X[28X  [                                    12 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [                                     2 ],[128X[104X
+    [4X[28X  [                                     3 ],[128X[104X
+    [4X[28X  [          7757870243425246987971789322 ],[128X[104X
+    [4X[28X  [       8164648856993269673396613497412 ],[128X[104X
+    [4X[28X  [                                     2 ] ][128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X5.11 [33X[0;0YComputing homology of a clique complex (Vietoris-Rips complex)[133X[101X
+  
+  [33X[0;0YTopological data analysis provides one motivation for wanting to compute the
+  homology of a clique complex. Consider for instance the cloud of data points
+  shown in Example [14X5.2-1[114X. This data is a set [22XS[122X of 400 points in the plane. Let
+  [22XΓ[122X  be the graph with vertex set [22XS[122X and with two vertices joined by an edge if
+  they lie within a Euclidean distance of 40 of each other. The clique complex
+  [22XK=K(Γ)[122X could be studied to see what it reveals about the data. The following
+  commands construct [22XK[122X and show that it is a 23-dimensional simplicial complex
+  consisting of a total of 36191976 simplices.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xfile:=HapFile("data134.txt");;                              [127X[104X
+    [4X[25Xgap>[125X [27XRead(file);[127X[104X
+    [4X[25Xgap>[125X [27XA:=VectorsToSymmetricMatrix(S,EuclideanApproximatedMetric);;[127X[104X
+    [4X[25Xgap>[125X [27Xthreshold:=40;; [127X[104X
+    [4X[25Xgap>[125X [27Xgrph:=SymmetricMatrixToGraph(A,threshold);;[127X[104X
+    [4X[25Xgap>[125X [27Xdimension_cap:=100;; [127X[104X
+    [4X[25Xgap>[125X [27XK:=CliqueComplex(grph,dimension_cap);[127X[104X
+    [4X[28XSimplicial complex of dimension 23.[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XSize(K);[127X[104X
+    [4X[28X36191976[128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThe  computation  of  the  homology  of this clique complex [22XK[122X is a challenge
+  because  of  its size. If we are only interested in [22XK[122X up to homotopy then we
+  could  try to modify the graph [22XΓ[122X in such a way that the homotopy type of the
+  clique  complex  is unchanged but the size of the clique complex is reduced.
+  This  is  done in the following commands, producing a smaller [22X19[122X-dimensional
+  simplicial complex [22XK[122X with 4180652 simplices.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XContractGraph(grph);;[127X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27Xdimension_cap:=100;; [127X[104X
+    [4X[25Xgap>[125X [27XK:=CliqueComplex(grph,dimension_cap);[127X[104X
+    [4X[28XSimplicial complex of dimension 19.[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XSize(K);[127X[104X
+    [4X[28X4180652[128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YTo  compute the homology of [22XK[122X in degrees [22X0[122X to [22X5[122X say, we could represent [22XK[122X as
+  a  regular  CW-complex  [22XY[122X and then compute the homology of [22XY[122X as follows. The
+  homology  [22XH_n(K)= Z[122X for [22Xn=0,1[122X and [22XH_n(K)= 0[122X for [22Xn=2,3,4,5[122X is consistent with
+  the  data  having  been  sampled  from  a  space with the homotopy type of a
+  circle.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XY:=RegularCWComplex(K);[127X[104X
+    [4X[28XRegular CW-complex of dimension 19[128X[104X
+    [4X[28X[128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,0);[127X[104X
+    [4X[28X[ 0 ][128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,1);[127X[104X
+    [4X[28X[ 0 ][128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,2);[127X[104X
+    [4X[28X[  ][128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,3);[127X[104X
+    [4X[28X[  ][128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,4);[127X[104X
+    [4X[28X[  ][128X[104X
+    [4X[25Xgap>[125X [27XHomology(Y,5)[127X[104X
+    [4X[28X[  ][128X[104X
+    [4X[28X[128X[104X
+  [4X[32X[104X
+  
