@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion='1'>
+    <script>
+var AppDefaultPath	= "/Applications/GarageBand.app";
+var AppMinVersion	= "6.0.0";
+var AppMaxVersion	= "6.0.5";
+
+</script>
+    <!-- Installer UI-ey stuff -->
+    <title>SU_TITLE</title>
+    <welcome file="SUDescription.html"/>
+    <license auto='false' file="License.rtf" sla="EA0760"/>
+    <background file='background.tif' scaling='none' alignment='left'/>
+    <options customize="never" rootVolumeOnly="true" hostArchitectures='ppc,i386'/>
+    <platforms>
+        <client arch="i386,ppc"/>
+        <server arch="i386,ppc"/>
+    </platforms>
+    <!-- Manual Install package layout -->
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='manual' title='MANUAL_TITLE'>
+        <pkg-ref id='manual' auth='Root'>#GarageBand6.0.5Update.pkg</pkg-ref>
+    </choice>
+    <!-- Software Update package layout -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' visible='needsGBUpdate(AppDefaultPath,AppMinVersion,AppMaxVersion)' suDisabledGroupID='GarageBand605Update' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html'></choice>
+    <choices-outline ui='invisible'>
+        <line choice='SU-GBUp'/>
+    </choices-outline>
+    <choice id="SU-GBUp" title="GarageBand 6.0.5 Package" selected='(typeof(choices.su) != "undefined")'>
+        <pkg-ref id='su' auth='Root'>GarageBand6.0.5Update.pkg</pkg-ref>
+    </choice>
+    <!-- SCRIPT stuff -->
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck()
+{
+	// Installation check since we're root volume only. That way, the user gets error
+	// right away, not at volume select screen.
+	
+	return (rootVolumeOSGood() &amp;&amp;
+			hasAppStoreReceipt() &amp;&amp;
+			canHasUpdateWithErrors(AppDefaultPath,AppMinVersion,AppMaxVersion)
+			);
+}
+
+function rootVolumeOSGood()
+{
+	// Error if OS X below 10.6.8
+	if (-1 == system.compareVersions(system.version.ProductVersion, '10.6.8'))
+	{
+		my.result.message = system.localizedStringWithFormat('ERROR_OSSNOWLEO');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+	// OS X 10.6.8 or newer -- PASS
+	return true;
+}
+
+function needsiLMB()
+{
+	return needsUpdate(ILMBDefaultPath,ILMBMinVersion,ILMBMaxVersion);
+}
+
+function hasAppStoreReceipt()
+{
+	var receiptPath = "/Applications/GarageBand.app/Contents/_MASReceipt/receipt";
+	if (system.files.fileExistsAtPath(receiptPath))
+	{
+		my.result.message = system.localizedStringWithFormat('ERROR_MASAPP');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+	return true;
+}
+
+
+function canHasUpdateWithErrors(bundlePath, minVersionString, maxVersionString)
+{
+	var bundleVersion = PathGetShortVersion(bundlePath);
+	if (!bundleVersion &amp;&amp; minVersionString &amp;&amp; (minVersionString != 0))
+	{
+		my.result.message = system.localizedStringWithFormat('ERROR_APP');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if (system.compareVersions(bundleVersion,minVersionString) == -1)
+	{
+		my.result.message = system.localizedStringWithFormat('ERROR_APP');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if (system.compareVersions(bundleVersion,maxVersionString) == 1)
+	{
+		my.result.message = system.localizedStringWithFormat('ERROR_TOONEW');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	return true;
+}
+
+function canHasUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;= 0));
+}
+
+function needsUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;0));
+}
+
+function needsGBUpdate()
+{
+	return	(hasAppStoreReceipt() &amp;&amp;
+		needsUpdate(AppDefaultPath,AppMinVersion,AppMaxVersion));
+}
+
+</script>
+    <!-- Common include -->
+    <script>
+	function PathGetShortVersion(path)
+	{
+		var bundle = system.files.bundleAtPath(path);
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		return shortVers;
+	}
+
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length >tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (;components.length&lt;tupleCount;)
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0;i&lt;propObj.length;i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE"		= "GarageBand Update";
+"SU_VERS" 		= "6.0.5";
+"SU_SERVERCOMMENT" 	= "For Client and Server systems.";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1138.32">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'; min-height: 15.0px}
+  </style>
+</head>
+<body>
+<p class="p1">This update supports general compatibility and addresses overall stability and performance, including the following:<span class="Apple-converted-space"> </span></p>
+<p class="p2"><br></p>
+<p class="p1">• Updates compatibility with GarageBand for iOS projects</p>
+<p class="p1">• Fixes a playback issue with the GarageBand Lesson preview videos</p>
+<p class="p1">• Corrects issues with some software instruments triggering incorrect or stuck notes</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='su' installKBytes='109272' version='6.0.5.0.1.1203730862'/>
+</installer-gui-script>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386,x86_64" customize="never" type="config-data"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="CustomVoiceUpdate_en_US_nicky" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="Voice Update - Nicky" visible="Script1(my.target.mountpoint) &amp;&amp; BundleCheck0(my.target.mountpoint)">
+        <pkg-ref id="com.apple.pkg.CustomVoiceUpdate_en_US_nicky.16U1181" auth="Root" packageIdentifier="com.apple.pkg.CustomVoiceUpdate_en_US_nicky.16U1181">CustomVoiceUpdate_en_US_nicky.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.13') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.14') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_7E7AEE96CA', '10.13');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_3491501876');
+	if (!BundleCheck0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function BundleCheck0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + './System/Library/Speech/Voices/NickySiri.SpeechVoice');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.2.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.13') &lt; 0 || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.14') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_7E7AEE96CA', '10.13');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!BundleCheck0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script1(prefix) {
+	return !!(!my.target.receiptForIdentifier('com.apple.pkg.CustomVoiceUpdate_en_US_nicky.16U1181'));
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Voice Update - Nicky";
+"SU_VERS" = "1.2.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+        &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+        &lt;title&gt;&lt;/title&gt;
+        &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+        &lt;meta name="CocoaVersion" content="1038.35"&gt;
+        &lt;style type="text/css"&gt;
+            p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'}
+            p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px \'Lucida Grande\'; min-height: 15.0px}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;p class="p2"&gt;•&lt;span class="Apple-converted-space"&gt;  &lt;/span&gt;&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.CustomVoiceUpdate_en_US_nicky.16U1181" installKBytes="416526" version="3.0.0.0.1.1501349317"/>
+</installer-gui-script>

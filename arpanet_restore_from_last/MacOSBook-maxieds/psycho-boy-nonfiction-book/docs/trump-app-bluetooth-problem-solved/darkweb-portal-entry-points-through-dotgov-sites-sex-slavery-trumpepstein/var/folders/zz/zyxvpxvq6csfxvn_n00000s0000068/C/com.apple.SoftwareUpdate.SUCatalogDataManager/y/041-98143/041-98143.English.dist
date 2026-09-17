@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options visibleOnlyForPredicate="true" hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBook8,1','MacBookAir5,1','MacBookAir5,2','MacBookAir6,1','MacBookAir6,2','MacBookAir7,1','MacBookAir7,2','MacBookPro9,1','MacBookPro9,2','MacBookPro10,1','MacBookPro10,2','MacBookPro11,1','MacBookPro11,2','MacBookPro11,3','MacBookPro11,4','MacBookPro11,5','MacBookPro12,1','MacPro6,1','Macmini6,1','Macmini6,2','Macmini7,1','iMac13,1','iMac13,2','iMac13,3','iMac14,1','iMac14,2','iMac14,3','iMac14,4','iMac15,1',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_0');
+	if (!Script0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script0(prefix) {
+	if (!system.ioregistry.matchingClass("ATIRadeonX1000").length == 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	return true;
+}
+function FileCheck1(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Library/Application Support/BootCamp/WindowsSupport.dmg') == 0) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <tags>
+        <tag>BootCampAutoUnattend</tag>
+    </tags>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="BootCampESD" start_selected="true" visible="FileCheck1('/') &amp;&amp; Script0('/')">
+        <pkg-ref id="ESD" auth="Root" packageIdentifier="com.apple.pkg.BootCampESD">BootCampESD.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "BootCamp";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	body {font: 11.0px Lucida Grande;}
+    p {margin: 0.0px 0.0px 0.0px 0.0px;}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;This is the BootCamp ESD update.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="ESD" installKBytes="1024487" version="1.0.0.0.1.1306847324"/>
+</installer-gui-script>

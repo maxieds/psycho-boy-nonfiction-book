@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386,x86_64,arm64" customize="never" visibleOnlyForPredicate="true"/>
+    <title>SU_TITLE</title>
+    <volume-check script="VolumeCheck()"/>
+    <tags>
+        <tag>bridgeOSUpdate</tag>
+        <tag>bridgeos-variant:customer</tag>
+    </tags>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="BridgeOSUpdateCustomer" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE">
+        <pkg-ref id="com.apple.pkg.BridgeOSUpdateCustomer" auth="Root" packageIdentifier="com.apple.pkg.BridgeOSUpdateCustomer">BridgeOSUpdateCustomer.pkg</pkg-ref>
+        <pkg-ref id="com.apple.pkg.BridgeOSBrain" auth="Root" packageIdentifier="com.apple.pkg.BridgeOSBrain">BridgeOSBrain.pkg</pkg-ref>
+    </choice>
+    <script>
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!BridgeIdentityCheck0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function BridgeIdentityCheck0(prefix) {
+	if (!system.hasOwnProperty('bridge') || !system.bridge.hasOwnProperty('deviceIdentity') || system.bridge.deviceIdentity.chipID == 0 || system.bridge.deviceIdentity.boardID == 0 || !system.bridge.hasOwnProperty('bridgeVersion') || !system.bridge.hasOwnProperty('bridgeBuildGroup')) {
+		return false;
+	}
+	var values0 = [0x0C,0x0A,0x37,0x17,0x3A,0x0F,0x0E,0x22,0x23,0x18,0x3E,0x38,0x3B,0x3F,0x0B,0x07];
+	if (!system.bridge.deviceIdentity.hasOwnProperty('boardID') || values0.indexOf(system.bridge.deviceIdentity.boardID) &lt; 0) {
+		return false;
+	}
+	var values1 = [0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012,0x8012];
+	if (!system.bridge.deviceIdentity.hasOwnProperty('chipID') || values1.indexOf(system.bridge.deviceIdentity.chipID) &lt; 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "BridgeOSUpdateCustomer";
+"SU_VERS" = "26.3";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+</installer-gui-script>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options visibleOnlyForPredicate="true" hostArchitectures="i386,x86_64" customize="never" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <tags>
+        <tag>VOICEID:com.apple.speech.synthesis.voice.Alex_2</tag>
+    </tags>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.10') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_1');
+	if (!BundleCheck0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function BundleCheck0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + './System/Library/Speech/Voices/Alex.SpeechVoice');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '2.0.36') >= 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.10') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_2');
+	if (!BundleCheck0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="SpeechVoice_en_US_AlexPremium" start_selected="true" visible="BundleCheck0('/')">
+        <pkg-ref id="SpeechVoice_en_US_AlexPremium" auth="Root" packageIdentifier="com.apple.pkg.SpeechVoice_en_US_AlexPremium">SpeechVoice_en_US_AlexPremium.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Voice Update - Alex";
+"SU_VERS" = "2.0.36";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	body {font: 11.0px Lucida Grande;}
+    p {margin: 0.0px 0.0px 0.0px 0.0px;}
+  </style>
+</head>
+<body>
+<p></p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='SpeechVoice_en_US_AlexPremium' installKBytes='578789' version='3.0.0.0.1.1407544405'/>
+</installer-gui-script>

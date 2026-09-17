@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <pkg-ref id="BeatsUpdaterAuto" installKBytes="3330" version="1.0.0.0.1.1578353858">
+        <must-close>
+            <app id="com.apple.Beats-Updater"/>
+            <app id="com.beatsbydre.Beats-Updater"/>
+        </must-close>
+    </pkg-ref>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="BeatsUpdaterAuto" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="StagedOlder(my.target.mountpoint)">
+        <pkg-ref id="BeatsUpdaterAuto" auth="Root" packageIdentifier="com.apple.pkg.BeatsUpdaterAuto">BeatsUpdaterAuto.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.13') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.13');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.13') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.13');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function StagedOlder(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/Applications/Beats\ Updater.app/Contents/Info.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '4.4.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Beats Updater";
+"SU_VERS" = "4.4";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1265.19"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\'; min-height: 13.0px}
+    span.s1 {text-decoration: underline ; color: #4787ff}
+    span.Apple-tab-span {white-space:pre}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;What’s New in Beats Updater 4.4&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="Apple-converted-space"&gt;     &lt;span class="Apple-tab-span"&gt;  &lt;/span&gt;&lt;/span&gt;• Support for Powerbeats&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+</installer-gui-script>

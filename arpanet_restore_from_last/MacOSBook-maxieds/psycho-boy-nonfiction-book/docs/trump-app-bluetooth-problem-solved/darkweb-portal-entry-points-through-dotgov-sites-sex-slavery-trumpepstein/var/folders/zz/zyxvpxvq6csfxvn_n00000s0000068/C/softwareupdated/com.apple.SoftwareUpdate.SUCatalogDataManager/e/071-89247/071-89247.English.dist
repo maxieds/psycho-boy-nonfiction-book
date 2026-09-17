@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <pkg-ref id="Safari14.1.2Mojave">
+        <must-close>
+            <app id="com.apple.Safari"/>
+        </must-close>
+    </pkg-ref>
+    <pkg-ref id="Safari14.1.2MojaveAuto" installKBytes="237238" version="1.0.0.0.1.1629749149">
+        <must-close>
+            <app id="com.apple.Safari"/>
+        </must-close>
+    </pkg-ref>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="Safari14.1.2MojaveAuto" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="DoesntHaveNewerOrSameWebkit(my.target.mountpoint)">
+        <pkg-ref id="Safari14.1.2MojaveAuto" auth="Root" packageIdentifier="com.apple.pkg.Safari14.1.2MojaveAuto">Safari14.1.2MojaveAuto.pkg</pkg-ref>
+    </choice>
+    <script>
+function compareBuildVersions(lhs, rhs) {
+	var lhsMatch = lhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	var rhsMatch = rhs.match(/([0-9]+)([A-Z])([0-9]+)([a-z])?/);
+	return system.compareVersions(lhsMatch.slice(1).join(","), rhsMatch.slice(1).join(","));
+}
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.14') &lt; 0 || system.compareVersions(system.version.ProductVersion, '10.15') &gt;= 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_7E7AEE96CA', '10.14');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (compareBuildVersions(system.version.ProductBuildVersion, '18G84') &lt; 0) {
+		my.result.message = system.localizedString('ERROR_3491501876');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.14.6') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.14.6');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.14.9') &gt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_25CBFE41C7', '10.14.9');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (compareBuildVersions(myTargetSystemVersion.ProductBuildVersion, '18G84') &lt; 0) {
+		my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!DoesntHaveNewerWebkit(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function DoesntHaveNewerWebkit(prefix) {
+	if (FrameworkOlderOrEqual(prefix) &amp;&amp; StagedOlderOrEqual(prefix)) {
+		return true;
+	}
+	my.result.message = system.localizedString('ERROR_2DFA280740');
+	return false;
+}
+function FrameworkOlderOrEqual(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/Frameworks/WebKit.framework/Resources/Info.plist');
+	if (!plist) {
+		return true;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(plistKeyValue, '14611.3.10.1.7') &gt; 0) {
+		return false;
+	}
+	return true;
+}
+function StagedOlderOrEqual(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/StagedFrameworks/Safari/WebKit.framework/Resources/Info.plist');
+	if (!plist) {
+		return true;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(plistKeyValue, '14611.3.10.1.7') &gt; 0) {
+		return false;
+	}
+	return true;
+}
+function DoesntHaveNewerOrSameWebkit(prefix) {
+	if (FrameworkOlder(prefix) &amp;&amp; StagedOlder(prefix)) {
+		return true;
+	}
+	return false;
+}
+function FrameworkOlder(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/Frameworks/WebKit.framework/Resources/Info.plist');
+	if (!plist) {
+		return true;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(plistKeyValue, '14611.3.10.1.7') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function StagedOlder(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/StagedFrameworks/Safari/WebKit.framework/Resources/Info.plist');
+	if (!plist) {
+		return true;
+	}
+	var plistKeyValue = plist['CFBundleVersion'];
+	if (!plistKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(plistKeyValue, '14611.3.10.1.7') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Safari";
+"SU_VERS" = "14.1.2";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1265.19"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\';}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\'; min-height: 8.0px}
+    p.bulleted {margin: 0 12px; text-indent: -12px}
+    span.s1 {text-decoration: underline ; color: #4787ff}
+    span.Apple-tab-span {white-space:pre;}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;Safari 14.1.2 includes security improvements and bug fixes.&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;For detailed information on the security content of this update, please visit: &lt;a href="https://support.apple.com/kb/HT201222"&gt;&lt;span class="s1"&gt;https://support.apple.com/kb/HT201222&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+</installer-gui-script>

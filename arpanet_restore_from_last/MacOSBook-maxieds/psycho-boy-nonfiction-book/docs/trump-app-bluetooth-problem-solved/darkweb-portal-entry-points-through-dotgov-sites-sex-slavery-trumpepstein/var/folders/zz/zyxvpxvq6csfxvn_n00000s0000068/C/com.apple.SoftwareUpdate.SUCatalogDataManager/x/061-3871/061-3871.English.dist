@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <options customize='never'/>
+    <options hostArchitectures='i386,ppc'/>
+    <platforms>
+        <client arch='intel,ppc'/>
+        <server arch='intel,ppc'/>
+    </platforms>
+    <title>SU_TITLE</title>
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='su' suDisabledGroupID='QT72CompatibilityUpdate'>
+        <pkg-ref id='auto' auth='Root'>QT72CompatibilityUpdate.pkg</pkg-ref>
+    </choice>
+    <choice id='manual'>
+        <pkg-ref id='manual' auth='Root'>.</pkg-ref>
+    </choice>
+    <choice id='su' title='SU_TITLE'/>
+    <choice id='su' versStr='SU_VERS'/>
+    <choice id='su' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='su' visible="commonRequirements() &amp;&amp; !installed()"/>
+    <volume-check script='volumeCheck()'/>
+    <script>
+
+        function commonRequirements()
+        {
+            try {
+                // must have an OS
+                if(false == system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist")) {
+                    return (false);
+                }
+    
+                // must have QT 7.2.0
+                var plist = system.files.plistAtPath(my.target.mountpoint + "/System/Library/Frameworks/QuickTime.framework/Versions/Current/Resources/version.plist");
+                if (!plist || plist.CFBundleShortVersionString != '7.2.0') {
+                    return (false);
+                }
+
+                // must not have tier3 loc
+                if(true == system.files.fileExistsAtPath(my.target.mountpoint + "/var/db/.AppleTier3Language")) {
+                    return (false);
+                }
+
+            }
+            catch(err) {return false;}
+            return(true);
+        }
+
+        function volumeCheck()
+        {
+            if (commonRequirements()) {
+                return (true);
+            }
+            my.result.type = 'Fatal';
+            my.result.message = system.localizedString('ERROR_INSTALL');
+            return(false);
+        }
+        
+        // for SU
+        function installed()
+        {
+            try {
+                var file = system.files.plistAtPath(my.target.mountpoint + "/Library/Receipts/QT72CompatibilityUpdate.pkg/Contents/Info.plist");
+                if (file) {
+                    var v = file.CFBundleVersion;
+                    if(-1 != system.compareVersions(v, "1.0")) {
+                        return(true);
+                    }
+                }
+            }
+            catch(err) {return false;}
+            
+            return(false);
+        }
+
+        </script>
+    <readme file='SUDescription.html'/>
+    <license file='License.rtf'/>
+    <background file='background.tif' alignment='topleft' scaling='proportional'/>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "Compatibility Update for QuickTime 7.2";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+
+"SU_DESCRIPTION"='<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="824.41">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px Lucida Grande; min-height: 13.0px}
+  </style>
+</head>
+<body>
+<p class="p1">This update delivers increased compatibility with iLife.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

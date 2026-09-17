@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="firmware" customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBookPro11,1',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_1');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	var versions = ['MBP111.88Z.0133.B00.1309220923',];
+	var rom = system.ioregistry.fromPath('IODeviceTree:/rom@0');
+	if (!rom || !(rom.version) || versions.indexOf(rom.version) == -1) {
+		my.result.message = system.localizedString('ERROR_1');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (system.compareVersions(system.version.ProductVersion, '10.9') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.9');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacBookProRetinaEFIUpdate1.3" start_selected="true">
+        <pkg-ref id="MacBookProTwo" auth="Root" packageIdentifier="com.apple.pkg.MacBookProRetinaEFIUpd" onConclusion="RequireRestart">MacBookProRetinaEFIUpd.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "MacBook Pro EFI Firmware Update";
+"SU_VERS" = "1.3";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '<HTML><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin-left: 0.0px margin-top: 0.0px; font: 11px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p>
+MacBook Pro Retina EFI Update 1.3
+</p>
+<p>
+This update is recommended for MacBook Pro (Retina, 13-inch, late 2013) models.  This update addresses an issue where the built-in keyboard and Multi-Touch trackpad may become unresponsive.
+</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+    <readme mime-type="text/html"><![CDATA[<HTML><!DOCTYPE html <HTML><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin: 0.0px 0.0px 0.0px 0.0px; font: 11px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p>
+The MacBook Pro Retina EFI Firmware Update will update the EFI firmware on your computer. Your computer's power cord must be connected and plugged into a working power source. When your MacBook Pro Retina restarts, a gray screen will appear with a status bar to indicate the progress of the update. It will take several minutes for the update to complete. Do not disturb or shut off the power on your MacBook Pro Retina during this update.
+</p>
+</body>
+</html>
+]]></readme>
+
+	<pkg-ref id='MacBookProTwo' installKBytes='5430' version='1.3.0.0.1.1355452227'/>
+</installer-gui-script>

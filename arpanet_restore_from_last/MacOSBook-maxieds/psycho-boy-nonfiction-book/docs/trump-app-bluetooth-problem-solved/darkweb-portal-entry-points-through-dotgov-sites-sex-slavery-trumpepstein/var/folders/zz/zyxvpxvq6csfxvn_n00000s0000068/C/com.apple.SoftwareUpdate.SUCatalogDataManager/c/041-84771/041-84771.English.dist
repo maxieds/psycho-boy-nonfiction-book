@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="firmware" customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+var updateName = "MacBookAirEFIUpdate";
+
+
+
+function MBA61SMC()
+   {
+            debuglog("Checking MBA61");
+
+	   		var model = system.sysctl("hw.model");
+			if (!model) return false;
+			if (model != "MacBookAir6,1") 
+			{
+				debuglog("MBA61 Model Property fail; got: " + model);
+				return false;
+			}
+			debuglog("Model property pass; got: " + model);
+			
+       		var obj = system.ioregistry.fromPath("IOService:/AppleACPIPlatformExpert/SMC/AppleSMC");
+       		if (obj) {
+           	var property = obj["smc-version"];
+           	if (property)
+			{
+				// greater than or equal to 2.12f135
+				return (compareTwoSMCVersions(property,"2.12f134") == 1);	
+			}
+          }       
+       return false;
+   }
+
+function MBA62SMC()
+   {
+            debuglog("Checking MBA62");
+	   		var model = system.sysctl("hw.model");
+			if (!model) return false;
+			if (model != "MacBookAir6,2") 
+			{
+				debuglog("MBA62 Model Property fail; got: " + model);
+				return false;
+			}
+			debuglog("Model property pass; got: " + model);
+
+       		var obj = system.ioregistry.fromPath("IOService:/AppleACPIPlatformExpert/SMC/AppleSMC");
+       		if (obj) {
+           	var property = obj["smc-version"];
+           	if (property)
+			{
+				// greater than or equal to 2.13f7
+				return (compareTwoSMCVersions(property,"2.13f6") == 1);	
+			}
+          }
+       return false;
+   }
+
+
+function compareTwoSMCVersions(leftSMC, rightSMC)
+{
+    // SMC versions look like this: 2.15f6
+    // However, if the SMC gets "borked" it reports as "0.000"
+	// input is two SMC versions, each as above
+	// output:
+	//		-2 if there's an error
+	//		-1 if left &lt; right
+	//		0 if left == right
+	//		1 if left &gt; right
+
+
+	debuglog("Entering compareTwoSMCVersions with leftSMC '" + leftSMC + "' and rightSMC '" + rightSMC +"'");
+
+    if ((leftSMC === "0.000") &amp;&amp; (rightSMC === "0.000"))
+    {
+        debuglog("both sides borked, means both sides are equal");
+        return 0;
+
+    } else if ((leftSMC === "0.000") &amp;&amp; !(rightSMC === "0.000"))
+    {
+        debuglog("left side borked, right side not, so left is less than right");
+        return -1;
+    } else if (!(leftSMC === "0.000") &amp;&amp; (rightSMC === "0.000"))
+    {
+        debuglog("left side not, right side borked, so left is greater than right");
+        return 1;
+    }
+
+    // split SMC strings via regex
+    var SMCre = /(\d+)\.(\d+)([a-f]{1})(\d+)/;
+
+    // check the leftSMC for validity
+    var leftResultObj = SMCre.exec(leftSMC);
+    if (leftResultObj[0] != leftSMC)
+    {
+        // we didn't match the regex
+        debuglog("LeftSMC '" + leftSMC + "' does not match regex, error!");
+        return -2;
+    }
+    debuglog("LeftSMC '" + leftSMC + "' is a valid SMC Version.");
+
+    // split into components
+    var leftMajorVersion  = leftResultObj[1];
+    var leftMinorVersion  = leftResultObj[2];
+    var leftBuildType     = leftResultObj[3];
+    var leftBuildNumber   = leftResultObj[4];
+
+
+    // check the rightSMC for validity
+    var rightResultObj = SMCre.exec(rightSMC);
+    if (rightResultObj[0] != rightSMC)
+    {
+        // we didn't match the regex
+        debuglog("right SMC version '" + rightSMC + "' does not match regex, error!");
+        return -2;
+    }
+    debuglog("right SMC version '" + rightSMC + "' is a valid SMC Version.");
+
+    // split into components
+    var rightMajorVersion  = rightResultObj[1];
+    var rightMinorVersion  = rightResultObj[2];
+    var rightBuildType     = rightResultObj[3];
+    var rightBuildNumber   = rightResultObj[4];
+
+    // Business rules:
+    //      rightMajorVersion must equal leftMajorVersion
+    //      rightMinorVersion must equal leftMinorVersion
+    //      rightBuildType must be "f"
+    //      leftBuildType must be "f"
+    //      see above for output result
+
+    //      rightMajorVersion must equal leftMajorVersion
+    if (rightMajorVersion != leftMajorVersion)
+    {
+        debuglog("rightMajorVersion '" + rightMajorVersion + "' does not match leftMajorVersion '" + leftMajorVersion + "', error!");
+        return -2;
+    }
+	debuglog("Major versions match, continue");
+
+    //      rightMinorVersion must equal leftMinorVersion
+    if (rightMinorVersion != leftMinorVersion)
+    {
+        debuglog("rightMinorVersion '" + rightMinorVersion + "' does not match leftMinorVersion '" + leftMinorVersion + "', error!");
+        return -2;
+    }
+	debuglog("Minor versions match, continue");
+
+    //      rightBuildType must be "f"
+    if (rightBuildType != "f")
+    {
+        debuglog("rightBuildType '" + rightBuildType + "'is not f, error!");
+        return -2;
+    }
+
+    //      leftBuildType must be "f"
+    if (leftBuildType != "f")
+    {
+        debuglog("leftBuildType '" + leftBuildType + "'is not f, error!");
+        return -2;
+    }
+	debuglog("Build types are 'f', continue");
+
+    if (parseInt(rightBuildNumber) &lt; parseInt(leftBuildNumber))
+    {
+        debuglog("rightBuildNumber '" + parseInt(rightBuildNumber) + "' is less than leftBuildNumber '" + parseInt(leftBuildNumber) + "', return -1");
+        return 1;
+    }
+
+    if (parseInt(rightBuildNumber) &gt; parseInt(leftBuildNumber))
+    {
+        debuglog("rightBuildNumber '" + parseInt(rightBuildNumber) + "' is greater than leftBuildNumber '" + parseInt(leftBuildNumber) + "', return 1");
+        return -1;
+    }
+
+    debuglog("versions exactly equal, return 0");
+    return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+function debuglog(message)
+{
+   // yes, this is secure
+   if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+}
+////////////////////////////////////////////////////////////////////////////////
+</script>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBookAir6,1','MacBookAir6,2',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_0');
+	if (!NeedsUpdate("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function NeedsUpdate(prefix) {
+	if (LogicalOr0(prefix) &amp;&amp; EFIVersionCheck3(prefix) &amp;&amp; hasTargetSMCRange(prefix)) {
+		return true;
+	}
+	return false;
+}
+function LogicalOr0(prefix) {
+	if (PlistCheck1(prefix) || PlistCheck2(prefix)) {
+		return true;
+	}
+	return false;
+}
+function PlistCheck1(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.8.5') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.9') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck2(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.9.2') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function EFIVersionCheck3(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_2');
+	var versions = ['MBA61.88Z.0099.B00.1305241529','MBA61.88Z.0099.B01.1307121317','MBA61.88Z.0099.B07.1311121319','MBA61.88Z.0099.B09.1402071141','MBA61.88Z.0099.B04.1309271229'];
+	var obj = system.ioregistry.fromPath('IODeviceTree:/rom@0');
+	if (obj) {
+		var property = obj.version;
+		if (!property) return false;
+		for (var i = 0; i &lt; versions.length; i++) {
+			if (versions[i] == property) return true;
+		}
+	}
+	return false;
+}
+function hasTargetSMCRange(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_3');
+	if (MBA62SMCJS(prefix) || MBA61SMCJS(prefix)) {
+		return true;
+	}
+	return false;
+}
+function MBA62SMCJS(prefix) {
+	if (!MBA62SMC()) {
+		return false;
+	}
+	return true;
+}
+function MBA61SMCJS(prefix) {
+	if (!MBA61SMC()) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacBookAirEFIUpdate2.8" start_selected="true">
+        <pkg-ref id="MacBookAir" auth="Root" packageIdentifier="com.apple.pkg.MacBookAirEFIUpdate" onConclusion="RequireRestart">MacBookAirEFIUpdate.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "MacBook Air EFI Firmware Update";
+"SU_VERS" = "2.8";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	body {font: 11.0px Lucida Grande;}
+    p {margin: 0.0px 0.0px 0.0px 0.0px;}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;MacBook Air EFI Firmware Update 2.8&lt;/p&gt;&lt;br/&gt;
+&lt;p&gt;This update is recommended for MacBook Air (mid 2013 and early 2014) models. This update improves reliability when waking from sleep and when booting while certain USB and Thunderbolt devices are connected. This update also addresses a rare memory issue that may cause the system to randomly reboot, and an issue where the system may not properly sleep the built-in display when an external display is connected while running Windows using Boot Camp.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;';
+</strings>
+    </localization>
+    <readme mime-type="text/html">&lt;HTML&gt;&lt;!DOCTYPE html &lt;HTML&gt;&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	p {margin: 0.0px 0.0px 0.0px 0.0px; font: 11px Lucida Grande;}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;
+The MacBook Air EFI Firmware Update will update the EFI firmware on your computer. Your computer's power cord must be connected and plugged into a working power source. When your MacBook Air restarts, a gray screen will appear with a status bar to indicate the progress of the update. It will take several minutes for the update to complete. Do not disturb or shut off the power on your MacBook Air during this update.
+&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</readme>
+    <pkg-ref id="MacBookAir" installKBytes="5430" version="2.8.0.0.1.1355452227"/>
+</installer-gui-script>

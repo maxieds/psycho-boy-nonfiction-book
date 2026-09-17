@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="firmware" customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+////////////////////////////////////////////////////////////////////////////////
+var updateName = "Mac Flash Storage Firmware Update";
+var validBoardIDs = oc(["Mac-06F11FD93F0323C5","Mac-06F11F11946D27C5"]);
+var validDeviceRevisions = oc(["BXW1PA0Q"]);
+var valdDateCodes = oc(["G4","G5","G6","G7"]);
+
+////////////////////////////////////////////////////////////////////////////////
+function oc(a)
+{
+	var o = {};
+	for(var i=0;i &lt; a.length;i++)
+	{
+		o[a[i]]='';
+	}
+	return o;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function debuglog(message)
+{
+	// yes, this is secure
+	if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function hasValidBoardIDJS()
+{
+	debuglog("Entering hasValidBoardID");
+
+	var actualBoardID = "";
+	var servicePlane = system.ioregistry.fromPath('IOService:/');
+	// avoid a bug...
+	for(var index=0; index &lt; 5; index++)
+	{
+		if (servicePlane &amp;&amp; servicePlane['board-id']) break;
+
+		// didn't find any, try again
+		servicePlane = system.ioregistry.fromPath('IOService:/');
+	}
+
+	if (servicePlane &amp;&amp; servicePlane['board-id'])
+	{
+		debuglog("retried " + index + " times to get board ID.");
+		actualBoardID = servicePlane['board-id'];
+	}
+	else
+	{
+		debuglog("retried " + index + " times and failed to get board ID.");
+	}
+
+	debuglog("This machine has board ID '" + actualBoardID + "'");
+
+	var result = (actualBoardID in validBoardIDs);
+
+	if (result)
+	{
+		debuglog("Valid boardID.");
+	}
+	else
+	{
+		debuglog("boardID not in supported list. Alas.");
+	}
+
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function hardwareNeedsUpdateJS()
+{
+	debuglog("Entering hardwareNeedsUpdate");
+	// 1 Get all the IOAHCIDevice entities by name
+	var myIOAHCIDevices = system.ioregistry.matchingName('IOAHCIDevice');
+	for(var index=0; index &lt; 5; index++)
+	{
+		if (myIOAHCIDevices) break;
+
+		// didn't find any, try again
+		myIOAHCIDevices = system.ioregistry.matchingName('IOAHCIDevice');
+	}
+
+	if (myIOAHCIDevices)
+	{
+		debuglog("retried " + index + " times to get IOAHCIDevices.");
+	}
+	else
+	{
+		debuglog("retried " + index + " times and failed to get IOAHCIDevices. FAIL.");
+		return false;
+	}
+
+	for( var i = 0 ; i &lt; myIOAHCIDevices.length ; i++ ) {
+		// 2 Iterate over the children
+		var childrenArray = system.ioregistry.childrenOf(myIOAHCIDevices[i]);
+		for( var j = 0 ; j &lt; childrenArray.length ; j++ ) {
+			// 3 Check for valid Revision field
+			var revision = childrenArray[j]['Revision'];
+
+			debuglog("SSD Revision is: " + revision);
+			if (revision in validDeviceRevisions)
+			{
+				debuglog("Revision is valid");
+			}
+			else
+			{
+				debuglog("Revision is not valid, try next device.");
+				continue;
+			}
+
+			// 4 Check for valid serial number
+			// The eighth and ninth characters in the string must be in the approved list
+			var serial = childrenArray[j]['Serial Number'];
+			debuglog("Serial Number is '" + serial + "'");
+			var dateCode = serial.substring(7,9);
+			debuglog("Date Code is '" + dateCode + "'");
+			if (dateCode in valdDateCodes)
+			{
+				debuglog("Date Code is valid; we have an eligible device. Return TRUE");
+				return true;
+			}
+			else
+			{
+				debuglog("Date Code is not valid; try next device.");
+			}
+		}
+		debuglog("Out of children of IOAHCIDevice " + i);
+	}
+	debuglog("Out of IOAHCIDevices, so return FALSE");
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+</script>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	my.result.message = system.localizedString('ERROR_0');
+	if (!hasValidBoardID("/") || !hardwareNeedsUpdate("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function hasValidBoardID(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	if (!hasValidBoardIDJS()) {
+		return false;
+	}
+	return true;
+}
+function hardwareNeedsUpdate(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	if (!hardwareNeedsUpdateJS()) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacFlashStorageFWUpd1.0" start_selected="true">
+        <pkg-ref id="package1" auth="Root" packageIdentifier="com.apple.pkg.MacBookProFlashStorageFWUpd1.0" onConclusion="RequireRestart">MacBookProFlashStorageFWUpd1.0.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "MacBook Pro Flash Storage Firmware Update";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	p {margin-left: 0.0px; margin-top: 0.0px; font: 11.0px "Lucida Grande";}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;
+This update is recommended for MacBook Pro (Retina, 15-inch, mid 2015) models. This update addresses a storage firmware issue that, in rare cases, may cause data corruption.
+&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <readme mime-type="text/html">&lt;HTML&gt;&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	body {font: 11px "Lucida Grande";}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;p&gt;
+	Your MacBook Pro requires this update.
+	&lt;/p&gt;&lt;p&gt;
+	Before installing this update, back up the data on your MacBook Pro to an external drive or Time Capsule. To initiate the update, the power cord must be connected to your MacBook Pro and plugged into a working power source. If you've already backed up your data and connected to power, click Continue to begin the update.
+	&lt;/p&gt;&lt;p&gt;
+	Do not reset, shut down, or turn off the power to your MacBook Pro while updating your flash storage. If there is a problem during the update, your flash storage may become unusable and all the data on it could be lost.
+	&lt;/p&gt;&lt;p&gt;
+	When the update is complete, your MacBook Pro will restart.
+	&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</readme>
+    <pkg-ref id="package1" installKBytes="3390" version="1.0.0.0.1.1355452227"/>
+</installer-gui-script>

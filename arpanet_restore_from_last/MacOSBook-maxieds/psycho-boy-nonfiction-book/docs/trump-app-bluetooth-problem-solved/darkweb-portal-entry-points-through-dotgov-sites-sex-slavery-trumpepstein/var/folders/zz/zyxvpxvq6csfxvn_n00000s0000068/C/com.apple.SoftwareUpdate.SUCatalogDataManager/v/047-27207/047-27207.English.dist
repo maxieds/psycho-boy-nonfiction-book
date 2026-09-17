@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options rootVolumeOnly="true" customize="never" hostArchitectures="x86_64,arm64"/>
+    <title>SU_TITLE</title>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+		var updateName = "Motion Content";
+
+		function shouldAllowInstall()
+		{
+			// nothing found, fail
+			var resultsM = my.search.results[ 'find-Motion-by-id' ] || [];
+			var resultsMCS = my.search.results[ 'find-MotionCS-by-id' ] || [];
+			var results = resultsM.concat(resultsMCS);
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find Motion.");
+				return false;
+			}
+
+			// If any result is version 4.9 or newer, allow install
+			for ( var i = 0 ; i &lt; results.length ; ++i )
+			{
+				debuglog("Found a copy at " + results[i] + " with version " + PathGetShortVersion(results[i]));
+				if ( system.compareVersions(PathGetShortVersion(results[i]),4.9) &gt;= 0 )
+				{
+					debuglog("Success!"); 
+					return true;
+				}
+				else
+				{
+					debuglog("Not new enough."); 
+				}
+			}
+
+			// else fail
+			debuglog("Ran out of copies, alas.");
+			return false;
+		}
+
+		function PathGetShortVersion(path)
+		{
+			var bundle = system.files.bundleAtPath(path);
+			if (bundle == null) return _PadVersionString(0, 3);
+			var shortVers = bundle.CFBundleShortVersionString;
+			shortVers = _PadVersionString(shortVers, 3);
+			return shortVers;
+		}
+
+		function _PadVersionString(version, tupleCount)
+		{
+			if (version == null) version = "0";
+			var components = version.split(".");
+			if (components.length &gt; tupleCount)
+				components = components.slice(0, tupleCount);
+			else
+				for (; components.length&lt;tupleCount; )
+					components.push("0");
+			return components.join(".");
+		}
+
+		function debuglog(message)
+		{
+			// yes, this is secure
+			if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+		}
+	</script>
+    <locator>
+        <search id="find-Motion-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.motionapp"/>
+        </search>
+        <search id="find-MotionCS-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.motionappApp"/>
+        </search>
+    </locator>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MotionContent" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="File4(my.target.mountpoint)">
+        <pkg-ref id="MotionContent" auth="Root" packageIdentifier="com.apple.pkg.MotionContent">MotionContent.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	my.result.message = system.localizedString('ERROR_3491501876');
+	if (!Or0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Or0(prefix) {
+	if (Script1(prefix) || Plist2(prefix)) {
+		return true;
+	}
+	return false;
+}
+function Script1(prefix) {
+	if (system.env.COMMAND_LINE_INSTALL) {
+		return true;
+	}
+	return false;
+}
+function Plist2(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		my.result.message = system.localizedString('ERROR_F462844AFF');
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		my.result.message = system.localizedString('ERROR_F462844AFF');
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.6.6') &lt; 0) {
+		my.result.message = system.localizedString('ERROR_F462844AFF');
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!Script3(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script3(prefix) {
+	if (shouldAllowInstall()) {
+		return true;
+	}
+	my.result.message = system.localizedString('ERROR_92A2E80765');
+	return false;
+}
+function File4(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Library/Application Support/Final Cut Pro/Library/PDF.localized/Folio.localized/Benedictine.pdf') == 0) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Motion Supplemental Content";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;style type="text/css"&gt;
+	body {font: 12.0px Lucida Grande;}
+    p {margin: 0.0px 0.0px 0.0px 0.0px;}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;This update adds the following content for use in Motion 5:&lt;/p&gt;
+&lt;ul&gt;
+	&lt;li&gt;Motion Templates: A variety of professionally-designed, customizable templates.&lt;/li&gt;
+	&lt;li&gt;Motion Library Content: Animated vector graphics, backgrounds, template media, sample Motion projects, and royalty-free still images.&lt;/li&gt;
+	&lt;li&gt;Motion Sample Media: Clips and images for use with Motion Help examples and tutorials.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This update is recommended for all users of Motion 5.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="MotionContent" installKBytes="1109550" version="1.0.0.0.1.1769503355"/>
+</installer-gui-script>

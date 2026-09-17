@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options visibleOnlyForPredicate="true" hostArchitectures="ppc,i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <tags>
+        <tag>3.9.0_RemoteDesktopClientInstaller.pkg</tag>
+    </tags>
+    <script>
+function InstallationCheck(prefix) {
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.10.5') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_1', '10.10.5');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_2');
+	if (!NotTier3(my.target.mountpoint) || !ShellOSChecks(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function NotTier3(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_3');
+	if (system.files.fileExistsAtPath(prefix + '/var/db/.AppleTier3Language') == 0) {
+		return true;
+	}
+	return false;
+}
+function ShellOSChecks(prefix) {
+	if (OSCheck10105(prefix) || OSCheck1011(prefix) || OSCheck1012(prefix)) {
+		return true;
+	}
+	return false;
+}
+function OSCheck10105(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_4');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.10.5') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.11') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function OSCheck1011(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_4');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.11.6') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.12') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function OSCheck1012(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_4');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.12.2') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="ppc,intel"/>
+        <server arch="ppc,intel"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="RemoteDesktopClientShell" start_selected="true">
+        <pkg-ref id="RemoteDesktopClientShell" auth="Root" packageIdentifier="com.apple.pkg.RemoteDesktopClientShell">RemoteDesktopClientShell.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Remote Desktop Client Shell";
+"SU_TITLE_ALT" = "";
+"SU_VERS" = "3.9.2";
+"SU_VERS_ALT" = "";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1187"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'Lucida Grande\'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'Lucida Grande\'; min-height: 13.0px}
+    span.s1 {text-decoration: underline ; color: #042eee}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;The Remote Desktop Client Shell will install the Remote Desktop Client application on a machine that has requested the download through the Software Update tag.&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+"SU_DESCRIPTION_ALT" = '';
+</strings>
+    </localization>
+    <pkg-ref id="RemoteDesktopClientShell" installKBytes="62" version="1.1.0.0.1.1497319096"/>
+</installer-gui-script>

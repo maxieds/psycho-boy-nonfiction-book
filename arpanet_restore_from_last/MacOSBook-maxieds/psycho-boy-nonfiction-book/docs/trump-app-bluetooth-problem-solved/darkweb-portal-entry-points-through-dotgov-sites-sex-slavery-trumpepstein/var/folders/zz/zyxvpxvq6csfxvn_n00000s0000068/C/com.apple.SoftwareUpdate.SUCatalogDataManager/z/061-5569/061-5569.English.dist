@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <!-- Installer UI-ey stuff -->
+    <title>SU_TITLE</title>
+    <welcome file="Welcome.rtf"/>
+    <license file="License.rtf"/>
+    <background file="background.tif" scaling="proportional" alignment="upperleft"/>
+    <options customize="never" rootVolumeOnly="true" hostArchitectures='ppc,i386'/>
+    <platforms>
+        <client arch="i386,ppc"/>
+        <server arch="i386,ppc"/>
+    </platforms>
+    <!-- Manual Install package layout -->
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='manual'>
+        <pkg-ref auth='Root' id='a'>.</pkg-ref>
+    </choice>
+    <choice id='manual' title='MANUAL_TITLE' versStr='SU_VERS'/>
+    <!-- Software Update package layout -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su'>
+        <pkg-ref auth='Root' id='com.apple.pkg.iPhoto_715'>iPhoto_715.pkg</pkg-ref>
+    </choice>
+    <choice id='su' visible='volumeNeedsAppUpdated()' start_selected='true' suDisabledGroupID='iPhoto715'/>
+    <choice id='su' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html'/>
+    <choice id='su' secondaryDescription='SU_SERVERCOMMENT'/>
+    <!-- Installer logic -->
+    <installation-check script="InstallationCheck()"/>
+    <script>
+	function InstallationCheck()
+	{
+		return(hasNoTier3() &amp;&amp; hasGoodSSW() &amp;&amp; hasGoodQT() &amp;&amp; canHasUpdate());
+	}
+
+	function hasGoodSSW()
+	{
+		var sysVersion = system.version;
+		
+		if (!sysVersion || (1 == system.compareVersions("10.4.11",sysVersion.ProductVersion))) {
+			my.result.message = system.localizedStringWithFormat('systemTooOld');
+			my.result.type = 'Fatal';
+			return false;
+		}
+		
+		return true;
+	}
+
+	function hasGoodQT()
+	{
+        var path = "/System/Library/Frameworks/QuickTime.framework";
+		var bundle = system.files.bundleAtPath(path);
+		var version = BundleGetCompositeVersion5(bundle);
+		
+		if (!version || (system.compareVersions(version, "7.5.0.0.0") == -1))
+		{
+			my.result.message = system.localizedStringWithFormat('QTTooOld');
+			my.result.type = 'Fatal';
+			return false;
+		}
+				
+		return true;
+	}
+
+	function hasNoTier3()
+	{
+		var path = "/var/db/.AppleTier3Language";
+		if (!system.files.fileExistsAtPath(path))
+			return true;
+			
+		my.result.message = system.localizedStringWithFormat('volumeHasTier3');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+	function canHasUpdate()
+	{
+		var path = "/Applications/iPhoto.app";
+		var bundle = system.files.bundleAtPath(path);
+		var version = BundleGetCompositeVersion5(bundle);
+		
+		if (!version || (system.compareVersions(version, "7.1.4.0.0") == -1))
+		{
+			my.result.message = system.localizedStringWithFormat('noAppToUpdate');
+			my.result.type = 'Fatal';
+			return false;
+		}
+		
+		if (system.compareVersions(version, "7.1.6.0.0") >= 0)
+		{
+			my.result.message = system.localizedStringWithFormat('isDowngrade');
+			my.result.type = 'Fatal';
+			return false;
+		}
+		
+		return true;
+	}
+	
+	function volumeNeedsAppUpdated()
+	{
+		var path = my.target.mountpoint + "/Applications/iPhoto.app";
+		var bundle = system.files.bundleAtPath(path);
+		var version = BundleGetCompositeVersion5(bundle);
+		
+		return (version &amp;&amp; 
+				(system.compareVersions(version, "7.1.4.0.0") != -1) &amp;&amp; 
+				(system.compareVersions(version, "7.1.5.0.0") == -1))
+	}
+	</script>
+    <!-- Common include -->
+    <script>
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length > tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (; components.length&lt;tupleCount; )
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0; i&lt;propObj.length; i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "iPhoto Update";
+"SU_VERS" = "7.1.5";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+
+"SU_DESCRIPTION"='<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8"></meta></HEAD>
+<BODY><FONT FACE="Lucida Grande">
+<P>
+This update improves the printing quality of books, cards and calendars ordered via the iPhoto printing service.
+</P>
+</FONT></BODY></HTML>
+';
+]]></strings>
+    </localization>
+</installer-gui-script>

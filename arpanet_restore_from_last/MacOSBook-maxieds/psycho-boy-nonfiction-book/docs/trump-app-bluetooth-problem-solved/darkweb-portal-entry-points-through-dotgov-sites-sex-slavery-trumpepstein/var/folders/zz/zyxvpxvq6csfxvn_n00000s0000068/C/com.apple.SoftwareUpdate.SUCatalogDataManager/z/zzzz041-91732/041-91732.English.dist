@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="iPodVoiceOverKit" start_selected="true" title="SU_TITLE" visible="NeedsUpdate(my.target.mountpoint)">
+        <pkg-ref id="VoiceOver" auth="Root" packageIdentifier="com.apple.pkg.VoiceOver">VoiceOver.pkg</pkg-ref>
+    </choice>
+    <script>
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	if (!myTargetSystemVersion || system.compareVersions(myTargetSystemVersion.ProductVersion, '10.7.0') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '10.7.0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+if (myTargetSystemVersion &amp;&amp; system.compareVersions(myTargetSystemVersion.ProductVersion, '10.14.0') &gt;= 0) {return true;}
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!iTunesCheck(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function iTunesCheck(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/PrivateFrameworks/iTunesAccess.framework/Versions/A/Resources/version.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['CFBundleShortVersionString'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.4.0') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function NeedsUpdate(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/Library/Application Support/iTunes/iPodVoiceOver.framework/Versions/A/Resources/version.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['CFBundleShortVersionString'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '1.4.2') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "VoiceOver";
+"SU_TITLE_ALT" = "";
+"SU_VERS" = "1.4.2";
+"SU_VERS_ALT" = "";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="949.43"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Lucida Grande; min-height: 15.0px}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Lucida Grande}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Lucida Grande; color: #244fab}
+    span.s1 {letter-spacing: 0.0px}
+    span.s2 {color: #000f95}
+    span.s3 {text-decoration: underline ; letter-spacing: 0.0px color: #244fab}
+    span.Apple-tab-span {white-space:pre}
+    ul.ul2 {list-style-type: disc}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p2"&gt;The VoiceOver Kit enables compatible iPods to announce the names of playlists, songs, and artists, as well as battery status and other messages, in multiple languages.&lt;/p&gt;	
+&lt;p class="p1"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p2"&gt;This version adds support for iTunes 12.6.1.&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;span class="s1"&gt;For additional information about VoiceOver Kit and compatible iPods, please see:&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p3"&gt;&lt;span class="s2"&gt;&lt;span class="Apple-tab-span"&gt;	&lt;/span&gt;&lt;a href="http://support.apple.com/kb/HT4046"&gt;&lt;span class="s3"&gt;http://support.apple.com/kb/HT4046&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+"SU_DESCRIPTION_ALT" = '';
+</strings>
+    </localization>
+    <pkg-ref id="VoiceOver" installKBytes="78239" version="1.4.2.1.1188253749"/>
+</installer-gui-script>

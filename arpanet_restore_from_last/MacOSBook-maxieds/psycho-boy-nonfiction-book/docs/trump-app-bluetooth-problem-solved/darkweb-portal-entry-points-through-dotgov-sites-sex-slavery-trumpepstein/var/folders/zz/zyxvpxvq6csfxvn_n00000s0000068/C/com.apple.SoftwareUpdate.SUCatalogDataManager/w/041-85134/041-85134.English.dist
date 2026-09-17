@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion='1'>
+    <script>
+var	AppDefaultPath	= "/Applications/iPhoto.app";
+var AppMinVersion	= "8.1";
+var AppMaxVersion	= "8.1.2";
+</script>
+    <!-- Installer UI-ey stuff -->
+    <title>SU_TITLE</title>
+    <welcome file="SUDescription.html"/>
+    <license auto='false' file="License.rtf" sla="EA0502"/>
+    <background file='background.tif' scaling='none' alignment='left'/>
+    <options customize="never" rootVolumeOnly="true" hostArchitectures='ppc,i386'/>
+    <platforms>
+        <client arch="ppc,i386"/>
+        <server arch="ppc,i386"/>
+    </platforms>
+    <!-- Manual Install package layout -->
+    <choices-outline>
+        <line choice='manual'/>
+    </choices-outline>
+    <choice id='manual' title='SU_TITLE'>
+        <pkg-ref id='manual' auth='Root'>#iPhoto_812.pkg</pkg-ref>
+    </choice>
+    <!-- Software Update package layout -->
+    <choices-outline ui='SoftwareUpdate'>
+        <line choice='su'/>
+    </choices-outline>
+    <choice id='su' visible='needsUpdate(AppDefaultPath,AppMinVersion,AppMaxVersion)' suDisabledGroupID='iPhoto_812' title='SU_TITLE' versStr='SU_VERS' description='SU_DESCRIPTION' description-mime-type='text/html' secondaryDescription='SU_SERVERCOMMENT'>
+        <pkg-ref id='su' auth='Root'>iPhoto_812.pkg</pkg-ref>
+    </choice>
+    <!-- SCRIPT stuff -->
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck()
+{
+	// Installation check since we're root volume only. That way, the user gets error
+	// right away, not at volume select screen.
+	
+	return (rootVolumeOSGood() &amp;&amp;
+			canHasUpdateWithErrors(AppDefaultPath,AppMinVersion,AppMaxVersion,"noUpdate","tooNew")
+			);
+}
+
+function rootVolumeOSGood()
+{
+	// Error if OS X below 10.5.6
+	if (-1 == system.compareVersions(system.version.ProductVersion, '10.5.6'))
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_OS_Leopard');
+		my.result.message = system.localizedStringWithFormat('ERROR_OS_Leopard');
+		my.result.type = 'Fatal';
+		return false;
+	}
+
+	// OS X 10.5.6 or newer -- PASS
+	return true;
+}
+
+function canHasUpdateWithErrors(bundlePath, minVersionString, maxVersionString, minErrString, maxErrString)
+{
+	var bundleVersion = PathGetShortVersion(bundlePath);
+	if (!bundleVersion &amp;&amp; minVersionString &amp;&amp; (minVersionString != 0))
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_' + minErrString);
+		my.result.message = system.localizedStringWithFormat('ERROR_' + minErrString);
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if (system.compareVersions(bundleVersion,minVersionString) == -1)
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_' + minErrString);
+		my.result.message = system.localizedStringWithFormat('ERROR_' + minErrString);
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	if (system.compareVersions(bundleVersion,maxVersionString) == 1)
+	{
+		my.result.title = system.localizedStringWithFormat('TITLE_' + maxErrString);
+		my.result.message = system.localizedStringWithFormat('ERROR_' + maxErrString);
+		my.result.type = 'Fatal';
+		return false;
+	}
+	
+	return true;
+}
+
+function canHasUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;= 0));
+}
+
+function needsUpdate(bundlePath, minVersionString, maxVersionString)
+{
+	return ((system.compareVersions(PathGetShortVersion(bundlePath),minVersionString) >= 0) &amp;&amp;
+			(system.compareVersions(PathGetShortVersion(bundlePath),maxVersionString) &lt;0));
+}
+
+</script>
+    <!-- Common include -->
+    <script>
+	function PathGetShortVersion(path)
+	{
+		var bundle = system.files.bundleAtPath(path);
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		return shortVers;
+	}
+
+	function _PadVersionString(version, tupleCount)
+	{
+		if (version == null)
+			version = "0";
+		var components = version.split(".");
+		if (components.length >tupleCount)
+			components = components.slice(0, tupleCount);
+		else
+			for (;components.length&lt;tupleCount;)
+				components.push("0");
+		return components.join(".");
+	}
+
+	function BundleGetCompositeVersion5(bundle)
+	{
+		if (bundle == null)
+			return null;
+		var shortVers = bundle.CFBundleShortVersionString;
+		shortVers = _PadVersionString(shortVers, 3);
+		var sourceVers = bundle.SourceVersion;
+		sourceVers = _PadVersionString(sourceVers, 1);
+		var buildVers = bundle.BuildVersion;
+		buildVers = _PadVersionString(buildVers, 1);
+		var fiveTupleVers = shortVers + "." + sourceVers + "." + buildVers;
+		return fiveTupleVers;
+	}
+
+	function CheckNameRegistry(path, property, value)
+	{
+		try
+		{
+			var obj = system.ioregistry.fromPath(path);
+			if (obj == null)
+				return false;
+
+			var propObj = obj[property];
+			if (propObj == null)
+				return false;
+
+			if (typeof(propObj) == "string")	// string
+			{
+				return (propObj == value);
+			}
+			else if (typeof(propObj) == "object")	// array contains
+			{
+				for (var i=0;i&lt;propObj.length;i++)
+					if (propObj[i] == value)
+						return true;
+			}
+		}
+		catch (e) {}
+
+		return false;
+	}
+	</script>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "iPhoto Update";
+"SU_VERS" = "8.1.2";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+
+"SU_DESCRIPTION"='<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8"></meta></HEAD>
+<BODY><FONT FACE="Lucida Grande">
+<P>
+This update addresses minor issues in the area of import and syncing to iPhone, 
+iPod or Apple TV.
+</P><P>
+The update is recommended for all users of iPhoto ’09.
+</P><P>
+For detailed information on this update, please visit this website: <a href="http://support.apple.com/kb/HT4052">http://support.apple.com/kb/HT4052</a>
+</P>
+</FONT></BODY></HTML>
+';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='su' installKBytes='40113' version='8.1.2.1.1203730862'/>
+</installer-gui-script>

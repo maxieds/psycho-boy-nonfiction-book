@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386,x86_64" type="config-data" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <installation-check script="InstallationCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="AppleKextExcludeList_10_15" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="Incompatible Kernel Extension Configuration Data" visible="Script1(my.target.mountpoint)">
+        <pkg-ref id="com.apple.pkg.AppleKextExcludeList_10_15.16U1924" auth="Root" packageIdentifier="com.apple.pkg.AppleKextExcludeList_10_15.16U1924">AppleKextExcludeList_10_15.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.15') != 0) {
+		my.result.message = system.localizedStringWithFormat('', '10.15');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_3491501876');
+	if (!Bundle0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Bundle0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Apple/System/Library/Extensions/AppleKextExcludeList.kext');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '15.1.1') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function Script1(prefix) {
+	if (!my.target.receiptForIdentifier('com.apple.pkg.AppleKextExcludeList_10_15.16U1924')) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Incompatible Kernel Extension Configuration Data";
+"SU_VERS" = "15.1.1";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.AppleKextExcludeList_10_15.16U1924" installKBytes="3090" version="15.1.1.1.1571704784"/>
+</installer-gui-script>

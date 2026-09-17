@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options customize="never" rootVolumeOnly="true" hostArchitectures="x86_64,arm64"/>
+    <title>SU_TITLE</title>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <product version="3.1"/>
+    <script>
+		var updateName = "ProVideoFormats";
+		
+		function hasProApps()
+		{
+			return (hasFCPTrial() || hasFCP() || hasMotion() || hasCompressor() || hasFCPApp() || hasMotionApp() || hasCompressorApp() );
+		}
+        
+        	function hasFCPTrial()
+        	{
+        	    // nothing found, fail
+        	    var results = my.search.results[ 'find-FCPTrial-by-id' ];
+        	    if ( ! results || results.length == 0 )
+        	    {
+        	        debuglog("Didn't find FCPTrial.");
+        	        return false;
+        	    }
+            
+        	    // any version of FCPTrial counts
+        	    debuglog("Found a copy of FCPTrial!");
+        	    return true;
+        	}
+
+		function hasFCP()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-FCP-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find new FCP.");
+				return false;
+			}
+
+			debuglog("Found a copy of FCP.");
+			return true;
+		}
+
+		function hasMotion()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-Motion-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find Motion.");
+				return false;
+			}
+
+			debuglog("Found a copy of Motion.");
+			return true;
+		}
+
+		function hasCompressor()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-Compressor-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find Compressor.");
+				return false;
+			}
+
+			debuglog("Found a copy of Compressor.");
+			return true;
+		}
+
+                function hasFCPApp()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-FCPApp-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find new FCP.");
+				return false;
+			}
+
+			debuglog("Found a copy of FCP.");
+			return true;
+		}
+
+                function hasMotionApp()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-MotionApp-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find Motion.");
+				return false;
+			}
+
+			debuglog("Found a copy of Motion.");
+			return true;
+		}
+
+                function hasCompressorApp()
+		{
+			// nothing found, fail
+			var results = my.search.results[ 'find-CompressorApp-by-id' ];
+			if ( ! results || results.length == 0 )
+			{
+				debuglog("Didn't find Compressor.");
+				return false;
+			}
+
+			debuglog("Found a copy of Compressor.");
+			return true;
+		}
+
+		function debuglog(message)
+		{
+			// yes, this is secure
+			if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+		}
+	</script>
+    <locator>
+        <search id="find-FCPTrial-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.FinalCutTrial"/>
+        </search>
+        <search id="find-FCP-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.FinalCut"/>
+        </search>
+        <search id="find-FCPApp-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.FinalCutApp"/>
+        </search>
+        <search id="find-OlderFCP-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.FinalCutPro"/>
+        </search>
+        <search id="find-Motion-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.motionapp"/>
+        </search>
+        <search id="find-MotionApp-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.motionappApp"/>
+        </search>
+        <search id="find-Compressor-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.Compressor"/>
+        </search>
+        <search id="find-CompressorApp-by-id" type="component">
+            <bundle CFBundleIdentifier="com.apple.CompressorApp"/>
+        </search>
+    </locator>
+    <pkg-ref id="MXFPlugIns" installKBytes="1726" version="3.1.1.1769503355">
+        <must-close>
+            <app id="com.apple.Compressor"/>
+            <app id="com.apple.CompressorApp"/>
+        </must-close>
+    </pkg-ref>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="ProVideoFormats" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="needsCodecs(my.target.mountpoint) &amp;&amp; hasPAWORPVF(my.target.mountpoint)">
+        <pkg-ref id="ProVideoFormats" auth="Root" packageIdentifier="com.apple.pkg.ProVideoFormats" active="canHasOtherCodecs(my.target.mountpoint) &amp;&amp; canHasProResRAWCodec(my.target.mountpoint)">ProVideoFormats.pkg</pkg-ref>
+        <pkg-ref id="MXFPlugIns" auth="Root" packageIdentifier="com.apple.pkg.MXFPlugIns" active="canHasMXFPlugins(my.target.mountpoint)">MXFPlugIns.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '11.0.1') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '11.0.1');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!canHasCodecs(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function canHasCodecs(prefix) {
+	if (canHasOtherCodecs(prefix) || canHasProResRAWCodec(prefix) || canHasMXFPlugins(prefix)) {
+		return true;
+	}
+	return false;
+}
+function canHasOtherCodecs(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleAVCIntraCodec.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '2.3.2.0') &gt; 0) {
+		my.result.message = system.localizedString('ERROR_CC6A45CC4F');
+		return false;
+	}
+	return true;
+}
+function canHasProResRAWCodec(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleProResRAWCodec.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.14.0.0') &gt; 0) {
+		my.result.message = system.localizedString('ERROR_CC6A45CC4F');
+		return false;
+	}
+	return true;
+}
+function canHasMXFPlugins(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleMXFImport.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.24.0.0') &gt; 0) {
+		my.result.message = system.localizedString('ERROR_CC6A45CC4F');
+		return false;
+	}
+	return true;
+}
+function needsCodecs(prefix) {
+	if (needsOtherCodecs(prefix) || needsProResRAWCodec(prefix) || needsMXFPlugins(prefix)) {
+		return true;
+	}
+	return false;
+}
+function needsOtherCodecs(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleAVCIntraCodec.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '2.3.2.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function needsProResRAWCodec(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleProResRAWCodec.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.14.0.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function needsMXFPlugins(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleMXFImport.bundle');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '1.24.0.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function hasPAWORPVF(prefix) {
+	if (hasProAppsWrapper(prefix) || hasProVideoFormats(prefix)) {
+		return true;
+	}
+	return false;
+}
+function hasProAppsWrapper(prefix) {
+	if (hasProApps()) {
+		return true;
+	}
+	my.result.message = system.localizedString('ERROR_FDB64EB786');
+	return false;
+}
+function hasProVideoFormats(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Library/Video/Professional Video Workflow Plug-Ins/AppleAVCIntraCodec.bundle') == 1) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Pro Video Formats";
+"SU_VERS" = "3.1";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1265.2"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica; color: #343534; min-height: 16.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica; color: #343534}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #4d4e4d}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #4d4e4d; min-height: 14.0px}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica; color: #363636}
+    p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #4e4e4e}
+    p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica; color: #4d4e4d; min-height: 16.0px}
+    p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Helvetica; min-height: 16.0px}
+    body {font: 13.0px Helvetica}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;br&gt;
+	&lt;p&gt;The Pro Video Formats package provides support for the following codecs that are used in professional video workflows:
+        &lt;ul&gt;
+            &lt;li&gt;Apple ProRes RAW and ProRes RAW HQ*&lt;/li&gt;
+            &lt;li&gt;Apple Intermediate Codec&lt;/li&gt;
+            &lt;li&gt;Avid DNxHD&amp;reg; / DNxHR&amp;reg; decoder&lt;/li&gt;
+            &lt;li&gt;AVC-Intra 50 / 100 / 200 / 4:4:4 / LT&lt;/li&gt;
+            &lt;li&gt;AVC-LongG&lt;/li&gt;
+            &lt;li&gt;XAVC&lt;/li&gt;
+            &lt;li&gt;XF-AVC&lt;/li&gt;
+            &lt;li&gt;XF-HEVC&lt;/li&gt;
+            &lt;li&gt;DVCPRO HD&lt;/li&gt;
+            &lt;li&gt;HDV&lt;/li&gt;
+            &lt;li&gt;XDCAM EX / HD / HD422&lt;/li&gt;
+            &lt;li&gt;MPEG IMX&lt;/li&gt;
+            &lt;li&gt;Uncompressed 4:2:2&lt;/li&gt;
+		&lt;/ul&gt;
+	&lt;/p&gt;	
+	&lt;p&gt;	
+		* Requires a Mac computer that supports Metal: &lt;a href="https://support.apple.com/en-us/HT205073"&gt;https://support.apple.com/en-us/HT205073&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="ProVideoFormats" installKBytes="29878" version="3.1.1.1769503355"/>
+</installer-gui-script>

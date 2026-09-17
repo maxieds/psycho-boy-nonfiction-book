@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="firmware" customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <script>
+</script>
+    <installation-check script="InstallationCheck()"/>
+    <title>MAN_TITLE</title>
+    <script>
+		var updateName = "MacBookProTrackpadUpdate";
+		
+		 	function needsTPUpdate()
+    		{
+				var reg = system.ioregistry.matchingClass("AppleUSBMultitouchDriver")
+		
+				if( reg )
+				{
+					for( var i = 0; i &lt; reg.length; i++ )
+					{
+						var vendorID = reg[i].idVendor;
+						var productID = reg[i].idProduct;
+						var bcdVers = reg[i].bcdVersion;
+						debuglog("idVendor for this AppleUSBMultitouchDriver is: " + vendorID);
+						debuglog("idProduct for this AppleUSBMultitouchDriver is: " + productID);
+						debuglog("bcdVersion for this AppleUSBMultitouchDriver is: " + bcdVers);
+				
+						if(     (vendorID == 0x5AC) &amp;&amp;
+								((productID == 0x0262) || (productID == 0x0263) || (productID == 0x0264)) &amp;&amp;
+								((bcdVers == 0x0212) || (bcdVers == 0x0215) || (bcdVers == 0x0))
+							)
+						{
+						return true;
+						}
+					}
+				}
+        		return false;
+    		}
+				
+			function debuglog(message)
+			{
+					// yes, this is secure
+					if (system.files.fileExistsAtPath("/tmp/com.apple.pkg.testing")) system.log("********** " + updateName + ": " + message);
+			}
+   
+	</script>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBookPro10,1',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_0');
+	if (!Script0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script0(prefix) {
+	if (!needsTPUpdate()) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacBookProTrackpadUpdate1.0" start_selected="true">
+        <pkg-ref id="MBP" auth="Root" packageIdentifier="com.apple.pkg.MacBookProTrackpadUpdate">MacBookProTrackpadUpdate.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "MacBook Pro (Retina) Trackpad Update";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin-left: 0.0px; margin-top: 0.0px; font: 11.0px "Lucida Grande";}
+  </style>
+</head>
+<body>
+<p>This update addresses an issue where the trackpad may not respond consistently to user input, and is recommended for all MacBook Pro with Retina display notebooks.</p>
+<p>Your computer\'s power cord must be connected and plugged into a working power source when running the update. The trackpad will not respond during the brief update.</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+    <readme mime-type="text/html"><![CDATA[<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin-left: 0.0px; margin-top: 0.0px; font: 11.0px "Lucida Grande";}
+  </style>
+</head>
+<body>
+<p>This update addresses an issue where the trackpad may not respond consistently to user input, and is recommended for all MacBook Pro with Retina display notebooks.</p>
+<p>Your computer's power cord must be connected and plugged into a working power source when running the update. The trackpad will not respond during the brief update.</p>
+</body>
+</html>
+]]></readme>
+
+	<pkg-ref id='MBP' installKBytes='538' version='1.0.0.0.1.1342651205'/>
+</installer-gui-script>

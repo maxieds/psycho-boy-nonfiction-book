@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options visibleOnlyForPredicate="true" hostArchitectures="i386,x86_64" customize="never" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <options visibleOnlyForPredicate="true"/>
+    <tags>
+        <tag>SRCLANGID:com.apple.speech.SpeechRecognitionCoreLanguage.sv_SE_2</tag>
+    </tags>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '10.10') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.10') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.10');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_2');
+	if (!BundleCheck0(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function BundleCheck0(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + './System/Library/Speech/Recognizers/SpeechRecognitionCoreLanguages/sv_SE.SpeechRecognition/');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '2.0.1') >= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="SpeechRecognitionCoreLanguage_sv_SE" start_selected="true" visible="BundleCheck0('/')">
+        <pkg-ref id="SpeechRecognitionCoreLanguage_sv_SE" auth="Root" packageIdentifier="com.apple.pkg.SpeechRecognitionCoreLanguage_sv_SE">SpeechRecognitionCoreLanguage_sv_SE.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "SpeechRecognitionCoreLanguage_sv_SE";
+"SU_VERS" = "2.0.1";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '';
+]]></strings>
+    </localization>
+
+	<pkg-ref id='SpeechRecognitionCoreLanguage_sv_SE' installKBytes='379689' version='1.0.0.0.1.1396476239'/>
+</installer-gui-script>

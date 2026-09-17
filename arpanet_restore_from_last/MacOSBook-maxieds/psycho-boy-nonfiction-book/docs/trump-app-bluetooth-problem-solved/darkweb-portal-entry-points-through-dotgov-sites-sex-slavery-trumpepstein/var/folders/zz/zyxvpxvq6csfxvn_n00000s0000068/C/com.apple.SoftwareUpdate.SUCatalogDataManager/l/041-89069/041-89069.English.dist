@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options customize="never" hostArchitectures="ppc,i386"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	my.result.message = system.localizedString('ERROR_0');
+	if (!ShellOSChecks("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function ShellOSChecks(prefix) {
+	if (OSCheck10105(prefix) || OSCheck1011(prefix) || OSCheck1012(prefix)) {
+		return true;
+	}
+	return false;
+}
+function OSCheck10105(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.10.5') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.11') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function OSCheck1011(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.11.6') &lt; 0) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.12') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+function OSCheck1012(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_1');
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.12.2') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	my.result.message = system.localizedString('ERROR_2');
+	if (!VolumeHasOS(my.target.mountpoint) || !NotTier3(my.target.mountpoint) || !NotADowngrade(my.target.mountpoint) || !ShellOSChecks(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function VolumeHasOS(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_2');
+	if (system.files.fileExistsAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist') == 1) {
+		return true;
+	}
+	return false;
+}
+function NotTier3(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_3');
+	if (system.files.fileExistsAtPath(prefix + '/var/db/.AppleTier3Language') == 0) {
+		return true;
+	}
+	return false;
+}
+function NotADowngrade(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_4');
+	var bundle = system.files.bundleAtPath(prefix + '/System/Library/CoreServices/RemoteManagement/ARDAgent.app');
+	if (!bundle) {
+		return true;
+	}
+	var bundleKeyValue = bundle['CFBundleVersion'];
+	if (!bundleKeyValue) {
+		return true;
+	}
+	if (system.compareVersions(bundleKeyValue, '520.5.0') &gt; 0) {
+		return false;
+	}
+	return true;
+}
+function RemoteDesktopCheck(prefix) {
+	if (NoRemoteDesktopApp(prefix) || RemoteDesktopIsCorrectVersion(prefix) || ARDAppStoreReceiptDoesExist(prefix)) {
+		return true;
+	}
+	return false;
+}
+function NoRemoteDesktopApp(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Applications/Remote Desktop.app') == 0) {
+		return true;
+	}
+	return false;
+}
+function RemoteDesktopIsCorrectVersion(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_5');
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/Remote Desktop.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '3.7.2') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function ARDAppStoreReceiptDoesExist(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Applications/Remote Desktop.app/Contents/_MASReceipt/receipt') == 1) {
+		return true;
+	}
+	return false;
+}
+function ARDVersion(prefix) {
+	if (typeof(my.result) != 'undefined') my.result.message = system.localizedString('ERROR_6');
+	var bundle = system.files.bundleAtPath(prefix + '/System/Library/CoreServices/RemoteManagement/screensharingd.bundle');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleVersion'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '520.5.0') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="ppc,intel"/>
+        <server arch="ppc,intel"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="RemoteDesktopClient" start_selected="true" visible="ShellOSChecks('/') &amp;&amp; RemoteDesktopCheck('/') &amp;&amp; ARDVersion('/')">
+        <pkg-ref id="RemoteDesktopClient" auth="Root" packageIdentifier="com.apple.pkg.RemoteDesktopClient">RemoteDesktopClient.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Remote Desktop Client Update";
+"SU_TITLE_ALT" = "";
+"SU_VERS" = "3.9.3";
+"SU_VERS_ALT" = "";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems.";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1344.33"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'Lucida Grande\'; color: #000000; -webkit-text-stroke: #000000}
+    span.s1 {font-kerning: none}
+    span.s2 {text-decoration: underline ; font-kerning: none; color: #0000ee; -webkit-text-stroke: 0px #0000ee}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;The 3.9 update is recommended for all Apple Remote Desktop clients and addresses several issues related to overall reliability, usability and compatibility.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;&lt;br&gt;
+&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;For detailed information on this update, please visit this website: &lt;a href="http://support.apple.com/kb/HT201068"&gt;&lt;span class="s2"&gt;http://support.apple.com/kb/HT201068&lt;/span&gt;&lt;/a&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+"SU_DESCRIPTION_ALT" = '';
+</strings>
+    </localization>
+    <pkg-ref id="RemoteDesktopClient" installKBytes="9166" version="3.9.3.0.1.1497319096"/>
+</installer-gui-script>

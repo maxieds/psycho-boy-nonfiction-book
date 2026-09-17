@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386" visibleOnlyForPredicate="true" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <tags>
+        <tag>BootCampMediaFree</tag>
+    </tags>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="BootCampESD" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="FileCheck1(my.target.mountpoint) &amp;&amp; Script0(my.target.mountpoint)">
+        <pkg-ref id="ESD" auth="Root" packageIdentifier="com.apple.pkg.BootCampESD">BootCampESD.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBookPro15,1','MacBookPro15,2',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_3491501876');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_3491501876');
+	if (!Script0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Script0(prefix) {
+	return !!(system.ioregistry.matchingClass("ATIRadeonX1000").length == 0);
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	return true;
+}
+function FileCheck1(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Library/Application Support/BootCamp/WindowsSupport.dmg') == 0) {
+		return true;
+	}
+	return false;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "BootCamp";
+"SU_VERS" = "1.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1480.2"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 13.0px; font: 14.0px \'Helvetica Neue\'; color: #000000; -webkit-text-stroke: #000000}
+    li.li1 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 13.0px; font: 14.0px \'Helvetica Neue\'; color: #000000; -webkit-text-stroke: #000000}
+    span.s1 {font-kerning: none}
+    span.s2 {-webkit-text-stroke: 0px #000000}
+    span.s3 {text-decoration: underline ; font-kerning: none; color: #0000ee; -webkit-text-stroke: 0px #0000ee}
+    ul.ul1 {list-style-type: disc}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;&lt;b&gt;iMac Pro Update for Boot Camp&lt;/b&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;&lt;br&gt;
+&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;This update improves compatibility of iMac Pro with Apple mice, keyboards, and trackpads when running Windows 10 through Boot Camp.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;span class="s1"&gt;&lt;br&gt;
+&lt;/span&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="ESD" installKBytes="977398" version="1.0.0.0.1.1533854777"/>
+</installer-gui-script>

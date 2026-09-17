@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="firmware" customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <title>SU_TITLE</title>
+    <script>
+</script>
+    <volume-check script="VolumeCheck()"/>
+    <installation-check script="InstallationCheck()"/>
+    <script>
+function InstallationCheck(prefix) {
+	var models = ['MacBookPro8,1','MacBookPro8,2','MacBookPro8,3',];
+	var model = system.sysctl('hw.model');
+	if (models.indexOf(model) == -1) {
+		my.result.message = system.localizedString('ERROR_1');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	var versions = ['MBP81.88Z.0047.B00.1101231136','MBP81.88Z.0047.B04.1102071707','MBP81.88Z.0047.B0E.1104221557','MBP81.88Z.0047.B1E.1109091244','MBP81.88Z.0047.B22.1109281426','MBP81.88Z.0047.B24.1110141131','MBP81.88Z.0047.B26.1110311252',];
+	var rom = system.ioregistry.fromPath('IODeviceTree:/rom@0');
+	if (!rom || !(rom.version) || versions.indexOf(rom.version) == -1) {
+		my.result.message = system.localizedString('ERROR_1');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	if (system.compareVersions(system.version.ProductVersion, '10.6.8') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	my.result.message = system.localizedString('ERROR_1');
+	if (!LogicalOr0("/")) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function LogicalOr0(prefix) {
+	if (LogicalAnd1(prefix) || PlistCheck4(prefix)) {
+		return true;
+	}
+	return false;
+}
+function LogicalAnd1(prefix) {
+	if (PlistCheck2(prefix) &amp;&amp; PlistCheck3(prefix)) {
+		return true;
+	}
+	return false;
+}
+function PlistCheck2(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.7') >= 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck3(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.6.8') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function PlistCheck4(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/System/Library/CoreServices/SystemVersion.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['ProductVersion'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, '10.7.3') &lt; 0) {
+		return false;
+	}
+	return true;
+}
+function VolumeCheck(prefix) {
+	if (system.env.OS_INSTALL == 1) return true;
+	var hasOS = system.files.fileExistsAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist");
+	if (!hasOS || system.compareVersions(my.target.systemVersion.ProductVersion, '10.6.8') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_0', '10.6.8');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+</script>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" title="SU_TITLE" versStr="SU_VERS" description="SU_DESCRIPTION" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="MacBookProEFIUpdate2.7" start_selected="true">
+        <pkg-ref id="MacBookProTwo" auth="Root" packageIdentifier="com.apple.pkg.MacBookPro2011EFIUpdate" onConclusion="RequireRestart">MacBookPro2011EFIUpdate.pkg</pkg-ref>
+    </choice>
+    <localization>
+        <strings language="English"><![CDATA["SU_TITLE" = "MacBook Pro EFI Firmware Update";
+"SU_VERS" = "2.7";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '<HTML><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin-left: 0.0px margin-top: 0.0px; font: 11px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p>
+About MacBook Pro EFI Firmware Update 2.7</p>
+<p>
+This update fixes several issues to improve the stability of MacBook Pro (Early 2011) and MacBook Pro (Late 2011) computers and is recommended for all users.
+</p>
+<p>
+This update improves the reliability of booting from the network, addresses an issue that can prevent HDCP authentication after a reboot, and resolves an issue with boot device selection when a USB storage device is hot-plugged.
+</p>
+</body>
+</html>
+';
+]]></strings>
+    </localization>
+    <readme mime-type="text/html"><![CDATA[<HTML><!DOCTYPE html <HTML><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+	p {margin: 0.0px 0.0px 0.0px 0.0px; font: 11px Lucida Grande;}
+  </style>
+</head>
+<body>
+<p>
+The MacBook Pro EFI Firmware Update will update the EFI firmware on your computer. Your computer's power cord must be connected and plugged into a working power source. When your MacBook Pro restarts, a gray screen will appear with a status bar to indicate the progress of the update. It will take several minutes for the update to complete. Do not disturb or shut off the power on your MacBook Pro during this update.
+</p>
+</body>
+</html>
+]]></readme>
+
+	<pkg-ref id='MacBookProTwo' installKBytes='5435' version='2.7.0.0.1.1330468277'/>
+</installer-gui-script>

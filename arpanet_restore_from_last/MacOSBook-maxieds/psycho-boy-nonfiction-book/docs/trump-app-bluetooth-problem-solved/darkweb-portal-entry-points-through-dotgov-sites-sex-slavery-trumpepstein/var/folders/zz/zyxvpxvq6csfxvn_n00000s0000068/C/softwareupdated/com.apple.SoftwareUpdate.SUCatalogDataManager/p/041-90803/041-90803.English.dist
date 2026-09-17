@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options type="config-data" hostArchitectures="i386,x86_64" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <volume-check script="VolumeCheck()"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="NoticeboardRemovalTool" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="Noticeboard Removal Tool" visible="Script5(my.target.mountpoint)">
+        <pkg-ref id="com.apple.pkg.NoticeboardRemovalTool.16U1429" auth="Root" packageIdentifier="com.apple.pkg.NoticeboardRemovalTool.16U1429">NoticeboardRemovalTool.pkg</pkg-ref>
+    </choice>
+    <script>
+function VolumeCheck(prefix) {
+	var myTargetSystemVersion = (my.target.systemVersion || system.files.plistAtPath(my.target.mountpoint + "/System/Library/CoreServices/SystemVersion.plist"));
+	my.result.message = system.localizedString('ERROR_ABA5BBB51F');
+	if (!Not0(my.target.mountpoint) || !PlistCheck4(my.target.mountpoint)) {
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function Not0(prefix) {
+	if (!(LogicalAnd1(prefix))) {
+		return true;
+	}
+	return false;
+}
+function LogicalAnd1(prefix) {
+	if (BundleCheck2(prefix) &amp;&amp; FileCheck3(prefix)) {
+		return true;
+	}
+	return false;
+}
+function BundleCheck2(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/Install macOS High Sierra.app');
+	if (!bundle) {
+		return false;
+	}
+	return true;
+}
+function FileCheck3(prefix) {
+	if (system.files.fileExistsAtPath(prefix + '/Applications/Install macOS High Sierra.app') == 1) {
+		return true;
+	}
+	return false;
+}
+function PlistCheck4(prefix) {
+	var plist = system.files.plistAtPath(prefix + '/Library/Preferences/com.apple.noticeboard.plist');
+	if (!plist) {
+		return false;
+	}
+	var plistKeyValue = plist['identifiers'];
+	if (!plistKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(plistKeyValue, 'com.apple.noticeboard.notification.legacy') != 0) {
+		return false;
+	}
+	return true;
+}
+function Script5(prefix) {
+	return !!(my.target.receiptForIdentifier('com.apple.pkg.LegacyInstallAssistantAuto'));
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "Noticeboard Removal Tool";
+"SU_VERS" = "1.0.0.0";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="com.apple.pkg.NoticeboardRemovalTool.16U1429" installKBytes="0" version="1.0.0.0"/>
+</installer-gui-script>

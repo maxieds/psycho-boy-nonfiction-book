@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <options hostArchitectures="i386,x86_64,arm64" rootVolumeOnly="true" customize="never"/>
+    <title>SU_TITLE</title>
+    <script/>
+    <installation-check script="InstallationCheck()"/>
+    <domains enable_localSystem="true" enable_anywhere="true" enable_currentUserHome="true"/>
+    <platforms>
+        <client arch="i386"/>
+        <server arch="i386"/>
+    </platforms>
+    <choices-outline ui="SoftwareUpdate">
+        <line choice="su"/>
+    </choices-outline>
+    <choices-outline>
+        <line choice="su"/>
+    </choices-outline>
+    <choice id="su" description-mime-type="text/html" secondaryDescription="SU_SERVERCOMMENT" suDisabledGroupID="SFSymbolsAuto" start_selected="true" versStr="SU_VERS" description="SU_DESCRIPTION" title="SU_TITLE" visible="applicationOutOfDate(my.target.mountpoint)">
+        <pkg-ref id="SFSymbolsAuto" auth="Root" packageIdentifier="com.apple.pkg.SFSymbolsAuto">SFSymbolsAuto.pkg</pkg-ref>
+    </choice>
+    <script>
+function InstallationCheck(prefix) {
+	if (system.compareVersions(system.version.ProductVersion, '14.0') &lt; 0) {
+		my.result.message = system.localizedStringWithFormat('ERROR_B85E600482', '14.0');
+		my.result.type = 'Fatal';
+		return false;
+	}
+	return true;
+}
+function applicationOutOfDate(prefix) {
+	var bundle = system.files.bundleAtPath(prefix + '/Applications/SF Symbols.app');
+	if (!bundle) {
+		return false;
+	}
+	var bundleKeyValue = bundle['CFBundleShortVersionString'];
+	if (!bundleKeyValue) {
+		return false;
+	}
+	if (system.compareVersions(bundleKeyValue, '7.2') &gt;= 0) {
+		return false;
+	}
+	return true;
+}
+</script>
+    <localization>
+        <strings language="English">"SU_TITLE" = "SF Symbols";
+"SU_VERS" = "7.2";
+"SU_SERVERCOMMENT" = "For Desktop and Server systems";
+"SU_DESCRIPTION" = '&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt;
+  &lt;meta http-equiv="Content-Style-Type" content="text/css"&gt;
+  &lt;title&gt;&lt;/title&gt;
+  &lt;meta name="Generator" content="Cocoa HTML Writer"&gt;
+  &lt;meta name="CocoaVersion" content="1894.6"&gt;
+  &lt;style type="text/css"&gt;
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px \'-apple-system\'; min-height: 13.0px}
+    span.s1 {text-decoration: underline ; color: #4787ff}
+    span.Apple-tab-span {white-space:pre}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p class="p1"&gt;&lt;b&gt;Version 7.0&lt;/b&gt; introduces Draw animations and variable rendering, enhanced Magic Replace, gradients, and hundreds of new symbols.&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;b&gt;Version 7.1&lt;/b&gt; adds new symbols and minor bug fixes.&lt;/p&gt;
+&lt;p class="p2"&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p class="p1"&gt;&lt;b&gt;Version 7.2&lt;/b&gt; resolves a crash during launch under specific conditions.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+';
+</strings>
+    </localization>
+    <pkg-ref id="SFSymbolsAuto" installKBytes="683666" version="7.2.1.1770259514"/>
+</installer-gui-script>
