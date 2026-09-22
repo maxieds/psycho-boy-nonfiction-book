@@ -1,0 +1,574 @@
+function changeToLocalDateTime() {
+
+    let formatter = function (el, format) {
+        let d = new Date(el.dataset.utcdate);
+        fmt = new DateFmt(format);
+        el.innerHTML = fmt.format(d) + " " + getTimezone(d);
+    },
+        datetime_utc = document.querySelectorAll('.datetime_utc');
+    datetime_utc.forEach(function (el) {
+        formatter(el, "%n %j, %y at %g:%M%A");
+    });
+    let date_utc = document.querySelectorAll('.date_utc');
+    date_utc.forEach(function (el) {
+        formatter(el, "%o %j");
+    });
+    let dateyear_utc = document.querySelectorAll('.dateyear_utc');
+    dateyear_utc.forEach(function (el) {
+        formatter(el, "%n %j, %y");
+    });
+
+}
+
+function getTimezone(d) {
+    return (d.toString().match(/\b(?:(?:(?:Pacific|Mountain|Central|Eastern|Atlantic)\s+|[PMCEA])(?:(?:Standard|Daylight|Prevailing)\s+|[SDP])(?:Time|T)|(?:GMT|UTC)(?:[+-]\d{4})?)\b/g) || [""]).pop().replace(/[^A-Z0-9+-]/g, "");
+}
+
+function DateFmt(fstr) {
+    this.formatString = fstr
+
+    var mthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var shortMthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    var zeroPad = function (number) {
+        return ("0" + number).substr(-2, 2);
+    }
+    var convert24to12 = function (hours) {
+        // only -12 from hours if it is greater than 12 (if not back at mid night)
+        hours = (hours > 12) ? hours - 12 : hours;
+        // if 00 then it is 12 am
+        hours = (hours == '00') ? 12 : hours;
+        return hours;
+    }
+    var AMorPM = function (hours) {
+        // it is pm if hours from 12 onwards
+        suffix = (hours >= 12) ? 'PM' : 'AM';
+        return suffix;
+    }
+
+    var dateMarkers = {
+        j: ['getDate', function (v) {
+            return v
+        }],
+        d: ['getDate', function (v) {
+            return zeroPad(v)
+        }],
+        m: ['getMonth', function (v) {
+            return zeroPad(v + 1)
+        }],
+        n: ['getMonth', function (v) {
+            return mthNames[v];
+        }],
+        o: ['getMonth', function (v) {
+            return shortMthNames[v];
+        }],
+        w: ['getDay', function (v) {
+            return dayNames[v];
+        }],
+        y: ['getFullYear'],
+        H: ['getHours', function (v) {
+            return zeroPad(v)
+        }],
+        g: ['getHours', function (v) {
+            return convert24to12(v)
+        }],
+        A: ['getHours', function (v) {
+            return AMorPM(v)
+        }],
+        M: ['getMinutes', function (v) {
+            return zeroPad(v)
+        }],
+        S: ['getSeconds', function (v) {
+            return zeroPad(v)
+        }],
+        i: ['toISOString']
+    };
+
+    this.format = function (date) {
+        var dateTxt = this.formatString.replace(/%(.)/g, function (m, p) {
+            var rv = date[(dateMarkers[p])[0]]()
+
+            if (dateMarkers[p][1] != null) rv = dateMarkers[p][1](rv)
+
+            return rv
+
+        });
+
+        return dateTxt
+    }
+
+}
+
+// @TODO: seems unused
+/*
+function removeParam(key, sourceURL) {
+    var rtn = sourceURL.split("?")[0],
+        param,
+        params_arr = [],
+        queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+    if (queryString !== "") {
+        params_arr = queryString.split("&");
+        for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+            param = params_arr[i].split("=")[0];
+            if (param === key) {
+                params_arr.splice(i, 1);
+            }
+        }
+        rtn = rtn + "?" + params_arr.join("&");
+    }
+    return rtn;
+}
+
+
+var hash = function (string) {
+    var hash = 0, i, chr, len;
+    if (string.length == 0) {
+        return hash;
+    }
+    for (i = 0, len = string.length; i < len; i++) {
+        chr = string.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+*/
+
+function parseUrlWithParams(url, params) {
+    // catch relative url
+    try {
+        url = new URL(url);
+    } catch (e) {
+        url = new URL(url, document.location);
+    }
+    if (typeof params === 'object') {
+        for (key in params)
+            url.searchParams.append(key, params[key]);
+    }
+
+    return url.href;
+}
+
+let get = function (url, body, callback) {
+
+    url = parseUrlWithParams(url, body);
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            callback(xhr.status, xhr);
+        }
+    };
+    xhr.send(null);
+}
+
+let post = function (url, body, callback) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            let responseText = '';
+            try {
+                responseText = JSON.parse(xhr.responseText)
+            } catch (e) { }
+            callback(xhr.status, responseText);
+        }
+    };
+    APKM.log(url + ', ' + xhr.status);
+    xhr.send(JSON.stringify(body));
+}
+
+function pushbulletGenerator() {
+    let $this = this;
+    $data = $this.dataset;
+    feedUrl = $data.feedUrl || '',
+        tag = $data.tag || '',
+        channelName = $data.channelName || '',
+        description = $data.description || '',
+        imageUrl = $data.imageUrl || '';
+
+    get(ajaxurl,
+        {
+            'action': 'frontend_ajax_pb_channel_check',
+            'tag': tag
+        },
+        function (status, response) {
+            if (status === 200) {
+                if (response.responseText != '200') {
+                    APKM.log('PB ' + channelName + ': ' + response.responseText + ', description = ' + description + ', imageUrl = ' + imageUrl + ', feedUrl = ' + feedUrl);
+                    post('https://channelmaker.pushbullet.com/', {
+                        'tag': tag,
+                        'name': channelName,
+                        'description': description,
+                        'image_url': imageUrl,
+                        'feed_url': feedUrl
+                    },
+                        function (status, reply) {
+                            APKM.log('APDEBUG PB: returned status = ' + status + ', reply = ' + reply);
+                            if (reply) {
+                                if (status == 200) {
+                                    if (reply.error) {
+                                        $this.querySelector('svg').classList.remove('icon-spin');
+                                    } else {
+                                        apkmShowPushbulletButton($this);
+                                    }
+                                } else {
+                                    $this.querySelector('svg').classList.remove('icon-spin');
+                                }
+                            }
+                        }
+                    );
+                } else {
+                    apkmShowPushbulletButton($this);
+                }
+            } else {
+                APKM.log(status, response)
+            }
+        }
+    );
+}
+
+
+
+let socials_loaded = {};
+function apkmAjaxLoadSocial() {
+    let button = this,
+        $content = button.parentNode.querySelector('.dropdown-menu');
+
+    if (socials_loaded[button.id] !== true) {
+        get(
+            ajaxurl,
+            {
+                'action': (button.dataset.action || 'frontend_ajax_generate_pb'),
+                'post_id': (button.dataset.postid || ''),
+                'term_id': (button.dataset.termid || ''),
+                'level': (button.dataset.level || ''),
+                'type': (button.dataset.type || ''),
+                'url': (button.dataset.url || '')
+            },
+            function (status, response) {
+                if (status === 200) {
+                    $content.innerHTML = response.responseText;
+                    if (response.responseText.indexOf('pushbullet-subscribe-widget')) {
+
+                        $content.querySelectorAll('.pushbullet-subscribe-widget').forEach(function (el) {
+                            pushbulletGenerator.call(el);
+                        });
+                    }
+                } else {
+                    APKM.log(status, response)
+                }
+            }
+        )
+        socials_loaded[button.id] = true;
+    }
+}
+
+function apkmShowPushbulletButton(widget) {
+    widget.querySelector('svg').classList.remove('icon-spin');
+    widget.classList.remove('disabled');
+    widget.classList.remove('hidden');
+    widget.classList.add('abtn-pb');
+    widget.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.open('https://www.pushbullet.com/channel-popup?tag=' + this.dataset.tag, null, "height=460,width=700,status=yes,toolbar=no,menubar=no,location=no");
+    });
+}
+
+// Positions the APKM bundle badge so that it doesn't run off the right edge of the screen
+if (typeof apkm_maybe_show_tooltip !== 'function') {
+    function apkm_maybe_show_tooltip(e) {
+        let target = e.target,
+            has_tooltip = target.hasAttribute('data-apkm-tooltip') ? target : (target.closest('[data-apkm-tooltip]') || false);
+        if (has_tooltip && !has_tooltip.hasAttribute('data-apkm-tooltip-showing')) {
+            let tooltip = document.createElement("div");
+            tooltip.className = 'apkm-tooltip';
+            tooltip.innerHTML = has_tooltip.getAttribute('data-apkm-tooltip');
+            document.body.appendChild(tooltip);
+
+            let parent_rect = has_tooltip.getBoundingClientRect(),
+                left = Math.max(parseInt(parent_rect.left) + ((has_tooltip.offsetWidth - tooltip.offsetWidth) / 2), 3);
+
+            // screen overflow right
+            if (((left + tooltip.offsetWidth) > window.innerWidth)) {
+                left = Math.max((window.innerWidth - tooltip.offsetWidth - 3), 3);
+                if (left == 3) {
+                    tooltip.style.right = '3px';
+                    tooltip.style.overflowWrap = 'anywhere';
+                    tooltip.style.whiteSpace = 'normal';
+                }
+            }
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = parseInt(parent_rect.top) - tooltip.offsetHeight + window.scrollY + 'px';
+            has_tooltip.setAttribute('data-apkm-tooltip-showing', true);
+            if (e.type == 'click') {
+                setTimeout(function () {
+                    has_tooltip.removeAttribute('data-apkm-tooltip-showing');
+                    tooltip.remove();
+                }, 2000);
+            } else {
+                has_tooltip.addEventListener("mouseleave", function (e) {
+                    setTimeout(function () {
+                        has_tooltip.removeAttribute('data-apkm-tooltip-showing');
+                        tooltip.remove();
+                    }, 200);
+                }, { once: true });
+            }
+        }
+    }
+    document.addEventListener("mouseover", function (e) {
+        apkm_maybe_show_tooltip(e)
+    });
+    document.addEventListener("click", function (e) {
+        apkm_maybe_show_tooltip(e)
+    });
+}
+
+function apkm_ripple_effect(el, event = false, slower = false) {
+    if (el.querySelector('.ripple')) el.querySelector('.ripple').remove();
+
+    let circle = document.createElement('div'),
+        d = Math.max(el.clientWidth, el.clientHeight);
+
+    el.classList.add('withripple');
+    circle.style.width = circle.style.height = d + 'px';
+    circle.style.backgroundColor = circle.style.height = window.getComputedStyle(el).color;
+    el.appendChild(circle);
+
+    if (event) {
+        let rect = event.target.getBoundingClientRect();
+        circle.style.top = event.clientY - rect.top - d / 2 + 'px';
+        circle.style.left = event.clientX - rect.left - d / 2 + 'px';
+    } else {
+        circle.style.top = '0px';
+        circle.style.left = '0px';
+    }
+
+    if (slower) {
+        circle.classList.add('slower');
+    }
+    circle.classList.add('ripple');
+}
+APKM.docReady(function () {
+
+    changeToLocalDateTime();
+    // share dropdown
+    document.querySelectorAll("#pbDropdown, #rssDropdown, #qrDropdown").forEach(function (el) {
+        el.addEventListener("click", apkmAjaxLoadSocial);
+        if (el.parentNode.classList.contains('open')) {
+            apkmAjaxLoadSocial.call(el);
+        }
+    });
+
+    const loadDisqus = function () {
+        const lazyDisqus = document.querySelector('#disqus_embed-js');
+        lazyDisqus.src = lazyDisqus.dataset.src
+    };
+    const thread = document.querySelector('#disqus_thread');
+    if (thread) {
+        if (window.location.hash.startsWith('#comment-')) {
+            loadDisqus();
+            thread.scrollIntoView();
+        } else {
+            // load disqus thread only when in the view port
+            const DisqusObserver = new IntersectionObserver((entries, theObserver) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        loadDisqus();
+                        theObserver.unobserve(thread);
+                        //entry.target
+                    }
+                })
+            });
+            DisqusObserver.observe(thread);
+        }
+    }
+
+    // load disqus comments count
+    APKM.loadJs('//' + apkm_disqus_shortname + '.disqus.com/count.js', 'dsq-count-scr').then(function (val) {
+        DISQUSWIDGETS.old_displayCount = DISQUSWIDGETS.displayCount;
+        DISQUSWIDGETS.displayCount = function (arg) {
+            arg.text.comments.zero = "";
+            DISQUSWIDGETS.old_displayCount(arg);
+        }
+    });
+
+    // load pushbullet buttons
+    let pushbulletWidgets = document.querySelectorAll('.pushbullet-subscribe-widget');
+    pushbulletWidgets.forEach(function (el) {
+        if (el.classList.contains('disabled')) {
+            pushbulletGenerator.call(el);
+        } else {
+            apkmShowPushbulletButton(el);
+        }
+    })
+
+
+    // add ripple effect 
+    document.querySelectorAll('btn:not(.btn-link),.card-image,.navbar a:not(.withoutripple),.dropdown-menu a,.nav-tabs a:not(.withoutripple),.withripple').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            apkm_ripple_effect(this, e);
+        }, false);
+    });
+
+    document.querySelectorAll('.smooth-scroll').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            let target = this.getAttribute('href');
+            if (target.startsWith('#')) {
+                target = target.split('#')[1]
+            }
+            let target_el = document.querySelector('body [name="' + target + '"]');
+            if (target_el) {
+                e.preventDefault();
+                target_el.scrollIntoView({ behavior: "smooth" });
+                let header = target_el.parentElement.querySelector('.tabs-header') || target_el.parentElement.querySelector('.widgetHeader');
+                if (header) {
+                    apkm_ripple_effect(header, false, true)
+                }
+            }
+        });
+    });
+
+    let adv_search_container = document.querySelector('.advanced-search-container');
+    if (adv_search_container) {
+        let selectBoxDPI, selectBoxArch, selectBoxCap,
+            sliderJS = document.querySelector('#nouislider-js-promise-js'),
+            selectJS = document.querySelector('#multiselect-js-promise-js');
+
+        if (sliderJS && selectJS) {
+            APKM.loadJs(sliderJS.dataset.src)
+                .then(resolve => {
+                    // Create the slider
+                    let sliderMinapi = document.querySelector('#slider-minapi');
+                    noUiSlider.create(sliderMinapi, {
+                        start: [minapi_current_min, minapi_current_max],
+                        tooltips: [{
+                            to: function (value) {
+                                return minapilist[Math.round(value)];
+                            }
+                        }, {
+                            to: function (value) {
+                                return minapilist[Math.round(value)];
+                            }
+                        }],
+                        cssPrefix: 'apkm-noUi-',
+                        connect: true,
+                        snap: true,
+                        pips: {
+                            mode: 'values',
+                            density: -1,
+                            values: slider_pips,
+                            filter: filterPips,
+                            format: {
+                                to: function (value) {
+                                    if (minapilist[Math.round(value)] % 1 == 0) {
+                                        return Math.round(minapilist[Math.round(value)]);
+                                    } else {
+                                        return minapilist[Math.round(value)];
+                                    }
+                                }
+                            }
+                        },
+                        range: minapilist_nouislider
+                    });
+
+                    // Updates the hidden form fields whenever the slider values change
+                    sliderMinapi.noUiSlider.on('update', function (values, handle) {
+                        let value = Math.round(values[handle]);
+                        if (handle === 0) {
+                            let minapi_min = document.querySelector('#apkm-search-minapi-min');
+                            minapi_min.value = value;
+
+                            if (value !== slider_pips[0]) {
+                                minapi_min.disabled = false;
+                            } else {
+                                minapi_min.disabled = true;
+                            }
+                        } else {
+                            let minapi_max = document.querySelector('#apkm-search-minapi-max');
+                            minapi_max.value = value;
+
+                            if (value !== slider_pips[slider_pips.length - 1]) {
+                                minapi_max.disabled = false;
+                            } else {
+                                minapi_max.disabled = true;
+                            }
+                        }
+                    });
+
+                    function filterPips(value, type) {
+                        // Only show labels on pips that are whole numbers (4.0, 11, not 4.4)
+                        if (minapilist[Math.round(value)] % 1 == 0) {
+                            return 1;
+                        }
+                        if (minapilist[Math.round(value)] === '+') {
+                            return 1;
+                        }
+                        return 0;
+                    }
+                })
+                .catch(reject => APKM.log(reject));
+
+            APKM.loadJs(selectJS.dataset.src)
+                .then(resolve => {
+                    selectBoxDPI = new vanillaSelectBox("#select-dpi", {
+                        "placeHolder": "No filter",
+                        "maxHeight": 300,
+                        "translations": { "items": "selected" },
+                        search: false
+                    });
+                    selectBoxArch = new vanillaSelectBox("#select-arch", {
+                        "placeHolder": "No filter",
+                        "maxHeight": 300,
+                        "translations": { "items": "selected" },
+                        search: false
+                    });
+                    selectBoxCap = new vanillaSelectBox("#select-cap", {
+                        "placeHolder": "No filter",
+                        "maxHeight": 300,
+                        "translations": { "items": "selected" },
+                        search: false
+                    });
+                    selectBoxBundles = new vanillaSelectBox("#select-bundles", {
+                        "placeHolder": "No filter",
+                        "maxHeight": 300,
+                        "translations": { "items": "selected" },
+                        search: false
+                    });
+                })
+                .catch(reject => APKM.log(reject));
+
+
+            document.querySelector('#reset-search-form').addEventListener('click', function (e) {
+                try {
+                    selectBoxDPI.empty();
+                    selectBoxArch.empty();
+                    selectBoxCap.empty();
+                    selectBoxBundles.setValue('all');
+                    let sliderMinapi = document.querySelector('#slider-minapi');
+                    sliderMinapi.noUiSlider.set([slider_pips[0], slider_pips[slider_pips.length - 1]]);
+                } catch (e) {
+
+                }
+                document.querySelector('#check-descriptions').checked = false;
+            });
+
+
+            // Search filter Apply button
+            document.querySelector('#apply-search-form').addEventListener('click', function (e) {
+                let searchquery;
+                document.querySelectorAll('.searchbox').forEach(function (el) {
+                    if (APKM.visible(el)) {
+                        searchquery = el.value;
+                    }
+                });
+
+                document.querySelector('#apkm-search-filters-s').value = typeof searchquery == 'undefined' ? '' : searchquery;
+                document.forms["apkm-search-filters"].submit();
+            });
+
+        }
+    }
+});

@@ -1,0 +1,107 @@
+
+var $$_$$ = {
+    user : {"is_user_guest":true,"is_user_login":false,"avatar_url":"","display_name":"","isVerifiedEmail":false}
+};
+(function(d) {
+    var nav_user_new = d.getElementById("nav_user_new");
+    var nav_user_a = d.getElementById("nav_user_a");
+    var nav_user_img = d.getElementById("nav_user_img");
+    var nav_download_management = d.getElementById("nav_download_management");
+    var nav_user_hint = d.getElementById("nav_user_hint");
+    var menu_nav_logout = d.getElementById("menu_nav_logout");
+    var menu_btn = d.getElementById("menu_btn");
+    var href = nav_user_new.getAttribute("data-ref");
+    var nextUrl = "nextByApkpure('" + href + "')";
+    var setDownloadManagementCookie = "$$.setCookie('login_download_management_pop', 'close', 9999)";
+    var navActionListTemplate = document.getElementById('nav_action_list');
+    var navRecommendUpdateTemplate = document.getElementById('nav_recommend_update');
+    var login_img = "https://static.apkpure.com/www/static/imgs/no_login_v1.png";
+
+    window.setNavUserInfo = function () {
+        var urlOrigin = location.origin;
+        var isMobileUA = false;
+        if (isMobileUA && urlOrigin === "https://apkpure.com") {
+          urlOrigin = "https://m.apkpure.com";
+        }
+        if ($$_$$.user.is_user_guest) {
+            nav_user_a.setAttribute("href", urlOrigin + "/login");
+            nav_user_a.setAttribute("onclick", nextUrl + ";" + setDownloadManagementCookie);
+
+            if (nav_download_management) {
+                nav_user_new.classList.add('nav_download_manage_pop');
+                menu_btn.classList.add('red-dot');
+            }
+
+            nav_user_a.classList.add('show-hint');
+
+            window.refreshDt && window.refreshDt();
+
+            return;
+        }
+        
+        if (!$$_$$.user.is_user_login) {
+            nav_user_a.setAttribute("href", urlOrigin + "/login");
+        }
+        nav_user_a.setAttribute("href", urlOrigin + "/users/");
+
+        try {
+            nav_user_a.classList.add('login-user');
+        } catch(e) {}
+
+        if ($$_$$.user.avatar_url) {
+            nav_user_img.setAttribute("src", $$_$$.user.avatar_url);
+            login_img = $$_$$.user.avatar_url
+        }
+
+        if (navActionListTemplate) {
+            var actionDownloadManagement = navActionListTemplate.content.querySelector('a#nav_action_download_management');
+            var actionSettings = navActionListTemplate.content.querySelector('a#nav_action_settings');
+
+            if (actionDownloadManagement) {
+                actionDownloadManagement.setAttribute("href", "/users//download-management");
+            }
+
+            if (actionSettings) {
+                actionSettings.setAttribute("href", "/users//settings");
+            }
+        }
+
+        var o = document.createElement("div");
+        o.innerHTML = `
+            <div class="nav_user_info">
+            <a class="logout" href="/account/logout">Logout</a>
+            <div class="nav_user_head">
+                <a class="nav_user_avatar" href="${urlOrigin}/users/${$$_$$.user.id}">
+                    <img width="60" height="60" src="${login_img}">
+                </a>
+                <a class="display_name" href="${urlOrigin}/users/${$$_$$.user.id}">${$$_$$.user.display_name}</a>
+            </div>
+            ${navActionListTemplate ? navActionListTemplate.innerHTML : ''}
+        </div>     
+        `;
+        nav_user_new.appendChild(o);
+
+        if (menu_nav_logout && menu_nav_logout.style) {
+            menu_nav_logout.style.display = 'block';
+        }
+
+        if (navRecommendUpdateTemplate) {
+            $.get(`${$$x_ll}/api/v2/app-update-recommend`).then((res) => {
+                if (res.error !== 0 || !res.data || !res.data.listHtml) return;
+
+                var $recommendTemplate = $($('#nav_recommend_update').html());
+                $recommendTemplate.append(res.data.listHtml);
+
+                $('.nav_user_functional .nav_user_info').append($recommendTemplate);
+                $('#nav_action_download_management').addClass('red-dot');
+                $('#nav_user_a').addClass('red-dot');
+
+                window.refreshDt && window.refreshDt();
+              })
+        }
+
+        window.refreshDt && window.refreshDt();
+    }
+    
+    window.setNavUserInfo();
+})(document);
