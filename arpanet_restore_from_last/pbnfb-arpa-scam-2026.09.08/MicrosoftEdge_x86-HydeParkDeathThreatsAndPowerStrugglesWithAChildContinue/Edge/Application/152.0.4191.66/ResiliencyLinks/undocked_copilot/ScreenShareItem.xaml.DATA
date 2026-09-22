@@ -1,0 +1,234 @@
+<!--
+    One screen-share list item (monitor OR window variant), loaded per device via
+    XamlUtils::LoadXamlMarkup -> ParseXamlString and bound by ScreenShareFlyout.cpp.
+    All structure / sizing / theming lives here; C++ only sets image sources, the
+    device name, automation, the monitor-vs-window visibility, and the share Click.
+
+    Theme brushes ({ThemeResource ...}) resolve at tree-insertion against the flyout
+    Border.Resources ThemeDictionaries in VoiceComposer.xaml (VisionFlyoutBorder).
+-->
+<Border xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Name="ScreenShareItemRoot"
+        Background="Transparent"
+        BorderThickness="0"
+        Padding="16,0,16,0"
+        Height="80"
+        HorizontalAlignment="Stretch">
+    <Border.Resources>
+        <ResourceDictionary>
+            <!--
+                Self-contained theme brushes. This item loads as a standalone fragment via
+                XamlReader::Load, which resolves {ThemeResource} at parse time against this
+                document only — it cannot see VisionFlyoutBorder's brushes in VoiceComposer.xaml,
+                so they are mirrored here.
+            -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ThumbnailBackgroundBrush" Color="#DCDCDC" />
+                    <SolidColorBrush x:Key="ScreenShareFallbackIconBrush" Color="#808080" />
+                    <SolidColorBrush x:Key="ScreenShareButtonRestBackgroundBrush" Color="#B3FFFFFF" />
+                    <LinearGradientBrush x:Key="ScreenShareButtonRestBorderBrush" StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0.91" Color="#0F000000" />
+                        <GradientStop Offset="1.0" Color="#29000000" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="ScreenShareButtonHoverBackgroundBrush" Color="#B3D2D2D2" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBackgroundBrush" Color="#99F9F9F9" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBorderBrush" Color="#0F000000" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ThumbnailBackgroundBrush" Color="#505050" />
+                    <SolidColorBrush x:Key="ScreenShareFallbackIconBrush" Color="#808080" />
+                    <SolidColorBrush x:Key="ScreenShareButtonRestBackgroundBrush" Color="#0FFFFFFF" />
+                    <LinearGradientBrush x:Key="ScreenShareButtonRestBorderBrush" StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0.0" Color="#17FFFFFF" />
+                        <GradientStop Offset="1.0" Color="#12FFFFFF" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="ScreenShareButtonHoverBackgroundBrush" Color="#2EFFFFFF" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBackgroundBrush" Color="#08FFFFFF" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBorderBrush" Color="#12FFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="ThumbnailBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="ScreenShareFallbackIconBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="ScreenShareButtonRestBackgroundBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="ScreenShareButtonRestBorderBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
+                    <SolidColorBrush x:Key="ScreenShareButtonHoverBackgroundBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBackgroundBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ScreenShareButtonPressedBorderBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+        <!--
+            Minimal Button template: rest brushes flow in via TemplateBinding from the
+            Setters below; PointerOver/Pressed override Background/BorderBrush from the
+            themed brushes; Disabled dims. Replaces the former C++ CreateShareButtonStyle
+            + the manual PointerEntered/Pressed/Released/CaptureLost handlers.
+        -->
+        <Style x:Key="ScreenShareItemButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{ThemeResource ScreenShareButtonRestBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource ScreenShareButtonRestBorderBrush}" />
+            <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,4,12,4" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="UseSystemFocusVisuals" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonLayoutRoot"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                Padding="{TemplateBinding Padding}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonLayoutRoot.Background" Value="{ThemeResource ScreenShareButtonHoverBackgroundBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonLayoutRoot.Background" Value="{ThemeResource ScreenShareButtonPressedBackgroundBrush}" />
+                                            <Setter Target="ButtonLayoutRoot.BorderBrush" Value="{ThemeResource ScreenShareButtonPressedBorderBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonLayoutRoot.Opacity" Value="0.5" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter x:Name="ContentPresenter"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        </ResourceDictionary>
+    </Border.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!--  MONITOR variant: direct 100x56 thumbnail, rounded + clipped  -->
+        <Grid x:Name="MonitorThumbRoot"
+              Grid.Column="0"
+              Width="100"
+              Height="56"
+              Margin="0,0,12,0"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Center"
+              Visibility="Collapsed">
+            <Grid CornerRadius="8">
+                <Grid.Clip>
+                    <RectangleGeometry Rect="0,0,100,56" />
+                </Grid.Clip>
+                <Image x:Name="MonitorImage"
+                       Stretch="UniformToFill"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+                <FontIcon x:Name="MonitorFallbackIcon"
+                          Glyph="&#xE7F4;"
+                          FontSize="20"
+                          Foreground="{ThemeResource ScreenShareFallbackIconBrush}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Visibility="Collapsed" />
+            </Grid>
+        </Grid>
+
+        <!--  WINDOW variant: 76x48 image inside a 100x56 themed backdrop, with app-icon overlay  -->
+        <Grid x:Name="WindowThumbRoot"
+              Grid.Column="0"
+              Width="110"
+              Height="66"
+              Margin="0,0,2,0"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Center"
+              Visibility="Collapsed">
+            <Border x:Name="WindowBackdrop"
+                    Width="100"
+                    Height="56"
+                    CornerRadius="8"
+                    Background="{ThemeResource ThumbnailBackgroundBrush}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center">
+                <Grid Width="76"
+                      Height="48"
+                      CornerRadius="8"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <Grid.Clip>
+                        <RectangleGeometry Rect="0,0,76,48" />
+                    </Grid.Clip>
+                    <Image x:Name="WindowImage"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                    <FontIcon x:Name="WindowFallbackIcon"
+                              Glyph="&#xE8A5;"
+                              FontSize="20"
+                              Foreground="{ThemeResource ScreenShareFallbackIconBrush}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Visibility="Collapsed" />
+                </Grid>
+            </Border>
+            <Border x:Name="AppIconContainer"
+                    Width="20"
+                    Height="20"
+                    CornerRadius="6"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="90,46,0,0"
+                    Visibility="Collapsed">
+                <Image x:Name="AppIconImage"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <!--  Device name  -->
+        <StackPanel Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Spacing="2">
+            <TextBlock x:Name="NameText"
+                       FontSize="14"
+                       FontWeight="Normal"
+                       TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis"
+                       MaxLines="1" />
+        </StackPanel>
+
+        <!--  Share button (content set by C++ via GetLocalisedString)  -->
+        <Button x:Name="ShareButton"
+                Grid.Column="2"
+                MinWidth="60"
+                MinHeight="32"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                IsTabStop="True"
+                Style="{StaticResource ScreenShareItemButtonStyle}" />
+    </Grid>
+</Border>
