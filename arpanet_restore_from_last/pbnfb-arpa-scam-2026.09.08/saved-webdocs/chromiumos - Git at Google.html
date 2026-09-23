@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)https://chromium.googlesource.com/chromiumos/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>chromiumos - Git at Google</title><link rel="icon" href="https://chromium.googlesource.com/+static/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="https://chromium.googlesource.com/+static/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="https://chromium.googlesource.com/+static/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://chromium.googlesource.com/+static/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="https://chromium.googlesource.com/+static/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="./chromiumos - Git at Google_files/base.css"><!-- default customHeadTagPart --><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  try {
+    let t = localStorage.getItem('gitiles-theme');
+    if (!t) {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        t = decodeURIComponent(m[1]);
+      }
+    }
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) {}
+})();
+</script></head><body class="Site"><header class="Site-header"><div class="Header"><style>
+  .Header-image--dark {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--light {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--dark {
+    display: inline-block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .Header-image--light {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .Header-image--dark {
+      display: inline-block;
+    }
+  }
+</style><a class="Header-image" href="https://chromium.googlesource.com/"><img class="Header-image--light" src="./chromiumos - Git at Google_files/lockup_git_color_108x24dp.png" width="108" height="24" alt="Google Git"><img class="Header-image--dark" src="./chromiumos - Git at Google_files/lockup_git_light_color_108x24dp.png" width="108" height="24" alt="Google Git"></a><div class="Header-menu"> <a class="Header-menuItem" href="https://accounts.google.com/AccountChooser?faa=1&amp;continue=https://chromium.googlesource.com/login/chromiumos/">Sign in</a> <button class="Header-menuItem Header-themeToggle" id="gitiles-theme-toggle" type="button" title="Theme: Auto (click to switch to Dark)" aria-label="Theme: Auto (click to switch to Dark)"><span class="Header-themeIcon" aria-hidden="true">◑</span><span class="Header-themeLabel">Auto</span></button><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  function getTheme() {
+    try {
+      const t = localStorage.getItem('gitiles-theme');
+      if (t) {
+        return t;
+      }
+    } catch (e) {}
+    try {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        return decodeURIComponent(m[1]);
+      }
+    } catch (e) {}
+    return 'auto';
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark' || theme === 'light') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  function updateButton(btn, theme) {
+    const icon = btn.querySelector('.Header-themeIcon');
+    const label = btn.querySelector('.Header-themeLabel');
+    if (theme === 'dark') {
+      if (icon) {
+        icon.textContent = '\u263E';
+      }
+      if (label) {
+        label.textContent = 'Dark';
+      }
+      btn.title = 'Theme: Dark (click to switch to Light)';
+    } else if (theme === 'light') {
+      if (icon) {
+        icon.textContent = '\u2600';
+      }
+      if (label) {
+        label.textContent = 'Light';
+      }
+      btn.title = 'Theme: Light (click to switch to Auto)';
+    } else {
+      if (icon) {
+        icon.textContent = '\u25D1';
+      }
+      if (label) {
+        label.textContent = 'Auto';
+      }
+      btn.title = 'Theme: Auto (click to switch to Dark)';
+    }
+    btn.setAttribute('aria-label', btn.title);
+  }
+
+  function initToggle() {
+    const btn = document.getElementById('gitiles-theme-toggle');
+    if (!btn) {
+      return;
+    }
+    const current = getTheme();
+    updateButton(btn, current);
+    btn.onclick = function() {
+      const cur = getTheme();
+      const next = (cur === 'auto') ? 'dark' : ((cur === 'dark') ? 'light' : 'auto');
+      applyTheme(next);
+      try {
+        localStorage.setItem('gitiles-theme', next);
+      } catch (e) {}
+      try {
+        document.cookie = 'gitiles-theme=' + encodeURIComponent(next) + ';path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+      updateButton(btn, next);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    initToggle();
+  }
+})();
+</script></div></div></header><div class="Site-content"><div class="Container "><div class="Breadcrumbs"><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/?format=HTML">chromium</a><span class="Breadcrumbs-sep">/</span><span class="Breadcrumbs-crumb">chromiumos</span></div><h2 class="RepoDescription">Rights inherited for all ChromiumOS Projects</h2><div class="CloneRepo"><div class="CloneRepo-title">Clone this repo:</div><input id="clone-repo-input" type="text" class="u-monospace CloneRepo-command" readonly="readonly" value="git clone https://chromium.googlesource.com/chromiumos"></div><ol class="CommitLog"><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/f73e3693af99fd87555ebb4a1dbf6d9bc4a6ab20">f73e369</a> <a href="https://chromium.googlesource.com/chromiumos/+/f73e3693af99fd87555ebb4a1dbf6d9bc4a6ab20">code-owners: stop allowing fallback</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Mon Jul 06 15:11:40 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/c291e136c9ed1bd1c19451d441a921af55369eb7">c291e13</a> <a href="https://chromium.googlesource.com/chromiumos/+/c291e136c9ed1bd1c19451d441a921af55369eb7">try slightly more verbose firmware form since current isn't working</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Wed Jun 24 22:45:54 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/8aeb5d1d9c346a5a21c767dd8a000e42dc8be149">8aeb5d1</a> <a href="https://chromium.googlesource.com/chromiumos/+/8aeb5d1d9c346a5a21c767dd8a000e42dc8be149">Allow merge commits in firmware branches in any project</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Wed Jun 24 18:22:43 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/69bf6b48b8934f02e4f72dbe4ee88c76d9dfb612">69bf6b4</a> <a href="https://chromium.googlesource.com/chromiumos/+/69bf6b48b8934f02e4f72dbe4ee88c76d9dfb612">Update CfM Owners-Override to use wildcard for stabilize-cfm-* branches</a> <span class="CommitLog-author" title="dogancanemek@google.com">by Dogancan Emek</span> <span class="CommitLog-time" title="Fri May 08 09:39:59 2026">· 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/34f7b80ff8145bb058f31ce6d44d2d1a20a03eb9">34f7b80</a> <a href="https://chromium.googlesource.com/chromiumos/+/34f7b80ff8145bb058f31ce6d44d2d1a20a03eb9">Review access change</a> <span class="CommitLog-author" title="dogancanemek@google.com">by Doğancan Emek</span> <span class="CommitLog-time" title="Tue May 05 09:59:40 2026">· 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/050d272f16b899a24b44b184cbfdf0c2f562b20e">050d272</a> <a href="https://chromium.googlesource.com/chromiumos/+/050d272f16b899a24b44b184cbfdf0c2f562b20e">Format CfM Owners-Override</a> <span class="CommitLog-author" title="dogancanemek@google.com">by Dogancan Emek</span> <span class="CommitLog-time" title="Thu Feb 12 14:11:10 2026">· 7 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/c480ad13ec1e2f480408cef7e4198dc2b7cf92f0">c480ad1</a> <a href="https://chromium.googlesource.com/chromiumos/+/c480ad13ec1e2f480408cef7e4198dc2b7cf92f0">Update CfM Owners-Override for chrome-internal and kernel branches</a> <span class="CommitLog-author" title="dogancanemek@google.com">by Dogancan Emek</span> <span class="CommitLog-time" title="Tue Feb 10 23:11:01 2026">· 7 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/6535e56056c5a5a288b67ba8250c341b5d3905f2">6535e56</a> <a href="https://chromium.googlesource.com/chromiumos/+/6535e56056c5a5a288b67ba8250c341b5d3905f2">b/481415152: Grant CfM onduty team submit rights on stabilize-cfm-16503.60.B</a> <span class="CommitLog-author" title="dogancanemek@google.com">by Dogancan Emek</span> <span class="CommitLog-time" title="Mon Feb 09 16:24:29 2026">· 8 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/7eb7ddbc84d8ca8d3cb1470c4d6487104e2dec73">7eb7ddb</a> <a href="https://chromium.googlesource.com/chromiumos/+/7eb7ddbc84d8ca8d3cb1470c4d6487104e2dec73">tricium.config: delete unused file</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Wed Nov 26 17:34:12 2025">· 10 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/5c9a4eb72fd2f32dc05117ccaf74bc76c564c347">5c9a4eb</a> <a href="https://chromium.googlesource.com/chromiumos/+/5c9a4eb72fd2f32dc05117ccaf74bc76c564c347">Grant Fingerprint Team OO access for firmware-fpmcu-.* branches</a> <span class="CommitLog-author" title="patrykd@google.com">by Patryk Duda</span> <span class="CommitLog-time" title="Mon Sep 22 17:10:44 2025">· 1 year ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/a499ba5ea86afeef304ac1b92879bb8749fb16b7">a499ba5</a> <a href="https://chromium.googlesource.com/chromiumos/+/a499ba5ea86afeef304ac1b92879bb8749fb16b7">migrate mobiletc-prebuild to crostc-worker</a> <span class="CommitLog-author" title="gbiv@google.com">by George Burgess IV</span> <span class="CommitLog-time" title="Fri Sep 19 19:14:03 2025">· 1 year ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/a59990f4608113ef52f8e78697898f8b3535a51f">a59990f</a> <a href="https://chromium.googlesource.com/chromiumos/+/a59990f4608113ef52f8e78697898f8b3535a51f">Grant mdb mdb/meet-devices-onduty-team OO access for stabilize-16295.54</a> <span class="CommitLog-author" title="bryner@google.com">by Brian Ryner</span> <span class="CommitLog-time" title="Tue Aug 05 19:17:44 2025">· 1 year, 2 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/5d9df589fdf49898241bbe7b511f75af11034082">5d9df58</a> <a href="https://chromium.googlesource.com/chromiumos/+/5d9df589fdf49898241bbe7b511f75af11034082">Grant abandon permission for mdb/jetstream-releng</a> <span class="CommitLog-author" title="lenchen@google.com">by Len Chen</span> <span class="CommitLog-time" title="Mon May 12 14:49:48 2025">· 1 year, 4 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/78dff84f6ef81557b02587378996aab418688939">78dff84</a> <a href="https://chromium.googlesource.com/chromiumos/+/78dff84f6ef81557b02587378996aab418688939">Remove Bot-Commit label permissions from refs/changes/*.</a> <span class="CommitLog-author" title="jsca@google.com">by Joey Scarr</span> <span class="CommitLog-time" title="Wed May 07 01:39:20 2025">· 1 year, 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/4767aba0036094ffcc394b8b5894249e85c2e98f">4767aba</a> <a href="https://chromium.googlesource.com/chromiumos/+/4767aba0036094ffcc394b8b5894249e85c2e98f">Review access change</a> <span class="CommitLog-author" title="jpmurphy@google.com">by Jon Murphy</span> <span class="CommitLog-time" title="Tue May 06 21:46:02 2025">· 1 year, 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/429d04dde78fadc64d382c2249a96b85012c4f36">429d04d</a> <a href="https://chromium.googlesource.com/chromiumos/+/429d04dde78fadc64d382c2249a96b85012c4f36">Grant copybot Read and Verified+1 ability.</a> <span class="CommitLog-author" title="jsca@google.com">by Joey Scarr</span> <span class="CommitLog-time" title="Wed Apr 23 21:26:57 2025">· 1 year, 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/d5e319c02cc149428ee710cf8e85cd93bcb07ee0">d5e319c</a> <a href="https://chromium.googlesource.com/chromiumos/+/d5e319c02cc149428ee710cf8e85cd93bcb07ee0">Remove label-Bot-Commit permissions for group chromeos-bots.</a> <span class="CommitLog-author" title="mitchella@google.com">by Andrew Mitchell</span> <span class="CommitLog-time" title="Tue Apr 15 05:13:32 2025">· 1 year, 5 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/8cfd9675d12826dbf1359ff86c690cc6d182c42a">8cfd967</a> <a href="https://chromium.googlesource.com/chromiumos/+/8cfd9675d12826dbf1359ff86c690cc6d182c42a">drop old refs/tryjobs/ namespace</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Wed Apr 09 17:03:50 2025">· 1 year, 6 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/3d9f2b7db22898d933ad04af632f72ce09d8217f">3d9f2b7</a> <a href="https://chromium.googlesource.com/chromiumos/+/3d9f2b7db22898d933ad04af632f72ce09d8217f">allow staging pupr to abandon CLs too</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Wed Apr 09 17:03:38 2025">· 1 year, 6 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/+/41f20695400bbf9379b3305c58b271dbc329b8ef">41f2069</a> <a href="https://chromium.googlesource.com/chromiumos/+/41f20695400bbf9379b3305c58b271dbc329b8ef">grant starline override access to starline branches</a> <span class="CommitLog-author" title="vapier@chromium.org">by Mike Frysinger</span> <span class="CommitLog-time" title="Tue Apr 08 03:23:18 2025">· 1 year, 6 months ago</span></li></ol><nav class="LogNav"><a class="LogNav-next" href="https://chromium.googlesource.com/chromiumos/+log">More »</a></nav></div> <!-- Container --></div> <!-- Site-content --><footer class="Site-footer"><div class="Footer"><span class="Footer-poweredBy">Powered by <a href="https://gerrit.googlesource.com/gitiles/">Gitiles</a>| <a href="https://policies.google.com/privacy">Privacy</a>| <a href="https://policies.google.com/terms">Terms</a></span><span class="Footer-formats"><a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/chromiumos/?format=TEXT">txt</a> <a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/chromiumos/?format=JSON">json</a></span></div></footer><script nonce="">{let f = document.getElementById("clone-repo-input"); f.onclick = () => {f.focus(); if (f.selectionStart === f.selectionEnd) {f.select();}};}</script></body></html>

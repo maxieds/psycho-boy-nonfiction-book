@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)https://chromium.googlesource.com/chromiumos/platform/chameleon/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>chromiumos/platform/chameleon - Git at Google</title><link rel="icon" href="https://chromium.googlesource.com/+static/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="https://chromium.googlesource.com/+static/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="https://chromium.googlesource.com/+static/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://chromium.googlesource.com/+static/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="https://chromium.googlesource.com/+static/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="./chromiumos_platform_chameleon - Git at Google_files/base.css"><!-- default customHeadTagPart --><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  try {
+    let t = localStorage.getItem('gitiles-theme');
+    if (!t) {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        t = decodeURIComponent(m[1]);
+      }
+    }
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) {}
+})();
+</script></head><body class="Site"><header class="Site-header"><div class="Header"><style>
+  .Header-image--dark {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--light {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--dark {
+    display: inline-block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .Header-image--light {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .Header-image--dark {
+      display: inline-block;
+    }
+  }
+</style><a class="Header-image" href="https://chromium.googlesource.com/"><img class="Header-image--light" src="./chromiumos_platform_chameleon - Git at Google_files/lockup_git_color_108x24dp.png" width="108" height="24" alt="Google Git"><img class="Header-image--dark" src="./chromiumos_platform_chameleon - Git at Google_files/lockup_git_light_color_108x24dp.png" width="108" height="24" alt="Google Git"></a><div class="Header-menu"> <a class="Header-menuItem" href="https://accounts.google.com/AccountChooser?faa=1&amp;continue=https://chromium.googlesource.com/login/chromiumos/platform/chameleon/">Sign in</a> <button class="Header-menuItem Header-themeToggle" id="gitiles-theme-toggle" type="button" title="Theme: Auto (click to switch to Dark)" aria-label="Theme: Auto (click to switch to Dark)"><span class="Header-themeIcon" aria-hidden="true">◑</span><span class="Header-themeLabel">Auto</span></button><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  function getTheme() {
+    try {
+      const t = localStorage.getItem('gitiles-theme');
+      if (t) {
+        return t;
+      }
+    } catch (e) {}
+    try {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        return decodeURIComponent(m[1]);
+      }
+    } catch (e) {}
+    return 'auto';
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark' || theme === 'light') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  function updateButton(btn, theme) {
+    const icon = btn.querySelector('.Header-themeIcon');
+    const label = btn.querySelector('.Header-themeLabel');
+    if (theme === 'dark') {
+      if (icon) {
+        icon.textContent = '\u263E';
+      }
+      if (label) {
+        label.textContent = 'Dark';
+      }
+      btn.title = 'Theme: Dark (click to switch to Light)';
+    } else if (theme === 'light') {
+      if (icon) {
+        icon.textContent = '\u2600';
+      }
+      if (label) {
+        label.textContent = 'Light';
+      }
+      btn.title = 'Theme: Light (click to switch to Auto)';
+    } else {
+      if (icon) {
+        icon.textContent = '\u25D1';
+      }
+      if (label) {
+        label.textContent = 'Auto';
+      }
+      btn.title = 'Theme: Auto (click to switch to Dark)';
+    }
+    btn.setAttribute('aria-label', btn.title);
+  }
+
+  function initToggle() {
+    const btn = document.getElementById('gitiles-theme-toggle');
+    if (!btn) {
+      return;
+    }
+    const current = getTheme();
+    updateButton(btn, current);
+    btn.onclick = function() {
+      const cur = getTheme();
+      const next = (cur === 'auto') ? 'dark' : ((cur === 'dark') ? 'light' : 'auto');
+      applyTheme(next);
+      try {
+        localStorage.setItem('gitiles-theme', next);
+      } catch (e) {}
+      try {
+        document.cookie = 'gitiles-theme=' + encodeURIComponent(next) + ';path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+      updateButton(btn, next);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    initToggle();
+  }
+})();
+</script></div></div></header><div class="Site-content"><div class="Container "><div class="Breadcrumbs"><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/?format=HTML">chromium</a><span class="Breadcrumbs-sep">/</span><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/chromiumos/">chromiumos</a><span class="Breadcrumbs-sep">/</span><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/chromiumos/platform/">platform</a><span class="Breadcrumbs-sep">/</span><span class="Breadcrumbs-crumb">chameleon</span></div><h2 class="RepoDescription">Framework for automating external display testing across VGA, HDMI, and DisplayPort (DP);
+
+see http://dev.chromium.org/chromium-os/testing/chamelium</h2><div class="CloneRepo"><div class="CloneRepo-title">Clone this repo:</div><input id="clone-repo-input" type="text" class="u-monospace CloneRepo-command" readonly="readonly" value="git clone https://chromium.googlesource.com/chromiumos/platform/chameleon"></div><div class="RepoShortlog"><div class="RepoShortlog-refs"><div class="RefList RefList--responsive"><h3 class="RefList-title">Branches</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/main">main</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-14162.B">factory-14162.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-14778.B">factory-14778.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-ambassador-14265.B">factory-ambassador-14265.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-arkham-7077.113.B">factory-arkham-7077.113.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-asurada-13929.B">factory-asurada-13929.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-atlas-11907.B">factory-atlas-11907.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-auron-6459.B">factory-auron-6459.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-auron-6772.B">factory-auron-6772.B</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/factory-brox-16086.B">factory-brox-16086.B</a></li></ul></div><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+refs">More...</a><div class="RefList RefList--responsive"><h3 class="RefList-title">Tags</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/tags/v3">v3</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/tags/v3-proto2">v3-proto2</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/tags/v3-fsi">v3-fsi</a></li></ul></div></div><div class="RepoShortlog-log"><ol class="CommitLog"><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/7387a6e6fb3bd80cea2967f488645df6975df9fe">7387a6e</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/7387a6e6fb3bd80cea2967f488645df6975df9fe">chameleond: Add hardware reset and fix BT controller teardown in bluetooth_raspi</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Sep 16 08:50:21 2026">· 7 days ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/main">main</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/937773395e28feb83855b5d8217d80c437f4301f">9377733</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/937773395e28feb83855b5d8217d80c437f4301f">Fix self-doc expr syntax not supported in 3.7</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Thu Aug 27 07:59:19 2026">· 4 weeks ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-R154-16805.2.B">firmware-R154-16805.2.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-R155-16820.2.B">firmware-R155-16820.2.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/release-R154-16805.B">release-R154-16805.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/release-R155-16820.B">release-R155-16820.B</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e1043a04326e3abf10742dba03c9699ddec7b078">e1043a0</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e1043a04326e3abf10742dba03c9699ddec7b078">chameleond: Include dependencies in MANIFEST explicitly</a> <span class="CommitLog-author" title="maxlyu@google.com">by Max Yu</span> <span class="CommitLog-time" title="Tue Aug 25 19:02:02 2026">· 4 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/f236965bae02a8cfb568283f2998e4e76d075b3c">f236965</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/f236965bae02a8cfb568283f2998e4e76d075b3c">Add mouse scroll grpc</a> <span class="CommitLog-author" title="maxlyu@google.com">by Max Yu</span> <span class="CommitLog-time" title="Tue Aug 25 05:00:58 2026">· 4 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/10321b9f9c74e20bf262c9856689ea0218aa4260">10321b9</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/10321b9f9c74e20bf262c9856689ea0218aa4260">chameleond: Handle DoesNotExist error during StopAgent</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Mon Aug 10 02:14:27 2026">· 6 weeks ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-R153-16790.2.B">firmware-R153-16790.2.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/release-R153-16790.B">release-R153-16790.B</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/ac6881c105f7a519e41039761f3fe51d16eb8da9">ac6881c</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/ac6881c105f7a519e41039761f3fe51d16eb8da9">chameleond: Support handsfree_audio_gateway in HFP patterns</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Aug 05 09:38:58 2026">· 7 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/442649b55e556da2baf13d78395a37e75beafe0e">442649b</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/442649b55e556da2baf13d78395a37e75beafe0e">chameleond: Add latency-msec=15 to pacat record command</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Aug 05 09:38:58 2026">· 7 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/c87558c7bfb3aac2f17932755de3ba4ffb66fa1c">c87558c</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/c87558c7bfb3aac2f17932755de3ba4ffb66fa1c">chameleond: Combine disabled plugins into single -P flag</a> <span class="CommitLog-author" title="howardchung@google.com">by howardchung</span> <span class="CommitLog-time" title="Wed Aug 05 09:38:58 2026">· 7 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/d55a81cf9594a1375d3542fd3403491a3b3096f7">d55a81c</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/d55a81cf9594a1375d3542fd3403491a3b3096f7">chameleond: Raise error on audio subprocess/server startup failures</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Aug 05 09:38:58 2026">· 7 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/b79ffe6dcef5c337d7316586e5127c8cbf7a4a91">b79ffe6</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/b79ffe6dcef5c337d7316586e5127c8cbf7a4a91">chameleond: fix Pandora readiness race, L2CAP socket conflict, and recording permissions on Bookworm</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Aug 05 09:38:58 2026">· 7 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/49e521b563bec122f622e910e829806f6ad6a069">49e521b</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/49e521b563bec122f622e910e829806f6ad6a069">Add warning when discoverability may not be set</a> <span class="CommitLog-author" title="maxlyu@google.com">by Max Yu</span> <span class="CommitLog-time" title="Thu Jul 23 17:55:15 2026">· 9 weeks ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-R152-16765.2.B">firmware-R152-16765.2.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/release-R152-16765.B">release-R152-16765.B</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/1002cf17bf4e3ca1ff3ff44027f92996353cc5d6">1002cf1</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/1002cf17bf4e3ca1ff3ff44027f92996353cc5d6">chameleond: Support pulse-controlled (Model 2026) audio jack pluggers</a> <span class="CommitLog-author" title="elow@google.com">by Eugene Low</span> <span class="CommitLog-time" title="Thu Jul 23 09:19:00 2026">· 9 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/6c8b8b9def528497de814cf07dbbfaae30e3aeb3">6c8b8b9</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/6c8b8b9def528497de814cf07dbbfaae30e3aeb3">chameleond: disable sap plugin and include -P input in SERIAL_PORT_BTD_FLAGS</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Thu Jul 23 02:10:36 2026">· 9 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e9bc7a392471124f10df6d757e85011d5f1e8483">e9bc7a3</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e9bc7a392471124f10df6d757e85011d5f1e8483">chameleond: add detailed diagnostic logging for socket bind and flag transitions</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Thu Jul 23 02:10:34 2026">· 9 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e45049b0b3de96df35b35766ce4bd97bfb4e1abf">e45049b</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/e45049b0b3de96df35b35766ce4bd97bfb4e1abf">chameleond: Do not use legacy pulseaudio binary on Debian 12 Bookworm</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Thu Jul 23 02:10:30 2026">· 9 weeks ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/c7c5a32b593a731038525fe5c742a68199543824">c7c5a32</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/c7c5a32b593a731038525fe5c742a68199543824">Add logs for inspecting keyboard reactive test delay</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Thu Jul 09 10:16:32 2026">· 3 months ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-tanjiro-16759.B">firmware-tanjiro-16759.B</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/d99ba26ac8a50ed8813d8aeb60738809a2ec4e36">d99ba26</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/d99ba26ac8a50ed8813d8aeb60738809a2ec4e36">Fix pulse log not showing up on non-uprev</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Wed Jul 08 10:08:21 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/9dad44a850ae74a4aef6328107c6742cb9f5e934">9dad44a</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/9dad44a850ae74a4aef6328107c6742cb9f5e934">chameleond: bluetooth: Initialize D-Bus threading support</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Tue Jul 07 03:44:21 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/a3cf103d7116b003b2798c68f66bb3a025e42fa9">a3cf103</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/a3cf103d7116b003b2798c68f66bb3a025e42fa9">Change the pulseaudio to output to system log</a> <span class="CommitLog-author" title="bobwang@google.com">by Bob Wang</span> <span class="CommitLog-time" title="Mon Jul 06 07:37:16 2026">· 3 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/34d28fad46a942c5363964d4ce2d127c65950f1a">34d28fa</a> <a href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/34d28fad46a942c5363964d4ce2d127c65950f1a">Bluetooth: Disable auto-enable advertisement on disconnect for new tests</a> <span class="CommitLog-author" title="howardchung@google.com">by howardchung</span> <span class="CommitLog-time" title="Thu Jun 18 19:03:48 2026">· 3 months ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/firmware-R151-16733.2.B">firmware-R151-16733.2.B</a> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+/refs/heads/release-R151-16733.B">release-R151-16733.B</a></li></ol><nav class="LogNav"><a class="LogNav-next" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/+log">More »</a></nav></div></div></div> <!-- Container --></div> <!-- Site-content --><footer class="Site-footer"><div class="Footer"><span class="Footer-poweredBy">Powered by <a href="https://gerrit.googlesource.com/gitiles/">Gitiles</a>| <a href="https://policies.google.com/privacy">Privacy</a>| <a href="https://policies.google.com/terms">Terms</a></span><span class="Footer-formats"><a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/?format=TEXT">txt</a> <a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/chromiumos/platform/chameleon/?format=JSON">json</a></span></div></footer><script nonce="">{let f = document.getElementById("clone-repo-input"); f.onclick = () => {f.focus(); if (f.selectionStart === f.selectionEnd) {f.select();}};}</script></body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)https://chromium.googlesource.com/android_tools/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>android_tools - Git at Google</title><link rel="icon" href="https://chromium.googlesource.com/+static/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="https://chromium.googlesource.com/+static/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="https://chromium.googlesource.com/+static/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://chromium.googlesource.com/+static/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="https://chromium.googlesource.com/+static/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="./android_tools - Git at Google_files/base.css"><!-- default customHeadTagPart --><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  try {
+    let t = localStorage.getItem('gitiles-theme');
+    if (!t) {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        t = decodeURIComponent(m[1]);
+      }
+    }
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) {}
+})();
+</script></head><body class="Site"><header class="Site-header"><div class="Header"><style>
+  .Header-image--dark {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--light {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--dark {
+    display: inline-block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .Header-image--light {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .Header-image--dark {
+      display: inline-block;
+    }
+  }
+</style><a class="Header-image" href="https://chromium.googlesource.com/"><img class="Header-image--light" src="./android_tools - Git at Google_files/lockup_git_color_108x24dp.png" width="108" height="24" alt="Google Git"><img class="Header-image--dark" src="./android_tools - Git at Google_files/lockup_git_light_color_108x24dp.png" width="108" height="24" alt="Google Git"></a><div class="Header-menu"> <a class="Header-menuItem" href="https://accounts.google.com/AccountChooser?faa=1&amp;continue=https://chromium.googlesource.com/login/android_tools/">Sign in</a> <button class="Header-menuItem Header-themeToggle" id="gitiles-theme-toggle" type="button" title="Theme: Auto (click to switch to Dark)" aria-label="Theme: Auto (click to switch to Dark)"><span class="Header-themeIcon" aria-hidden="true">◑</span><span class="Header-themeLabel">Auto</span></button><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  function getTheme() {
+    try {
+      const t = localStorage.getItem('gitiles-theme');
+      if (t) {
+        return t;
+      }
+    } catch (e) {}
+    try {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        return decodeURIComponent(m[1]);
+      }
+    } catch (e) {}
+    return 'auto';
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark' || theme === 'light') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  function updateButton(btn, theme) {
+    const icon = btn.querySelector('.Header-themeIcon');
+    const label = btn.querySelector('.Header-themeLabel');
+    if (theme === 'dark') {
+      if (icon) {
+        icon.textContent = '\u263E';
+      }
+      if (label) {
+        label.textContent = 'Dark';
+      }
+      btn.title = 'Theme: Dark (click to switch to Light)';
+    } else if (theme === 'light') {
+      if (icon) {
+        icon.textContent = '\u2600';
+      }
+      if (label) {
+        label.textContent = 'Light';
+      }
+      btn.title = 'Theme: Light (click to switch to Auto)';
+    } else {
+      if (icon) {
+        icon.textContent = '\u25D1';
+      }
+      if (label) {
+        label.textContent = 'Auto';
+      }
+      btn.title = 'Theme: Auto (click to switch to Dark)';
+    }
+    btn.setAttribute('aria-label', btn.title);
+  }
+
+  function initToggle() {
+    const btn = document.getElementById('gitiles-theme-toggle');
+    if (!btn) {
+      return;
+    }
+    const current = getTheme();
+    updateButton(btn, current);
+    btn.onclick = function() {
+      const cur = getTheme();
+      const next = (cur === 'auto') ? 'dark' : ((cur === 'dark') ? 'light' : 'auto');
+      applyTheme(next);
+      try {
+        localStorage.setItem('gitiles-theme', next);
+      } catch (e) {}
+      try {
+        document.cookie = 'gitiles-theme=' + encodeURIComponent(next) + ';path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+      updateButton(btn, next);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    initToggle();
+  }
+})();
+</script></div></div></header><div class="Site-content"><div class="Container "><div class="Breadcrumbs"><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/?format=HTML">chromium</a><span class="Breadcrumbs-sep">/</span><span class="Breadcrumbs-crumb">android_tools</span></div><div class="CloneRepo"><div class="CloneRepo-title">Clone this repo:</div><input id="clone-repo-input" type="text" class="u-monospace CloneRepo-command" readonly="readonly" value="git clone https://chromium.googlesource.com/android_tools"></div><div class="RepoShortlog"><div class="RepoShortlog-refs"><div class="RefList RefList--responsive"><h3 class="RefList-title">Branches</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/heads/main">main</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/heads/2403">2403</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/heads/agrieve-roll-inline-tweaks">agrieve-roll-inline-tweaks</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/heads/agrieve-roll-inline-tweaks2">agrieve-roll-inline-tweaks2</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/heads/agrieve-roll-string-inline">agrieve-roll-string-inline</a></li></ul></div><div class="RefList RefList--responsive"><h3 class="RefList-title">Tags</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/android_tools/+/refs/tags/master-backup">master-backup</a></li></ul></div></div><div class="RepoShortlog-log"><ol class="CommitLog"><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/4521cdcd6ada3de6c444bf49186c296bc71ff1a1">4521cdc</a> <a href="https://chromium.googlesource.com/android_tools/+/4521cdcd6ada3de6c444bf49186c296bc71ff1a1">Adds corresponding NPM lockfiles to package.json files. This enumerates dependencies, including transitive ones, and their versions, to avoid using vulnerable ones. For more details, see go/npm-lockfile-cl-guide</a> <span class="CommitLog-author" title="yuanjkang@google.com">by Yuan Kang</span> <span class="CommitLog-time" title="Thu Aug 01 14:31:25 2024">· 2 years, 2 months ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/android_tools/+/refs/heads/main">main</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/93a052c95edf0c571fe820d3aee2653e3a158943">93a052c</a> <a href="https://chromium.googlesource.com/android_tools/+/93a052c95edf0c571fe820d3aee2653e3a158943">Adding bjoyce@, hypan@, and zhiyuans@ to the OWNERS file.</a> <span class="CommitLog-author" title="hypan@google.com">by Haiyang Pan</span> <span class="CommitLog-time" title="Fri Mar 17 21:37:43 2023">· 3 years, 6 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/7667f459e66f4935182607adec3755bf926a57ba">7667f45</a> <a href="https://chromium.googlesource.com/android_tools/+/7667f459e66f4935182607adec3755bf926a57ba">Add .gitmodules file.</a> <span class="CommitLog-author" title="jojwang@chromium.org">by Joanna Wang</span> <span class="CommitLog-time" title="Tue Mar 07 04:09:32 2023">· 3 years, 7 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/347a7c8078a009e98995985b7ab6ec6b35696dea">347a7c8</a> <a href="https://chromium.googlesource.com/android_tools/+/347a7c8078a009e98995985b7ab6ec6b35696dea">Update .gitignore for sdk/platform-tools/package.xml</a> <span class="CommitLog-author" title="digit@google.com">by David 'Digit' Turner</span> <span class="CommitLog-time" title="Fri Feb 01 15:17:20 2019">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/e958d6ea74442d4e0849bb8a018d215a0e78981d">e958d6e</a> <a href="https://chromium.googlesource.com/android_tools/+/e958d6ea74442d4e0849bb8a018d215a0e78981d">Update sdk/platform-tools to version 28.0.1.</a> <span class="CommitLog-author" title="jbudorick@chromium.org">by John Budorick</span> <span class="CommitLog-time" title="Wed Dec 12 21:42:15 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/32e0d5f807b17399ca50b903b93aa4a4c8794df4">32e0d5f</a> <a href="https://chromium.googlesource.com/android_tools/+/32e0d5f807b17399ca50b903b93aa4a4c8794df4">Remove ndk from gitignore</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Wed Nov 07 18:27:33 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/6fecaa542f73dd5aeed170d9a4cf340159b42976">6fecaa5</a> <a href="https://chromium.googlesource.com/android_tools/+/6fecaa542f73dd5aeed170d9a4cf340159b42976">Update README and prepare to delete ndk dir</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Wed Nov 07 17:56:44 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/81a57e30579c5f07a7b1276f9810a873d2344bfc">81a57e3</a> <a href="https://chromium.googlesource.com/android_tools/+/81a57e30579c5f07a7b1276f9810a873d2344bfc">Add tools-lint directory to keep lint up to date</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Wed Nov 07 15:43:46 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/0a7d5bb57c665bde0ce1e8fc260d7eed6087032e">0a7d5bb</a> <a href="https://chromium.googlesource.com/android_tools/+/0a7d5bb57c665bde0ce1e8fc260d7eed6087032e">Update OWNERS</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Thu Aug 02 16:01:47 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/fde88301c94c81a87fc6a7aacb74ed3251d0d048">fde8830</a> <a href="https://chromium.googlesource.com/android_tools/+/fde88301c94c81a87fc6a7aacb74ed3251d0d048">Add instant app support</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Mon Jul 16 19:29:28 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/130499e25286f4d56acafa252fee09f3cc595c49">130499e</a> <a href="https://chromium.googlesource.com/android_tools/+/130499e25286f4d56acafa252fee09f3cc595c49">Update to platforms;android-28.</a> <span class="CommitLog-author" title="jbudorick@chromium.org">by John Budorick</span> <span class="CommitLog-time" title="Mon Jun 25 20:17:43 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/3545ab5b9883087a54cb9e5337c32617cb2a443d">3545ab5</a> <a href="https://chromium.googlesource.com/android_tools/+/3545ab5b9883087a54cb9e5337c32617cb2a443d">Add version 25.0.2 of dx.jar to sdk/build-tools.</a> <span class="CommitLog-author" title="jbudorick@chromium.org">by John Budorick</span> <span class="CommitLog-time" title="Thu Jun 21 19:54:03 2018">· 8 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/c22a664c39af72dd8f89200220713dcad811300a">c22a664</a> <a href="https://chromium.googlesource.com/android_tools/+/c22a664c39af72dd8f89200220713dcad811300a">Update sdk/platform-tools to version 27.0.1</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Mon Mar 05 13:57:36 2018">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/9a70d48fcdd68cd0e7e968f342bd767ee6323bd1">9a70d48</a> <a href="https://chromium.googlesource.com/android_tools/+/9a70d48fcdd68cd0e7e968f342bd767ee6323bd1">Update SDK build-tools to 27.0.3</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Wed Feb 07 21:52:36 2018">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/c9f9bbf0a6c862fbef6115e80e8617093cd58e6b">c9f9bbf</a> <a href="https://chromium.googlesource.com/android_tools/+/c9f9bbf0a6c862fbef6115e80e8617093cd58e6b">Remove tools-lint subdirectory</a> <span class="CommitLog-author" title="wnwen@chromium.org">by Peter Wen</span> <span class="CommitLog-time" title="Mon Jan 15 16:19:00 2018">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/0e0e5924744f42e1d1c4650d057c3ada194678fb">0e0e592</a> <a href="https://chromium.googlesource.com/android_tools/+/0e0e5924744f42e1d1c4650d057c3ada194678fb">[ndk] Update catapult file with new android ndk root locate</a> <span class="CommitLog-author" title="shenghuazhang@chromium.org">by Shenghua Zhang</span> <span class="CommitLog-time" title="Thu Jan 11 02:02:55 2018">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/c78b25872734e0038ae2a333edc645cd96bc232d">c78b258</a> <a href="https://chromium.googlesource.com/android_tools/+/c78b25872734e0038ae2a333edc645cd96bc232d">Restore emma.jar, by copying it from previous SDK.</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Fri Dec 22 02:51:26 2017">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/7d781b3544ef67dfa8c7c0c1a347b818c49c42bc">7d781b3</a> <a href="https://chromium.googlesource.com/android_tools/+/7d781b3544ef67dfa8c7c0c1a347b818c49c42bc">Roll ndk to include CHROMIUM_LIBCPP_INLINE_VISIBILITY patch</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Wed Dec 20 02:28:00 2017">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/a8d40d515d9f2fe4491abd80fa009da6763417c8">a8d40d5</a> <a href="https://chromium.googlesource.com/android_tools/+/a8d40d515d9f2fe4491abd80fa009da6763417c8">Roll ndk to pick up revert of TWEAK_INLINES</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Mon Dec 18 18:41:35 2017">· 9 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_tools/+/4394a76c4460630a42c904724db226f9e24d1ff9">4394a76</a> <a href="https://chromium.googlesource.com/android_tools/+/4394a76c4460630a42c904724db226f9e24d1ff9">Roll ndk to r16</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Wed Dec 06 02:59:37 2017">· 9 years ago</span></li></ol><nav class="LogNav"><a class="LogNav-next" href="https://chromium.googlesource.com/android_tools/+log">More »</a></nav></div></div></div> <!-- Container --></div> <!-- Site-content --><footer class="Site-footer"><div class="Footer"><span class="Footer-poweredBy">Powered by <a href="https://gerrit.googlesource.com/gitiles/">Gitiles</a>| <a href="https://policies.google.com/privacy">Privacy</a>| <a href="https://policies.google.com/terms">Terms</a></span><span class="Footer-formats"><a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/android_tools/?format=TEXT">txt</a> <a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/android_tools/?format=JSON">json</a></span></div></footer><script nonce="">{let f = document.getElementById("clone-repo-input"); f.onclick = () => {f.focus(); if (f.selectionStart === f.selectionEnd) {f.select();}};}</script></body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://chromium.googlesource.com/android_ndk/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>android_ndk - Git at Google</title><link rel="icon" href="https://chromium.googlesource.com/+static/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="https://chromium.googlesource.com/+static/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="https://chromium.googlesource.com/+static/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://chromium.googlesource.com/+static/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="https://chromium.googlesource.com/+static/apple-touch-icon.png"><link rel="stylesheet" type="text/css" href="./android_ndk - Git at Google_files/base.css"><link rel="stylesheet" type="text/css" href="./android_ndk - Git at Google_files/doc.css"><!-- default customHeadTagPart --><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  try {
+    let t = localStorage.getItem('gitiles-theme');
+    if (!t) {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        t = decodeURIComponent(m[1]);
+      }
+    }
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) {}
+})();
+</script></head><body class="Site"><header class="Site-header"><div class="Header"><style>
+  .Header-image--dark {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--light {
+    display: none;
+  }
+  html[data-theme="dark"] .Header-image--dark {
+    display: inline-block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .Header-image--light {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .Header-image--dark {
+      display: inline-block;
+    }
+  }
+</style><a class="Header-image" href="https://chromium.googlesource.com/"><img class="Header-image--light" src="./android_ndk - Git at Google_files/lockup_git_color_108x24dp.png" width="108" height="24" alt="Google Git"><img class="Header-image--dark" src="./android_ndk - Git at Google_files/lockup_git_light_color_108x24dp.png" width="108" height="24" alt="Google Git"></a><div class="Header-menu"> <a class="Header-menuItem" href="https://accounts.google.com/AccountChooser?faa=1&amp;continue=https://chromium.googlesource.com/login/android_ndk/">Sign in</a> <button class="Header-menuItem Header-themeToggle" id="gitiles-theme-toggle" type="button" title="Theme: Auto (click to switch to Dark)" aria-label="Theme: Auto (click to switch to Dark)"><span class="Header-themeIcon" aria-hidden="true">◑</span><span class="Header-themeLabel">Auto</span></button><script nonce="">// Copyright (C) 2026 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+(function() {
+  function getTheme() {
+    try {
+      const t = localStorage.getItem('gitiles-theme');
+      if (t) {
+        return t;
+      }
+    } catch (e) {}
+    try {
+      const m = document.cookie.match(/(?:^|; )gitiles-theme=([^;]*)/);
+      if (m) {
+        return decodeURIComponent(m[1]);
+      }
+    } catch (e) {}
+    return 'auto';
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark' || theme === 'light') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  function updateButton(btn, theme) {
+    const icon = btn.querySelector('.Header-themeIcon');
+    const label = btn.querySelector('.Header-themeLabel');
+    if (theme === 'dark') {
+      if (icon) {
+        icon.textContent = '\u263E';
+      }
+      if (label) {
+        label.textContent = 'Dark';
+      }
+      btn.title = 'Theme: Dark (click to switch to Light)';
+    } else if (theme === 'light') {
+      if (icon) {
+        icon.textContent = '\u2600';
+      }
+      if (label) {
+        label.textContent = 'Light';
+      }
+      btn.title = 'Theme: Light (click to switch to Auto)';
+    } else {
+      if (icon) {
+        icon.textContent = '\u25D1';
+      }
+      if (label) {
+        label.textContent = 'Auto';
+      }
+      btn.title = 'Theme: Auto (click to switch to Dark)';
+    }
+    btn.setAttribute('aria-label', btn.title);
+  }
+
+  function initToggle() {
+    const btn = document.getElementById('gitiles-theme-toggle');
+    if (!btn) {
+      return;
+    }
+    const current = getTheme();
+    updateButton(btn, current);
+    btn.onclick = function() {
+      const cur = getTheme();
+      const next = (cur === 'auto') ? 'dark' : ((cur === 'dark') ? 'light' : 'auto');
+      applyTheme(next);
+      try {
+        localStorage.setItem('gitiles-theme', next);
+      } catch (e) {}
+      try {
+        document.cookie = 'gitiles-theme=' + encodeURIComponent(next) + ';path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+      updateButton(btn, next);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    initToggle();
+  }
+})();
+</script></div></div></header><div class="Site-content"><div class="Container "><div class="Breadcrumbs"><a class="Breadcrumbs-crumb" href="https://chromium.googlesource.com/?format=HTML">chromium</a><span class="Breadcrumbs-sep">/</span><span class="Breadcrumbs-crumb">android_ndk</span></div><div class="CloneRepo"><div class="CloneRepo-title">Clone this repo:</div><input id="clone-repo-input" type="text" class="u-monospace CloneRepo-command" readonly="readonly" value="git clone https://chromium.googlesource.com/android_ndk"></div><div class="RepoShortlog"><div class="RepoShortlog-refs"><div class="RefList RefList--responsive"><h3 class="RefList-title">Branches</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/main">main</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/agrieve-inline-tweaks">agrieve-inline-tweaks</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/agrieve-inline-tweaks-string">agrieve-inline-tweaks-string</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/next">next</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/r16">r16</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/heads/unmodified">unmodified</a></li></ul></div><div class="RefList RefList--responsive"><h3 class="RefList-title">Tags</h3><ul class="RefList-items"><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/tags/r14b">r14b</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/tags/r13b">r13b</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/tags/r12b">r12b</a></li><li class="RefList-item"><a href="https://chromium.googlesource.com/android_ndk/+/refs/tags/r11c">r11c</a></li></ul></div></div><div class="RepoShortlog-log"><ol class="CommitLog"><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_ndk/+/310956bd122ec2b96049f8d7398de6b717f3452e">310956b</a> <a href="https://chromium.googlesource.com/android_ndk/+/310956bd122ec2b96049f8d7398de6b717f3452e">Route cpu_features to //third_party/cpu_features</a> <span class="CommitLog-author" title="prashanthsw@google.com">by Prashanth Swaminathan</span> <span class="CommitLog-time" title="Thu May 18 13:35:12 2023">· 3 years, 4 months ago</span> <a class="CommitLog-branchLabel" href="https://chromium.googlesource.com/android_ndk/+/refs/heads/main">main</a></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_ndk/+/8388a2be5421311dc75c5f937aae13d821a27f3d">8388a2b</a> <a href="https://chromium.googlesource.com/android_ndk/+/8388a2be5421311dc75c5f937aae13d821a27f3d">Restore binutil's objdump from r22</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Mon Apr 11 15:23:31 2022">· 4 years, 6 months ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_ndk/+/9644104c8cf85bf1bdce5b1c0691e9778572c3f8">9644104</a> <a href="https://chromium.googlesource.com/android_ndk/+/9644104c8cf85bf1bdce5b1c0691e9778572c3f8">Restore binutils dwp from r22</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Thu Oct 28 13:18:11 2021">· 5 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_ndk/+/248cc50e5b63ab7ceb474e10640203924a2b1119">248cc50</a> <a href="https://chromium.googlesource.com/android_ndk/+/248cc50e5b63ab7ceb474e10640203924a2b1119">Update Android NDK to r23</a> <span class="CommitLog-author" title="agrieve@chromium.org">by Andrew Grieve</span> <span class="CommitLog-time" title="Mon Sep 13 18:32:58 2021">· 5 years ago</span></li><li class="CommitLog-item CommitLog-item--committeroneline"><a class="u-sha1 u-monospace CommitLog-sha1" href="https://chromium.googlesource.com/android_ndk/+/401019bf85744311b26c88ced255cd53401af8b7">401019b</a> <a href="https://chromium.googlesource.com/android_ndk/+/401019bf85744311b26c88ced255cd53401af8b7">Update android ndk to version 22.</a> <span class="CommitLog-author" title="bjoyce@google.com">by Ben Joyce</span> <span class="CommitLog-time" title="Mon Jan 18 03:32:31 2021">· 6 years ago</span></li></ol><nav class="LogNav"><a class="LogNav-next" href="https://chromium.googlesource.com/android_ndk/+log">More »</a></nav><div class="doc RepoIndexDoc"><h1><a class="h" name="Android-NDK" href="https://chromium.googlesource.com/android_ndk/#Android-NDK"><span></span></a><a class="h" name="android-ndk" href="https://chromium.googlesource.com/android_ndk/#android-ndk"><span></span></a>Android NDK</h1><h2><a class="h" name="Documentation" href="https://chromium.googlesource.com/android_ndk/#Documentation"><span></span></a><a class="h" name="documentation" href="https://chromium.googlesource.com/android_ndk/#documentation"><span></span></a>Documentation</h2><p>NDK documentation, guides, and API reference are available on <a href="https://developer.android.com/ndk/index.html">our website</a>.</p><p>NDK code samples are available on <a href="https://github.com/googlesamples/android-ndk">GitHub</a>.</p><p>Information about Android Studio can be found on <a href="https://developer.android.com/studio/index.html">the Android Studio website</a>.</p><h2><a class="h" name="Filing-Bugs" href="https://chromium.googlesource.com/android_ndk/#Filing-Bugs"><span></span></a><a class="h" name="filing-bugs" href="https://chromium.googlesource.com/android_ndk/#filing-bugs"><span></span></a>Filing Bugs</h2><p>NDK bugs should be filed on <a href="https://github.com/android-ndk/ndk/issues/new">GitHub</a>.</p><p>Android Studio and Gradle bugs should be filed in the <a href="http://b.android.com/">Android Studio Bug Tracker</a>. For the fastest response, make sure you follow their guide on <a href="http://tools.android.com/filing-bugs">Filing Bugs</a>.</p></div></div></div></div> <!-- Container --></div> <!-- Site-content --><footer class="Site-footer"><div class="Footer"><span class="Footer-poweredBy">Powered by <a href="https://gerrit.googlesource.com/gitiles/">Gitiles</a>| <a href="https://policies.google.com/privacy">Privacy</a>| <a href="https://policies.google.com/terms">Terms</a></span><span class="Footer-formats"><a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/android_ndk/?format=TEXT">txt</a> <a class="u-monospace Footer-formatsItem" href="https://chromium.googlesource.com/android_ndk/?format=JSON">json</a></span></div></footer><script nonce="">{let f = document.getElementById("clone-repo-input"); f.onclick = () => {f.focus(); if (f.selectionStart === f.selectionEnd) {f.select();}};}</script></body></html>
