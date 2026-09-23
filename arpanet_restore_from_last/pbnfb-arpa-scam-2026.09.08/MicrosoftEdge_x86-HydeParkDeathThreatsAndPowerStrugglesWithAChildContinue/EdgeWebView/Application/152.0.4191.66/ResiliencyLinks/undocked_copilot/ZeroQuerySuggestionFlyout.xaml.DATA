@@ -1,0 +1,321 @@
+<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SuggestionBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SuggestionBorderBrush" Color="#0F000000" />
+                    <SolidColorBrush x:Key="SuggestionHeaderBrush" Color="#616161" />
+                    <SolidColorBrush x:Key="SuggestionTextBrush" Color="#424242" />
+                    <SolidColorBrush x:Key="NavButtonBackgroundBrush" Color="Transparent" />
+                    <!-- Hover bg: black at ~8% opacity in light mode (matches design mock) -->
+                    <SolidColorBrush x:Key="NavButtonHoverBrush" Color="#14000000" />
+                    <!-- Foreground is a darker base color; baseline icon opacity (0.65) renders
+                         it as a soft mid-grey, hover bumps opacity to 1.0 for the darker hover state. -->
+                    <SolidColorBrush x:Key="NavButtonForegroundBrush" Color="#616161" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrush" Color="#FFFFFFFF" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrushOnHover" Color="#FFF0F0F0" />
+                    <SolidColorBrush x:Key="DismissButtonIconBrush" Color="#2C2C2C" />
+                    <SolidColorBrush x:Key="IndicatorTrackBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="IndicatorFillBrush" Color="#D7D7D7" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SuggestionBackgroundBrush" Color="#292929" />
+                    <SolidColorBrush x:Key="SuggestionBorderBrush" Color="#0FFFFFFF" />
+                    <SolidColorBrush x:Key="SuggestionHeaderBrush" Color="#B0B0B0" />
+                    <SolidColorBrush x:Key="SuggestionTextBrush" Color="#E0E0E0" />
+                    <SolidColorBrush x:Key="NavButtonBackgroundBrush" Color="Transparent" />
+                    <!-- Hover bg: white at ~8% opacity in dark mode (matches design mock) -->
+                    <SolidColorBrush x:Key="NavButtonHoverBrush" Color="#14FFFFFF" />
+                    <!-- Lighter base brush; baseline icon opacity dims it, hover restores full color. -->
+                    <SolidColorBrush x:Key="NavButtonForegroundBrush" Color="#B0B0B0" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrush" Color="#FF383838" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrushOnHover" Color="#FF484848" />
+                    <SolidColorBrush x:Key="DismissButtonIconBrush" Color="#E0E0E0" />
+                    <SolidColorBrush x:Key="IndicatorTrackBrush" Color="#292929" />
+                    <SolidColorBrush x:Key="IndicatorFillBrush" Color="#757575" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="SuggestionBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="SuggestionBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="SuggestionHeaderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="SuggestionTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="NavButtonBackgroundBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="NavButtonHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="NavButtonForegroundBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="DismissButtonBackgroundBrushOnHover" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="DismissButtonIconBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="IndicatorTrackBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+                    <SolidColorBrush x:Key="IndicatorFillBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <!-- Navigation button style: subtle circular background appears on hover (~8% opacity
+                 black/white). Icon also darkens on hover via opacity ramp on ContentElement (the
+                 foreground brush is already a darker base color). -->
+            <Style x:Key="NavButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="MinWidth" Value="28" />
+                <Setter Property="MinHeight" Value="28" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid MinWidth="44" MinHeight="44"
+                                  Background="Transparent">
+                                <!-- Hover background circle: 32x32, semi-transparent black (light) / white (dark).
+                                     Hidden by default, fades in on PointerOver. Sits behind the icon. -->
+                                <Border x:Name="HoverBackground"
+                                        Width="32"
+                                        Height="32"
+                                        CornerRadius="16"
+                                        Background="{ThemeResource NavButtonHoverBrush}"
+                                        Opacity="0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center" />
+                                <ContentPresenter
+                                    x:Name="ContentElement"
+                                    Opacity="0.65"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="HoverBackground.Opacity" Value="1" />
+                                                <Setter Target="ContentElement.Opacity" Value="1" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="HoverBackground.Opacity" Value="1" />
+                                                <Setter Target="ContentElement.Opacity" Value="0.85" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Focused" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Close button style: filled circle matching QuickView dismiss button -->
+            <Style x:Key="DismissButtonStyle" TargetType="Button">
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root"
+                                    Width="{TemplateBinding Width}"
+                                    Height="{TemplateBinding Height}"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="{TemplateBinding CornerRadius}">
+                                <ContentPresenter
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="Root.Background" Value="{ThemeResource DismissButtonBackgroundBrushOnHover}"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="Root.Opacity" Value="0.8"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- FlyoutPresenter is styled transparent in C++ Opened handler -->
+    <!-- Outer Grid padding reserves popup space ONLY for the close button which extends past the
+         card's top-right corner (Margin="0,-10,-10,0") and its drop shadow (Translation Z=32).
+         Bottom padding stays 0 so the visual gap to the live mode pill is controlled solely by
+         Margin.Bottom (12px) — matching the previous, tighter spacing. Symmetric horizontal
+         padding keeps the card centered over the toolbar. -->
+    <Grid Margin="0,0,0,12" Padding="32,32,32,0">
+        <!-- Wrapper Grid: hover target for showing/hiding close + nav buttons.
+             Named so C++ attaches PointerEntered/Exited here instead of on suggestionBorder,
+             ensuring the close button (which extends outside the card) remains reachable.
+             NOT a tab stop itself — its child buttons (close, prev, next) are the real
+             focus targets. Making the wrapper a tab stop / programmatic focus target was
+             causing pointer/focus state to stick after the first hover and broke the live
+             mode bar's click-and-drag behaviour. -->
+        <Grid x:Name="hoverTargetGrid" HorizontalAlignment="Center" Background="Transparent"
+              AutomationProperties.LandmarkType="Custom">
+        <Grid.Resources>
+            <ThemeShadow x:Name="ZQSharedShadow" />
+        </Grid.Resources>
+        <!-- Card -->
+        <!-- Issue 10: CornerRadius 16→28 | Issue 5: Padding 16→12 horiz for chevron room -->
+        <Border x:Name="suggestionBorder"
+                Padding="12,16,12,0"
+                Background="{ThemeResource SuggestionBackgroundBrush}"
+                BorderBrush="{ThemeResource SuggestionBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="28"
+                MinWidth="340"
+                MinHeight="132"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Center"
+                Translation="0,0,16"
+                Shadow="{StaticResource ZQSharedShadow}">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                    <!-- Row 0: Header text (centered across full width) -->
+                    <TextBlock x:Name="headerText"
+                               Grid.Row="0"
+                               FontSize="13"
+                               FontWeight="Normal"
+                               Foreground="{ThemeResource SuggestionHeaderBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextWrapping="NoWrap"
+                               Margin="0,0,0,12" />
+
+                    <!-- Row 1: Navigation arrows + Suggestion text -->
+                    <Grid Grid.Row="1" Margin="0,0,0,8" VerticalAlignment="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Previous arrow -->
+                        <!-- Issue 3: Opacity=0 default, shown on card hover via C++ -->
+                        <!-- Issue 5: Negative margin pulls chevron closer to card edge -->
+                        <Button x:Name="prevButton"
+                                Grid.Column="0"
+                                Style="{StaticResource NavButtonStyle}"
+                                AutomationProperties.Name="Previous suggestion"
+                                IsTabStop="True"
+                                TabIndex="1"
+                                Opacity="0"
+                                VerticalAlignment="Center"
+                                Margin="-16,0,0,0">
+                            <FontIcon Glyph="&#xE76B;"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource NavButtonForegroundBrush}" />
+                        </Button>
+
+                        <!-- Suggestion text with clip for slide animation -->
+                        <Grid Grid.Column="1"
+                              Margin="0,0,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.Clip>
+                                <RectangleGeometry x:Name="suggestionClipRect" Rect="0,0,260,80" />
+                            </Grid.Clip>
+
+                            <TextBlock x:Name="suggestionText"
+                                       FontSize="20"
+                                       FontWeight="Normal"
+                                       Foreground="{ThemeResource SuggestionTextBrush}"
+                                       TextWrapping="Wrap"
+                                       MaxLines="2"
+                                       TextAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       AutomationProperties.LiveSetting="Assertive">
+                                <TextBlock.RenderTransform>
+                                    <TranslateTransform x:Name="suggestionSlideTransform" X="0" />
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- Next arrow -->
+                        <!-- Issue 3: Opacity=0 default, shown on card hover via C++ -->
+                        <!-- Issue 5: Negative margin pulls chevron closer to card edge -->
+                        <Button x:Name="nextButton"
+                                Grid.Column="2"
+                                Style="{StaticResource NavButtonStyle}"
+                                AutomationProperties.Name="Next suggestion"
+                                IsTabStop="True"
+                                TabIndex="2"
+                                Opacity="0"
+                                VerticalAlignment="Center"
+                                Margin="0,0,-16,0">
+                            <FontIcon Glyph="&#xE76C;"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource NavButtonForegroundBrush}" />
+                        </Button>
+                    </Grid>
+
+                    <!-- Row 2: Single full-width progress bar indicator.
+                         Track is invisible (same color as card background).
+                         Fill Rectangle has RadiusX/RadiusY for rounded edges. -->
+                    <Grid x:Name="indicatorPanel"
+                          Grid.Row="2"
+                          Height="2"
+                          Margin="-12,0,-12,0"
+                          HorizontalAlignment="Stretch">
+                        <Rectangle x:Name="indicatorFill0"
+                                   Fill="{ThemeResource IndicatorFillBrush}"
+                                   RenderTransformOrigin="0,0.5">
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform x:Name="indicatorScale0" ScaleX="0" ScaleY="1" />
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                    </Grid>
+                </Grid>
+        </Border>
+
+        <!-- Close button: floating at top-right corner of card, partially outside.
+             Negative margins push it beyond the card border into the outer padding space.
+             Matches QuickView DismissMainGridButton pattern with filled circle + shadow. -->
+        <Button x:Name="closeButton"
+                Style="{StaticResource DismissButtonStyle}"
+                Width="32"
+                Height="32"
+                Background="{ThemeResource DismissButtonBackgroundBrush}"
+                CornerRadius="16"
+                Padding="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,-10,-10,0"
+                Translation="0,0,32"
+                Shadow="{StaticResource ZQSharedShadow}"
+                Opacity="0"
+                AutomationProperties.Name="Close suggestions"
+                IsTabStop="True"
+                TabIndex="3">
+            <Grid Width="10" Height="10"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+                <Path Data="M1 1 L9 9 M9 1 L1 9"
+                      Stroke="{ThemeResource DismissButtonIconBrush}"
+                      StrokeThickness="1.25"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round" />
+            </Grid>
+        </Button>
+        </Grid>
+    </Grid>
+</UserControl>

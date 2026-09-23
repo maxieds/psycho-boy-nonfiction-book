@@ -1,0 +1,93 @@
+<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!-- Content for the vision-consent card, parented at runtime into the bebop / NeonBrush inline
+         overlay host (InlineVisionConsentHost). Text carries English literals as the fallback;
+         VoiceComposerLocalizationResolver localizes named elements from resw (<x:Name>_Text /
+         _Content) when keys exist. The EU vs non-EU button variance is a visibility toggle applied
+         in VisionConsent.cpp. -->
+    <UserControl.Resources>
+        <!-- Black-filled CTA buttons per the mock, inverted for dark, system colors for HC.
+             Overrides the framework Button theme-resource keys so hover/pressed follow suit;
+             mirrors the ThemeDictionaries pattern used by ScreenShareItem/ZeroQuery XAML. -->
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#000000" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#1F1F1F" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#333333" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ConsentLinkBrush" Color="#000000" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E6E6E6" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#CCCCCC" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="#000000" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#000000" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#000000" />
+                    <SolidColorBrush x:Key="ConsentLinkBrush" Color="#FFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="{ThemeResource SystemColorButtonTextColor}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="ConsentLinkBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <!-- Full-card vision-consent card, parented into the fixed-height inline overlay host
+         (InlineVisionConsentHost) in the bebop / NeonBrush layout. A '*' top row + Auto button row
+         means the copy fills the card and scrolls if needed while the CTA buttons stay pinned to the
+         bottom. Buttons are full-width + stacked to match the overlay mock. -->
+    <Grid Padding="28" MinWidth="280">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollMode="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollMode="Disabled"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Orientation="Vertical">
+                <TextBlock x:Name="ConsentTitle"
+                           Text="Before we get started..."
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           LineHeight="28"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,16" />
+                <TextBlock x:Name="ConsentBody"
+                           Text="Get help from Copilot by sharing your browser, screen or camera and talking about it. Copilot can listen and respond to your voice. To do this, it may process what you share, including physical characteristics like faces and hands."
+                           FontSize="14"
+                           LineHeight="20"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,16" />
+                <RichTextBlock FontSize="14" LineHeight="20" TextWrapping="Wrap">
+                    <Paragraph>
+                        <Run x:Name="ConsentPermissionRun" Text="By continuing, you confirm you have permission from anyone in the images you share with Copilot. " />
+                        <Hyperlink NavigateUri="https://privacy.microsoft.com/privacystatement"
+                                   Foreground="{ThemeResource ConsentLinkBrush}"
+                                   UnderlineStyle="Single"><Run x:Name="ConsentLearnMoreRun" Text="Privacy statement" /></Hyperlink>
+                    </Paragraph>
+                </RichTextBlock>
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Orientation="Vertical" Spacing="8" Margin="0,16,0,0">
+            <Button x:Name="ConsentConfirm" Content="Confirm and continue" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="0,6,0,6" CornerRadius="12" BorderThickness="0" FontWeight="SemiBold" />
+            <Button x:Name="ConsentNotNow" Content="Not now" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="0,6,0,6" CornerRadius="12" BorderThickness="0" FontWeight="SemiBold" />
+            <Button x:Name="ConsentContinue" Content="Continue" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="0,6,0,6" CornerRadius="12" BorderThickness="0" FontWeight="SemiBold" Visibility="Collapsed" />
+        </StackPanel>
+    </Grid>
+</UserControl>
