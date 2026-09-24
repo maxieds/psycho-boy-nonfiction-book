@@ -1,0 +1,915 @@
+Last login: Sun Jun  7 10:54:31 on ttys001
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+(base) Drs-MacBook-Pro:porche911 maxieds$ dmesg | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo dmesg | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo dmesg > arpa-bin/dmesg.out
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -h
+nvram: (usage: )
+nvram [-x|-X] [-p] [-f filename] [-d name] [-c] name[=value] ...
+	-x         use XML format for printing or reading variables
+	           (must appear before -p or -f)
+	-X         use HEX format for printing or reading variables
+	           (must appear before -p or -f)
+	-p         print all firmware variables
+	-f         set firmware variables from a text file
+	-d         delete the named variable
+	-c         delete all variables
+	name=value set named variable
+	name       print variable
+Note that arguments and options are executed in order.
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -p | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -X | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -X -p | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -X -p > arpa-bin/nvram2.txt
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -p > arpa-bin/nvram.txt
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -x -p | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -x -p > arpa-bin/nvram3.txt
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -x -X -p | less
+-X hex mode not supported with -x XMLmode.
+(base) Drs-MacBook-Pro:porche911 maxieds$ nvram -x -X -p | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls arpa-bin/
+dmesg.out             netstat-detailed.txt  nvram.txt             skywalkctl
+gitmo-note.txt        netstat.strings       nvram2.txt            skywalkctl.strings
+netstat               netstat.txt           nvram3.txt            
+(base) Drs-MacBook-Pro:porche911 maxieds$ which nvram
+/usr/sbin/nvram
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /usr/sbin/nvram arpa-bin/
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -a -s -t /usr/sbin/nvram | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -a -s -t /usr/sbin/nvram > arpa-bin/nvram.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ which skywalkctl
+/usr/sbin/skywalkctl
+(base) Drs-MacBook-Pro:porche911 maxieds$ firmwarepasswd -h
+ERROR | main | This tool must be run as root.
+
+firmwarepasswd v 1.2
+Copyright (C) 2014-2019 Apple Inc.  All Rights Reserved.
+
+
+Usage: firmwarepasswd [OPTION]
+
+     ?                               Show usage
+     -h                              Show usage
+     -setpasswd                      Set a firmware password. You will be promted for passwords as needed.
+                                         NOTE: if this is the first password set, and no mode is
+                                               in place, the mode will automatically be set to "command"
+     -setmode [mode] [-allow-oroms]  Set mode to:
+                                         "command" - password required to change boot disk
+                                         "full" - password required on all startups
+                                         -allow-oroms permits option roms execution
+                                         NOTE: cannot set a mode without having set a password
+     -mode                           Print out the current mode setting
+     -check                          Print out whether there is / isn't a firmware password is set
+     -delete                         Delete current firmware password and mode setting
+     -verify                         Verify current firmware password
+     -unlockseed                     Generate a firmware password recovery key
+                                         NOTE: Machine must be stable for this command to generate
+                                               a valid seed.  No pending changes that need a restart.
+                                         NOTE: Seed is only valid until the next time a firmware password
+                                               command occurs.
+     -disable-reset-capability       Disable firmware password reset using unlockseed
+     -enable-reset-capability        Enable firmware password reset using unlockseed
+                                         NOTE: cannot enable or disable firmware password reset
+                                               without having set a password
+
+(base) Drs-MacBook-Pro:porche911 maxieds$ which firmwarepasswd 
+/usr/sbin/firmwarepasswd
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo firmwarepasswd -mode
+Password:
+Mode: none
+Option roms allowed
+
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo firmwarepasswd -check
+Password Enabled: No
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo firmwarepasswd -verify
+No firmware password set
+ERROR | main | Exiting with error: 5
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo firmwarepasswd -unlockseed
+Machine is not locked
+ERROR | main | Exiting with error: 46
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings firmwarepasswd
+error: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strings: can't open file: firmwarepasswd (No such file or directory)
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /usr/sbin/firmwarepasswd
+firmwarepasswd v 1.2
+Copyright (C) 2014-2019 Apple Inc.  All Rights Reserved.
+Usage: firmwarepasswd [OPTION]
+     ?                               Show usage
+     -h                              Show usage
+     -setpasswd                      Set a firmware password. You will be promted for passwords as needed.
+                                         NOTE: if this is the first password set, and no mode is
+                                               in place, the mode will automatically be set to "command"
+     -setmode [mode] [-allow-oroms]  Set mode to:
+                                         "command" - password required to change boot disk
+                                         "full" - password required on all startups
+                                         -allow-oroms permits option roms execution
+                                         NOTE: cannot set a mode without having set a password
+     -mode                           Print out the current mode setting
+     -check                          Print out whether there is / isn't a firmware password is set
+     -delete                         Delete current firmware password and mode setting
+     -verify                         Verify current firmware password
+     -unlockseed                     Generate a firmware password recovery key
+                                         NOTE: Machine must be stable for this command to generate
+                                               a valid seed.  No pending changes that need a restart.
+                                         NOTE: Seed is only valid until the next time a firmware password
+                                               command occurs.
+     -disable-reset-capability       Disable firmware password reset using unlockseed
+     -enable-reset-capability        Enable firmware password reset using unlockseed
+                                         NOTE: cannot enable or disable firmware password reset
+                                               without having set a password
+command
+full
+ERROR | %s | Change mode failed, error: %d
+setMode
+ERROR | %s | Unable to generate mode change command
+ERROR | %s | Can't set mode with no EFI password set
+Incorrect Password
+ERROR | %s | Can't set a mode when firmware password is not set
+ERROR | %s | Invalid mode: %s
+ERROR | %s | Mode: %d, or Password: %d, not specified
+none
+Option roms allowed
+none
+Option roms not allowed
+command
+Option roms allowed
+command
+Option roms not allowed
+full
+Option roms allowed
+full
+Option roms not allowed
+unknown
+Option roms allowed
+No password set
+Setting Firmware Password
+Attempting to change EFI password with mode: %d, resetting to command mode
+ERROR | %s | Unable to generate EFI command
+setPasswdFromCommandLine
+ERROR | %s | Unable to verify password
+Password changed
+NOTE: Must restart before changes will take effect
+-setmode
+-allow-oroms
+Mode changed
+No firmware password set
+Delete Firmware Password
+Password incorrect
+Password removed
+Enable Firmware Password Reset Capability
+Disable Firmware Password Reset Capability
+WARNING: This will eliminate AppleCare's ability to reset your firmware password.
+If you forget your firmware password, resetting the password will require a main logic board (MLB) replacement.
+Do you consent to being responsible for all repair costs if you forget your firmware password?
+Enter "Yes" to continue or anything else to cancel
+Canceled
+Password reset capability is enabled
+Password reset capability is disabled
+Verifying Firmware Password
+Incorrect
+Correct
+NULL
+%s%llX
+ERROR | %s | Could not find serial number data
+generateUnlockSeed
+ERROR | %s | Could not find MLB serial number
+Machine is not locked
+ERROR | %s | This tool must be run as root.
+main
+-check
+Password Enabled: %s
+-setpasswd
+-mode
+Mode: %s
+-delete
+-verify
+-unlockseed
+-disable-reset-capability
+-enable-reset-capability
+No recognized command found.
+ERROR | %s | Exiting with error: %d
+ERROR | %s | returned error: %d
+PerformTRBCommand
+Enter password:
+Enter new password:
+Re-enter new password:
+Passwords do not match.
+Enter new password:
+Invalid Password.
+Enter new password:
+ERROR | %s | The firmware on this machine is not supported.
+SetupTRBSettings
+ERROR | %s | Error GetCachedTrbVersion == NULL, the firmware on this machine is not supported.
+ERROR | %s | Error GetCachedNonce == NULL, the firmware on this machine is not supported.
+/var/db/com.apple.firmwarepasswd.debugflags
+IODeviceTree:/options
+ERROR | %s | IOMasterPort returned: %d
+SaveDataToNvram
+ERROR | %s | IORegistryEntryFromPath returned 0
+stringWithUTF8String:
+length
+getBytes:length:
+isPartialStringValid:newEditingString:errorDescription:
+initWithBytes:length:
+UTF8String
+appendData:
+init
+characterSetWithRange:
+invert
+mutableCopy
+rangeOfCharacterFromSet:
+setFormatMask:
+stringForObjectValue:
+getObjectValue:forString:errorDescription:
+invalidChars
+restrictToMask
+LowAsciiFormatter
+@16@0:8
+v20@0:8c16
+@24@0:8@16
+c40@0:8^@16@24@32
+c40@0:8@16^@24^@32
+@"NSCharacterSet"
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /usr/sbin/firmwarepasswd | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /usr/sbin/firmwarepasswd > arpa-bin/firmwarepasswd.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -a -s -t /usr/sbin/firmwarepasswd | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -a -s -t /usr/sbin/firmwarepasswd > arpa-bin/firmwarepasswd.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /usr/sbin/firmwarepasswd arpa-bin/
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings firmwarepasswd
+error: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strings: can't open file: firmwarepasswd (No such file or directory)
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Tool
+Toolchains/ Tools/      
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Tools/
+DeRez        GetFileInfo  ResMerger    Rez          SetFile      SplitForks   
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo 
+lrwxr-xr-x  1 maxieds  staff    22B Jan 27 13:34 /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo -> ../usr/bin/GetFileInfo
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo > arpa-bin/xcode-GetFileInfo.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/GetFileInfo > arpa-bin/xcode-GetFileInfo.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/SetFile | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/SetFile > arpa-bin/xcode-SetFile.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/SetFile | less
+SetFile
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/SetFile | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/SetFile > arpa-bin/xcode-SetFile.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/Rez | less
+Rez
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/Rez | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/Rez > arpa-bin/xcode-Rez.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/Rez | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/Rez > arpa-bin/xcode-Rez.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/SplitForks | less
+SplitForks
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/SplitForks | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Tools/SplitForks > arpa-bin/xcode-SplitForks.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/SplitForks | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ objdump -s -t -a /Applications/Xcode.app/Contents/Developer/Tools/SplitForks > arpa-bin/xcode-SplitForks.objdump
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls
+Desktop-obama-images
+Jan6Nov7Porche911OnJunteenth-Screen Shot 2026-06-06 at 11.13.52 AM.png
+arpa-bin
+arpa-git-local
+arpa-git-local3
+docs
+dotandroid
+mac-terminal-logs
+maralago-mastadon
+mercor-titanium
+var-run
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Tools ~/
+.CFUserTextEncoding                      Downloads/
+.DS_Store                                GATechGTDMMBSoftwareBackup/
+.RNAStructViz/                           Library/
+.Trash/                                  MacPorts-2.11.6/
+.android/                                MacPorts-2.11.6.tar.bz2
+.bash_history                            MertensFunctionManuscriptMathematics/
+.bash_profile                            Movies/
+.bash_sessions/                          Music/
+.bashrc                                  Pictures/
+.conda/                                  Public/
+.config/                                 RNAStructViz/
+.emulator_console_auth_token             abq-bugreport-data/
+.gradle/                                 anaconda3/
+.lesshst                                 antlr4/
+.local/                                  git-token.txt
+.m2/                                     gradle/
+.minirc.chameleon                        gradlew
+.msgsrc                                  gradlew.bat
+.sage/                                   gtaccess-token
+.skiko/                                  hbinstall
+.vim/                                    homebrew-core/
+.viminfo                                 libnfc/
+.vimrc                                   macports-fltk
+.wget-hsts                               maxieds_keystore2.jks
+.zsh_history                             miniconda3/
+.zsh_sessions/                           more-mertens-referee-history/
+AndroidFilePickerLight2-NewBuildScripts/ new-keystore.jks
+AndroidStudioProjects/                   psycho-boy-nonfiction-book/
+Applications/                            psycho-boy-nonfiction-book3/
+ChameleonMini/                           psycho-boy-nonfiction-book4/
+ChameleonMini-emsec/                     public-file-stashes/
+ChameleonMiniLiveDebugger3/              temp/
+Desktop/                                 tiny-AES-c/
+Documents/                               upload_certificate.pem
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Tools ~/Desktop/porche911/XCodeDevTools
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls ~/Desktop/porche911/XCodeDevTools/
+DeRez        GetFileInfo  ResMerger    Rez          SetFile      SplitForks   
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls ~/Desktop/porche911/XCodeDevTools
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Tool
+Toolchains/ Tools/      
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/
+Developer/           ToolchainInfo.plist  usr/                 
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/
+Developer/           ToolchainInfo.plist  usr/                 
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/Developer/Platforms/
+AppleTVSimulator.platform/ MacOSX.platform/           iPhoneSimulator.platform/
+(base) Drs-MacBook-Pro:porche911 maxieds$ ls -lha /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/
+Developer/           ToolchainInfo.plist  usr/                 
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/ToolchainInfo.plist | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/ToolchainInfo.plist arpa-bin/
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+Display all 129 possibilities? (y or n)
+air-ar                     dwarfdump                  metal-source
+air-arch                   dwarfdump-classic          metal-tt
+air-as                     flex                       metallib
+air-config                 flex++                     mig
+air-dsymutil               gcov                       nm
+air-libtool                gm4                        nm-classic
+air-link                   gperf                      nmedit
+air-lipo                   iig                        objdump
+air-lld                    indent                     otool
+air-nm                     install_name_tool          otool-classic
+air-nt                     intelgpu-nt                pagestuff
+air-objdump                ld                         ranlib
+air-opt                    lex                        rpcgen
+air-pack                   libtool                    segedit
+air-ranlib                 lipo                       size
+air-readobj                llvm-cov                   size-classic
+air-size                   llvm-cxxfilt               sourcekit-lsp
+air-tt                     llvm-dwarfdump             strings
+amdgpu-nt                  llvm-nm                    strip
+applegpu-nt                llvm-objdump               swift
+ar                         llvm-otool                 swift-api-digester
+as                         llvm-profdata              swift-api-extract
+asa                        llvm-size                  swift-build
+bison                      lorder                     swift-build-tool
+bitcode_strip              m4                         swift-demangle
+c++                        metal                      swift-driver
+c++filt                    metal-ar                   swift-frontend
+c89                        metal-arch                 swift-help
+c99                        metal-as                   swift-package
+cc                         metal-config               swift-package-collection
+clang                      metal-dsymutil             swift-package-registry
+clang++                    metal-libtool              swift-run
+clangd                     metal-link                 swift-stdlib-tool
+cmpdylib                   metal-lipo                 swift-symbolgraph-extract
+codesign_allocate          metal-lld                  swift-test
+codesign_allocate-p        metal-nm                   swiftc
+coremlc                    metal-nt                   tapi
+coremlcompiler             metal-objdump              tapi-analyze
+cpp                        metal-opt                  unifdef
+ctags                      metal-pack                 unifdefall
+ctf_insert                 metal-ranlib               unwinddump
+docc                       metal-readobj              vtool
+dsymutil                   metal-size                 yacc
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-
+air-ar        air-config    air-link      air-nm        air-opt       air-readobj
+air-arch      air-dsymutil  air-lipo      air-nt        air-pack      air-size
+air-as        air-libtool   air-lld       air-objdump   air-ranlib    air-tt
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-link | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-arch | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-pack | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-readobj | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-size | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-dsymutil | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-ar | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/air-lipo | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/ | less
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/ | less
+Developer/           ToolchainInfo.plist  usr/                 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/ | less
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/ | less
+FlexLexer.h         c++/                libcodedirectory.h  swift/
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/ | less
+Display all 159 possibilities? (y or n)
+__algorithm/              charconv                  list
+__availability            chrono                    locale
+__bit/                    cinttypes                 locale.h
+__bit_reference           ciso646                   map
+__bits                    climits                   math.h
+__bsd_locale_defaults.h   clocale                   memory
+__bsd_locale_fallbacks.h  cmath                     module.modulemap
+__charconv/               codecvt                   mutex
+__compare/                compare                   new
+__concepts/               complex                   numbers
+__config                  complex.h                 numeric
+__config_site             concepts                  optional
+__cxxabi_config.h         condition_variable        ostream
+__debug                   csetjmp                   queue
+__errc                    csignal                   random
+__format/                 cstdarg                   ranges
+__function_like.h         cstdbool                  ratio
+__functional/             cstddef                   regex
+__functional_base         cstdint                   scoped_allocator
+__hash_table              cstdio                    semaphore
+__iterator/               cstdlib                   set
+__libcpp_version          cstring                   setjmp.h
+__locale                  ctgmath                   shared_mutex
+__mbstate_t.h             ctime                     span
+__memory/                 ctype.h                   sstream
+__mutex_base              cwchar                    stack
+__node_handle             cwctype                   stdbool.h
+__nullptr                 cxxabi.h                  stddef.h
+__random/                 deque                     stdexcept
+__ranges/                 errno.h                   stdint.h
+__split_buffer            exception                 stdio.h
+__std_stream              execution                 stdlib.h
+__string                  experimental/             streambuf
+__support/                ext/                      string
+__threading_support       fenv.h                    string.h
+__tree                    filesystem                string_view
+__tuple                   float.h                   strstream
+__undef_macros            format                    system_error
+__utility/                forward_list              tgmath.h
+__variant/                fstream                   thread
+algorithm                 functional                tuple
+any                       future                    type_traits
+array                     initializer_list          typeindex
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/ | less
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib | less
+lib/     libexec/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/ | less
+SwiftSourceKitClientPlugin.framework/ libswiftDemangle.dylib
+SwiftSourceKitPlugin.framework/       libtapi.dylib
+arc/                                  sourcekitd.framework/
+clang/                                sourcekitdInProc.framework/
+libIndexStore.dylib                   swift/
+libLTO.dylib                          swift-5.0/
+libSwiftDriver.dylib                  swift-5.5/
+libclang.dylib                        tapi/
+libcodedirectory.dylib                
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/ | less
+as/     migcom  swift/  
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/ | less
+arm/    i386/   x86_64/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/ | less
+arm/    i386/   x86_64/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/arm/as | less
+as
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/arm/as | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/arm/as > arpa-bin/xcode-libexec-arm-as.strings
+(base) Drs-MacBook-Pro:porche911 maxieds$ x /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/arm/as | 
+x265             xctrace          xjc              xscertadmin      xzcmp
+xar              xdvi             xminicom         xslt-config      xzdec
+xargs            xdvipdfmx        xml2-config      xsltproc         xzdiff
+xartutil         xed              xml2man          xsubpp           xzegrep
+xattr            xgettext         xmlcatalog       xsubpp-5.34      xzfgrep
+xcdebug          xgettext.pl      xmllint          xsubpp5.18       xzgrep
+xcode-select     xgettext5.18.pl  xmlwf            xsubpp5.30       xzless
+xcodebuild       xgettext5.30.pl  xpath            xtractprotos     xzmore
+xcrun            xhlatex          xpath5.18        xxd              
+xcscontrol       xindex           xpath5.30        xz               
+xcsdiagnose      xip              xsanctl          xzcat            
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/ | 
+as/     migcom  swift/  
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/ | 
+arm/    i386/   x86_64/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/x86_64/as | 
+as
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/x86_64/as | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/as/x86_64/as > arpa-bin/xcode-libexec-x86_64-as.strings 
+(base) Drs-MacBook-Pro:porche911 maxieds$ xattr -h
+usage: xattr [-l] [-r] [-s] [-v] [-x] file [file ...]
+       xattr -p [-l] [-r] [-s] [-v] [-x] attr_name file [file ...]
+       xattr -w [-r] [-s] [-x] attr_name attr_value file [file ...]
+       xattr -d [-r] [-s] attr_name file [file ...]
+       xattr -c [-r] [-s] file [file ...]
+
+The first form lists the names of all xattrs on the given file(s).
+The second form (-p) prints the value of the xattr attr_name.
+The third form (-w) sets the value of the xattr attr_name to the string attr_value.
+The fourth form (-d) deletes the xattr attr_name.
+The fifth form (-c) deletes (clears) all xattrs.
+
+options:
+  -h: print this help
+  -l: print long format (attr_name: attr_value and hex output has offsets and
+      ascii representation)
+  -r: act recursively
+  -s: act on the symbolic link itself rather than what the link points to
+  -v: also print filename (automatic with -r and with multiple files)
+  -x: attr_value is represented as a hex string for input and output
+(base) Drs-MacBook-Pro:porche911 maxieds$ xattr -l -v /usr/sbin/
+Display all 230 possibilities? (y or n)
+(base) Drs-MacBook-Pro:porche911 maxieds$ xattr -l -v /usr/sbin/netstat 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/ | less
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/ | less
+ios/   macos/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/ | less
+bison/ clang/ doc/   docc/  man/   swift/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/ | less
+README       c.m4         glr.cc       location.cc  yacc.c       
+c++.m4       glr.c        lalr1.cc     m4sugar/     
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/ | less
+bison/ clang/ doc/   docc/  man/   swift/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/doc | less
+doc/  docc/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ strings /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/ | less
+css/                      favicon.svg               js/
+developer-og-twitter.jpg  img/                      theme-settings.json
+developer-og.jpg          index-template.html       
+favicon.ico               index.html                
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/ arpa-bin/docc-twitter-web-render
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/
+css/                      favicon.svg               js/
+developer-og-twitter.jpg  img/                      theme-settings.json
+developer-og.jpg          index-template.html       
+favicon.ico               index.html                
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/js/
+chunk-2d0d3105.cd72cc8e.js
+chunk-vendors.b24b7aaa.js
+documentation-topic.f62098b6.js
+documentation-topic~topic~tutorials-overview.8e36e44f.js
+highlight-js-bash.1b52852f.js
+highlight-js-c.d1db3f17.js
+highlight-js-cpp.eaddddbe.js
+highlight-js-css.75eab1fe.js
+highlight-js-custom-markdown.7cffc4b3.js
+highlight-js-custom-swift.5cda5c20.js
+highlight-js-diff.62d66733.js
+highlight-js-http.163e45b6.js
+highlight-js-java.8326d9d8.js
+highlight-js-javascript.acb8a8eb.js
+highlight-js-json.471128d2.js
+highlight-js-llvm.6100b125.js
+highlight-js-markdown.90077643.js
+highlight-js-objectivec.bcdf5156.js
+highlight-js-perl.757d7b6f.js
+highlight-js-php.cc8d6c27.js
+highlight-js-python.c214ed92.js
+highlight-js-ruby.f889d392.js
+highlight-js-scss.62ee18da.js
+highlight-js-shell.dd7f411f.js
+highlight-js-swift.84f3e88c.js
+highlight-js-xml.9c3688c7.js
+index.58e30ec4.js
+topic.6a1c7b7f.js
+tutorials-overview.c8178b83.js
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/
+css/                      favicon.svg               js/
+developer-og-twitter.jpg  img/                      theme-settings.json
+developer-og.jpg          index-template.html       
+favicon.ico               index.html                
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/i
+img/                 index-template.html  index.html           
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/i
+img/                 index-template.html  index.html           
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/img/
+added-icon.d6f7e47d.svg       modified-icon.f496e73d.svg    
+deprecated-icon.015b4f17.svg  no-image@2x.df2a0a50.png      
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/
+css/                      favicon.svg               js/
+developer-og-twitter.jpg  img/                      theme-settings.json
+developer-og.jpg          index-template.html       
+favicon.ico               index.html                
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/css/
+documentation-topic.3bca6578.css
+documentation-topic~topic~tutorials-overview.82acfe22.css
+index.12bb178a.css
+topic.ee15af52.css
+tutorials-overview.06e8bcf7.css
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/theme-settings.json 
+.DS_Store
+Desktop-obama-images/
+Jan6Nov7Porche911OnJunteenth-Screen Shot 2026-06-06 at 11.13.52 AM.png
+arpa-bin/
+arpa-git-local/
+arpa-git-local3/
+docs/
+dotandroid/
+mac-terminal-logs/
+maralago-mastadon/
+mercor-titanium/
+var-run/
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/render/theme-settings.json | less
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/doc
+doc/  docc/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ cat /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/doc/swift/diagnostics/
+complex-closure-inference.md              property-wrapper-requirements.md
+dynamic-callable-requirements.md          protocol-type-non-conformance.md
+existential-member-access-limitations.md  result-builder-methods.md
+multiple-inheritance.md                   string-interpolation-conformance.md
+nominal-types.md                          temporary-pointers.md
+opaque-type-inference.md                  trailing-closure-matching.md
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/doc/swift/diagnostics/ arpa-bin/xcode-share-doc-swift-markdown
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/
+bison/ clang/ doc/   docc/  man/   swift/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man/man
+man1/ man3/ man5/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man/man1/
+ar.1                 flex++.1             m4.1                 segedit.1
+as.1                 flex.1               metal-arch.1         size-classic.1
+asa.1                gcov.1               metal-config.1       size.1
+bison.1              gm4.1                metal-libtool.1      strings.1
+bitcode_strip.1      gperf.1              metal-nt.1           strip.1
+c++.1                indent.1             metal-tt.1           swift.1
+c++filt.1            install_name_tool.1  metal.1              tapi-analyze.1
+c89.1                ld.1                 mig.1                tapi-archive.1
+c99.1                lex.1                migcom.1             tapi-installapi.1
+cc.1                 libtool.1            nm-classic.1         tapi-reexport.1
+clang++.1            lipo.1               nm.1                 tapi-stubify.1
+clang.1              llvm-cov.1           nmedit.1             tapi.1
+cmpdylib.1           llvm-cxxfilt.1       objdump.1            unifdef.1
+codesign_allocate.1  llvm-nm.1            otool-classic.1      unifdefall.1
+ctags.1              llvm-objdump.1       otool.1              unwinddump.1
+ctf_insert.1         llvm-otool.1         pagestuff.1          vtool.1
+dsymutil.1           llvm-profdata.1      ranlib.1             yacc.1
+dwarfdump.1          lorder.1             rpcgen.1             
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man/man
+man1/ man3/ man5/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man/man3/
+arch.3                     getsectbyname.3            getsectdatafromheader.3
+end.3                      getsectbynamefromheader.3  getsegbyname.3
+get_end.3                  getsectdata.3              kld.3
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man/man5/
+Mach-O.5                  ar.5                      ranlib.5
+a.out.5                   metal-pipelines-script.5  stab.5
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/
+bin/     include/ lib/     libexec/ metal/   share/   
+(base) Drs-MacBook-Pro:porche911 maxieds$ cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/
+Developer/           ToolchainInfo.plist  usr/                 
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain ~/Desktop/porche911/
+.DS_Store        XCodeDevTools/   arpa-git-local/  arpa-git-local3/ 
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo cp -RXpaL /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain ~/Desktop/porche911/XCodeDevToolchain
+Password:
+load: 2.13  cmd: cp 1061 uninterruptible 0.10u 7.18s
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/clang/lib/darwin/libclang_rt.orc_ios.a -> /Users/maxieds/Desktop/porche911/XCodeDevToolchain/usr/lib/swift/clang/lib/darwin/libclang_rt.orc_ios.a   6%
+^[[B^[[B^[[B^[[A^[[A(base) Drs-MacBook-Pro
+(base) Drs-MacBook-Pro:porche911 maxieds$ sudo find / -iname '*dyld_stub*'
+find: /Library/Application Support/com.apple.TCC: Operation not permitted
+find: /Library/Caches/com.apple.aned: Operation not permitted
+find: /System/Library/Templates/Data/Library/Application Support/com.apple.TCC: Operation not permitted
+find: /System/Library/Templates/Data/private/var/db/oah: Operation not permitted
+find: /System/Volumes/Data/home: Operation not permitted
+find: /System/Volumes/Data/.Spotlight-V100: No such file or directory
+find: /System/Volumes/Data/boot: No such file or directory
+find: /System/Volumes/Data/Previous Content: No such file or directory
+find: /System/Volumes/Data/Library/Application Support/com.apple.TCC: Operation not permitted
+find: /System/Volumes/Data/Library/Caches/com.apple.aned: Operation not permitted
+find: /System/Volumes/Data/System/Library/Templates/Data/Library/Application Support/com.apple.TCC: Operation not permitted
+find: /System/Volumes/Data/System/Library/Templates/Data/private/var/db/oah: Operation not permitted
+load: 1.62  cmd: find 1182 running 4.22u 61.21s
+find: /System/Volumes/Data/mnt: No such file or directory
+find: /System/Volumes/Data/.fseventsd: No such file or directory
+find: /System/Volumes/Data/private/var/networkd/db: Operation not permitted
+find: /System/Volumes/Data/private/var/db/appinstalld: Operation not permitted
+find: /System/Volumes/Data/private/var/db/Spotlight: Operation not permitted
+find: /System/Volumes/Data/private/var/db/sysdiagnose/com.apple.sysdiagnose: Operation not permitted
+find: /System/Volumes/Data/private/var/db/DumpPanic: Operation not permitted
+find: /System/Volumes/Data/private/var/db/fpsd/dvp: Operation not permitted
+find: /System/Volumes/Data/private/var/db/installcoordinationd: Operation not permitted
+find: /System/Volumes/Data/private/var/db/Spotlight-V100: Operation not permitted
+find: /System/Volumes/Data/private/var/db/oah: Operation not permitted
+find: /System/Volumes/Data/private/var/db/Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/db/lockdown: Operation not permitted
+find: /System/Volumes/Data/private/var/db/KernelExtensionManagement/Staging: Operation not permitted
+find: /System/Volumes/Data/private/var/db/DifferentialPrivacy: Operation not permitted
+find: /System/Volumes/Data/private/var/db/MobileIdentityService: Operation not permitted
+find: /System/Volumes/Data/private/var/db/searchparty: Operation not permitted
+find: /System/Volumes/Data/private/var/db/CoreDuet: Operation not permitted
+find: /System/Volumes/Data/private/var/db/ConfigurationProfiles/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.lockoutagent: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.progressd/ClassKit: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.exchangesync: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.secinitd/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/dmd: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.routined/dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.ScreenTimeAgent/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.trustd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.triald/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.news.widget/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.notificationcenterui/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.nsurlsessiond/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.TextEdit/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.parsecd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.sharingd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.geod/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/homed/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.quicklook.ThumbnailsAgent/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.pluginkit/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.donotdisturbd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/0: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/C: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n000013800008t/T/com.apple.trustd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000y800007k/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000y800007k/T/com.apple.nsurlsessiond/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.lockoutagent: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.exchangesync: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/dmd: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.routined/dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000s0000068/T/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.mobileassetd/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.revisiond/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.nehelper/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.GSSCred/TemporaryItems: Operation not permitted
+find: /System/Volumes/Data/private/var/protected/trustd/private: Operation not permitted
+find: /System/Volumes/Data/.DocumentRevisions-V100: No such file or directory
+find: /System/Volumes/Data/Users/maxieds/Pictures/Photos Library.photoslibrary: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/CallHistoryTransactions: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/com.apple.sharedfilelist: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/Knowledge: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/com.apple.TCC: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/FileProvider: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/AddressBook: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/com.apple.avfoundation/Frecents: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Application Support/CallHistoryDB: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Assistant/SiriVocabulary: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Autosave Information: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/IdentityServices: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Calendars: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Messages: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/HomeKit: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Sharing: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Mail: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/DuetExpertCenter: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Accounts: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Safari: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Biome: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Shortcuts: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Suggestions: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Group Containers/group.com.apple.secure-control-center-preferences: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Group Containers/group.com.apple.notes: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.VoiceMemos: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.archiveutility: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.Home: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.Safari: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.CloudDocs.MobileDocumentsFileProvider: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.mail: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.Notes: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.news: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Containers/com.apple.stocks: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/PersonalizationPortrait: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Photos/Libraries/Syndication.photoslibrary: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Metadata/CoreSpotlight: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Reminders: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Cookies: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/CoreFollowUp: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/StatusKit: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Caches/com.apple.HomeKit: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Caches/CloudKit: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Caches/com.apple.Safari: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Caches/com.apple.homed: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/Library/Caches/com.apple.ap.adprivacyd: Operation not permitted
+find: /System/Volumes/Data/Users/maxieds/.Trash: Operation not permitted
+find: /System/Volumes/Data/.PreviousSystemInformation: No such file or directory
+find: /System/Volumes/Data/.TemporaryItems: No such file or directory
+find: /System/Volumes/iSCPreboot: No such file or directory
+find: /System/DriverKit: No such file or directory
+find: /private/var/networkd/db: Operation not permitted
+find: /private/var/db/appinstalld: Operation not permitted
+find: /private/var/db/Spotlight: Operation not permitted
+find: /private/var/db/sysdiagnose/com.apple.sysdiagnose: Operation not permitted
+find: /private/var/db/DumpPanic: Operation not permitted
+find: /private/var/db/fpsd/dvp: Operation not permitted
+find: /private/var/db/installcoordinationd: Operation not permitted
+find: /private/var/db/Spotlight-V100: Operation not permitted
+find: /private/var/db/oah: Operation not permitted
+find: /private/var/db/Sandbox: Operation not permitted
+find: /private/var/db/lockdown: Operation not permitted
+find: /private/var/db/KernelExtensionManagement/Staging: Operation not permitted
+find: /private/var/db/DifferentialPrivacy: Operation not permitted
+find: /private/var/db/MobileIdentityService: Operation not permitted
+find: /private/var/db/searchparty: Operation not permitted
+find: /private/var/db/CoreDuet: Operation not permitted
+find: /private/var/db/ConfigurationProfiles/Store: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.lockoutagent: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.progressd/ClassKit: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.exchangesync: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.secinitd/Store: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/dmd: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.nsurlsessiond: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/0/com.apple.routined/dv: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.ScreenTimeAgent/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.trustd/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.triald/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.news.widget/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.notificationcenterui/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.nsurlsessiond/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.TextEdit/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.parsecd/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.sharingd/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.geod/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/homed/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.quicklook.ThumbnailsAgent/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.pluginkit/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/T/com.apple.donotdisturbd/TemporaryItems: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /private/var/folders/wp/f6srgbb54x16r_d6bddv90mr0000gn/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/0: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/C: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n000013800008t/T/com.apple.trustd/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000y800007k/0/com.apple.nsurlsessiond: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000y800007k/T/com.apple.nsurlsessiond/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.lockoutagent: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.exchangesync: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/dmd: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.nsurlsessiond: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.routined/dv: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n00000s0000068/T/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.mobileassetd/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.revisiond/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.nehelper/TemporaryItems: Operation not permitted
+find: /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/com.apple.GSSCred/TemporaryItems: Operation not permitted
+find: /private/var/protected/trustd/private: Operation not permitted
+find: /Users/maxieds/Pictures/Photos Library.photoslibrary: Operation not permitted
+find: /Users/maxieds/Library/Application Support/CallHistoryTransactions: Operation not permitted
+find: /Users/maxieds/Library/Application Support/com.apple.sharedfilelist: Operation not permitted
+find: /Users/maxieds/Library/Application Support/Knowledge: Operation not permitted
+find: /Users/maxieds/Library/Application Support/com.apple.TCC: Operation not permitted
+find: /Users/maxieds/Library/Application Support/FileProvider: Operation not permitted
+find: /Users/maxieds/Library/Application Support/AddressBook: Operation not permitted
+find: /Users/maxieds/Library/Application Support/com.apple.avfoundation/Frecents: Operation not permitted
+find: /Users/maxieds/Library/Application Support/CallHistoryDB: Operation not permitted
+find: /Users/maxieds/Library/Assistant/SiriVocabulary: Operation not permitted
+find: /Users/maxieds/Library/Autosave Information: Operation not permitted
+find: /Users/maxieds/Library/IdentityServices: Operation not permitted
+find: /Users/maxieds/Library/Calendars: Operation not permitted
+find: /Users/maxieds/Library/Messages: Operation not permitted
+find: /Users/maxieds/Library/HomeKit: Operation not permitted
+find: /Users/maxieds/Library/Sharing: Operation not permitted
+find: /Users/maxieds/Library/Mail: Operation not permitted
+find: /Users/maxieds/Library/DuetExpertCenter: Operation not permitted
+find: /Users/maxieds/Library/Accounts: Operation not permitted
+find: /Users/maxieds/Library/Safari: Operation not permitted
+find: /Users/maxieds/Library/Biome: Operation not permitted
+find: /Users/maxieds/Library/Shortcuts: Operation not permitted
+find: /Users/maxieds/Library/Suggestions: Operation not permitted
+find: /Users/maxieds/Library/Group Containers/group.com.apple.secure-control-center-preferences: Operation not permitted
+find: /Users/maxieds/Library/Group Containers/group.com.apple.notes: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.VoiceMemos: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.archiveutility: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.Home: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.Safari: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.CloudDocs.MobileDocumentsFileProvider: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.mail: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.Notes: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.news: Operation not permitted
+find: /Users/maxieds/Library/Containers/com.apple.stocks: Operation not permitted
+find: /Users/maxieds/Library/PersonalizationPortrait: Operation not permitted
+find: /Users/maxieds/Library/Photos/Libraries/Syndication.photoslibrary: Operation not permitted
+find: /Users/maxieds/Library/Metadata/CoreSpotlight: Operation not permitted
+find: /Users/maxieds/Library/Reminders: Operation not permitted
+find: /Users/maxieds/Library/Cookies: Operation not permitted
+find: /Users/maxieds/Library/CoreFollowUp: Operation not permitted
+find: /Users/maxieds/Library/StatusKit: Operation not permitted
+find: /Users/maxieds/Library/Caches/com.apple.HomeKit: Operation not permitted
+find: /Users/maxieds/Library/Caches/CloudKit: Operation not permitted
+find: /Users/maxieds/Library/Caches/com.apple.Safari: Operation not permitted
+find: /Users/maxieds/Library/Caches/com.apple.homed: Operation not permitted
+find: /Users/maxieds/Library/Caches/com.apple.ap.adprivacyd: Operation not permitted
+find: /Users/maxieds/.Trash: Operation not permitted
+find: /dev/fd/3: Not a directory
+find: /dev/fd/4: Not a directory
+find: /dev/fd/6: Not a directory
+(base) Drs-MacBook-Pro:porche911 maxieds$ 
