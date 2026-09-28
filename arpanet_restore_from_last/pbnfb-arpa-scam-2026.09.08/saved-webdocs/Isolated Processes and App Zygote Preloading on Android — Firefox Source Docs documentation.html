@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<!-- saved from url=(0103)https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html -->
+<html class="writer-html5" lang="en" data-content_root="../../../../../"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs  documentation</title>
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/pygments.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/theme.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/graphviz.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/sphinx_js.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/copybutton.css">
+      <link media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/pygments_dark.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/custom_theme.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/sphinx-design.min.css">
+      <link rel="stylesheet" type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/dark_mode.css">
+
+  
+    <link rel="shortcut icon" href="https://firefox-source-docs.mozilla.org/_static/firefox.ico">
+      <script async="" src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/async-ads.js.download"></script><script async="" src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/f.txt"></script><script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/jquery.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/_sphinx_javascript_frameworks_compat.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/documentation_options.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/doctools.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/sphinx_highlight.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/clipboard.min.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/copybutton.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/scrollable_regions.js.download"></script>
+      <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/design-tabs.js.download"></script>
+    <script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/theme.js.download"></script>
+    <link rel="index" title="Index" href="https://firefox-source-docs.mozilla.org/genindex.html">
+    <link rel="search" title="Search" href="https://firefox-source-docs.mozilla.org/search.html">
+    <link rel="next" title="Fenix" href="https://firefox-source-docs.mozilla.org/mobile/android/fenix/index.html">
+    <link rel="prev" title="Sharing rust libraries across the Firefox (for Android) stack" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/design/sharing-rust-libraries.html"> 
+<script src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/cse_element__en.js.download" type="text/javascript"></script><link type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/default_v6+en.css" rel="stylesheet"><link type="text/css" href="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/default.css" rel="stylesheet"><style type="text/css">.gsc-control-cse{font-family:arial, sans-serif}.gsc-control-cse .gsc-table-result{font-family:arial, sans-serif}.gsc-refinementsGradient{background:linear-gradient(to left,rgba(255,255,255,1),rgba(255,255,255,0))}</style><style type="text/css">.gscb_a{display:inline-block;font:27px/13px arial,sans-serif}.gsst_a .gscb_a{color:#a1b9ed;cursor:pointer}.gsst_a:hover .gscb_a,.gsst_a:focus .gscb_a{color:#36c}.gsst_a{display:inline-block}.gsst_a{cursor:pointer;padding:0 4px}.gsst_a:hover{text-decoration:none!important}.gsst_b{font-size:16px;padding:0 2px;position:relative;user-select:none;-webkit-user-select:none;white-space:nowrap}.gsst_e{vertical-align:middle;opacity:0.55;}.gsst_a:hover .gsst_e,.gsst_a:focus .gsst_e{opacity:0.72;}.gsst_a:active .gsst_e{opacity:1;}.gsst_f{background:white;text-align:left}.gsst_g{background-color:white;border:1px solid #ccc;border-top-color:#d9d9d9;box-shadow:0 2px 4px rgba(0,0,0,0.2);-webkit-box-shadow:0 2px 4px rgba(0,0,0,0.2);margin:-1px -3px;padding:0 6px}.gsst_h{background-color:white;height:1px;margin-bottom:-1px;position:relative;top:-1px}.gsib_a{width:100%;padding:4px 6px 0}.gsib_a,.gsib_b{vertical-align:top}.gssb_c{border:0;position:absolute;z-index:989}.gssb_e{border:1px solid #ccc;border-top-color:#d9d9d9;box-shadow:0 2px 4px rgba(0,0,0,0.2);-webkit-box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:default}.gssb_f{visibility:hidden;white-space:nowrap}.gssb_k{border:0;display:block;position:absolute;top:0;z-index:988}.gsdd_a{border:none!important}.gsq_a{padding:0}.gssb_a{padding:0 7px}.gssb_a,.gssb_a td{white-space:nowrap;overflow:hidden;line-height:22px}#gssb_b{font-size:11px;color:#36c;text-decoration:none}#gssb_b:hover{font-size:11px;color:#36c;text-decoration:underline}.gssb_g{text-align:center;padding:8px 0 7px;position:relative}.gssb_h{font-size:15px;height:28px;margin:0.2em;-webkit-appearance:button}.gssb_i{background:#eee}.gss_ifl{visibility:hidden;padding-left:5px}.gssb_i .gss_ifl{visibility:visible}a.gssb_j{font-size:13px;color:#36c;text-decoration:none;line-height:100%}a.gssb_j:hover{text-decoration:underline}.gssb_l{height:1px;background-color:#e5e5e5}.gssb_m{color:#000;background:#fff}.gssb_a{padding:8px 16px}.gsib_a{padding:4px 10px 4px 56px}.gscb_a{line-height:27px}.gssb_e{border:0}.gssb_l{margin:5px 0}input.gsc-input::-webkit-input-placeholder{font-size:14px}input.gsc-input:-moz-placeholder{font-size:14px}input.gsc-input::-moz-placeholder{font-size:14px}input.gsc-input:-ms-input-placeholder{font-size:14px}input.gsc-input:focus::-webkit-input-placeholder{color:transparent}input.gsc-input:focus:-moz-placeholder{color:transparent}input.gsc-input:focus::-moz-placeholder{color:transparent}input.gsc-input:focus:-ms-input-placeholder{color:transparent}.gssb_c .gsc-completion-container{position:static}.gssb_c{z-index:5000}.gsc-completion-container table{background:transparent;font-size:inherit;font-family:inherit}.gssb_c > tbody > tr,.gssb_c > tbody > tr > td,.gssb_d,.gssb_d > tbody > tr,.gssb_d > tbody > tr > td,.gssb_e,.gssb_e > tbody > tr,.gssb_e > tbody > tr > td{padding:0;margin:0;border:0}.gssb_a table,.gssb_a table tr,.gssb_a table tr td{padding:0;margin:0;border:0}.gssb_a,.gssb_a td{line-height:24px}</style></head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+
+          
+          
+          <a href="https://firefox-source-docs.mozilla.org/index.html" class="icon icon-home">
+            Firefox Source Docs
+              <img src="./Isolated Processes and App Zygote Preloading on Android — Firefox Source Docs documentation_files/firefox-wordmark.svg" class="logo" alt="Logo">
+          </a><!-- -- This code is governed by the BSD license ---->
+
+<div>
+  <h3>Quick search</h3>
+  <script>
+    (function () {
+      var cx = "dd12886298f75dbef";
+      var gcse = document.createElement("script");
+      gcse.async = true;
+      gcse.src = "https://cse.google.com/cse.js?cx=" + cx;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(gcse, s);
+    })();
+  </script>
+  <div id="___gcse_0"><div class="gsc-control-cse gsc-control-cse-en"><div class="gsc-control-wrapper-cse" dir="ltr"><form class="gsc-search-box gsc-search-box-tools" accept-charset="utf-8"><table cellspacing="0" cellpadding="0" role="presentation" class="gsc-search-box"><tbody><tr><td class="gsc-input"><div class="gsc-input-box" id="gsc-iw-id1"><table cellspacing="0" cellpadding="0" role="presentation" id="gs_id50" class="gstl_50 gsc-input" style="width: 100%; padding: 0px;"><tbody><tr><td id="gs_tti50" class="gsib_a"><input autocomplete="off" type="text" size="10" class="gsc-input" name="search" title="search" aria-label="search" id="gsc-i-id1" dir="ltr" spellcheck="false" style="width: 100%; padding: 0px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; margin: 0px; height: auto; background: url(&quot;https://www.google.com/cse/static/images/1x/en/branding.png&quot;) left center no-repeat rgb(255, 255, 255); outline: none;"></td><td class="gsib_b"><div class="gsst_b" id="gs_st50" dir="ltr"><a class="gsst_a" href="javascript:void(0)" title="Clear search box" role="button" style="display: none;"><span class="gscb_a" id="gs_cb50" aria-hidden="true">×</span></a></div></td></tr></tbody></table></div></td><td class="gsc-search-button"><button class="gsc-search-button gsc-search-button-v2"><svg width="13" height="13" viewBox="0 0 13 13"><title>search</title><path d="m4.8495 7.8226c0.82666 0 1.5262-0.29146 2.0985-0.87438 0.57232-0.58292 0.86378-1.2877 0.87438-2.1144 0.010599-0.82666-0.28086-1.5262-0.87438-2.0985-0.59352-0.57232-1.293-0.86378-2.0985-0.87438-0.8055-0.010599-1.5103 0.28086-2.1144 0.87438-0.60414 0.59352-0.8956 1.293-0.87438 2.0985 0.021197 0.8055 0.31266 1.5103 0.87438 2.1144 0.56172 0.60414 1.2665 0.8956 2.1144 0.87438zm4.4695 0.2115 3.681 3.6819-1.259 1.284-3.6817-3.7 0.0019784-0.69479-0.090043-0.098846c-0.87973 0.76087-1.92 1.1413-3.1207 1.1413-1.3553 0-2.5025-0.46363-3.4417-1.3909s-1.4088-2.0686-1.4088-3.4239c0-1.3553 0.4696-2.4966 1.4088-3.4239 0.9392-0.92727 2.0864-1.3969 3.4417-1.4088 1.3553-0.011889 2.4906 0.45771 3.406 1.4088 0.9154 0.95107 1.379 2.0924 1.3909 3.4239 0 1.2126-0.38043 2.2588-1.1413 3.1385l0.098834 0.090049z"></path></svg></button></td><td class="gsc-clear-button"><div class="gsc-clear-button" title="clear results">&nbsp;</div></td></tr></tbody></table></form><div class="gsc-results-wrapper-overlay"><div class="gsc-results-close-btn" tabindex="0"></div><div class="gsc-positioningWrapper"><div class="gsc-tabsAreaInvisible"><div aria-label="refinement" role="tab" class="gsc-tabHeader gsc-inline-block gsc-tabhActive">Custom Search</div><span class="gs-spacer"> </span></div></div><div class="gsc-positioningWrapper"><div class="gsc-refinementsAreaInvisible"></div></div><div class="gsc-above-wrapper-area-invisible"><div class="gsc-above-wrapper-area-backfill-container"></div><table cellspacing="0" cellpadding="0" role="presentation" class="gsc-above-wrapper-area-container"><tbody><tr><td class="gsc-result-info-container"><div class="gsc-result-info-invisible"></div></td><td class="gsc-orderby-container"><div class="gsc-orderby-invisible"><div class="gsc-option-menu-container gsc-inline-block"><div class="gsc-orderby-label gsc-inline-block">Sort by</div><div class="gsc-selected-option-container gsc-inline-block"><div class="gsc-option-selector"></div></div><div class="gsc-option-menu-invisible"><div class="gsc-option-menu-item"><div class="gsc-option-checkbox gsc-inline-block gsc-option-checkbox-checked"></div><div class="gsc-option gsc-inline-block">Relevance</div></div><div class="gsc-option-menu-item"><div class="gsc-option-checkbox gsc-inline-block"></div><div class="gsc-option gsc-inline-block">Date</div></div></div></div></div></td></tr></tbody></table></div><div class="gsc-adBlockInvisible"></div><div class="gsc-wrapper"><div class="gsc-adBlockInvisible"></div><div class="gsc-resultsbox-invisible"><div class="gsc-resultsRoot gsc-tabData gsc-tabdActive"><div><div class="gsc-expansionArea"></div></div></div></div></div></div><div class="gsc-modal-background-image" tabindex="0"></div></div></div></div>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/glossary/index.html">A Glossary of Common Terms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/overview/index.html">A Quick Guide to Mozilla Applications</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/setup/index.html">Getting Set Up To Work On The Firefox Codebase</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working On Firefox</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/contributing/index.html">Working on Firefox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/bug-mgmt/index.html">Bug Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/crash-reporting/index.html">Firefox Crash Reporting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Firefox User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/3d_view/index.html">3D view</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/about_colon_debugging/index.html">about:debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/accessibility_inspector/index.html">Accessibility Inspector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/application/index.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/browser_console/index.html">Browser Console</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/browser_toolbox/index.html">Browser Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/custom_formatters/index.html">Custom Formatters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/debugger/index.html">The Firefox JavaScript Debugger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/debugger-api/index.html">Debugger-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/deprecated_tools/index.html">Deprecated tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/devtoolsapi/index.html">DevTools API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/devtoolscolors/index.html">DevToolsColors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/dom_property_viewer/index.html">DOM Property Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/eyedropper/index.html">Eyedropper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/index/index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/javascript_tracer/index.html">JavaScript Tracer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/json_viewer/index.html">JSON viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/keyboard_shortcuts/index.html">All keyboard shortcuts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/local_mode/index.html">Local Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/measure_a_portion_of_the_page/index.html">Measure a portion of the page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/memory/index.html">Memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/migrating_from_firebug/index.html">Migrating from Firebug</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/index.html">Network Monitor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/page_inspector/index.html">Page Inspector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/performance/index.html">Performance Tool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/responsive_design_mode/index.html">Responsive Design Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/rulers/index.html">Rulers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/settings/index.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/shader_editor/index.html">Shader Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/storage_inspector/index.html">Storage Inspector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/style_editor/index.html">Style Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/taking_screenshots/index.html">Taking screenshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/tips/index.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/tools_toolbox/index.html">Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/validators/index.html">Validators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/view_source/index.html">View Source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/web_audio_editor/index.html">Web Audio Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/web_console/index.html">Web Console</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/working_with_iframes/index.html">Working with iframes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools-user/index.html">Firefox DevTools User Docs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Source Code Documentation</span></p>
+<ul class="current" aria-expanded="true">
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mots/index.html">Governance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/browser/index.html">Firefox Front-end</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/dom/index.html">DOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/editor/index.html">Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/layout/index.html">Style system (CSS) &amp; Layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/gfx/index.html">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/ipc/index.html">Processes, Threads and IPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools/README.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools/architecture-overview.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools/bugs-issues.html">Bugs and issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/devtools/index.html">Firefox DevTools Contributor Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/toolkit/index.html">Toolkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/js/index.html">SpiderMonkey</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/jsloader/index.html">JS Loader</a></li>
+<li class="toctree-l1 current" aria-expanded="true"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/index.html"><button class="toctree-expand" title="Open/close menu"></button>GeckoView</a><ul class="" aria-expanded="false">
+<li class="toctree-l2 current" aria-expanded="true"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/index.html#documentation"><button class="toctree-expand" title="Open/close menu"></button>Documentation</a><ul class="" aria-expanded="false">
+<li class="toctree-l3"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/index.html">Using GeckoView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/index.html">Contributing to GeckoView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/design/index.html">Design docs</a></li>
+<li class="toctree-l3 current" aria-expanded="true"><a class="reference internal current" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#" aria-expanded="true"><button class="toctree-expand" title="Open/close menu"></button>Isolated Processes and App Zygote Preloading on Android</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#isolated-processes">Isolated Processes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#app-zygote-preloading">App Zygote Preloading</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference external" href="https://mozilla.github.io/geckoview/javadoc/mozilla-central/org/mozilla/geckoview/doc-files/CHANGELOG">Changelog</a></li>
+<li class="toctree-l3"><a class="reference external" href="https://mozilla.github.io/geckoview/javadoc/mozilla-central/index.html">API Javadoc</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/index.html#more-information">More information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/fenix/index.html">Fenix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mobile/android/focus-android/index.html">Focus for Android</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/dom/bindings/webidl/index.html">WebIDL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/modules/libpref/index.html">libpref</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/networking/index.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/remote/index.html">Remote Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/services/index.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/permissions/index.html">Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/uriloader/index.html">File Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/widget/cocoa/index.html">Firefox on macOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/widget/windows/index.html">Firefox on Windows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/toolkit/components/ml/index.html">Firefox AI Runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/toolkit/components/pageextractor/index.html">Page Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/accessible/index.html">Accessibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/media/index.html">Media Playback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/code-quality/index.html">Code quality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/writing-rust-code/index.html">Writing Rust Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/rust-components/index.html">Rust Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/profiler/index.html">Gecko Profiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/performance/index.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/storage/index.html">Database bindings (SQLite, KV, …)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/xpcom/index.html">XPCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/nspr/index.html">NSPR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/security/nss/index.html">Network Security Services (NSS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/content-security/index.html">Web Security Checks in Gecko</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/rlbox/index.html">RLBox sandboxing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The Firefox Build System</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mach/index.html">Mach</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/try/index.html">Pushing to Try</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/build/buildsystem/index.html">Build System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/taskcluster/index.html">Firefox CI and Taskgraph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/moztreedocs/index.html">Managing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mozbuild/vendor/index.html">Vendoring Third Party Components</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing &amp; Test Infrastructure</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/automated-testing/index.html">Automated Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/treeherder-try/index.html">Understanding Treeherder Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/sheriffed-intermittents/index.html">Sheriffed intermittent failures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/tests-for-new-config/index.html">Turning on Firefox tests for a new configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/intermittent/index.html">Avoiding intermittent tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/debugging-intermittents/index.html">Debugging Intermittent Test Failures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/testing-policy/index.html">Testing Policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/ci-configs/index.html">Configuration Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/browser-chrome/index.html">Browser chrome mochitests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/chrome-tests/index.html">Chrome Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html">geckodriver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/test-verification/index.html">Test Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/webrender/index.html">WebRender Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/mochitest-plain/index.html">Mochitest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/xpcshell/index.html">XPCShell tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/tps/index.html">TPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/web-platform/index.html">web-platform-tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/gtest/index.html">GTest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/fuzzing/index.html">Fuzzing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/sanitizer/index.html">Sanitizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing/perfdocs/index.html">Performance Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/code-coverage/index.html">Code coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/testing-rust-code/index.html">Testing &amp; Debugging Rust Code</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">AI Agent Tools</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/ai-agent-tools/index.html">AI Agent Tools for Firefox Development</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Releases &amp; Updates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/update-infrastructure/index.html">Mozilla Update Infrastructure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/update-infrastructure/index.html#watershed-updates">Watershed Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/update-infrastructure/index.html#desupport-updates">Desupport Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/tools/update-verify/index.html">Update Verify</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Localization &amp; Internationalization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/intl/index.html">Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/l10n/index.html">Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Firefox and Python</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/mozbase/index.html">mozbase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/python/index.html">Using third-party Python packages</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Metrics Collected in Firefox</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://firefox-source-docs.mozilla.org/metrics/index.html">Firefox metrics</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="https://firefox-source-docs.mozilla.org/index.html">Firefox Source Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this file,
+   - You can obtain one at http://mozilla.org/MPL/2.0/.  --><div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="https://firefox-source-docs.mozilla.org/index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/index.html">GeckoView</a></li>
+      <li class="breadcrumb-item active">Isolated Processes and App Zygote Preloading on Android</li>
+<li class="wy-breadcrumbs-aside">
+  <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Developer+Infrastructure&amp;component=Firefox+Source+Docs%3A+Content&amp;short_desc=Documentation+issue+on+mobile/android/geckoview/project/isolated-process/overview&amp;comment=URL+=+https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html&amp;bug_file_loc=https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html" rel="nofollow">Report an issue</a>
+  /
+  <a href="https://github.com/mozilla-firefox/firefox/blob/main/mobile/android/docs/geckoview/project/isolated-process/overview.md" rel="nofollow">View page source</a>
+</li>
+
+  </ul>
+  <hr>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="isolated-processes-and-app-zygote-preloading-on-android">
+<h1>Isolated Processes and App Zygote Preloading on Android<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#isolated-processes-and-app-zygote-preloading-on-android" title="Link to this heading"></a></h1>
+<section id="isolated-processes">
+<h2>Isolated Processes<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#isolated-processes" title="Link to this heading"></a></h2>
+<p>Isolated processes on Android are an OS level concept that uses <a class="reference external" href="https://cs.android.com/android/platform/superproject/main/+/main:system/sepolicy/private/isolated_app_all.te">SELinux permissions</a> to sandbox processes. Isolated processes are separate from Fission, the Gecko technology that separates rendering processes based on origin. A service that is using isolated processes will have <code class="docutils literal notranslate"><span class="pre">android:isolatedProcess="true"</span></code> in the manifest.</p>
+<p>Isolated processes have been supported since Android 4.1 (level 16). To use <code class="docutils literal notranslate"><span class="pre">bindIsolatedService</span></code>, an API level of Android 10 (level 29) is required. <code class="docutils literal notranslate"><span class="pre">android.os.Process.isIsolated()</span></code> is available since Android 4.1 (level 16), but a hidden API until Android 9 (level 28).</p>
+<p>There are many differences between isolated processes and regular processes.</p>
+<p>Some important differences include:</p>
+<ul class="simple">
+<li><p>Isolated processes are not allowed to start or bind most other components (e.g. services, activities)</p></li>
+<li><p>The UID of the isolated process is different from the parent process, so it does not share permissions, identity, or UID-based file access</p></li>
+<li><p>Isolated processes do not inherit the app’s runtime permissions and must rely on IPC to a non-isolated process for permission-gated operations</p></li>
+<li><p>Access to system services, app state, and filesystem paths is more restricted due to tighter SELinux confinement</p></li>
+<li><p>Many system calls and kernel interactions are restricted compared to regular app processes</p></li>
+</ul>
+<p>Some links to external documentation:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=Ive8WaeldWA">Video overview of isolated processes</a></p></li>
+<li><p><a class="reference external" href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/security-enhanced_linux/chap-security-enhanced_linux-selinux_contexts">SELinux Contexts</a></p></li>
+<li><p><a class="reference external" href="https://cs.android.com/android/platform/superproject/main/+/main:system/sepolicy/README.md">Android SE Policy</a></p></li>
+<li><p><a class="reference external" href="https://cs.android.com/android/platform/superproject/main/+/main:system/sepolicy/private/isolated_app_all.te">SELinux Policy Rules for isolated processes on Android</a></p></li>
+</ul>
+<section id="how-to-run-isolated-process-mode">
+<h3>How to run isolated process mode<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#how-to-run-isolated-process-mode" title="Link to this heading"></a></h3>
+<section id="geckoview-test-runner-locally">
+<h4>GeckoView Test Runner Locally<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#geckoview-test-runner-locally" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://searchfox.org/firefox-main/rev/f37efeb9fd346125bfc98d132ae0dea48a1e2584/mobile/android/moz.configure#62"><code class="docutils literal notranslate"><span class="pre">ac_add_options</span> <span class="pre">--enable-isolated-process</span></code></a>
+(Should apply to junit, supported mochitests, xpcshell, wpt, and reftests.)</p>
+</section>
+<section id="geckoview-example">
+<h4>GeckoView Example<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#geckoview-example" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://searchfox.org/firefox-main/rev/5c6d4ae3f944972de57bd80adb49fcf18fa5f3bb/mobile/android/geckoview/src/main/java/org/mozilla/geckoview/GeckoRuntimeSettings.java#869">Hardcode</a> <code class="docutils literal notranslate"><span class="pre">mIsolatedProcess</span></code> to true in <code class="docutils literal notranslate"><span class="pre">GeckoRuntimeSettings.java</span></code>.</p>
+</section>
+<section id="ci">
+<h4>CI<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#ci" title="Link to this heading"></a></h4>
+<p>Currently in CI as a build type of <a class="reference external" href="https://searchfox.org/firefox-main/rev/f37efeb9fd346125bfc98d132ae0dea48a1e2584/mobile/android/config/mozconfigs/android-x86_64/debug-isolated-process">debug-isolated-process</a>. It is in the process of transitioning to a variant of <a class="reference external" href="https://phabricator.services.mozilla.com/D265099">geckoview-isolated-process.</a></p>
+</section>
+<section id="fenix">
+<h4>Fenix<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#fenix" title="Link to this heading"></a></h4>
+<p>Isolated processes may be tested by enabling it in Fenix’s secret settings and restarting the app.</p>
+<p>Note: If app zygote preloading is also enabled, those settings will take precedence. Also, the GV flags will not apply because Fenix has control of the setting.</p>
+</section>
+</section>
+<section id="how-to-confirm-isolated-processes">
+<h3>How to confirm isolated processes<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#how-to-confirm-isolated-processes" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre id="codecell0"><span></span><span class="c1"># GeckoView Test Runner</span>
+<span class="n">adb</span> <span class="n">shell</span> <span class="s2">"ps -Z -A | grep -i geckoview.test"</span>
+
+<span class="c1"># Fenix</span>
+<span class="n">adb</span> <span class="n">shell</span> <span class="s2">"ps -Z -A | grep -i fenix"</span>
+
+<span class="c1"># Note: The exact full process name will vary based on release type, but should still be found using "fenix". e.g. beta, debug</span>
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell0">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<section id="example-isolated-process">
+<h4>Example Isolated Process<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#example-isolated-process" title="Link to this heading"></a></h4>
+<p>✅ Yes, isolated process:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre id="codecell1" tabindex="0"><span></span>u:r:isolated_app:s0:c512,c768 u0_i9795 19244 5586 17883664 217912 do_epoll_wait 0 S org.mozilla.geckoview_example:isolatedTab0:org.mozilla.gecko.process.GeckoChildProcessServices$isolatedT
+    ^^^^^^^^^^^^              ^^^^^^^^                                                                            ^^^^^^^^^^^
+   (isolated_app)             (u0_i prefix)                                                                       (isolatedTab)
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<p>Key indicators: <code class="docutils literal notranslate"><span class="pre">isolated_app</span></code> type, <code class="docutils literal notranslate"><span class="pre">u0_i</span></code> prefix in UID, <code class="docutils literal notranslate"><span class="pre">isolatedTab</span></code> in the process name</p>
+<p>Only the tab processes will be stated as isolated. Other processes won’t be isolated.</p>
+</section>
+<section id="example-regular-process">
+<h4>Example Regular Process<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#example-regular-process" title="Link to this heading"></a></h4>
+<p>❌ Not isolated process:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre id="codecell2"><span></span>u:r:untrusted_app:s0:c75,c257,c512,c768 u0_a331 19936 5586 17833968 170608 do_epoll_wait 0 S org.mozilla.firefox_beta:tab30
+    ^^^^^^^^^^^^^                       ^^^^^^^                                                                       ^^^
+    (untrusted_app)                     (u0_a prefix)                                                                 (tab)
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<p>Key indicators: <code class="docutils literal notranslate"><span class="pre">untrusted_app</span></code> type, <code class="docutils literal notranslate"><span class="pre">u0_a</span></code> prefix in UID, and <code class="docutils literal notranslate"><span class="pre">tab</span></code> in process name (<strong>not</strong> <code class="docutils literal notranslate"><span class="pre">isolatedTab</span></code>)</p>
+</section>
+</section>
+</section>
+<section id="app-zygote-preloading">
+<h2>App Zygote Preloading<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#app-zygote-preloading" title="Link to this heading"></a></h2>
+<p>For Firefox on Android, <a class="reference external" href="https://developer.android.com/reference/android/app/ZygotePreload">app zygote preloading</a> creates a zygote process with libraries preloaded to help increase efficiency when launching new tab processes. The libraries selected are defined in <a class="reference external" href="https://searchfox.org/firefox-main/source/mobile/android/geckoview/src/main/java/org/mozilla/gecko/process/ZygotePreload.java">ZygotePreload.java</a>.</p>
+<p>Isolated processes working as expected is a prerequisite for app zygote preloading. We automatically enable isolated processes for the app zygote case.</p>
+<p>App zygote preloading requires Android 10 (level 29) or higher.</p>
+<section id="how-to-run-app-zygote-preloading">
+<h3>How to run app zygote preloading<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#how-to-run-app-zygote-preloading" title="Link to this heading"></a></h3>
+<section id="id1">
+<h4>GeckoView Test Runner Locally<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#id1" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://searchfox.org/firefox-main/rev/f37efeb9fd346125bfc98d132ae0dea48a1e2584/mobile/android/moz.configure#43"><code class="docutils literal notranslate"><span class="pre">ac_add_options</span> <span class="pre">--enable-isolated-zygote-process</span></code></a>
+(Should apply to junit, supported mochitests, xpcshell, wpt, and reftests.)</p>
+</section>
+<section id="id2">
+<h4>GeckoView Example<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#id2" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://searchfox.org/firefox-main/rev/0fce12de99c5e7d74536d8f93cf9778ce6199a1f/mobile/android/geckoview/src/main/java/org/mozilla/geckoview/GeckoRuntimeSettings.java#870">Hardcode</a> <code class="docutils literal notranslate"><span class="pre">mAppZygoteProcess</span></code> to true in <code class="docutils literal notranslate"><span class="pre">GeckoRuntimeSettings.java</span></code>.</p>
+</section>
+<section id="id3">
+<h4>CI<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#id3" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://searchfox.org/firefox-main/rev/f37efeb9fd346125bfc98d132ae0dea48a1e2584/taskcluster/test_configs/variants.yml#232">geckoview-zygote</a> variant</p>
+</section>
+<section id="id4">
+<h4>Fenix<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#id4" title="Link to this heading"></a></h4>
+<p>App zygote preloading can be tested by enabling it in Fenix’s secret settings and restarting the app.</p>
+<p>Note: The GV flags will not apply because Fenix has control of the setting.</p>
+</section>
+</section>
+<section id="how-to-confirm-app-zygote-preloading">
+<h3>How to confirm app zygote preloading<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#how-to-confirm-app-zygote-preloading" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre id="codecell3"><span></span><span class="c1"># GeckoView Test Runner</span>
+<span class="n">adb</span> <span class="n">shell</span> <span class="s2">"ps -Z -A | grep -i geckoview.test"</span>
+
+<span class="c1"># Fenix</span>
+<span class="n">adb</span> <span class="n">shell</span> <span class="s2">"ps -Z -A | grep -i fenix"</span>
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<section id="example-app-zygote-preloading">
+<h4>Example App Zygote Preloading<a class="headerlink" href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/project/isolated-process/overview.html#example-app-zygote-preloading" title="Link to this heading"></a></h4>
+<p>✅ Yes, app zygote preloading process:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre id="codecell4"><span></span>u:r:app_zygote:s0:c512,c768 u0_a212 6475 350 15686420 180720 do_sys_poll 0 S org.mozilla.fenix.debug_zygote
+    ^^^^^^^^^^
+   (app_zygote)
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<p>Key indicator: <code class="docutils literal notranslate"><span class="pre">app_zygote</span></code> type</p>
+<p>✅ Yes, isolated process that launched via app zygote:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre id="codecell5"><span></span>u:r:isolated_app:s0:c512,c768 u0_i0 6525 6475 18017956 315748 do_epoll_wait 0 S org.mozilla.fenix.debug:zygoteTab:org.mozilla.gecko.process.GeckoChildProcessServices
+    ^^^^^^^^^^^^              ^^^^^                                                                     ^^^^^^^^^
+   (isolated_app)            (u0_i)                                                                    (zygoteTab)
+</pre><button class="copybtn o-tooltip--left" data-tooltip="Copy" data-clipboard-target="#codecell5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copy" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Copy to clipboard</title>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+  <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"></path>
+</svg>
+    </button></div>
+</div>
+<p>Key indicators: <code class="docutils literal notranslate"><span class="pre">isolated_app</span></code> type, <code class="docutils literal notranslate"><span class="pre">u0_i</span></code> prefix in UID, and <code class="docutils literal notranslate"><span class="pre">zygoteTab</span></code> in the process name</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="https://firefox-source-docs.mozilla.org/mobile/android/geckoview/design/sharing-rust-libraries.html" class="btn btn-neutral float-left" title="Sharing rust libraries across the Firefox (for Android) stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="https://firefox-source-docs.mozilla.org/mobile/android/fenix/index.html" class="btn btn-neutral float-right" title="Fenix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org/">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+
+<table cellspacing="0" cellpadding="0" role="presentation" class="gstl_50 gssb_c" style="width: 212px; display: none; top: 229px; left: 37px; position: absolute;"><tbody><tr><td class="gssb_f"></td><td class="gssb_e" style="width: 100%;"></td></tr></tbody></table></body></html>

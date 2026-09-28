@@ -1,0 +1,2299 @@
+/**
+ * normalize - Remove most spacing between table cells.
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* apply a natural box layout model to all elements */
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --page-background: #fff;
+  --page-foreground: #333;
+  --page-subtle-foreground: #666;
+  --page-border-color: #333;
+
+  --button-color: var(--page-color);
+  --button-background: #f5f5f5;
+  --button-hover-background: white;
+  --button-active-background: #d5d5d5;
+
+  --link-color: #0095dd;
+  --link-hover-color: #00539f;
+
+  --tooltip-foreground: var(--page-foreground);
+  --tooltip-background: #ffffe0;
+    --tooltip-border: var(--page-border-color);
+
+  --search-box-background-image: linear-gradient(to bottom, #f8f8f8, #eaeaea);
+  --revision-text-color: #656565;
+
+  --panel-header-background: #333;
+  --panel-header-color: #fff;
+
+  --list-hover-background: #e0e0e0;
+  --list-subtle-background: var(--line-stuck-background);
+  --list-hover-color: var(--page-foreground);
+
+  --info-box-test-skip-info-background: #eee;
+  --info-box-error-background: #ffeeee;
+  --info-box-warning-background: #ffffee;
+  --info-box-info-background: #eeffee;
+
+  --table-header-color: #555;
+  --table-header-background: #f5f5f5;
+  --table-even-row-background: #f5f5f5;
+
+  --blame-popup-background: #404040;
+  --blame-popup-color: #fff;
+  --blame-light-gray: lightgray;
+  --blame-dark-gray: darkgray;
+
+  --context-menu-new-section: #ccc;
+  --context-menu-same-section: #f8f8f8;
+  --context-menu-same-section-sep: #ddd;
+
+  --line-highlight-background: rgb(255, 255, 204);
+  --line-stuck-background: #ffe;
+
+  --syntax-type-color: teal;
+  --syntax-comment-color: darkred;
+  --syntax-reserved-color: blue;
+  --syntax-string-color: green;
+  --syntax-regex-color: #6d7b8d;
+  --syntax-symbol-highlight: yellow;
+
+  /* Our red-blue color scheme is from
+   * https://colorbrewer2.org/#type=diverging&scheme=RdBu&n=11 and was chosen
+   * for being "color blind friendly" while also being reasonably intuitive thanks
+   * to a correspondence to the stereotypical red/green color theme (that's not
+   * color blind friendly!). */
+  --cov-interpolated-background: #f7f7f7;
+  --cov-miss-background: #f4a582;
+  --cov-hit-background-1: #d1e5f0;
+  --cov-hit-background-2: #92c5de;
+  --cov-hit-background-3: #4393c3;
+  --cov-hit-background-4: #2166ac;
+  --cov-hit-background-5: #053061;
+
+  --cov-hit-unhovered-background: var(--cov-hit-background-1);
+  --cov-miss-unhovered-background: var(--cov-miss-background);
+
+  --diff-minus-line-background: rgb(255, 204, 204);
+  --diff-plus-line-background: rgb(153, 204, 255);
+
+  --result-context-color: royalblue;
+
+  --select-arrow-svg: url("../images/select-arrow-light.svg");
+
+  --diagram-depth-hue: 270deg;
+
+  --base-font-size: 12px;
+  --base-line-height: 1.5;
+  --source-line-height: 1.3;
+
+  /* In order to position the navigationpanel and the sticky lines,
+   * we need to specify the exact size of each elements inside the
+   * header. */
+
+  --search-box-padding: 0.8rem;
+  --search-box-old-rev-padding-bottom: 0.4rem;
+
+  --revision-padding-top: 0.2rem;
+
+  --checkbox-margin: 3px;
+  --checkbox-height: 14px;
+
+  --search-box-border-width: 1px;
+
+  --checkbox-label-height: calc(
+      var(--checkbox-margin)
+      + var(--checkbox-height)
+      + var(--checkbox-margin)
+  );
+
+  --search-box-fieldset-min-height: calc(
+    2 * var(--checkbox-label-height)
+  );
+
+  --header-height: calc(
+      var(--search-box-padding)
+      + var(--search-box-fieldset-min-height)
+      + var(--search-box-padding)
+      + var(--search-box-border-width)
+  );
+
+  --diagram-ptr-strong: #7fbc41;
+  --diagram-ptr-unique: #b8e186;
+  --diagram-ptr-weak: #fde0ef;
+  --diagram-ptr-raw: #f1b6da;
+  --diagram-ptr-ref: #e6f5d0;
+  --diagram-hovered-cur-node: #fbf;
+  --diagram-hovered-out-node: #bbf;
+  --diagram-hovered-in-node: #bfb;
+  --diagram-hovered-cur-edge: #eae;
+  --diagram-edge-clicktarget: rgba(0,0,0,0);
+  --diagram-hovered-out-edge: blue;
+  --diagram-hovered-in-edge: green;
+  --diagram-true-diag: white;
+  --diagram-overload-depth: #d0d0d0;
+  --diagram-overload-depth-text: var(--page-foreground);
+  --diagram-overload-other: #ffdd40;
+  --diagram-overload-other-text: #202020;
+
+  --tree-switcher-width: 24px;
+  --tree-switcher-height: 24px;
+
+  --breadcrumbs-margin-top: 18px;
+  --breadcrumbs-padding: 1rem;
+  --breadcrumbs-height: var(--tree-switcher-height);
+  --stuck-shadow-radius: 8px;
+}
+
+:root.old-rev {
+  /* Adjust the navigation panel location for the presence of the indexed revision.
+   * See above for more. */
+  --header-height: calc(
+      var(--search-box-padding)
+      + var(--search-box-fieldset-min-height)
+      + var(--revision-padding-top)
+      + var(--base-font-size) * var(--base-line-height)
+      + var(--search-box-old-rev-padding-bottom)
+      + var(--search-box-border-width)
+  );
+}
+
+@supports (color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-background: rgb(28, 27, 34);
+    --page-foreground: rgb(251, 251, 254);
+    --page-subtle-foreground: #ccc;
+    --page-border-color: ThreeDLightShadow;
+
+    --search-box-background-image: linear-gradient(to bottom, #444, #333);
+    --revision-text-color: #ddd;
+
+    --button-background: rgb(43, 42, 51);
+    --button-hover-background: rgb(82, 82, 94);
+    --button-active-background: rgb(91, 91, 102);
+
+    --link-color: #1897db;
+    --link-hover-color: #016cbf;
+
+    --tooltip-foreground: var(--page-foreground);
+    --tooltip-background: #333333;
+    --tooltip-border: var(--page-border-color);
+
+    --list-hover-background: var(--button-hover-background);
+
+    --info-box-test-skip-info-background: #161b22;
+    --info-box-error-background: #57161c;
+    --info-box-warning-background: #664d03;
+    --info-box-info-background: #0a3722;
+
+    --table-header-color: var(--page-foreground);
+    --table-header-background: rgb(43, 42, 51);
+    --table-even-row-background: rgb(34, 37, 44);
+
+    --blame-light-gray: #595959;
+    --blame-dark-gray: #393939;
+
+    --context-menu-new-section: #444;
+    --context-menu-same-section: #181818;
+    --context-menu-same-section-sep: #333;
+
+    --line-highlight-background: #3c3111;
+    --line-stuck-background: #221c09;
+
+    --syntax-comment-color: GrayText;
+    --syntax-symbol-highlight: #5d4d1d;
+    /* Shamelessly taken from source.chromium.org's dark theme */
+    --syntax-type-color: #79a9c4;
+    --syntax-reserved-color: #d8884b;
+    --syntax-string-color: #97c67b;
+    --syntax-regex-color: #b98eff;
+
+    /* Hit colors from the dark bits from https://colorbrewer2.org/#type=sequential&scheme=Blues&n=9
+     * Miss background from the same link as the light colors (the darkest red in there). */
+    --cov-interpolated-background: #595959;
+    --cov-miss-background: #67001f;
+    --cov-hit-background-1: #6baed6;
+    --cov-hit-background-2: #4292c6;
+    --cov-hit-background-3: #2171b5;
+    --cov-hit-background-4: #08519c;
+    --cov-hit-background-5: #08306b;
+
+    --diff-minus-line-background: #42161c;
+    --diff-plus-line-background: #172c47;
+
+    --result-context-color: #7892df;
+
+    --select-arrow-svg: url("../images/select-arrow-dark.svg");
+
+    color-scheme: dark;
+
+    --diagram-ptr-strong: #1e310f;
+    --diagram-ptr-unique: #7fbc41;
+    --diagram-ptr-weak: #63565d;
+    --diagram-ptr-raw: #5d4453;
+    --diagram-ptr-ref: #595f50;
+    --diagram-hovered-cur-node: #634663;
+    --diagram-hovered-out-node: #464662;
+    --diagram-hovered-in-node: #476448;
+    --diagram-hovered-cur-edge: #eae;
+    --diagram-edge-clicktarget: rgba(0,0,0,0);
+    --diagram-hovered-out-edge: #4c50fc;
+    --diagram-hovered-in-edge: #53cb59;
+    --diagram-true-diag: #646464;
+    --diagram-overload-depth: #a0a0a0;
+    --diagram-overload-depth-text: var(--page-foreground);
+    --diagram-overload-other: #d0d040;
+    --diagram-overload-other-text: #202020;
+  }
+}
+}
+
+@media (forced-colors) {
+  :root {
+    --blame-popup-background: Canvas;
+    --blame-popup-color: CanvasText;
+    --blame-light-gray: ButtonFace;
+    --blame-dark-gray: ButtonText;
+  }
+}
+
+:root {
+  font: var(--base-font-size)/var(--base-line-height) Arial, Helvetica, sans-serif;
+
+  background-color: var(--page-background);
+  color: var(--page-foreground);
+}
+
+body {
+  margin: 0;
+}
+
+.context-menu .confidence-cppTemplateHeuristic {
+  background-color: var(--list-subtle-background);
+}
+
+/* Link styling */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+/* Some links look like list items */
+.panel section .item,
+.folder-content a {
+  text-decoration: none;
+  color: unset;
+}
+
+/* .folder-content is handled with the whole row getting hover styles, so it doesn't need this. */
+.panel section .item:is(:hover, :focus),
+.context-menu a:is(:hover, :focus) {
+  background-color: var(--list-hover-background);
+  color: var(--list-hover-color);
+  outline: none;
+}
+
+/* Others look more seamless (they only show underlines when hovered) */
+.file a,
+.results tr:where(:not(.result-head)) a {
+  color: unset;
+}
+
+/* Some links always show underlines, but use the underlying text color */
+#revision a,
+.info-box a,
+.blame-popup a {
+  color: unset;
+  text-decoration: underline;
+}
+
+#content details {
+  margin-left: 2rem;
+}
+
+/* summary headings should not start a new block and should not have crazy big margins */
+details > summary > h1,
+details > summary > h2,
+details > summary > h3,
+details > summary > li > h3 {
+  display: inline-block;
+  margin: 4px 0px;
+}
+details > summary > li {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+details > summary > h1 {
+  font-size: 16px;
+}
+details > summary > h2 {
+  font-size: 14px;
+}
+details > summary > h3,
+details > summary > li > h3 {
+  font-size: var(--base-font-size);
+}
+
+.commit-content {
+  padding: 0 1rem;
+}
+
+h4 {
+  margin: 0 0 0.5rem 0;
+}
+caption {
+  text-align: left;
+}
+table {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: auto;
+}
+table.folder-content {
+  margin: 0.5rem 2rem;
+  width: calc(100% - 4rem);
+}
+table#file {
+  width: 100%;
+}
+table.folder-content thead tr:first-child {
+  color: var(--table-header-color);
+  background-color: var(--table-header-background);
+  padding: 0.5em;
+}
+table th {
+  font-weight: bold;
+  padding: 0.5em;
+  text-align: left;
+}
+.folder-content th:first-child {
+  padding-left: 0.5em;
+}
+.folder-content th {
+  padding-left: 0;
+  padding-right: 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+}
+table.folder-content tr:nth-child(even) {
+  background-color: var(--table-even-row-background);
+}
+table.folder-content tbody tr:hover,
+table tbody tr:hover {
+  background-color: var(--list-hover-background);
+  color: var(--list-hover-color);
+}
+table.folder-content td {
+  padding: 0;
+}
+table.folder-content a {
+  display: block; /* Make entire cells clickable. */
+  padding-top: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.5em;
+}
+table td {
+  padding: 0.5em;
+}
+table.folder-content td.name {
+  white-space: nowrap;
+  min-width: 40ch;
+}
+table.folder-content td.description {
+  max-width: 60vw;
+  padding-right: 2em;
+  width: 100%;
+}
+table.folder-content td.description a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+table.folder-content td.size {
+  min-width: 9ch;
+}
+table.folder-content td.coverage, #panel-coverage:is(:hover, :focus) {
+  .cov-percentage {
+    font-weight: 600;
+  }
+
+  .cov-percentage-0 {
+    color: #d91a47;
+    font-weight: 800;
+  }
+  .cov-percentage-1    { color: #c62828; }
+  .cov-percentage-2    { color: #d32f2f; }
+  .cov-percentage-3    { color: #e53935; }
+  .cov-percentage-4    { color: #f57c00; }
+  .cov-percentage-5    { color: #fbc02d; }
+  .cov-percentage-6    { color: #c0ca33; }
+  .cov-percentage-7    { color: #7cb342; }
+  .cov-percentage-8    { color: #43a047; }
+  .cov-percentage-9    { color: #2e7d32; }
+  .cov-percentage-10   { color: #00c853; }
+  .cov-percentage-none { color: #9e9e9e; }
+}
+td.code {
+  padding: 0 0 0 0.5em;
+}
+td#line-numbers {
+  padding: 0;
+}
+
+.source-line-with-number {
+  padding: 0rem 1rem;
+  line-height: var(--source-line-height);
+  display: flex;
+}
+
+.line-number::before {
+  content: attr(data-line-number);
+}
+
+.line-number {
+  display: inline-block;
+  cursor: pointer;
+  text-align: right;
+  padding: 0 0.5rem;
+  /* this was originally set on the ".file td:first-child" */
+  color: #aaa;
+  width: 8ex;
+  flex-shrink: 0;
+  /* This prevents shift-clicking in non-gecko browsers from selecting all
+   * text in between the lines */
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.highlighted {
+  background: none repeat scroll content-box 0 0 var(--line-highlight-background) !important;
+}
+.source-line {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  white-space: pre;
+  flex-grow: 1;
+}
+
+.breadcrumbs.stuck,
+.source-line-with-number.stuck {
+  background-color: var(--line-stuck-background);
+}
+.breadcrumbs.last-stuck,
+.source-line-with-number.last-stuck {
+  box-shadow: 0px 4px var(--stuck-shadow-radius) rgba(0, 0, 0, .9);
+}
+
+.source-line a,
+g[data-symbols],
+g.overload {
+  cursor: pointer;
+}
+.code code {
+  padding: 0 0.5rem;
+  width: 100%;
+}
+.code code a {
+  cursor: context-menu;
+}
+mark {
+  position: relative;
+  padding: 0.5rem;
+}
+
+g.diagram-overload text {
+  pointer-events: none;
+}
+
+g.diagram-overload-depth circle {
+  stroke: var(--diagram-overload-depth);
+  fill: var(--page-background);
+  stroke-opacity: 0.8;
+  fill-opacity: 0.8;
+}
+g.diagram-overload-depth circle:hover {
+  fill: var(--diagram-overload-depth);
+  stroke-opacity: 1;
+  fill-opacity: 1;
+}
+g.diagram-overload-depth circle:hover + text {
+  fill: var(--diagram-overload-depth-text);
+  fill-opacity: 1;
+}
+
+g.diagram-overload-other polygon {
+  stroke: var(--diagram-overload-other);
+  fill: var(--page-background);
+  stroke-opacity: 1;
+  fill-opacity: 0.8;
+}
+g.diagram-overload-other polygon:hover {
+  fill: var(--diagram-overload-other);
+  stroke-opacity: 1;
+  fill-opacity: 1;
+}
+g.diagram-overload-other polygon:hover + text {
+  fill: var(--diagram-overload-other-text);
+  fill-opacity: 1;
+}
+
+.diagram-overload-list {
+  margin: 0.5rem;
+  padding-inline-start: 2.5rem;
+}
+
+.diagram-no-path-hint {
+  border: 3px double var(--info-box-warning-background);
+  padding: 0 1rem;
+  margin: 0 1rem 1rem 1rem;
+}
+
+/**
+ * See bug 1996714 for details on the fixed header mechanism history.
+ *
+ * A placeholder for the header.
+ * This element takes the vertical space above the page content.
+ *
+ * While this element sticks to the vertical scroll, horizontal scrolling
+ * can move this element.
+ *
+ * We use another element #search-box with fixed position, in order
+ * to keep the position also for horizontal scroll.
+ */
+#fixed-header {
+  position: sticky;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: var(--header-height);
+  z-index: 200;
+}
+#search-box {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: var(--header-height);
+}
+
+/**
+ * This is named as "scrolling" For historical reason, but is no longer
+ * scrolling. The html element is scrolling.
+ */
+#scrolling {
+}
+
+/**
+ * Nesting!
+ */
+
+.nesting-depth-0 {
+  --nesting-level: 0;
+}
+.nesting-depth-1 {
+  --nesting-level: 1;
+}
+.nesting-depth-2 {
+  --nesting-level: 2;
+}
+.nesting-depth-3 {
+  --nesting-level: 3;
+}
+.nesting-depth-4 {
+  --nesting-level: 4;
+}
+.nesting-depth-5 {
+  --nesting-level: 5;
+}
+.nesting-depth-6 {
+  --nesting-level: 6;
+}
+.nesting-depth-7 {
+  --nesting-level: 7;
+}
+.nesting-depth-8 {
+  --nesting-level: 8;
+}
+.nesting-depth-9 {
+  --nesting-level: 9;
+}
+
+.nesting-sticky-line {
+  /* be sticky, contained within a .nesting-container */
+  position: sticky;
+  /* even with our "stuck" and "last-stuck" classes, it's important to have an
+   opaque background color for these because those classes don't take effect
+   immediately. */
+  background-color: var(--page-background);
+  top: calc(
+      var(--header-height) +
+      var(--breadcrumbs-height) +
+      var(--nesting-level) * var(--base-font-size) * var(--source-line-height)
+  );
+  z-index: calc(100 - var(--nesting-level));
+}
+/* Search results */
+
+.search-result-header {
+  padding: 0 2rem;
+}
+
+.nsresult-desc {
+  padding: 2rem 2rem 0 2rem;
+  font-size: 1.2rem;
+}
+
+table.results {
+  margin: 0.5rem 2rem;
+  width: calc(100% - 4rem);
+}
+
+/* Make context lines more subtle. */
+.results tr.before-context-line,
+.results tr.after-context-line {
+  opacity: 0.5;
+}
+
+/* Delineate the transition between consecutive groups. */
+tr.after-context-line + tr.before-context-line {
+  border-top: 1px solid gray;
+}
+
+.results tr:hover,
+.file tr:hover {
+  background: none;
+}
+.results tr,
+.file tr {
+  border: 0;
+  line-height: var(--source-line-height);
+}
+.file tr .line-number,
+.file tr .code pre code {
+  /* don't let bolded code increase the line-height - see bug 1322740 comment 9 */
+  max-height: calc(var(--base-font-size) * var(--source-line-height));
+}
+.left-column,
+.file td:first-child {
+  text-align: right;
+  color: #aaa;
+  width: 8ex;
+}
+.results td {
+  padding: 0.1rem 0.5rem;
+}
+.results a {
+  cursor: pointer;
+  display: inline-block;
+}
+.file a:target {
+  background-color: gray;
+  color: white;
+  padding: 0 0.5rem;
+}
+.results code {
+  white-space: pre;
+}
+.result-head td {
+  padding-top: 0.3rem; /* Additional padding to visually separate results.*/
+  padding-bottom: 0;
+}
+.result-head td.left-column {
+  padding-right: 0.2rem; /* Moves the icon closer to the path by reducing the padding.*/
+}
+
+.result-context {
+  font-style: italic;
+  margin-left: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: var(--result-context-color);
+}
+
+.result-upsearch {
+  padding-left: 8px;
+  color: var(--link-color);
+}
+
+.section {
+  text-align: right;
+  font-size: 150%;
+}
+
+.result-pathkind {
+  font-size: 150%;
+}
+
+.result-kind {
+  font-size: var(--base-font-size);
+  font-weight: 800;
+}
+
+.expando {
+  cursor: pointer;
+  color: var(--page-foreground);
+}
+/* End search results */
+
+.file td {
+  padding: 0;
+}
+.file pre {
+  margin: 0;
+}
+
+/* Context menu */
+.context-menu {
+  /* absolutely positioned within the containing block of the <body> relative
+     to the click event */
+  position: absolute;
+  width: max-content;
+  background-color: var(--page-background);
+  color: var(--page-color);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--page-border-color);
+  border-radius: 6px;
+  list-style: none;
+  z-index: 202;
+  overflow: auto;
+  transition: opacity .2s ease;
+}
+.context-menu:not(.bottom) {
+  border-top-left-radius: 0;
+}
+.context-menu.bottom {
+  border-bottom-left-radius: 0;
+}
+.context-menu.left:not(.bottom) {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 0;
+}
+.context-menu.left.bottom {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 0;
+}
+.context-menu:focus {
+  outline: none;
+}
+.context-menu a {
+  display: block;
+}
+.contextmenu-expansion-preview {
+  max-width: 600px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.context-menu code {
+  white-space: nowrap;
+}
+.context-menu-group-label {
+  display: block;
+  padding: 0.5em;
+  font-weight: bold;
+}
+.content {
+  padding: 0 0 0.5rem 0;
+}
+
+/* Breadcrumbs */
+.path-separator {
+  margin: 0 0.2rem;
+}
+.breadcrumbs {
+  display: inline-block;
+  margin: 0;
+  padding: 1rem;
+  position: sticky;
+  z-index: 101;
+  top: var(--header-height);
+  margin: var(--breadcrumbs-margin-top) 0 1rem 0;
+  padding: 0 var(--breadcrumbs-padding);
+  width: 100%;
+  height: var(--breadcrumbs-height);
+  text-align: left;
+}
+.breadcrumbs.stuck {
+  white-space: nowrap;
+
+  .breadcrumbs-extra-button {
+    display: none !important;
+  }
+}
+
+#tree-switcher {
+  pointer-events: auto;
+  background-color: transparent;
+  background-image: var(--select-arrow-svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  appearance: none;
+  border: none;
+  vertical-align: middle;
+  width: var(--tree-switcher-width);
+  height: var(--tree-switcher-height);
+  border-radius: 2px;
+}
+#tree-switcher:hover {
+  background-color: var(--list-hover-background);
+}
+#tree-switcher:active {
+  background-color: var(--button-active-background);
+}
+
+#tree-switcher-menu {
+  display: flex;
+  flex-direction: row;
+}
+
+#tree-switcher-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#tree-switcher-menu ul + ul {
+  border-inline-start: 1px solid var(--page-border-color);
+}
+
+#tree-switcher-menu .indent {
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+}
+
+#coverage-sparkline {
+  display: flex;
+  margin-left: 1ch;
+}
+
+#coverage-graph {
+  margin: 0.5rem 2rem;
+  width: calc(100% - 4rem);
+  border: 1px solid var(--page-border-color);
+  cursor: pointer;
+
+  position: fixed;
+  top: 50%;
+  translate: 0 -50%;
+
+  &:open {
+    display: flex;
+  }
+
+  svg a .tooltip {
+    display: none;
+
+    transform: translateY(-1.5rem);
+
+    rect {
+      width: 16ch;
+      height: 2rem;
+      transform: translate(-8ch, -1rem);
+      fill: var(--blame-popup-background);
+      rx: 3px;
+      ry: 3px;
+    }
+
+    text {
+      dominant-baseline: middle;
+      text-anchor: middle;
+      fill: var(--blame-popup-color);
+    }
+  }
+
+  svg {
+    a.hovered, a:focus {
+      circle {
+        fill: var(--list-hover-color);
+        stroke: var(--list-hover-color);
+        r: 3px;
+      }
+
+      .tooltip {
+        display: inline;
+      }
+    }
+  }
+}
+
+/* Footer */
+.footer {
+  color: #999;
+  font-size: 1rem;
+  margin: 1.2rem;
+  justify-content: center;
+}
+
+/* Navigation panel */
+.panel {
+  /* (position:fixed is always relative to the viewport's initial containing
+     block, so it doesn't matter where this node lives in the DOM, apart from
+     accessibility tree purposes.) */
+  position: fixed;
+  /* We position the navigation panel just below the search box so that when
+   * it is collapsed it exists in the margins of the page so that we can show
+   * it on all pages.
+   *
+   * Previously it was styled to be floating on the page which was only
+   * appropriate on source listing pages where it would usually be in the
+   * right margin of the page. But now we want it visible on all pages.
+   *
+   * Note that on pages where we display the indexed revision as part of the
+   * search box, this offset needs to be adjusted, and we do that below using
+   * the ".old-rev" selector. */
+  top: var(--header-height);
+  right: 22px;
+  background-color: var(--page-background);
+  border: 1px solid var(--page-border-color);
+  min-width: 12rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100% - 150px);
+  z-index: 202;
+}
+#panel-toggle {
+  display: inline-block;
+  background-color: var(--panel-header-background);
+  color: var(--panel-header-color);
+  margin: 0;
+  padding: 0.5rem 0.2rem 0.5rem 0.7rem;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+#panel-coverage {
+  #coverage-sparkline {
+    filter: contrast(0%);
+  }
+
+  &:is(:hover, :focus) {
+    #coverage-sparkline {
+      filter: unset;
+    }
+  }
+}
+.navpanel-other-icons {
+  float: right;
+}
+#show-settings {
+  margin-right: 0.5rem;
+  color: var(--panel-header-color);
+}
+#open-help {
+  margin-left: 0.5rem;
+  color: var(--panel-header-color);
+}
+.navpanel-icon {
+  display: inline-block;
+}
+.navpanel-toggle-icon::before {
+  margin-right: 0.5rem;
+  transform: rotate(-90deg);
+  transition: all 0.1s;
+}
+.navpanel-toggle-icon.expanded::before {
+  transform: rotate(0deg);
+  transition: all 0.1s;
+}
+.panel h4 {
+  margin: 0;
+  padding: 0.5rem;
+}
+.panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.panel a.class {
+  background-position: 4px 8px;
+}
+.panel a.method {
+  background-position: 4px 6px;
+}
+.panel a.field {
+  background-position: 2px 10px;
+}
+.panel section .item {
+  display: inline-flex;
+  width: 100%;
+  cursor: pointer;
+}
+.panel section button.item {
+  font: unset;
+  appearance: unset;
+  border: unset;
+  text-align: unset;
+}
+.panel section .item:disabled,
+.panel section .item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panel .selected-symbol-section {
+  width: 240px;
+  display: grid;
+  grid-template-columns: 200px 30px;
+  gap: 10px;
+}
+
+.panel .selected-symbol-section .selected-symbol-box {
+  position: relative;
+}
+
+.panel .selected-symbol-section .selected-symbol-box .selected-symbol-ns {
+  position: absolute;
+  top: -1em;
+  padding-inline-start: 26px;
+  height: 0.8em;
+  font-size: 0.8em;
+  white-space: pre;
+}
+.panel .selected-symbol-section .selected-symbol-box .selected-symbol-local {
+  padding-inline-start: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+.panel .selected-symbol-section .copy-box.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Info Boxes */
+.info-box {
+  border: 1px solid rgba(0, 0, 0, .5);
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin: 0.5rem;
+  font-size: 110%;
+}
+.info-box-error {
+  background-color: var(--info-box-error-background);
+}
+.info-box-warning {
+  background-color: var(--info-box-warning-background);
+}
+.info-box-info {
+  background-color: var(--info-box-info-background);
+}
+.info-box ul {
+  padding-inline-start: 20px;
+  margin: 0;
+}
+.info-box .test-skip-info {
+  font-family: monospace;
+  background-color: var(--info-box-test-skip-info-background);
+  padding: 5px;
+  margin: -5px;
+}
+
+.no-results {
+  clear: both;
+  font-style: italic;
+}
+#fetch-results {
+  display: none;
+}
+
+/* Hovering over symbol names */
+span[data-symbols]:hover {
+  cursor: pointer;
+}
+span[data-symbols].hovered,
+span[data-symbols].selected {
+  background-color: var(--syntax-symbol-highlight);
+}
+
+/* Help screen */
+.intro, .settings-page {
+  font: 14px/var(--base-line-height) Arial, Helvetica, sans-serif;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-bottom: 10%;
+}
+
+.intro td,
+.intro th {
+  text-align: center;
+  vertical-align: middle;
+}
+.intro td[yes]::before {
+  content: "\2713";
+}
+
+.contextmenu-link:before,
+.submenu-label:before,
+.contextmenu-section-title:before,
+.contextmenu-subsection-title:before {
+  padding-right: 0.4em;
+}
+.context-menu .contextmenu-link,
+.context-menu .contextmenu-section-title,
+.context-menu .contextmenu-subsection-title {
+  text-decoration: none;
+  color: var(--page-subtle-foreground);
+  padding: 0.5em;
+}
+.context-menu .contextmenu-subsection-title {
+  margin-inline-start: 1.4em;
+}
+.contextmenu-link > strong {
+  color: var(--page-foreground);
+  font-weight: normal;
+}
+
+.contextmenu-with-buttons {
+  display: flex;
+}
+
+.contextmenu-section-title,
+.contextmenu-subsection-title {
+  flex: 1;
+}
+
+.context-menu .contextmenu-buttons {
+  display: flex;
+  padding-inline-start: 26px;
+}
+
+.context-menu a.contextmenu-button {
+  color: var(--page-color);
+  display: inline-block;
+  border: 1px solid var(--context-menu-new-section);
+  padding: 0.5em;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.context-menu a.contextmenu-button + a.contextmenu-button {
+  border-inline-start: none;
+}
+
+.context-menu a.contextmenu-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contextmenu-row ~ .contextmenu-row.contextmenu-same-section  {
+  border-top: 1px solid var(--context-menu-same-section);
+}
+
+.contextmenu-row ~ .contextmenu-row.contextmenu-same-section-sep  {
+  border-top: 1px dashed var(--context-menu-same-section-sep);
+}
+
+.contextmenu-row ~ .contextmenu-row.contextmenu-new-section  {
+  border-top: 1px solid var(--context-menu-new-section);
+}
+
+.contextmenu-row.has-submenu a {
+  display: flex;
+}
+.contextmenu-row.has-submenu a .submenu-label {
+  flex: 1;
+}
+.contextmenu-row.has-submenu a .submenu-marker:before {
+  content: ">";
+}
+
+/* ## Line number goto ##
+
+   `createSyntheticAnchor` in code-highlighter.js creates a synthetic anchor
+   element for the current hash string (which may be more than just "#200" and
+   instead could be "#200-220" or "#220,225,227" or something like that) and
+   gives it this class.
+
+   The element is made a child of the .line-number element.
+
+   See the method's documentation for more context.
+*/
+.goto {
+  /* This needs to be large enough so that the "position: sticky"
+     stuck lines don't obscure the line we're trying to display.
+     Also, we add an extra line of padding to compensate for the box-shadow.
+     Note: The default must be -1 * the offset for the non-stuck case.
+   */
+  scroll-margin-top: calc(
+      var(--header-height) +
+      var(--breadcrumbs-height) + var(--stuck-shadow-radius) +
+      (var(--nesting-level, -2) + 2) * var(--base-font-size) * var(--source-line-height)
+  );
+}
+
+.nesting-container > .goto {
+  /* The anchor for the first-line of a sticky container doesn't need to
+     account for the sticky line itself, but still needs a line of padding
+     for the box-shadow.  Disclaimer: This is only necessary for nesting
+     levels >= 1 and results in an extra line of padding for == 0, but the
+     complexity to fix it doesn't seem worth it.
+   */
+  scroll-margin-top: calc(
+      var(--header-height) +
+      var(--breadcrumbs-height) + var(--stuck-shadow-radius) +
+      (var(--nesting-level) + 1) * var(--base-font-size) * var(--source-line-height)
+  );
+}
+
+/* ## Blame ## */
+.line-strip {
+  display: flex;
+}
+.blame-strip {
+  display: block;
+  width: 20px;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  touch-action: none; /* fallback for FF pre-85 which didn't support touch-action:pinch-zoom */
+  touch-action: pinch-zoom;
+  @media (forced-colors) {
+    border-inline: 1px solid ButtonText;
+    &:hover {
+      background-color: SelectedItem;
+      border-color: SelectedItemText;
+    }
+    &:active {
+      border-color: ButtonText;
+    }
+  }
+}
+/* blame zebra stripes: we alternate colors whenever the revision a line is from
+   changes between lines. */
+.c1 {
+  background-color: var(--blame-light-gray);
+}
+.c2 {
+  background-color: var(--blame-dark-gray);
+}
+
+.blame-popup {
+  position: absolute;
+  /* positioned by BlamePopup in blame.js */
+  top: 0;
+  left: 0;
+  padding: 10px;
+  background-color: var(--blame-popup-background);
+  color: var(--blame-popup-color);
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, .5);
+  border-radius: 3px;
+  text-align: left;
+  z-index: 201;
+  cursor: auto;
+  @media (prefers-contrast) {
+    border: 1px solid CanvasText;
+  }
+}
+.blame-popup .blame-entry {
+  width: 600px;
+}
+.blame-popup code {
+  background-color: var(--page-background);
+  color: var(--page-foreground);
+  display: block;
+  padding: 0.5em;
+  white-space: pre;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+.deemphasize {
+  color: GrayText;
+}
+.minus-line {
+  background-color: var(--diff-minus-line-background);
+}
+.plus-line {
+  background-color: var(--diff-plus-line-background);
+}
+
+/* Search box */
+input,
+select {
+  padding: 0.5em;
+}
+input[placeholder],
+input::placeholder {
+  text-overflow: ellipsis;
+}
+#search-box #query {
+  width: 100%;
+}
+#search-box #path {
+  width: 100%;
+}
+#query {
+  /* Leave room for spinner. */
+  padding-right: 40px;
+  @media (forced-colors) {
+    background-color: Field;
+    border: 1px solid ButtonText;
+    color: FieldText;
+  }
+}
+.in-progress #spinner {
+  background: transparent url("../images/spinner-large.gif") 0 0 / contain
+    no-repeat;
+}
+#spinner {
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding-left: 2rem;
+  width: auto;
+  bottom: 10px;
+}
+.access-key {
+  text-decoration: underline;
+}
+#search-box {
+  background-image: var(--search-box-background-image);
+  border-bottom: var(--search-box-border-width) solid var(--page-border-color);
+  padding: var(--search-box-padding);
+  width: 100%;
+}
+#search-box > fieldset {
+  min-height: var(--search-box-fieldset-min-height);
+}
+
+#search-box > fieldset {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+:root.old-rev #search-box {
+  padding-bottom: var(--search-box-old-rev-padding-bottom);
+}
+#revision {
+  padding-top: 0;
+}
+:root.old-rev #revision {
+  padding-top: var(--revision-padding-top);
+  color: var(--revision-text-color);
+}
+.v-flex-container {
+  display: flex;
+  flex-direction: column;
+}
+#query-section {
+  flex: 6;
+  position: relative;
+}
+#option-section {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+
+  justify-content: center;
+  padding: 0 2rem 0 0;
+  /*min-width: 9rem;*/
+  /*align-self: center;*/
+}
+#option-section label {
+  height: var(--checkbox-label-height);
+}
+#option-section input[type="checkbox"] {
+  margin: var(--checkbox-margin);
+  height: var(--checkbox-height);
+}
+#path-section {
+  flex: 3;
+}
+/*http://developer.yahoo.com/blogs/ydn/posts/2012/10/clip-your-hidden-content-for-better-accessibility/*/
+.visually-hidden {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0;
+  border: 0;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+/* Message bubble */
+.bubble {
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  color: #6c6c6c;
+  display: none;
+  font-size: 85%;
+  padding: 0.1rem 30px 0.1rem 34px;
+  position: absolute;
+  top: 0.25rem;
+}
+/* The big triangle */
+.bubble:before {
+  content: "";
+  position: absolute;
+  border-style: solid;
+  border-color: #ccc transparent;
+  /* reduce the damage in FF3.0 */
+  display: block;
+  width: 0;
+
+  top: -9px; /* value = - border-top-width - border-bottom-width */
+  bottom: auto;
+  right: auto;
+  left: 11px; /* controls horizontal position */
+  border-width: 0 9px 9px;
+}
+/* The small triangle */
+.bubble:after {
+  content: "";
+  position: absolute;
+  border-style: solid;
+  border-color: #fff transparent;
+  /* reduce the damage in FF3.0 */
+  display: block;
+  width: 0;
+
+  top: -8px; /* value = - border-top-width - border-bottom-width */
+  bottom: auto;
+  right: auto;
+  left: 11px; /* value = (:before left) + (:before border-left) - (:after border-left) */
+  border-width: 0 9px 9px;
+}
+.bubble.info {
+  background: white url(../images/info.gif) 12px 0 / 3ex no-repeat;
+}
+.bubble.warning {
+  background: white url("../images/warning.gif") 10px -2px / 3.5ex no-repeat;
+}
+.bubble.error {
+  background: white url(../images/error.gif) 12px 0 / 3ex no-repeat;
+}
+.zero-size-container {
+  position: relative;
+  height: 0;
+  width: 100%;
+}
+@media only screen and (min-width: 740px) {
+  .bubble {
+    margin-right: 16%; /* 100% minus the above */
+  }
+}
+
+@media only screen and (min-device-width: 320px) {
+  .bubble {
+    margin-right: 38%; /* 100% minus the above */
+  }
+  input[type="submit"] {
+    margin-right: 14%;
+  }
+}
+
+.svg-preview {
+  padding: 0 1rem;
+}
+
+.svg-preview > h4 {
+  margin-bottom: 0;
+}
+
+.svg-preview > a {
+  display: block;
+}
+
+.svg-preview > a > img {
+  min-height: 50px;
+  max-height: 300px;
+  min-width: 50px;
+  max-width: 300px;
+  box-sizing: content-box;
+  border: 1px dashed #555;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+#svg-preview-background-checkerboard:checked ~ a > img {
+  background-image: linear-gradient(
+      45deg,
+      #555 25%,
+      transparent 25%,
+      transparent 75%,
+      #555 75%,
+      #555 100%
+    ),
+    linear-gradient(
+      45deg,
+      #555 25%,
+      transparent 25%,
+      transparent 75%,
+      #555 75%,
+      #555 100%
+    );
+  background-size: 10px 10px;
+  background-position: 0 0, 5px 5px;
+}
+
+#svg-preview-background-light:checked ~ a > img {
+  background-color: #d8d8d8;
+  color-scheme: light;
+}
+
+#svg-preview-background-dark:checked ~ a > img {
+  background-color: #181818;
+  color-scheme: dark;
+}
+
+.syn_def {
+  font-weight: 600;
+}
+
+.syn_type {
+  color: var(--syntax-type-color);
+}
+
+.syn_string {
+  color: var(--syntax-string-color);
+}
+
+.syn_comment {
+  color: var(--syntax-comment-color);
+}
+
+.syn_tag,
+.syn_key,
+.syn_reserved {
+  color: var(--syntax-reserved-color);
+}
+
+.syn_regex {
+  color: var(--syntax-regex-color);
+}
+
+/* ## Code Coverage Styling ## */
+
+/* Color themes are currently from the Color Brewer 2.0 Project which is for
+ * cartography and other uses.  Themes below are using "diverging"
+ * "colorblind safe" 11-count colors.  The (middle) 6th color is used as the
+ * uncovered foreground color, the adjacent (lightest) 5th and 7th colors used
+ * for background colors, and 2nd and 10th colors used for foreground colors
+ * unless otherwise noted.
+ *
+ * Our visual presentation of coverage data has two modes:
+ * 1. The user is not hovering over coverage cells.  In this case, we want
+ *    as little visual noise as possible so we display interpolated coverage
+ *    data with only hits and misses (and uncovered at the top and bottom where
+ *    interpolation is not appropriate.)
+ * 2. The user is hovering over a coverage cell.  In this case we aren't
+ *    concerned about the coverage data being distracting and we want to show
+ *    more detail.  We no longer show interpolated values and we also vary the
+ *    color of hits so that lines with more coverage hits are shown with darker
+ *    colors.
+ *
+ * To this end, we have two variables --cov-hit-unhovered-background and
+ * --cov-miss-unhovered-background that have valid color values when we're not
+ * hovering and are made to be empty when we're hovering, allowing us to fail
+ * over to a second set of colors.
+ */
+:root.coverage-details-shown {
+  --cov-miss-unhovered-background: unset;
+  --cov-hit-unhovered-background: unset;
+}
+
+.cov-strip {
+  display: block;
+  width: 5px;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  touch-action: none; /* fallback for FF pre-85 which didn't support touch-action:pinch-zoom */
+  touch-action: pinch-zoom;
+}
+
+.cov-interpolated.cov-miss {
+  background-color: var(--cov-miss-unhovered-background, var(--cov-interpolated-background));
+}
+.cov-interpolated.cov-hit {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-interpolated-background));
+}
+
+.cov-known.cov-miss {
+  background-color: var(--cov-miss-background);
+}
+
+.cov-log10-0,
+.cov-log10-1 {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-hit-background-1));
+}
+.cov-log10-2,
+.cov-log10-3 {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-hit-background-2));
+}
+.cov-log10-4,
+.cov-log10-5 {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-hit-background-3));
+}
+.cov-log10-6,
+.cov-log10-7 {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-hit-background-4));
+}
+.cov-log10-8,
+.cov-log10-9 {
+  background-color: var(--cov-hit-unhovered-background, var(--cov-hit-background-5));
+}
+
+/* ## Class Diagram Styling ## */
+/* Everything about diagrams needs some kind of dark mode support.
+ *
+ * Our diagram pointer background colors come from the ColorBrewer2 diverging
+ * PiYG scheme with 11 steps: https://colorbrewer2.org/#type=diverging&scheme=PiYG&n=11
+ */
+
+@supports (color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+
+svg [fill="white"] {
+  fill: var(--page-background);
+}
+svg [stroke="black"] {
+  stroke: var(--page-foreground);
+}
+svg text {
+  fill: var(--page-foreground);
+}
+
+polygon[fill="#eeeeee"] {
+  fill: var(--panel-header-background);
+}
+
+}
+}
+
+g.ptr-strong > polygon {
+  fill: var(--diagram-ptr-strong);
+}
+g.ptr-unique > polygon {
+  fill: var(--diagram-ptr-unique);
+}
+g.ptr-weak > polygon {
+  fill: var(--diagram-ptr-weak);
+}
+g.ptr-raw > polygon {
+  fill: var(--diagram-ptr-raw);
+}
+g.ptr-ref > polygon, g.ptr-contains > polygon {
+  fill: var(--diagram-ptr-ref);
+}
+
+g.hovered-cur-node > polygon {
+  fill: var(--diagram-hovered-cur-node);
+}
+div.hovered-cur-node {
+  background-color: var(--diagram-hovered-cur-node);
+}
+g.hovered-out-node > polygon {
+  fill: var(--diagram-hovered-out-node);
+}
+div.hovered-out-node {
+  background-color: var(--diagram-hovered-out-node);
+}
+g.hovered-in-node > polygon {
+  fill: var(--diagram-hovered-in-node);
+}
+div.hovered-in-node {
+  background-color: var(--diagram-hovered-in-node);
+}
+
+g.hovered-cur-edge > path:not(.clicktarget),
+g.hovered-cur-edge > polygon {
+  stroke: var(--diagram-hovered-cur-edge);
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+
+g.edge > path.clicktarget {
+  stroke: var(--diagram-edge-clicktarget);
+  stroke-width: 10px;
+}
+
+g.edge.hovered-out-edge > path,
+g.edge.hovered-out-edge > polygon {
+  stroke: var(--diagram-hovered-out-edge);
+  stroke-width: 2px;
+  stroke-opacity: 1;
+}
+g.edge.hovered-in-edge > path,
+g.edge.hovered-in-edge > polygon {
+  stroke: var(--diagram-hovered-in-edge);
+  stroke-width: 2px;
+  stroke-opacity: 1;
+}
+
+g.edge > path {
+  stroke-opacity: 0.2;
+}
+
+g.blurry g.edge polygon,
+g.blurry g.edge path {
+  stroke: none
+}
+
+g.blurry g.node text {
+  fill: none;
+}
+
+g.blurry g.cluster polygon {
+  stroke: none;
+}
+g.blurry g.cluster text {
+  fill: none;
+}
+
+/* The depth mechanism was initially introduce for experimental metablob
+ * blurring, but we can use the 0 depth to help emphasize the roots of the
+ * graph without the blurring and in a way that doesn't conflict with uses of
+ * color.
+ */
+.diagram-depth-0 {
+  --diagram-depth: 0;
+  stroke-width: 2;
+}
+.diagram-depth-1 {
+  --diagram-depth: 1;
+}
+.diagram-depth-2 {
+  --diagram-depth: 2;
+}
+.diagram-depth-3 {
+  --diagram-depth: 3;
+}
+.diagram-depth-4 {
+  --diagram-depth: 4;
+}
+.diagram-depth-5 {
+  --diagram-depth: 5;
+}
+.diagram-depth-6 {
+  --diagram-depth: 6;
+}
+.diagram-depth-7 {
+  --diagram-depth: 7;
+}
+.diagram-depth-8 {
+  --diagram-depth: 8;
+}
+.diagram-depth-9 {
+  --diagram-depth: 9;
+}
+.diagram-depth-10 {
+  --diagram-depth: 10;
+}
+.diagram-depth-11 {
+  --diagram-depth: 10;
+}
+.diagram-depth-12 {
+  --diagram-depth: 10;
+}
+.diagram-depth-13 {
+  --diagram-depth: 10;
+}
+
+g.blurry.depth-mode g.node polygon {
+  fill: hwb(var(--diagram-depth-hue) calc(40% + 60% * var(--diagram-depth) / 3) 0%);
+  stroke: hwb(var(--diagram-depth-hue) calc(40% + 60% * var(--diagram-depth) / 3) 0%);
+}
+
+g.true-diag g.node polygon {
+  fill: var(--diagram-true-diag);
+}
+
+.diagram-limit-warning {
+  border: 3px double var(--info-box-warning-background);
+  padding: 0 1rem;
+  margin: 0 1rem 1rem 1rem;
+}
+
+#diagram-limit-warning-overload-list.hidden {
+  display: none;
+}
+
+.diagram-limit-kind {
+  font-weight: bold;
+}
+
+.diagram-limit-eq {
+  font-weight: bold;
+}
+
+.breadcrumbs-extra-button {
+  margin-inline-start: 2rem;
+  width: fit-content;
+  border: 1px solid var(--page-border-color);
+}
+
+#diagram-panel {
+  margin-inline-start: 1rem;
+  width: fit-content;
+  border: 1px solid var(--page-border-color);
+  padding: 1rem;
+  display: flex;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#diagram-panel h3 {
+  margin: 0;
+}
+
+#diagram-panel h4 {
+  margin: 0 0 0 1rem;
+}
+
+.diagram-panel-section {
+  margin-inline-start: 1rem;
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  align-items: center;
+  gap: 2px;
+}
+
+.diagram-panel-range {
+  vertical-align: middle;
+}
+
+.diagram-panel-range-min {
+  width: 4rem;
+  display: inline-block;
+  text-align: end;
+  margin-inline-end: 0.5rem;
+}
+.diagram-panel-range-max {
+  width: 4rem;
+  display: inline-block;
+  text-align: start;
+  margin-inline-start: 0.5rem;
+}
+
+#diagram-legend-pane {
+  margin-inline-start: 2rem;
+}
+
+.diagram-legend {
+  margin-inline-start: 2rem;
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  align-items: center;
+  gap: 2px;
+}
+
+.diagram-badge-tooltip {
+  position: absolute;
+}
+
+.diagram-badge-tooltip-main {
+  display: block;
+  width: fit-content;
+  white-space: nowrap;
+  height: fit-content;
+  background: var(--tooltip-background);
+  color: var(--tooltip-foreground);
+  border: 1px solid var(--tooltip-border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.diagram-badge-tooltip-arrow-box {
+  position: absolute;
+  left: 16px;
+  top: -8px;
+  display: block;
+  width: 16px;
+  height: 9px;
+  overflow: hidden;
+}
+
+.diagram-badge-tooltip-arrow {
+  position: absolute;
+  left: 0px;
+  top: 3px;
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: var(--tooltip-background);
+  border: 1px solid var(--tooltip-foreground);
+  box-sizing: border-box;
+  transform: rotate(45deg);
+}
+
+/* Interactive graph */
+
+html.for-interactive-graph {
+  height: 100%;
+}
+
+html.for-interactive-graph body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+html.for-interactive-graph #scrolling {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+html.for-interactive-graph #content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+html.for-interactive-graph .footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 0 0 0 1.2rem;
+}
+
+html.for-interactive-graph .query-result {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#interactive-graph-base {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+#interactive-graph-viewport {
+  touch-action: none;
+  flex: 1;
+  position: relative;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+#interactive-graph-container {
+  position: absolute;
+  transform-origin: top left;
+}
+
+.interactive-graph-block {
+  position: absolute;
+  border: 1px solid var(--page-border-color);
+  box-sizing: border-box;
+  border-radius: 8px;
+  min-width: 120px;
+  width: max-content;
+  font-family: monospace;
+  cursor: pointer;
+}
+.interactive-graph-block-source,
+.interactive-graph-block-target {
+  border-width: 3px;
+}
+
+.interactive-graph-block-scope {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  text-align: start;
+  opacity: 0.6;
+}
+
+.interactive-graph-block-text {
+  padding: 0.8rem;
+  text-align: center;
+}
+.interactive-graph-block-scope + .interactive-graph-block-text {
+  padding-top: 0;
+}
+
+.interactive-graph-edge {
+  fill: none;
+  stroke: var(--page-foreground);
+}
+
+.interactive-graph-edge-implementation {
+  stroke-dasharray: 5px, 2px;
+}
+.interactive-graph-edge-ipc {
+  stroke-dasharray: 2px, 3px;
+}
+
+.interactive-graph-edge-head {
+  fill: var(--page-foreground);
+  stroke: none;
+}
+
+.interactive-graph-edge-head-inheritance,
+.interactive-graph-edge-head-implementation,
+.interactive-graph-edge-head-aggregation {
+  fill: var(--page-background);
+  stroke: var(--page-foreground);
+  stroke-width: 2px;
+}
+
+.interactive-graph-buttons {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+}
+.interactive-graph-buttons button {
+  border: 1px solid var(--page-border-color);
+  padding: 0.2rem 0.4rem;
+}
+.interactive-graph-button-zoom-in {
+  border-radius: 4px 4px 0 0;
+}
+.interactive-graph-button-zoom-out {
+}
+.interactive-graph-button-fit {
+  border-radius: 0 0 4px 4px;
+}
+
+/* Field Layout */
+
+#symbol-tree-table-col-selector,
+#symbol-tree-table-list {
+  padding: 0 2rem;
+}
+
+#symbol-tree-table-list .type-cell {
+  display: none;
+}
+
+#symbol-tree-table-list.hide-name .name-cell {
+  display: none;
+}
+
+#symbol-tree-table-list.show-type .type-cell {
+  display: table-cell;
+}
+
+#symbol-tree-table-list.hide-line .line-cell {
+  display: none;
+}
+
+.symbol-tree-table {
+  border-collapse: separate;
+}
+
+.symbol-tree-table .field-type {
+  display: inline-block;
+  max-width: 40vw;
+}
+
+.symbol-tree-table .class-size {
+  font-weight: bold;
+}
+
+.symbol-tree-table .class-size,
+.symbol-tree-table .field-offset,
+.symbol-tree-table .field-size,
+.symbol-tree-table .field-hole,
+.symbol-tree-table .field-padding {
+  white-space: pre;
+}
+
+.symbol-tree-table + .symbol-tree-table {
+  margin-top: 2em;
+}
+
+.symbol-tree-table h3 {
+  margin: 0;
+}
+
+.symbol-tree-table td, .symbol-tree-table th {
+  border-color: var(--page-border-color);
+  border-style: solid;
+  border-width: 0px;
+}
+
+.symbol-tree-table tr:first-child th {
+  border-block-start-width: 1px;
+}
+
+.symbol-tree-table th,
+.symbol-tree-table td {
+  border-block-end-width: 1px;
+  border-inline-start-width: 1px;
+}
+
+.symbol-tree-table td.base-class-false {
+  border-block-end-width: 0px;
+}
+
+.symbol-tree-table td.class-size-cell {
+  border-inline-start-width: 0px;
+}
+
+.symbol-tree-table tr.class-alignment-and-size td {
+  border-inline-start-width: 0px;
+}
+
+#symbol-tree-table-list:not(.hide-name) tr.class-alignment-and-size td.name-cell {
+  border-inline-start-width: 1px;
+}
+#symbol-tree-table-list.hide-name.show-type tr.class-alignment-and-size td.type-cell {
+  border-inline-start-width: 1px;
+}
+#symbol-tree-table-list.hide-name:not(.show-type):not(.hide-line) tr.class-alignment-and-size td.line-cell {
+  border-inline-start-width: 1px;
+}
+
+.symbol-tree-table th:last-child,
+.symbol-tree-table td:last-child {
+  border-inline-end-width: 1px;
+}
+
+.symbol-tree-table tr:first-child th:first-child,
+#symbol-tree-table-list.hide-name.show-type tr:first-child th.type-cell,
+#symbol-tree-table-list.hide-name:not(.show-type) tr:first-child th.line-cell {
+  border-start-start-radius: 4px;
+}
+.symbol-tree-table tr:first-child th:last-child {
+  border-start-end-radius: 4px;
+}
+.symbol-tree-table tr:last-child td:first-child,
+#symbol-tree-table-list.hide-name.show-type tr:last-child td.type-cell,
+#symbol-tree-table-list.hide-name:not(.show-type) tr:last-child td.line-cell {
+  border-end-start-radius: 4px;
+}
+.symbol-tree-table tr:last-child td:last-child {
+  border-end-end-radius: 4px;
+}
+
+.symbol-tree-table th {
+  color: var(--table-header-color);
+  background-color: var(--table-header-background);
+}
+
+#symbol-tree-table-col-selector {
+  text-align: end;
+}
+
+#symbol-tree-table-col-selector label {
+  display: inline-block;
+}
+
+#symbol-tree-table-col-selector label + label {
+  margin: 0 0 0 8px;
+}
+
+/* Query result debugging */
+
+#query-debug-results-json[aria-hidden] {
+  display: none;
+}
+
+.result-no-uses-note {
+  color: var(--page-foreground);
+  font-style: italic;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.result-no-uses-note small {
+  display: block;
+  margin-top: 5px;
+  color: var(--page-subtle-foreground);
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.result-head .left-column {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.result-head .expando {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.alt-for-icon {
+  font-size: 0;
+}
+
+textarea.monospace {
+  font-family: monospace;
+  tab-size: 2;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.example-json {
+  border: 1px solid var(--page-border-color);
+  padding: 8px;
+  margin-top: 6px;
+  background: var(--page-background);
+}
+
+.settings-page > section {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--page-border-color);
+}
+
+.intro p,
+.settings-page section > p,
+.settings-page section > form {
+  padding-inline-start: 2rem;
+}
+
+.intro dl, .intro ul {
+  margin-inline-start: 2em;
+}
+
+.settings-page section > form + form {
+  margin-block-start: 1rem;
+}
+
+.intro h2,
+.settings-page section h2 {
+  border-inline-start: 4px solid var(--page-border-color);
+  padding-inline-start: 1rem;
+}
+
+.intro h3,
+.settings-page section h3 {
+  padding-inline-start: 1rem;
+}
+
+.export-import-buttons {
+  margin-block-end: 1rem;
+}
+
+.export-import-buttons button + button {
+  margin-inline-start: 1rem;
+}
