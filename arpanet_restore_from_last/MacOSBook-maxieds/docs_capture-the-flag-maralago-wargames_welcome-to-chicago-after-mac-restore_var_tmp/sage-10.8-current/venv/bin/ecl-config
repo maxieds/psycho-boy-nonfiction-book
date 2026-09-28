@@ -1,0 +1,40 @@
+#!/bin/sh
+# bin/ecl-config.pre.  Generated from ecl-config by configure.
+
+usage()
+{
+  cat <<EOF
+Usage: $0 [OPTIONS] [LIBS]
+Options: 
+	[--cflags]
+	[--libs|--ldflags]
+Libs:
+	cmp
+EOF
+}
+
+LDFLAGS="-lecl"
+for i in $*; do
+  case $i in
+    --cflags|-c)
+      echo_cflags=yes
+      ;;
+    --libs|--ldflags|-l)
+      echo_ldflags=yes
+      ;;
+    cmp)
+      LDFLAGS="$LDFLAGS -lcmp"
+      ;;
+    *)
+      usage 1 >&2
+      ;;
+    esac;
+done
+
+if test "$echo_cflags" = "yes"; then
+  echo "-Ddarwin   -I/private/var/tmp/sage-10.8-current/local/include"
+fi
+
+if test "$echo_ldflags" = "yes"; then
+  echo "-Wl,-rpath,/private/var/tmp/sage-10.8-current/local/lib -L/private/var/tmp/sage-10.8-current/local/lib $LDFLAGS -L/private/var/tmp/sage-10.8-current/local/lib -L/private/var/tmp/sage-10.8-current/local/lib -Wl,-platform_version,macos,10.13,10.13 -L/var/tmp/sage-10.8-current/local/lib     -lgc -lgc -lgc -lpthread -lm  "
+fi
