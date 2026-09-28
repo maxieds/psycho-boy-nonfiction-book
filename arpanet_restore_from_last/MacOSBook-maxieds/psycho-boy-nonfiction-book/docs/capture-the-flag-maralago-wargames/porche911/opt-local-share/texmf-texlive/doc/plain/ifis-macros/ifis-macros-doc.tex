@@ -1,0 +1,138 @@
+% This file is part of the CTAN package named isIntDim.
+% 
+%   info.tex: instructions for two macro packages: ifisinteger.tex
+%             and ifisdimension.tex
+%
+%   Copyright (C) 2024  Udo Wermuth (author)
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+% %%%
+% %%% verbatim macros (from manmac.tex)
+% %%%
+\newskip\ttglue {\tt\global\ttglue=0.5em plus 0.25em minus 0.15em }
+\def\ttverbatim{\begingroup \frenchspacing
+  \catcode`\\=12 \catcode`\{=12 \catcode`\}=12 \catcode`\$=12 \catcode`\&=12
+  \catcode`\#=12 \catcode`\%=12 \catcode`\~=12 \catcode`\_=12 \catcode`\^=12
+  \obeyspaces \obeylines \tt}
+\def\verbatimspace{\ifvmode\indent\fi\space}
+{\obeyspaces \gdef\makespaceverbspace{\def {\verbatimspace}}}
+\outer\def\verbatim{$$\ifdim\parskip>0pt
+    \abovedisplayskip=\parskip \abovedisplayshortskip=\parskip
+    \belowdisplayskip=\parskip \belowdisplayshortskip=\parskip
+  \else
+    \abovedisplayskip=3pt \abovedisplayshortskip=3pt
+    \belowdisplayskip=3pt \belowdisplayshortskip=3pt
+  \fi
+  \let\par=\endgraf \ttverbatim \makespaceverbspace \parskip=0pt
+  \catcode`\§=0 \advance\leftskip by 10pt \ttfinish}
+{\catcode`\§=0 §catcode`§\=12 % § is temporary escape character
+  §obeylines % end of line is active
+  §gdef§ttfinish#1^^M#2\endverbatim{§vbox{#2}§endgroup$$}}
+\catcode`\|=\active
+{\obeylines \gdef|{\ttverbatim \spaceskip\ttglue \let^^M=\  \let|=\endgroup}}
+
+\def\noitem{\item{\phantom{0.}}}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\font\titlefont=cmssdc10 at 36pt
+\font\subtitlefont=cmssdc10 at 17pt
+%
+\centerline{\titlefont ifis-macros}
+\bigskip
+\centerline{\subtitlefont Version 1.0, 7.04.2024}
+\bigskip
+\centerline{Macros for plain \TeX}
+\medskip
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+There are two main macros in the files {\tt ifisinteger.tex} and {\tt
+ifisdimension.tex}. The macro |\ifisint| tests if a given input string
+represents a number for \TeX. The macro |\ifisdim| does this for
+dimensions.
+
+Both macros generate errors but hide them from the terminal as they
+work in |\batchmode|. There is one configuration parameter:
+|\IIcurrentmode|. The default is |\errorstopmode|. Change this if you
+call the macros in a different interaction mode so that they can
+return to this mode.
+
+\bigskip
+
+\beginsection 0.\ Installation
+
+To use the macro |\ifisint| load via |\input ifisinteger.tex| the file
+that contains the code. For |\ifisdim| use |\input ifisdimension.tex|.
+
+\bigskip
+
+\beginsection 1.\ File {\tt ifisinteger.tex}
+
+The main macro is called |\ifisint| and must be used like an
+|\if|-conditional except that its argument is delimited by |\Boolend|:
+|\ifisint <argument>\Boolend <true branch>\else <false branch>\fi|.
+
+\medskip
+
+The implemented algorithm has four steps:
+\smallskip
+\item{1.}1)~Remove signs with or without braces; add sentinel |W|.
+\noitem  2)~Test that the input isn't now |"W|, etc.; otherwise
+         return false.
+\item{2.}Create a canonical form with a leading zero.
+\item{3.}1)~Assign the input to a |\count| register inside an
+         |\hbox|.
+\noitem  2)~Test that the box width is the width of the sentinel.
+\noitem  3)~Otherwise return false.
+\item{4.}1)~Return true if the number isn't \TeX's maximum.
+\noitem  2)~Otherwise test if the canonical form is \TeX's maximum.
+         If yes, return true.
+\noitem  3)~Otherwise return false.
+\medskip
+
+For more details see my article in TUGboat {\bf45}:1 (2024), 106--109.
+
+\bigskip
+
+\beginsection 2.\ File {\tt ifisdimension.tex}
+
+The main macro is called |\ifisdim| and must be used like an
+|\if|-conditional except that its argument is delimited by |\Boolend|:
+|\ifisdim <argument>\Boolend <true branch>\else <false branch>\fi|.
+
+\medskip
+
+The implemented algorithm has four steps:
+\smallskip
+\item{1.}1)~Remove signs with or without braces; add sentinel |mm|.
+\noitem  2)~Exclude trivial non-numerics as done in |\ifisint|.
+\noitem  3)~Otherwise return false.
+\item{2.}1)~Get the integer part.
+\noitem  2)~Get fraction and the unit.
+\noitem  3)~Get the width of the unit.
+\item{3.}1)~Assign the input to a |\dimen| register inside an
+         |\hbox|.
+\noitem  2)~Test that the box width is the width of the sentinel.
+\noitem  3)~Otherwise return false.
+\item{4.}1)~Return true if the dimension isn't \TeX's |\maxdimen|.
+\noitem  2)~Otherwise test if the coerced sum of the integer part
+         and the fraction expressed in the unit |sp| is |\maxdimen|.
+\noitem  3)~If no, return false.
+\noitem  4)~Otherwise return true.
+\medskip
+
+For more details see my article in TUGboat {\bf45}:1 (2024), 109--112.
+
+\bye

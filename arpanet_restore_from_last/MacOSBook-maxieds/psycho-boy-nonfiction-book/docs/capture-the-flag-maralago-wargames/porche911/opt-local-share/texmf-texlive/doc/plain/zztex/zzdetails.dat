@@ -1,0 +1,1597 @@
+//---------------------------------------------------------------------------
+//
+//  Copyright (c) 2012--2018 by Paul C. Anagnostopoulos
+//
+//  This software may be used on your own computer systems and may
+//  be distributed freely to other people. It may not be sold or
+//  incorporated into any commercial products.
+//
+//  Paul C. Anagnostopoulos
+//  Windfall Software
+//  978 371-2316
+//  paul@windfall.com
+//
+//---------------------------------------------------------------------------
+//
+//  ZzExplore:  Describe built-in TeX, Plain TeX, ZzTeX, and design
+//              file entities for compositors.
+//
+//              This is the details phrase file.
+//
+//  Created:    7 May 2016
+
+//                      \art Block
+//                      ---- -----
+
+.details art_details \art
+.template art_details
+== The |\art| Block
+
+This tutorial describes the ZzTeX |\art| block, which is used to place
+Encapsulated PostScript (EPS) files on the page. EPS files can be created
+with many different applications, the most common being Adobe Illustrator
+and PhotoShop.
+
+=== The |\art| Command
+
+The format of the |\art| command is:
+
+| \art{*type*}{*file*,*width*,*height*,*scale*[,*gutter*,*file*,*width*,*height*,*scale*,...]}
+
+The *type* argument specifies the type of the code block and thus its
+design. Common examples are |figure| for art in floating figures and
+|text| for art in text.
+
+A single piece of art is described by four values in the second argument:
+
+& *file*& The name of the EPS file. See below.
+& *width*& The width of the art, usually specified in picas.
+& *height*& The height of the art.
+& *scale*& The scale factor for the art. See below.
+&.
+
+You can place multiple pieces of art, or panels, side-by-side by including
+additional values in the second argument. The *gutter* specifies the
+horizontal distance between the adjacent panels. The next four arguments specify
+the second art file, in the same manner as the first. This sequence can be
+continued to place three or four panels side-by-side.
+
+=== File Name
+
+The file name specified in the |\art| command is the name of an EPS file to be
+placed on the page. There is no need to specify the extension |.eps|. The
+file is assumed to reside in the directory specifed by the |\setartroot|
+command in the book's root file. If the name is preceded by an exclamation
+point (|!|), then the file is located in the main project directory (this
+feature is used for design art).
+
+Occasionally, a piece of art will include spurious whitespace on the edges
+of the art, but within its bounding box. This whitespace is called *slop*,
+and will result in the art appearing out of position. ZzTeX can compensate
+for the slops if you specify them with the file name, as follows:
+
+  \art{figure}{{smi01f01,0pt,5pt,0pt,3pt},...}
+
+Note the extra set of braces around the file name and slops. All four slops
+must be specified, in this order: left side, right side, top, bottom. If all
+the slops are less than 1.5 points or so, there is no need to include them.
+We haven't used slops much in the past decade or so; we simply ask the
+illustrator to eliminate the whitespace.
+
+=== Width and Height
+
+If both the width and height are specified as zero (i.e., |0pc,0pc|), then the
+art will be dynamically sized when the file is processed. ZzTeX inspects the
+EPS file to determine the art size. If it cannot find the |%%BoundingBox|
+comment that specifies the size, an error results. We use this feature
+only for design art.
+
+The ZzSizeArt utility can automatically size the art in a chapter file.
+Try |~.facility; sizing art| for more details.
+
+=== Scale Factor
+
+The scale factor specifies the scale at which the piece of art should be
+placed, relative to its natural size. The scale factor must always be
+specified, even if it is 100. There are three ways to specify it:
+
+* *percentage*&_A  number that specifes the percentage of scaling.
+The number may include decimal places.
+
+* |=|&_An equal sign specifies that the art should be scaled
+to fit in the prevailing width. The width is usually the
+text measure or the type area width.
+
+* |=*width*|&_An equal sign and a width specifies that the art should
+be scaled to the specified width.
+*.
+
+=== Aligning Side-by-Side Panels
+
+The |\art| command aligns side-by-side panels along their top edges. Sometimes
+you want them aligned differently. To shift a panel vertically, specify a
+top slop that is positive to shift the panel up or negative to shift the panel
+down.
+
+Note that the slops are scaled by the scale factor, so the exact slop
+required to shift the panel correctly may not be obvious.
+
+//                      Art Sizing
+//                      --- ------
+
+
+.phrase art_sizing art sizing : text
+.synonym sizing art
+.synonym zzsizeart
+.template
+= ZzSizeArt Art Sizing Utility
+
+The ZzSizeArt utility allows you to manipulate the art sizes specified in
+|\art| commands in ZzTeX source files. Its two primary capabilities are to set
+the sizes of art files by inspecting the Encapsulated PostScript (EPS) files
+and to replace existing EPS files with new versions.
+
+The ZzSizeArt facility relies on the following conventions for art files:
+
+* The bulk of the art files for a book are stored in the art/
+subdirectory under the primary project directory.
+
+* Replacement art files are loaded into the new/ subdirectory under
+the art/ directory before eventually being hoisted into the
+art/ directory.
+
+* Before an art file in an |\art| command is sized, its width and height are
+coded as |20pc,10pc|. This special combination signals that the art has not
+been sized.
+
+* ZzTeX supports dynamic sizing by setting the |\art| size
+to |0pc,0pc|. In this case, the size is determined by inspecting the
+EPS file every time the chapter is processed, rather than being set
+statically. Most ZzSizeArt commands ignore dynamically sized files.
+*.
+
+== zzsizeart Command
+
+The zzsizeart command has the following syntax:
+
+| zzsizeart *root* *command* *additional-items*
+
+The *root* parameter specifies the root name of the book. It is usually
+specified as a period (|.|), which causes ZzSizeArt to figure out the root
+name. The command parameter is a keyword that determines which function
+ZzSizeArt performs. Its functions are described in alphabetical order
+in the following paragraphs.
+
+* |zzsizeart *root* reset *source-file*|
+
+This command resets all the art sizes in the specified ZzTeX source file to
+|20pc,10pc|. Dynamically sized art files are ignored unless the |-all| option is
+included, in which case they are reset also.
+
+If the |-scale| option is specified, then ZzSizeArt also resets the scale of
+the art files to 100.
+
+* |zzsizeart *root* replace *optional-file-spec*|
+
+This command analyzes the replacement art files in the art/new/ subdirectory
+to determine whether they are the same size as the existing art files and
+can safely replace them. If a *file-spec* parameter is provided, only the
+replacement files that match the file spec are analyzed. The command
+generates a report about the replacement art files and displays it on the
+screen. This reports tells you whether the replacement art files are the
+same size or a different size.
+
+If the |-hoist| option is included, then any replacement art files that are the
+same size as the existing files are hoisted from the new/ subdirectory up to
+the art/ directory, replacing the old art files of the same names. The rest of
+the replacement art files are left in the new/ subdirectory. You can use the
+PrintEPS utility to generate a proof of the remaining art files, from which
+you can read the sizes of those files. Also see the |tell| command below.
+
+If the |-all| option is also specified, then all replacement art files are
+hoisted, including those that are a different size from the existing art
+files.
+
+The |-epsilon=*w*,*h*| option specifies the epsilon values for the width (*w*) and
+height (*h*). If the difference in size is within these epsilons, the
+replacement file is considered the same size as the existing file. The
+default width and heigh epsilons are both 1.5 points.
+
+* |zzsizeart *root* size *source-file*|
+
+This command sizes the |\art| commands in the specified ZzTeX source file by
+analyzing the EPS files named in those |\art| commands. Every art file must have
+the size |20pc,10pc|, except for dynamically-sized art files, which are
+ignored. Every named art file must exist in the art/ subdirectory. The
+source file is modified so that the art files have their actual sizes.
+
+If the |-ifexists| option is specified, then ZzSizeArt will size those art
+files that exist in the art/ subdirectory and ignore any other files named
+in |\art| commands. *All* art files must still have the size |20pc,10pc|, but any
+files that do not exist will not be set to their actual sizes.
+
+If the |-partial| option is specified, then ZzSizeArt will size those art
+files whose sizes are |20pc,10pc| and ignore any other art files named in |\art|
+commands. This allows you to size art files that were not sized previously
+for whatever reason, possibly due to a prior use of the |-ifexists| option.
+
+If both |-ifexists| and |-partial| are specified, then ZzTeX will size any
+art file who size is |20pc,10pc| and that exists in the art/ subdirectory.
+
+* |zzsizeart *root* tell *eps-file* ...|
+
+This command analyzes the specified EPS files and displays a report giving
+their sizes. This is useful when you need to know the sizes of a few EPS
+files in order to update their |\art| commands by hand.
+*.
+----
+For more details on the |\art| command, try |~.facility; \art|.
+
+//                      Cleanup Report
+//                      ------- ------
+
+
+.phrase cleanup_report cleanup report
+.synonym clean-up report
+.synonym clean up report
+.template
+= Cleanup Report for ~.project;
+
+This report describes the chapter cleanup activities for books
+in general and ~.project; in particular.
+
+Before reading this report, it's a good idea to read the design
+report for ~.project;. Try |~.facility; design report|.
+
+== General Cleanup
+
+=== Clean Up Headings
+
+The heads in sectioning commands (e.g., |\chapter|, |\section|) and
+tables, along with the titles in captions, must be formatted according
+to the design. This involves
+
+* Captitalizing them correctly
+
+* Adding or removing trailing punctuation
+
+* Ensuring that run-in heads have no blank lines after them
+
+* Adding |\noindent| commands where they might be missing
+
+* Once the chapter is processed, turning multi-line heads with
+|\titlenl;| or |\titletl;|
+*.
+
+Here are the styles of the various heads and titles.
+
+&= Command& Style
+----
+~foreach cmd, style_table;
+& ~.cmd;& ~.style_table[cmd];
+~end;
+&.
+
+=== Clean Up Floats
+
+The cleanup for floats involves
+
+* Making sure there is a blank line on either side
+
+* Determining whether the author embedded floats in the middle of 
+paragraphs and merging the broken paragraph segments
+
+* Moving floats after the first paragraph of reference (this may be
+easier during page make-up)
+
+* Placing the correct file names in |\art| commands.
+
+* Checking captions to see if they need a |\legend| marker.
+*.
+
+//                      \code Block
+//                      ----- -----
+
+.details code_details \code
+.template code_details subclass_set command code
+== Code Facilities
+
+This tutorial describes the ZzTeX code facilities. These facilities are
+used to produce computer program code examples.
+
+=== The |\code| Block
+
+The |\code| command has the following syntax:
+
+| \code{*type*}
+| *line of code*
+| ...
+| *line of code*
+| \endcode
+
+The *type* argument specifies the type of the code block and thus its
+design. Each line of code is set more or less verbatim and line breaks
+are preserved as they are. Code blocks are almost always set in a monospaced
+font so that indentation can be accomplished with spaces at the beginnings
+of lines.
+
+=== Verbatim Lines
+
+The degree to which the code lines are taken verbatim is determined
+by certain block design parameters. To investigate the design
+parameters for a code block, try |~.facility; \code*type* details|.
+
+* |\allowTeXcommands|&_If this flag is on, ZzTeX commands can be
+included in the code, as long as they use only backslash and
+braces (|\|, |{|, |}|). This flag is on in most code blocks.
+To include those characters in the code itself, you must use:
+|\\|, |\{|, |\}|.
+
+* |\allowTeXmath|&_If this flag is on, math expressions can be
+included in the code, using dollar sign, underscore, and hat (|$|,
+|_|, |^|). This flag is off in most code blocks. To include those
+character in the code itself, you must use: |\$|, |\_|, |\hat|.
+(See |\codemath| for another way to include math in code.)
+
+* |\allowatsigncommands|&_If this flag is on, at-sign commands
+can be included in the code and would probably be provided by
+the code design. This flag is off in most code blocks. To include an
+at-sign in the code itself, you must use: |\@|.
+
+=== |\code| Tools
+
+The following list includes all the tools that can be used within a |\code|
+block. You can explore these various commands to learn what they do.
+
+~foreach name, name_set;
+* |~.name;|
+~end;
+*.
+
+//                      \enunciation Block
+//                      ------------ -----
+
+.details enunciation_details \enunciation
+.template enunciation_details
+== The |\enunciation| Block
+
+This tutorial describes the ZzTeX |\enunciation| block, which produces
+mathematical "enunciations" such as theorems, corollaries, and proofs.
+Using the |\enunciation| command is reasonably straightforward,
+but defining the various types of enunciations is a bit trickier.
+
+The format is the |\enunciation| command is:
+
+| \enunciation{*type*}{*optional-attribution*}
+
+The *type* argument specifies the type of the code block and thus its
+design. The *optional-attribution* argument can have one of three
+formats. Note that the second set of braces is required in *all* cases.
+
+# |{}|&_If empty, there is no attribution for the enunciation.
+& Theorem 1.1.&_There exist irrational numbers ...
+&.
+
+# |{Smith's Conjecture}|&_The specified text is the attribution for the
+enunciation.
+& Conjecture 1.2 (Smith's Conjecture).&_Let *K* be the *n*th cyclotomic field ...
+&.
+
+# |{\title Kleene's Theorem}|&_The text specified after the |\title| marker
+is the complete title for the enunciation.
+& Kleene's Theorem.&_Every language definable with a regular expression ...
+&.
+#.
+
+=== Defining an Enunciation Type
+
+Prior to ZzTeX v5.8, each enunciation type had to be defined by
+writing a complete design macro, as with other block types. There
+are some subtle issues that make this difficult. In v5.8, the 
+|\definenunciation| command was added.
+
+| \defineenunciation{*type*}{*association*}{*design*}
+
+The first argument is the enunciation's type. The second argument
+can be empty or specify the type of another enunciation whose
+number counter is to be shared. Both types of enunciation will be
+numbered sequentially with the same counter.
+
+The third argument specifies a design macro for the base design
+that is to be used for this new enunciation type. Multiple enunciations
+can share the same base design. For example,
+
+  \defineenunciation{conjecture}{}{\enunciationtheoremlikedesign{Conjecture}}
+  \defineenunciation{corollary}{}{\enunciationtheoremlikedesign{Corollary}}
+  \defineenunciation{definition}{}{\enunciationtheoremlikedesign{Definition}}
+  \defineenunciation{lemma}{}{\enunciationtheoremlikedesign{Lemma}}
+  \defineenunciation{proof}{}{\enunciationprooflikedesign{Proof}}
+  \defineenunciation{proposition}{}{\enunciationtheoremlikedesign{Proposition}}
+
+There are two base designs for these enunciations: |\enunciationtheoremlikedesign|
+for enunciations formatted like theorems, and |\enunciationprooflikedesign|
+for enunciations formatted like proofs. Note that the two design macros expect
+an argument that is the word to appear in the title of the enunciation (e.g.,
+"Conjecture", "Proof").
+
+So defining a set of related enunciations boils down to writing one
+base design macro.
+
+=== Base Enunciation Design
+
+Most of the details about enunciation design macros are the same
+as other design macros. There are two interesting additions.
+
+  \def \enunciationtheoremlikedesign #1{%
+    \aboveskip = \standardskip
+    ...
+    \def \labelformat ##1{%
+      \noindent
+      \attributiontypecase
+        {\llap{\colortext{darkblue}{\enunnumbersize\dbf #1 \the\enunciationcomptext}%
+               \hspace{10pt}}}% no attribution
+        {\llap{\colortext{darkblue}{\enunnumbersize\dbf #1 \the\enunciationcomptext}%
+               \hspace{10pt}}##1.\quad}% normal attribution
+        {\llap{\colortext{darkblue}{\enunnumbersize\dbf ##1}%
+               \hspace{10pt}}}% title override
+      \ignorespaces}%
+
+The first addition is that the design macro accepts an argument that is
+the word to be set in the title. The |#1| in the first line represents
+that argument.
+
+The second addition is the |\attributiontypecase| command in the
+label formatter. It takes three arguments, each of which formats the
+title (label) of the enunciation. The three arguments correspond to the
+three title argument formats described above.
+
+# The attribution argument is empty.
+# The attribution argument specifies an attribution.
+# The attribution argument includes the |\title| marker.
+#.
+
+=== The |\defineeoedingbat| Command
+
+The |\enunciation| block includes a design parameter named |\autoqed|.
+This parameter can specify the name of an "end-of-enunciation dingbat"
+that should appear at the end of the enunciation.
+
+  \def \enunciationprooflikedesign #1{%
+    ...
+    \autoqed = {\qed}%
+
+The |\qed| command, which typesets a dingbat, is automatically performed
+at the end of enunciations based on the |\enunciationprooflikedesign|
+design. To override the position of the resulting dingbat, you can 
+specify the |\qed| command explicitly in the text of the enunciation.
+
+An end-of-enunciation dingbat is defined with
+
+| \defineeoedingbat{*name*}{*text*}{*space*}
+
+The first argument is the name of the dingbat command. The second argument
+is the text of the dingbat. The third argument specifies how to
+separate the dingbat from the final word of the enunciation.
+
+* |{10pt}|&_The dingbat is set 10 points from the final word.
+
+* |{\flushright 8pt}|&_The dingbat is set flush right, but a minimum
+of 8 points must separate it from the final word.
+*.
+
+So the |\qed| dingbat used above could be defined with
+
+  \defineeoedingbat{\qed}{\colortext{darkblue}{\slug{5pt}{5pt}}}{\flushright 8pt}
+
+//                      Environments
+//                      ------------
+
+
+.phrase environments environments : text
+.synonym LaTeX environments
+.template
+= LaTeX Environments
+
+A LaTeX *environment* is the equivalent of a ZzTeX *block*.
+The term environment is not used in ZzTeX.
+
+//                      \eqno Marker
+//                      ----- ------
+
+.details eqno_details \eqno
+.template eqno_details
+== Equation Numbers
+
+This tutorial describes the ZzTeX facilities for setting equation numbers on
+math displays. An equation number is set with the |\eqno| marker, which can
+appear in three places:
+
+# At the end of a single-line math display, before the closing |$$|.
+
+# At the end of an aligned math display, *after* the close brace of the
+|\eqaligned| and before the closing |$$|. In this case, the number pertains
+to the entire display.
+
+# At the end of a row of an aligned display, just *before* the |\cr| or
+close brace of the |\eqaligned|. In this case, the number pertains to
+the row in which it appears.
+#.
+
+Almost all book designs call for one of two formats of equation number. In
+most cases, the number consists of the chapter composite text and a sequence
+number within the chapter, as in "3.17". In a few cases, only a sequence
+number is used, as in "17". In the descriptions below, *chap* stands for the
+chapter composite text, while *num* stands for the equation sequence number. The
+sequence number is derived from the math display counter, in the same manner
+as section numbers are derived from the section counter.
+
+You can code an equation number in one of four ways:
+
+| \eqno
+| \eqno \tag{*xyz*}
+| \eqno *override*
+| \eqno *override* \tag{*xyz*}
+
+The optional *override* text is used to override the normal numbering sequence.
+A space or line break can be placed before and/or after the |\tag| command to
+aid readability. The |\tag| command must appear immediately following its
+paired |\eqno| in order to associate the tag with the correct equation
+number.
+
+The following paragraphs present the various forms of the *override* text for
+overriding the numbering sequence. Each case includes two examples, the
+first where the equations are numbered in the common (*chap*.*num*) format, and
+the second where the equations are numbered with only a sequence number, as
+in (*num*). The examples assume that the chapter number is 2 and the
+math display counter is at 4 prior to the display
+and also show the counter *after* the equation number is typeset.
+
+* |\eqno|&_&_&_Next sequence number
+
+The math display counter is incremented and its arabic form is used as
+the *num* text. This is the common case.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.5)& (5)& 5
+&.
+
+* |\eqno +a|&_&_&_Next sequence number; use with suffix
+
+The math display counter is incremented and its arabic form is joined
+with the suffix following the plus sign to make up the *num* text.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.6a)& (6a)& 5
+&.
+
+* |\eqno ,b|&_&_&_Same sequence number with suffix
+
+The math display counter is *not* incremented. Its arabic form is joined
+with the suffix following the comma to make up the *num* text.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.4b)& (4b)& 4
+&.
+
+* |\eqno ,$'$|&_&_&_Same sequence number with suffix
+
+This is another example of the preceding case, showing the common use
+of a prime after the *num* text.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.4&prime;)& (4&prime;)& 4
+&.
+
+* |\eqno A1|&_&_&_Ignore sequence number; use specified *num*
+
+The math display counter is ignored. The specified text is used as the
+complete *num* text.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.A1)& (A1)& 4
+&.
+
+* |\eqno :A1|&_&_&_Next sequence number; use specified *num*
+
+The math display counter is incremented *but then ignored*. The specified
+text is used as the complete *num* text.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.A1)& (A1)& 5
+&.
+
+* |\eqno =12;a|&_&_&_Set sequence number; use with suffix
+
+The math display counter is set to 12 and its arabic form is joined
+with the suffix following the semicolon to make up the *num* text. Note that
+the suffix (|a| here) is optional but the semicolon is required.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2.12a)& (12a)& 12
+&.
+
+* |\eqno !2B.1|&_&_&_Use specified text for number
+
+The chapter composite text and math display counter are ignored. The text
+following the exclamation point is the complete equation number. This
+feature is useful when you need to set an out-of-sequence equation number
+in something like a sidebar or a chapter appendix.
+
+&= Result when& Result when
+&= (*chap*.*num*) style& (*num*) style& Counter After
+----
+& (2B.1)& (2B.1)& 4
+&.
+
+* |\eqno >{*tag*}|&_&_&_Use equation number associated with tag
+
+The chapter composite text and math display counter are ignored. The equation
+number associated with the tag is duplicated for the equation number
+of this display.
+*.
+
+If you ever need to reset the math display counter, the following command
+will do it:
+
+| \setmathdisplaynumber{*num*}
+
+//                      Indexing
+//                      --------
+
+.phrase indexing indexing : text
+.template
+= Indexing Facilities, version 2
+
+This tutorial describes the second generation ZzTeX indexing facilities.
+These facilities are used to index a document with embedded indexing commands and
+then generate one or more indexes for typesetting.
+
+First, some definitions.
+
+* Locator.&_An item followng a heading that refers the reader to related
+information in the book. This is usually a page number or range, 
+but sometimes a "See" or "See also." The term *locator* is also used
+for the commands that are inserted in the text to create index entries.
+
+* Main heading.&_The heading of a top-level entry in an index.
+
+* Raw index entry.&_A locator command such as |\xpage| generates
+a raw index entry in the raw index entry files. The entry contains
+unformatted information about the locator.
+
+* Sort override.&_An alternate heading used in place of a regular heading
+to specify how it should be sorted, For example, the heading "3-D"
+might have a sort heading of "three D".
+
+* Subheading.&_The heading of a second- or third-level entry in an index,
+subordinate to a main heading.
+*.
+
+== Indexing Locators
+
+Indexing locators are commands that are inserted in the text to produce raw index
+entries that ultimately make up the index. This section describes typical
+indexing locators. For another overview of locators, try |~.facility;
+locators|.
+
+Most locator commands produce a raw index entry that identifies a page or range of
+pages relevant to the headings. 
+
+  \xpage{Automobiles}
+  \xpage{Automobiles|muscle cars}
+
+Locator commands begin with an |x| and include a type word that identifies
+the type of locator produced. The argument specifies one to three
+headings, separated by vertical bars (|&||). The first heading is the main heading
+and any remaining headings are subheadings.
+
+If the locator allows a page range, then the commands |\x*type*begin| and
+|\x*type*end| identify the beginning and ending positions of the range.
+
+  \xpagebegin{Automobiles}
+  ...
+  \xpageend{Automobiles}
+
+Some locators require an additional argument called the "text." This provides
+more information about the locator.
+
+  \xsee{Cars}{Automobiles}
+  \xseealso{Automobiles|muscle cars}{Automobiles|pony cars}
+
+Such locator commands produce locators that do not include a page number
+but rather text that refers the reader to other entries. The additional
+text argument is always the first argument of the locator command.
+
+=== Sort Overrides
+
+(To be supplied.)
+
+== Design File
+
+This section describes the commands that appear in the design file to define
+locators and their formatting and specify the design of the indexes in the
+book. The commands are described in the order in which they must appear in
+the design file.
+
+  \indexversion{2}
+
+This command must appear at the beginning of the Index section of the design
+file. It specifies that version 2 of the indexing facility is being used.
+
+=== Generating Indexes
+
+Multiple indexes can be generated from the raw index entries of a book. Each
+index is assigned a name and declared using the following command.
+
+| \generateindex{*name*}
+
+Typical names are |subject|, |author|, and |symbol|. For each generated
+index, ZzTeX produces an "index parameter file" with the same name as the
+index and the extension |zzp|. A parameter file contains information about
+the defined locators and information taken from the design definition for
+the named index. This information is used by the index generator to build
+the final index file. (See below for a description of index parameter files.)
+
+=== Defining Locators
+
+| \definelocator{*type*}{*attributes*}{*optional-format*}
+
+This command defines an index locator and establishes the indexing commands
+used to include the locator in the index. The first argument is the type word that
+identifies the type of locator. Typical examples are |page|, |figure|, and
+|see|.
+
+The second argument gives the attributes of the locator. It is a series
+of keywords:
+
+* |\page|, |\nopage|&_Indicates whether the locator includes a page number.
+
+* |\range|, |\norange|&_Indicates whether the locator may be used to specify
+a range of pages in addition to a single page.
+
+* |\text|, |\notext|&_Indicates whether the locator includes additional text.
+*.
+
+Assume that the type is |thing|. In all cases, the following locator command
+is defined:
+
+| \xthing{*headings*}
+
+If a range is allowed, then two additional commands are defined:
+
+| \xthingbegin{*headings*}
+| \xthingend{*headings*}
+
+If the locator includes additional text, then all commands take a first
+argument specifying the text:
+
+| \xthing{*text*}{*headings*}
+| \xthingbegin{*text*}{*headings*}
+| \xthingend{*text*}{*headings*}
+
+The third argument to |\definelocator| is optional and specifies the format
+of the locator in the final index. If the braces are empty, then the
+separetely defined format with the same name as the locator is used. To
+provide the format, use three sets of braces to specify the second, third,
+and fourth arguments for the |\definelocatorformat| command (below). The new
+format will be given the same name as the locator.
+
+=== Defining Formats
+
+| \definelocatorformat{*name*}{*rank*.*order*}{*level-1-items*}{*level-2-items*}
+
+This command defines a locator format with the given name for the final index.
+The third and fourth arguments specify items that are needed to format
+the locator. The level-1-items are used for locators associated with main
+headings, while the level-2-items include overrides that pertain to
+subheadings (both second- and third-level).
+
+The second argument specifies the rank and order of this locator. The *rank*
+determines this locator's position in the overall sequence of locators for a
+heading. Typically, the page locators appear first, then the "see" locator,
+then any "see also" locators.
+
+The *order* determines the order of the locator within a series of locators
+all with the same page number. Typically, plain page numbers appear first,
+then pages with suffix 'f' for figure, then pages with suffix 't' for table,
+etc.
+
+& Mustang, 13, 44--49, 45*f*, 45*t*
+&.
+
+Each item list argument is in the following format:
+
+| {*item*:*text*&|*item*:*text*&|...}
+
+There is a sequence of items separated by bars (|&||). Each item consists of
+an item tag, a colon (|:|), and some text.  The following item tags are
+available.
+
+* |prefix1|&_Text to precede all locators of this rank, when this is
+the first locator after the heading. Defaults to empty.
+
+* |prefix2|&_Text to precede all locators of this rank, when this is
+not the first locator after the heading. Defaults to |prefix1|.
+
+* |tmplt|&_Template for this locator when there is a single page
+or no page (only text). No default.
+
+* |rtmplt|&_Template for this locator when there is a range of pages.
+No default.
+
+* |sep|&_Separator between locators of this rank. Defaults to empty.
+
+* |suffix|&_Text to follow all locators of this rank. Defaults to empty.
+
+* |term|&_Text to terminate the entire sequence of locators. Defaults to empty.
+*.
+
+The templates |tmplt| and |rtmplt| may include the following substitutors.
+
+&= Substitutor& What is substituted
+----
+& |?P|& Single page or first page of range.
+& |?Q|& Second page of range.
+& |?T|& Text (e.g., for |see| or |seealso| locators).
+& |??|& Single question mark (|?|).
+&.
+
+The builtin locators can be found in the ZzTeX file zzindexv2.tex. They
+are good examples of how locator formats are defined.
+
+== Index Design
+
+Each index of a book is typeset inside an index block whose design is
+specified, as usual, with a design macro. The parameters of the design macro
+include many common ones, but also a few that are special for index designs.
+The following paragraphs describe the special parameters.
+
+* |\def \alphaformat ##1{*text*}|
+
+This parameter specifies how to format the break between letters produced by
+the |\alphbreak{...}| command. The macro is passed the argument text from the
+|\alphabreak|.
+
+* |\divisions = {*div1*,*div2*,...}|
+
+This parameter specifies the book divisions to be included in the index.
+The value can be |\all|; a list of division names; or |\allbut| followed by a
+list of division names.
+
+* |\locators = {*loc1*,*loc2*,...}|
+
+This parameter specifies the locators to be included in the index. The value
+can be |\all|; a list of locators; or |\allbut| followed by a list of locators.
+Each locator consists of the locator type followed by an optional colon and
+format name. If a format name is not included, then the locator is formatted
+according to the format with the same name as the locator.
+
+* |\indexparams = {...}|
+
+This parameter specifies index parameter statements to be included in the
+index parameter file. See below for a description of the parameter
+statements.
+
+* |\position = {*options*}|
+
+This parameter specifies the overall format of the index. It consists of a
+sequence of the following options:
+
+&= Option& Meaning
+----
+& |\oneup|& Run index in one column.
+& |\outline|& Format entries in outline style.
+& |\runin|& Format entries in run-in (paragraph) style.
+& |\threeup|& Run index in three columns.
+& |\twoup|& Run index in two columns.
+& |\usetextmeasure|& Use the text measure for the columns.
+& |\usetextwidth|& Synonym for |\usetextmeasure|.
+& |\usetypewidth|& Use the type area width for the columns.
+&.
+*.
+
+=== Entry Formatters
+
+(To be supplied.)
+
+== Raw Index Entry Files
+
+ZzTeX populates raw index entry files as it encounters indexing locator
+commands in the book files. Each indexing locator generates one raw entry
+record in the file whose name is the same as the division with an extension
+of |.zzi|. A raw entry record has the following format. The semicolon (|;|)
+represents the field separator character hex B8, chosen because it cannot
+appear in an index heading.
+
+| *type*;*code*;*folio*;*main-head*;*subhead*;*sub-subhead*;*text*
+
+The *code* is |S| for a single page entry, |B| for a begin page range entry,
+or |E| for an end range entry.
+
+== Index Parameter Files
+
+(This material is highly technical and incomplete.)
+
+An index parameter file contains a series of statements that specify
+parameters for the index generator (zzindex2.exe). Each time an index is
+generated, at least two parameter files are read:
+
+* *index-name*.zzp&_The parameter file generated by the |\generateindex|
+command for the specific index being generated.
+
+* zzindex2.zzp&_A generic parameter file included with ZzTeX.
+*.
+
+Each statement in a parameter file has the following format:
+
+| [*mode*] *keyword* *item* ... ;
+
+The optional mode is enclosed in brackets and specifies the mode to which
+the statement pertains. If the mode is not specified, the statement is used
+in all modes. The items are separated by spaces. The statement ends with a
+semicolon.
+
+A parameter file may also contain blank lines and comment lines beginning
+with |//|. Comment lines are ignored.
+
+Statements that specify actions for tokens in headings include the token for
+which the action is to be performed. A token can be one of the following:
+
+&= Token& Meaning
+----
+& |SP|& space
+& |\SP|& TeX \<space> command
+& |\*name*|& TeX |\*name*| command
+& |\*c*|& TeX |\*c*| character command
+& *x*& any other character
+&.
+
+The following statements can appear in an index parameter file.
+
+* |begin-group *token* ;|
+
+The token begins a group and is discarded. The mode stack is pushed with the
+current mode.
+
+* |define-format *format-text* ;|
+
+(To be supplied.)
+
+* |define-locator *definition-text* ;|
+
+(To be supplied.)
+
+* |[mode] discard *token* ;|
+
+The token is discarded and does not appear in the canonicalized heading.
+
+* |[mode] discard/u *token* ;|
+
+The token is removed from the heading but suffixed to the canonicalized
+heading.
+
+* |divisions *divisions-text* ;|
+
+This statement specifies the required divisions from the |\divisions| parameter
+of the index design.
+
+* |end-group *token* ;|
+
+The token ends a group and is discarded. The mode stack is popped.
+
+* |include-param *file* ;|
+
+This statement requests that the named index parameter file be loaded.
+
+* |include-raw *file* ;|
+
+This statement requests that the named raw index entry file be included in
+the set of raw index entry files.
+
+* |index "*name*" ;|
+
+This statement specifies the name of the index to be generated.
+
+* |[mode] invalid *token* ;|
+
+The token is invalid and an error message is produced.
+
+* |[mode] keep *token* ;|
+
+The token is preserved as is on the canonicalized heading.
+
+* |locators *locators-text* ;|
+
+This statement specifies the required locators from the |\locators| parameter
+of the index design.
+
+* |math/u *token* ;|
+
+The token begins or ends math mode. The mode stack is pushed or popped as
+appropriate. The token is suffixed to the canonicalized heading.
+
+* |noise/u "*word*" ;|
+
+If the word appears at the beginning of a subheading or sub-subheading, it
+is removed but suffixed to the canonicalized heading.
+
+* |[mode] replace *token* "*text*" ;|
+
+The token is discarded and replaced with the specified text, which is not
+rescanned.
+
+* |[mode] replace/u *token* "*text*" ;|
+
+The token is discarded and replaced with the specified text, which is not
+rescanned. The token is, however, suffixed to the canonicalized heading.
+
+* |root "*name*" ;|
+
+This statement specifies the name of the book's root file.
+
+* |sort *mode* ;|
+
+(To be supplied.)
+
+* |[mode] synonym *token* "*text*" ;|
+
+The token is discarded and replaced with the specified text, which is then
+rescanned.
+*.
+
+//                      Letterspacing
+//                      -------------
+
+.details letterspace_details \letterspace
+.template letterspace_details
+== Letterspacing
+
+This tutorial describes the letterspacing facility in ZzTeX. All letterspacing
+is accomplished with the \letterspace command, which comes in two flavors:
+
+| \letterspace{*amount*}{*text*}
+
+This command letterspaces the specified text. The amount of letterspace is
+specified by the first argument, usually in ems.
+
+| \letterspace{*amount*,*space*}{*text*}
+
+This command operates like the first variant, except that the width of a
+space is specified explicitly after the letterspace amount.
+
+Note that |\letterspace| commands are usually embedded in design macros in
+the design file. Rarely does one appear directly in book files. However, to
+code titles that will be letterspaced, the compositor needs to understand
+the behavior of the |\letterspace| command.
+
+=== What Happens Automatically
+
+What a title or other text is letterspaced, the |\letterspace| command does
+the following things automatically:
+
+* Inserts the letterspace amount between adjacent pairs of keyboarded
+characters (e.g, |AB|, |01|, |l.|). A "keyboarded character" is one that
+is typed on the keyboard, not coded like |\copyright| or |\alpha|.
+
+* Replaces explicit spaces and tie characters (|~~|) with the space width
+derived from the first argument to the |\letterspace| command.
+
+* Recognizes en dashes (|--|), em dashes (|---|), and double quotes (|``...''|)
+and does not break them apart with letterspace.
+
+* Does *not* letterspace before or after ZzTeX commands, open braces (|{|), or
+close braces (|}|). This means that there will be no letterspacing around
+|\copyright|, |\ellipsis|, |\alpha|, |\times|, etc.
+*.
+
+=== Explicit Control of Letterspacing
+
+The automatic rules take care of many letterspacing problems. However,
+sometimes you need explicit control over letterspacing, so the following
+commands can be used within a title that is letterspaced. If the same
+title is carried elsewhere (such as into a running head)
+but is not letterspaced there, these commands have no effect.
+
+& |\lsp|& Insert a letterspace amount here.
+& |\lspspace|& Insert a letterspaced space here.
+& |\lspoff|& Turn off letterspacing completely.
+& |\lspon|& Restore letterspacing.
+&.
+
+=== An Example
+
+The following diabolical example shows the power of the letterspacing
+facility. Here is a chapter title that is letterspaced:
+
+  \chapter{Text Access\titlenl; ``Methods''\titlenl;
+    \lspoff$a-b'\times c$\lspon\lsp---Why~~Isn't It?}
+
+This produces the following title, where the vertical bar represents a
+letterspace and the underscore represents a space:
+
+& T&|e&|x&|t_A&|c&|c&|e&|s&|s
+& "&|M&|e&|t&|h&|o&|d&|s&|"
+& *a*&thinsp;-&thinsp;*b*&prime;&thinsp;&times;&thinsp;*c*&|---&|W&|h&|y_I&|s&|n&|'&|t_I&|t&|?
+&.
+
+If this title is used in a running head or table of contents, the control
+commands |\lspoff|, |\lspon|, and |\lsp| are ignored (as well as |\titlenl|,
+of course).  Note that the |\lsp| command is necessary to produce a
+letterspace before the em-dash, since letterspacing is automatically
+supressed after the |\lspon| command.
+
+//                      Runners
+//                      -------
+
+.phrase runners runners
+.synonym running heads
+.synonym running feet
+.template
+= Running Heads and Feet
+
+Running heads and feet are collectively called *runners*. A design file can
+make use of multiple styles of runners. One is built into ZzTeX:
+
+* |blind|&_A style with empty running heads and feet.
+*.
+
+ZzTeX assumes the existence of two styles that must be defined in the
+design file:
+
+* |normal|&_The style for normal body pages.
+* |chapter|&_the style for chapter opener pages.
+*.
+
+Specific designs may use additional styles defined in the design file,
+for example:
+
+* |part|&_The style for part opener pages.
+*.
+
+For each style (except |blind|), the design file contains two definitions,
+one for the running head and one for the foot. These macros are responsible
+for formatting the header and footer, often using mark information to
+obtain chapter numbers, section titles, etc., and using |\folio| to obtain
+the page number:
+
+  \def \headernormalformat {...}
+
+  \def \footernormalformat {...}
+
+  \def \headerchapterformat {...}
+
+  \def \footerchapterformat {...}
+
+== Runner Commands
+
+The following commands are used to establish the runner styles
+for subsequent pages in the book.
+
+~foreach cmd, command_set;
+* |~.cmd;|
+~end;
+*.
+
+Those commands are lovely but rarely used explicitly, except in
+the front matter. Instead, runners are established using the |\runners|
+parameter of certain blocks.
+
+== |\runners| Parameter
+
+The |\runners| parameter is a design parameter for certain blocks in ZzTeX.
+It is usually specified in the design macros for those blocks in the design
+file, but you can override the normal styles by using the |\with| modifier on
+such blocks.
+
+The following list specifies the blocks that use the |\runner| parameter to
+perform an implicit |\setrunners| command. Each entry shows the standard
+value of the parameter:
+
+& |\part|& | \runners={blind,normal}|
+& |\quasipart|& |\runners={blind,normal}|
+& |\chapter|& |\runners={chapter,normal}|
+& |\quasichapter|& |\runners={chapter,normal}|
+& |\appendix|& |\runners={chapter,normal}|
+& |\float|& |\runners={normal}|
+&.
+
+Imagine you had a quasichapter and you wanted to suppress the drop folio
+normally set by the chapter runners. You simply do the following:
+
+  \with{\runners={blind,normal}}
+  \quasichapter{Weird Back Matter}
+
+You must remember to specify a second style of |normal| for the remaining
+pages of the quasichapter or they will all have blind runners.
+
+You can accomplish the same goal as follows:
+
+  \quasichapter{Weird Back Matter}
+  \overriderunners{blind}
+
+The |\float| block uses the |\runner| parameter to perform an implicit
+|\overriderunners| command.
+The float mechanism arranges to perform an |\overriderunners| with the
+style specified by the |\runner| parameter when it is about set a page
+containing *only floats*. If you want to suppress the running head on such a
+page:
+
+  \with{\runners={blind}}
+  \float{figure}
+
+However, see the |\userharea| block modifier for the best way to
+accomplish this.
+
+== Some Examples
+
+A book with a two-page-spread chapter opener could use the |\runners|
+parameter in the chapter design to set the correct runners for both
+opener pages:
+
+  \def \chapterdesign {%
+    ...
+    \def \paging {\freshpage{\short\floats\even}}%
+    ...
+    \runners = {blind,chapter,normal}%
+    ...}
+
+Some books have part pages but Chapter 1 occurs before Part I. If the
+running heads include the part number and title, that will probably fail in
+Chapter 1 because no part has been established. If the design file provides
+a special runners style |normalnopart| for such "part-less" chapters, you
+can use it quite easily:
+
+  \with{\runners={chapter,normalnopart}}
+  \chapter{The First Chapter}
+
+//                      \tabbing Block
+//                      -------- -----
+
+.details tabbing_details \tabbing
+.template tabbing_details
+== Tabbing Facilities
+
+This tutorial describes the ZzTeX tabbing facilities. The primary 
+tabbing feature is the |\tabbing| block, which replaced the tabbing
+capability of the |\text| block in ZzTeX v17.2.
+
+=== The |\tabbing| Block
+
+The |\tabbing| command has the following syntax:
+
+| \tabbing{*type*}
+| *line of text*\nl
+| *another line*
+| &_*of text*\nl
+| ...
+| *last line of text*\nl
+| \endtabbing
+
+The *type* argument specifies the type of the tabbing block and thus its
+design. A line in the typeset block can occupy multiple lines in the
+TeX file but must end with an |\nl| command. Line breaks in the file are
+not taken verbatim. The |\nl| after the final line is optional.
+
+=== Setting Tab Stops
+
+There are two ways to set tab stops for the lines in a tabbing block.
+The first is to set uniform tab stops across the line. The distance
+between tab stops is specified by the |\defaulttabwidth| design
+parameter. If this parameter is a positive dimension, say, |14pt|,
+then tab stops are set every 14 points across the line.
+
+The second method of setting tab stops is to include a *template line*
+at the beginning of the tabbing block. For example,
+
+  \tabbing{algorithm}
+  @Cxxxxx@.xxxxx@.xxxxx@.xxxxxxxxxxxxxxx@.@D
+
+The |@C| command clears any existing tab stops. Each |@.| command
+sets a tab stop at the current width of the line. In this example,
+there will be a tab stop at the width of 5 |x| letters, 10 letters,
+15 letters, and 30 letters. The |@D| command discards the line
+so it doesn't show up on the page. The line exists only for the
+purpose of setting the stops.
+
+=== Tabbing
+
+The |@>| command is used to tab from one tab stop to the next. In this
+example, assume that tab stops are set every 14 points.
+
+  \tabbing{algorithm}
+  $\mvar{scores} = \{\}$\qquad // score accumulator maps doc IDs to scores\nl
+  \For $w\in q$ \Do\nl
+  @>\For $d, \mvar{count}\in \mvar{Idx}.\mvar{fetch}\_\mvar{docs}(w)$ \Do\nl
+  @>@>$\mvar{scores}[d] = \mvar{scores}[d] + \mvar{score}\_\mvar{term}(\mvar{count})$ 
+  @>\EndFor\nl
+  \EndFor\nl
+  \Return top $k$ documents from $\mvar{scores}$\nl
+  \endtabbing
+
+The third line is indented 14 points, the fourth line is indented 28 points, etc.
+
+Note that each |@>| command tabs to the next tab stop in the sequence of stops,
+regardless of whether the width of the text is beyond that stop. If the width
+of the text is beyond the next stop, the text following that stop will overprint
+the preceding text.
+
+=== Vertical Adjustments
+
+The are two ways to make vertical adjustments between lines of text.
+The first is to code a blank line:
+
+  \tabbing{algorithm}
+  $\mvar{scores} = \{\}$\qquad // score accumulator maps doc IDs to scores\nl
+  \nl
+  \For $w\in q$ \Do\nl
+
+A blank line produces the amount of vertical space specified by the
+|\tabbinggapskip| design parameter. This vertical space is usually
+less than a full line.
+
+The second method of performaing a vertical adjustment is to use the
+|\adjusttabbing| command in between two lines. Try |~.facility; \adjusttabbing|
+for more information.
+
+=== Line Numbers
+
+[To be supplied.]
+
+//                      \tabular Block
+//                      -------- -----
+
+.details tabular_details \tabular
+.template tabular_details subclass_set command tabular
+== Tabular Facilities, version 3
+
+This tutorial describes the third generation of the ZzTeX tabular
+facilities. These facilities are used to produce tabular material in
+text or in a floating table.
+
+First, some definitions:
+
+* Cell.&_The intersection of each row and column is called a cell.
+The cell contains the text at that row/column intersection.
+
+* Column.&_Tabular material is organized into vertical columns.
+Each column has a particular format, specified in the template.
+
+* Gutter.&_The gutter is the horizontal space between columns. It is
+typically 1 pica and can stretch or shrink if tables are
+to be forced to a particular width. The gutter between two
+columns can be changed on a case-by-case basis.
+
+* Interrow space.&_An extra amount of vertical space that is placed between
+rows of tabular material.
+
+* Picture.&_A sequence of characters used to determine the alignment
+of decimal-aligned numeric columns.
+
+* Row.&_Tabular material is organized into horizontal rows, with
+
+* Ruled table.&_Tabular material that includes vertical rules.
+
+* Template.&_An argument to the \tabular command that specifies the
+number of columns and the format for each column.
+*.
+
+=== The |\tabular| Command
+
+The |\tabular| command has the following syntax:
+
+| \tabular{*type*}{*template*}
+|  *row* ... \cr
+|  *row* ... \cr
+|  ...
+|  *row* ... \cr
+|  \endtabular
+
+The *type* argument specifies the type of the tabular block and thus its
+design. The *template* argument specifies the number of columns and their
+associated formats (see below).
+
+Each row consists of a series of cells and is terminated by the |\cr| command
+("carriage return" or "complete row"). The cells are specified as follows:
+
+| *cell-1*&& *cell-2*&&&& *cell-4*&& ...&& *cell-n*\cr
+
+There is one cell for each column and they are separated by ampersands
+(|&&|). It is important to eliminate any spaces *preceding* the ampersands,
+although spaces following them are fine. An empty cell is allowed, as with
+the third cell above.
+
+In a ruled table, every cell in a row must be specified, although some may
+be empty (the cells corresponding to rule columns usually are). In a table
+that is not ruled, rightmost cells that are empty need not be specified.
+
+=== How ZzTeX Formats Tabular Material
+
+ZzTeX goes through the following steps to format tabular material.
+
+# The template is analyzed to check it, count the columns, and prepare the
+individual column formats.
+
+# All rows are read and each cell is formatted in its own box.
+
+# The maximum width of the cells in each column is determined, and all the
+cell boxes in that column are set to the maximum width. (See |\hidewidth| for
+an exception.)
+
+# All the boxes in each row are set side by side, with the column gutter
+between them. The widths of the rows are forced to the specified overall
+table width, if required by the design. The extra space is placed in the
+gutters.
+
+# The rows are butted together vertically, with no extra space between
+them.
+#.
+
+There are some interesting implications of this scheme:
+
+* Because every cell box in a column, except the widest, will not be filled
+with text, the template for each column must include at least one |\hfil|
+command to take up the slack. These |\hfil| commands are included in the
+builtin templates described below.
+
+* Because there is no extra space between the rows, each row must occupy the
+full height and depth of the tabular body font, plus any interrow space.
+Otherwise the rows will not be spaced uniformly. It is this requirement that
+makes ruled tables tricky.
+*.
+
+=== The Template
+
+The template argument to the |\tabular| command is coded as a sequence of
+format specifications, one for each column, in the desired order.
+
+| \tabular{*type*}{@*x* @*y* ... @*z*}
+
+The available column formats are specified as follows. Spaces and line
+breaks may appear in the template for readability.
+
+* |@l|&_Single line; text flush left.
+
+* |@c|&_Single line; text centered.
+
+* |@r|&_Single line; text flush right.
+
+* |@L{*picture*}|&_Decimal-aligned number; text flush left. See below.
+
+* |@C{*picture*}|&_Decimal-aligned number; text centered.
+
+* |@R{*picture*}|&_Decimal-aligned number; text flush right.
+
+* |@p{*width*}|&_Text set in multiple lines as one or more
+paragraphs. The width of the line is specified.
+The raggedness, hang, and paragraph skip is
+determined by the design.
+
+* |@e{*width*}|&_Empty column of the specified width.
+
+* |@s{*sequence*}|&_Special custom column. See below.
+
+* |@&||&_Column contains a vertical rule whose color and
+width are determined by the design. This is a real
+column that must be included in each row, but is
+normally empty.
+
+* |@!{*color*}{*width*}|&_Column contains a vertical rule whose color and
+width are specified.
+
+* |@>{*width*}|&_This template may appear following any of the
+above templates. It specifies the exact width of
+the gutter between the current column and the next,
+in place of the standard gutter determined by the
+design. Rule columns are surrounded by gutters half
+as wide as the standard, unless overridden with |@>|.
+If the width is follow by an asterisk (|&*|), then
+the gutter can vary in width according to the
+|\columngutter| parameter of the design.
+*.
+
+=== Decimal-Aligned Columns
+
+Decimal-aligned column templates include a picture that determines how the
+cells are aligned. The picture is composed of the following characters:
+
+& |0|& Represents a digit.
+& |.|& Specifies the position of the decimal point.
+& |,|& Indicates a comma in the number.
+& |$-$|& Indicates that the number may be preceded by a negative sign.
+& |(...)|& Indicates that the number may be surrounded by parentheses.
+&.
+
+If there is no decimal point in the picture, the cells are aligned on the
+right. If there is a decimal point, they are aligned on the point. The
+difference between left-, center-, and right-aligned number columns is
+irrelevant unless a nonnumeric cell in the column is wider than the widest
+numeric cell. In this case the numeric cells are set flush left, center, or
+right on those wider cells. This happens when the column heads are wider
+than the numbers.
+
+Because ZzTeX splits decimal-aligned numbers at their decimal points, it is
+necessary that both halves of the picture and of all the cell numbers
+be balanced with respect to braces and dollar signs.
+
+=== Special Custom Columns
+
+A special custom column can be used to construct a complex column that
+contains boilerplate material. For example, imagine a left column in which
+all entries should be in italic and enclosed in parentheses. This column
+could be specified as follows:
+
+| \tabular{table}{... @s{\emph{(#)}\hfil} ...}
+| ...& special& ...\cr
+| ...& critical& ...\cr
+
+The two cells would appear in italic in this format:
+
+| ... *(special)* ...
+| ... *(critical)* ...
+
+Each cell is formatted by replacing the template sequence's sharp sign (|#|)
+with the text specified in the row cell, then using the resulting sequence as
+the final text of the cell. In the first row above, the final text would be
+|\emph{(special)}\hfil|. Note that the template includes an |\hfil| command to
+take up the slack and left-align the text. Don't forget the sharp sign and
+at least one |\hfil|.
+
+=== |\tabular| Tools
+
+The following list includes all the tools that can be used with a |\tabular|
+block. You can explore these various commands to learn what they do.
+
+~foreach name, name_set;
+* |~.name;|
+~end;
+*.
+
+//                      \todo Block
+//                      ----- -----
+
+.details todo_details \todo
+.template todo_details
+== To-Do Facility
+
+The to-do facility allows you to place a
+reminder in a book file and optionally to typeset '???' to represent text
+that is still to come. 
+
+The \todo command has three forms. The first form is used most frequently.
+
+| \todo{This math display needs to be cleaned up later.}
+
+This command displays the message on your console and includes it in the log
+file. Processing continues without interruption. A summary of the number of
+to-do reminders is displayed at the end of the run.
+
+| \todo{!Cannot continue until this table is formatted correctly.}
+
+This variant includes the message in the log file, but then generates a
+warning message and halts execution. You can continue processing by
+pressing Enter. Use this variant to force a halt when the division is
+processed.
+
+| \todo{?cover image credit}
+
+This command is similar to the first variant, but also typesets a triple
+question mark (|???|) where the |\todo| appears. You can use this variant to set
+the standard triple question mark where text will be supplied later.
+
+To obtain a list of all the outstanding to-dos, try |~.facility; to-dos|.
+
+.end

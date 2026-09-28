@@ -1,0 +1,386 @@
+% ruscap10.mf
+% Version 1.0
+% Copyright (c) 2024, Victor Sannier with Reserved Font Name ruscap.
+% This Font Software is licensed under the SIL Open Font License, Version 1.1.
+
+font_size 10pt#;
+font_quad 13pt#;
+
+u# := 10/12 pt#; % unit
+s# := 2/3 u#; % sidebearing
+o# := 1/4 u#; % overshoot
+
+% Heights
+cap_height# := 9 u#;
+asc_height# := 11 u#;
+desc_height# := 1 u#;
+crossbar_height# := 5 u#;
+
+diag_angle := 90 + 35;
+spur_width# := 1/2 u#;
+spur_angle := 35;
+
+% Pen
+thick# := 5/4 u#;
+thin# := 1/3 u#;
+pen_angle := 65;
+
+% Serif
+serif_width# := 5/2 u#;
+serif_angle := 90 / 6;
+
+mode_setup;
+
+o_width# := 6u#;
+e# := 1/3 u#;
+
+define_pixels(u, s);
+define_whole_pixels(serif_width, spur_width, o_width);
+define_whole_vertical_pixels(cap_height, asc_height, desc_height);
+define_blacker_pixels(thick, thin);
+define_good_y_pixels(crossbar_height);
+define_corrected_pixels(o, e);
+
+pickup pensquare xscaled thick yscaled thin rotated pen_angle;
+rustic_pen := savepen;
+
+font_slant 0;
+font_normal_space 3/4 o_width#;
+font_normal_stretch 1/3 o_width#;
+font_normal_shrink 1/2 o_width#;
+font_x_height cap_height#;
+
+% Macros
+
+def draw_serif(suffix i, j)(expr width) =
+	rt x.j - lft x.i = width; y.i = y.j;
+	draw z.i{dir serif_angle} .. {dir serif_angle}z.j;
+enddef;
+
+def draw_diag_stroke(suffix i, j)(expr angle) =
+	z.i - z.i.l = z.j.r - z.j = spur_width * dir spur_angle;
+ 	z.j - z.i = whatever * (dir angle);
+	draw z.i.l .. z.i .. tension 3 .. z.j .. z.j.r;
+enddef;
+
+def draw_I(suffix i, j, k, l)(expr sw) =
+	x.i = x.j;  % vertical stem
+	top y.i = h + o; bot y.j = 0;
+	z.i - z.i.l
+	  = spur_width * dir spur_angle;
+
+	% Serif
+	rt (2 x.j - x.k) - lft x.k = serif_width;
+	y.j = y.k;
+	draw_serif(k, l)(sw);
+
+	draw z.i.l .. z.i .. tension 5 .. z.j;
+enddef;
+
+def draw_P(suffix i, j, k, l, m)(expr w) =
+	lft x.k = s;
+	draw_I(i, j, k, l)(serif_width);
+	rt x.m = w - s;
+	y.m = crossbar_height + 1/2 (cap_height - crossbar_height);
+	draw z.i{right} .. z.m .. {left}(x.i + e, crossbar_height);
+enddef;
+
+% Characters
+
+beginchar("A", 8u# + 2u#, cap_height#, 0);
+	"Rustic A";
+	pickup rustic_pen;
+
+	top y1 = h + o; bot y2 = -o; rt x2.r = w - s;
+	draw_diag_stroke(1, 2)(diag_angle);
+
+	lft x5 = s; bot y5 = 0;
+	z3 = 1/5 [z1, z2];
+	z4 = 1/2 [z5, z6];
+        draw_serif(5, 6)(serif_width);
+	draw z3 .. z4;
+
+	labels(range 1 thru 6);
+	labels(1.l, 2.r);
+endchar;
+
+beginchar("B", 5u# + 2s#, cap_height#, 0);
+	"Rustic B";
+	pickup rustic_pen;
+	draw_P(1, 2, 3, 4, 5)(5u);
+	rt x6 = w - s; y6 = crossbar_height / 2;
+	draw (x1, crossbar_height){right} .. z6 .. {left}z4;
+	labels(range 1 thru 6);
+endchar;
+ 
+beginchar("C", 5u# + 2s#, cap_height#, 0);
+	"Rustic C";
+	pickup rustic_pen;
+	rt x1 = w - s; y1 = (crossbar_height + cap_height) / 2;
+	x2 = w / 2; top y2 = h + o;
+	lft x3 = s; y3 = cap_height - crossbar_height;
+	x4 = w / 2; bot y4 = 0;
+	rt x5 = w - s; bot y5 = 0;
+	draw z1 .. z2 .. z3.. z4 .. {right}z5;
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("D", 5u# + 2s#, cap_height#, 0);
+	"Rustic D";
+	pickup rustic_pen;
+	lft x3 = s;
+	draw_I(1, 2, 3, 4)(serif_width);
+	rt x5 = w - s; y5 = crossbar_height;
+	draw z1{right} .. z5 .. {left}z4;
+	labels(range 1 thru 5);
+endchar;
+
+def draw_EF =
+	pickup rustic_pen;
+	% Top stroke
+	lft x1 = s; top y1 = h;
+	rt x2 = w - s; top y2 = h;
+	draw z1{dir serif_angle} .. {dir serif_angle}z2;
+	% Down stroke
+	rt (2 x5 - x1) - lft x1 = serif_width;
+	x6 = x5; top y5 = h; bot y6 = 0;
+	draw z5 .. z6;
+	% Bottom stroke
+	lft x3 = s; bot y3 = 0; bot y4 = 0;
+	draw z3{dir serif_angle} .. {dir serif_angle}z4;
+	% Middle stroke
+	z7 = (x5, crossbar_height); z8 = (x2, crossbar_height);
+	draw z7 .. z8;
+	labels(range 1 thru 8);
+enddef;
+
+beginchar("E", 3.5u# + 2s#, cap_height#, 0);
+	"Rustic E";
+	x4 = x2;
+	draw_EF;
+endchar;
+
+beginchar("F", 4u# + 2s#, asc_height#, 0);
+	"Rustic F";
+	x6 = (x3 + x4) / 2;
+	draw_EF;
+endchar;
+
+beginchar("G", 5u# + 2s#, cap_height#, 0);
+	"Rustic G";
+	pickup rustic_pen;
+	rt x1 = w - s; y1 = (crossbar_height + cap_height) / 2;
+	x2 = w / 2; top y2 = h + o;
+	lft x3 = s; y3 = cap_height - crossbar_height;
+	x4 = w / 2; bot y4 = -o;
+	rt x5 = w - s; y5 = cap_height - crossbar_height;
+	draw z1 .. z2 .. z3.. z4 .. z5;
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("H", 7u# + 2s#, cap_height#, 0);
+	"Rustic H";
+	pickup rustic_pen;
+	lft x9 = s; y9 = crossbar_height;
+	x1 - x9 = u;
+	draw_I(1, 2, 3, 4)(serif_width);
+	rt x8 = w - s;
+	draw_I(5, 6, 7, 8)(serif_width);
+	draw z9 .. (x5, crossbar_height);
+	labels(range 1 thru 9);
+endchar;
+
+beginchar("I", serif_width# + 2s#, cap_height#, 0);
+	"Rustic I";
+	pickup rustic_pen;
+	lft x3 = s;
+	draw_I(1, 2, 3, 4)(serif_width);
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("K", 7u# + 2s#, cap_height#, 0);
+	"Rustic K";
+	pickup rustic_pen;
+	lft x3 = s;
+	draw_I(1, 2, 3, 4)(serif_width);
+	x5 = x6 - 2u; top y5 = h + o;
+	rt x6 = w - s; bot y6 = 0;
+	draw (x1 + e, crossbar_height) .. {dir pen_angle}z5;
+	draw (x1 + e, crossbar_height) .. tension 2 .. z6 - (u, 0) .. z6;
+	labels(range 1 thru 6);
+endchar;
+ 
+beginchar("L", 5u# + 2s#, asc_height#, 0);
+	"Rustic L";
+	pickup rustic_pen;
+	lft x3 = s;
+	draw_I(1, 2, 3, 4)(w - 2s);
+	labels(range 1 thru 4);
+	labels(1.l);
+endchar;
+
+beginchar("M", 11u# + 2s#, cap_height#, 0);
+	"Rustic M";
+	pickup rustic_pen;
+	top y1 = h + o; bot y2 = -o;
+	x1 = x5 + u;
+	1/2 (z5.l + z5.r) = z5; lft x5 = s + serif_width/2;
+	a := (diag_angle - 90) * 3/4 + 90;
+	draw_diag_stroke(1, 2)(a);
+	top y3 = h + o; bot y4 = 0; rt x4.r = w - s;
+	a := (diag_angle - 90) / 3 + 90;
+	draw_diag_stroke(3, 4)(a);
+
+	% Left stem
+	bot y5 = 0;
+	draw z1 .. z5;
+	draw_serif(5.l, 5.r, serif_width);
+	% Right stem
+	draw z3 .. z2.r;
+
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("N", 8u# + 2s#, cap_height#, 0);
+	"Rustic N";
+	pickup rustic_pen;
+
+	% Diagonal stroke
+	x1 + x2 = w; top y1 = h + o; bot y2 = 0;
+	draw_diag_stroke(1, 2)(diag_angle);
+
+	% Left stem
+	bot y3 = 0; lft x3 = s + serif_width/2 - u/3;
+	draw z1 .. z3;
+	1/2 (z3.l + z3.r) = z3;
+	draw_serif(3.l, 3.r, serif_width);
+
+	% Right stem
+	x4 = x5 = x2.r;  % vertical stem
+	top y4 = h + o; bot y5 = 0;
+	z4 - z4.l = spur_width * dir spur_angle;
+	draw z4.l .. z4 -- z5;
+
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("O", o_width# + 2s#, cap_height#, 0);
+	"Rustic O";
+	pickup rustic_pen;
+	lft x2 = s; rt x4 = w - s; x1 = x3 = w/2;
+	top y1 = h + o; bot y3 = -o; y2 = y4 = crossbar_height;
+	draw z1 .. z2 .. z3 .. z4 .. cycle;
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("P", 4u# + 2s#, cap_height#, 0);
+	"Rustic P";
+	pickup rustic_pen;
+	draw_P(1, 2, 3, 4, 5)(w);
+	labels(range 1 thru 5);
+endchar;
+ 
+beginchar("Q", 6u# + 2s#, cap_height#, u#);
+	"Rustic Q";
+	pickup rustic_pen;
+	lft x2 = s; rt x4 = o_width + s; x1 = x3 = (o_width + 2s)/2;
+	top y1 = h + o; bot y3 = -o; y2 = y4 = crossbar_height;
+	rt x5 = w - s; bot y5 = -d;
+	draw z3{curl 3} .. z4 .. z1 .. z2 .. z3 .. {down}z5;
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("R", 7u# + 2s#, cap_height#, 0);
+	"Rustic P";
+	pickup rustic_pen;
+	draw_P(1, 2, 3, 4, 5)(5u);
+	rt x6 = w - s; bot y6 = 0;
+	draw (x1 + u, crossbar_height) .. tension 2 .. z6 - (u, 0) .. z6;
+	labels(range 1 thru 6);
+endchar;
+
+beginchar("S", 4u# + 2s#, cap_height#, 0);
+	"Rustic S";
+	pickup rustic_pen;
+	lft x2 = s; x2 = x4;
+	rt x1 = w - s; x1 = x3;
+	top y1 = h - 3/2 u; bot y4 = u/2;
+	h - y2 = y3; z2 - z3 = whatever * dir diag_angle;
+	draw z1{curl 2} .. z2 .. z3 .. {curl 1}z4;
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("T", 6u# + 2s#, cap_height#, 0);
+	"Rustic T";
+	pickup rustic_pen;
+	x1 = w - x2; top y1 = h;
+	draw_serif(1, 2)(w - 2s);
+	x3 = w - x4; bot y3 = 0;
+	draw_serif(3, 4)(serif_width);
+	draw 1/2 [z1, z2] .. 1/2 [z3, z4];
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("V", 6u# + 2s#, cap_height#, 1/2 u#);
+	"Rustic V";
+	pickup rustic_pen;
+	lft x1 = s + spur_width; rt x3 = rt x4 = rt x5 = w - s - u/2;
+	top y1 = h + o; bot y3 = u; top y4 = h + o; bot y5 = -d;
+	bot y2 = 0; lft x2 = 5/2 u + s;
+	draw z1{down} .. z2 .. z3{right};
+	z1 - z1.l = spur_width * dir spur_angle; draw z1.l .. z1; % Spur
+	draw z4{dir -85} .. z5;
+	labels(range 1 thru 5);
+endchar;
+
+beginchar("X", 7u# + 2s#, cap_height#, 0);
+	"Rustic X";
+	pickup rustic_pen;
+	top y1 = h + o; bot y2 = 0; rt x2.r = w - s;
+	draw_diag_stroke(1, 2)(diag_angle);
+	draw (x1, y2) .. (x2, y1);
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("Y", 8u# + 2s#, cap_height#, 0);
+	"Rustic Y";
+	pickup rustic_pen;
+	x2 = x3 = w/2;
+	lft x1 = s; rt x4 = w - s;
+	bot y3 = 0;
+	top y1 = top y4 = h + o; y2 = crossbar_height;
+	draw z1 .. z2 .. tension 2 .. z3;
+	draw z4{left} .. z2;
+	% Serif
+	1/2 (z3.l + z3.r) = z3;
+	draw_serif(3.l, 3.r, serif_width);
+	labels(range 1 thru 4);
+endchar;
+
+beginchar("Z", 6u# + 2s#, cap_height#, 0);
+	"Rustic Z";
+	pickup rustic_pen;
+	lft x1 = s; top y1 = h;
+	draw_serif(1, 2)(w - 2s);
+	lft x3 = s; bot y3 = 0;
+	draw_serif(3, 4)(w - 2s);
+	draw z2 .. z3;
+	labels(range 1 thru 4);
+endchar;
+
+ligtable "A": "T" kern -1.5u#, "Y" kern -1.5u#;
+ligtable "B": "C" kern .5u#, "M" kern -u#;
+ligtable "F": "A" kern -.5u#, "M" kern -u#, "T" kern -u#;
+ligtable "G": "C" kern .5u#, "Q" kern .5u#, "G" kern .5u#, "O" kern .5u#;
+ligtable "K": "C" kern -u#, "G" kern -u#, "T" kern -u#, "Y" kern -u#;
+ligtable "L": "T" kern -u#, "Y" kern -2u#;
+ligtable "M": "T" kern -u#;
+ligtable "O": "M" kern -.5u#;
+ligtable "P": "A" kern -.5u#, "M" kern -.5u#;
+ligtable "R": "C" kern -.5u#, "O" kern -u#, "T" kern -u#, "Y" kern -1.5u#;
+ligtable "T": "A" kern -u#, "H" kern -u#, "M" kern -u#;
+ligtable "V": "M" kern -u#;
+ligtable "Y": "M" kern -u#;
+
+end;
+

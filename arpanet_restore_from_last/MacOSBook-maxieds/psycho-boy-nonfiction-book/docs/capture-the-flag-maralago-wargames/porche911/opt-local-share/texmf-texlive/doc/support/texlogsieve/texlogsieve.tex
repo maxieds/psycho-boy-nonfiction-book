@@ -1,0 +1,582 @@
+% texlogsieve - filter and summarize LaTeX log files
+%
+% Copyright (C) 2021-2025 Nelson Lago <lago@ime.usp.br>
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%
+% Code etc: https://gitlab.com/lago/texlogsieve
+
+\documentclass{ltxdoc}
+
+\usepackage[hyperref,svgnames,x11names,table]{xcolor}
+\usepackage{url}
+\urlstyle{sf}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  citecolor=DarkGreen,
+  linkcolor=NavyBlue,
+  urlcolor=DarkRed,
+  filecolor=green,
+  anchorcolor=black,
+}
+
+\usepackage{libertinus}
+\usepackage[scale=.85]{sourcecodepro}
+\usepackage{microtype}
+\usepackage{metalogo}
+
+\hyphenation{tex-log-sieve tex-log-sieverc}
+
+\RecordChanges
+
+\changes{1.0.0-beta-1}{2021/12/16}{First public prerelease}
+\changes{1.0.0-beta-2}{2022/01/04}{Automatically read \texttt{texlogsieverc}
+                                    if it exists}
+\changes{1.0.0-beta-2}{2022/01/04}{Add options \texttt{-\/-be-redundant}
+                                    and \texttt{-\/-box-detail}}
+\changes{1.0.0-beta-2}{2022/01/04}{Add options
+                                    \texttt{-\/-set-to-level-[levelname]}}
+\changes{1.0.0-beta-2}{2022/01/04}{Include silenced messages in summaries}
+\changes{1.0.0-beta-2}{2022/01/04}{Substitute empty citation/label keys
+                                    for ``???''}
+\changes{1.0.0-beta-2}{2022/01/04}{Fix bug that prevented
+                                    \texttt{-\/-add-[info\textbar
+                                    warning]-message} from working}
+\changes{1.0.0-beta-2}{2022/01/04}{Misc small bugfixes}
+\changes{1.0.0-beta-3}{2022/02/02}{Add options
+                                    \texttt{-\/-summary-detail},
+                                    \texttt{-\/-ref-detail},
+                                    \texttt{-\/-cite-detail}}
+\changes{1.0.0-beta-3}{2022/02/02}{Abort on invalid command-line options}
+\changes{1.0.0-beta-3}{2022/02/02}{Detect ``please rerun`` messages and
+                                    add them to the summary}
+\changes{1.0.0-beta-3}{2022/02/02}{Fix line unwrapping with \XeTeX}
+\changes{1.0.0-final={1.0.0}}{2022/02/09}{Better compatibility with MiK\TeX\ for
+                                 Windows}
+\changes{1.0.0-final={1.0.0}}{2022/02/09}{If possible, use the \texttt{.fls} file}
+\changes{1.0.0-final={1.0.0}}{2022/02/09}{Add options \texttt{-\/-file-banner}
+                                 and \texttt{-\/-color}}
+\changes{1.0.0-final={1.0.0}}{2022/02/09}{Changed the effect of filters on the summary}
+\changes{1.1.0}{2022/03/04}{Print ``No important messages to show'' when
+                            nothing is printed}
+\changes{1.1.0}{2022/03/04}{Fix bug with filename and URL on the same line}
+\changes{1.1.0}{2022/03/04}{Print warning in the summary when there are
+                            error messages}
+\changes{1.1.0}{2022/03/04}{Do not lose messages if the file is truncated}
+\changes{1.1.1}{2022/03/05}{Fix error in variable scope}
+\changes{1.1.2}{2022/03/14}{Fix bug unwrapping lines starting with ``]''}
+\changes{1.1.3}{2022/04/22}{Be more careful with continuation lines in error
+                            msgs}
+\changes{1.2.0}{2022/07/21}{Fix bug with missing citations}
+\changes{1.2.0}{2022/07/21}{Colored keys with missing citations / chars}
+\changes{1.2.0}{2022/07/21}{Improved example latexmkrc in TIPS section}
+\changes{1.2.0}{2022/07/21}{Summary messages include line numbers}
+\changes{1.2.0}{2022/07/21}{Summary messages use singular and plural
+                            for pages and files}
+\changes{1.2.0}{2022/07/21}{Add unused labels to summary}
+\changes{1.3.0}{2022/08/05}{Sort line numbers in summary}
+\changes{1.3.0}{2022/08/05}{Indicate whether there were parse errors
+                            in summary}
+\changes{1.3.0}{2022/08/05}{Add line number to parse error messages}
+\changes{1.3.0}{2022/08/05}{Add \texttt{-\/-verbose} option}
+\changes{1.3.0}{2022/08/05}{Search for a config file in the user's homedir too}
+\changes{1.3.1}{2022/09/05}{Fix bug when searching for config files in Windows}
+\changes{1.4.0}{2023/11/30}{Add tips on how to fix some warnings}
+\changes{1.4.0}{2023/11/30}{Handle files opened during shipout}
+\changes{1.4.1}{2024/01/15}{Look 5 lines ahead instead of 3}
+\changes{1.4.1}{2024/01/15}{Reduce priority of harmless font substitutions}
+\changes{1.4.1}{2024/01/15}{Recognize more messages}
+\changes{1.4.2}{2024/11/22}{Recognize more messages}
+\changes{1.4.2}{2024/11/22}{Correctly handle ``*full hbox while output\dots``}
+\changes{1.4.2}{2024/11/22}{Add mention to \texttt{pulp}}
+\changes{1.4.2}{2024/11/22}{Add messages from \texttt{comment} pkg}
+\changes{1.5.0}{2025/03/03}{Add .log extension if necessary}
+\changes{1.5.0}{2025/03/03}{Always convert \texttt{CR LF} to \texttt{LF}
+                            when reading the .log and .fls files}
+\changes{1.5.0}{2025/03/03}{When showing an UNKNOWN message, also show the
+                            previous one if it was suppressed, as they may
+                            be related}
+\changes{1.5.0}{2025/03/03}{Improved and refactored handling of error messages}
+\changes{1.5.0}{2025/03/03}{Allow for some messages that differ only in some
+                            details to be identified as the same message}
+\changes{1.5.0}{2025/03/03}{Identify some engine-specific errors and warnings}
+\changes{1.5.0}{2025/03/03}{Greatly improved shipoutFilesHandler (preventing
+                            weird errors)}
+\changes{1.5.0}{2025/03/03}{When adding a file or shipout to the stack,
+                            remove dangling ``DUMMY'' entry}
+\changes{1.5.0}{2025/03/03}{Fixed bug that prevented some summaries from
+                            being printed}
+
+\begin{document}
+
+\title{\textsf{texlogsieve}:\thanks{This document
+corresponds to \textsf{texlogsieve}~1.5.0,
+dated~2025-03-03.}\\[.3\baselineskip]
+{\normalsize(yet another program to)\\[-.6\baselineskip]}
+{\large filter and summarize \LaTeX\ log files}
+}
+
+\author{
+Nelson Lago\\
+\texttt{lago@ime.usp.br}\\
+~\\
+\url{https://gitlab.com/lago/texlogsieve}
+}
+
+\maketitle
+
+\begin{abstract}
+
+\texttt{texlogsieve} reads a \LaTeX\ log file (or the standard input if
+no file is specified), filters out less relevant messages, and displays
+a summary report. Highlights:
+
+\begin{itemize}
+  \item Two reports: the most important messages from the log file
+        followed by a summary of repeated messages, undefined
+        references etc.;
+  \item The program goes to great lengths to correctly handle \TeX\ line
+        wrapping and does a much better job at that than existing tools;
+  \item Multiline messages are treated as a single entity;
+  \item Several options to control which messages should be filtered out;
+  \item No messages are accidentally removed.
+\end{itemize}
+
+\end{abstract}
+
+\section*{Introduction}
+
+The \LaTeX\ log file is very verbose, which is useful when debugging but
+a hindrance during document preparation, as warnings such as ``missing
+character'', ``undefined reference'', and others become buried among lots
+of less relevant messages. This program filters out such less relevant
+messages and outputs the rest, together with a final summary for the
+specially important ones. It is a \texttt{texlua} script, similar in
+spirit to tools such as \href{https://ctan.org/pkg/texfot}{\texttt{texfot}},
+\href{https://ctan.org/pkg/texloganalyser}{\texttt{texloganalyser}},
+\href{https://gitlab.com/latex-rubber/rubber}{\texttt{rubber-info}},
+\href{https://ctan.org/pkg/texlog-extract}{\texttt{textlog\_extract}},
+\href{https://github.com/reitzig/texlogparser}{\texttt{texlogparser}},
+\href{https://gricad-gitlab.univ-grenoble-alpes.fr/labbeju/latex-packages}
+{\texttt{texlogfilter}}, \href{https://github.com/dmwit/pulp}
+{\texttt{pulp}}, and others.
+
+Note that it does not try to do anything smart about error messages (but
+it shows a warning in the summary if one is detected; check the ``Tips''
+section regarding this); if there is an error, you probably want to take
+a look directly at the log file anyway. It also cannot detect if \LaTeX{}
+stops for user input, so you should \textbf{really} run \LaTeX\ in
+\texttt{nonstopmode} when \texttt{texlogsieve} is reading from a pipe.
+
+\texttt{texlogsieve} \textbf{must} be run from the same directory as
+\verb/[pdf|lua|xe]latex/, because it searches for the files used during
+compilation (packages loaded from the current directory, files included
+with \verb|\input| etc.).
+
+\pagebreak[1]
+The defaults are reasonable; hopefully, you can just do
+
+\begin{list}{}{}
+    \small\item
+    \verb/[pdf|lua|xe]latex -interaction nonstopmode myfile.tex | texlogsieve/
+    \par
+    {\normalsize or\par}
+    \verb|texlogsieve myfile.log|
+\end{list}
+
+\noindent and be satisfied with the result.
+
+Since it needs to know what messages to expect, \texttt{texlogsieve} is
+currently geared towards \LaTeX; I have no idea how it would work with
+Con\TeX{}t or plain \TeX. Still, adding support to them should not be
+too difficult.
+
+If you want to know more about the \TeX\ log file and the workings of the
+program, check the initial comments in the code.
+
+\section{Unwrapping Long Lines}
+
+\TeX\ wraps (breaks) lines longer than \texttt{max\_print\_line} (by
+default, 79 characters). Most tools detect lines that are exactly 79
+characters long and treat the next line as a continuation, but that fails
+in quite a few cases (check the comments in the \texttt{texlogsieve} code
+for a discussion on that). So, if at all possible, it is a very good idea
+to set \texttt{max\_print\_line} to a really large value (such as 100,000),
+effectively disabling line wrapping. It was useful in the 1980s, but not
+anymore (your terminal or editor wraps automatically)\footnote{Likewise,
+\texttt{error\_line} and \texttt{half\_error\_line} should be, respectively,
+254 and 238 (more about these values here:
+\url{https://tex.stackexchange.com/a/525972}).}.
+
+Still, \texttt{texlogsieve} goes to great lengths to correctly handle
+\TeX{} line wrapping and does a pretty good job at that. It understands
+the \texttt{max\_print\_line} \TeX{} configuration variable and reads its
+value from the same places as \TeX. Setting \texttt{max\_print\_line} to
+a value larger than 9999 makes \texttt{texlogsieve} ignore line wrapping.
+
+\section{Unrecognized Messages}
+\label{unrecognized}
+
+\texttt{texlogsieve} automatically handles messages such as ``Package blah
+Info:\dots'' or ``LaTeX Warning:\dots''. However, many  messages do not
+follow this pattern. To do its thing, \texttt{texlogsieve} should know about
+these other messages beforehand. This is important for three reasons:
+
+\begin{enumerate}
+  \item Unknown messages are given maximum priority; if you do not want to
+        see them, you have to use \texttt{-\/-silence-string};
+  \item If the message has more than one line, each line is treated as an
+        independent message. This means you need to use
+        \texttt{-\/-silence-string} multiple times;
+  \item In some rare cases, an unrecognized message may make
+        \texttt{texlogsieve} misclassify nearby wrapped lines (if it comes
+        right after a 79 characters long line of a specific type), close
+        file messages (if it includes an unmatched close parens character),
+        or shipout messages (if it includes an unmatched close square bracket
+        character or an open square bracket character followed only by
+        numbers).
+\end{enumerate}
+
+While \texttt{texlogsieve} recognizes quite a few messages out of the box,
+you may run into a message generated by some package that it does not know
+about (you can check for this using \texttt{-l unknown}). If that is the
+case, you can use the \verb/--add-[debug|info|warning|critical]-message/
+options to add it to the list of messages known to the program.
+
+\section{Configuration File}
+
+\texttt{texlogsieve} always searches automatically for the (optional)
+\texttt{texlogsieverc} configuration file in \texttt{\$TEXINPUTS} (i.e.,
+it searches using \texttt{Kpathsea}). In the default configuration, the
+current directory is in \texttt{\$TEXINPUTS}, so adding a config file
+with that name to the project directory is enough to make it work.
+Options in the config file are exactly the same as the long command-line
+options described below, but without the preceding ``\texttt{-\/-}''
+characters. Lines starting with a ``\#'' sign are comments. An example
+configuration file:
+
+\begin{quote}
+\begin{verbatim}
+no-summary-detail
+no-page-delay
+# no-page-delay enables shipouts, but we do not want that
+no-shipouts
+set-to-level-info=Hyperreferences in rotated content will be misplaced
+# no need to escape the "\" (or any other) character
+silence-string = Using \overbracket and \underbracket from `mathtools'
+# silence a string using lua pattern matching
+silence-string = ////luaotfload | aux : font no %d+ %(.-%)
+silence-files = *.sty
+\end{verbatim}
+\end{quote}
+
+If you'd like to also have a generic configuration file for all your projects
+(a good idea), put it at \texttt{\$HOME/.texlogsieverc} in unix-like systems;
+in Windows, put it either at \texttt{\%LOCALAPPDATA\%\textbackslash{}%
+texlogsieverc} (\texttt{C:\textbackslash{}Users\textbackslash{}<username>%
+\textbackslash{}AppData\textbackslash{}Local}) or \texttt{\%APPDATA\%%
+\textbackslash{}texlogsieverc} (\texttt{C:\textbackslash{}Documents and
+Settings\textbackslash{}<username>\textbackslash{}Application Data} or
+\texttt{C:\textbackslash{}Users\textbackslash{}<username>\textbackslash{}%
+AppData\textbackslash{}Roaming}).
+
+\section{Options}
+
+\begin{description}
+\item[\texttt{-\/-page-delay}, \texttt{-\/-no-page-delay}]~\\
+Enable/disable grouping messages by page before display. When enabled, messages
+are only output after the current page is finished (shipout). The advantage is
+that the page number is included in the message (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-summary}, \texttt{-\/-no-summary}]~\\
+Enable/disable final summary (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-only-summary}]~\\
+No messages, show only the final summary (default disabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-shipouts}, \texttt{-\/-no-shipouts}]~\\
+Enable/disable reporting shipouts (default disabled with page-delay, enabled
+with no-page-delay).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-file-banner}, \texttt{-\/-no-file-banner}]~\\
+Show/don't show the ``From file\dots'' banner messages (default enabled,
+except with level \texttt{DEBUG} as that would be redundant and confusing).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-repetitions}, \texttt{-\/-no-repetitions}]~\\
+Allow/prevent repeated messages (default disabled, i.e., repeated messages
+are supressed).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-be-redundant}, \texttt{-\/-no-be-redundant}]~\\
+Present/suppress ordinary messages that will also appear in the summary.
+This affects messages that have special summaries (such as under/overfull
+boxes or undefined citations). With \texttt{-\/-no-be-redundant} (the
+default), these messages are filtered out and only appear in the final
+summary.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-box-detail}, \texttt{-\/-no-box-detail}]~\\
+Include/exclude detailed information on under/overfull boxes in the final
+summary. With \texttt{-\/-no-box-detail}, the summary presents only a list
+of pages and files that had under/overfull boxes (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-ref-detail}, \texttt{-\/-no-ref-detail}]~\\
+Include/exclude detailed information on undefined references in the final
+summary. With \texttt{-\/-no-ref-detail}, the summary presents only a list of
+undefined references, without page numbers and filenames (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-cite-detail}, \texttt{-\/-no-cite-detail}]~\\
+Include/exclude detailed information on undefined citations in the final
+summary. With \texttt{-\/-no-cite-detail}, the summary presents only a list
+of undefined citations, without page numbers and filenames (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-summary-detail}, \texttt{-\/-no-summary-detail}]~\\
+Toggle \texttt{-\/-box-detail}, \texttt{-\/-ref-detail}, and
+\texttt{-\/-cite-detail} at once.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-heartbeat}, \texttt{-\/-no-heartbeat}]~\\
+Enable/disable progress gauge in page-delay mode (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-color}, \texttt{-\/-no-color}]~\\
+Enable/disable colored output. On Windows, this will only work with
+an up-to-date Windows 10 or later (default disabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-tips}, \texttt{-\/-no-tips}]~\\
+Enable/disable suggesting fixes for some known warnings (default enabled).
+\end{description}
+
+\begin{description}
+\item[\texttt{-l LEVEL}, \texttt{-\/-minlevel=LEVEL}]~\\
+Filter out messages with severity level lower than \texttt{LEVEL}. Valid
+levels are \texttt{DEBUG} (no filtering), \texttt{INFO}, \texttt{WARNING},
+\texttt{CRITICAL}, and \texttt{UNKNOWN} (default \texttt{WARNING}).
+\end{description}
+
+\begin{description}
+\item[\texttt{-u}, \texttt{-\/-unwrap-only}]~\\
+Do not filter messages and do not output the summary, only unwrap long,
+wrapped lines. The output should be very similar (but not equal) to the
+input file, but with wrapped lines reconstructed. This activates
+\texttt{-l debug}, \texttt{-\/-no-summary}, \texttt{-\/-no-page-delay},
+\texttt{-\/-repetitions}, \texttt{-\/-be-redundant}, \texttt{-\/-shipouts},
+and \texttt{-\/-no-file-banner}, and also supresses the verbose ``open/close
+file'' and ``shipout'' messages, simulating instead the \TeX{} format, with
+parens and square brackets. This is useful if you prefer the reports
+generated by some other tool but want to benefit from texlogsieve's line
+unwrapping algorithm; the output generated by this option should be
+parseable by other tools (but you probably need to coerce the other
+tool not to try to unwrap lines).
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-silence-package=PKGNAME}]~\\
+Filter out messages that can be identified as coming from the given package.
+Use this option multiple times to suppress messages from several different
+packages.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-silence-string=EXCERPT OF UNWANTED MESSAGE}]~\\
+Filter out messages that contain the given string (you only need to provide
+part of the message text for the whole message to be suppressed). Use this
+option multiple times to suppress several different messages. The string
+should be a single line, but that is not a problem for multiline log
+messages: space characters in the provided string match any sequence of
+whitespace characters in the message, including newlines. If needed, you
+may precede the string with ``////'', in which case you can use lua-style
+pattern matching (\url{https://www.lua.org/pil/20.2.html}). Note that the
+string is used verbatim: you may need to enclose it in quotes or escape
+special characters such as ``\textbackslash'' for the benefit of the
+shell, but such quoting and escaping is unnecessary (and harmful) in
+the configuration file.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-silence-file=FILENAME OR FILE GLOB}]~\\
+Filter out messages that have been generated while the given file was being
+processed. Do \textbf{not} use absolute or relative paths, only filenames.
+Simple file globs, such as ``\texttt{*.cls}'', work as expected. If you are
+only using packages you already know, silencing ``\texttt{*.sty}'' may be a
+good idea (note that this does not suppress all messages from all packages,
+only the messages generated while the packages are being loaded). Use this
+option multiple times to suppress messages from several different files.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-semisilence-file=FILENAME OR FILE GLOB}]~\\
+Just like the previous option, but non-recursive. This means that messages
+generated while the given file was being processed are excluded, but messages
+generated by some other file that was opened by it are not. For example,
+if ``\texttt{chapters.tex}'' includes (with \textbackslash input) the
+files ``\texttt{chapter1.tex}'' and ``\texttt{chapter2.tex}'', using
+``\texttt{-\/-silence-file=chapters.tex}'' will prevent messages generated
+by any of the three files from being displayed. If, however, you use
+``\texttt{-\/-semisilence-file=chapters.tex}'', messages generated by
+\texttt{chapters.tex} will be suppressed, but messages generated by
+\texttt{chapter1.tex} or \texttt{chapter2.tex} will not.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-add-[debug\textbar info\textbar warning\textbar
+      critical]-message=MESSAGE}]~\\
+Add \texttt{MESSAGE} to the list of messages known to the program with the
+given severity level; see Section \ref{unrecognized} for more information
+about this. Like \texttt{-\/-silence-string}, these should be a single line;
+unlike \texttt{-\/-silence-string}, you need to embed \verb|\n| explicitly
+to indicate line breaks (this is literally a backslash character followed
+by the letter ``n'', \textbf{not} a linefeed character). You may precede
+the string with ``////'' to use lua-style pattern matching, but embedding
+\verb|\n| to indicate line breaks is unavoidable. Use these options multiple
+times to add many different messages.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-set-to-level-[debug\textbar info\textbar warning\textbar
+      critical]=EXCERPT OF MESSAGE}]~\\
+Redefine the severity level of messages that contain the provided string
+to the given level. Check the explanation for \texttt{-\/-silence-string},
+as this works in a similar way. Use these options multiple times to change
+the severity level of many different messages.
+\end{description}
+
+\begin{description}
+\item[\texttt{-c CFGFILE}, \texttt{-\/-config-file=CFGFILE}]~\\
+Read options from the given configuration file in addition to the
+default config files (see the ``Configuration File'' section).
+\end{description}
+
+\begin{description}
+\item[\texttt{-v}, \texttt{-\/-verbose}]~\\
+Print the list of configuration files read and a short summary of the
+most important active configuration options.
+\end{description}
+
+\begin{description}
+\item[\texttt{-h}, \texttt{-\/-help}]
+Show concise options description.
+\end{description}
+
+\begin{description}
+\item[\texttt{-\/-version}]
+Print program version.
+\end{description}
+
+\section{Tips}
+
+\begin{itemize}
+  \item If the program output is still too verbose to your liking, resist
+  the urge to use \texttt{-l critical} or \texttt{-\/-only-summary}. Instead,
+  create a configuration file with \texttt{no-summary-detail} and appropriate
+  \texttt{silence-[something]} and \texttt{set-to-level-[something]} options:
+  You will get reasonably quiet output but still be notified of problems. Since
+  you probably always use essentially the same set of packages and classes,
+  the file will be useable in other \LaTeX\ projects too; just put it in one
+  of the places discussed in the ``Configuration File'' section.
+
+  \item \texttt{texlogsieve} has no smarts to deal with error messages, but
+  you may use options \texttt{-l unknown -\/-no-page-delay -\/-no-summary
+  -\/-no-shipouts -\/-no-file-banner} to get almost nothing but errors.
+
+  \item With \texttt{latexmk}, it is enough to put something like this in
+  \texttt{latexmkrc}:
+
+  \bgroup\small
+  \begin{verbatim}
+set_tex_cmds("-halt-on-error -interaction nonstopmode %O %S|texlogsieve");\end{verbatim}
+  \egroup
+
+  However, this means you get to see the repeated output of all iterations
+  needed to produce the document. To only see the output of the last iteration,
+  you may do something like this:
+
+  \bgroup\small
+  \begin{verbatim}
+set_tex_cmds("-halt-on-error %O %S");
+
+$silent = 1; # This adds "-interaction batchmode"
+$silence_logfile_warnings = 1;
+
+END {
+  local $?; # do not override previous exit status
+  if (-s "$root_filename.blg"
+              and open my $bibfile, '<', "$root_filename.blg") {
+
+      print("**********************\n");
+      print("bibtex/biber messages:\n");
+      while(my $line = <$bibfile>) {
+          if ($line =~ /You.ve used/) {
+              last;
+          } else {
+              print($line);
+          };
+      };
+      close($bibfile);
+  };
+
+  if (-s "$root_filename.ilg"
+              and open my $indfile, '<', "$root_filename.ilg") {
+
+      print("*************************\n");
+      print("makeindex/xindy messages:\n");
+      while(my $line = <$indfile>) {
+          print($line);
+      };
+      close($indfile);
+  };
+
+  if (-s "$root_filename.log") {
+      print("***************\n");
+      print("LaTeX messages:\n");
+      Run_subst("texlogsieve %R.log");
+  };
+};\end{verbatim}
+  \egroup
+\end{itemize}
+
+\section{License}
+
+Copyright © 2021--2025 Nelson Lago \textless lago@ime.usp.br\textgreater\\
+License GPLv3+: GNU GPL version 3 or later
+\url{https://gnu.org/licenses/gpl.html}.\\
+This is free software: you are free to change and redistribute it.\\
+There is NO WARRANTY, to the extent permitted by law.
+
+\PrintChanges
+
+\end{document}

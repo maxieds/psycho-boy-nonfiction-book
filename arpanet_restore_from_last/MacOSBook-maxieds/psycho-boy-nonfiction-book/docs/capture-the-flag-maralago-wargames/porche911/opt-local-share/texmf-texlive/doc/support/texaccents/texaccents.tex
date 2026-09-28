@@ -1,0 +1,258 @@
+% TEXACCENTS.TEX
+% Documentation for texaccents.sno / texaccents.spt
+% version 1.0.1 -- 17th september 2022
+% author: guido.milanese@unicatt.it
+% tex file produced from markdown source
+% using `pandoc texaccents.md -s -o texaccents.tex`
+% and compiled with lualatex
+% Line 35 was added: \microtypesetup{nopatch=item}
+% See: https://github.com/schlcht/microtype/issues/4
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  12pt,
+  english,
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[]{libertine}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+  \microtypesetup{nopatch=item}
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={TeXaccents version 1.0.1},
+  pdfauthor={Guido Milanese},
+  pdflang={en},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifXeTeX
+  % Load polyglossia as late as possible: uses bidi with RTL langages (e.g. Hebrew, Arabic)
+  \usepackage{polyglossia}
+  \setmainlanguage[]{english}
+\else
+  \usepackage[main=english]{babel}
+% get rid of language-specific shorthands (see #6817):
+\let\LanguageShortHands\languageshorthands
+\def\languageshorthands#1{}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{TeXaccents\\
+version 1.0.1}
+\author{Guido Milanese\footnote{Università Cattolica d.S.C.,
+  Dipartimento di scienze storiche e filologiche, via Trieste 17,
+  I-25121 Brescia}}
+\date{17\textsuperscript{th} September 2022}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+TeXaccents is a standalone utility designed to convert legacy (La)TeX
+ligatures and codes for ``accented'' characters to Unicode equivalents
+(text mode, no math) . For example, \texttt{\textbackslash{}=\{a\}} (`a'
+with macron) will be converted to \texttt{ā}.
+\end{abstract}
+
+\hypertarget{general-information}{%
+\section{General information}\label{general-information}}
+
+Even if modern compilers handle Unicode encoding, (La) and files
+featuring ``legacy'' encoding for non-Ascii characters are still very
+common, and users may need to incorporate old code into new texts that
+make use of modern text encoding.
+
+Several utilities are available online that claim to be able to convert
+legacy (La) encoding to standard Unicode. See:
+
+\begin{itemize}
+\item
+  \emph{Simple LaTeX to Text Converter}. A complex programme, able to
+  deal with maths. Insofar as non-Ascii chars are concerned, it fails
+  sometimes, at least according to my tests. See
+  \url{https://pylatexenc.readthedocs.io/en/latest/latexwalker/}.
+  Written in Python.
+\item
+  \emph{LaTeX handler}. Converts non-Ascii (La) encoding to Unicode.
+  However, it does not seem to be able to deal with the legacy encoding,
+  e.g.~\texttt{\{\textbackslash{}a\}} instead of
+  \texttt{\textbackslash{}\{a\}} or \texttt{\textbackslash{}a}. It does
+  not convert simple ligatures as \texttt{\textbackslash{}ae\{\}}
+  \texttt{\textbackslash{}oe\{\}}. I used the tables provided by this
+  programme as a starting point. Written in Python. See
+  \url{https://github.com/hayk314/LaTex-handler}.
+\item
+  \emph{Pandoc} is the standard programme for any text format conversion
+  (\url{https://pandoc.org/}). It converts almost all the accents (thorn
+  and eth missing?), but (if I have checked this correctly) normalises
+  files stripping non-standard fields. This can be a problem for
+  scholars who frequently use non-standard fields, such as e.g.
+  ``shorttitle'', required by not a few bibliographic styles.
+\end{itemize}
+
+\emph{TeXaccents} should be able to transform (La) normal text or
+``accents'' (not ``math'' accents) to their Unicode equivalent. The
+programme deals with the following codes (\emph{not all the fonts are
+able to output all the required Unicode glyphs of this table!}):
+
+\begin{verbatim}
+| NAME              | \tex       | Unicode |
+|---------------    |-------    |---------|
+| Umlaut            | \"{a}     | ä       |
+| acute             | \'{a}     | á       |
+| double acute      | \H{a}     | a̋       |
+| grave             | \`{a}     | à       |
+| circumflex        | \^{a}     | â       |
+| caron hraceck     | \v{a}     | ǎ       |
+| breve             | \u{a}     | ă       |
+| cedilla           | \c{c}     | ç       |
+| dot               | \.{a}     | ȧ       |
+| dot under         | \d{a}     | ạ       |
+| ogonek            | \k{a}     | ą       |
+| tilde             | \~{a}     | ã       |
+| macron            | \={a}     | ā       |
+| bar under         | \b{a}     | a̱       |
+| ring over         | \r{a}     | å       |
+\end{verbatim}
+
+The programme should recognize the following varieties:
+
+\texttt{\textbackslash{}\textquotesingle{}a} --
+\texttt{\textbackslash{}\textquotesingle{}\{a\}} --
+\texttt{\{\textbackslash{}\textquotesingle{}a\}} --
+\texttt{\{\{\textbackslash{}\textquotesingle{}a\}\}}
+
+It transforms also the encoding for : \texttt{æ~œ~Æ~Œ~ð~Ð~þ~Þ~ø~Ø~ł~Ł}.
+Checking the page
+\url{https://www.utf8-chartable.de/unicode-utf8-table.pl?number=512} I
+could not find a legacy text mode encoding for:
+\textbf{ƀ~Ƀ~đ~Đ~ǥ~Ǥ~ħ~Ħ~ɨ~Ɨ~ŧ~Ŧ~ƶ~Ƶ} (some chars are accessible in math
+mode).
+
+\hypertarget{setup}{%
+\section{Setup}\label{setup}}
+
+\hypertarget{from-source}{%
+\subsection{From source}\label{from-source}}
+
+The programme is written in Snobol
+(\url{https://en.wikipedia.org/wiki/SNOBOL} or
+\url{https://it.wikipedia.org/wiki/SNOBOL}) and should run on any
+platform. Steps:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Install Snobol4 (version 2.3, March 2022) from
+  \url{http://www.regressive.org/snobol4/csnobol4/curr/}. Make sure to
+  install the compiler in a folder listed in your \texttt{PATH} or add
+  the folder to your path. On Linux the folder \texttt{snobol4} is
+  installed under \texttt{/usr/local/bin/}, which is normally listed in
+  the PATH of a standard Linux system.
+\item
+  Test the compiler running \texttt{snobol4} from the command line.
+  Leave the compiler with \texttt{Ctr-C} or writing \texttt{end}.
+\item
+  Copy \texttt{texaccents.sno} and all the provided \texttt{*.inc} files
+\end{enumerate}
+
+\begin{quote}
+\texttt{compiler.inc}~\texttt{delete.inc}~\texttt{grepl.inc}~\texttt{newline.inc}~\texttt{systype.inc}
+\end{quote}
+
+to a folder of your choice
+(e.g.~\texttt{/home/\textless{}user\textgreater{}/bin}).
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  In this folder, run
+  \texttt{snobol4\ texaccents.sno\ testaccents-in\ testaccents-out} to
+  test the programme. The test file contains all the accents listed
+  above. See the result typing \texttt{cat~testaccents-out} (Unixes /
+  Powershell) or \texttt{type~testaccents-out} (Windows/Dos prompt), or
+  open the file with your text editor. The output file name is just a
+  suggestion, of course.
+\end{enumerate}
+
+\hypertarget{windows-standalone-version}{%
+\subsection{Windows standalone
+version}\label{windows-standalone-version}}
+
+If preferred, a Windows EXE standalone file is provided. It was compiled
+using Spitbol (see \url{https://github.com/spitbol/windows-nt}); the
+source code has been slightly adapted to Spitbol (basically only
+input/output syntax). From any directory, run
+\texttt{texaccents.exe\ INPUT\ OUTPUT}. To test the programme, run
+\texttt{texaccents.exe\ testaccents-in\ testaccents-out}. As above, the
+output file name is just a suggestion.
+
+\hypertarget{history}{%
+\section{History}\label{history}}
+
+\begin{itemize}
+\tightlist
+\item
+  25\textsuperscript{th} July 2022. First version (after trying
+  unsuccesfully to convert an old file with existing utilities)
+\item
+  17\textsuperscript{th} August 2022. First complete version (0.9).
+\item
+  27\textsuperscript{rd} August 2022. This version (1.0) with
+  documentation and comments.
+\item
+  17\textsuperscript{th} September 2022. Windows standalone executable.
+  Manual page written. Version message added; help message improved. In
+  the source, a regular shebang according to the recommendation of CTAN
+  (\url{https://tug.org/texlive/pkgcontrib.html}) was added.
+  Documentation updated accordingly.
+\end{itemize}
+
+\hypertarget{contacts-todo}{%
+\section{Contacts / todo}\label{contacts-todo}}
+
+Bugs / suggestions / improvements: please write to
+\url{guido.milanese@unicatt.it} using \emph{TeXaccents} as subject of
+the mail.
+
+Genoa, Italy, 17\textsuperscript{th} September 2022
+
+\end{document}

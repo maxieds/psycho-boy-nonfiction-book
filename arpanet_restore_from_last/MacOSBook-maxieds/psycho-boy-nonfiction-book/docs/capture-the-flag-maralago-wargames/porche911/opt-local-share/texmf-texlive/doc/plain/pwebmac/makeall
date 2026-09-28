@@ -1,0 +1,459 @@
+#!/bin/sh -e
+
+PROG=$(basename $0)
+
+usage ()
+{
+	cat << HELP
+Usage: $PROG [options]
+
+Test driver for 'pwebmac.tex' in combination with various TeX engines.
+Produce TeX output in DVI, PDF or HINT format from a set of C/WEB programs
+included in the 'TeX Live' source tree.
+
+Options are (--long options only with Linux-getopt):
+	-c, --changes		Apply change file to C/WEB source
+	-f, --files STRING	Process only subset of C/WEB programs
+	-h, --help		Print this help message and exit
+	-n, --new		Use 'pwebmac' instead of 'webmac'
+	-o, --outdir ARG	Create tarballs in path ARG
+	-p, --pdftocfront	Place TOC page at the front (PDF only)
+	-t, --tex ARG		Use TeX variant ARG=[(hi|pdf|xe)]tex
+	-v, --validpdf		Use correct number of entries in NOS node
+
+Public domain.  Originally written by Andreas Scherer, 2020.
+HELP
+}
+
+LONGOPTS=changes,files:,help,new,outdir:,pdftocfront,tex:,validpdf
+SHRTOPTS=cf:hno:pt:v
+
+CHANGES= # apply changefile to C/WEB source
+FILESELECT=false # user-defined '--files' selection
+NEW=false # '\input pwebmac' instead of '\input webmac' for PDF et al.
+OUTDIR=. # path where the resulting tarballs are placed
+PDFTOCFRONT=false # push table-of-contents to front of PDF output
+TEX=tex # or 'pdftex' or 'xetex' or 'hitex' or 'luatex'
+VALID=false # give 'pdftex' a chance to produce valid output
+
+# Extra material -- unpublished
+LOCALSTUFF=/opt/github/web
+
+# Initial list of C/WEB sources to process, overridable with option '-f':
+KNUTHWHERE=$(locate /bibtex.web)
+if [ -z "$KNUTHWHERE" ]
+then echo "$PROG: Can't locate the TeX Live source tree!" >&2; exit 1
+fi
+KNUTHWARE=$(dirname $KNUTHWHERE)
+
+FILES="$KNUTHWARE/*.web pdftex.web xetex.web twill"
+WEBINPUTS=$KNUTHWARE//:
+
+FILES="$FILES common ctangle cweave ctwill refsort twinx ctie tie hitex \
+	mp mpost mpmath mpmathbinary mpmathdecimal mpmathdouble mpstrings tfmin"
+CWEBINPUTS=$KNUTHWARE//:
+
+KNUTHWHERE=$(locate /glue.web)
+if [ -n "$KNUTHWHERE" ]
+then
+	FILES="$FILES $KNUTHWHERE"
+	WEBINPUTS=$(dirname $KNUTHWHERE):$KNUTHWARE//:
+fi
+
+export WEBINPUTS CWEBINPUTS
+
+getopt -T >/dev/null && true # keep going
+
+if [ $? -eq 4 ] # Check for Linux-getopt with extensions
+then OPTS=$(getopt -n $PROG -o $SHRTOPTS -l $LONGOPTS -- "$@")
+else OPTS=$(getopt $SHRTOPTS $*)
+fi
+
+if [ $? -eq 0 ] # Check return code from getopt
+then eval set -- $OPTS
+else echo "Failed to parse options." >&2; exit 1
+fi
+
+while true
+do
+	case "$1" in
+		-c | --changes ) CHANGES="-changes"; shift ;;
+		-f | --files ) FILES="$2"; FILESELECT=true; shift 2 ;;
+		-h | --help ) usage; exit 0 ;;
+		-n | --new ) NEW=true; shift ;;
+		-o | --outdir ) OUTDIR="$2"; shift 2 ;;
+		-p | --pdftocfront ) PDFTOCFRONT=true; shift ;;
+		-t | --tex ) TEX=$2; shift 2 ;;
+		-v | --validpdf ) VALID=true; shift ;;
+		-- ) shift; break ;;
+		* ) usage; exit 1 ;;
+	esac
+done
+
+CWEAVE="cweave -f +lX +bph"
+CTWILL="ctwill -f +lpdf +bph"
+HITEX="hitex --compress"
+PAX="pax -wvzf"
+PDF=pdf # default extension for 'knuth-pdf'
+SED_I="sed -i" # non-GNU-sed requires an extra '' argument for '-i' option.
+WEAVE=weave
+XETEX=xetex
+
+case "$TEX" in
+	hitex ) # HINT format
+		CTWILL="$CTWILL +P"
+		TEX="$HITEX"
+		PDF=hnt # default extension for 'knuth-hint'
+		PDFTOCFRONT=false # use 'hintview -h' to start with TOC page
+		VALID=false ;; # HiTeX has no command-line option '--shell-escape'
+
+	pdftex | luatex ) # actually only necessary for 'pwebmac.tex'
+		VALID=true ;;
+
+	* ) # plain TeX and XeTeX use different approaches
+		[ tex = "$TEX" ] && XETEX="$XETEX --no-pdf"
+			# XeTeX's extended DVI format
+		VALID=false ;;
+esac
+
+# Valid PDF output from 'pdftex' and 'luatex': In 'pwebmac.tex' set '\countD'
+# to the actual number of @<named modules@>, not the number of all sections.
+if $VALID && { [ pdftex = "$TEX" ] || [ luatex = "$TEX" ]; }
+then
+	NEW=true # PDF output requires 'pwebmac.tex'
+	TEX="$TEX --shell-escape"
+fi
+
+# Use alternative TeX macros more suited for PDF output.
+[ -n "$CHANGES" ] && NEW=true
+$NEW && WEAVE="$WEAVE -p"
+
+# Loop over WEB and CWEB programs we want to get formatted
+for f in $FILES
+do
+	f=$(basename $f .web)
+
+	case $f in
+		pdftex ) # Fix several 'Overfull \hbox'es
+			tie -m $f.web $f.web $LOCALSTUFF/$f.ch ;;
+
+		mp | mpost | mpmath* | mpstrings | tfmin )
+			# Beautifications for MetaPost
+			tie -m $f.w $f.w $LOCALSTUFF/$f.ch ;;
+
+		weave | twill )
+			if [ "$HITEX" = "$TEX" ] # Fix non-constant factor
+			then
+				cp $KNUTHWARE/weave.web .
+				$SED_I weave.web -e 's/\\the\\hsize/460pt/'
+			fi ;;
+	esac
+
+	if [ -n "$CHANGES" ]
+	then
+		case $f in
+			# These are changes in and of themselves
+			ctwill | twill | glue | hitex | mp | mpost | \
+				mpmath* | mpstrings | tfmin ) continue ;;
+
+			# CWEB programs have individual changefiles
+			common ) $CWEAVE $f comm-w2c ;;
+			ctangle ) $CWEAVE $f ctang-w2c ;;
+			cweave ) $CWEAVE $f cweav-w2c ;;
+			refsort | twinx ) $CWEAVE $f $f ;;
+			ctie ) $CWEAVE $f $f-k ;;
+			tie ) $CWEAVE $f $f-w2c ;;
+
+			# main WEB programs have complex change files
+			tex | mf | pdftex | xetex )
+				WEBINPUTS=.:$KNUTHWARE/../../Work//:$WEBINPUTS: \
+				$WEAVE $f $f-final ;;
+
+			# all other WEB codes have singular changefiles
+			* ) $WEAVE $f $f ;;
+		esac
+
+		# only document changed modules/sections
+		$SED_I $f.tex -e '/\\let\\maybe/s/\\iftrue/\\iffalse/'
+	else # -z $CHANGES
+		case $f in
+			ctwill ) # apply tons of editorial changes to 'ctwill.w'
+				[ "$HITEX" = "$TEX" ] &&
+					ctie -m $f.w cweave.w $f-w2c.ch $f-hint.ch ||
+					ctie -m $f.w cweave.w $f-w2c.ch $f-mini.ch
+				$CTWILL $f # prime the pump
+				$CTWILL $f ;; # get decent answers
+
+			c* | refsort | twinx | tie ) $CWEAVE $f ;;
+			hitex ) $CWEAVE $f || true ;; # lots of unused sections
+
+			mp | mpost | mpmath* | mpstrings | tfmin )
+				CWEBINPUTS=.: $CWEAVE $f ;;
+
+			twill ) WEBINPUTS=.:$WEBINPUTS \
+				tie -c $f.ch weave.web weave.ch weav-$f.ch
+				WEBINPUTS=.:$WEBINPUTS $WEAVE weave $f $f ;;
+
+			pdftex | weave ) WEBINPUTS=.:$WEBINPUTS $WEAVE $f ;;
+
+			* ) $WEAVE $f ;;
+		esac
+	fi # $CHANGES
+
+	# 'pwebmac' is for WEB only; do nothing for CWEB programs
+	if $NEW && echo $f | grep -v -q -E \
+		'^c|refsort|twinx|tie|hitex|^mp|tfmin'
+	then
+		# timestamp on table-of-contents page or the first page
+		case $f in
+			bibtex | patgen | tangle | weave | twill )
+				$SED_I $f.tex -e 's/\\def\\title{/\\datecontentspage\n&/' ;; # }
+
+			mf | tex | pdftex | xetex )
+				# amend '\N' redefinition for PDF outlines in
+				# Metafont and TeX (also pdfTeX and XeTeX)
+				# 'pwebmac' defines headers differently
+				cat > texmf-pdf.sed << 'FI'
+s/\\outer\\def\\N.*{/&%/
+s/\\def\\rhead\({.*}\)/\\gtitle=\1\\MN#1.\\vfill\\eject/
+s/\\def\\title{/\\datethis\n\\emergencystretch=.1\\hsize\n&/
+FI
+				# active links in PDF outlines/bookmarks
+				cat > texmf-pdf.patch1 << FI
+  \ifpdf{\makeoutlinetoks{[#2] #3}\outlinedone}\fi
+FI
+				cat >> texmf-pdf.sed << 'FI'
+/\\outer\\def\\N/r texmf-pdf.patch1
+s/{\\the\\pageno}/&{\\the\\toksE}/
+FI
+				cat > texmf-pdf.patch2 << FI
+  \ifpdflua\relax\else
+  \ifpdf\special{pdf: outline 0 << /Title (\the\toksE) /Dest
+    [ @thispage /FitH @ypos ] >>}\fi\fi
+FI
+				cat >> texmf-pdf.sed << 'FI'
+/\\edef\\next/r texmf-pdf.patch2
+FI
+				$SED_I $f.tex -f texmf-pdf.sed
+				rm -f texmf-pdf.* ;;
+
+			* ) $SED_I $f.tex -e '/\\def\\botofcontents/d' \
+				-e 's/  \\centerline{\(\\hsize\)/\\def\\covernote{\1/' \
+				-e 's/\(Publishing Company.}}\)}/\1\n\\datecontentspage/' \
+				-e 's/\(Mathematical Society.}}\)}/\1\n\\datecontentspage/' ;;
+		esac
+	fi # $NEW
+
+	# special treatment for individual C/WEB programs
+	case $f in
+		# replace former convention to indicate "not a title
+		# page" to include page headers for table-of-contents;
+		# purge conflict between bibtex.web and webmac.tex
+		# 'E' no longer free to be active character
+		# fix table-of-contents page for bibtex
+		# FIX: don't wait for Oren Patashnik.
+		bibtex ) $SED_I $f.tex -e 's/\\def\\titlepage{F}/\\titletrue/'
+			[ -z "$CHANGES" ] && $SED_I $f.tex -e "71,78d" ;;
+
+		# FIX: GFtoDVI uses 'Metafont' in a module name;
+		# this should appear correctly in the bookmarks, too.
+		gftodvi ) $NEW && $SED_I $f.tex \
+			-e 's/\\def\\(/\\ifpdf\\sanitizecommand\\MF{Metafont}\\fi\n\n&/' ;; # )
+
+		# FIX: 'glue.web' obviously uses an old 'webmac.tex'.
+		glue ) $SED_I $f.tex -e 's/titlefalse/titletrue/' \
+			-e 's/\\def\\title{GLUE}/&\n\\pageno=\\contentspagenumber \\advance\\pageno by1\\relax/' ;;
+
+		# FIX: Metafont uses '\over' in several module names;
+		# this should appear correctly in the bookmarks, too.
+		mf ) $NEW && $SED_I $f.tex \
+			-e 's/\\def\\(/\\ifpdf\n\\sanitizecommand\\MF{Metafont}\n\\sanitizecommand\\over{\/}\n\\sanitizecommand\\langle{<}\n\\sanitizecommand\\rangle{>}\n\\fi\n\n&/' ;; # )
+
+		# FIX: MFT uses '\pb' in several module names;
+		# this should appear correctly in the bookmarks, too.
+		mft ) $NEW && $SED_I $f.tex \
+			-e 's/\\def\\pb.*/&\n\\ifpdf\\sanitizecommand\\pb{\|...\|}\\fi/' ;;
+
+		# FIX: pdfTeX uses '\pdfTeX' in section names; these should
+		# appear correctly in the bookmarks, too.
+		pdftex ) $NEW && $SED_I $f.tex \
+			-e 's/\\def\\pdfeTeX{pdf\\eTeX}/&\n\\ifpdf\n\\sanitizecommand\\pdfTeX{pdfTeX}\n\\sanitizecommand\\eTeX{e-TeX}\n\\sanitizecommand\\over{\/}\n\\fi/' ;;
+
+		# FIX: weave uses '\max' in name of module 173; this should
+		# appear correctly in the bookmarks, too.
+		weave ) $NEW && $SED_I $f.tex \
+			-e 's/\\def\\({}/\\ifpdf\\sanitizecommand\\max{max}\\fi\n&/' ;; # )
+
+		# FIX: purge obsolete macros from XeTeX.
+		# FIX: XeTeX uses '\pdfTeX' from section 114, which is not
+		# changed and thus 'disappears'; repeat in preamble.
+		# FIX: apply '\sanitizecommand' for bookmarks.
+		xetex ) $SED_I $f.tex -e '/\\input xewebmac/d' \
+			-e 's/\\let\\maybe/\\def\\pdfTeX{pdf\\TeX}\n&/'
+			$NEW && $SED_I $f.tex \
+				-e 's/\\def\\pdfTeX{pdf\\TeX}/&\n\\ifpdf\\sanitizecommand\\pdfTeX{pdfTeX}\\fi/' \
+				-e 's/\\def\\eTeX/\\ifpdf\n\\sanitizecommand\\eTeX{e-TeX}\n\\sanitizecommand\\over{\/}\n\\fi\n&/' ;;
+
+		# timestamp on table-of-contents page or the first page
+		hitex | mp ) $SED_I $f.tex -e 's/\\def\\topofcontents/\\datethis\n\\emergencystretch=.1\\hsize\n&/' ;;
+		common | ctangle | cweave | ctie | tie ) $SED_I $f.tex -e 's/\\def\\botofcontents/\\datethis\n&/' ;;
+		mpost | mpmath* | mpstrings | tfmin ) $SED_I $f.tex -e 's/\\def\\title{/\\datecontentspage\n\n&/' ;; # }
+	esac
+
+	# shift table-of-contents pages to the front in PDF
+	if $PDFTOCFRONT && echo $f | grep -v -q -E 'ctwill|hitex'
+	then $SED_I $f.tex \
+		-e '0,/\\N[1{]/s/\\N[1{]/\\input pdfwebtocfront\n\n&/'
+	fi # $PDFTOCFRONT
+
+	if [ -n "$CHANGES" ] || [ twill = "$f" ]
+	then
+		# We add an Editor's Note and the list of changed
+		# sections on the ToC page.
+		cp $LOCALSTUFF/editorsnote.tex .
+
+		case $f in
+			mf ) $SED_I $f.tex -e 's/\\datethis/\\input editorsnote.tex\n\\def&{\\def\\startsection{\\leftline{\\sc\\today\\ at \\hours}\n  \\medskip\\editorsnote\\readchanges\\bigskip\n  \\let\\startsection=\\stsec\\stsec}}\n&/' ;;
+
+			# TeX and XeTeX grow significantly for TeX Live
+			# so there's enough room on the last ToC page.
+			pdftex | tex | xetex ) $SED_I $f.tex \
+				-e '/\\datethis/d' \
+				-e 's/\(\\def\\botofcontents\).*/\\input editorsnote.tex\n\1{\\hsize6.5in\\vskip 0pt plus 1filll\n  \\editorsnote\\readchanges\\medskip\\noindent\\sc\\today\\ at \\hours}/' \
+				-e 's/\\input pdfwebtocfront/&\n\n\\def\\tocpages{2}/' ;;
+
+			bibtex | patgen | tangle | weave | refsort | twinx ) $SED_I $f.tex -e 's/\\date.*/\\input editorsnote\n\\def\\covernote{\\vbox{\\editorsnote\\readchanges\\par}}\n\\datecontentspage/' ;;
+
+			common | ctangle | cweave | ctie | tie ) $SED_I $f.tex \
+				-e 's/\\def\\covernote/\\input editorsnote.tex\n&/' \
+				-e 's/^}}/\\bigskip\\editorsnote\\readchanges\\par&/' ;;
+
+			twill ) $SED_I $f.tex \
+				-e 's/\\datecontentspage/\\input editorsnote.tex\n\\def\\covernote{\\vbox{\\editorsnote\\readchanges\\par}}\n&/' ;;
+
+			* ) $SED_I $f.tex \
+				-e 's/\\def\\title{/\\input editorsnote.tex\n&/' \
+				-e 's/\\vbox{\\ninerm/&\\editorsnote\\readchanges\\medskip/' ;;
+		esac
+	fi # $CHANGES
+
+	case $f in
+		ctwill ) # gives two different outcomes
+			if [ "$HITEX" = "$TEX" ] # sort mini-indexes
+			then # directly in the TeX file
+				( ctwill-proofsort < $f.tex ) 1<> $f.tex
+			else # in the TeX-created .ref file
+				$TEX $f
+				ctwill-refsort < $f.ref > $f.sref
+			fi
+			$TEX $f ;;
+
+		* ) # run TeX twice
+			if $PDFTOCFRONT || [ -n "$CHANGES" ]
+			then # only XeTeX can process XETEX.WEB
+				[ xetex = $f ] && $XETEX $f || $TEX $f
+			fi
+			[ xetex = $f ] && $XETEX $f || $TEX $f ;;
+	esac
+done
+
+# create tarballs w/o changes for publication
+if ( $PDFTOCFRONT || [ "$HITEX" = "$TEX" ] ) && ! $FILESELECT
+then
+	if [ -z "$CHANGES" ]
+	then
+		export TEXINPUTS=.:$(kpsewhich --var-value=TEXMFDIST)//:$KNUTHWARE//
+		touch pages.tex # let 'manmac' produce output at all
+
+		$TEX -jobname=errorlog $LOCALSTUFF/Xerrorlog.tex
+		for f in one two three four five six seven eight nine ten \
+			eleven twelve
+		do $TEX -jobname errata.$f errata.$f
+		done
+		$TEX errata
+		$PAX "$OUTDIR/errata.tar.gz" -s ,^,errata/, err*.$PDF
+
+		$PAX "$OUTDIR/hitex.tar.gz" -s ,^,hitex/, hitex.$PDF
+		$PAX "$OUTDIR/mp.tar.gz" -s ,^,mp/, mp.$PDF mpost.$PDF
+
+		# Finally, build the remaining documents
+		# * TeX and Metafont test routines
+		# * WEB and CWEB manuals
+		rm -f trapman.tex webman.tex cwebman.tex
+
+		# FIX: Prepare 'trapman' for automatic processing; several
+		# input files are renamed in TeX Live (in fact, there are
+		# additional files for MetaPost).
+		# Prepare 'webman' with section links and bookmarks.
+		for f in trapman webman
+		do
+			f=$(kpsewhich -engine tex $f)
+			tie -m $(basename $f) $f $LOCALSTUFF/$(basename $f .tex).ch
+		done
+
+		# Prepare 'cwebman' with footnotes describing the extended CWEB.
+		f=$(kpsewhich -engine tex cwebman)
+		tie -m $(basename $f) $f $(basename $f .tex)-w2c.ch
+
+		for f in tripman trapman webman cwebman
+		do $TEX $f
+		done
+
+		$PAX "$OUTDIR/mf.tar.gz" -s ,^,mf/, mf.$PDF trapman.$PDF
+		$PAX "$OUTDIR/tex.tar.gz" -s ,^,tex/, \
+			glue.$PDF tex.$PDF tripman.$PDF
+		$PAX "$OUTDIR/web.tar.gz" -s ,^,web/, \
+			webman.$PDF tangle.$PDF weave.$PDF twill.$PDF
+		$PAX "$OUTDIR/cweb.tar.gz" -s ,^,cweb/, \
+			cwebman.$PDF common.$PDF ctangle.$PDF cweave.$PDF \
+			ctwill.$PDF refsort.$PDF twinx.$PDF
+	else # -n $CHANGES
+		for f in *.$PDF
+		do
+			case $f in *$CHANGES.$PDF ) rm -f $f; continue ;; esac
+			mv $f $(basename $f .$PDF)$CHANGES.$PDF
+		done
+		[ "$HITEX" = "$TEX" ] && mv -f xetex.pdf xetex$CHANGES.pdf
+		$PAX "$OUTDIR/mf$CHANGES.tar.gz" -s ,^,mf/, mf$CHANGES.$PDF
+		$PAX "$OUTDIR/tex$CHANGES.tar.gz" -s ,^,tex/, tex$CHANGES.$PDF
+		$PAX "$OUTDIR/web$CHANGES.tar.gz" -s ,^,web/, \
+			tangle$CHANGES.$PDF weave$CHANGES.$PDF
+		$PAX "$OUTDIR/cweb$CHANGES.tar.gz" -s ,^,cweb/, \
+			common$CHANGES.$PDF ctangle$CHANGES.$PDF \
+			cweave$CHANGES.$PDF refsort$CHANGES.$PDF \
+			twinx$CHANGES.$PDF
+	fi # $CHANGES
+
+	$PAX "$OUTDIR/etc$CHANGES.tar.gz" -s ,^,etc/, \
+		vftovp$CHANGES.$PDF vptovf$CHANGES.$PDF
+	$PAX "$OUTDIR/mfware$CHANGES.tar.gz" -s ,^,mfware/, \
+		gftodvi$CHANGES.$PDF gftopk$CHANGES.$PDF \
+		gftype$CHANGES.$PDF mft$CHANGES.$PDF
+	$PAX "$OUTDIR/texware$CHANGES.tar.gz" -s ,^,texware/, \
+		dvitype$CHANGES.$PDF pltotf$CHANGES.$PDF \
+		pooltype$CHANGES.$PDF tftopl$CHANGES.$PDF
+	$PAX "$OUTDIR/other$CHANGES.tar.gz" -s ,^,other/, \
+		dvicopy$CHANGES.$PDF patgen$CHANGES.$PDF \
+		pktogf$CHANGES.$PDF pktype$CHANGES.$PDF
+	$PAX "$OUTDIR/xetex$CHANGES.tar.gz" -s ,^,xetex/, \
+		xetex$CHANGES.pdf
+	for f in bibtex pdftex ctie tie
+	do $PAX "$OUTDIR/$f$CHANGES.tar.gz" -s ,^,$f/, $f$CHANGES.$PDF
+	done
+
+	# Notes to self:
+	# (1) Create a user-friendly central entrypoint with
+	#     (a) pandoc index.md -o index.pdf
+	#     (b) pandoc index.md -o index.tex;
+	#         pandoc index.tex -s -o index.html \
+	#           --metadata title="C/WEB programs in TeX Live";
+	#         rm index.tex
+	# (2) Prepare a super-tarball from all the contents of these
+	#     individual tarballs (42/53 and 34/54) with either of
+	#     (a) pax -wzf knuth-pdf.tar.gz knuth-pdf
+	#     (a') pax -wzf knuth-hint.tar.gz knuth-hint
+	#     (b) zip -r knuth-pdf.zip knuth-pdf
+	#     (b') zip -r knuth-hint.zip knuth-hint
+fi
+
+exit 0

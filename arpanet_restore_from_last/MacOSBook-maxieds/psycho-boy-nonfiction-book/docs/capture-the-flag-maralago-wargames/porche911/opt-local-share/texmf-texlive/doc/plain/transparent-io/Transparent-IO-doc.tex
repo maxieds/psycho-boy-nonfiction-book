@@ -1,0 +1,832 @@
+% some \tt chars
+\def\bs{\char"5C }\def\ocb{\char"7B }\def\ccb{\char"7D }
+% simple \verbatim macros
+\def\beginverbatim{\medskip\noindent\bgroup\frenchspacing\tt}
+\def\parni{\par\noindent}\def\endverbatim{\egroup\goodbreak\medskip}
+% for control sequences in text another macro is used
+\def\cs#1{{\tt\string#1}}
+% important instructions are formulated as rules:
+\def\rule#1{\smallskip\def\par{\let\par=\endgraf\smallskip}{\parindent52pt \item{\rm#1. RULE:}}}
+% macros to indent error messages
+\def\fivespaces{\ \ \ \ \ }\def\tenspaces{\fivespaces\fivespaces}
+\def\twentyspaces{\tenspaces\tenspaces}\def\fortyspaces{\twentyspaces\twentyspaces}
+% macro to enter file names with descriptions
+\def\filename #1. #2:{\item{#1.}\hbox to 100pt{{\tt#2}\hfil--}}
+%
+\hyphenation{TrIO-macros TrIO-support TrIO-private TrIO-input
+   TrIO-extract TrIO-lineno TrIO-auto TrIO-open TrIO-names
+   TrIO-install openin open-out}
+\parskip=0pt
+
+
+
+\centerline{\bf TrIO: Transparent file I/O}
+\smallskip
+\centerline{\bf Version of 2022-04-30}
+\smallskip
+\centerline{Udo Wermuth}
+\smallskip
+
+\noindent
+The macros are written for the {\bf original \TeX} running with the
+format {\bf plain.tex}. It assumes that a path to a file uses
+directory names that are separated by slashes. Except letters, digits,
+and the slash only a period is used to separate the main part of the
+file name and its extension.
+
+The operation is done on a {\bf command line} and makes use of a {\bf
+bash script} and the stream editor~{\bf sed}. The installation scripts
+assume a {\bf UNIX-like operating system}.
+
+The application of the macros requires {\bf concentration}; don't
+execute \TeX\ with an instrumented source file hastily. Moreover, to
+use the macros successfully you must have a {\bf non-beginner's
+knowledge} of~\TeX. Strictly speaking, {\bf the more you know about
+plain \TeX\ the better}; see section~10.
+
+\smallskip
+{\sl Note}: My article in {\sl TUGboat\/} 43:1 (2022), 59--72,
+contains a lot of additional information, for example, about my
+motivation to develop these macros. But it omits some parts like the
+start message. I suggest to read the article and this manual if
+you want to apply the macros.
+
+\beginsection \rm a) Meaning of ``transparent'' 
+
+The word ``transparent'' means that the instrumented source cannot do
+any \cs\input, \cs\openin, or \cs\openout\ without an approval of the
+user. Well, {\tt\string\input} is an exception as it might be possible
+to input a file without approval---{\sl might} because it depends on
+your operating system and your \TeX\ program---but that a file is
+input is always shown on the terminal and the user must stop the
+processing. An evil-doer might try to circumvent the reporting of the
+macros. In such a case the user must check the source carefully for
+malicious code before it should be compiled again by~\TeX.
+
+\beginsection \rm b) Rules
+
+As indicated in the previous paragraph the application of the macros
+requires that the user follows a couple of rules. Otherwise the macros
+of this package might not do what is intended.
+
+ \rule1 Create in the directory with the source that you want to test
+a new subdirectory, say, {\tt trioo}, and redirect all \cs\openout\
+commands to this subdirectory.
+
+ \rule2 Check that the bundle of the source files doesn't include a
+file that carries a name that's identical to a file name of this
+package. Otherwise rename such a source file.
+
+ \rule3 Never approve that a file of this package is processed by the
+source file. Enter the new name of a source file if you renamed one of
+them because of rule~2. Otherwise stop the run and check the source.
+
+ \rule4 Follow all terminal messages carefully; don't allow that the
+source inputs a file without your approval. Otherwise stop the run and
+check the source. (Maybe you need to apply an option; see section~4.)
+
+
+
+\beginsection 1. Files in the package
+
+The package contains the following files:
+
+\medskip
+\filename  1. TrIOmacros.org: main file to instrument a source file
+\filename  2. TrIOsupport.org: common macros to {\tt TrIOmacros.tex} and {\tt TrIOauto.tex}
+\filename  3. TrIOprivate.org: copies of control sequences and test routines
+\filename  4. TrIOinput.org: called for every \cs\input
+\filename  5. TrIOopenin.org: entered by the user for every \cs\openin
+\filename  6. TrIOopenout.org: entered by the user for every \cs\openout
+\smallskip
+\filename  7. TrIOextract.org: {\tt sed} script to create {\tt TrIOnames.tex}
+\filename  8. TrIOlineno.org: another {\tt sed} script to create {\tt TrIOnames.tex}
+\filename  9. TrIOauto.org: replacement for {\tt TrIOmacros.tex} in repeated executions
+\filename 10. TrIOopen.org: called for every I/O command in {\tt TrIOnames.tex}
+\smallskip
+\filename 11. TrIO.org: {\tt bash} script to install the package
+\filename 12. TrIOinstall.org: {\tt sed} script to set passwords and private messages
+\filbreak\medskip
+
+The last two files are only used for the installation. They must be
+renamed and edited, see section~2. The other files get a new extension
+during the installation.
+
+The first six files are required to instrument a source; see
+section~3. All are renamed during the installation so that all have
+the extension {\tt tex} instead of {\tt org}; in the names of files 5
+and 6 the ``TrIO'' prefix is deleted too. Files 7--10 are needed for
+repeated executions; see section~8. The first two become {\tt sed}
+scripts the other two {\tt tex} files.
+
+
+
+\beginsection 2. Installation
+
+{\tt TrIOinstall.org} and {\tt TrIO.org} are used for the installation. 
+
+The other files are changed during the installation. They must be
+either moved into the directory that contains the source to be tested
+or they are installed in a directory that is searched for input files
+by the program \TeX.
+
+\beginsection Step 1: \rm Rename and edit {\tt TrIOinstall.org}
+
+{\tt TrIOinstall.org} must be copied to {\tt TrIOinstall.sed}. This
+file must then be edited to have {\bf individual password-protected
+macro names} and {\bf private messages}. Note there is no valid
+default active. The macros fail to do what they should do if this file
+isn't carefully edited.
+
+\beginsection \rm a) Passwords
+
+A password-protected name contains a string of at least six
+letters. It must be a mix of lower- and uppercase, one letter should
+be from the first and one from the last third of the alphabet. It
+should be neither an English word nor one in your language. The
+general idea is that this string cannot be guessed or computed by
+someone else. A user hasn't to enter these password-protected macro
+names (except one) so a user has not to remember them. Thus, they must
+not be simple.
+
+One of the passwords occur in a command that is displayed together
+with a private message. Although not required it would be nice to
+recognize this password. A second password is part of a control word
+that must be entered by the user into the source if the source
+contains extremely weird constructions; see section~5.
+
+In total eight passwords must be created. {\tt TrIOinstall.sed}
+contains lines like
+\smallskip\noindent
+{\tt s/aAmNzZ/new password/g}
+\smallskip\noindent
+and you have to replace ``{\tt new password}'' with the new password,
+i.e., a string of at least six letters with the above mentioned
+distribution. And please, never use the known default, i.e., the
+string {\tt aAmNzZ}, etc.
+
+\beginsection \rm b) Private messages
+
+Next, you have to choose two private messages. The first one explains
+what to do for \cs\openin\ or \cs\openout, the second signals that the
+correct file for \cs\input\ was executed.
+
+\medskip
+The rest of {\tt TrIOinstall.sed} can be ignored for the moment. These
+lines must be used if the source uses {\tt TrIO} or {\tt TRIO} as a
+prefix for its own macros; see c). Then one can change these prefixes
+in the macros of this package.
+
+\beginsection \rm c) Optional: Prefix ``{\tt T[r|R]IO}''
+
+The last lines in the installation script are used to change the
+prefix ``{\tt TrIO}'' and the prefix ``{\tt TRIO}'' in the case that
+some source uses one of them too. The macros detect if one of their
+control sequences gets redefined by the source and reports that with
+an error message: {\tt !\ TrIO ALERT !!!\ Don't trust the source
+(<name of the redefined control word>).}
+
+ \rule5 Stop the run if the ``{\tt TrIO ALERT}'' error message is
+displayed. The source has redefined one of the control words that
+occur in the macros of this package. Check the source carefully to
+determine if that happens by accident or intentionally.
+\smallskip
+
+Note, the easiest way to fix a single use of the prefix ``{\tt TrIO}''
+is to change the source. Otherwise a user can apply the installation
+script and change the prefix for all macros of the package. The prefix
+isn't private, i.e., the source might contain code that determines
+which prefix is used by the macro package.
+
+
+\beginsection Step 2: \rm Rename and edit {\tt TrIO.org}; then execute
+
+Rename {\tt TrIO.org} to {\tt TrIO.sh}. Make sure that the renamed
+file can be executed, for example, apply {\tt chmod 744}. The file
+must be edited too: Enter a valid path for {\tt inst\_dir}.
+
+The execution of the script {\tt TrIO.sh}, i.e., enter {\tt ./TrIO.sh}
+on a command line in the directory of the {\tt TrIO*.org} files,
+installs the files by default in this directory. This might be okay if
+the package should be placed there. But if you use a \TeX\
+distribution the installation directory should probably be changed;
+consult the documentation of your distribution to figure out where
+configured packages should be stored.
+
+My suggestion: Use the current directory for experiments. If you like
+the macros then install them in your \TeX\ file system and make sure
+that the correct {\tt openin.tex} and {\tt openout.tex} are found as
+these files carry quite generic names. (Maybe you must {\bf rename}
+them in {\tt TrIO.sh}; see also section~9.)
+
+
+
+
+\beginsection 3. Using {\tt TrIOmacros.tex}
+
+To activate the macros create a new first line in the main file of the
+source that should be instrumented. Enter ``{\tt
+<options> \cs\input\space TrIOmacros}''; where {\tt <options>} is a
+combination of
+\medskip
+\item{i)} empty;
+\item{ii)} {\tt\cs\let\cs\twonosubdirs=y};
+\item{iii)} {\tt\cs\let\cs\threenosubdirs=y};
+\item{iv)} {\tt\cs\let\cs\disablespecial=n};
+\item{v)} {\tt\cs\let\cs\disablespecial=y}.
+\medskip\noindent
+Note: here iii) beats ii) and v) beats iv). The options are explained
+in the next section.
+
+\beginsection \rm a) An example
+
+Let's do a trial run with {\tt Transparent-IO-example.tex}; here with
+line numbers.
+\beginverbatim
+1.\bs input TrIOmacros\parni
+2.\parni
+3.\bs input Transparent-IO-hello\parni
+4.\parni
+5.\bs openin0=Transparent-IO-hello\parni
+6.\parni
+7.\bs openout5=Transparent-IO-goodbye\parni
+8.\parni
+9.\bs bye\endverbatim
+
+After \TeX's banner line and the name of
+the main file, \TeX\ inputs three files (I omit the license message):
+\beginverbatim
+(./TrIOmacros.tex (./TrIOsupport.tex) (./TrIOprivate.tex)\parni
+<<< TrIO >>> \bs special: primitive\parni
+<<< TrIO >>> \bs TrIOnosubdir: nosubdir/\endverbatim
+
+You should check that the correct files of section 1, items 1--3, are
+input. Here I assume that the files are in the current directory
+indicated by ``{\tt./}''. Then \TeX\ displays two lines about the
+current values of control sequences that are influenced by
+options. Here both show the default value: \cs\special\ is kept
+as \TeX's primitive and \cs\TrIOnosubdir\ is a single directory
+with the name {\tt nosubdir/}.
+
+Next, the macros inform the user that they are active. 
+\beginverbatim
+! TrIO activated. Type h to get instructions.\parni
+l.115 ...IO activated. Type h to get instructions\ccb\parni
+\fortyspaces\tenspaces\bs endgroup\parni
+? h\parni
+File I/O ( \bs input \bs openin \bs openout ) is now under TrIO's control.\parni
+Be alerted if a file is loaded without the proper TrIO message\parni
+and follow always the instruction of this message.\parni
+Make sure that the sequence number is incremented sequentially.\parni
+? \parni
+)\endverbatim
+
+The help text gives two important hints. Follow the instructions that
+are displayed at every stop initiated by these macros. As above these
+messages contain a combination of the word ``TrIO'' and three `{\tt<}'
+or three `{\tt>}' symbols. The second hint defines a rule.
+
+ \rule6 Check the counter for I/O commands. It must increase
+sequentially; otherwise stop the run and check the source.
+\smallskip
+
+The counter appears as soon as \TeX\ stops for an I/O
+command. For \cs\input\ is looks like this.
+\beginverbatim
+<<<\parni
+(./TrIOinput.tex\parni
+>>> TRIO: Check passed!\parni
+)\parni
+TrIO >>> ( 1 ) Line 3: input\parni
+>>> enter shown file name without `nosubdir/'.\parni
+<<<\parni
+! I can't find file `nosubdir/Transparent-IO-hello.tex'.\parni
+l.3 \bs input Transparent-IO-hello\parni
+\ \parni
+Please type another input file name: \endverbatim
+
+The first four lines appear every time a file gets input. It contains
+one of the private messages; here it's the default message ``{\tt>>>
+TRIO: Check successful!}'' with an uppercase `R' in the word
+``TRIO''. During the installation this message was changed and you
+should always check that your private message is displayed.
+
+ \rule7 Check that for every \cs\input\ the file {\tt
+TrIOinput.tex} is input and that your private message
+follows. Otherwise stop the run and check the source.
+\smallskip
+
+Then the macros inform that an I/O command was found. It is the first
+command in the file: It occurs in line~3, and it's the
+command \cs\input. The stop of the run was initiated by an error
+message that was intentionally raised through the use of an
+nonexistent subdirectory in front of the file name. The source doesn't
+contain this subdirectory; it is added by the macros. Thus \TeX\
+reports that it cannot find ``{\tt nosubdir/Transparent-IO-hello.tex}'' although the
+source states ``{\tt\bs input Transparent-IO-hello}''.
+
+Next, the user has to enter a new file name. As the file {\tt
+Transparent-IO-hello.tex} doesn't belong to the macro package (see rule~4) we follow
+the instruction (see rule~4) and enter ``Transparent-IO-hello'' as new file name.
+\beginverbatim
+Please type another input file name: Transparent-IO-hello\parni
+(./Transparent-IO-hello.tex)\endverbatim
+
+The next block shows a stop for the I/O command \cs\openin\ with
+stream number~0.
+\beginverbatim
+<<<\parni
+TrIO >>> ( 2 ) Line 5: openin 0\parni
+>>> If you accept that the file (without nosubdir/) is read\parni
+>>> enter `openin' and follow the instructions.\parni
+<<<\parni
+! I can't find file `nosubdir/Transparent-IO-hello.tex'.\parni
+l.5 \bs openin0=Transparent-IO-hello\parni
+\ \parni
+Please type another input file name: \endverbatim
+
+After the check that the counter was increased we follow the
+instruction and enter the file name of the package ({\tt openin.tex})
+and not the name that appears in the source (here: {\tt Transparent-IO-hello}).
+\beginverbatim
+Please type another input file name: openin\parni
+(./openin.tex\parni
+Enter 1> return 2> file name\ccb\bs TRIOgGKptTpausing=0=>\endverbatim
+
+This block shows the second private message and one of our private
+passwords. Again, we follow the instructions, that is, we press
+{\tt<return>} and at the next prompt we enter the name of the file
+that should be opened:
+\beginverbatim
+\bs FilenameOPENIN=Transparent-IO-hello\parni
+)\endverbatim
+
+The treatment of \cs\openout\ is similar to \cs\openin.
+\beginverbatim
+<<<\parni
+TrIO >>> ( 3 ) Line 7: openout 5\parni
+>>> If you accept that the file (without nosubdir/) is created\parni
+>>> enter `openout' and follow the instructions.\parni
+<<<\parni
+! I can't find file `nosubdir/Transparent-IO-goodbye.tex'.\parni
+l.7 \bs openout5=Transparent-IO-goodbye\parni
+\ \parni
+Please type another input file name: openout\parni
+(./openout.tex\parni
+Enter 1> return 2> file name\ccb\bs TRIOgGKptTpausing=0=>\parni
+\ \parni
+\bs FilenameOPENOUT=trioo/Transparent-IO-goodbye\parni
+)\endverbatim
+
+There is one new technique based on rule~1. The file isn't created in
+the current directory but in a special subdirectory called {\tt
+trioo/} as seen in the second last line. Of course, one must remember
+which files were redirected to this subdirectory as the source might
+want to input it later again and then the name of the subdirectory
+must be used too.
+
+Of course, \cs\immediate\ is handled by the macros too; the user sees
+``immediate openout'' instead of ``openout'' in the {\tt TrIO >>>}
+line. But someone who knows the macros can fake the occurrence
+of \cs\immediate. Although there isn't much harm in a
+wrong \cs\immediate\ it is recommended to follow this rule.
+
+ \rule8 Always check that an \cs\immediate\ appears in front of
+an \cs\openout\ if the macros report ``immediate openout''. Check the
+source carefully and reject it if \cs\immediate\ doesn't appear.
+
+
+
+\beginsection 4. Options
+
+In section~3 the four options for the macros were introduced.
+
+\beginsection \rm a) Path with nonexistent directories
+
+As explained in section~3 a single nonexistent directory ``{\tt
+nosubdir/}'' is used in the macros by default. But if the source
+contains a file given with a path that starts with a move to the
+parent directory, i.e., {\tt../}, then the effect of {\tt
+nosubdir/../} might specify the current directory; this depends on
+several factors, i.e., your \TeX\ might not do it. If it's done a file
+in the current directory carrying the same name as the file that the
+source wants to input from the parent directory is directly input
+without a stop of the run. That violates rule~4.
+
+Therefore you should use either the option
+{\tt\cs\let\cs\twonosubdirs=y} or {\tt\cs\let\cs\threenosubdirs=y}. In
+the first case the single nonexistent directory is replaced by two
+nonexistent directories and in the second there are three
+nonexistent directories. The start message of the package shows how
+many {\tt nosubdir/}'s are present.
+
+ \rule9 Stop the processing if the source that failed with a single
+nonexistent directory fails again at the same I/O command although the
+number of nonexistent subdirectories was increased. The source reacts
+on this number.
+
+
+\beginsection \rm b) Treatment of \cs\special
+
+The second start message is about \cs\special. This command can be
+dangerous as it writes arbitrary data to \TeX's main output file. The
+macros don't check what is written to the DVI file and they assume
+that a user switches on the safety features of the program that
+display, prints, or transforms the DVI~file. Therefore \cs\special\ is
+kept as primitive.
+
+ \rule{10} The programs that interpret the DVI file can be the target
+by with an untrusted source attacks your system. Thus switch on all
+options to avoid that the DVI file executes unfriendly code if you
+keep the primitive \cs\special\ active.
+
+The option {\tt\cs\let\cs\disablespecial=y} redirects all data of
+a \cs\special\ into the LOG file of the \TeX\ run. That
+is, \cs\special\ is no longer a primitive; nothing is written to the
+DVI file.
+
+The option {\tt\cs\let\cs\disablespecial=n} tries to be a mixture of
+the described behaviours. The primitive \cs\special\ is kept but its
+data (or a part of it) is also written to the LOG file; the integer
+parameters \cs\showboxdepth\ and \cs\showboxbreadth\ are increased. To
+look at the data enter on a command-line the command ``{\tt grep
+-e'\char"5E\bs.\bs.*\bs\bs special' <logfile>}''.
+
+
+
+\beginsection 5. Errors
+
+Errors in the original source are of course kept in the instrumented
+source. But a few eccentric cases can occur that produce new errors
+because of the fact that the I/O primitives are now macros.
+
+I don't mean a case where a source tests if the I/O commands are
+macros or primitives. The source must do something after this test and
+whatever it does I don't count this as an error.
+
+Here is the file {\tt Transparent-IO-eccentric.tex} that contains some
+eccentric cases:\vskip-3pt
+\beginverbatim
+\bs input TrIOmacros\parni
+\bs global\bs input Transparent-IO-hello\parni
+\bs expandafter\bs show\bs input Transparent-IO-hello\parni
+\bs edef\bs csone\ocb\bs input Transparent-IO-hello \ccb\parni
+\bs expandafter\bs show\bs openin0=Transparent-IO-hello\parni
+\bs bye\parni
+\endverbatim
+
+
+\beginsection \rm a) Command in front of \cs\input\
+meant for the first token of the file that is input
+
+Some errors happen with \cs\input\ in situations like this one
+where \cs\global\ is applied to \cs\input.
+\beginverbatim
+! You can't use a prefix with `\bs begingroup'.\parni
+<to be read again> \parni
+\tenspaces\fivespaces\ \ \ \ \bs TRIObegingroup \parni
+\bs input ->\bs TRIObegingroup \parni
+\twentyspaces\fivespaces\bs TRIOafterassignment \bs TRIOnoexpand \bs TrIOempty \bs TRIO...\parni
+l.2 \bs global\bs input\parni
+\tenspaces\fivespaces\ \ \ Transparent-IO-hello\parni
+? \endverbatim
+
+This is the typical picture for an error where \TeX\ wants to read
+again the first token of the macro \cs\input. It is shown not only
+for \cs\global\ but also for \cs\number\ and many other commands.
+
+The solution is to type {\tt42}---you have to remember this
+number---and then to insert the command that appears in front
+of \cs\input; here it's \cs\global.
+\beginverbatim
+? 42\parni
+\ \parni
+\bs input ...put.tex \bs TrIOinputmessage \bs TrIOendgroup \parni
+\fortyspaces\tenspaces\bs TRIOinput \bs TrIOnosubdir \parni
+l.2 \bs global\bs input\parni
+\tenspaces\fivespaces\ \ \ Transparent-IO-hello\parni
+? I\bs global\parni
+! I can't find file `nosubdir/Transparent-IO-hello.tex'.\parni
+l.2 \bs global\bs input Transparent-IO-hello\parni
+\ \parni
+Please type another input file name: \endverbatim
+
+Note this is a very strange use of \cs\input\ as the acceptance of the
+command in front of \cs\input\ depends on the first token in the file
+that's input.
+
+
+\beginsection \rm b) \cs\input\ as second token after \cs\expandafter
+
+Another kind of error occurs if the commands in front of \cs\input\ digests
+tokens. Here is an example.
+\beginverbatim
+> \bs TRIObegingroup=\bs begingroup.\parni
+\bs input ->\bs TRIObegingroup \parni
+\twentyspaces\fivespaces\bs TRIOafterassignment \bs TRIOnoexpand \bs TrIOempty \bs TRIO...\parni
+l.3 \bs expandafter\bs show\bs input\parni
+\twentyspaces\fivespaces\ \ \ Transparent-IO-hello\parni
+? \endverbatim
+
+The solution is to type {\tt41} (as $42-1=41$) and then to insert the
+two commands in front of \cs\input.
+\beginverbatim
+? 41\parni
+\ \parni
+\bs input ...put.tex \bs TrIOinputmessage \bs TrIOendgroup \parni
+\fortyspaces\tenspaces\bs TRIOinput \bs TrIOnosubdir \parni
+l.3 \bs expandafter\bs show\bs input\parni
+\twentyspaces\fivespaces\ \ \ Transparent-IO-hello\parni
+? I\bs expandafter\bs show\parni
+! I can't find file `nosubdir/Transparent-IO-hello.tex'.\parni
+l.3 \bs expandafter\bs show\bs input Transparent-IO-hello\parni
+\ \parni
+Please type another input file name: \endverbatim
+
+
+\beginsection \rm c) Use of \cs\input\ in an \cs\edef
+
+Expansion in an \cs\edef\ or \cs\xdef\ generates a new kind of
+error. This time the error message is the well-known {\tt !\ Undefined
+control sequence}. This message is raised intentionally by a token
+that explains what to do next.
+\beginverbatim
+! Undefined control sequence.\parni
+\bs input ...y \bs TRIOdef \bs TrIOskipXXXVIinsTrIOfixedef \parni
+\fortyspaces\tenspaces\bs TrIOempty \ocb\ccb\bs TrIOempty \bs T...\parni
+l.4 \bs edef\bs csone\ocb\bs input\parni
+\twentyspaces\ \ \ Transparent-IO-hello \ccb\parni
+? \endverbatim
+
+The undefined control word states to skip {\tt36} tokens and then to
+insert \cs\TrIOfixedef. You could also enter
+first \cs\show\cs\TrIOfixedef\ and check that the macro wasn't changed.
+\beginverbatim
+? 36\parni
+\ \parni
+\bs input ...put.tex \bs TrIOinputmessage \bs TrIOendgroup \parni
+\fortyspaces\tenspaces\bs TRIOinput \bs TrIOnosubdir \parni
+l.4 \bs edef\bs csone\ocb\bs input\parni
+\twentyspaces\ \ \ Transparent-IO-hello \ccb\parni
+? I\bs TrIOfixedef\parni
+! I can't find file `nosubdir/Transparent-IO-hello.tex'.\parni
+l.4 \bs edef\bs csone\ocb\bs input Transparent-IO-hello \parni
+\twentyspaces\tenspaces\ccb\parni
+Please type another input file name: \endverbatim
+
+Note the source throws more errors as \cs\input\ cannot be used in
+an \cs\edef\ except the file that's input ends with a certain
+command. Again a unusual scenario.
+
+
+\beginsection \rm d) Errors with \cs\openin\ and \cs\openout
+
+For \cs\openin\ and \cs\openout\ there is only one error situation. It
+occurs with expansion if a sequence of tokens like the
+nonsense \cs\expandafter \cs\show \cs\openin{\tt0=Transparent-IO-hello} appears in
+the source. In this case the expansion of \cs\openin, which contains
+two tokens, looses its first token (that's a \cs\the). One has to
+insert this token to continue the processing.
+\beginverbatim
+> \bs TRIOthe=\bs the.\parni
+\bs openin ->\bs TRIOthe \parni
+\tenspaces\fivespaces\ \ \ \ \bs TrIOtropenin \parni
+l.5 \bs expandafter\bs show\bs openin\parni
+\twentyspaces\fivespaces\ \ \ \ 0=Transparent-IO-hello\parni
+? \endverbatim
+
+Again, a very strange code pattern. Why would someone want to expand
+an usually unexpandable token before \cs\show\ is applied?
+
+
+\beginsection \rm Summary
+
+Most of the described cases don't occur in normal code. Some cases
+represent a \TeX\ coding error, i.e., they throw one or more errors
+during normal execution. These cases might be inserted by someone who
+wants to fool you---maybe after the detection that {\tt TrIOmacros} is
+used. Thus, I recommend to either inspect the code carefully in order
+to find out why the unusual construction is used or to ignore the
+source.
+
+ \rule{11} Inspect the source carefully if an error occurs that involves
+one of the I/O commands. These errors can only appear with weird code
+without any valid use case. Consider to ignore the source.
+
+
+
+\beginsection 6. Permanent fixes for the errors
+
+Note that the interactive fixes of the errors in the previous section
+have suppressed several messages, for example, the counter was not
+shown and it was not increased. This generates a problem for {\tt
+TrIOauto.tex} as we will see later.
+
+An \cs\expandafter\ with \cs\openin\ or \cs\openout\ can be deleted in
+the source. Some constructions for \cs\input\ require a different
+approach; to fix a \cs\global\cs\input\ permanently the source must be
+edited too.
+
+The macros contain the password-protected control
+sequence \cs\TrIOcCkPxXmove\ that has to be entered in front of the
+commands that would occur after the {\tt ?I} in the interactive
+fix. For example, the above case is permanently fixed with the
+code \cs\TrIOcCkPxXmove\cs\global\cs\input. Of course, you must use
+the control word that contains the password that you picked during the
+installation; as mentioned above this is the only password one must
+remember.
+
+ \rule{12} Never return an edited source file to the author without
+removing the first line and all appearances of \cs\TrIOcCkPxXmove.
+
+ \rule{13} Never return a LOG file of your runs to the author of the
+source. If you want to return it make sure that it contains no
+information about your password-protected macro names, your private
+messages, or any trace information of the TrIO macros.
+
+ \rule{14} Never return the DVI file of your runs to the author of the
+source. If you want to return it check the DVI output and make sure,
+for example, by using the program {\tt dvitype} of the \TeX ware
+collection, that it contains no information about your
+password-protected macro names or your private messages.
+
+ \rule{15} Create new passwords and private messages if you violate
+one of the rules 12--14 by accident.
+
+
+
+\beginsection 7. An unsolvable problem
+
+There is one \TeX\ primitive that can create errors which cannot be
+detected by the macros and, thus, which cannot be fixed. But the
+macros can detect if the problematic primitive is active.
+If the macros report this the user has to check the source carefully
+in order to confirm that the activation is required and that it
+happens in a way which doesn't influence the work of the macros.\goodbreak
+
+The problematic primitive is the integer
+parameter \cs\globaldefs. Usually its value is 0 and the macros can do
+their work without problems. If its value is less than 0 everything is
+fine too. But a value greater than 0 makes any assignment global even
+if it is not prefixed with \cs\global\ and this can lead to a problem.
+
+Our macros first reset the value to 0; this assignment is global. At
+the end the macros set the value locally back to 1 or $-1$ depending
+of the value of \cs\globaldefs\ when a macro is called. Thus code like
+this doesn't work correctly: \cs\globaldefs{\tt=1 \ocb}\cs\input\ {\tt
+Transparent-IO-hello \ccb}. In this case the value of \cs\globaldefs\ after the
+closing brace is 0 not 1. But this case cannot be distinguished by the
+macros from the good case {\tt\ocb}\cs\globaldefs{\tt=1} \cs\input\
+{\tt Transparent-IO-hello \ccb}. The macros can only detect if \cs\globaldefs\ has a
+value greater than 0 and they report this finding.
+
+ \rule{16} Stop the run if the macros report that \cs\globaldefs\ is
+positive. Check the source carefully why this rarely used parameter
+must be set. If it must have a value greater 0 check that only the
+good case occurs. Otherwise reject the source.
+
+
+
+\beginsection 8. Using {\tt TrIOauto}
+
+If a run with {\tt TrIOmacros.tex} was successful, i.e., no interactive
+fix was necessary, repeated executions of the source can be made
+simpler.
+
+First, the LOG file of the successful run should be saved; copy it, for
+example, and give it the extension {\tt trio}. Second, one of the two
+{\tt sed} files must be applied to this copy. For example, {\tt sed -f
+TrIOlineno.sed <triofile> > TrIOnames.tex} where {\tt<triofile>} is
+the copy of the LOG file of the successful run. The last step is to
+change {\tt TrIOmacros} in the first line of the instrumented source
+by {\tt TrIOauto}.
+
+The file {\tt TrIOlineno.sed} makes stricter comparisons than {\tt
+TrIOextract.sed}. You can always recreate {\tt TrIOnames.tex} if the
+source file needs to be edited and a comparison of line numbers would
+fail by using {\tt TrIOextract.sed} instead of {\tt TrIOlineno.sed} in
+the above {\tt sed} command.
+
+\beginsection \rm a) Rerun of the example of section~3
+
+A run with {\tt TrIOauto.tex} starts similar to a run with {\tt
+TrIOmacros.tex} except that one more file is loaded but no information
+about a nonexistent subdirectory is given.
+\beginverbatim
+(./TrIOauto.tex (./TrIOsupport.tex) (./TrIOprivate.tex) (./TrIOnames.tex)\parni
+<<< TrIO >>> \bs special: primitive\parni
+! TrIO auto-mode activated. Type h to get instructions.\parni
+l.61 ...ode activated. Type h to get instructions\ccb\parni
+\fortyspaces\tenspaces\bs endgroup\parni
+? h\parni
+File I/O ( \bs input \bs openin \bs openout ) is now under TrIO's control.\parni
+Be alerted if a file is loaded without the proper TrIO message\parni
+and check that the file name without extension that raises\parni
+the font error matches the file name of the TrIO message.\parni
+? \endverbatim
+
+The nonexistent subdirectory isn't required anymore as all I/O
+commands are taken from the file {\tt TrIOnames.tex}. In this run a
+user cannot change a file name used in the source; the macros use the
+ones entered during the successful run. A surprise might be the text
+about ``font errors'' in the help text. Although no file name has to
+be entered the macros show the name of the successful run and the name
+that they read in the current run.
+\beginverbatim
+(./TrIOopen.tex\parni
+TrIO >>> ( 1 ) Line 3: input Transparent-IO-hello \parni
+)\parni
+! Font \bs TRIOunused=TrIO\char"5FTransparent-IO-hello not loadable: Metric (TFM) file not found.\parni
+<to be read again> \parni
+\tenspaces\fivespaces\ \ \ \ \bs par\parni
+l.4 \parni
+\ \parni
+? \endverbatim
+\noindent
+Note that \TeX\ has the complete file name only after it sees the next
+line which is empty.
+
+Although only approved file names are processed a user should still be
+concentrated.
+
+ \rule{17} With {\tt TrIOauto.tex} a user should check that {\tt
+TrIOopen.tex} is loaded, the sequential counter is increased from stop
+to stop, and that the main part of the file name in the line that
+starts with ``{\tt TrIO >>>}'' agrees with the name that appears after
+the underline in the error message (with \cs\openout\ the path is
+replaced by {\tt trioo}, see rule~1). Otherwise the source operates
+with varying file names; check the source carefully.\looseness=-1
+
+Now press return to input {\tt Transparent-IO-hello.tex} and to go to the next I/O
+command. The messages for \cs\openin\ and \cs\openout\ look similar.
+\beginverbatim
+(./TrIOopen.tex\parni
+TrIO >>> ( 2 ) Line 5: openin 0 Transparent-IO-hello\parni
+)\parni
+! Font \bs TRIOunused=TrIO\char"5FTransparent-IO-hello not loadable: Metric (TFM) file not found.\parni
+<to be read again> \parni
+\tenspaces\fivespaces\ \ \ \ \bs par\parni
+l.6 \parni
+\ \parni
+? \parni
+(./TrIOopen.tex\parni
+TrIO >>> ( 3 ) Line 7: openout 5 trioo/Transparent-IO-goodbye\parni
+)\parni
+! Font \bs TRIOunused=TrIO\char"5FTransparent-IO-goodbye not loadable: Metric (TFM) file not found.\parni
+<to be read again> \parni
+\tenspaces\fivespaces\ \ \ \ \bs par\parni
+l.8 \parni
+\ \parni
+? \endverbatim
+
+You can see that the subdirectory {\tt trioo} (see rule~1) is
+mentioned in the case of \cs\openout. Of course,
+an \cs\immediate\cs\openout\ is signaled by ``immediate openout''
+instead of ``openout'' in the line that starts with {\tt TrIO >>>}.
+
+
+
+
+\beginsection 9. Remarks about {\tt openin.tex} and {\tt openout.tex}
+
+The \TeX\ commands \cs\openin\ and \cs\openout\ are less verbose
+than \cs\input\ with respect to the file name they have to process. As
+they occur less frequently than \cs\input\ the macros implement a
+two-step procedure to enter the file names for \cs\openin\
+and \cs\openout. This slow-down in the workflow gives the user a
+chance to avoid hasty decisions.
+
+But I assume some users want to have a faster processing. Here are two
+ideas how to speed-up the workflow. (1)~The file {\tt openin.tex} and
+{\tt openout.tex} aren't called by other files of the package; they
+are only entered by the user. Thus, a user can rename them to make the
+names easier to type. (The names are used in messages (see {\tt
+TrIOmacros.org}) so either change them there too or remember that you
+have changed the file names.)  (2)~The files stop with a private
+message whereas {\tt TrIOinput.tex} just outputs such a message. If
+you check all private messages carefully you can change the code in
+{\tt openin.tex} and {\tt openout.tex} so that it displays the private
+message on the terminal without using \cs\pausing\ to avoid to enter
+{\tt<return>}.\looseness=-1
+
+
+
+
+\beginsection 10. Precautionary warning
+
+As you saw the macros cannot run without user interaction. This means,
+your knowledge about plain \TeX\ is a crucial success factor if
+problems occur. You must be able to distinguish if an error message is
+based on TrIO's actions, or if it's an aggressive attempt to
+circumvent TrIO, or if it's a simple error in the source.
+
+Above I wrote that you should have a non-beginner's knowledge of
+plain \TeX. Now you should be aware that your knowledge about the
+original \TeX, plain \TeX, the command {\tt\bs special} and its risks,
+as well as tools like {\tt dvitype}, {\tt sed}, etc.\ are important.
+
+As soon as you don't understand what happens in the untrusted source
+stop the execution by \TeX. Stop the execution in an error situation
+if you don't understand what you have to do with TrIO.
+
+\bye

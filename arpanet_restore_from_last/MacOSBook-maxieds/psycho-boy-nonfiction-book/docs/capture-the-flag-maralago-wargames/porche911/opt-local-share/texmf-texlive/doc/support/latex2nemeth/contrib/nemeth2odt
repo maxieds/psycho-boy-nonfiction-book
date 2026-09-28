@@ -1,0 +1,30 @@
+#!/bin/bash
+#get a random name first of 8 chars
+tmpdir=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8`
+
+#make a folder
+mkdir $tmpdir
+
+#get the base name of the fole to convert
+file=`basename "$1" .nemeth`
+
+#convert nemeth from utf16 to utf8
+iconv -f utf-16 -t utf-8 "$1" > $file.txt
+
+#convert txt file to odt
+libreoffice --headless --convert-to odt $file.txt 1>/dev/null
+
+# odt is setup with a bultintemplate for convertions
+#from text, that uses Liberation Mono font.
+#we need DejaVu Serif. We change the font and repack 
+#the odt file
+unzip -qq -d $tmpdir $file.odt
+rm -f $file.odt
+find $tmpdir -type f | xargs sed -i 's/Liberation Mono/DejaVu Serif/g'
+( cd $tmpdir; zip -qq -r ../$file.odt . )
+
+#cleanup
+/bin/rm -rf $tmpdir $file.txt
+
+
+

@@ -1,0 +1,939 @@
+% llmk: the reference manual
+% Copyright 2020-2023 Takuto Asakura (wtsnjp)
+
+% +++
+% latex = "texfot xelatex"
+% +++
+\documentclass{llmk-doc}
+
+% Metadata
+\title{llmk: Light {\LaTeX} Make}
+\author{Takuto Asakura (wtsnjp)}
+\subtitle{Reference Manual}
+\date{v1.2.0\quad\today}
+\keywords{llmk, build-tool, toml, lua, luatex}
+
+\begin{document}
+
+\maketitle
+
+\section{Overview}
+
+Light {\LaTeX} Make (\prog{llmk}) is yet another build tool specific for
+{\LaTeX} documents. Its aim is to provide a simple way to specify a workflow of
+processing {\LaTeX} documents and encourage people to always explicitly show
+the right workflow for each document.
+
+The main features of \prog{llmk} are all about the above purpose. First, you
+can write the workflows either in an external file \code{llmk.toml} or in a
+{\LaTeX} document source in a form of magic comments. Further, multiple magic
+comment formats can be used. Second, it is fully cross-platform. The only
+requirement of the program is the \code{texlua} command; \prog{llmk} makes a
+uniform way to describe the workflows available for nearly all {\TeX}
+environments. Third, it behaves exactly the same in any environment. At this
+point, \prog{llmk} intentionally does not provide any method for user
+configuration. Therefore, one can guarantee that a {\LaTeX} document with an
+\prog{llmk} setup, the process of typesetting the document must be reproduced
+in any {\TeX} environment with the program.
+
+\subsection{Installation}
+
+This software is included in {\TeX} Live and MiK{\TeX} as Package
+\code{light-latex-make}. If you have one of the latest distributions, you
+normally don't need to install it by yourself. If you want to install the
+development version, please refer to our {\README}.
+
+\subsection{Learning \prog{llmk}}
+
+The bundled {\README} has a general introduction for the program. If you are
+new to \prog{llmk} and looking for a quick guidance, you are recommended to
+read it first. Conversely, this document can be regarded as a reference manual:
+it contains detailed descriptions for every feature of \prog{llmk} as much as
+possible, but unsuitable for getting general ideas of its basic usage.
+
+\begin{samepage}
+All official resources are available from the repository on GitHub:
+%
+\begin{quote}
+\url{https://github.com/wtsnjp/llmk}
+\end{quote}
+%
+Notably, you can find some example {\LaTeX} documents with \prog{llmk} setups
+in the \href{https://github.com/wtsnjp/llmk/tree/master/examples}
+{\code{examples}} directory.
+% TODO: mention wiki on github when some contents are gathered?
+\end{samepage}
+
+The design concept of \prog{llmk} is described in a separate TUGboat
+article~\cite{asakura2020}. It will not give you practical tips, but if you are
+interested in the underlying ideas of the program, it should be worth reading.
+The differences from other similar tools, \eg\prog{latexmk}~\cite{latexmk} and
+\prog{arara}~\cite{arara}, are also discussed in the article.
+
+\subsection{Reporting bugs and requesting features}
+
+If you get trouble with \prog{llmk} or think you have found a bug, please
+report it by creating either an issue or a pull request on the GitHub
+repository:
+%
+\begin{quote}
+\url{https://github.com/wtsnjp/llmk/issues}
+\end{quote}
+%
+If you do not want to use GitHub for some reasons, it is also fine to directly
+send an email to the author (\email{tkt.asakura@gmail.com}).
+
+Requests for new features are also welcome; the author cannot promise to
+implement the requested features, but will happy to take them into account.
+Before making a request, it is strongly recommended to read the article about
+the design concept~\cite{asakura2020}.
+
+\section{Command-line interface}
+
+\subsection{Command usage}
+\label{sec:command}
+
+The full usage of \prog{llmk} can be summarized as follows:
+%
+\begin{htcode}
+llmk \meta{options} \meta{files}
+\end{htcode}
+
+Herein, \meta{options} are the command-line options, that start with the hyphen
+character |-|, and \meta{files} are the arguments for the |llmk| command.
+
+\subsubsection*{Arguments \meta{files}}
+
+You can specify the filenames of the source {\TeX} files, normally the files
+with \code{.tex} or \code{.ltx} extensions, as the arguments for the \code{llmk}
+command. When one or more \meta{files} are specified, \prog{llmk} will read
+either the TOML field (Section~\ref{sec:toml}) or another supported magic
+comment (Section~\ref{sec:magic-comment}) in each of the source files and
+process it with the specified workflow in the given order.
+
+As well as the \code{tex} command, you can omit the \code{.tex} extensions and
+just give the basenames of the files for the argument; when a \meta{basename},
+which must not contain any dot character, is given and the file that exactly
+matches to the name does not exist, \prog{llmk} will automatically add the
+\code{.tex} extension and process it like any other if the file
+|\meta{basename}.tex| exists.
+
+Note that \prog{llmk} naively pass the given filenames to invoked commands.
+Filenames that contains special characters of {\TeX}, \eg |#| and |%|, are very
+likely to be causes of troubles. Moreover, at this point \prog{llmk} does not
+any specific features to take care of multi-byte characters: filenames
+including multi-byte characters may work in some cases but can be cause of
+problems\footnote{The author admits that \prog{llmk} needs to be enhanced in
+this aspect: it should have better features to treat various filenames with
+multi-byte characters, though the author is negative to support special
+characters of {\TeX}. Suggestions and patches in this direction are especially
+welcome.}. Using filenames that contain only the characters in the range of the
+ASCII code, except special characters of {\TeX}, is the safest way to go at any
+rate.
+
+Alternatively, if the argument is not specified, \prog{llmk} will read the
+special TOML file \code{llmk.toml} in the working directory and execute the
+workflow specified in the file (see Section~\ref{sec:toml}). In case the
+argument is not specified and the \code{llmk.toml} does not exist, it will
+result in an error. When \prog{llmk} executes the workflow specified in the
+file \code{llmk.toml}, all magic comments, including TOML fields and other
+formats, in each source {\LaTeX} files specified in the \ckey{source} array
+will be ignored.
+
+\subsubsection*{Command-line options \meta{options}}
+\enlargethispage{5mm}% FIXME
+
+We have tried to implement a GNU-compatible option parser. Short options, each of
+which consists of a single letter, must start with a single hyphen |-|.
+Multiple short options can be specified with a single hyphen, \eg |-vs| is
+equivalent to |-v -s|. Long options have to be following double hyphens |--|.
+All options must be specified before the first argument. A string beginning
+with a hyphen after the first argument will be treated as an argument.
+
+When two or more options are specified, \prog{llmk} applies them in the given
+order. If contradicting options are specified, \eg \sopt{q} v.s.\ \sopt{v}, the
+option in the latter position wins over the former one.
+
+\begin{clopt}{\sopt{c}, \lopt{clean}}
+Removes temporary files such as \code{aux} and \code{log} files. The files
+removed with this action can be customized with keys \ckey{clean\_files} and
+\ckey{extra\_clean\_files}.
+\end{clopt}
+
+\begin{clopt}{\sopt{C}, \lopt{clobber}}
+Removes all generated files including final PDFs. The files removed with this
+action can be customized with the key \ckey{clobber\_files}.
+\end{clopt}
+
+\begin{clopt}{%
+  \code{\sopt{d} \meta{category}}, \code{\lopt{debug}=\meta{category}},
+  \sopt{D}, \lopt{debug}}
+Activates the specified debug category; debugging messages related to the
+activated category will be shown. Herein, available debug categories are:
+|config|, |parser|, |run|, |fdb|, |programs|, and |all| to activate all of
+these. You can repeat this option more than once to activate multiple
+categories. If you specify |-D| or |--debug| without the argument
+\meta{category}, it activates all available debug categories.
+\end{clopt}
+
+\begin{clopt}{\sopt{h}, \lopt{help}}
+Shows a quick help message (namely a list of command-line options) and exit
+successfully. When this is specified, all other options and arguments are
+ignored.
+\end{clopt}
+
+\begin{clopt}{\sopt{n}, \lopt{dry-run}}
+Show what would have been executed without actually invoking the commands. This
+flag is useful if you want to make sure whether your configuration will work as
+expected before the actual building. With option \lopt{verbose}, you can get
+further detailed information.
+\end{clopt}
+
+\begin{clopt}{\sopt{q}, \lopt{quiet}}
+This suppress most of the messages from the program.
+\end{clopt}
+
+\begin{clopt}{\sopt{s}, \lopt{silent}}
+Silence messages from invoked programs. To be more specific, this redirects
+both standard output and standard error streams to the null device.
+\end{clopt}
+
+\begin{clopt}{\sopt{v}, \lopt{verbose}}
+Make \prog{llmk} to print additional information such as invoked commands
+with options and arguments by the program.
+\end{clopt}
+
+\begin{clopt}{\sopt{V}, \lopt{version}}
+Shows the current version of the program and exit successfully. When this is
+specified, all other options and arguments are ignored.
+\end{clopt}
+
+\subsection{Exit codes}
+
+\begin{samepage}
+You can grasp whether \prog{llmk} successfully executed or not by seeing its
+status code. Note that the exit codes of invoked programs are not directly
+transferred as the exit code of \prog{llmk}; instead, the statuses of external
+programs that failed, if any, are reported in the error messages.
+%
+\begin{center}
+\begin{tabular}{rp{12em}rp{12em}}
+\toprule
+Code & Error type & Code & Error Type \\ \midrule
+\code{0} & Success & \code{3} & Parser error \\
+\code{1} & General error & \code{4} & Type error \\
+\code{2} & Error in invoked program & \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{samepage}
+
+\section{Writing workflows in TOML format}
+\label{sec:toml}
+
+The primary configuration format for \prog{llmk} is TOML\Dash Tom's Obvious
+Minimal Language~\cite{toml}. You can specify the workflows to process your
+{\LaTeX} documents in the format either in the special configuration file
+(\code{llmk.toml}) or in the TOML field (Section~\ref{sec:toml-where}). You
+have full access to the \prog{llmk} configuration with this primary format,
+while other supported magic comment formats (Section~\ref{sec:magic-comment})
+have only partial access. You can read the entire TOML specification at
+\href{https://toml.io/}{its website}.
+
+\subsection{TOML in \prog{llmk}}
+
+The configuration for \prog{llmk} written in the TOML format is read by our
+built-in parser. At this point, the built-in parser supports a subset of the
+TOML specification; only the data-types that necessary for the configuration
+keys (Section~\ref{sec:top-level-keys}~\&~\ref{sec:keys-in-programs}) are
+supported.
+
+\begin{center}
+\newcommand{\ok}{{\color{special}\usym{1F5F8}}}
+\begin{tabular}{llc}
+\toprule
+Type & Example & Supported \\ \midrule
+Bare keys & \code{key} & \ok \\
+Quoted keys & \code{"key"} & \\
+Dotted keys & \code{tex.latex} & \ok \\ \midrule
+Basic strings & \code{"str"} & \ok \\
+Multi-line basic strings & & \\
+Literal strings & \code{'str'} & \ok \\
+Multi-line literal strings & & \\ \midrule
+Integer & \code{123} & \ok \\ \midrule
+Boolean & \code{true} & \ok \\ \midrule
+Float & \code{3.14} & \\ \midrule
+Date \& Time & \code{1979-05-27} & \\ \midrule
+Array & \code{[1, 2, 3]} & \ok \\ \midrule
+Table & \code{[table]} & \ok \\
+Inline table & & \\
+Array of tables & \code{[[fruit]]} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Where to write}
+\label{sec:toml-where}
+
+You have two options to write the configuration for \prog{llmk} in TOML format:
+(1)~creating a special file \code{llmk.toml} and (2)~writing a TOML field in
+your {\LaTeX} source file. Either way, you have full access to the \prog{llmk}
+configuration and specify the same workflows in (almost) the same manner.
+
+\subsubsection*{Special file: \code{llmk.toml}}
+
+When the \code{llmk} command is executed without any argument, the special file
+\code{llmk.toml} is loaded automatically (Section~\ref{sec:command}). This
+filename is fixed and cannot be customized at this point. The entire content of
+the file must be a valid TOML; you can include supplemental information in the
+form of TOML comment that starts with the \code{\#} character. The file must
+be encoded in UTF-8 because it is required by the TOML
+specification~\cite{toml}. The \ckey{source} key is \emph{required} in this
+file.
+
+\subsubsection*{TOML field}
+
+The other way to pass the configuration in TOML format to \prog{llmk} is using
+\emph{TOML fields}\Dash special comment areas in {\LaTeX} source files that are
+given by comment lines containing only three or more consecutive \code{+}
+characters. The following is a simple example.
+%
+\begin{lstlisting}[style=latex]
+% +++
+% # This is a sample TOML field!
+% latex = "xelatex"
+% +++
+\documentclass{article}
+\end{lstlisting}
+
+The formal syntax of opening and closing for TOML fields is:
+%
+\begin{htcode}
+\meta{optional spaces}%\meta{optional spaces}+++\meta{optional pluses}\meta{optional spaces}
+\end{htcode}
+%
+where the definitions of \meta{optional spaces} and \meta{optional pluses} are
+given as follows (hereafter, whitespace \code{\textvisiblespace} denotes tab
+\texttt{0x09} or space \texttt{0x20}).
+%
+\begin{align*}
+&\text{\meta{optional spaces}}
+  \longrightarrow \text{\meta{empty}}
+  \mid\text{\code{\textvisiblespace}\meta{optional spaces}} \\
+&\text{\meta{optional pluses}}
+  \longrightarrow \text{\meta{empty}}
+  \mid\text{\code{+}\meta{optional pluses}}
+\end{align*}
+
+The line of opening and closing for TOML fields must include only the
+characters specified in the above. In a TOML filed, you can write TOML code for
+\prog{llmk} configuration in the form of {\LaTeX} comment lines.
+%
+\begin{htcode}
+\meta{optional spaces}%\meta{optional spaces}\meta{TOML line}\meta{optional spaces}
+\end{htcode}
+
+If one or more arguments are given for the \code{llmk} command, it first looks
+for a TOML field from the beginning of each file. Only the topmost field in a
+file is the valid TOML field, \ie you cannot have multiple TOML fields in a
+file. TOML fields have the highest priority for \prog{llmk} configuration; if a
+TOML field is found in a file, other supported magic comments described in
+Section~\ref{sec:magic-comment} are ignored.
+
+Though the author recommend you to always encode your {\LaTeX} source file in
+UTF-8, you can use other encodings. In any case, the TOML lines in the fields
+must be consist of valid UTF-8 encoded strings. Therefore, it is recommended to
+use only the characters in the range of ASCII code in your TOML field if you
+chose the other encodings for some reasons.
+
+\subsection{Available top-level keys}
+\label{sec:top-level-keys}
+
+Now we are going to look over all available TOML keys for \prog{llmk}
+configuration. This section includes the full list of available top-level keys,
+that are effective for an entire workflow. The detailed specification for each
+program in your workflow can be given by the keys in the \ckey{programs} table,
+which will be described in the next section. Only the keys shown in these two
+sections are effective for \prog{llmk}; if other key names are specified, they
+will be ignored. Each key requests a value of specified type; if a value of
+which is not the expected type, it will result in a type error.
+
+In the string values for some specific keys, a few \emph{format specifiers} are
+available. These specifiers will be replaced to appropriate strings before
+executing actions by \prog{llmk}:
+%
+\begin{itemize}
+\item |%S|
+  is replaced by the filename given to the \code{llmk} as a command-line
+  argument or as an element of the \ckey{source} array.
+\item |%T|
+  is replaced by the target for each program.
+\item |%o|
+  is replaced by the output directory, or \code{.} if none was specified.
+\item |%b|
+  is replaced by the basename of |%S|.
+\item |%B|
+  is replaced by the output directory concatenated with the basename of |%S|.
+\end{itemize}
+
+Some keys have default values; the default configuration of \prog{llmk} should
+work well for typical and simple {\LaTeX} documents. Only the keys you
+explicitly specify in the TOML format override the default configuration. If
+you do not write a key in your configuration, the default value will be used.
+In other words, you only need to write the differences from the default
+configuration.
+
+\begin{confkey}{bibtex}{type: \type{string}}[default: \code{"bibtex"}]
+The command to use for the \progname{bibtex} program. Reference processing
+tools that are compatible with {\BibTeX} can be specified for this key, \eg
+\code{"biber"}. Internally, this key is an alias for the \ckey{command} key in
+the \progname{bibtex} entry. If the \ckey{command} key is specified in the
+\ckey{programs} table, this alias is ineffective.
+\end{confkey}
+
+\begin{confkey}{clean\_files}{type: \type{array of strings}}
+  [default: see bellow]
+The files to be removed with the cleaning action (\lopt{clean}). The format
+specifiers are available for this key. The default value is:
+%
+\begin{htcode}
+[
+  "%B.aux", "%B.bbl", "%B.bcf", "%B-blx.bib", "%B.blg", "%B.fls",
+  "%B.idx", "%B.ilg", "%B.ind", "%B.lof", "%B.log", "%B.lot",
+  "%B.nav", "%B.out", "%B.run.xml", "%B.snm", "%B.toc", "%B.vrb"
+]
+\end{htcode}
+\end{confkey}
+
+\begin{confkey}{clobber\_files}{type: \type{array of strings}}
+  [default: see bellow]
+The files to be removed with the clobbering action (\lopt{clobber}). The format
+specifiers are available for this key. The default value is:
+%
+\begin{htcode}
+["%B.dvi", "%B.pdf", "%B.ps", "%B.synctex.gz"]
+\end{htcode}
+\end{confkey}
+
+\begin{confkey}{dvipdf}{type: \type{string}}[default: \code{"dvipdfmx"}]
+The command to use for the \progname{dvipdf} program. Internally, this key is
+an alias for the \ckey{command} key in the \progname{dvipdf} entry. If the
+\ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{dvips}{type: \type{string}}[default: \code{"dvips"}]
+The command to use for the \progname{dvips} program. Internally, this key is an
+alias for the \ckey{command} key in the \progname{dvips} entry. If the
+\ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{extra\_clean\_files}{type: \type{array of strings}}
+  [default: \code{[]}]
+Extra files to be removed with the cleaning action (\lopt{clean}). By using
+this key, you can easily add files to be removed on top of the default
+\ckey{clean\_files}. The format specifiers are available for this key.
+\end{confkey}
+
+\begin{confkey}{latex}{type: \type{string}}[default: \code{"lualatex"}]
+The command to use for the \progname{latex} program. Internally, this key is an
+alias for the \ckey{command} key in the \progname{latex} entry. If the
+\ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{llmk\_version}{type: \type{string}}
+You can declare the \prog{llmk} version to use with this key. This is
+especially useful in consideration of compatibility. In case breaking changes
+are made in the future updates and an incompatible version is declared with the
+key, \prog{llmk} will fallback to the previous behavior or at least show you a
+warning message. The versioning of \prog{llmk} will try to follow the semantic
+versioning~\cite{semvar} and you can specify one of the versions in the
+following syntax:
+%
+\begin{htcode}
+\meta{major}.\meta{minor}.\meta{patch}
+\end{htcode}
+%
+Optionally, you can ommit the tailing \code{.\meta{patch}} part.
+\end{confkey}
+
+\begin{confkey}{makeindex}{type: \type{string}}[default: \code{"makeindex"}]
+The command to use for the \progname{makeindex} program. Internally, this key
+is an alias for the \ckey{command} key in the \progname{makeindex} entry. If
+the \ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{makeglossaries}{type: \type{string}}[default: \code{"makeglossaries"}]
+The command to use for the \progname{makeglossaries} program. Internally, this key
+is an alias for the \ckey{command} key in the \progname{makeglossaries} entry. If
+the \ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{max\_repeat}{type: \type{integer}}[default: \code{5}]
+You can specify the maximum number of execution repetitions for each command in
+your \ckey{sequence}. When processing your \ckey{sequence}, \prog{llmk} repeats
+a command until \ckey{aux\_file} becomes unchanged from the former execution if
+the key is specified and the corresponding auxiliary file exists. This key is to
+prevent the potential infinite loop of repetition.
+\end{confkey}
+
+\begin{confkey}{output\_directory}{type: \type{string}}
+Use this option to specify a directory where \progname{latex} output files should be written to and read from. This directory must already exist, or else \prog{llmk} will fail with an error. If the option is not specified, then output files will be written to the directory where \prog{llmk} is run from.
+\end{confkey}
+
+\begin{confkey}{programs}{type: \type{table}}
+  [default: see Section~\ref{sec:default-programs}]
+The table that contains the detailed configuration for each program. See
+Section~\ref{sec:keys-in-programs} for the details.
+\end{confkey}
+
+\begin{confkey}{ps2pdf}{type: \type{string}}[default: \code{"ps2pdf"}]
+The command to use for the \progname{ps2pdf} program. Internally, this key is
+an alias for the \ckey{command} key in the \progname{ps2pdf} entry. If the
+\ckey{command} key is specified in the \ckey{programs} table, this alias is
+ineffective.
+\end{confkey}
+
+\begin{confkey}{sequence}{type: \type{array of strings}}
+  [default: see Section~\ref{sec:default-sequence}]
+The array that contains the names of programs that will be executed by
+\prog{llmk}. The programs specified in this array are processed in the given
+order with the setups specified in the \ckey{programs} table. Further
+information about the default behavior can be found in
+Section~\ref{sec:default-sequence}.
+\end{confkey}
+
+\begin{confkey}{source}{type: \type{string} or \type{array of strings}}
+You can specify a {\LaTeX} source file as a \type{string} value or one or more
+files as an \type{array of strings}. This key is only effective and
+\emph{required} in \code{llmk.toml}. Conversely, ineffective in TOML fields.
+The given filenames will be treated as well as those specified as command-line
+arguments.
+\end{confkey}
+
+\subsection{Available keys in \code{programs} table}
+\label{sec:keys-in-programs}
+
+As it is described, \prog{llmk} invokes each program whose name specified in
+the \ckey{sequence} array in the given order. You can control each program
+execution by specifying the detailed configuration in the \ckey{programs}
+table.
+
+The \ckey{programs} table is a table of tables; each of the entries (\aka
+elements) is a set of configuration consists of the keys in the following list.
+The \ckey{programs} table must have corresponding entries for all names in the
+\ckey{sequence} array, otherwise, it will result in an error.
+
+As well as the top-level keys, some available keys in the \ckey{programs} table
+have default values, and only the values for the keys you explicitly specified
+in your configuration override. In string values for some specific keys, the
+format specifiers described in Section~\ref{sec:top-level-keys} can be used in
+the same way.
+
+\begin{confkey}{args}{type: \type{string} or \type{array of strings}}
+  [default: \code{["\%T"]}]
+You can specify an argument to give the command as a \type{string} value or one
+or more arguments as an \type{array of strings}. Each argument will be
+surrounded by a pair of double quotations, \eg \code{"arg"}. The format
+specifiers are available for this key.
+\end{confkey}
+
+\begin{confkey}{aux\_file}{type: \type{string}}
+The auxiliary file to monitor so that to check whether rerunning for the
+program is necessary or not. If this key is set and the specified file that is
+non-empty (see \ckey{aux\_empty\_size}) exists, \prog{llmk} will repeat the
+program execution until no change is made to the auxiliary file. This key is
+originally for the auxiliary file of {\LaTeX}, but the monitoring feature
+should be applicable to other programs. The format specifiers are available
+for this key.
+\end{confkey}
+
+\begin{confkey}{aux\_empty\_size}{type: \type{integer}}
+The empty size in bytes with this key, The auxiliary files specified with the
+\ckey{aux\_file} which is smaller than the value of this key are recognized as
+\emph{empty} and will be ignored. For instance, the auxiliary files of {\LaTeX},
+which normally have \code{.aux} extensions, contain
+|\cs{relax}\textvisiblespace\meta{line break}| (9 bytes); thus the default
+value of this key for the \progname{latex} program is \code{9}.
+\end{confkey}
+
+\begin{confkey}{command}{type: \type{string}}
+The name of the command to invoke. This is the only \emph{required} key for
+each entry in the \ckey{programs} table.
+\end{confkey}
+
+\begin{confkey}{generated\_target}{type: \type{boolean}}
+This flag is to denote whether or not the \ckey{target} is a file that should
+be generated in the \ckey{sequence} execution. For instance, DVI files, PS files,
+and the input files for \prog{makeindex}, which have \code{.idx} extensions are
+applicable. Conversely, files that you directly edit are not generated files.
+When the value is \code{true}, \prog{llmk} will consider only the target files
+newer than the time that the sequence processing starts. In case the target
+file is older, it will be ignored and the program will not be called.
+\end{confkey}
+
+\begin{confkey}{opts}{type: \type{string} or \type{array of strings}}
+You can specify a command-line option to give the command as a \type{string}
+value or one or more options as an \type{array of strings}. The format
+specifiers are available for this key.
+\end{confkey}
+
+\begin{confkey}{postprocess}{type: \type{string}}
+The name of a program (in the \ckey{programs} table) to be executed as
+postprocess. The specified program will be called only when the current main
+program is executed.
+\end{confkey}
+
+\begin{confkey}{target}{type: \type{string}}[default: \code{"\%S"}]
+The target filename of the program. The existence of the target file is checked
+by \prog{llmk} right before trying to execute each program, and the programs
+are invoked only when it exists. This filename is also used for replacing the
+value for the format specifiers. When this key is not specified, the input
+filename that is given as a command-line argument, or the filename in the value
+for the \ckey{source} key is used as a target.
+\end{confkey}
+
+\subsection{Default \code{programs} and \code{sequence}}
+
+In this section, the default values of the two important data structures for
+advanced control for \prog{llmk}, \ie the default configuration for the
+\ckey{programs} table and the \ckey{sequence} array. As it is already described
+in Section~\ref{sec:top-level-keys}, \ckey{programs} is the table to contain
+detailed configuration for each program to execute by \prog{llmk}, and
+\ckey{sequence} is an array to contain the names of entries in the
+\ckey{programs} table in the order of execution for a workflow. The default
+values of these are designed to work well for typical {\LaTeX} documents.
+Therefore, you normally do not need to change the values, but you can override
+any of the values by writing new values in your TOML configuration.
+
+\subsubsection{The default \code{programs}}
+\label{sec:default-programs}
+
+The followings are the default values in the \ckey{programs} table for each
+entry, \ie program, expressed in the TOML format. The default \ckey{programs}
+table contains useful settings for popular tools in the ecosystem of {\LaTeX}%
+\footnote{Reuquests for new settings for other programs will be considered.}.
+Only some of them are used in the default \ckey{sequence} (see Section~%
+\ref{sec:default-sequence}), but other entries can be easily used just by
+overriding the \ckey{sequence} array.
+
+\Program{bibtex} The entry for the {\BibTeX} program and friends, \eg Biber.
+The \progname{latex} program is set as \ckey{postprocess} so that to make sure
+rerunning {\LaTeX} command after this execution.
+%
+\begin{lstlisting}[style=toml]
+[programs.bibtex]
+command = "bibtex"
+target = "%B.bib"
+args = ["%B"]
+postprocess = "latex"
+\end{lstlisting}
+
+\Program{dvipdf} The entry for the \prog{dvipdf} program and friends.
+%
+\begin{lstlisting}[style=toml]
+[programs.dvipdf]
+command = "dvipdfmx"
+target = "%B.dvi"
+generated_target = true
+\end{lstlisting}
+
+\Program{dvips} The entry for the \prog{dvips} program and friends.
+%
+\begin{lstlisting}[style=toml]
+[programs.dvips]
+command = "dvips"
+target = "%B.dvi"
+generated_target = true
+\end{lstlisting}
+
+\Program{latex} The entry for the main {\LaTeX} programs. The default value for
+the \ckey{command} is \code{"lualatex"}; since \prog{llmk} runs on
+\code{texlua}, the installation of {\LuaTeX} is guaranteed. That is why the
+command is chosen for the default.
+%
+\begin{lstlisting}[style=toml]
+[programs.latex]
+command = "lualatex"
+opts = [
+  "-interaction=nonstopmode",
+  "-file-line-error",
+  "-synctex=1",
+  '-output-directory="%o"'
+]
+aux_file = "%B.aux"
+aux_empty_size = 9
+\end{lstlisting}
+
+\Program{makeindex} The entry for the Makeindex program and friends. The
+\progname{latex} program is set as \ckey{postprocess} so that to make sure
+rerunning {\LaTeX} command after this execution.
+%
+\begin{lstlisting}[style=toml]
+[programs.makeindex]
+command = "makeindex"
+target = "%B.idx"
+generated_target = true
+postprocess = "latex"
+\end{lstlisting}
+
+\Program{makeglossaries} The entry for the Makeglossaries program and friends. The
+\progname{latex} program is set as \ckey{postprocess} so that to make sure
+rerunning {\LaTeX} command after this execution.
+%
+\begin{lstlisting}[style=toml]
+[programs.makeglossaries]
+command = "makeglossaries"
+target = "%B.glo"
+generated_target = true
+postprocess = "latex"
+opts = ['-d "%o"']
+args = ["%b.glo"]
+\end{lstlisting}
+
+\Program{ps2pdf} The entry for the \prog{ps2pdf} program and friends.
+%
+\begin{lstlisting}[style=toml]
+[programs.ps2pdf]
+command = "ps2pdf"
+target = "%B.ps"
+generated_target = true
+\end{lstlisting}
+
+\subsubsection{The default \code{sequence}}
+\label{sec:default-sequence}
+
+The following is the default value for the \ckey{sequence} array:
+%
+\begin{htcode}
+["latex", "bibtex", "makeindex", "makeglossaries", "dvipdf"]
+\end{htcode}
+
+With these default settings in the \ckey{programs} table the \ckey{sequence}
+array, the default behavior of \prog{llmk} can be summarized as follows.
+%
+\begin{enumerate}
+\item It runs the {\LaTeX} command, by default {\LuaLaTeX}, against your
+  {\LaTeX} source file. This execution may be repeated when the auxiliary file
+  exists until no change made for the file to resolve all cross-references and
+  so on.
+\item If the corresponding {\BibTeX} database file, whose name matches to
+  \code{\%B.bib}, exists, the {\BibTeX} program is executed. When the execution
+  occurs, the \progname{latex} program is executed again right after because
+  the program is set as \ckey{postprocess}.
+\item Identically, if the corresponding input files for Makeindex and
+  Makeglossaries exist, the program is executed. When the execution occurs,
+  the \progname{latex} program is executed again right after because the
+  program is set as \ckey{postprocess}.
+\item In case the corresponding DVI file is generated in the previous steps,
+  though this will not happen with the default value of \ckey{latex}, \ie
+  \code{"lualatex"}, the \progname{dvipdf} program, by default \code{dvipdfmx},
+  is executed to produce the final PDF file.
+\end{enumerate}
+
+The entries that are not used within the default \ckey{sequence} are to make it
+easier to use other tools from the above. For instance, if you wan to use
+$\text{\progname{dvips}}+\text{\progname{ps2pdf}}$ combination instead of
+\progname{dvipdf}, you can just modify the value of \ckey{sequence} a bit:
+%
+\begin{htcode}
+sequence = [
+  "latex", "bibtex", "makeindex", "makeglossaries", "dvips", "ps2pdf"
+]
+\end{htcode}
+
+\section{Other supported formats}
+\label{sec:magic-comment}
+
+In addition to the TOML format, \prog{llmk} also supports a few other magic
+comment formats that are supported in some existing tools. These features are
+for user convenience, but note that the aim of \prog{llmk} is not to behave
+perfectly compatible with other tools.
+
+For \prog{llmk}, in your {\LaTeX} file, configuration in TOML format has the
+highest priority: when a TOML field is found, all the other magic comments will
+be ignored. The precedence of magic comment formats is as follows. Remember
+that all of these will be ignored if \prog{llmk} uses the configuration in a
+special file \code{llmk.toml}.
+%
+\begin{enumerate}
+\item TOML field (Section~\ref{sec:toml})
+\item {\TeX}Shop directives (Section~\ref{sec:ts-directive})
+\item Shebang-like directive (Section~\ref{sec:shebang})
+\end{enumerate}
+
+\subsection{{\TeX}Shop directives}
+\label{sec:ts-directive}
+
+{\TeX}Shop~\cite{texshop}, a {\TeX}-oriented IDE, understands special
+directives, which typically start with \code{\%\textvisiblespace !TEX}, to
+specify a workflow for processing {\LaTeX} document, \eg which {\TeX} engine to
+use. Similar directives are also supported in a few other tools such as {\TeX}%
+works~\cite{texworks} and {\TeX}studio~\cite{texstudio}.
+
+Among several variation of the directives, \prog{llmk} supports two of them.
+One is the directive to specify a variant of {\TeX} engine. The formal syntax
+of the directive is:
+%
+\bgroup
+\newcommand{\OS}{\meta{optional spaces}}
+\newcommand{\VS}{\textvisiblespace}
+\begin{htcode}
+\meta{TS prefix}TEX\VS{\OS}program\meta{equals}\meta{command}\OS
+\meta{TS prefix}TeX\VS{\OS}program\meta{equals}\meta{command}\OS
+\meta{TS prefix}TEX\VS{\OS}TS-program\meta{equals}\meta{command}\OS
+\end{htcode}
+\egroup
+%
+where the definitions of \meta{TS prefix} and \meta{equals} are given as
+follows.
+%
+\bgroup
+\newcommand{\OS}{\meta{optional spaces}}
+\begin{align*}
+&\text{\meta{TS prefix}}
+  \longrightarrow \text{\code{\OS\%\OS!\OS}} \\
+&\text{\meta{equals}}
+  \longrightarrow \text{\code{\OS=\OS}}
+\end{align*}
+\egroup
+%
+The \meta{command} part will be passed to the \ckey{latex} key of \prog{llmk}.
+The other supported {\TeX}Shop directive is that for the {\BibTeX} program. The
+syntax is very similar to the first one:
+%
+\bgroup
+\newcommand{\OS}{\meta{optional spaces}}
+\newcommand{\VS}{\textvisiblespace}
+\begin{htcode}
+\meta{TS prefix}BIB\VS{\OS}program\meta{equals}\meta{command}\OS
+\meta{TS prefix}BIB\VS{\OS}TS-program\meta{equals}\meta{command}\OS
+\end{htcode}
+\egroup
+%
+The \meta{command} part will be passed to the \ckey{bibtex} key of \prog{llmk}.
+For both of the two directives, only the topmost ones are effective; the others
+will be ignored. For example, the following two configuration are equivalent:\\
+%
+\begin{minipage}[t]{.5\textwidth}
+\begin{lstlisting}[style=latex]
+% !TEX TS-program = xelatex
+% !BIB TS-program = biber
+\documentclass{article}
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\begin{lstlisting}[style=latex]
+% +++
+% latex = "xelatex"
+% bibtex = "biber"
+% +++
+\documentclass{article}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Shebang-like directive}
+\label{sec:shebang}
+
+A few existing tools, notably the YaTeX mode for Emacs~\cite{yatex}, support
+the so-called shebang-like directive. This is also supported by \prog{llmk}.
+The syntax is:
+%
+\begin{htcode}
+\meta{optional spaces}%#!\meta{optional spaces}\meta{command}\meta{optional spaces}
+\end{htcode}
+%
+The \meta{command} part will be passed to the \ckey{latex} key of \prog{llmk}.
+This directive is only effective strictly in the first line in your {\LaTeX}
+source file.
+
+For example, the following two configuration are equivalent:\\
+%
+\begin{minipage}[t]{.5\textwidth}
+\begin{lstlisting}[style=latex]
+%#!pdflatex
+\documentclass{article}
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{.49\textwidth}
+\begin{lstlisting}[style=latex]
+% +++
+% latex = "pdflatex"
+% +++
+\documentclass{article}
+\end{lstlisting}
+\end{minipage}
+
+\section{Acknowledgements}
+
+This project has been supported by the {\TeX} Development Fund created by the {\TeX}
+Users Group (No.~29). I would like to thank all contributors and the people who
+gave me advice and suggestions for new features for the \prog{llmk} project.
+
+\section{License}
+
+This software is released under the MIT license:
+%
+\begin{quotation}
+\parindent=0pt
+\parskip=\baselineskip
+\small\ttfamily
+\noindent
+\printLICENSE
+\end{quotation}
+
+\subsection*{Third-party software}
+
+\paragraph{toml.lua} Copyright 2017 Jonathan Stoler. Released under the MIT
+license:
+%
+\begin{quote}
+\url{https://github.com/jonstoler/lua-toml/blob/master/LICENSE}
+\end{quote}
+
+\begin{thebibliography}{9}
+\bibitem{asakura2020}
+  Takuto Asakura. \textit{The design concept for \prog{llmk}\Dash Light {\LaTeX}
+  Make}. TUGboat, Volume~41, No.~2. (2020)
+
+\bibitem{arara}
+  Paulo Cereda, et al. \textit{arara\Dash The cool {\TeX} automation
+  tool}. \url{https://ctan.org/pkg/arara}
+
+\bibitem{latexmk}
+  John Collins. \textit{latexmk\Dash generate {\LaTeX} document}.
+  \url{https://ctan.org/pkg/latexmk}
+
+\bibitem{yatex}
+  Yuuji Hirose. \textit{YaTeX\Dash Yet Another TeX mode for Emacs}.
+  \url{https://www.yatex.org/}
+
+\bibitem{texworks}
+  Jonathan Kew, Stefan L\"offler, and Charlie Sharpsteen.
+  \textit{{\TeX}works\Dash lowering the entry barrier to the {\TeX} world}.
+  \url{https://tug.org/texworks/}
+
+\bibitem{texshop}
+  Richard Koch, et al. \textit{{\TeX}Shop}.
+  \url{https://pages.uoregon.edu/koch/texshop/}
+
+\bibitem{semvar}
+  Tom Preston-Werner. \textit{Semantic Versioning 2.0.0}.
+  \url{https://semver.org/}
+
+\bibitem{toml}
+  Tom Preston-Werner. \textit{TOML: Tom's Obvious Minimal Language}.
+  \url{https://toml.io/}
+
+\bibitem{texstudio}
+  Benito van der Zander, et al.
+  \textit{{\TeX}studio\Dash {\LaTeX} made comfortable}.\\
+  \url{https://texstudio.org/}
+\end{thebibliography}
+
+\end{document}
+% vim: set spell:

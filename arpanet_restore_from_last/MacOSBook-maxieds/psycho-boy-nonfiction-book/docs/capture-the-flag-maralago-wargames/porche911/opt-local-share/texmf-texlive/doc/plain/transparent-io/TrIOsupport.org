@@ -1,0 +1,163 @@
+% \let-assignments of the used primitives, internal regeisters and quantities
+\let\TRIObegingroup\begingroup
+\let\TRIOendgroup\endgroup
+\let\TRIOexpandafter\expandafter
+\let\TRIOnoexpand\noexpand
+\let\TRIOdef\def
+\let\TRIOedef\edef
+\let\TRIOgdef\gdef
+\let\TRIOxdef\xdef
+\let\TRIOlet\let
+\let\TRIOfuturelet\futurelet
+\let\TRIOglobal\global
+\let\TRIOglobaldefs\globaldefs
+\let\TRIOifcase\ifcase
+\let\TRIOifcat\ifcat
+\let\TRIOifnum\ifnum
+\let\TRIOifx\ifx
+\let\TRIOor\or
+\let\TRIOelse\else
+\let\TRIOfi\fi
+\let\TRIOafterassignment=\afterassignment
+\let\TRIOimmediate\immediate
+\let\TRIOinput\input
+\let\TRIOread\read
+\let\TRIOwrite\write
+\let\TRIOthe\the
+\let\TRIOnumber\number
+\let\TRIOadvance\advance
+\let\TRIOcatcode\catcode
+\let\TRIOfont\font
+\let\TRIOinputlineno\inputlineno
+\let\TRIOrelax\relax
+\let\TRIOundefined\undefined
+%
+\let\TrIOspace\space
+%
+\catcode`@=11
+\def\wlog{\TRIOimmediate\write\m@ne}% avoid our macros for \immediate in \wlog
+\def\TrIOwlog{\TRIOimmediate\TRIOwrite\m@ne}% and provide version with our \write
+\def\TrIOmessage{\TRIOimmediate\TRIOwrite\sixt@@n}% can't use \newlinechar
+\catcode`@=12
+%
+% First: \afterassignment
+%
+\newif\ifTrIOsavedtoken           % true: a token is stored by \afterassignment
+\newif\ifTrIOblockafterassignment % true: don't insert a token after an assignment
+\newif\ifTrIOusetokenlist         % true: store the saved token in a token register
+\newtoks\TrIOtoken                % the token register for \afterassignment
+\newtoks\TrIOtrafterassignment
+% \globaldefs
+\def\TrIOglobaldefs{% inform about \globaldefs>0 and switch to \globaldefs=0
+   \TRIOifnum\TRIOglobaldefs>0 \TrIOmessage{TrIO Info: globaldefs is >0 (store)}%
+      \TRIOafterassignment\TrIOsuspendafterassignment \TRIOglobaldefs=0
+      \TRIOdef\TrIOresetglobaldefs{\TrIOblockafterassignmentfalse
+         \TRIOafterassignment\TrIOinitafterassignment\TRIOglobaldefs=1 }%
+   \TRIOelse\TRIOifnum\TRIOglobaldefs<0
+      \TRIOafterassignment\TrIOsuspendafterassignment \TRIOglobaldefs=0
+      \TRIOdef\TrIOresetglobaldefs{\TrIOblockafterassignmentfalse
+         \TRIOafterassignment\TrIOinitafterassignment\TRIOglobaldefs=-1 }%
+   \TRIOelse \TrIOsuspendafterassignment
+      \TRIOdef\TrIOresetglobaldefs{\TrIOresumeafterassignment}%
+\TRIOfi\TRIOfi}
+% the replacement of the primitive
+\def\afterassignment{\TRIOthe\TrIOtrafterassignment}
+\TrIOtrafterassignment={\TrIOafterassignment}
+\def\TrIOafterassignment{% save a token for further inspection
+   \TRIObegingroup\TRIOendgroup   % a trick to make the prefix \global invalid
+   \TrIOglobaldefs \TrIOsavedtokentrue       % stop \globaldefs; store a token
+   \TRIOfuturelet\TrIOsavedtoken\TrIOchecktoken}% the token stays in the input
+% two more user commands for those who know the macros   
+\def\TrIOsuspendafterassignment{% inactivate the application of the token
+   \TrIOblockafterassignmenttrue}
+\def\TrIOresumeafterassignment{% activate insertion of a stored token
+   \TrIOblockafterassignmentfalse\TrIOinitafterassignment}
+\def\TrIOinitafterassignment{\TRIOafterassignment\TrIOAFTERASSIGNMENT}
+% the internal macros
+\def\TrIOchecktoken{% check type of token, store a macro in token register
+   \TRIOifcat\TRIOnoexpand\TrIOsavedtoken\TRIOrelax
+      \TRIOlet\TrIOnext=\TrIOstoresavedtoken   % save the macro in \TrIOtoken
+   \TRIOelse \TRIOlet\TrIOnext=\TrIOremovesavedtoken % otherwise remove token
+   \TRIOfi \TrIOnext}
+\def\TrIOstoresavedtoken#1{% #1: control sequence stored in token register
+   \TRIOlet\TrIOnext=\TRIOundefined
+   \TrIOusetokenlisttrue\TrIOtoken={#1}\TrIOresetglobaldefs}
+\def\TrIOremovesavedtoken{% the \TrIOsavedtoken is still part of the input
+   \TRIOlet\TrIOnext=\TRIOundefined
+   \TrIOusetokenlistfalse\TRIOafterassignment\TrIOresetglobaldefs
+   \TRIOlet\TrIOsavedtoken=}
+\def\TrIOAFTERASSIGNMENT{% use the stored token (sometimes)
+   \ifTrIOblockafterassignment                        % if true nothing to do
+   \TRIOelse\ifTrIOsavedtoken            % otherwise only if a token is saved
+      \TRIOifnum\TRIOglobaldefs>0 \TrIOmessage{TrIO Info: globaldefs is 1 (apply)}%
+         \TRIOglobaldefs=0 \TrIOsavedtokenfalse
+         \TRIOglobaldefs=1 \TRIOelse \TrIOsavedtokenfalse \TRIOfi
+      \TRIOexpandafter\TRIOexpandafter\TRIOexpandafter\TrIOoutputtoken
+      \TRIOexpandafter           % get rid of the 2 \fi with 3+1 \expandafter
+   \fi\fi}
+\def\TrIOoutputtoken{% output the token depending on its type
+   \ifTrIOusetokenlist \TRIOexpandafter\TRIOthe\TRIOexpandafter\TrIOtoken
+   \TRIOelse \TRIOexpandafter\TrIOsavedtoken \TRIOfi}
+%
+% Second: \input
+%
+% make sure that a file loaded via \input is always displayed on the terminal
+\let\batchmode\scrollmode \let\nonstopmode\scrollmode
+\def\TrIOcnt{0 }% an internal counter for each \input, \openin, \openout
+\countdef\TrIOcount=255 % counter for \TrIOcnt, stream numbers, etc.; used in a group
+\def\TrIOcountiocmd{% increment \TrIOcnt
+   \TrIOcount=\TrIOcnt \TRIOadvance \TrIOcount by 1
+   \TRIOxdef\TrIOcnt{\TRIOnumber\TrIOcount\TrIOspace}}
+\def\TrIOhandleglobaldefs{% inform about \globaldefs>0 and switch to \globaldefs=0
+   \TRIOifnum\TRIOglobaldefs>0 \TrIOmessage{TrIO Info: globaldefs is >0 (I/O)}%
+      \TRIOafterassignment\TrIOsuspendafterassignment \TRIOglobaldefs=0
+      \TRIOdef\TrIOendgroup{\TRIOendgroup            % end a group opened earlier
+         \TRIOafterassignment\TrIOinitafterassignment \TRIOglobaldefs=1 }%
+   \TRIOelse \TrIOsuspendafterassignment \TRIOglobaldefs=0
+      \TRIOdef\TrIOendgroup{\TRIOendgroup\TrIOinitafterassignment}%
+   \TRIOfi}
+\def\TrIOsetcatcodes{% establish a few \catcodes
+   \TRIOedef\TrIOnext{\TRIOthe\TRIOcatcode`\%}{\TRIOcatcode`\%=\TrIOnext}%
+   \TRIOcatcode`\%=12 \TRIOlet\%=\TRIOcatcode
+   \%`\\=0 \%`\==12 \%`\`=12 \%`\1=12 \%`\2=12 }
+%
+% Third: \openin
+%
+\newtoks\TrIOtropenin
+\let\TRIOaAmNzZopenin=\openin   % this name must be password protected
+%
+% Fourth: \immediate and \openout
+%
+\newif\ifTrIOimoo % true: \immediate is applied to \openout
+\newtoks\TrIOtrimmediate
+\newtoks\TrIOtropenout
+\let\TRIObBlOyYopenout=\openout % this name must be password protected
+%
+% Fifth: \special
+%
+\ifx y\disablespecial % deactivate \special; write to log file
+   \def\special{\TrIOwlog{<<< TrIO >>> Line \TRIOthe\inputlineno: special}\TrIOwlog}%
+   \let\TRIOhHJqsSspecial\special
+\else\ifx n\disablespecial % trace \special
+   \tracingoutput=1 \showboxdepth=10000 \showboxbreadth=10000
+   \let\tracingoutput=\tracinglostchars
+   \let\showboxdepth=\tracinglostchars \let\showboxbreadth=\tracinglostchars
+\fi\fi
+\let\disablespecial\undefined
+%
+% NO WARRANTY
+%
+\begingroup\newlinechar=`\^^J
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, version 3 (GPL3).
+% If you change the next line to \iffalse please obey the GPL3 license
+% when you distribute such a changed macro file.
+\iftrue
+   \errhelp{This program is distributed in the hope that it will be
+     useful,^^Jbut WITHOUT ANY WARRANTY; without even the implied warranty
+     of^^JMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+     the^^JGNU General Public License, version 3, for more
+     details.^^JType `x' if you want to stop the execution of TrIO now.}
+   \errmessage{The TrIO macros come with ABSOLUTELY NO WARRANTY; for details type `h'}
+\fi\endgroup

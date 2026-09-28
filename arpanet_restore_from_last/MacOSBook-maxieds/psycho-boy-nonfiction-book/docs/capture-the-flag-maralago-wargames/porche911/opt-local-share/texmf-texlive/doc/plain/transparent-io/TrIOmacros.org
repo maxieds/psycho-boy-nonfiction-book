@@ -1,0 +1,115 @@
+\input TrIOsupport.tex
+%
+% First, macros for \input
+%
+\def\TrIOempty{}\def\TrIOfixedef{\TRIOnoexpand\TrIOempty{}\TRIOendgroup}
+% use \let\threenosubdirs=y or \let\twonosubdirs=y before \input \TrIOmacros
+\ifx y\threenosubdirs % set the prefix for \input; the directories must no exist
+   \def\TrIOnosubdir{nosubdir/nosubdir/nosubdir/}
+\else\ifx y\twonosubdirs
+   \def\TrIOnosubdir{nosubdir/nosubdir/}
+\else
+   \def\TrIOnosubdir{nosubdir/}
+\fi\fi
+\let\threenosubdirs=\undefined \let\twonosubdirs=\undefined
+% the next \def gives us the skip value 42 for \csname and \global, \long, \outer
+\def\TrIOinputmessage{% inform user what happens and what has to be done
+   \TrIOmessage{TrIO >>> ( \TrIOcnt) Line \TRIOthe\TRIOinputlineno: input}%
+   \TrIOmessage{>>> enter shown file name without `\TrIOnosubdir'.}\TrIOmessage{<<<}}
+\def\input{% add an unknown subdirectory to raise an error
+   \TRIObegingroup \TRIOafterassignment\TRIOnoexpand\TrIOempty
+   % the next line catches an \edef; then enter: 36, I\TrIOfixedef
+   \TRIOdef\TrIOskipXXXVIinsTrIOfixedef\TrIOempty{}\TrIOempty\TrIOhandleglobaldefs
+   \TRIOglobal\TRIOlet\TrIOskipXXXVIinsTrIOfixedef= \TRIOundefined \TrIOcountiocmd
+   \TrIOmessage{<<<}\TrIOsetcatcodes \TRIOinput TrIOinput.tex
+   \TrIOinputmessage \TrIOendgroup \TRIOinput \TrIOnosubdir}% plus file name gives error
+\def\TrIOcCkPxXmove#1\input{% transfer tokens closer to \TRIOinput
+   \def\TrIOcCkPxXtransfer{#1}\TrIOcCkPxXinput}
+\def\TrIOcCkPxXinputmessage{% inform user what happens and what has to be done
+   \TrIOmessage{TrIO >>> ( \TrIOcnt) Line \TRIOthe\TRIOinputlineno: INPUT}%
+   \TrIOmessage{>>> enter shown file name without `\TrIOnosubdir'.}\TrIOmessage{<<<}}
+\def\TrIOcCkPxXinput{% variant of \input for \TrIOcCkPxXmove
+   \TRIObegingroup \TRIOafterassignment\TRIOnoexpand\TrIOempty
+   \TRIOdef\TrIOskipXXXVIinsTrIOfixedef\TrIOempty{}\TrIOempty\TrIOhandleglobaldefs
+   \TRIOglobal\TRIOlet\TrIOskipXXXVIinsTrIOfixedef= \TRIOundefined \TrIOcountiocmd
+   \TrIOmessage{<<<}\TrIOsetcatcodes \TRIOinput TrIOinput.tex
+   \TrIOcCkPxXinputmessage \TrIOendgroup \TrIOcCkPxXtransfer\TRIOinput \TrIOnosubdir}
+%
+% Second, macros for \openin
+%
+\def\openin{\TRIOthe\TrIOtropenin} \TrIOtropenin={\TrIOopenin}
+\def\TrIOopenin{\TRIObegingroup \TrIOhandleglobaldefs \TrIOcountiocmd
+   \TRIOafterassignment\TrIOOpenIn \TrIOcount=}% get the stream number
+\def\TrIOOpenIn{\TRIOafterassignment\TrIOOPENIN
+   \TRIOlet\TrIOnxt=}% remove an optional =
+\def\TrIOOPENIN{% prepend the file name with a nonexistent subdirectory
+   \TrIOmessage{<<<}%
+   \TrIOmessage{TrIO >>> ( \TrIOcnt) Line \TRIOthe\TRIOinputlineno:
+      openin \TRIOthe\TrIOcount}%
+   \TrIOmessage{>>> If you accept that the file (without \TrIOnosubdir) is read}%
+   \TrIOmessage{>>> enter `openin' and follow the instructions.}%
+   \TrIOmessage{<<<}%
+   \TRIOifx=\TrIOnxt \TRIOdef\TrIOnxt{}\TRIOfi % keep a \next<>`='
+   \TrIOsetcatcodes \TRIOinput \TrIOnosubdir\TrIOnxt}% read a file name
+% look at file ``openin.tex''
+\def\TrIOaAmNzZopenin{% get a file name from user for \openin
+   \TRIOread16 to \FilenameOPENIN
+   \TRIOaAmNzZopenin\TRIOnumber\TrIOcount=\FilenameOPENIN
+   \TRIOlet\FilenameOPENIN=\TRIOundefined
+   \TRIOlet\TrIOnext=\TRIOundefined \TRIOlet\TrIOnxt=\TRIOundefined \TrIOendgroup}
+%
+% Third, macros for \immediate and \openout
+%
+\def\immediate{\TRIOthe\TrIOtrimmediate} \TrIOtrimmediate={\TrIOImmediate}
+\def\TrIOImmediate{% set a flag if \openout follows
+   \TRIObegingroup \TrIOhandleglobaldefs
+   \TRIOafterassignment\TrIOIMMEDIATE
+   \TrIOcount=`x}% a trick to expand the following token
+\def\TrIOIMMEDIATE#1{% if #1 is \TRIOimmediate set \TrIOimootrue
+   \TRIOifx#1\TRIOimmediate \TRIOglobal\TrIOimootrue
+   \TRIOelse \TRIOglobal\TrIOimoofalse\TRIOfi
+   \TrIOendgroup\TRIOimmediate#1}% apply the primitive
+\def\openout{\TRIOthe\TrIOtropenout} \TrIOtropenout={\TrIOopenout}
+\def\TrIOopenout{\TRIOimmediate\TRIObegingroup % unique start, not \begingroup
+   \TrIOhandleglobaldefs \TrIOcountiocmd
+   \TRIOafterassignment\TrIOOpenOut \TrIOcount=}
+\def\TrIOOpenOut{\TRIOafterassignment\TrIOOPENOUT
+   \TRIOlet\TrIOnxt=}% remove an optional =
+\def\TrIOOPENOUT{% prepend the file name with an unknown (!!) subdirectory
+   \TrIOmessage{<<<}%
+   \TrIOmessage{TrIO >>> ( \TrIOcnt) Line \TRIOthe\TRIOinputlineno:
+      \ifTrIOimoo immediate \TRIOfi openout \TRIOthe\TrIOcount}%
+   \TrIOmessage{>>> If you accept that the file (without \TrIOnosubdir) is created}%
+   \TrIOmessage{>>> enter `openout' and follow the instructions.}%
+   \TrIOmessage{<<<}%
+   \TRIOifx=\TrIOnxt \TRIOdef\TrIOnxt{}\TRIOfi % keep a \nxt<>`='
+   \TrIOsetcatcodes \TRIOinput \TrIOnosubdir\TrIOnxt}% read a file name
+% look at file ``openout.tex''
+\def\TrIObBlOyYopenout{% get a file name from user for \openout
+   \TRIOread16 to \FilenameOPENOUT
+   \ifTrIOimoo \TRIOglobal\TrIOimoofalse
+      \TRIOlet\TrIOnext=\TRIOimmediate
+   \TRIOelse \TRIOlet\TrIOnext=\TRIOrelax
+   \TRIOfi
+   \TrIOnext\TRIObBlOyYopenout\TRIOnumber\TrIOcount=\FilenameOPENOUT
+   \TRIOlet\FilenameOPENOUT=\TRIOundefined
+   \TRIOlet\TrIOnext=\TRIOundefined \TRIOlet\TrIOnxt=\TRIOundefined \TrIOendgroup}
+%
+% Start
+%
+\TRIOinput TrIOprivate
+\begingroup \newlinechar=`\^^J
+\errhelp{File I/O ( \input\openin\openout) is now under TrIO's control.^^JBe
+   alerted if a file is loaded without the proper TrIO message^^Jand
+   follow always the instruction of this message.^^JMake sure that the
+   sequence number is incremented sequentially.}
+\ifx y\disablespecial % deactivate \special; write to log file
+   \TrIOmessage{<<< TrIO >>> \string\special: disabled, trace in \jobname.log}
+\else\ifx n\disablespecial % trace \special
+   \TrIOmessage{<<< TrIO >>> \string\special: primitive, trace in \jobname.log}
+\else
+   \TrIOmessage{<<< TrIO >>> \string\special: primitive}
+\fi\fi
+\let\disablespecial\undefined
+\TrIOmessage{<<< TrIO >>> \string\TrIOnosubdir: \TrIOnosubdir}
+\errmessage{TrIO activated. Type h to get instructions}\endgroup
