@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://linuxbash.sh/post/mounting-virtual-disk-images-in-linux -->
+<html lang="en-US" class="__variable_space scroll-smooth light" id="html-id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="HTMLy">
+<link rel="icon" type="image/png" href="https://linuxbash.sh/post/themes/linuxbash/logo-icon.png">
+<link rel="sitemap" href="https://linuxbash.sh/sitemap.xml">
+<link rel="alternate" type="application/rss+xml" title="Linux Bash Feed" href="https://linuxbash.sh/feed/rss">
+<meta name="google-site-verification" content="G-9XNT6TQV7Q">
+	<title>Mounting Virtual Disk Images in Linux - Linux Bash</title>
+
+    <meta name="description" content="Learn how to mount virtual disk images in Linux with this detailed guide for beginners. Explore essential tools like 'mount' and 'losetup', and processes for handling ISO, IMG, and VDI file types. Utilize `qemu` for advanced disk image types, and uncover the steps for partitioned images and VDI files in VirtualBox using `qemu-nbd`. Ideal for developers and tech aficionados looking to enhance their Linux skills and streamline their workflow.">
+	<link rel="canonical" href="https://linuxbash.sh/post/mounting-virtual-disk-images-in-linux">
+	<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Linux Bash">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mounting Virtual Disk Images in Linux">
+<meta name="author" content="linuxbash">
+<meta name="article:published_time" content="2025-01-12T12:36:58+00:00">
+<meta name="article:modified_time" content="2026-08-27T19:01:24+01:00">
+<meta name="article:section" content="Filesystem">
+<meta name="article:section_url" content="https://linuxbash.sh/category/filesystem">
+<meta property="article:publisher" content="https://www.facebook.com/youdsmedia">
+<meta name="twitter:creator" content="@youdsmedia">
+<meta name="twitter:site" content="@youdsmedia">
+<meta property="og:url" content="https://linuxbash.sh/post/mounting-virtual-disk-images-in-linux">
+<meta property="og:description" content="Learn how to mount virtual disk images in Linux with this detailed guide for beginners. Explore essential tools like 'mount' and 'losetup', and processes for handling ISO, IMG, and VDI file types. Utilize `qemu` for advanced disk image types, and uncover the steps for partitioned images and VDI files in VirtualBox using `qemu-nbd`. Ideal for developers and tech aficionados looking to enhance their Linux skills and streamline their workflow.">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://linuxbash.sh/system/resources/images/logo-big.png">
+	<link rel="stylesheet" href="./Mounting Virtual Disk Images in Linux - Linux Bash_files/typography.css" data-precedence="next">
+	<link rel="stylesheet" href="./Mounting Virtual Disk Images in Linux - Linux Bash_files/tailwind.css" data-precedence="next">
+	<link rel="stylesheet" href="./Mounting Virtual Disk Images in Linux - Linux Bash_files/style.css" data-precedence="next">
+	<!-- Cronitor RUM -->
+	<script async="" src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/script.js.download"></script>
+	<script>
+	    window.cronitor = window.cronitor || function() { (window.cronitor.q = window.cronitor.q || []).push(arguments); };
+	    cronitor('config', { clientKey: '1e5515c1e5f2094686a9c0972bd91534' });
+	</script>
+
+<script async="" src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/cookie-consent-code.js.download"></script><script async="" src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/linuxbash.sh"></script><style>.termsfeed-com---nb{overflow:auto;z-index:99999999999;font-size:16px}.termsfeed-com---nb .cc-nb-main-container{padding:3rem}.termsfeed-com---nb .cc-nb-title{font-size:24px;font-weight:600}.termsfeed-com---nb .cc-nb-text{font-size:16px;margin:0 0 1.25rem 0}.termsfeed-com---nb .cc-nb-okagree,.termsfeed-com---nb .cc-nb-reject,.termsfeed-com---nb .cc-nb-changep{font-weight:bold;font-size:14px;margin-right:.25rem !important;margin-bottom:.25rem !important}@media(max-width: 480px){.termsfeed-com---nb .cc-nb-okagree,.termsfeed-com---nb .cc-nb-reject,.termsfeed-com---nb .cc-nb-changep{display:block;width:100%}}.termsfeed-com---nb-headline{right:0;top:auto;bottom:0;left:0;max-width:100%;position:relative}@media(max-width: 320px),(max-height: 480px){.termsfeed-com---nb-headline{overflow:auto;height:200px;max-width:100%;right:0;top:auto;bottom:0;left:auto;position:fixed}}.termsfeed-com---nb-simple{right:0;top:auto;bottom:0;left:auto;max-width:50%;position:fixed}@media screen and (max-width: 600px){.termsfeed-com---nb-simple{max-width:80%}}@media(max-width: 320px),(max-height: 480px){.termsfeed-com---nb-simple{overflow:auto;height:200px;max-width:100%}}.termsfeed-com---nb-interstitial-overlay{position:fixed;top:0;left:0;height:100%;width:100%;background:rgba(0,0,0,.8);z-index:9999999999}.termsfeed-com---nb-interstitial{right:3vw;top:3vh;left:3vw;max-width:100%;position:fixed}@media(max-width: 320px),(max-height: 480px){.termsfeed-com---nb-interstitial{overflow:auto;height:200px;right:0;top:auto;bottom:0;left:auto;position:fixed}}.termsfeed-com---nb-standalone{position:fixed;top:0;left:0;height:100%;width:100%}@media(max-width: 320px),(max-height: 480px){.termsfeed-com---nb-standalone{overflow:auto;height:200px;max-width:100%;right:0;top:auto;bottom:0;left:auto;position:fixed}}.termsfeed-com---pc-overlay{width:100%;height:100%;position:fixed;background:rgba(0,0,0,.5);z-index:999999999999;top:0;left:0;display:none}@media screen and (max-width: 600px){.termsfeed-com---pc-overlay{overflow-y:scroll}}.termsfeed-com---pc-dialog{position:absolute;margin:30px auto;width:750px;max-width:90%;height:auto;left:0;right:0}.termsfeed-com---pc-dialog>div{width:100%}.termsfeed-com---pc-dialog .cc-pc-container{width:100%;display:flex;background:#fff;flex-direction:column}.termsfeed-com---pc-dialog .cc-pc-head{background:#fff;color:#111;display:flex;flex-direction:row;justify-content:space-between}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-pc-head{flex-direction:column}}.termsfeed-com---pc-dialog .cc-pc-head-title{display:flex;padding-left:15px;flex-direction:column;justify-content:center;align-items:baseline}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-pc-head-title{align-items:center;padding:15px 0 0 0}}.termsfeed-com---pc-dialog .cc-pc-head-title-text{font-size:16px;line-height:1.5;margin:0}.termsfeed-com---pc-dialog .cc-pc-head-title-headline{font-size:20px;font-weight:600;margin:0}.termsfeed-com---pc-dialog .cc-pc-head-lang{display:flex;align-items:center;padding-right:15px;min-height:80px;justify-content:center;flex-direction:row-reverse}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-pc-head-lang{padding:15px 0;min-height:20px}}.termsfeed-com---pc-dialog .cc-pc-head-close{display:flex;align-items:center;justify-content:center;margin-left:15px}.termsfeed-com---pc-dialog .cc-cp-body{display:flex;flex-direction:row;align-items:stretch;background:#292929;color:#f5f5f5;border-bottom:none}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-cp-body{flex-direction:column}}.termsfeed-com---pc-dialog .cc-cp-body-tabs{font-family:Arial,sans-serif !important;width:150px;margin:0;padding:0;background:#e6e6e6;min-width:150px}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-cp-body-tabs{width:100%}}.termsfeed-com---pc-dialog .cc-cp-body-tabs-item{margin:0;padding:0;float:left;display:block;width:100%;color:#666;background:#e6e6e6;border-radius:0;border-bottom:1px solid #ccc;border-right:1px solid #ccc;border-right:0;transition:all ease .1s;box-sizing:content-box}@media screen and (max-width: 600px){.termsfeed-com---pc-dialog .cc-cp-body-tabs-item{border-right:0}}.termsfeed-com---pc-dialog .cc-cp-body-tabs-item[active=true]{background:#292929;color:#f5f5f5}.termsfeed-com---pc-dialog .cc-cp-body-tabs-item-link{text-decoration:none;color:#666;display:block;font-weight:700;font-size:12px;line-height:19px;position:relative;cursor:pointer;width:100%;text-align:left;background:none;word-wrap:break-word;white-space:break-spaces;padding:0}.termsfeed-com---pc-dialog .cc-cp-body-tabs-item-link span{padding:10px 5px 10px 10px;display:block}.termsfeed-com---pc-dialog .cc-cp-body-content{background:#292929;color:#f5f5f5}.termsfeed-com---pc-dialog .cc-cp-body-content-entry{width:100%;display:none;padding:25px;box-sizing:border-box}.termsfeed-com---pc-dialog .cc-cp-body-content-entry[active=true]{display:block}.termsfeed-com---pc-dialog .cc-cp-body-content-entry[active=true]:focus{outline:none}.termsfeed-com---pc-dialog .cc-cp-body-content-entry-title{font-size:24px;font-weight:600;padding:0;padding-bottom:20px}.termsfeed-com---pc-dialog .cc-cp-body-content-entry-text{font-size:16px;line-height:1.5}.termsfeed-com---pc-dialog .cc-cp-foot{background:#f2f2f2;display:flex;flex-direction:row;align-items:center;border-top:1px solid #ccc;justify-content:space-between}.termsfeed-com---pc-dialog .cc-cp-foot-byline{padding:20px 10px;font-size:14px;color:#333;display:block !important}.termsfeed-com---pc-dialog .cc-cp-foot-byline a{color:#999}.termsfeed-com---pc-dialog .cc-cp-foot-save{margin-right:10px;opacity:.9;transition:all ease .3s;font-size:14px;font-weight:bold;height:auto}.termsfeed-com---pc-dialog .cc-cp-foot-save:hover{opacity:1}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox{position:absolute;margin:2px 0 0 16px;cursor:pointer;appearance:none;border:0}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox+label{position:relative;padding:4px 0 0 50px;line-height:2em;cursor:pointer;display:inline;font-size:14px}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox+label:before{content:"";position:absolute;display:block;left:0;top:0;width:40px;height:24px;border-radius:16px;background:#fff;border:1px solid #d9d9d9;-webkit-transition:all .3s;transition:all .3s}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox+label:after{content:"";position:absolute;display:block;left:0px;top:0px;width:24px;height:24px;border-radius:16px;background:#fff;border:1px solid #d9d9d9;-webkit-transition:all .3s;transition:all .3s}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox+label:hover:after{box-shadow:0 0 5px rgba(0,0,0,.3)}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox:checked+label:after{margin-left:16px}.termsfeed-com---pc-dialog input[type=checkbox].cc-custom-checkbox:checked+label:before{background:#55d069}
+.termsfeed-com---nb.termsfeed-com---lang-ar,.termsfeed-com---pc-overlay.termsfeed-com---lang-ar{text-align:right}
+.termsfeed-com---palette-dark.termsfeed-com---nb{background-color:#111;color:#fff}.termsfeed-com---palette-dark .cc-nb-title{color:#fff}.termsfeed-com---palette-dark .cc-nb-text{color:#fff}.termsfeed-com---palette-dark .cc-nb-text a{color:#fff;text-decoration:underline}.termsfeed-com---palette-dark .cc-nb-text a:hover{text-decoration:none}.termsfeed-com---palette-dark .cc-nb-text a:focus{box-shadow:0 0 0 2px #3dd000}.termsfeed-com---palette-dark .cc-nb-okagree{color:#000;background-color:#ff0}.termsfeed-com---palette-dark .cc-nb-okagree:focus{box-shadow:0 0 0 2px #3dd000}.termsfeed-com---palette-dark .cc-nb-reject{color:#000;background-color:#ff0}.termsfeed-com---palette-dark .cc-nb-reject:focus{box-shadow:0 0 0 2px #3dd000}.termsfeed-com---palette-dark .cc-nb-changep{background-color:#eaeaea;color:#111}.termsfeed-com---palette-dark .cc-nb-changep:focus{box-shadow:0 0 0 2px #3dd000}.termsfeed-com---palette-dark .cc-pc-container{background:#212121}.termsfeed-com---palette-dark .cc-pc-head{background:#212121;color:#fff;border-bottom:1px solid #111}.termsfeed-com---palette-dark .cc-pc-head-title-headline{color:#fff}.termsfeed-com---palette-dark .cc-pc-head-title-text{color:#fff}.termsfeed-com---palette-dark .cc-pc-head-lang select{color:#212121}.termsfeed-com---palette-dark .cc-pc-head-lang select:focus{box-shadow:0 0 0 2px #ff0}.termsfeed-com---palette-dark .cc-pc-head-close{background:none;color:#fff}.termsfeed-com---palette-dark .cc-pc-head-close:active,.termsfeed-com---palette-dark .cc-pc-head-close:focus{border:2px solid #ff0}.termsfeed-com---palette-dark .cc-cp-body{background:#292929 !important;color:#f5f5f5}.termsfeed-com---palette-dark .cc-cp-body-tabs{color:#666;background:#e6e6e6}.termsfeed-com---palette-dark .cc-cp-body-tabs-item{border-right-color:#ccc;border-bottom-color:#ccc}.termsfeed-com---palette-dark .cc-cp-body-tabs-item-link{color:#666}.termsfeed-com---palette-dark .cc-cp-body-tabs-item-link:hover{color:#000}.termsfeed-com---palette-dark .cc-cp-body-tabs-item-link:focus span{box-shadow:inset 3px 0 0 0 #3dd000}.termsfeed-com---palette-dark .cc-cp-body-tabs-item-link[active=true]{background:#292929 !important;color:#f5f5f5}.termsfeed-com---palette-dark .cc-cp-body-tabs-item-link[active=true]:hover{color:#ccc}.termsfeed-com---palette-dark .cc-cp-body-content{background:#292929 !important;color:#f5f5f5}.termsfeed-com---palette-dark .cc-cp-body-content-entry:focus{box-shadow:inset 0 0 0 2px #ff0}.termsfeed-com---palette-dark .cc-cp-body-content-entry-title{color:#fff}.termsfeed-com---palette-dark .cc-cp-body-content-entry-text{color:#fff}.termsfeed-com---palette-dark .cc-cp-body-content-entry a{color:#fff;text-decoration:underline}.termsfeed-com---palette-dark .cc-cp-body-content-entry a:hover{text-decoration:none}.termsfeed-com---palette-dark .cc-cp-body-content-entry a:focus{box-shadow:inset 3px 0 0 0 #ff0}.termsfeed-com---palette-dark .cc-cp-foot{background:#212121;border-top-color:#111}.termsfeed-com---palette-dark .cc-cp-foot-byline{color:#fff}.termsfeed-com---palette-dark .cc-cp-foot-byline a{color:#fff}.termsfeed-com---palette-dark .cc-cp-foot-byline a:focus{box-shadow:0 0 0 2px #ff0}.termsfeed-com---palette-dark .cc-cp-foot-save{background:#ff0;color:#000}.termsfeed-com---palette-dark .cc-cp-foot-save:focus{box-shadow:0 0 0 2px #3dd000}
+.termsfeed-com---palette-light.termsfeed-com---nb{background-color:#f2f2f2;color:#111}.termsfeed-com---palette-light .cc-nb-title{color:#111}.termsfeed-com---palette-light .cc-nb-text{color:#111}.termsfeed-com---palette-light .cc-nb-text a{color:#111;text-decoration:underline}.termsfeed-com---palette-light .cc-nb-text a:hover{text-decoration:none}.termsfeed-com---palette-light .cc-nb-text a:focus{box-shadow:0 0 0 2px #ff8d00}.termsfeed-com---palette-light .cc-nb-okagree{color:#fff;background-color:green}.termsfeed-com---palette-light .cc-nb-okagree:focus{box-shadow:0 0 0 2px #ff8d00}.termsfeed-com---palette-light .cc-nb-reject{color:#fff;background-color:green}.termsfeed-com---palette-light .cc-nb-reject:focus{box-shadow:0 0 0 2px #ff8d00}.termsfeed-com---palette-light .cc-nb-changep{background-color:#eaeaea;color:#111}.termsfeed-com---palette-light .cc-nb-changep:focus{box-shadow:0 0 0 2px #ff8d00}.termsfeed-com---palette-light .cc-pc-container{background:#fff}.termsfeed-com---palette-light .cc-pc-head{background:#fff;color:#111;border-bottom:1px solid #ccc}.termsfeed-com---palette-light .cc-pc-head-title-headline{color:#111}.termsfeed-com---palette-light .cc-pc-head-title-text{color:#111}.termsfeed-com---palette-light .cc-pc-head-lang select{color:#111}.termsfeed-com---palette-light .cc-pc-head-lang select:focus{box-shadow:0 0 0 2px green}.termsfeed-com---palette-light .cc-pc-head-close{background:none;color:#111}.termsfeed-com---palette-light .cc-pc-head-close:active,.termsfeed-com---palette-light .cc-pc-head-close:focus{border:2px solid green}.termsfeed-com---palette-light .cc-cp-body{background:#fbfbfb !important;color:#111}.termsfeed-com---palette-light .cc-cp-body-tabs{color:#666;background:#e6e6e6}.termsfeed-com---palette-light .cc-cp-body-tabs-item{border-right-color:#ccc;border-bottom-color:#ccc}.termsfeed-com---palette-light .cc-cp-body-tabs-item-link{color:#666}.termsfeed-com---palette-light .cc-cp-body-tabs-item-link:hover{color:#000}.termsfeed-com---palette-light .cc-cp-body-tabs-item-link:focus span{box-shadow:inset 3px 0 0 0 green}.termsfeed-com---palette-light .cc-cp-body-tabs-item-link[active=true]{background:#fbfbfb !important;color:#111}.termsfeed-com---palette-light .cc-cp-body-tabs-item-link[active=true]:hover{color:#666}.termsfeed-com---palette-light .cc-cp-body-content{background:#fbfbfb !important;color:#111}.termsfeed-com---palette-light .cc-cp-body-content-entry-title{color:#111}.termsfeed-com---palette-light .cc-cp-body-content-entry:focus{box-shadow:inset 0 0 0 2px green}.termsfeed-com---palette-light .cc-cp-body-content-entry-text{color:#111}.termsfeed-com---palette-light .cc-cp-body-content-entry a{color:#111;text-decoration:underline}.termsfeed-com---palette-light .cc-cp-body-content-entry a:hover{text-decoration:none}.termsfeed-com---palette-light .cc-cp-body-content-entry a:focus{box-shadow:inset 0 0 0 2px green}.termsfeed-com---palette-light .cc-cp-foot{background:#f2f2f2;border-top-color:#ccc}.termsfeed-com---palette-light .cc-cp-foot-byline{color:#111}.termsfeed-com---palette-light .cc-cp-foot-byline a{color:#111}.termsfeed-com---palette-light .cc-cp-foot-byline a:focus{box-shadow:0 0 0 2px green}.termsfeed-com---palette-light .cc-cp-foot-save{background:green;color:#fff}.termsfeed-com---palette-light .cc-cp-foot-save:focus{box-shadow:0 0 0 2px #ff8d00}
+
+.termsfeed-com---reset{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-ms-overflow-style:scrollbar;-webkit-tap-highlight-color:rgba(0,0,0,0);margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;text-align:left}.termsfeed-com---reset *,.termsfeed-com---reset *::before,.termsfeed-com---reset *::after{box-sizing:border-box}.termsfeed-com---reset a,.termsfeed-com---reset li,.termsfeed-com---reset p,.termsfeed-com---reset h1,.termsfeed-com---reset h2,.termsfeed-com---reset input,.termsfeed-com---reset button,.termsfeed-com---reset select{border-style:none;box-shadow:none;margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;outline:none}@-ms-viewport{.termsfeed-com---reset{width:device-width}}.termsfeed-com---reset [tabindex="-1"]:focus{outline:0 !important}.termsfeed-com---reset h1,.termsfeed-com---reset h2,.termsfeed-com---reset h3,.termsfeed-com---reset h4,.termsfeed-com---reset h5,.termsfeed-com---reset h6{margin-top:0;margin-bottom:0;color:#000}.termsfeed-com---reset p{margin-top:0;margin-bottom:1rem}.termsfeed-com---reset div{display:block}.termsfeed-com---reset ol,.termsfeed-com---reset ul,.termsfeed-com---reset dl{margin-top:0;margin-bottom:1rem}.termsfeed-com---reset ol ol,.termsfeed-com---reset ul ul,.termsfeed-com---reset ol ul,.termsfeed-com---reset ul ol{margin-bottom:0}.termsfeed-com---reset b,.termsfeed-com---reset strong{font-weight:bolder}.termsfeed-com---reset small{font-size:80%}.termsfeed-com---reset a{color:#007bff;text-decoration:none;background-color:rgba(0,0,0,0);-webkit-text-decoration-skip:objects}.termsfeed-com---reset a:hover{color:#0056b3;text-decoration:underline}.termsfeed-com---reset a:not([href]):not([tabindex]){color:inherit;text-decoration:none}.termsfeed-com---reset a:not([href]):not([tabindex]):hover,.termsfeed-com---reset a:not([href]):not([tabindex]):focus{color:inherit;text-decoration:none}.termsfeed-com---reset a:not([href]):not([tabindex]):focus{outline:0}.termsfeed-com---reset label{display:inline-block;margin-bottom:.5rem}.termsfeed-com---reset button{border-radius:2px;padding:.5rem 1rem;outline:none;background:#dcdae5;color:#111;cursor:pointer;border:none}.termsfeed-com---reset button:focus{outline:none}.termsfeed-com---reset select{border-style:none;padding:.5rem 1rem}.termsfeed-com---reset input,.termsfeed-com---reset button,.termsfeed-com---reset select,.termsfeed-com---reset optgroup,.termsfeed-com---reset textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}.termsfeed-com---reset button,.termsfeed-com---reset input{overflow:visible}.termsfeed-com---reset button,.termsfeed-com---reset select{text-transform:none}.termsfeed-com---reset button,.termsfeed-com---reset html [type=button],.termsfeed-com---reset [type=reset],.termsfeed-com---reset [type=submit]{-webkit-appearance:button}.termsfeed-com---reset button::-moz-focus-inner,.termsfeed-com---reset [type=button]::-moz-focus-inner,.termsfeed-com---reset [type=reset]::-moz-focus-inner,.termsfeed-com---reset [type=submit]::-moz-focus-inner{padding:0;border-style:none}.termsfeed-com---reset input[type=radio],.termsfeed-com---reset input[type=checkbox]{box-sizing:border-box;padding:0}.termsfeed-com---reset [hidden]{display:none !important}
+.termsfeed-com---is-hidden{display:none}.termsfeed-com---is-visible{display:block}
+</style></head>
+<body class="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-gray-950 dark:text-white"><div class="termsfeed-com---reset termsfeed-com---nb termsfeed-com---palette-dark termsfeed-com---nb-simple termsfeed-com---lang-en" id="termsfeed-com---nb" role="dialog" aria-modal="true" aria-labelledby="cc-nb-title" aria-describedby="cc-nb-text"><div class="cc-nb-main-container"><div class="cc-nb-title-container"><p class="cc-nb-title" id="cc-nb-title">We use cookies</p></div><div class="cc-nb-text-container"><p class="cc-nb-text" id="cc-nb-text"><span class="cc-nb-text-content">This website uses cookies and other tracking technologies to improve your browsing experience for the following purposes: <span class="cc-nb-text-purposes"><span class="cc-nb-text-purposes-item">to enable basic functionality of the website</span><span class="cc-nb-text-purposes-separator">, </span><span class="cc-nb-text-purposes-item">to provide a better experience on the website</span><span class="cc-nb-text-purposes-separator">, </span><span class="cc-nb-text-purposes-item">to measure your interest in our products and services and to personalize marketing interactions</span><span class="cc-nb-text-purposes-separator">, </span><span class="cc-nb-text-purposes-item">to deliver ads that are more relevant to you</span></span>.</span></p></div><div class="cc-nb-buttons-container"><button class="cc-nb-okagree" role="button">I agree</button><button class="cc-nb-reject" role="button">I decline</button><button class="cc-nb-changep" role="button">Change my preferences</button></div></div></div>
+			<script>
+		function setCookie(cname, cvalue, exdays) {
+			const d = new Date();
+			d.setTime(d.getTime() + (exdays*24*60*60*1000));
+			let expires = "expires="+ d.toUTCString();
+			document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+		}
+		function getCookie(cname) {
+			let name = cname + "=";
+			let decodedCookie = decodeURIComponent(document.cookie);
+			let ca = decodedCookie.split(';');
+			for (let i = 0; i <ca.length; i++) {
+				let c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+					return c.substring(name.length, c.length);
+				}
+			}
+			return "";
+		}
+		setCookie('dark', false);
+		
+		var html = document.getElementById("html-id");
+	    if (localStorage.getItem("tw-theme") === "dark") {
+			html.classList.remove('light');
+			html.classList.add('dark');
+			
+	    } else if (localStorage.getItem("tw-theme") === "light") {
+	        html.classList.remove('dark');
+			html.classList.add('light');
+			
+	    }
+		if (getCookie('dark') != true && localStorage.getItem("tw-theme") !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+			html.classList.remove('light');
+			html.classList.add('dark');
+			setCookie('dark', true);
+		}
+	</script>
+	<style>
+		a.logoContainer{display:block;width:245px;height:80px;background-size: 245px 45px;}
+		html.light a.logoContainer{background:url('https://linuxbash.sh/themes/linuxbash/logo.png') center no-repeat;}
+		html.dark a.logoContainer{background:url('https://linuxbash.sh/themes/linuxbash/logo-white.png') center no-repeat;}
+		
+	</style>
+	<section class="mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0">
+		<div class="flex h-screen flex-col justify-between font-sans">
+			<header class="flex items-center justify-between py-10">
+                <div>
+					<a aria-label="Quasilinear Musings" href="https://linuxbash.sh/">
+						</a><div class="flex items-center justify-between"><a aria-label="Quasilinear Musings" href="https://linuxbash.sh/">
+							</a><div class="mr-3"><a aria-label="Quasilinear Musings" href="https://linuxbash.sh/">
+								</a><a class="logoContainer" href="https://linuxbash.sh/" title="Linux Bash"></a>
+							</div>
+
+						</div>
+					
+				</div>
+				<div class="flex items-center space-x-4 leading-5 sm:space-x-6">
+					<ul class="nav nav-top"><li class="item nav-item first"><a class="nav-link" href="https://linuxbash.sh/">Linux Bash</a></li></ul>					<button aria-label="Search" class="search-open">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-gray-900 dark:text-gray-100">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+						</svg>
+					</button>
+					<div class="mr-5">
+						<div class="relative inline-block text-left">
+							<div>
+								<button id="theme-toggle" type="button" aria-label="Theme Mode" aria-haspopup="menu" aria-expanded="false">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-6 w-6 text-gray-900 dark:text-gray-100">
+										<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+					<button aria-label="Toggle Menu" class="sm:hidden menu-open" id="menu-toggle">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-8 w-8 text-gray-900 dark:text-gray-100">
+							<path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+						</svg>
+					</button>
+					<div class="menu-mobile" role="dialog" tabindex="-1">
+						<div class="fixed inset-0 z-60 bg-black/25"></div>
+						<div class="fixed left-0 top-0 z-70 h-full w-full bg-white opacity-95 duration-300 dark:bg-gray-950 dark:opacity-[0.98]">
+							<nav class="mt-8 flex h-full basis-0 flex-col items-start overflow-y-auto pl-12 pt-2 text-left">
+							<ul class="nav nav-mobile"><li class="item nav-item first"><a class="nav-link" href="https://linuxbash.sh/">Linux Bash</a></li></ul>							</nav>
+							<button class="fixed right-4 top-7 z-80 h-16 w-16 p-4 text-gray-900 hover:text-primary-500 dark:text-gray-100 dark:hover:text-primary-400 menu-close" aria-label="Toggle Menu">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+									<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+								</svg>
+							</button>
+						</div>
+					</div>
+				</div>
+			</header>
+			<main class="mb-auto">
+						<section class="mx-auto max-w-3xl sm:px-6 xl:max-w-5xl xl:px-0">
+    <article>
+        <div class="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
+            <header class="pt-6 xl:pb-6">
+                <div class="space-y-1 text-center">
+                    <dl class="space-y-10">
+                        <div>
+                            <dt class="sr-only">Posted on</dt>
+                            <dd class="text-base font-medium leading-6 text-gray-500 dark:text-gray-400"><time>January 2025</time> • <span class="text-primary-500"><a href="https://linuxbash.sh/category/filesystem">Filesystem</a></span>
+														</dd>
+                        </div>
+                    </dl>
+                    <div>
+										<h1 class="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14">Mounting Virtual Disk Images in Linux</h1>					
+										</div>
+                </div>
+            </header>
+            <div class="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
+                <dl class="pb-10 pt-6 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
+                    <dt class="sr-only">Author</dt>
+                    <dd>
+                        <ul class="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
+                            <li class="linuxbash">
+								<style>
+									html.light a.authorAvatar{background:url('https://linuxbash.sh/content/linuxbash.sh/images/logo-small.png');}
+									html.dark a.authorAvatar{background:url('https://linuxbash.sh/content/linuxbash.sh/images/logo-small-white.png') center no-repeat;}
+									html.dark a.authorAvatar, html.light a.authorAvatar {width:40px;height:40px;background-size:40px 40px;margin-right:12px;display:block;float:left;;}
+									
+								</style>
+                                <a href="https://linuxbash.sh/" src="https://linuxbash.sh/content/linuxbash.sh/images/logo-small.png" class="authorAvatar"></a>
+                                <dl class="whitespace-nowrap text-sm font-medium leading-5">
+                                    <dt class="sr-only">User</dt>
+                                    <dd class="text-gray-900 dark:text-gray-100">linuxbash</dd>
+                                    <dt class="sr-only">Posts by this author</dt>
+                                    <dd><a class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400" href="https://linuxbash.sh/author/linuxbash">Posts by this author</a></dd>
+                                </dl>
+                            </li>
+                        </ul>
+                    </dd>
+                </dl>
+                <div class="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
+                    <div class="prose max-w-none pb-8 pt-10 dark:prose-invert">
+					
+										
+					
+						<h3>Mounting Virtual Disk Images in Linux: A Guide for Beginners</h3>
+
+<p>Virtualization is a powerful tool in the world of computing, allowing users to run multiple operating systems simultaneously or to access the file systems within disk images as if they were physical disks. For Linux users, understanding how to mount virtual disk images can greatly enhance workflow efficiency, particularly for developers, systems administrators, and power users. Whether through regular operations, deployment scenarios, or testing, accessing content inside a disk image without booting into it is invaluable.</p>
+
+<p>In this guide, we'll walk through the basics of mounting virtual disk images in Linux. This includes commonly used formats like ISO, IMG, and VDI files.</p>
+
+<h4>Step 1: Understanding Mount Points</h4>
+
+<p>In Linux, to access the filesystem of a disk image, it first needs to be mounted to a directory in the local filesystem. This directory is termed as a "mount point". It acts as the access path to the contents of the disk image. Before mounting an image, ensure you create a directory that will serve as the mount point:</p>
+
+<pre><code class="bash">mkdir /mnt/mydisk
+</code></pre>
+
+<p>Replace "/mnt/mydisk" with the directory path where you prefer to mount the disk image.</p>
+
+<h4>Step 2: Installing Required Tools</h4>
+
+<p>Linux utilizes several tools to interact with disk images, chief among them <code>mount</code> and <code>losetup</code>. While <code>mount</code> handles the process of attaching the filesystem, <code>losetup</code> connects a loop device, which is a pseudo-device that makes a file accessible as a block device, to the disk images.</p>
+
+<p>However, to deal with specific image types beyond the basics (like VDI or VMDK), you may need additional tools. For instance, the <code>qemu</code> package includes support for various disk image types:</p>
+
+<pre><code class="bash">sudo apt-get install qemu-utils  # Debian/Ubuntu based systems
+sudo yum install qemu-img  # CentOS/RHEL based systems
+sudo dnf install qemu-img  # Fedora systems
+sudo zypper install qemu-tools  # openSUSE systems
+</code></pre>
+
+<h4>Step 3: Mounting an ISO Image</h4>
+
+<p>ISO images are straightforward to mount. This example assumes you have an ISO file named <code>image.iso</code>:</p>
+
+<pre><code class="bash">sudo mount -o loop image.iso /mnt/mydisk
+</code></pre>
+
+<p>The <code>-o loop</code> option tells <code>mount</code> to treat <code>image.iso</code> as a loop device, associating it with a loopback mount point.</p>
+
+<h4>Step 4: Mounting an IMG or RAW Disk Image</h4>
+
+<p>IMG files, commonly used for disk or USB image transfers, are also easy to handle, similar to ISO files:</p>
+
+<pre><code class="bash">sudo mount -o loop disk.img /mnt/mydisk
+</code></pre>
+
+<p>For partitioned IMG files, you might need to specify the offset of the partition:</p>
+
+<pre><code class="bash">sudo fdisk -l disk.img
+</code></pre>
+
+<p>Look for the "Start" sector of the desired partition and multiply this by the sector size to get the offset. Then use:</p>
+
+<pre><code class="bash">sudo mount -o loop,offset=XXXXX disk.img /mnt/mydisk
+</code></pre>
+
+<p>where <code>XXXXX</code> is the calculated offset.</p>
+
+<h4>Step 5: Mounting VDI (VirtualBox Disk Image) Files</h4>
+
+<p>Mounting VDI files, commonly associated with VirtualBox, requires another step:</p>
+
+<p>First, associate the VDI with a loop device:</p>
+
+<pre><code class="bash">sudo modprobe nbd  # if not already loaded
+sudo qemu-nbd -c /dev/nbd0 /path/to/disk.vdi
+</code></pre>
+
+<p>Look for partitions:</p>
+
+<pre><code class="bash">sudo fdisk -l /dev/nbd0
+</code></pre>
+
+<p>Finally, mount the partition as needed:</p>
+
+<pre><code class="bash">sudo mount /dev/nbd0p1 /mnt/mydisk
+</code></pre>
+
+<h4>Step 6: Accessing the Mounted Image</h4>
+
+<p>Once your disk image is mounted, you can access it like any other directory:</p>
+
+<pre><code class="bash">cd /mnt/mydisk
+ls
+</code></pre>
+
+<h4>Step 7: Unmounting the Disk Image</h4>
+
+<p>When you're done, it’s essential to unmount the image properly:</p>
+
+<pre><code class="bash">sudo umount /mnt/mydisk
+</code></pre>
+
+<p>For VDI images attached with <code>qemu-nbd</code>, you also need to disconnect the network block device:</p>
+
+<pre><code class="bash">sudo qemu-nbd -d /dev/nbd0
+</code></pre>
+
+<h3>Conclusion</h3>
+
+<p>Mounting disk images in Linux isn't overly complex but requires awareness of the correct tools and methods for different file types. By following the steps outlined above, Linux users can efficiently manage virtual disk images which is crucial in a variety of applications from development testing environments to system recovery tasks. Whether you're a seasoned admin or a curious novice, the ability to mount these images directly on your system provides a clear window into the virtualized world.</p>
+
+<h2>Further Reading</h2>
+
+<p>For further reading on working with virtual disk images in Linux, you may consider the following resources:</p>
+
+<ul>
+<li><p><strong>Understanding the Linux <code>mount</code> Command</strong>:<br>
+<a href="https://www.linux.com/training-tutorials/mounting-made-easy/">https://www.linux.com/training-tutorials/mounting-made-easy/</a><br>
+This article covers basics and nuances of the <code>mount</code> command, essential for working with filesystems.</p></li>
+<li><p><strong>Linux Loop Devices Detailed Explanation</strong>:<br>
+<a href="https://www.linux.org/threads/using-loop-devices.12137/">https://www.linux.org/threads/using-loop-devices.12137/</a><br>
+An in-depth guide on loop devices, crucial for manipulating file-based disk images as block devices.</p></li>
+<li><p><strong>Working with QEMU and Disk Images</strong>:<br>
+<a href="https://www.qemu.org/documentation/">https://www.qemu.org/documentation/</a><br>
+Official QEMU documentation that provides detailed usage scenarios, including handling various disk image formats.</p></li>
+<li><p><strong>Introduction to VirtualBox Disk Images (VDI)</strong>:<br>
+<a href="https://www.virtualbox.org/manual/ch05.html#vdidetails">https://www.virtualbox.org/manual/ch05.html#vdidetails</a><br>
+Oracle's detailed guide on VirtualBox disk images, including how to manage and modify VDI files.</p></li>
+<li><p><strong>Complete Guide to Using <code>fdisk</code> Tool</strong>:<br>
+<a href="https://linux.die.net/man/8/fdisk">https://linux.die.net/man/8/fdisk</a><br>
+A comprehensive manual page detailing the <code>fdisk</code> tool, important for partitioning and managing disk images.</p></li>
+</ul>
+                    </div>
+                    <div class="prose max-w-none pb-6 pt-6 text-sm text-gray-700 dark:text-gray-300 related-posts">
+						<h2 class="text-xl text-gray-700 dark:text-gray-300">Related posts</h2>
+						<ul><li><a href="https://linuxbash.sh/post/enabling-and-managing-acls-on-filesystems">Enabling and Managing ACLs on Filesystems</a></li><li><a href="https://linuxbash.sh/post/understanding-the-vfs-virtual-file-system-layer">Understanding the VFS (Virtual File System) Layer</a></li><li><a href="https://linuxbash.sh/post/access-control-lists-acls-for-advanced-permissions">Access Control Lists (ACLs) for Advanced Permissions</a></li><li><a href="https://linuxbash.sh/post/using-find-to-search-for-files">Using `find` to Search for Files</a></li><li><a href="https://linuxbash.sh/post/filesystem-limits-maximum-file-and-partition-sizes">Filesystem Limits: Maximum File and Partition Sizes</a></li></ul>                    </div>
+					                </div>
+                <footer>
+                    <div class="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
+                        <div class="py-4 xl:py-8">
+                            <h2 class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Tags</h2>
+                            <div class="flex flex-wrap">
+								<span class="mr-3 text-sm font-medium uppercase text-primary-500"><span class="tags"><a rel="tag" href="https://linuxbash.sh/tag/linux">linux</a> <a rel="tag" href="https://linuxbash.sh/tag/virtual%20disk%20images">virtual disk images</a> <a rel="tag" href="https://linuxbash.sh/tag/mounting">mounting</a> <a rel="tag" href="https://linuxbash.sh/tag/file%20systems">file systems</a> <a rel="tag" href="https://linuxbash.sh/tag/loop%20device">loop device</a></span></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between py-4 xl:block xl:space-y-8 xl:py-8">
+							                            <div>
+                                <h2 class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Previous Post</h2>
+                                <div class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"><a class="break-words" href="https://linuxbash.sh/post/monitoring-microservices-in-kubernetes-clusters">Monitoring Microservices in Kubernetes Clusters</a></div>
+                            </div>
+														                            <div>
+                                <h2 class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Next Post</h2>
+                                <div class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"><a class="break-words" href="https://linuxbash.sh/post/parallel-run-multiple-shell-commands-in-parallel">parallel: Run multiple shell commands in parallel</a></div>
+                            </div>
+							
+                        </div>
+
+                        <div id="advert" style="padding-top:32px;border-top:1px solid #3f3f3f;padding-bottom:32px;border-bottom:1px solid #3f3f3f;">
+                            <h2 class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Other Projects</h2>
+                            <a href="https://www.href.do/" target="_blank"><img src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/href-do-advert.png" alt="Href Do Advert"></a>
+                        </div>
+                        <div class="py-4 xl:py-8">
+                            <h2 class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Tag Cloud</h2>
+                            <div class="flex flex-wrap">
+								<span class="mr-3 text-sm font-medium uppercase text-primary-500"><span class="tags"> <a class="tag-cloud-link" href="https://linuxbash.sh/tag/ai" style="font-size:10.773076923077pt;">ai</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/anomaly%20detection" style="font-size:9.9653846153846pt;">anomaly detection</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/apache" style="font-size:10.126923076923pt;">apache</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/artificial%20intelligence" style="font-size:20.923076923077pt;">artificial intelligence</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/automation" style="font-size:19.119230769231pt;">automation</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/bash" style="font-size:15.134615384615pt;">bash</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/bash%20scripting" style="font-size:11.230769230769pt;">bash scripting</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/command%20line" style="font-size:10.826923076923pt;">command line</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/configuration" style="font-size:11.069230769231pt;">configuration</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/devops" style="font-size:11.123076923077pt;">devops</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/linux" style="font-size:22pt;">linux</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/linux%20bash" style="font-size:10.961538461538pt;">linux bash</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/machine%20learning" style="font-size:13.007692307692pt;">machine learning</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/mlops" style="font-size:10.315384615385pt;">mlops</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/monitoring" style="font-size:9.6692307692308pt;">monitoring</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/open%20source" style="font-size:10.180769230769pt;">open source</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/package%20management" style="font-size:9.6692307692308pt;">package management</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/scripting" style="font-size:12.2pt;">scripting</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/security" style="font-size:9.9653846153846pt;">security</a>  <a class="tag-cloud-link" href="https://linuxbash.sh/tag/shell%20scripting" style="font-size:9.5346153846154pt;">shell scripting</a> </span></span>
+                            </div>
+                        </div>		
+                    </div>
+										<div class="pt-4 xl:pt-8"><a class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400" aria-label="Back to homepage" href="https://linuxbash.sh/">← Back to homepage</a></div>
+					                </footer>
+            </div>
+        </div>
+    </article>
+</section>						</main>
+			<footer>
+				<div class="mt-16 flex flex-col items-center">
+					<div class="mb-3 flex space-x-4">
+						<div class="social-logo "><link rel="stylesheet" id="social-logo-style" href="./Mounting Virtual Disk Images in Linux - Linux Bash_files/social-logos.css" type="text/css" media="all"><a class="social-logo-x" href="https://www.twitter.com/youdsmedia" target="_blank" rel="nofollow"><span class="screen-reader-text">Twitter</span></a><a class="social-logo-facebook" href="https://www.facebook.com/youdsmedia" target="_blank" rel="nofollow"><span class="screen-reader-text">Facebook</span></a><a class="social-logo-feed" href="https://linuxbash.sh/feed/rss" target="_blank"><span class="screen-reader-text">RSS</span></a></div>					</div>
+					<div class="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
+						<div><span class="copyright">© Linux Bash</span> <span class="credit">Powered by <a href="http://www.htmly.com/" target="_blank" rel="nofollow">HTMLy</a></span></div>
+					</div>
+					<div class="mb-8 text-sm text-gray-500 dark:text-gray-400">Courtesy of <a style="te" target="_blank" rel="nofollow" href="https://www.youds.com/">Youds Media Limited</a></div>
+				</div>
+			</footer>
+		</div>
+	</section>
+	<div style="position: fixed; align-items: flex-start; justify-content: center; width: 100%; inset: 0px; padding: 14vh 16px 16px;" class="z-50 bg-gray-300/50 p-4 backdrop-blur backdrop-filter dark:bg-black/50 search-form">
+		<div style="opacity: 1; transform: scale(0.99); pointer-events: auto;" class="w-full max-w-xl">
+			<div>
+				<div class="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+					<div class="flex items-center space-x-4 p-4">
+						<span class="block w-5">
+							<svg class="text-gray-400 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+						</span>
+						<form role="search" class="w-full"><input name="search" class="h-8 w-full bg-transparent text-gray-600 placeholder-gray-400 focus:outline-none dark:text-gray-200 dark:placeholder-gray-500" autocomplete="off" role="combobox" spellcheck="false" aria-expanded="true" aria-controls="kbar-listbox" aria-activedescendant="kbar-listbox-item-1" placeholder="Type to search" value=""></form>
+						<button class="z-80 h-16 w-16 p-4 text-gray-900 hover:text-primary-500 dark:text-gray-100 dark:hover:text-primary-400 search-close" aria-label="Toggle Menu">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+								<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="fixed bottom-8 right-8 hidden flex-col gap-3" id="scroll-up" style="display: flex; opacity: 1;">
+        <button aria-label="Scroll To Top" class="rounded-full bg-gray-200 p-2 text-gray-500 transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600">
+            <a href="https://linuxbash.sh/post/mounting-virtual-disk-images-in-linux#"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg></a>
+        </button>
+    </div>
+	<script>
+		var mybutton = document.getElementById("scroll-up");
+		window.onscroll = function () {
+			if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+				mybutton.style.display = "flex";
+				mybutton.style.opacity = "1";
+			} else {
+				mybutton.style.display = "none";
+				mybutton.style.opacity = "0";
+			}
+		};
+	</script>
+	<script>
+		var html = document.getElementById("html-id");
+		document.getElementById("theme-toggle").addEventListener("click", () => {
+			if (html.className.includes("dark")) {
+				html.classList.remove('dark');
+				html.classList.add('light');
+				localStorage.setItem("tw-theme", 'light');
+			} else {
+				html.classList.remove('light');
+				html.classList.add('dark');
+				localStorage.setItem("tw-theme", 'dark');
+			}
+		})
+
+	</script>
+	<script src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/functions.js.download"></script>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9XNT6TQV7Q');
+</script>    <!-- Cookie Consent by TermsFeed https://www.TermsFeed.com -->
+    <script type="text/javascript" src="./Mounting Virtual Disk Images in Linux - Linux Bash_files/cookie-consent.js.download" charset="UTF-8"></script>
+    <script type="text/javascript" charset="UTF-8">
+        document.addEventListener('DOMContentLoaded', function () {
+            cookieconsent.run({"notice_banner_type":"simple","consent_type":"express","palette":"dark","language":"en","page_load_consent_levels":["strictly-necessary"],"notice_banner_reject_button_hide":false,"preferences_center_close_button_hide":false,"page_refresh_confirmation_buttons":false});
+        });
+    </script>
+
+
+
+
+
+
+</body></html>
