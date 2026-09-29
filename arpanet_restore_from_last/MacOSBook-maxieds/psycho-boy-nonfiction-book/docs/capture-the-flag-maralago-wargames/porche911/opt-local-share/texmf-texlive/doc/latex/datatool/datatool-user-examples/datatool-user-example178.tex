@@ -1,0 +1,42 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 178 Redefining the Start and End Hooks
+% Label: "ex:plotxyhooks"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents}[noheader,overwrite]{xydata.csv}
+X,Y
+-3.5,-2.75
+-3,3
+-2.5,-1
+-1,1.5
+1,-4.2
+2.6,1.8
+3.2,-0.4
+\end{filecontents}
+
+\usepackage{dataplot}
+\DTLsetup{store-datum}
+\DTLread[name=xydata]{xydata} 
+
+\renewcommand{\DTLplotdisplayticklabel}[1]{\ensuremath{#1}}
+\renewcommand{\DTLplotatbegintikz}{\draw (0,0) node[anchor=north east] {0};}
+\renewcommand{\DTLplotatendtikz}{
+ \draw[blue,dotted] (\DTLminX,\DTLminY) -- (\DTLmaxX, \DTLminY)
+ node[right] {$y_{\min} = \DTLminY$};
+ \draw[blue,dotted] (\DTLminX,\DTLmaxY) -- (\DTLmaxX, \DTLmaxY)
+ node[right] {$y_{\max} = \DTLmaxY$};
+ } 
+\begin{document}
+\DTLplot{xydata}{
+ x=X, y={Y},
+ tick-dir=out, tick-gap=1, round=0,
+ extend-axes={0,0.5}, 
+ tick-label-style={font=\small},
+ tick-label-offset=0pt,
+ axis-style={->,thick},
+ max-x-label={$x$}, max-y-label={$y$},
+ style=lines, width=3in, height=3in
+} 
+\end{document}

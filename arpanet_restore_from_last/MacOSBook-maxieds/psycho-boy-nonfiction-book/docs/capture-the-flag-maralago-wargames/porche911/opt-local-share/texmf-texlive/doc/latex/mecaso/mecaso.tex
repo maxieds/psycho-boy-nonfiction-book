@@ -1,0 +1,443 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{mecaso}
+\usepackage{draftwatermark}
+
+
+
+\begin{document}
+\SetWatermarkText{\textsc{Y.\textsc{Derrazi}}}
+\SetWatermarkLightness{0.8}
+\SetWatermarkScale{4}
+
+\title{- mecaso -\\Package pour les formules en mécanique du solide}
+\author{Youssef \textsc{Derrazi}}
+\maketitle
+
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Introduction}
+Ce package a été crée par moi-même, ingénieur génie civil et (à ce moment) candidat à l'agrégation externe de mécanique. Ce package regroupe un certain nombre de routines indispensables pour faciliter l'écriture de quelques expressions assez fastidieuses en mécanique du solide indéformable.
+\vspace{12pt}
+
+Prenant conscience que ce package est loin d'être complet, il est toujours conseillé d'utiliser \verb|renewcommand| dans un fichier \verb|*.sty| externe en attendant les mises à jour.
+\vspace{12pt}
+
+Pour toute remarque ou question, prière de prendre contact à l'adresse mail suivante : \verb|derrazi.youssef.97@gmail.com|.
+\vspace{12pt}
+
+Ce package est déployé sous la license GNU General Public License V3.0.
+
+\subsection{Différences notables}
+Le package suivant fait hérésie sur certains points par rapport au programme en vigueur aux universités françaises/marocaines :
+
+\begin{itemize}
+\item Le produit vectoriel est noté par une croix $\times$ au lieu d'un chapeau $\wedge$;
+\item Le moment cinétique est noté $L$ au lieu de $\sigma$;
+\item La résultante dynamique a un nom : $d$;
+\item Le vecteur vitesse de rotation est représenté par $\omega$;
+\item Les moments de forces sont en $M$ script.
+\end{itemize}
+
+\section{Mise en place du package}
+
+Le package est appelé par la commande : \verb|\usepackage{mecaso}|, il nécessite néanmoins les packages suivants : \verb|amsmath|, \verb|amssymb| et \verb|mathrsfs|.
+
+\newpage
+
+\section{Opérations mathématiques générales}
+
+\subsection{Définition d'un vecteur}
+La commande \verb| \Vct{} | prend comme entrée toute expression fournie par l'utilisateur et y accroche une flèche. Dans l'exemple qui suit, la ligne  \verb| \Vct{OM} | donne : $$ \Vct{OM} $$
+
+\subsection{Dérivée temporelle par rapport à un repère}
+Il existe dans ce package deux commandes permettant d'écrire la dérivée d'une fonction par rapport au temps et par rapport à un repère $R$.
+
+\subsubsection{Dérivée temporelle avec expression en nominateur}
+La commande \verb| \Din{} | prend comme entrée toute expression fournie par l'utilisateur et la met en nominateur de l'opérateur dérivation par rapport à un repère arbitraire $R$. Dans l'exemple qui suit, la ligne  \verb| \Din{f(t)} | donne : $$ \Din{f(t)} $$
+
+La commande \verb| \Din[]{} | permet d'affecter un repère différent dans la case entre crochets comme elle peut servir de case d'évaluation. Dans l'exemple qui suit, la ligne  \verb| \Din[t=t_0]{f(t)} | donne : $$ \Din[t=t_0]{f(t)} $$
+
+Ces mêmes commandes peuvent être utilisées avec les vecteurs moyennant l'imbrication suivante \verb| \Din{\Vct{}} | ou bien \verb| \Din[]{\Vct{}} |. Dans l'exemple qui suit, la ligne  \verb| \Din[R_G]{\Vct{B}} | donne : $$ \Din[R_G]{\Vct{B}} $$
+
+\subsubsection{Dérivée temporelle avec expression à la ligne}
+Pour les longues expressions, la commande \verb| \Dex{} | prend comme entrée toute expression fournie par l'utilisateur et la met à la ligne de l'opérateur dérivation par rapport à un repère arbitraire $R$. Dans l'exemple qui suit, la ligne  \verb| \Dex{f(t)} | donne : $$ \Dex{f(t)} $$
+
+La commande \verb| \Dex[]{} | permet d'affecter un repère différent dans la case entre crochets comme elle peut servir de case d'évaluation. Dans l'exemple qui suit, la ligne  \verb| \Dex[t=t_0]{f(t)} | donne : $$ \Dex[t=t_0]{f(t)} $$
+
+Ces mêmes commandes peuvent être utilisées avec les vecteurs moyennant l'imbrication suivante \verb| \Dex{\Vct{}} | ou bien \verb| \Dex[]{\Vct{}} |. Dans l'exemple qui suit, la ligne  \verb| \Dex[R_G]{\Vct{B}} | donne : $$ \Dex[R_G]{\Vct{B}} $$
+
+\newpage
+
+\section{Cinématique}
+
+\subsection{Vecteur vitesse de rotation}
+La commande \verb| \Rotation{} | écrit le vecteur vitesse de rotation par rapport à un repère arbitraire $R$, elle prend en entrée le nom du solide. Dans l'exemple qui suit, \verb| \Rotation{E} | donne : $$\Rotation{E}$$
+ 
+La commande \verb| \Rotation[]{} | écrit le vecteur vitesse de rotation par rapport à un repère précisé entre crochets. Dans l'exemple qui suit, la commande \verb| \Rotation[0]{1} | donne : $$\Rotation[0]{1}$$
+
+\subsection{Vecteur vitesse d'un point lié à un solide}
+La commande \verb| \Vel{}{} | écrit le vecteur vitesse d'un point lié à un solide dans son mouvement par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \Vel{M}{S} | donne : $$\Vel{M}{S}$$
+
+La commande \verb| \Vel[]{}{} | permet la modification du repère d'évaluation. Elle prend \textbf{dans l'ordre} le repère entre crochets, puis le point d'évaluation puis le solide. Dans l'exemple qui suit, \verb| \Vel[R_g]{A}{S} | donne : $$\Vel[R_g]{A}{S}$$
+
+\subsection{Transport d'un vecteur vitesse : formule de Varignon}
+La commande \verb| \VARK{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis le solide concerné. Dans l'exemple qui suit, \verb| \VARK{A}{B}{S} | donne : $$\VARK{A}{B}{S}$$
+
+Pour préciser un repère quelconque, la commande \verb| \VARK[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \VARK[R_0]{M}{G}{S} | donne : $$\VARK[R_0]{M}{G}{S}$$
+
+\subsection{Vecteur accélération d'un point lié à un solide}
+La commande \verb| \Acc{}{} | écrit le vecteur accélération d'un point lié à un solide dans son mouvement par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \Acc{M}{S} | donne : $$\Acc{M}{S}$$
+
+La commande \verb| \Acc[]{}{} | permet la modification du repère d'évaluation. Elle prend \textbf{dans l'ordre} le repère entre crochets, puis le point d'évaluation puis le solide. Dans l'exemple qui suit, \verb| \Acc[R_g]{M}{S} | donne : $$\Acc[R_g]{M}{S}$$
+
+\subsection{Accélération d'entrainement}
+La commande \verb| \Entr{}{}{}{} | écrit le vecteur accélération d'entraintement d'un point lié à un solide par rapport à deux repères. Elle prend \textbf{dans l'ordre} le repère de base, le repère de composition, le point d'origine puis le point de calcul. Dans l'exemple qui suit, \verb| \Entr{0}{1}{O}{M} | donne : $$\Entr{0}{1}{O}{M}$$
+
+\subsection{Accélération de Coriolis}
+La commande \verb| \Coriolis{}{}{}{} | écrit le vecteur accélération de \textsc{Coriolis} d'un point lié à un solide. Elle prend \textbf{dans l'ordre} le repère de base, le repère de passage, le point de calcul puis le solide. Dans l'exemple qui suit, \verb| \Coriolis{0}{1}{M}{2} | donne : $$\Coriolis{0}{1}{M}{2}$$
+
+\newpage
+
+\section{Statique}
+
+\subsection{Vecteur force}
+La commande \verb| \Force{} | permet d'écrire le vecteur force appliqué par un élément quelconque sur un solide de référence $S$. Dans l'exemple qui suit, la commande \verb| \Force{E_1} | donne : $$\Force{E_1}$$
+
+La commande \verb| \Force[]{} | permet d'écrire le vecteur force appliqué par un élément sur un solide que l'on précise entre crochets. Dans l'exemple qui suit, la commande \verb| \Force[D]{E_1} | donne : $$\Force[D]{E_1}$$
+
+\subsection{Vecteur moment de force}
+
+\subsubsection{Vecteur moment de force en un point, sans préciser la force}
+La commande \verb| \Moment{}{} | permet d'écrire le vecteur moment de force en précisant \textbf{dans l'ordre} l'élément qui applique la force puis le point de calcul. Dans l'exemple qui suit, la commande \verb| \Moment{Ext}{O} | donne : $$\Moment{Ext}{O}$$
+
+La commande \verb| \Moment[]{}{} | permet d'écrire le vecteur moment de force en précisant d'abord le nom du solide en jeu, puis \textbf{dans l'ordre} l'élément qui applique la force puis le point de calcul. Dans l'exemple qui suit, la commande \verb| \Moment[I]{II}{G} | donne : $$\Moment[I]{II}{G}$$
+
+\subsubsection{Vecteur moment de force en un point, en explicitant la force}
+Si l'expression de la force en jeu n'est pas standard,\verb| \Gmoment{}{} | permet d'écrire le vecteur moment de force en précisant \textbf{dans l'ordre} l'expression de la force puis le point de calcul. Dans l'exemple qui suit, la commande \verb| \Gmoment{\Vct{W}}{A} | donne : $$\Gmoment{\Vct{W}}{A}$$
+
+L'expression de la force peut être quelconque, par exemple si la force s'écrit $\Vct{P}_{eau \rightarrow S}$, on peut l'injecter dans la commande pour obtenir : $$\Gmoment{\Vct{P}_{eau \rightarrow S}}{O}$$
+
+\subsection{Résultante d'une force volumique}
+
+Le package fournit deux expressions pour l'évalutation d'une résultante sur un volume : un expression avec élément de masse $dm$ et une expression avec élément de volume $dV$.
+
+\subsubsection{Résultante d'une force volumique sur une mesure de masse}
+
+La commande \verb| \Vnet{}{} | prend \textbf{dans l'ordre} l'expression de la distribution de force massique puis le milieu appliquant celle-ci pour donner l'expression de l'intégrale sur la masse d'un solide $S$ arbitraire. Dans l'exemple qui suit, la commande \verb| \Vnet{f}{ext} | donne : $$\Vnet{f}{ext}$$
+
+La commande \verb| \Vnet[]{}{} | permet d'expliciter le nom du solide au début. Dans l'exemple qui suit, la commande \verb| \Vnet[V]{f}{ext} | donne : $$\Vnet[V]{f}{ext}$$
+
+\subsubsection{Résultante d'une force volumique sur une mesure de volume}
+
+La commande \verb| \VVnet{}{} | prend \textbf{dans l'ordre} l'expression de la distribution de force puis le milieu appliquant celle-ci pour donner l'expression de l'intégrale sur la masse d'un solide $S$ arbitraire. Dans l'exemple qui suit, la commande \verb| \VVnet{q}{ext} | donne : $$\VVnet{q}{ext}$$
+
+La commande \verb| \VVnet[]{}{} | permet d'expliciter le nom du solide au début. Dans l'exemple qui suit, la commande \verb| \VVnet[II]{q}{I} | donne : $$\VVnet[II]{q}{I}$$
+
+\subsection{Résultante d'une pression}
+
+Le package fournit deux expressions pour l'évalutation d'une résultante sur une surface : un expression sans précision du vecteur normal et une expression avec précision de celui-ci.
+
+\subsubsection{Résultante d'une force surfacique générale}
+
+La commande \verb| \Snet{}{} | prend \textbf{dans l'ordre} l'expression de la distribution de la pression puis le milieu appliquant celle-ci pour donner l'expression de l'intégrale sur une surface $\partial S$ d'un solide $S$ arbitraire. Dans l'exemple qui suit, la commande \verb| \Snet{T}{A} | donne : $$\Snet{T}{A}$$
+
+La commande \verb| \Snet[]{}{} | permet d'expliciter le nom du solide au début. Dans l'exemple qui suit, la commande \verb| \Snet[E]{\sigma}{A} | donne : $$\Snet[E]{\sigma}{A}$$
+
+\subsubsection{Résultante d'une force surfacique avec précision du vecteur normal}
+
+La commande \verb| \SSnet{}{}{} | prend \textbf{dans l'ordre} l'expression de la distribution de la pression puis le milieu appliquant celle-ci \textbf{puis} l'expression du vecteur normal pour donner l'expression de l'intégrale sur une surface $\partial S$ d'un solide $S$ arbitraire. Dans l'exemple qui suit, la commande \verb| \SSnet{T}{A}{n} | donne : $$\SSnet{T}{A}{n}$$
+
+La commande \verb| \SSnet[]{}{}{} | permet d'expliciter le nom du solide au début. Dans l'exemple qui suit, la commande \verb| \SSnet[B]{p}{A}{n} | donne : $$\SSnet[B]{p}{A}{n}$$
+
+\subsection{Transport d'un vecteur moment : formule de Varignon}
+
+\subsubsection{Transport d'un vecteur moment sans expliciter la force}
+
+La commande \verb| \VARS{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis l'élément appliquant la force sur un solide $S$ arbitraire. Dans l'exemple qui suit, \verb| \VARS{A}{B}{ext} | donne : $$\VARS{A}{B}{ext}$$
+
+Pour préciser le solide en jeu, la commande \verb| \VARS[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \VARS[S]{M}{C}{ext} | donne : $$\VARS[S]{M}{S}{ext}$$
+
+\subsubsection{Transport d'un vecteur moment avec précision de la force}
+
+La commande \verb| \GVARS{}{}{} | fonctionne comme la commande \verb| \Gmoment | et écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} l'expression de la force, puis le point déjà connu, puis le point où l'on désire évaluer. Dans l'exemple qui suit, \verb| \GVARS{\Vct{W}}{A}{B} | donne : $$ \GVARS{\Vct{W}}{A}{B}$$
+
+\newpage
+
+\section{Cinétique}
+
+\subsection{Vecteur quantité de mouvement}
+
+Le package propose deux expressions de la quantité de mouvement selon l'usage de l'utilisateur; une expression directe puis une expression qui continent la masse du solide ainsi que la vitesse de son centre de gravité.
+
+\subsubsection{Vecteur quantité de mouvement, expression directe}
+
+La commande \verb| \Psr{} | prend comme entrée le nom du solide et écrit le vecteur quantité de mouvement par rapport à un repère arbitraire $R$. La commande  \verb| \Psr{E} | donne : $$\Psr{E}$$
+
+La commande \verb| \Psr[]{} | permet de préciser le nom du repère en jeu. La commande  \verb| \Psr[R_0]{S} | donne : $$\Psr[R_0]{S}$$
+
+\subsubsection{Vecteur quantité de mouvement, expression alternative}
+
+La commande \verb| \Mv{} | prend comme entrée le nom du solide et écrit le vecteur quantité de mouvement par rapport à un repère arbitraire $R$. La commande  \verb| \Mv{E} | donne : $$\Mv{E}$$
+
+La commande \verb| \Mv[]{} | permet de préciser le nom du repère en jeu. La commande  \verb| \Mv[R_0]{S} | donne : $$\Mv[R_0]{S}$$
+
+\subsubsection{Remarque sur l'expression intégrale}
+
+L'expression intégrale de la quantité de mouvement peut être obtenue en utilisant la commande \verb|\int_{M\in S}\Vel[R]{M}{S}dm| : $$\Psr{S}=\int_{M\in S}\Vel{M}{S}dm$$
+
+\subsection{Tenseur d'inertie}
+
+\subsubsection{Expression du tenseur d'inertie}
+
+La commande \verb|\Inertia{}{}| permet d'écrire l'expression de la matrice d'inertie en précisant \textbf{dans l'ordre} le point de calcul puis le solide en jeu. La commande \verb|\Inertia{O}{S}| donne : $$\Inertia{O}{S}$$
+
+La commande \verb|\Inertia[]{}{}| permet en plus de préciser le repère de référence. La commande \verb|\Inertia[R_0]{A}{E}| donne : $$\Inertia[R_0]{A}{E}$$
+
+\subsubsection{Expression matricielle du tenseur d'inertie}
+
+La commande \verb|\InertiaE{}{}| permet d'écrire l'expression matricielle de la matrice d'inertie en précisant \textbf{dans l'ordre} le point de calcul puis le solide en jeu. La commande \verb|\InertiaE{O}{S}| donne : $$\InertiaE{O}{S}$$
+
+La commande \verb|\InertiaE[]{}{}| permet en plus de préciser le repère de référence. La commande \verb|\InertiaE[R_0]{A}{E}| donne : $$\InertiaE[R_0]{A}{E}$$
+
+\subsubsection{Matrice de transfert}
+
+La commande \verb|\Ip{}{}| permet d'écrire l'expression de la matrice de tranfert d'un point à un autre, elle prend comme entrées \textbf{dans l'ordre} le point où la matrice est déjà exprimée puis le point vers lequel on désire transférer. Dans l'exemple qui suit, la commande \verb|\Ip{G}{A}| donne : $$\Ip{G}{A}$$
+
+Pour préciser le solide en jeu, on utilise la commande \verb|\Ip[]{}{}| en explicitant le nom du solide au début. Dans l'exemple qui suit, la commande \verb|\Ip[E]{B}{A}| donne : $$\Ip[E]{B}{A}$$
+
+\subsubsection{Theorème d'Huygens}
+
+La commande \verb|\Huygens{}{}{}| écrit le théorème d'\textsc{Huygens} entre deux points. Elle prend comme entrées \textbf{dans l'ordre} le point de départ, le point d'arrivée et le nom du solide. Dans l'exemple qui suit, la commande \verb|\Huygens{G}{A}{S}| donne : $$\Huygens{G}{A}{S}$$
+
+Pour préciser le repère en jeu, on utilise la commande \verb|\Huygens[]{}{}{}| en explicitant le nom du repère au début. Dans l'exemple qui suit, la commande \verb|\Huygens[R_0]{B}{A}{S}| donne : $$\Huygens[R_0]{B}{A}{S}$$
+
+\subsection{Moment cinétique}
+Nous précisons ici toutes les commandes relatives au moment cinétique présentes dans ce package, elle vont de la définition par intégrale jusqu'à la formule explicite en utilisant la matrice d'inertie.
+\vspace{12pt}
+
+La commande \verb| \Lm{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \Lm{O}{S} | donne : $$\Lm{O}{S}$$
+
+La commande \verb| \Lm[]{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \Lm[R_g]{A}{S} | donne : $$\Lm[R_g]{A}{S}$$
+
+\subsubsection{Moment cinétique, définition par intégrale}
+La commande \verb| \Lmi{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \Lmi{O}{S} | donne : $$\Lmi{O}{S}$$
+
+La commande \verb| \Lmi[]{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \Lmi[R_g]{A}{S} | donne : $$\Lmi[R_g]{A}{S}$$
+
+\subsubsection{Moment cinétique, expression complète}
+La commande \verb| \LA{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \LA{O}{S} | donne : $$\LA{O}{S}$$
+
+La commande \verb| \LA[]{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \LA[R_g]{A}{S} | donne : $$\LA[R_g]{A}{S}$$
+
+\subsubsection{Moment cinétique, cas d'un point fixe ou du centre de gravité}
+La commande \verb| \LF{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \LF{O}{S} | donne : $$\LF{O}{S}$$
+
+La commande \verb| \LF[]{}{} | écrit le vecteur moment cinétique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \LF[R_g]{G}{S} | donne : $$\LF[R_g]{G}{S}$$
+
+\subsection{Transport du moment cinétique : formule de Varignon}
+
+\subsubsection{Transport du moment cinétique : première formule}
+La commande \verb| \VARC{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis le solide concerné. Dans l'exemple qui suit, \verb| \VARC{A}{B}{S} | donne : $$\VARC{A}{B}{S}$$
+
+Pour préciser un repère quelconque, la commande \verb| \VARC[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \VARC[R_0]{M}{G}{S} | donne : $$\VARC[R_0]{M}{G}{S}$$
+
+\subsubsection{Transport du moment cinétique : deuxième formule}
+Pour expliciter la quantité de mouvement, la commande \verb| \AVARC{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis le solide concerné. Dans l'exemple qui suit, \verb| \AVARC{A}{B}{S} | donne : $$\AVARC{A}{B}{S}$$
+
+Pour préciser un repère quelconque, la commande \verb| \AVARC[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \AVARC[R_0]{M}{G}{S} | donne : $$\AVARC[R_0]{M}{G}{S}$$
+
+\newpage
+
+\section{Dynamique}
+
+\subsection{Vecteur quantité d'accélération}
+
+Le package propose deux expressions de la quantité d'accélération selon l'usage de l'utilisateur; une expression directe puis une expression qui continent la masse du solide ainsi que l'accélération de son centre de gravité.
+
+\subsubsection{Vecteur quantité d'accélération, expression directe}
+
+La commande \verb| \Am{} | prend comme entrée le nom du solide et écrit le vecteur quantité de mouvement par rapport à un repère arbitraire $R$. La commande  \verb| \Am{E} | donne : $$\Am{E}$$
+
+La commande \verb| \Am[]{} | permet de préciser le nom du repère en jeu. La commande  \verb| \Am[R_0]{S} | donne : $$\Am[R_0]{S}$$
+
+\subsubsection{Vecteur quantité d'accélération, expression alternative}
+
+La commande \verb| \Amg{} | prend comme entrée le nom du solide et écrit le vecteur quantité de mouvement par rapport à un repère arbitraire $R$. La commande  \verb| \Amg{E} | donne : $$\Amg{E}$$
+
+La commande \verb| \Amg[]{} | permet de préciser le nom du repère en jeu. La commande  \verb| \Amg[R_0]{S} | donne : $$\Amg[R_0]{S}$$
+
+\subsubsection{Remarque sur l'expression intégrale}
+
+L'expression intégrale de la quantité d'accélération peut être obtenue en utilisant la commande \verb|\int_{M\in S}\Acc[R]{M}{S}dm| : $$\Am{S}=\int_{M\in S}\Acc{M}{S}dm$$
+
+\subsection{Moment dynamique}
+Nous précisons ici toutes les commandes relatives au moment dynamique présentes dans ce package, elle vont de la définition par intégrale jusqu'à la formule explicite en utilisant le moment cinétique.
+\vspace{12pt}
+
+La commande \verb| \ADelta{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \ADelta{O}{S} | donne : $$\ADelta{O}{S}$$
+
+La commande \verb| \ADelta[]{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \ADelta[R_g]{A}{S} | donne : $$\ADelta[R_g]{A}{S}$$
+
+\subsubsection{Moment dynamique, définition par intégrale}
+La commande \verb| \IDelta{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \IDelta{O}{S} | donne : $$\IDelta{O}{S}$$
+
+La commande \verb| \IDelta[]{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \IDelta[R_g]{A}{S} | donne : $$\IDelta[R_g]{A}{S}$$
+
+\subsubsection{Moment dynamique, expression complète}
+La commande \verb| \EDelta{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \EDelta{O}{S} | donne : $$\EDelta{O}{S}$$
+
+La commande \verb| \EDelta[]{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \EDelta[R_g]{A}{S} | donne : $$\EDelta[R_g]{A}{S}$$
+
+\subsubsection{Moment dynamique, cas d'un point fixe ou du centre de gravité}
+La commande \verb| \FDelta{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère arbitraire. Elle prend \textbf{dans l'ordre} le point d'évaluation, puis le solide. Dans l'exemple qui suit, \verb| \FDelta{O}{S} | donne : $$\FDelta{O}{S}$$
+
+La commande \verb| \FDelta[]{}{} | écrit le vecteur moment dynamique d'un solide dans par rapport à un repère précisé au début. Elle prend \textbf{dans l'ordre} le repère, le point d'évaluation puis le solide. Dans l'exemple qui suit, la commande \verb| \FDelta[R_g]{A}{S} | donne : $$\FDelta[R_g]{A}{S}$$
+
+\subsection{Transport du moment dynamique : formule de Varignon}
+
+\subsubsection{Transport du moment dynamique : première formule}
+La commande \verb| \VARD{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis le solide concerné. Dans l'exemple qui suit, \verb| \VARD{A}{B}{S} | donne : $$\VARD{A}{B}{S}$$
+
+Pour préciser un repère quelconque, la commande \verb| \VARD[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \VARD[R_0]{M}{G}{S} | donne : $$\VARD[R_0]{M}{G}{S}$$
+
+\subsubsection{Transport du moment dynamique : deuxième formule}
+La commande \verb| \AVARD{}{}{} | écrit directement la formule de \textsc{Varignon} entre deux points $A$ et $B$ sur un repère arbitraire $R$. Elle prend comme entrées \textbf{dans l'ordre} le point déjà connu, puis le point que l'on désire évaluer puis le solide concerné. Dans l'exemple qui suit, \verb| \AVARD{A}{B}{S} | donne : $$\AVARD{A}{B}{S}$$
+
+Pour préciser un repère quelconque, la commande \verb| \AVARD[]{}{}{} | pourra être utilisée. Dans l'exemple qui suit, \verb| \AVARD[R_0]{M}{G}{S} | donne : $$\AVARD[R_0]{M}{G}{S}$$
+
+\newpage
+
+\section{Energétique et puissance}
+
+\subsection{Puissance délivrée}
+La commande \verb| \Pow{}{} | permet d'exprimer la puissance délivrée par un solide sur un solide par rapport à un repère arbitraire $R$. Elle prend \textbf{dans l'ordre} le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, \verb| \Pow{S}{\overline{S}} | donne : $$\Pow{S}{\overline{S}}$$
+
+La commande \verb| \Pow[]{}{} | permet, en plus, de tenir compte d'un repère choisi. Elle prend \textbf{dans l'ordre} le repère de calcul, le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, cette commande \verb| \Pow[R_0]{S}{\overline{S}} | donne : $$\Pow[R_0]{S}{\overline{S}}$$
+
+\subsubsection{Puisance délivrée : expression torsorielle implicite}
+La commande \verb| \Ptor{}{} | permet d'exprimer la puissance délivrée par un solide sur un solide par rapport à un repère arbitraire $R$ sous forme de co-moment du torseur cinématique avec le torseur d'action mécanique. Elle prend \textbf{dans l'ordre} le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, \verb| \Ptor{S}{\overline{S}} | donne : $$\Ptor{S}{\overline{S}}$$
+
+La commande \verb| \Ptor[]{}{} | permet, en plus, de tenir compte d'un repère choisi. Elle prend \textbf{dans l'ordre} le repère de calcul, le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, cette commande \verb| \Ptor[R_0]{S}{\overline{S}} | donne : $$\Ptor[R_0]{S}{\overline{S}}$$
+
+\subsubsection{Puisance délivrée : expression torsorielle explicite}
+La commande \verb| \Power{}{}{} | permet d'exprimer la puissance délivrée par un solide sur un solide par rapport à un repère arbitraire $R$ en évaluant en un point le co-moment du torseur cinématique avec le torseur d'action mécanique. Elle prend \textbf{dans l'ordre} le point d'évaluation, le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, la commande \verb| \Power{M}{S}{\overline{S}} | donne : $$\Power{M}{S}{\overline{S}}$$
+
+La commande \verb| \Power[]{}{}{} | permet, en plus, de tenir compte d'un repère choisi. Elle prend \textbf{dans l'ordre} le repère de calcul, le solide concerné, puis le milieu délivrant la puissance. Dans l'exemple qui suit, cette commande \verb| \Power[R_0]{M}{S}{\overline{S}} | donne : $$\Power[R_0]{M}{S}{\overline{S}}$$
+
+\subsubsection{Puissance délivrée par un champ de force massique}
+La commande \verb| \IPow{}{} | permet d'exprimer la puissance délivrée par un champ de force massique sur un solide par rapport à un repère arbitraire $R$. Elle prend \textbf{dans l'ordre} le solide concerné, puis l'expression du champ de force. Dans l'exemple qui suit, \verb| \IPow{S}{\Vct{f}} | donne : $$\IPow{S}{f}$$
+
+La commande \verb| \IPow[]{}{}{} | permet, en plus, de tenir compte d'un repère choisi. Elle prend \textbf{dans l'ordre} le repère de calcul, le solide concerné, puis l'expression du champ de force. Dans l'exemple qui suit, cette commande \verb| \IPow[R_0]{S}{T} | donne : $$\IPow[R_0]{S}{T}$$
+
+\subsection{Puissance de liaison}
+La commande \verb| \LPow{}{} | permet d'exprimer la puissance de liaison entre deux solides. Elle prend \textbf{dans l'ordre} le premier puis le deuxième solide. Dans l'exemple qui suit, \verb| \LPow{I}{II} | donne : $$\LPow{I}{II}$$
+
+\subsubsection{Puisance de liaison : expression torsorielle implicite}
+La commande \verb| \PLtor{}{} | permet d'exprimer la puissance de liaison entre deux solides sous forme d'écriture torsorielle. Elle prend \textbf{dans l'ordre} le premier puis le deuxième solide. Dans l'exemple qui suit, \verb| \PLtor{I}{II} | donne : $$\PLtor{I}{II}$$
+
+\subsection{Energie cinétique d'un solide}
+La commande \verb| \KE{} | permet d'exprimer sous forme intégrale l'énergie cinétique d'un solide par rapport à un repère arbitraire $R$. Elle prend comme paramètre le nom du solide. Dans l'exemple qui suit, \verb| \KE{D} | donne : $$\KE{D}$$
+
+La commande \verb| \KE[]{} | permet d'exprimer sous forme intégrale l'énergie cinétique d'un solide par rapport à un repère déterminé. Elle prend comme paramètre le nom du solide précédé du nom du repère. Dans l'exemple qui suit, \verb| \KE[0]{1} | donne : $$\KE[0]{1}$$
+\textbf{N.B. :} Il n'existe pas de commande directe pour écrire $T_{S/R}$ : \verb|T_{S/R}|
+
+\subsubsection{Energie cinétique : expression torsorielle implicite}
+La commande \verb| \KEtor{} | permet d'exprimer sous forme torsorielle l'énergie cinétique d'un solide par rapport à un repère arbitraire $R$. Elle prend comme paramètre le nom du solide. Dans l'exemple qui suit, \verb| \KEtor{D} | donne : $$\KEtor{D}$$
+
+La commande \verb| \KEtor[]{} | permet d'exprimer sous forme torsorielle l'énergie cinétique d'un solide par rapport à un repère déterminé. Elle prend comme paramètre le nom du solide précédé du nom du repère. Dans l'exemple qui suit, \verb| \KEtor[0]{1} | donne : $$\KEtor[0]{1}$$
+
+\subsubsection{Energie cinétique : mouvement de translation seule}
+La commande \verb| \KineticT{}{} | permet d'exprimer sous forme explicite l'énergie cinétique d'un solide en translation par rapport à un repère arbitraire $R$. Elle prend comme paramètre le point d'évaluation puis le nom du solide. Dans l'exemple qui suit, \verb| \KineticT{A}{S} | donne : $$\KineticT{A}{S}$$
+
+La commande \verb| \KineticT[]{}{} | permet de tenir compte du repère choisi. Elle prend comme paramètre le le point d'évaluation puis le nom du solide précédé du nom du repère. Dans l'exemple qui suit, la commande \verb| \KineticT[R_g]{A}{S} | donne : $$\KineticT[R_g]{A}{S}$$
+
+\subsubsection{Energie cinétique : mouvement de rotation seule}
+La commande \verb| \KineticR{}{} | permet d'exprimer sous forme explicite l'énergie cinétique d'un solide en rotation par rapport à un repère arbitraire $R$. Elle prend comme paramètre le point d'évaluation puis le nom du solide. Dans l'exemple qui suit, \verb| \KineticR{A}{S} | donne : $$\KineticR{A}{S}$$
+
+La commande \verb| \KineticR[]{}{} | permet de tenir compte du repère choisi. Elle prend comme paramètre le le point d'évaluation puis le nom du solide précédé du nom du repère. Dans l'exemple qui suit, la commande \verb| \KineticR[R_g]{A}{S} | donne : $$\KineticR[R_g]{A}{S}$$
+
+\subsubsection{Energie cinétique : expression générale}
+La commande \verb| \Kinetic{}{} | permet d'exprimer sous forme explicite l'énergie cinétique d'un solide par rapport à un repère arbitraire $R$. Elle prend comme paramètre le point d'évaluation puis le nom du solide. Dans l'exemple qui suit, \verb| \Kinetic{A}{S} | donne : $$\Kinetic{A}{S}$$
+
+La commande \verb| \Kinetic[]{}{} | permet de tenir compte du repère choisi. Elle prend comme paramètre le le point d'évaluation puis le nom du solide précédé du nom du repère. Dans l'exemple qui suit, la commande suivante \verb| \Kinetic[R_g]{A}{S} | donne : $$\Kinetic[R_g]{A}{S}$$
+
+\subsubsection{Energie cinétique : cas du centre de gravité}
+La commande \verb| \KineticG{} | permet d'exprimer sous forme explicite l'énergie cinétique d'un solide par rapport à un repère arbitraire $R$ exprimée au centre de gravité de celui-ci. Elle prend comme paramètre le nom du solide. Dans l'exemple qui suit, \verb| \KineticG{S} | donne : $$\KineticG{S}$$
+
+La commande \verb| \KineticG[]{} | permet de tenir compte du repère choisi. Elle prend comme paramètre le le point d'évaluation puis le nom du solide précédé du nom du repère. Dans l'exemple qui suit, la commande suivante \verb| \KineticG[R_g]{S} | donne : $$\KineticG[R_g]{S}$$
+
+\newpage
+
+\section{Torseurs}
+
+\subsection{Torseur cinématique}
+La commande \verb|\Ktor[]{}{}| permet d'exprimer le torseur cinématique en un point du solide. Elle prend comme entrées le nom du repère (facultative), le point d'évaluation et le nom du solide. La commande \verb|\Ktor[R]{G}{S}| donne : $$\Ktor[R]{G}{S}$$
+
+La commande \verb|\EKtor[]{}{}| permet d'exprimer explicitement le torseur cinématique en un point du solide. Elle prend comme entrées le nom du repère (facultative), le point d'évaluation et le nom du solide. La commande \verb|\EKtor[R]{G}{S}| donne : $$\EKtor[R]{G}{S}$$
+
+\subsection{Torseur d'action mécanique}
+La commande \verb|\Stor[]{}{}| permet d'exprimer le torseur statique en un point du solide. Elle prend comme entrées le nom du solide (facultative), le milieu exerçant l'action et le point de calcul. La commande \verb|\Stor[S]{ext}{A}| donne : $$\Stor[S]{ext}{A}$$
+
+La commande \verb|\Ltor{}{}{}| permet d'exprimer le torseur statique d'une liaison entre deux solides. Elle prend comme entrées les noms des solides puis le point de calcul. La commande \verb|\Ltor{I}{II}{O}| donne : $$\Ltor{I}{II}{O}$$
+
+La commande \verb|\Lptor{}{}{}| permet d'exprimer le torseur statique d'une liaison entre deux solides en mouvemnent plan. Elle prend comme entrées les noms des solides puis le point de calcul. La commande \verb|\Lptor{I}{II}{O}| donne : $$\Lptor{I}{II}{O}$$
+
+\subsection{Torseur cinétique}
+La commande \verb|\Ctor[]{}{}| permet d'exprimer le torseur cinétique en un point du solide. Elle prend comme entrées le nom du repère (facultative), le point d'évaluation et le nom du solide. La commande \verb|\Ctor[R]{A}{S}| donne : $$\Ctor[R]{A}{S}$$
+
+\subsection{Torseur dynamique}
+La commande \verb|\Dtor[]{}{}| permet d'exprimer le torseur dynamique en un point du solide. Elle prend comme entrées le nom du repère (facultative), le point d'évaluation et le nom du solide. La commande \verb|\Dtor[R]{A}{S}| donne : $$\Dtor[R]{A}{S}$$
+
+\subsection{Torseur personnalisé}
+La commande \verb|\Ftor[]{}{}{}{}| permet d'exprimer un torseur personnalisé. Elle prend comme entrées le nom du repère (facultative), la lettre représentant le torseur (alphabet), l'expression de la résultante puis du moment et enfin le point d'évaluation. La commande (assez longue) suivante \verb|\Ftor[S/R]{W}{\Vct{R}}{\Vct{M}_{A}}{A}| donne : $$\Ftor[S/R]{W}{\Vct{R}}{\Vct{M}_{A}}{A}$$
+
+\subsection{Torseur personnalisé explicite}
+La commande \verb|\LFtor[]{}{}{}{}{}{}{}{}| permet d'exprimer un torseur personnalisé explicite. Elle prend comme entrées le nom du repère (facultative), la lettre représentant le torseur (alphabet), respectivement les trois composantes de la résultante, les trois composantes du moment et enfin le point d'évaluation.
+La commande \verb|\LFtor[S/R]{F}{X}{Y}{Z}{L}{M}{N}{G}| donne : $$\LFtor[S/R]{F}{X}{Y}{Z}{L}{M}{N}{G}$$
+
+\newpage
+
+\section{Exemples}
+\textbf{Formule de Boor :}
+
+\verb|\Din[0]{\Vct{AB}}=\Din[1]{\Vct{AB}}+\Rotation[0]{1}\times\Vct{AB}|
+$$\Din[0]{\Vct{AB}}=\Din[1]{\Vct{AB}}+\Rotation[0]{1}\times\Vct{AB}$$
+
+\textbf{Roulement sans glissement en I :}
+
+\verb|\Vel[1]{I}{2}=\Vct{0}|
+$$\Vel[1]{I}{2}=\Vct{0}$$
+
+\textbf{Composition des vitesses :}
+
+\verb|\Vel[0]{A}{n}=\sum_{i=}^{n-1}\Vel[i]{A}{i+1}|
+$$\Vel[0]{A}{n}=\sum_{i=0}^{n-1}\Vel[i]{A}{i+1}$$
+ 
+\textbf{Accélération :}
+
+\verb|\Acc[R]{A}{S}=\Dex[R]{\Vel[R]{A}{S}}|
+$$\Acc[R]{A}{S}=\Dex[R]{\Vel[R]{A}{S}}$$
+
+\textbf{Pincipe fondamental de la dynamique 1 :}
+
+\verb|\sum_{i=1}^{n}\Force[S]{S_i}=\Amg[R]{S}|
+$$\sum_{i=1}^{n}\Force[S]{S_i}=\Amg[R]{S}$$
+
+\textbf{Pincipe fondamental de la dynamique 2 :}
+
+\verb|\sum_{i=1}^{n}\Force[S]{S_i}=\Amg[R]{S}|
+$$\sum_{i=1}^{n}\Moment[S]{S_i}{O}=\ADelta[R]{O}{S}$$
+
+\textbf{Theorème de l'énergie cinétique}
+
+\verb|\Dex{T_{S/R}}=\Pow[R]{S{\overline{S}}|
+$$\Dex{T_{S/R}}=\Pow[R]{S}{\overline{S}}$$
+\end{document}

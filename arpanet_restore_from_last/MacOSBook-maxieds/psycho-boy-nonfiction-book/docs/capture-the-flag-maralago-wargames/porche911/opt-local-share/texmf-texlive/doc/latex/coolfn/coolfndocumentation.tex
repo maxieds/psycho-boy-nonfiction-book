@@ -1,0 +1,206 @@
+\documentclass[12pt]{article}
+\usepackage{coolfn}
+\usepackage{textcsc}
+\usepackage{xcolor}
+\usepackage{fontspec}\definecolor{darkspringgreen}{rgb}{0.09, 0.45, 0.27}
+\usepackage{titlesec}
+\titleformat{\subsection}
+  {\bfseries}{\thesection.\thesubsection}{1em}{\normalfont\bfseries}
+\usepackage[hidelinks]{hyperref}
+\usepackage{hologo}
+\usepackage[british]{babel}
+\usepackage[useregional]{datetime2}
+\DTMlangsetup[en-GB]{ord=omit}
+\definecolor{LightGray}{gray}{0.9}
+%\usepackage{mathpazo}
+\IfFontExistsTF{Palatine Parliamentary}{%
+\setromanfont[SmallCapsFeatures={LetterSpace=10},
+RawFeature={+calt,+hlig,+liga,+dlig,+onum,+pnum},
+BoldFont={Palatine Parliamentary Bold},
+ItalicFont={Palatine Parliamentary Italic}
+]{Palatine Parliamentary Regular}
+}{\setromanfont[RawFeature={+onum,+pnum}]{TeX Gyre PagellaX}}
+\setmonofont[Scale=.9,BoldFont=Source Code Pro Bold]{Source Code Pro}
+
+\usepackage{minted}
+\date{\today\\\smallskip\ttfamily Version \coolfnversionnumber}
+\author{Elijah Z Granet\thanks{e-mail: \href{mailto:ezg21@cantab.ac.uk}{\ttfamily ezg21@cantab.ac.uk}}}
+
+\title{\texttt{coolfn}:\\A package for a cool way to typeset footnotes}
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+\section{Overview}
+Legal writing, for better or for worse,\footnote{Almost certainly for the worse, except in the very rare situations where the author is capable of mastering the art of distinctive discursive footnote writing.  Far more authors think that they can pull off this delicate technique than \textit{actually} are capable of doing so. } often involves very long and discursive footnotes replete with a series of often doubtfully relevant citations (perhaps with blockquotes of  even more doubtful relevance).\footnote{Here, it is apt to note, as Parke \textcsc{B} said in Parke B in \textit{Mirehouse v Rennel} (1833) 1 Cl \& F 527, 546, that:
+\begin{quote}
+Our common law system consists in the applying to new combinations of circumstances those rules of law which we derive from legal principles and judicial precedents; and for the sake of attaining uniformity, consistency and certainty, we must apply those rules, where they are not plainly unreasonable or inconvenient, to all cases which arise; and we are not at liberty to reject them, and to abandon all analogy to them, in those to which they have not yet been judicially applied, because we think that the rules are not as convenient and reasonable as we ourselves could have devised.\end{quote}} Consequently, the formatting of footnotes for clear numbering, delineation of internal quotations and paragraphs, and clarity takes on a great importance.
+
+This is a subjective question, on which the typographic authorities offer many suggestions. This package simply provides a way of formatting long footnotes the author thinks is, for lack of a better word, cool. It uses a clear column of numbers separated from the footnote, of sufficient width to accommodate triple digit footnote numbers.  A hanging indent emphasises the footnote as the sideways mirror of the text, reflecting the paragraph but in a different way.\footnote{Think of the classic mirroring of the main text having the case name and the footnote the legal citation.} There is no footnote rule and a very slight increase in the parskip to help the eye distinguish multi-paragraph footnotes.\footnote{Which are usually a bad idea, but should at least look nice if they must be used.}
+\section{Usage}
+The package has no options, and the only configurable length is the \\\mintinline{latex}{\fnindent}, which sets the indent for the hanging footnotes, and also defines the relationship of the footnote number and main footnote blocks.  By default, this is set to 1 \textcsc{M}, but can be easily changed by using the simple inbuilt \LaTeX renewal macro. For example:
+\begin{quote}
+ \mintinline{latex}{\renewcommand{\fnindent}{1.25em}}.
+\end{quote}
+\section{Development}
+Bugs, feature requests, \textit{etc}, should be submitted to the project's official Githup page: (\url{https://github.com/ezgranet/coolfn/}).
+
+\section{Licence}
+	This project is licensed under the Latex Public Project Licence version 1.3\textit{c}. This documentation is copyright of the author but licensed under \textcsc{CC-BY-SA} 3.0.
+
+\clearpage
+\section{Implementation}
+\begin{minted}[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+bgcolor=LightGray,
+fontsize=\footnotesize,
+linenos,
+breaklines,
+firstnumber=last
+]
+{latex}
+
+\def\coolfnversionnumber{1.2.2}
+\ProvidesPackage{coolfn}
+[2023/11/29\coolfnversionnumber\
+ A cool way to format footnotes]
+% This work may be distributed and/or modified under the 
+% conditions of the LaTeX Project Public License, either version 1.3c 
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX 
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Elijah Z Granet
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FOOTNOTES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from 
+% https://tex.stackexchange.com/questions/305033/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[bottom]{footmisc}
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% multi paragraph footnotes
+% are inherently pretty bad 
+% but they happen in law
+% so might as well deal with them? so a slight spacing to compensate
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{Parskip}{%
+   \par
+   \parskip=0.25\baselineskip \advance\parskip by 0pt plus 1pt
+   \parindent=\z@
+   \def\@listI{\leftmargin\leftmargini
+      \topsep\z@ \parsep\parskip \itemsep\z@}
+   \let\@listi\@listI
+   \@listi
+   \def\@listii{\leftmargin\leftmarginii
+      \labelwidth\leftmarginii\advance\labelwidth-\labelsep
+      \topsep\z@ \parsep\parskip \itemsep\z@}
+   \def\@listiii{\leftmargin\leftmarginiii
+       \labelwidth\leftmarginiii\advance\labelwidth-\labelsep
+       \topsep\z@ \parsep\parskip \itemsep\z@}
+   \partopsep=\z@
+}{\par}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\fnindent}{1em}
+\usepackage{calc}% for maths
+\newlength{\lengtha}
+\setlength{\lengtha}{\textwidth}
+\newlength{\lengthb}%maths again
+\newlength{\lengthc}
+
+\setlength{\lengthc}{\fnindent}
+\setlength{\lengthb}{1.25\lengthc}%parblock
+
+\makeatletter
+\@ifclassloaded{memoir}{
+}{
+\usepackage{hanging}
+}
+  % for hanging paragraphs
+\renewcommand\footnoterule{}
+% ^ no one wants a rule sep for FN!
+\AtBeginDocument{\flushbottom}
+%^just to be safe 
+\makeatletter
+\long\def\@makefntext#1{\leavevmode
+  \@makefnmark\nobreak
+  #1%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% the magic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+ \renewcommand{\@makefntext}[1]{%
+\begin{minipage}[t]{\lengthb}%
+\noindent\normalfont%
+\@thefnmark%
+
+\end{minipage}%
+\begin{minipage}[t]{\textwidth-\lengthb}%
+\begin{Parskip}\begin{hangparas}{\lengthc}{1}
+\noindent#1\end{hangparas}\end{Parskip}%
+\end{minipage}%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{minted}
+
+
+
+
+
+
+
+
+\section{Version History}
+\subsection*{\texttt{1.2.2}}
+\ttfamily 29 November 2023: Fixed issue with textwidth
+
+\subsection*{\texttt{1.2.1}}
+\ttfamily 29 November 2023: Fixed issue with memoir
+
+\subsection*{\texttt{1.2.0}}
+
+
+
+\ttfamily 16 November 2023: Fixed issue with width of footnote block
+
+
+\subsection*{\texttt{1.1.0}}
+
+
+
+\ttfamily 27 February 2023: Fixed issue with footnotes at the bottom
+
+\subsection*{\texttt{1.0.0}}
+
+\ttfamily 6 October 2022: Package creation
+
+	
+\end{document}

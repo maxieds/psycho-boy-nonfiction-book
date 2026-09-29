@@ -1,0 +1,41 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 82 Display Data in a Stripy Table
+% Label: "ex:displaydbstripytable"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+ \begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+\usepackage{colortbl}
+\usepackage{datatool}
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv}
+\ExplSyntaxOn
+\RenewDocumentCommand \DTLdisplaydbAddItem { m m m m m m m m }
+{
+ \int_compare:nNnT { #7 } = { \c_one_int }
+ { % first column
+   \int_if_odd:nTF { #5 }
+  { % odd row
+   \tl_put_right:Nn #1 { \rowcolor { blue } }
+  }
+  { % even row
+   \tl_put_right:Nn #1 { \rowcolor { green } }
+  }
+  }
+ \tl_put_right:Nn #1 { #3 { #2 } }
+}
+\ExplSyntaxOff 
+\begin{document}
+\DTLaction{display} 
+\end{document}

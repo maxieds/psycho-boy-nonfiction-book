@@ -1,0 +1,51 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 143 Bar Chart With a Legend
+% Label: "ex:barchartlegend"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{fruit.csv}
+Name,Quantity
+"Apples",30
+"Pears",25
+"Lemons,Limes",40.5
+"Peaches",34.5
+"Cherries",20
+\end{filecontents}
+
+
+\usepackage{databar}
+% Load data from fruit.csv file:
+\DTLsetup{store-datum,default-name=fruit}
+\DTLread{fruit.csv} 
+\begin{document}
+\DTLbarchart
+{
+ init={% 
+ \def\mychartlegend{}% 
+ \renewcommand{\DTLeverybarhook}{% 
+  \ifdefempty{\mychartlegend}{}{\appto\mychartlegend{\\}}% 
+  \eappto\mychartlegend{% 
+    {\noexpand\DTLdobarcolor{\DTLbarindex}
+    \noexpand\rule{\noexpand\DTLbarwidth}{\noexpand\DTLbarwidth}}
+    \expandonce\Name
+  }% 
+  }% 
+ \renewcommand{\DTLbaratendtikz}{% 
+ \node[at={(\DTLbarchartwidth,0pt)},anchor=south west] 
+  {
+    \begin{tabular}{l}
+    \mychartlegend
+    \end{tabular}
+  };
+  }% 
+ },
+ variable=\Quantity,% variable required
+ y-ticks,ylabel=Quantity
+}
+{fruit}% database
+{\Quantity=Quantity,\Name=Name}% assignment list
+ 
+\end{document}

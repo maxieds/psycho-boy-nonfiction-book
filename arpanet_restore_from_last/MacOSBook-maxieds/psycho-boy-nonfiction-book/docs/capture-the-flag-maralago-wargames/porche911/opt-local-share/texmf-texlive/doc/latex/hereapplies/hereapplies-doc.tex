@@ -1,0 +1,235 @@
+%% LyX 2.3.7 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=3.25cm,bmargin=3.25cm,lmargin=3.25cm,rmargin=3.25cm}
+\usepackage{babel}
+\usepackage{url}
+\usepackage{setspace}
+\usepackage{microtype}
+\onehalfspacing
+\usepackage[unicode=true,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{pdftitle={The \textquotedblleft{}Here Applies\textquotedblright{} LaTeX Package},
+ pdfauthor={madmurphy},
+ pdfsubject={Package documentation},
+ pdfkeywords={Glossary, Index, LaTeX, LaTeX hyperref, LaTeX labels, LaTeX package, LyX, LyX module, TOC}}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{doc}
+\usepackage{upquote}
+
+\AtBeginDocument{%
+	% LyX should add automatically `\usepackage{listings}` to the preamble...
+	\lstset{%
+		language=TeX,
+		basicstyle=\footnotesize,
+		numbers=left,
+		stepnumber=1,
+		showstringspaces=false,
+		tabsize=1,
+		breaklines=true,
+		breakatwhitespace=false,
+	}%
+}
+
+\makeatother
+
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Listing}
+
+\begin{document}
+\title{The \textbf{Here Applies} \LaTeX{} Package}
+
+\maketitle
+\bigskip{}
+
+\begin{abstract}
+A \LaTeX{} package for referencing groups of pages that share something
+in common. 
+\end{abstract}
+\vspace{2cm}
+
+
+\section{Overview}
+
+\textbf{Here Applies} is a \LaTeX{} package that allows to collect
+groups of labels and reference them altogether. It can be used for
+creating informal glossaries that cross-link concepts to their applications,
+or simply mentioning multiple pages that share something in common.
+
+The package offers two commands: \texttt{\textbackslash hereapplies}
+and \texttt{\textbackslash whereapplies} (plus their ``starred''
+versions \texttt{\textbackslash hereapplies{*}} and \texttt{\textbackslash whereapplies{*}}).
+In both cases an identifier is passed as argument, and this can be
+any string invented in the moment (\texttt{\textbackslash hereapplies}
+additionally supports more than one identifier in the form of a comma-separated
+list).
+
+Every time \texttt{\textbackslash hereapplies} is invoked with known
+identifiers, the document is made aware that the place shares some
+kind of connection with other places in which the same identifiers
+were used. And so, every time the \texttt{\textbackslash whereapplies}
+command is invoked with a known identifier, all occurrences of the
+latter within the entire document will be printed in the form of a
+linkable page list (e.g. ``pp.\ 1, 5, 8--9, 14--20\dots '').
+
+As \texttt{\textbackslash hereapplies} is designed to be invoked
+in the middle of a chapter or a section and that location must be
+made linkable, the \texttt{\textbackslash phantomsection} directive
+is invoked by default before a label is added. To avoid calling \texttt{\textbackslash phantomsection},
+the ``starred'' command \texttt{\textbackslash hereapplies{*}}
+is available.
+
+Finally, like \texttt{\textbackslash whereapplies} resembles a pluralizable
+version of \texttt{\textbackslash pageref}, its ``starred'' version
+\texttt{\textbackslash whereapplies{*}} will resemble a pluralizable
+version of \texttt{\textbackslash pageref{*}}.
+
+If you use LyX, the package ships a LyX module as well (please check
+the \texttt{lyx-module} subdirectory).
+
+\pagebreak{}
+
+\section{Example usage}
+
+The following \LaTeX{} manuscript
+
+\vspace{3ex}
+
+\lstinputlisting[language=TeX]{hereapplies-example.tex}
+
+\vspace{3ex}
+
+\noindent will generate the \url{hereapplies-example.pdf} document
+attached.
+
+\section{A minimal tutorial}
+
+\begin{macro}{\hereapplies}
+
+Syntax:
+
+\bigskip{}
+
+\texttt{\textbackslash hereapplies\enskip{}{[}$\langle$}\texttt{\textit{label}}\texttt{$\rangle${]}\enskip{}\{$\langle$}\texttt{\textit{identifiers}}\texttt{$\rangle$\}}
+
+\texttt{\textbackslash hereapplies{*}\enskip{}{[}$\langle$}\texttt{\textit{label}}\texttt{$\rangle${]}\enskip{}\{$\langle$}\texttt{\textit{identifiers}}\texttt{$\rangle$\}}
+
+\noindent \smallskip{}
+
+\noindent The \texttt{\textbackslash hereapplies} command notifies
+the document that one or more identifiers apply to a particular point
+and adds a label to it.
+
+If the optional argument is passed the label created will be named
+accordingly, otherwise an opaque name will be chosen for it. This
+argument may contain only what is legal for \texttt{\textbackslash pageref}.
+
+The \texttt{\textit{identifiers}} argument must be a comma-separated
+list of identifiers (leading and trailing spaces around each member
+will be ignored). Each of these strings will remain confined within
+the internal scope of the package and will not create conflicts with
+possible macros or labels of the same names.
+
+After storing some internal values, \texttt{\textbackslash hereapplies}
+will expand exactly to
+
+\smallskip{}
+
+\begin{lstlisting}[language=TeX,numbers=none]
+\phantomsection\label{...}
+\end{lstlisting}
+
+\smallskip{}
+
+Its ``starred'' version (\texttt{\textbackslash hereapplies{*}})
+will not invoke the \texttt{\textbackslash phantomsection} directive.
+
+\end{macro}
+
+\smallskip{}
+
+\begin{macro}{\whereapplies}
+
+Syntax:
+
+\bigskip{}
+
+\texttt{\textbackslash whereapplies\enskip{}\{$\langle$}\texttt{\textit{identifier}}\texttt{$\rangle$\}}
+
+\texttt{\textbackslash whereapplies{*}\enskip{}\{$\langle$}\texttt{\textit{identifier}}\texttt{$\rangle$\}}
+
+\noindent \smallskip{}
+
+\noindent The \texttt{\textbackslash whereapplies} command prints
+all the occurrences of an identifier, in the form ``p.\ \dots ''
+or ``pp.\ \dots '' (with page range support).
+
+The \texttt{\textit{identifier}} argument will remain confined within
+the internal scope of the package and will not create conflicts with
+possible commands or labels of the same name. Leading and trailing
+spaces around this string will be ignored.
+
+If the same \texttt{\textit{identifier}} is not passed to \texttt{\textbackslash hereapplies}
+at least once throughout the document, \texttt{\textbackslash whereapplies}
+will print ``\textbf{??}''.
+
+The ``starred'' version of this command (\texttt{\textbackslash whereapplies{*}})
+will use \texttt{\textbackslash pageref{*}} instead of \texttt{\textbackslash pageref}
+for generating the page list.
+
+\end{macro}
+
+\section{Internationalization}
+
+Currently the localization of \textbf{Here Applies} is not automatic.
+It is possible however to control the strings generated by overwriting
+the four macros \texttt{\textbackslash hapage}, \texttt{\textbackslash hapages},
+\texttt{\textbackslash hadelimiter} and \texttt{\textbackslash halastdelimiter}.
+For example, writing at the beginning of a document
+
+\vspace{3ex}
+
+\begin{lstlisting}[language=TeX]
+% German translation of **Here Applies**
+% English: "p.\ "
+\gdef\hapage{S.\ }
+% English: "pp.\ "
+\gdef\hapages{S.\ }
+% English: "\ and\ "
+\gdef\halastdelimiter{\ und\ }
+% English: ",\ " (exactly like in German -- leave it)
+%\gdef\hadelimiter{,\ }
+\end{lstlisting}
+
+\vspace{3ex}
+
+\noindent will translate ``pp.\ 2, 4 and 6'' into ``S.\ 2, 4
+und 6''.
+
+\section{Get involved}
+
+If you wish to get involved, please do not hesitate to send \href{https://github.com/madmurphy/hereapplies.sty/pulls}{merge requests}
+or participate in the discussion. The package is also \href{https://www.ctan.org/pkg/hereapplies}{available on \textbf{CTAN}}
+under \href{https://www.ctan.org/tex-archive/macros/latex/contrib/hereapplies/}{\texttt{macros/latex/contrib/hereapplies/}}.
+For any issue, please \href{https://github.com/madmurphy/hereapplies.sty/issues}{drop a message}.
+
+\section{Free software}
+
+\textbf{Here Applies} is free software. You can redistribute it and/or
+modify it under the terms of the \textbf{AGPL} license version 3 or
+any later version. See \url{COPYING} for details.
+
+\newpage{}
+
+\section*{Code appendix}
+
+\addcontentsline{toc}{section}{Code appendix}
+
+\lstinputlisting[language=TeX]{hereapplies.sty}
+\end{document}

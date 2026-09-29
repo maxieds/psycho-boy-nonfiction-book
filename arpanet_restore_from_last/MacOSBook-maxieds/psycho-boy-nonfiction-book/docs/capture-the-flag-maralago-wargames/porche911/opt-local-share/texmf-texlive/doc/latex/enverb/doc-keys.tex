@@ -1,0 +1,111 @@
+\subsection{Available Keys\label{sec:keys}}
+\begin{function}{\enverbsetup}
+  \begin{syntax}
+    \cs{enverbsetup} \marg{key=value}
+  \end{syntax}
+  This macro can be used to (locally) change the settings of \envlogo\ outside
+  of the |\enverb| macro.
+\end{function}
+
+The available keys are:
+\begin{function}{ignore}
+  \begin{syntax}
+    ignore = \meta{int}\keydefault{\emph{unused}}
+  \end{syntax}
+  Set up the number of tokens to ignore at the start of each line. This is only
+  applied after the matching |\end| was found, hence doesn't affect the
+  |\end|-line. A line containing any non-whitespace tokens but in total
+  fewer tokens (counting whitespace) than \meta{int} will lead to undefined
+  behaviour.\par
+  |ignore| and |auto-ignore| are mutually exclusive.
+\end{function}
+
+\begin{function}{auto-ignore}
+  \begin{syntax}
+    auto-ignore\keydefault{true}
+    auto-ignore = \meta{bool}
+  \end{syntax}
+  If this is true (or no value is given) the number of leading tokens is
+  determined by the number of leading tokens found in the line with the matching
+  |\end|. This allows for nice nesting of indentation levels in your \LaTeX\
+  sources without affecting functionality. A line containing any non-whitespace
+  tokens but in total fewer tokens (counting whitespace) than the leading tokens
+  in the |\end|-line will lead to undefined behaviour.\par
+  |ignore| and |auto-ignore| are mutually exclusive.
+\end{function}
+
+\begin{function}{more-ignore}
+  \begin{syntax}
+    more-ignore = \meta{int}\keydefault{2}
+  \end{syntax}
+  If |auto-ignore| is true this specifies how many tokens in addition to the
+  number of leading tokens shall be ignored at the start of each line. This
+  allows for even the contents of the |\enverb|-environment to be further
+  indented than the |\begin| and |\end| statement.
+\end{function}
+
+\begin{function}{bol}
+  \begin{syntax}
+    bol = \meta{tokens}\keydefault{\emph{empty}}
+    bol+ = \meta{tokens}
+    +bol = \meta{tokens}
+  \end{syntax}
+  Defines which \meta{tokens} are placed at the \textbf{b}egin \textbf{o}f
+  \textbf{l}ines. Your \meta{tokens} can be arbitrary contents and are placed as
+  is (so can contain macros which work as you intend when using
+  \cs{enverbBody}). Keep in mind that if you want to use this with
+  \cs{enverbExecute} or \cs{enverbListing} your tokens should be rescanned to
+  the same code after they got |\detokenize|d.\par
+  The |bol+| variant adds your \meta{tokens} after the current contents of
+  |bol|, while |+bol| adds them in front of the contents.
+\end{function}
+
+\begin{function}{eol}
+  \begin{syntax}
+    eol = \meta{tokens}\keydefault{\emph{\string^\string^M\textsubscript{12}}}
+    eol+ = \meta{tokens}
+    +eol = \meta{tokens}
+  \end{syntax}
+  Defines which \meta{tokens} are placed at the \textbf{e}nd \textbf{o}f
+  \textbf{l}ines. Your \meta{tokens} can be arbitrary contents and are placed as
+  is (so can contain macros which work as you intend when using
+  \cs{enverbBody}). Keep in mind that if you want to use this with
+  \cs{enverbExecute} or \cs{enverbListing} your tokens should be rescanned to
+  the same code after they got |\detokenize|d.\par
+  The |eol+| variant adds your \meta{tokens} after the current contents of
+  |eol|, while |+eol| adds them in front of the contents.
+\end{function}
+
+\begin{function}{key-handler}
+  \begin{syntax}
+    key-handler = \meta{code}\keydefault{\emph{throw an error}}
+  \end{syntax}
+  If used any undefined keys encountered while parsing the mandatory and
+  optional arguments of \cs{enverb} is parsed via \meta{code}. Inside your
+  \meta{code} use |#1| to specify where to input the list of unknown keys. This
+  can be used to specify additional keys to provide an interface to control your
+  wrapping code. This includes the handling of any unknown keys encountered
+  while parsing the mandatory \meta{key=value} argument of \cs{enverb}.
+\end{function}
+
+\begin{function}{key-set}
+  \begin{syntax}
+    key-set = \meta{set}
+  \end{syntax}
+  \envlogo\ uses \pkg{expkv} for its key-parsing. This key is a special form of
+  |key-handler| defining a handler that parses the unknown keys as part of
+  \meta{set} in \pkg{expkv} (so basically a shorthand for
+  |key-handler = \ekvset{|\meta{set}|}{#1}|).
+\end{function}
+
+\begin{function}{oarg-not-enverb}
+  \begin{syntax}
+    oarg-not-enverb\keydefault{false}
+    oarg-not-enverb = \meta{bool}
+  \end{syntax}
+  If this is true (or no value is given) the \meta{key=value} list in the
+  optional argument to \cs{enverb} is not parsed as keys of \envlogo\ but only
+  inside your defined |key-handler|. Obviously this key doesn't have any effect
+  if only used as part of the optional argument of \cs{enverb}.
+\end{function}
+

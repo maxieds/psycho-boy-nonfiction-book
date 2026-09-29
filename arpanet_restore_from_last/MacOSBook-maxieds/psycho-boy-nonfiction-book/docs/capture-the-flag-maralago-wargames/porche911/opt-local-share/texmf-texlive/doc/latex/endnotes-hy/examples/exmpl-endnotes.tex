@@ -1,0 +1,81 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{endnotes-hy}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks,linkcolor=red}
+
+\usepackage{fancyvrb}
+
+\def\cs#1{\texttt{\char`\\#1}}
+
+% used to create verbatim endnotes
+\newbox\enbox
+\setbox\enbox\hbox{\verb!%^$^&$%^&!}
+\edef\VertTxti{\unhbox\enbox}
+
+% Use to get indentation in multi-paragraph endnotes
+\def\enPAR{\par\hskip15pt}
+
+\makeatletter
+% the use of \everypar is to get proper alignment of the left margin
+% in multi-paragraph endnotes.
+\def\enoteformat{%
+  \rightskip\z@ \leftskip\z@ \parindent=1.8em
+  \everypar{\hangindent=\parindent \hangafter=1}%
+  \leavevmode\llap{\makeenmark}}
+\makeatother
+
+% Modify how the endnote mark looks at the end.
+\patchcmd{\theendnotes}
+    {\makeatletter}
+    {\makeatletter
+     \renewcommand\makeenmark{\textbf{\theenmark{}.} }}
+    {}{}
+
+\usepackage{lipsum}
+
+\begin{document}
+
+%\show\enoteformat
+
+\section{Making endnotes clickable}\label{MkClk}
+
+The new syntax for the \cs{endnote} command is,
+\begin{Verbatim}[xleftmargin=15pt]
+\endnote*[<num>]{<note-text>}\label{<name>}
+\end{Verbatim}
+The use of \texttt* causes the endnote mark not to appear. If \verb!\label{<name>}! appears,
+a hypertext links is created pointing to the placement of the endnote at the end of the document.
+
+\begin{itemize}
+
+\item Some beginning text.\endnote{My endnote text.}\label{judy}
+
+\item Refer to endnote.\endnote{Tom Terrific!}\label{tom}
+
+\item Another method is to use the \texttt*-form and use
+\verb~\autoref~\endnote*{Alex-tastic!}\label{alex} to display
+the reference to \autoref{alex}.
+
+\item Now make another endnote.\endnote{Kira's endnote is a very long one.
+      Kira's endnote is a very long one. Kira's endnote is a very long one.\enPAR
+      Kira's endnote is a very long one. Kira's endnote is a very long one.
+      Kira's endnote is a very long one.}\label{kira}
+
+\item This is an endnote with two paragraphs\endnote*{Don is good.\par Tom is better.}\label{multipar} in endnote~\ref{multipar}.
+
+\item Here, we try \verb!\Nameref!, \verb~\nameref~, \verb~\autoref~: \Nameref{tom}, \nameref{tom}, \autoref{tom}.
+
+\item This is a specially number endnote.{\def\theendnote{N\arabic{endnote}}\endnote[1]{A special end note, verbatim: \VertTxti.}\label{cusNum}}
+
+\item We reference endnote\endnote{Don's endnote is here!}\label{don} on page~\pageref{don}.
+
+\end{itemize}
+\lipsum[1]
+
+\newpage
+
+\theendnotes
+
+\end{document}

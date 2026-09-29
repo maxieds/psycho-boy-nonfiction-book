@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mhequ}
+
+\def\eref#1{(\ref{#1})}
+
+\textwidth 13cm
+\textheight 22cm
+\oddsidemargin 0.2cm
+\topmargin 0.3cm
+\pagestyle{empty}
+
+\begin{document}
+
+\title{Using the \texttt{mhequ} package}
+\author{Martin Hairer}
+\date{Version 1.72, 9 November 2022}
+\maketitle
+\thispagestyle{empty}
+
+
+This package provides two environments: \texttt{equ} for single-line equations
+and \texttt{equs} for multi-line equations. They behave similarly to the built-in
+\texttt{equation} and \texttt{amsmath}'s \texttt{align} environments and can essentially
+be used as drop-in replacements. The main difference is that equation numbers are 
+handled differently: equations are numbered if and only if they have a \verb|\label|,
+so there is no need for starred versions. This also applies to individual lines in
+a multiline equation. Also, the \texttt{equs} environment supports blocks of equation
+with more
+
+Since \texttt{mhequ} redefines the \verb|\tag| and \verb|\intertext| commands, it should
+always be loaded \textit{after} the \texttt{amsmath} package. However, these
+two commands should still behave correctly inside the \texttt{amsmath} environments.
+The rest of this document demonstrates the usage of the \texttt{mhequ} package,
+it is easiest to just read the source code of this document to see how it works.
+See also the description given at the start of the file \texttt{mhequ.sty}.
+
+Here is a simple labelled equation:
+\begin{equ}[onelab]
+	e^{i\pi} + 1 = 0 \;.
+\end{equ}
+Removing or adding the label does not require a change of environment:
+\begin{equ}
+	e^{i\pi} + 1 = 0 \;.
+\end{equ}
+However, if the option \texttt{numberall} is set, then every single 
+equation is numbered.
+A simple list of equations can be displayed either with one number
+per equation
+\begin{align}
+	f(x) &= \sin(x) + 1\;, \label{e:equ1}\\
+	h(x) &= f(x) + g(x) -3\;, \label{e:equ3}
+\end{align}
+\begin{equs}
+	f(x) &= \sin(x) + 1\;, \label{e:equ1}\\
+	h(x) &= f(x) + g(x) -3\;, \label{e:equ3}
+\end{equs}
+or with one number for the whole list
+\begin{equs}[e:block]
+	f(x) &= \sin(x) + 1\;, \\
+	h(x) &= f(x) + g(x) -3\;.
+\end{equs}
+Of course, it can also have no number at all:
+\begin{equs}
+	f(x) &= \sin(x) + 1\;, \\
+	h(x) &= f(x) + g(x) -3\;.
+\end{equs}
+The command \verb|\minilab{label_name}| allows us to create a counter for the lines
+in a block of equations.
+\minilab{otherlabel}
+\begin{equs}
+	f(x) &= \sin(x) + 1\;, \label{e:f}\\
+	g(x) &= \cos(x) - x^2 + 4\;,\label{e:g}\\[3mm]
+	h(x) &= f(x) + g(x) -3\;. \label{e:h}
+\end{equs}
+One can refer to the whole block \eref{otherlabel} or to one
+line, like \eref{e:f} for example. 
+It is possible to use any tag one likes with the \verb|\tag{displayed_tag}|
+command
+\begin{equ}[mylabel]
+	 x = y\;, \tag{$\star$}
+\end{equ}
+which in this case was used as \verb|\tag{$\star$}|.
+Such an equation can be referred to as usual: \eref{mylabel}.
+Of course, \texttt{mhequ} can be used in conjunction with the usual \texttt{equation} environment, 
+but \texttt{mhequ} is great, so why would you want to do this? 
+\begin{equation}
+ x=y+z
+\end{equation}
+Typesetting several columns of equations is quite easy and doesn't require 10 different environments
+with awkward names:
+\begin{equs}
+	x&=y+z    &\qquad   a&= b+c     &\qquad x&= v \label{laba}\\
+	x&=y+z    &\qquad   a&= b+c     &\qquad x&= u+1\tag{\ref{laba}'}\label{labtag}\\
+	\multicol{4}{\text{(multicol)}}   &\qquad x&=y     \\
+	a&= b     &\multicol{4}{\qquad\text{(multicol)}} \\
+	x&=y+z    &\qquad a^2&= (b-c)^3 +y \\
+\intertext{and also (this is some \texttt{\string\intertext})}
+	x&=y+z    &\qquad   a&= (b+c)^2 - 5 &\qquad \ell&= m\label{labb}
+\end{equs}
+We can even extend the block \eref{otherlabel} much later
+using the \verb|\minilab{label_name}| command:
+\minilab{otherlabel}
+\begin{equs}
+	x&=y+z &\quad x&=y+z  &\quad f(x)&= b\label{e:x1}\\
+	x&=y+z & x&=y+z &\quad g(x)&= b\label{e:x2} \\
+	\multicol{6}{\sin^2 x + \cos^2 x = 1} \label{e:x3}
+\end{equs}
+It is possible to change the type of subnumbering and to use the 
+\texttt{\string\text} command without having to load \texttt{amstext}:
+\setlabtype{Alph}
+\minilab{alab}
+\begin{equs}
+	I_1 &= \int_a^b g(x)\,dx\;,&\quad&\text{(First equation)} \label{e:1}\\
+	I_2 &= \int_a^b g(x^2-1)\,dx\;.&\quad&\text{(Second equation)} \label{e:2}
+\end{equs}
+
+\end{document}

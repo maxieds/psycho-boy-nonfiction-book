@@ -1,0 +1,1376 @@
+\documentclass{article}
+\usepackage[a4paper,twoside=true,hmargin=5cm,vmargin=4.3cm]{geometry} % Mise en page
+\usepackage[T1]{fontenc} % Encodage pour fichier généré
+\usepackage[utf8]{inputenc} % Encodage pour fichier source
+\usepackage[english,german, spanish, italian,french]{babel} % Typographie française
+\usepackage{xspace} % Gestion des espaces
+\usepackage[svgnames]{xcolor} % Couleur
+\usepackage{marginnote} % Notes marginales
+\usepackage{hyperref} % Références croisées en hypertexte
+    \hypersetup{colorlinks=true, allcolors=Black} % Paramétrage des hyperliens
+\usepackage[french]{varioref} % Gestion des références de page
+\usepackage{graphicx} % Ingération d'images
+\usepackage{xparse} % Création de commandes
+\usepackage{soul} % texte souligné
+\usepackage{lipsum} % Faux texte
+\usepackage{conditext} % Gestion de texte conditionnel
+
+\setlength{\parskip}{5pt} % Espace inter-paragraphes
+\setminicondispace{french}
+
+%//// Commandes internes ///////////////////////////////////////////
+\NewDocumentCommand\initcap{m m}{% % Interface servant à mettre en majuscule la première lettre d'un mot/groupe de mot sur valeur booléenne "true"
+    \IfBooleanTF{#1}{\capitalize{#2}}{#2}}
+
+\NewDocumentEnvironment{listplus}{m}% % Liste personnalisée
+    {\begin{list}{}{\setlength{\topsep}{2mm}%
+    \setlength{\partopsep}{0mm}\setlength{\itemsep}{0mm}%
+    \setlength{\leftmargin}{2mm}#1}}{\end{list}}
+
+%//// Mise en évidence de mots /////////////////////////////////////////////////
+
+%//// Citation
+\NewDocumentCommand\titcit{m}{\emph{#1}} % Titre de document cité
+
+%//// Noms propres
+\NewDocumentCommand\techname{m}{\textsf{#1}} % Nom propre d'élément technique
+\NewDocumentCommand\app{m}{\techname{#1}} % Nom d'application
+\NewDocumentCommand\class{m}{\techname{#1}} % Nom de classe
+\NewDocumentCommand\xclass{s m}{% % Nom de classe avec terme introducteur
+    \IfBooleanTF{#1}{\classml*}{\classml} \class{#2}}
+\NewDocumentCommand\dist{m}{\techname{#1}} % Nom de distribution
+\NewDocumentCommand\dial{m}{\techname{#1}} % Nom de fenêtre de dialogue
+\NewDocumentCommand\file{m O{}}{\techname{#1}% % Nom de fichier
+    \ifthenelse{\NOT\equal{#2}{}}{.#2}{}}
+\NewDocumentCommand\menu{m}{\techname{#1}} % Nom de menu
+\NewDocumentCommand\pack{m}{\techname{#1}} % Nom de paquet
+\NewDocumentCommand\xpack{s m}{% % Nom de paquet avec terme introducteur
+    \IfBooleanTF{#1}{\packml*}{\packml} \pack{#2}}
+\newcommand\Latex{\LaTeX\xspace} % "LaTeX"
+\NewDocumentCommand\site{s m o}{% % Nom de site
+    \IfBooleanTF{#1}{%
+        \ifthenelse{\NOT\equal{#2}{}}{\techname{#2}}{\techname{?}}}
+        {\techname{\url{www.#2.#3}}}}
+\NewDocumentCommand\sys{s m}{% % Nom de système
+    \techname{#2}\IfBooleanT{#1}{\tmark}}
+\NewDocumentCommand\tmark{}{\techname{\scriptsize{\texttrademark}}} % Symbole "trademark"
+
+%//// Termes techniques
+\NewDocumentCommand\termml{m m O{} O{} O{} O{} O{} O{} O{}}{% % Matrice servant à définir des termes en version multilingue
+    \miniconditext{\initcap{#1}{#2}}[\initcap{#1}{#3}][\initcap{#1}{#4}]%
+        [\initcap{#1}{#5}][\initcap{#1}{#6}][\initcap{#1}{#7}][\initcap{#1}{#8}]%
+        [\initcap{#1}{#9}]}
+\NewDocumentCommand\argnml{s}{% % "Argument" en différentes langues
+    \termml{#1}{argument}[argument]}
+\NewDocumentCommand\classml{s}{% % "Classe" en différentes langues
+    \termml{#1}{classe}[class]}
+\NewDocumentCommand\cmdnml{s}{% % "Commande" en différentes langues
+    \termml{#1}{commande}[command]}
+\NewDocumentCommand\envnml{s}{% % "Environnement" en différentes langues
+    \termml{#1}{environnement}[environment]}
+\NewDocumentCommand\valoptml{s}{% % "Option" en différentes langues
+    \termml{#1}{option}[option]}
+\NewDocumentCommand\packml{s}{% % "Paquet" en différentes langues
+    \termml{#1}{paquet}[package]}
+\NewDocumentCommand\valml{s}{% % "Valeur" en différentes langues
+    \termml{#1}{valeur}[value]}
+\NewDocumentCommand\techterm{m}{\emph{#1}} % Terme technique
+\NewDocumentCommand\conc{m}{\techterm{#1}} % Notion
+
+%//// Éléments de code
+\NewDocumentCommand\code{m}{\textnormal{\texttt{#1}}} % Élément de code
+\NewDocumentCommand\coden{m}{\txtvar{#1}} % Élément de code : intitulé
+\NewDocumentEnvironment{codeblock}{}% % Bloc de code
+    {\begin{list}{}{\setlength{\topsep}{2mm}%
+    \setlength{\partopsep}{0mm}\setlength{\itemsep}{0mm}%
+    \setlength{\leftmargin}{2mm}\ttfamily}}{\end{list}}
+\NewDocumentEnvironment{subcodeblock}{}% % Sous-bloc de code
+    {\begin{list}{}{\setlength{\topsep}{0mm}%
+    \setlength{\partopsep}{0mm}\setlength{\itemsep}{0mm}%
+    \setlength{\leftmargin}{2mm}\ttfamily}}{\end{list}}
+\NewDocumentCommand\codestm{s m}{% % Instruction de code
+        \IfBooleanTF{#1}%
+            {\begin{codeblock}\item {#2}\end{codeblock}}%
+            {\item \small#2}}
+\NewDocumentCommand\endstm{}{\code{\%}} % Marque de fin dans une instruction
+\NewDocumentCommand\cmdn{m}{\code{\textbackslash#1}} % Commande : nom pour mention
+\NewDocumentCommand\xcmdn{s m}{% % Commande : nom pour mention avec terme introducteur
+    \IfBooleanTF{#1}{\cmdnml*}{\cmdnml} \cmdn{#2}}
+\NewDocumentCommand\cmdnx{m}{\code{#1}} % Commande : extrait de nom
+\NewDocumentCommand\cmd{s m O{} O{}}{% % Commande : forme déclarative
+    \IfBooleanTF{#1}%
+        {\code{\textbackslash#2*}}%
+        {\code{\textbackslash#2}}#3%
+            \ifthenelse{\NOT\equal{#4}{}}
+                {\textnormal{#4}}{}}
+\NewDocumentCommand\cmdheader{m m}{% % Commande : signature
+    \codestm*{\cmd{#1}[#2]}}
+\NewDocumentCommand\envn{s m}{% % Environnement : nom pour mention
+    \IfBooleanTF{#1}
+        {\cmd{begin}[\argm{#2}]\\\cmd{end}[\argm{#2}]}
+        {\code{#2}}}
+\NewDocumentCommand\xenvn{s m}{% % Environnement : nom pour mention avec terme introducteur
+    \IfBooleanTF{#1}{\envnml*}{\envnml} \envn{#2}}
+\NewDocumentCommand\env{m O{} O{}}{% % Environnement : forme déclarative
+    \begin{codeblock}
+        \codestm{\cmd{begin}[\argm{#1}#2]}%
+        \IfNoValueF{#3}%
+            {\codestm{\code{#3}}}%
+        \codestm{\cmd{end}[\argm{#1}]}%
+    \end{codeblock}}
+\NewDocumentCommand\envheader{m m}{% % Environnement : signature
+    \codestm*{\env{#1}[#2][\txt]}}
+\NewDocumentCommand\argmbegin{}{\{} % Borne de début d'argument obligatoire
+\NewDocumentCommand\argmend{}{\}} % Borne de fin d'argument obligatoire
+\NewDocumentCommand\argm{m}{\code{\argmbegin{#1}\argmend}} % Argument obligatoire
+\NewDocumentCommand\argmvoid{m}{\code{\argmbegin{\,}\argmend}} % Argument obligatoire vide
+\NewDocumentCommand\argo{m}{\code{[{#1}]}}  % Argument facultatif
+\NewDocumentCommand\argovoid{m}{\code{[{\,}]}}  % Argument facultatif vide
+\NewDocumentCommand\argn{m}{\coden{#1}} % Argument : intitulé
+\NewDocumentCommand\xargn{s m}{% % Argument : intitulé avec terme introducteur
+    \IfBooleanTF{#1}{\argnml*}{\argnml} \argn{#2}}
+\NewDocumentCommand\val{m}{\code{#1}} % Valeur d'argument
+\NewDocumentCommand\xval{s m}{% % Valeur d'argument avec terme introducteur
+    \IfBooleanTF{#1}{\valml*}{\valml} \val{#2}}
+\NewDocumentCommand\valopt{m}{\code{#1}} % Valeur d'option
+\NewDocumentCommand\xvalopt{s m}{% % Valeur d'option avec terme introducteur
+    \IfBooleanTF{#1}{\valoptml*}{\valoptml} \val{#2}}
+\NewDocumentEnvironment{valenum}{m}{% % Liste de valeurs
+    \begin{listplus}{\rmfamily}
+        \item #1
+    \end{listplus}}{}
+\NewDocumentCommand\comm{m}{\code{\endstm{}\quad#1}} % Commentaire de code
+\NewDocumentCommand\txtvar{m}{$\langle$\textrm{\emph{#1}}$\rangle$} % Texte variable dans une expression de code
+\NewDocumentCommand\txt{}{\coden{text}} % Texte : représentation dans une expression de code
+
+%//// Texte spécialisé
+\NewDocumentEnvironment{exmptextnormal}{+b}{\textnormal #1}{}
+\NewDocumentCommand\quo{m}{\og#1\fg} % Texte entre guillemets
+\NewDocumentEnvironment{ltext}{}% % Texte littéral
+    {\begin{list}{}{\setlength{\topsep}{2mm}%
+    \setlength{\partopsep}{0mm}\setlength{\itemsep}{0mm}%
+    \setlength{\leftmargin}{5mm}\sffamily\small}}{\end{list}}
+\NewDocumentCommand\ltextline{m}{\item#1} % Texte littéral : ligne
+
+%//// Références
+\NewDocumentCommand\seeml{s}{% % "cf." en différentes langues
+    \termml{#1}{cf.}[see]}
+\NewDocumentCommand\seeref{s m}{% % Référence précédée de "cf."
+    \IfBooleanTF{#1}
+        {\vpageref{#2}}
+        {\seeml{}~\vpageref{#2}}}
+\NewDocumentCommand\titref{m}{% % Référence avec titre
+    \emph{\nameref{#1}}}
+
+%//// Organisation du texte
+\NewDocumentCommand\resumepar{}{\noindent} % Reprise de paragraphe après incise
+\NewDocumentCommand\tutostep{O{}}{% % Étape de tutoriel
+    \subparagraph*{#1}}
+\NewDocumentCommand\cmdbookmark{m}{% % Signet de commande
+    \marginnote{\small{\cmdn{#1}}}}
+\NewDocumentCommand\envbookmark{m}{% % Signet d'environnement
+    \marginnote{\small{\envn*{#1}}}}
+\NewDocumentCommand\note{m}{\paragraph*{#1.}} % Note
+
+\begin{document}
+
+\title{\xpack{conditext}}
+\author{Jean-Louis Brabant}
+\date{Version 1.5 du 1 juin 2020}
+\maketitle
+
+\begin{abstract}
+Ce paquet permet de définir et gérer du contenu conditionnel (multilingue ou autre) dans un document source \LaTeX, sous la forme de commandes d'emploi aisé, et selon un paramétrage minimal.
+\end{abstract}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\part*{Introduction}
+Ce paquet fournit quelques facilités, sous la forme d'une petite dizaine de commandes, pour définir et gérer du contenu conditionnel dans un document source \Latex.
+
+Un \conc{contenu conditionnel}, au sens où ce paquet l'entend et le gère, est un texte (y compris sous forme de formules mathématiques ou autres) et/ou un élément graphique (diagramme, figure, image...) se présentant sous des formes pouvant se substituer les unes aux autres -- appelées \conc{formes substituables} dans cette documentation -- qui, en fonction d'un test de condition, figurent ou non dans le document généré.
+
+L'une des gestions de contenu conditionnel les plus courantes est d'ordre multilingue, mais il peut aussi s'agir d'éditions \quo{versionnées}, de niveaux de services, de niveaux de confidentialité etc.
+
+\note{Comment exploiter cette documentation}
+Pour une toute première utilisation du \xpack{conditext}, il est fortement conseillé, après un survol de cette documentation, de se reporter directement à la partie \titref{CtDoc_Tuto}. L'on y apprend à utiliser les différentes commandes disponibles, dans des contextes variés, avec des conseils de bonne pratique qui en permettront par la suite une exploitation optimisée.
+
+Une fois en mesure d'utiliser les principales ressources fonctionnelles du présent paquet, l'on pourra, avec profit et à loisir, consulter la partie \titref{CtDoc_Commandes} pour toutes précisions utiles concernant les différentes commandes.
+
+\part{Guide de l'utilisateur/référence des commandes}\label{CtDoc_Commandes}
+\section{Généralités}
+\subsection{Principe général}
+La philosophie du \xpack{conditext} repose sur les notions respectives de domaine de condition (\quo{condition field} en anglais), de propriété de condition (\quo{condition property}) et d'espace de condition (\quo{condition space}).
+
+Avec \pack{conditext}, dans un document source, toute forme substituable est identifiée par un domaine de condition et une propriété de condition.
+
+Le \conc{domaine de condition} est une thématique fonctionnelle qui permet de regrouper des formes substituables pour une même gestion conditionnelle.
+
+La \conc{propriété de condition} est une caractérisation fonctionnelle propre à chaque forme substituable d'une même domaine de condition.
+
+L'\conc{espace de condition} permet de désigner la ou les formes substituables qui doivent figurer dans le document généré. L'on définit un espace de condition en spécifiant un domaine de condition et une propriété de condition propres à correspondre à une ou plusieurs formes substituables.
+
+\subsection{Déclaration du paquet/option}
+L'on déclare le \xpack{conditext} par l'instruction \cmdn{usepackage} (ou \cmdn{requirespackage} s'il s'agit d'intégrer \pack{conditext} dans un paquet personnalisé).
+
+Pour information, \pack{conditext} fait usage des paquets \pack{xifthen} et \pack{xparse}.
+
+\note{Option}
+Dans sa déclaration, \pack{conditext} accepte une option, sous la forme :
+
+\codestm*{\cmd{usepackage}[\argo{defaultdisplayall}\argm{conditext}]}
+
+Par défaut (déclaration du paquet sans option), tant qu'aucun espace de condition n'est défini, aucune forme substituable quelle qu'elle soit, ne figure dans le document généré. L'option \val{defaultdisplayall} permet de modifier ce comportement : lorsqu'elle est spécifiée, si aucun espace de condition n'est défini, toute forme substituable figure dans le document généré. Pour retrouver le comportement d'origine, il suffit de retirer l'option dans la déclaration du paquet.
+
+\subsection{Modalités d'utilisation des commandes}
+Le \xpack{conditext} fournit une petite dizaine de commandes, décrites en détail dans les pages qui suivent, et qui se répartissent en deux grandes catégories selon leur nature et leurs fonctionnalités :
+
+L'\xenvn{conditext} (\seeref{CtDoc_Commandes_CondiText}), ainsi que les commandes \cmdn{setcondispace} (\seeref{CtDoc_Commandes_SetCondiSpace}), \cmdn{newcondifield} (\seeref{CtDoc_Commandes_NewCondiField}), \cmdn{newcondiprop} (\seeref{CtDoc_Commandes_NewCondiProp}) et \cmdn{setimplicitcondifield} (\seeref{CtDoc_Commandes_SetImplicitCondiField}) sont destinés à une gestion conditionnelle à l'échelle multi-paragraphique (de plusieurs dizaines à plusieurs milliers de signes), appelée désormais en tant que telle \conc{gestion de contenu conditionnel}.
+
+Les commandes \cmdn{miniconditext} (\seeref{CtDoc_Commandes_MiniCondiText}), \cmdn{setminicondispace} (\seeref{CtDoc_Commandes_MiniCondiText}) et \cmdn{setminicondiprop-} (\seeref{CtDoc_Commandes_SetMiniCondiProp-}) sont destinées à une gestion conditionnelle à l'échelle paragraphique ou intra-paragraphique (mots, groupes de mots), appelée désormais \conc{mini-gestion conditionnelle}.
+
+\note{Complémentarité des commandes}
+Dans un document-source, une mini-gestion conditionnelle peut être mise en oeuvre de manière indépendante, ou conjointement à une gestion conditionnelle ; d'une certaine manière, l'une et l'autre sont \emph{complémentaires}.
+
+Dans le cas d'une gestion conditionnelle multilingue, l'\xenvn{conditext} et la \xcmdn{setcondispace} sont directement exploitables, sans nécessiter de préalable d'aucune sorte. Pour toute autre gestion de contenu conditionnel, avant d'utiliser ces commandes, il est nécessaire de procéder aux créations des domaines de condition et propriétés de condition nécessaires, au moyen des commandes \cmdn{newcondifield} et \cmdn{newcondiprop}.
+
+\note{Emplacement des instructions}
+De manière générale, les intructions \cmdn{setcondispace}, \cmdn{newcondifield}, \cmdn{newcondiprop}, \cmdn{setimplicitcondifield}, \cmdn{setminicondispace} et \cmdn{setminicondiprop-} devront être placées dans le préambule.
+
+Toute instruction \envn{conditext} sera placée dans le corps même du document source.
+
+Une instruction \cmdn{miniconditext} pourra, selon les cas, être placée soit dans le préambule, soit dans le corps du document source.
+
+\section{Commandes relatives à la gestion de contenu conditionnel}
+\subsection{Saisie des formes substituables}\label{CtDoc_Commandes_CondiText}
+Tout contenu que l'on souhaite gérer comme forme substituable doit être saisi dans un \xenvn{conditext}\envbookmark{conditext}. Cet environnement -- éponyme du présent paquet -- s'utilise sous la forme suivante :
+
+\envheader{conditext}{\argo{\argn{domaine de condition}}\argm{\argn{propriété de condition}}\argo{*}}
+
+\subsubsection{Arguments et syntaxe}
+Les arguments \argn{domaine de condition} et \argn{propriété de condition} sont à renseigner l'un et l'autre avec une valeur de type alphabétique, sans caractères accentués ou à diacritiques, et sans espaces.
+
+Concernant l'argument~\val{*}, \seeref{CtDoc_Commandes_CondiText_Etoile}.
+
+Il est indispensable que \argn{domaine de condition} et \argn{propriété de condition} aient été au préalable déclarés -- nous dirons désormais \emph{créés} -- (commandes \cmdn{newcondifield} et \cmdn{newcondiprop}, cf. respectivement \seeref*{CtDoc_Commandes_NewCondiField} et \seeref*{CtDoc_Commandes_NewCondiProp}) ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation.
+
+En outre, la propriété de condition spécifiée doit avoir été impérativement créée avec un domaine de rattachement (\seeref{CtDoc_Commandes_NewCondiProp}) identique à celui précisé en \xargn{domaine de condition} ; si tel n'est pas le cas, un message d'erreur sera sera déclenché lors de la compilation.
+
+Si les arguments \argn{domaine de condition} ou \argn{propriété de condition} sont conjointement laissés vides (\argovoid{} et \argmvoid{}), un message d'erreur sera déclenché lors de la compilation.
+
+Par défaut, dans un contexte de gestion de contenu conditionnel \emph{multilingue}, l'\xargn{propriété de condition} n'a pas besoin d'être renseigné (\seeref{CtDoc_Commandes_CondiText_Multilingue}).
+
+\subsubsection{Utilisation}\label{CtDoc_Commandes_CondiText_Utilisation}
+Un \xenvn{conditext} est, à l'instar de l'\xenvn{document}, d'amplitude large et peut contenir de plusieurs dizaines à plusieurs milliers de signes. Tous les aspects propres à l'organisation et à la composition d'un texte sous \Latex (divisions, paragraphes, listes etc.) y sont laissés à l'appréciation de l'utilisateur.
+
+Dans un document source, il y aura autant d'environnments \envn{conditext} que souhaité. Les propriétés de condition et/ou les domaines de condition spécifiés pourront ou non être identiques, selon les besoins (plusieurs formes substituables appartenant à une même thématique, contenu conditionnel fragmenté et réparti à différents endroits du document source etc.).
+
+\note{Environnements imbriqués}
+Les environnements \envn{conditext} peuvent être imbriqués, à volonté, et autoriser ainsi diverses \quo{profondeurs} de condition, sur la base de domaines de condition différenciés (à savoir qu'imbriquer des environnements \envn{conditext} de domaines de condition identiques sera inévitablement source d'effets inattendus ou indésirables).
+
+La sémantique d'imbrication et son niveau de \emph{profondeur} sont laissés à l'appréciation de l'utilisateur.
+
+Dans le cas de contenus conditionnels imbriqués, les espaces de condition présentent certaines particularités de comportement (\seeref{CtDoc_Commandes_SetCondiSpace_Utilisation}).
+
+\subsubsection{Argument étoile}\label{CtDoc_Commandes_CondiText_Etoile}
+L'\xenvn{conditext} accepte une étoile en troisième argument sous la forme :
+
+\codestm*{\env{conditext}[\argo{\argn{domaine de condition}}\argm{\argn{propriété de condition}}*][\txt]}
+
+Atypique de par sa position en regard de l'usage habituel de l'étoile dans les commandes et environnements \Latex, l'argument~\val{*} affecte ponctuellement la prise en compte du domaine de condition et de la propriété de condition dans un espace de condition et modifie ainsi la logique d'affichage de la forme substituable correspondante dans le document généré.
+
+Plus précisément, l'étoile permet : soit de forcer l'inclusion de la forme substituable dans le document généré lorsqu'elle n'est pas désignée par un espace de condition ; soit à l'inverse, de forcer l'exclusion de la forme sustituable dans le document généré lorsqu'elle est désignée par un espace de condition.
+
+Cet argument est prévu pour une gestion individualisée \quo{au plus près} des formes substituables et son usage doit être en principe limité à des situations appropriées.
+
+Il est possible -- même si cette pratique est déconseillée car peu régulière (et encore moins efficace dans le cas d'un document source comportant de nombreuses instructions \envn{conditext}) --, de ne pas définir d'espace de condition et d'utiliser uniquement l'argument~\val{*} pour forcer directement l'affichage ou le non affichage des formes substituables dans le document généré (le résultat étant inversé selon que le \xpack{conditext} est déclaré sans ou avec l'\xvalopt{defaultdisplayall}).
+
+\subsubsection{Contenu conditionnel multilingue}\label{CtDoc_Commandes_CondiText_Multilingue}
+Par défaut, lorsqu'un \xenvn{conditext} est destiné à gérer un contenu conditionnel multilingue, l'\xargn{domaine de condition} n'a pas à être spécifié. Il s'agit en fait d'un domaine de condition prédéfini, intitulé \val{language}, pris en compte implicitement. L'on peut ainsi formuler une instruction \envn{conditext} à sémantique linguistique sous la forme :
+
+\codestm*{\env{conditext}[\argm{\argn{propriété de condition}}\argo{*}][\txt]}
+
+Ce comportement par défaut est cependant modifié dès lors qu'un domaine de condition implicite est défini par l'utilisateur (\xcmdn{setimplicitcondifield}, \seeref{CtDoc_Commandes_SetImplicitCondiField}). il est alors nécessaire de spécifier \emph{explicitement} \val{language} comme domaine de condition dans toute instruction \envn{conditext} devant gérer un contenu conditionnel multilingue. Ceci s'applique également à la \xcmdn{setcondispace}, \seeref{CtDoc_Commandes_SetCondiSpace}.
+
+\note{Prise en charge par \pack{babel}}
+L'\xargn{propriété de condition} doit être impérativement renseigné avec l'une des appellations linguistiques en vigueur dans le \xpack{babel}. Le \xpack{conditext} dispose des propriétés de condition prédéfinies suivantes :
+
+\begin{valenum}
+    {\val{albanian}, \val{american}, \val{arabic}, \val{armenian}, \val{bosnian}, \val{brazilian}, \val{breton}, \val{canadian}, \val{cantonese}, \val{catalan}, \val{chinese}, \val{croatian}, \val{czech}, \val{danish}, \val{dutch}, \val{english}, \val{esperanto}, \val{estonian}, \val{finnish}, \val{french}, \val{georgian}, \val{german}, \val{greek}, \val{hebrew}, \val{hungarian}, \val{icelandic}, \val{irish}, \val{italian}, \val{japanese}, \val{lithuanian}, \val{luxemburgish}, \val{macedonian}, \val{mexican}, \val{norsk}, \val{occitan}, \val{portuguese}, \val{romanian}, \val{romansh}, \val{russian}, \val{sanskrit}, \val{serbian}, \val{slovenian}, \val{spanish}, \val{swedish}, \val{tibetan}, \val{turkish}, \val{ukrainian}, \val{vietnamese}.}
+\end{valenum}
+
+Les propriétés de condition de sémantique linguistique sont plus que de simples \quo{étiquettes} ; elles permettent en fait de prendre en charge, pour chaque forme substituable saisie, le support linguistique spécifique -- notamment la gestion des césures-- disponible dans \xpack{babel}.
+
+Il est de ce fait indispensable que \pack{babel} soit déclaré dans le préambule, accompagné des langues susceptibles d'être spécifiées en propriétés de condition (se reporter à la documentation \pack{babel} pour plus de détails sur la déclaration du paquet et des langues). Les commandes du \xpack{conditext} ne prennent pas en compte la précédence de langue propre à \pack{babel} avec \val{main}.
+
+Dans sa version actuelle, le \xpack{conditext} ne permet pas de créer de nouvelles propriétés de condition à sémantique linguistique.
+
+\subsubsection{Domaines de condition et propriétés de condition prédéfinis}
+Outres le domaine de condition \val{language} et les propriétés de condition à sémantique linguistique, le \xpack{conditext} fournit plusieurs domaines de condition et propriétés de condition prédéfinis, à appellation générique, avant tout destinés à des gestions de contenu conditionnel peu exigeantes ou à des tests.
+
+Le principal (unique ?) avantage de ces domaines de condition et propriétés de condition prédéfinis est d'éviter à l'utilisateur des créations qui pourraient s'avérer fastidieuses, dans le cas de tests notamment.
+
+Les domaines de condition génériques prédéfinis sont au nombre de~3, disposant chacun d'un jeu de 9 propriétés de condition, soit :
+
+\begin{itemize}
+    \item le domaine de condition \val{fieldi}, avec les propriétés de condition
+        \begin{valenum}
+            { \val{propa},  \val{propb}, \val{propc}, \val{propd}, \val{prope}, \val{propf}, \val{propg}, \val{proph}, \val{propi} ;}
+        \end{valenum}
+    \item le domaine de condition \val{fieldii}, avec les propriétés de condition
+        \begin{valenum}
+            { \val{propaa},  \val{propbb}, \val{propcc}, \val{propdd}, \val{propee}, \val{propff}, \val{propgg}, \val{prophh}, \val{propii} ;}
+        \end{valenum}
+    \item le domaine de condition \val{fieldiii}, avec les propriétés de condition
+        \begin{valenum}
+            { \val{propaaa},  \val{propbbb}, \val{propccc}, \val{propddd}, \val{propeee}, \val{propfff}, \val{propggg}, \val{prophhh}, \val{propiii}.}
+        \end{valenum}
+\end{itemize}
+
+\subsection{Définition d'un espace de condition}\label{CtDoc_Commandes_SetCondiSpace}
+L'on définit un espace de condition au moyen de la \xcmdn{setcondispace}\cmdbookmark{setcondispace}, sur la base conjointe d'un domaine de condition et d'une propriété de condition, sous la forme suivante :
+
+\cmdheader{setcondispace}{\argo{*}\argo{\argn{domaine de condition}}\argm{\argn{propriété de condition}}}
+
+\subsubsection{Arguments et syntaxe}
+Les arguments \argn{domaine de condition} et \argn{propriété de condition} sont à renseigner l'un et l'autre avec une valeur de type alphabétique, sans caractères accentués ou à diacritiques, et sans espaces.
+
+Concernant l'argument~\val{*}, \seeref{CtDoc_Commandes_SetCondiSpace_Etoile}.
+
+Il est indispensable que \argn{domaine de condition} et \argn{propriété de condition} aient été créés au préalable (commandes \cmdn{newcondifield} et \cmdn{newcondiprop}, cf. respectivement \seeref*{CtDoc_Commandes_NewCondiField} et \seeref*{CtDoc_Commandes_NewCondiProp}) ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation.
+
+En outre, la propriété de condition spécifiée doit avoir été impérativement créée avec un domaine de rattachement (\seeref{CtDoc_Commandes_NewCondiProp}) identique à celui précisé en \xargn{domaine de condition} ; si tel n'est pas le cas, un message d'erreur sera sera déclenché lors de la compilation.
+
+Si les arguments \argn{domaine de condition} ou \argn{propriété de condition} sont conjointement laissés vides (\argovoid{} et \argmvoid{}), un message d'erreur sera déclenché lors de la compilation.
+
+Dans un contexte de gestion de contenu conditionnel \emph{multilingue}, l'\xargn{domaine de condition} n'a pas besoin d'être renseigné (\seeref{CtDoc_Commandes_SetCondiSpace_Multilingue}).
+
+Pour un usage spécifique de l'\xargn{propriété de condition} vide, \seeref{CtDoc_Commandes_SetCondiSpace_EspaceConditionGlobal}).
+
+\subsubsection{Utilisation}\label{CtDoc_Commandes_SetCondiSpace_Utilisation}
+Un espace de condition permet de désigner quelles formes substituables doivent figurer dans le document généré, en fonction d'un domaine de condition et d'une propriété de condition propres à correspondre aux formes substituables concernées.
+
+Plus précisément, un espace de condition repose sur un test de correspondance de type \quo{égal à} strict, entre : d'une part, un domaine de condition \emph{et} une propriété de condition spécifiés en arguments d'une instruction \envn{setcondispace}, et d'autre part, un domaine de condition \emph{et} une propriété de condition spécifiés en arguments d'une instruction \envn{conditext}.
+
+Si aucune correspondance n'existe, l'instruction \cmdn{setcondispace} est sans effet (tout se passe comme s'il n'y avait pas d'instruction formulée) ; sinon, toute forme substituable satisfaisant au test de correspondance figure dans le document généré.
+
+L'actuelle version du \xpack{conditext} supporte uniquement les tests de correspondance de type \quo{égal à} strict.
+
+\note{Instructions multiples}
+Il y aura autant d'instructions \cmdn{setcondispace} que souhaité, avec domaines de condition identiques ou non, en fonction des besoins (notamment dès lors la \quo{profondeur} de la gestion conditionnelle mise en oeuvre sera concernée). Si un espace de condition est défini deux fois, un message d'erreur sera déclenché lors de la compilation.
+
+Lorsque plusieurs instructions \cmd{setcondispace} sont formulées, l'ordre et la disposition dans lequel elles figurent, sont en principe laissés à l'appréciation de l'utilisateur ; quel que soit l'ordre et la disposition adoptés pour les instructions \cmd{setcondispace}, les formes substituables figureront toujours dans le document généré en fonction de l'ordre dans lequel elles figurent dans le document source.
+
+\note{Cas des contenus conditionnels imbriqués}
+Lorsque l'on gère des contenus conditionnels imbriqués (\seeref{CtDoc_Commandes_CondiText_Utilisation}), une instruction \cmdn{setcondispace} présente la particularité de comportement suivante : elle est sans effet si elle désigne un contenu conditionnel de niveau inférieur à un contenu conditionnel pour lequel un espace de condition n'est pas défini.
+
+Autrement dit, tout niveau de forme substituable supérieur à un niveau de forme substituable désigné par un espace de condition, doit être lui-même désigné par un espace de condition pour que l'espace de condition relatif au niveau inférieur soit effectif.
+
+\subsubsection{Espace de condition à sémantique linguistique}\label{CtDoc_Commandes_SetCondiSpace_Multilingue}
+Par défaut, lorsque l'on définit un espace de condition à sémantique linguistique, l'\xargn{domaine de condition}, de \xval{language}, est pris en compte implicitement et n'a pas à être spécifié. L'on peut ainsi formuler une instruction \envn{setcondispace} à sémantique linguistique sous la forme :
+
+\codestm*{\cmd{setcondispace}[\argm{\argn{propriété de condition}}]}
+
+Ce comportement par défaut est cependant modifié dès lors qu'un domaine de condition implicite est défini par l'utilisateur (\xcmdn{setimplicitcondifield}, \seeref{CtDoc_Commandes_SetImplicitCondiField}). Il est alors nécessaire de spécifier \emph{explicitement} \val{language} comme domaine de condition pour tout espace de condition à sémantique linguistique que l'on est amené à définir.
+
+L'\xargn{propriété de condition} quant à lui, doit être impérativement renseigné avec l'une des appellations linguistiques en vigueur dans le \xpack{babel} (\seeref{CtDoc_Commandes_CondiText_Multilingue} pour la liste des propriétés de condition à sémantique linguistique disponibles).
+
+\subsubsection{Version étoilée}\label{CtDoc_Commandes_SetCondiSpace_Etoile}
+La \xcmdn{setcondispace} accepte l'argument~\val{*}, mais uniquement dans le cadre d'une gestion de contenu conditionnel \emph{multilingue} ; l'argument~\val{*} est sans effet sinon.
+
+L'étoile permet de définir, relativement à une \emph{même langue} spécifiée en \xargn{propriété de condition}, conjointement un espace de condition pour les formes substituables gérées par l'\xenvn{conditext} \emph{et} un espace de condition pour les formes substituables gérées par la \xcmdn{miniconditext} (\seeref{CtDoc_Commandes_SetMiniCondiSpace_EspacesCouples}).
+
+L'argument~\val{*} peut s'avérer efficace dans les cas où les deux types de contenus substituables coexistent de manière interdépendante dans un même document source. L'usage de l'étoile a toutefois son revers : l'instruction \cmdn{setminicondispace} (\seeref{CtDoc_Commandes_SetMiniCondiSpace}) n'apparaissant pas explicitement, cela peut être source de confusion.
+
+De plus, dans la mesure où il ne peut exister qu'une seule instruction \cmdn{setminicondispace} dans le préambule (\seeref{CtDoc_Commandes_SetMiniCondiSpace}), il ne peut exister qu'une seule instruction \cmdn{setcondispace} avec étoile. Si plusieurs instructions de ce type sont spécifiées, le compilateur ne prendra en compte que la dernière de ces instructions, avec le risque d'effets indésirables ou inattendus.
+
+En toute logique, l'étoile est sans effet si l'instruction \cmdn{setcondispace} est utilisée pour définir un espace de condition global (\seeref{CtDoc_Commandes_SetCondiSpace_EspaceConditionGlobal}).
+
+\subsubsection{Espace de condition global}\label{CtDoc_Commandes_SetCondiSpace_EspaceConditionGlobal}
+En plus de l'usage préalablement décrit, la \xcmdn{setcondispace} peut être utilisée sous la forme spécifique suivante :
+
+\codestm*{\cmd{setcondispace}[\argo{\argn{domaine de condition}}\argm{}]}
+
+\resumepar L'espace de condition alors défini, est un \emph{espace de condition global} : toutes les formes substituables rattachées à un même domaine de condition s'affichent sans exception dans le document généré.
+
+À noter que l'utilisation de la \xcmdn{setcondispace} sous la forme \cmd{setcondispace}[\argo{}\argm{}] déclenche un message d'erreur au moment de la compilation.
+
+ Si l'on souhaite définir un espace de condition global dans un contexte de contenu conditionnel multilingue, l'\xargn{domaine de condition} doit être \emph{explicitement} renseigné avec la \xval{language}.
+
+\subsection{Création d'un domaine de condition}\label{CtDoc_Commandes_NewCondiField}
+L'on crée un domaine de condition au moyen de la \xcmdn{newcondifield}\cmdbookmark{newcondifield}, que l'on utilise sous la forme suivante :
+
+\cmdheader{newcondifield}{\argo{*}\argm{\argn{nouveau domaine de condition}}}
+
+\subsubsection{argument et syntaxe}
+L'\xargn{nouveau domaine de condition} est à renseigner sur la base d'une valeur de type alphabétique, sans caractères accentués ou à diacritiques, et sans espaces.
+
+Si l'\xargn{nouveau domaine de condition} est laissé vide, un message d'erreur sera déclenché lors de la compilation.
+
+Concernant l'argument~\val{*}, \seeref{CtDoc_Commandes_NewCondiField_Etoile}.
+
+\subsubsection{Utilisation}
+Un domaine de condition est une thématique fonctionnelle permettant de rattacher différents contenus substituables à une même sémantique de gestion conditionnelle.
+
+Ainsi, dans le cas de contenus substituables imbriqués, c'est le domaine de condition qui permet d'en gérer la profondeur avec ses différents niveaux.
+
+La création d'un domaine de condition se fait toujours sur le nom \argn{nouveau domaine de condition}, à l'exclusion de tout autre identifiant. Une fois créé, ce nom peut être directement utilisé en premier argument de l'\xenvn{conditext} et des commandes \cmdn{setcondispace} et \cmdn{newcondiprop}, ainsi qu'en argument unique de la \xcmdn{setimplicitcondifield}.
+
+Il y aura autant d'instructions \cmd{newcondifield} que de domaines de condition à créer. Si un domaine de condition est créé deux fois, un message d'erreur sera déclenché lors de la compilation.
+
+Il est possible de donner un nom identique à un domaine de condition et à une propriété de condition, mais, de par les risques de confusion que cette pratique est susceptible de produire, il convient de la réserver à des besoins spécifiques (\seeref{CtDoc_Commandes_NewCondiField_Etoile}).
+
+En toute logique, toute instruction \cmdn{newcondifield} doit impérativement précéder l'utilisation de l'\xenvn{conditext} et des commandes \cmdn{setcondispace}, \cmdn{newcondiprop} et \cmdn{setimplicitcondifield} ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation. Plus généralement, un message d'erreur sera déclenché lors de la compilation si un domaine de condition est spécifié dans une instruction \envn{conditext}, \cmdn{setcondispace} ou \cmdn{setimplicitcondifield} alors qu'il n'a pas été créé.
+
+\subsubsection{Version étoilée}\label{CtDoc_Commandes_NewCondiField_Etoile}
+La \xcmdn{newcondifield} accepte l'argument~\val{*}, qui permet de créer tout à la fois un domaine de condition \emph{et} une propriété de condition portant le même nom.
+
+Cet usage particulier de \cmdn{setcondispace} est essentiellement destiné à une gestion conditionnelle binaire, où une seule propriété de condition suffit par domaine de condition (l'instruction \cmdn{setcondispace} faisant office de \quo{commande interrupteur}).
+
+Il doit en principe rester modéré : aucune instruction explicite relative à la propriété de condition ainsi créée ne figurant dans le code du document, cela peut induire une certaine confusion lorsque plusieurs instructions \cmdn{newcondifield} avec étoile sont formulées, et favoriser le risque de créations de propriétés de condition en doublon si l'on n'est pas suffisamment vigilant.
+
+\subsubsection{Modification d'un domaine de condition}
+Pour modifier un domaine de condition, il conviendra d'utiliser les fonctionnalités de recherche/remplacement propres à l'éditeur \Latex utilisé, en veillant à ce que la valeur \argn{domaine de condition modifié} en argument de \cmdn{newcondifield} soit répercutée dans \emph{toutes} les instructions concernées, \envn{conditext}, \cmdn{setcondispace}, \cmdn{newcondiprop} ou encore \cmdn{setimplicitcondispace}.
+
+\subsubsection{Suppression d'un domaine de condition}
+La suppression d'un domaine de condition se pratique en retirant simplement l'instruction \cmdn{newcondifield} correspondant à ce domaine de condition. L'utilisateur veillera toutefois à ce qu'une fois cette instruction retirée, le domaine de condition concerné ne demeure spécifié dans aucune instruction \cmdn{conditext}, \cmdn{setcondispace}, \cmdn{newcondiprop} ou \cmdn{setimplicitcondispace} ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation.
+
+\subsection{Création d'une propriété de condition}\label{CtDoc_Commandes_NewCondiProp}
+L'on crée un domaine de condition au moyen de la \xcmdn{newcondifield}\cmdbookmark{newcondifield}, que l'on utilise sous la forme suivante :
+
+\cmdheader{newcondifield}{\argo{*}\argm{\argn{nouveau domaine de condition}}}
+
+\subsubsection{argument et syntaxe}
+L'\xargn{nouveau domaine de condition} est à renseigner sur la base d'une valeur de type alphabétique, sans caractères accentués ou à diacritiques, et sans espaces.
+
+Si l'\xargn{nouveau domaine de condition} est laissé vide, un message d'erreur sera déclenché lors de la compilation.
+
+Concernant l'argument~\val{*}, \seeref{CtDoc_Commandes_NewCondiField_Etoile}.
+
+\subsubsection{Utilisation}
+Un domaine de condition est une thématique fonctionnelle permettant de rattacher différents contenus substituables à une même sémantique de gestion conditionnelle.
+
+Ainsi, dans le cas de contenus substituables imbriqués, c'est le domaine de condition qui permet d'en gérer la profondeur avec ses différents niveaux.
+
+La création d'un domaine de condition se fait toujours sur le nom \argn{nouveau domaine de condition}, à l'exclusion de tout autre identifiant. Une fois créé, ce nom peut être directement utilisé en premier argument de l'\xenvn{conditext} et des commandes \cmdn{setcondispace} et \cmdn{newcondiprop}, ainsi qu'en argument unique de la \xcmdn{setimplicitcondifield}.
+
+Il y aura autant d'instructions \cmd{newcondifield} que de domaines de condition à créer. Si un domaine de condition est créé deux fois, un message d'erreur sera déclenché lors de la compilation.
+
+Il est possible de donner un nom identique à un domaine de condition et à une propriété de condition, mais, de par les risques de confusion que cette pratique est susceptible de produire, il convient de la réserver à des besoins spécifiques (\seeref{CtDoc_Commandes_NewCondiField_Etoile}).
+
+En toute logique, toute instruction \cmdn{newcondifield} doit impérativement précéder l'utilisation de l'\xenvn{conditext} et des commandes \cmdn{setcondispace}, \cmdn{newcondiprop} et \cmdn{setimplicitcondifield} ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation. Plus généralement, un message d'erreur sera déclenché lors de la compilation si un domaine de condition est spécifié dans une instruction \envn{conditext}, \cmdn{setcondispace} ou \cmdn{setimplicitcondifield} alors qu'il n'a pas été créé.
+
+\subsubsection{Version étoilée}\label{CtDoc_Commandes_NewCondiField_Etoile}
+La \xcmdn{newcondifield} accepte l'argument~\val{*}, qui permet de créer tout à la fois un domaine de condition \emph{et} une propriété de condition portant le même nom.
+
+Cet usage particulier de \cmdn{setcondispace} est essentiellement destiné à une gestion conditionnelle binaire, où une seule propriété de condition suffit par domaine de condition (l'instruction \cmdn{setcondispace} faisant office de \quo{commande interrupteur}).
+
+Il doit en principe rester modéré : aucune instruction explicite relative à la propriété de condition ainsi créée ne figurant dans le code du document, cela peut induire une certaine confusion lorsque plusieurs instructions \cmdn{newcondifield} avec étoile sont formulées, et favoriser le risque de créations de propriétés de condition en doublon si l'on n'est pas suffisamment vigilant.
+
+\subsubsection{Modification d'un domaine de condition}
+Pour modifier un domaine de condition, il conviendra d'utiliser les fonctionnalités de recherche/remplacement propres à l'éditeur \Latex utilisé, en veillant à ce que la valeur \argn{domaine de condition modifié} en argument de \cmdn{newcondifield} soit répercutée dans \emph{toutes} les instructions concernées, \envn{conditext}, \cmdn{setcondispace}, \cmdn{newcondiprop} ou encore \cmdn{setimplicitcondispace}.
+
+\subsubsection{Suppression d'un domaine de condition}
+La suppression d'un domaine de condition se pratique en retirant simplement l'instruction \cmdn{newcondifield} correspondant à ce domaine de condition. L'utilisateur veillera toutefois à ce qu'une fois cette instruction retirée, le domaine de condition concerné ne demeure spécifié dans aucune instruction \cmdn{conditext}, \cmdn{setcondispace}, \cmdn{newcondiprop} ou \cmdn{setimplicitcondispace} ; dans le cas contraire, un message d'erreur sera déclenché lors de la compilation.
+
+\subsection{Définition d'un domaine de condition implicite}\label{CtDoc_Commandes_SetImplicitCondiField}
+Dans certains cas, notamment lorsque de nombreux environnements \envn{conditext} doivent être utilisés avec un domaine de condition identique, il peut s'avérer pratique -- à la fois pour faciliter la saisie et rendre le code plus lisible -- que ce domaine de condition n'ait pas à être spécifié à chaque fois.
+
+L'on peut alors définir ce domaine de condition comme \conc{domaine de condition implicite} (en anglais, \quo{implicit condition field}). Par défaut, c'est le domaine de condition \val{language} (\seeref{CtDoc_Commandes_CondiText_Multilingue}) qui est défini comme domaine de condition implicite.
+
+L'on définit un domaine de condition implicite au moyen de la \xcmdn{implicitcondifield}\cmdbookmark{implicitcondifield}, sous la forme :
+
+\cmdheader{setimplicitcondifield}{\argm{\argn{domaine de condition}}}
+
+\subsubsection{Argument}
+L'\xargn{domaine de condition} est à renseigner avec une valeur de type alphabétique, sans caractères accentués ou à diacritiques, et sans espaces.
+
+Il est indispensable que \argn{domaine de condition} ait été au préalable créé (\xcmdn{newcondifield} (\seeref{CtDoc_Commandes_NewCondiField}) ; dans le cas contraire, un message d'erreur est déclenché au moment de la compilation.
+
+De même, si l’argument \argn{domaine de condition} est laissé vide, un message d’erreur sera déclenché lors de la compilation.
+
+\subsubsection{Utilisation}
+Il ne peut exister qu'une seule instruction \cmdn{setimplicitcondifield} -- donc, un seul domaine de condition implicite -- par document source. Si plusieurs instructions de ce type sont spécifiées, le compilateur ne prendra en compte que la dernière de ces instructions, avec le risque d'effets indésirables ou inattendus.
+
+L'instruction \cmdn{setimplicitcondifield} devra être précisée avant toute instruction \cmdn{setcondispace}.
+
+Il est possible, bien qu'inutile, de spécifier explicitement un domaine de condition défini comme domaine de condition implicite.
+
+Si l'utilisateur définit un domaine de condition implicite tout en ayant à gérer par ailleurs certains contenus conditionnels multilingues dans le même document source, il est alors nécessaire de spécifier \emph{explicitement} \val{language} dans les instructions \envn{conditext} et \cmdn{setcondispace} liées à cette gestion conditionnelle multilingue -- là où, par défaut, cela n'avait pas lieu d'être (\seeref{CtDoc_Commandes_CondiText_Multilingue}).
+
+L'on peut rétablir le comportement par défaut (\val{language} comme domaine de condition implicite) : soit en retirant simplement l'instruction \cmdn{setimplicitcondispace}, soit en formulant l'instruction \cmd{setimplicitcondifield}[\argm{language}].
+
+\section{Commandes relatives à la mini-gestion conditionnelle}
+\subsection{Saisie des formes substituables pour une mini-gestion conditionnelle}\label{CtDoc_Commandes_MiniCondiText}
+Toute forme substituable destinée à une mini-gestion conditionnelle doit être saisie au moyen de la \cmdn{miniconditext}.
+
+À la différence de l'\xenvn{conditext} qui permet de gérer des formes substituables multi-paragraphiques, la \xcmdn{miniconditext} est destinée à gérer des contenus conditionnels à l'échelle paragraphique ou intra-paragraphique (mots, groupes de mots).
+
+L'un des usages auxquels elle est destinée, est la gestion conditionnelle multilingue de termes ou d'intitulés, mais il peut aussi s'agir d'expressions à formatage conditionnel en fonction des destinataires d'un document donné etc.
+
+Autre différence fondamentale avec l'\xenvn{conditext} : alors que, dans le cadre d'une gestion de contenu conditionnel à l'échelle multi-paragraphique, l'on peut créer et gérer autant de domaines de condition et de propriétés de condition, et utiliser autant d'\xenvn{conditext} et d'espaces de condition que souhaité, la \xcmdn{miniconditext} est limitée à 9 propriétés de condition et 9 possibilités de formes substituables et il ne peut y avoir qu'un seul espace de condition pour mini-gestion conditionnelle dans le préambule.
+
+La \xcmdn{miniconditext}\cmdbookmark{miniconditext} s'utilise sous la forme suivante :
+
+\cmdheader{miniconditext}{\argm{\argn{forme substituable \no 1}}\argo{\argn{forme substituable \no 2}}\argo{\argn{forme substituable \no 3}}\argo{\argn{forme substituable \no 4}}\argo{\argn{forme substituable \no 5}}\argo{\argn{forme substituable \no 6}}\argo{\argn{forme substituable \no 7}}\argo{\argn{forme substituable \no 8}}\argo{\argn{forme substituable \no 9}}}
+
+
+\subsubsection{Arguments et syntaxe}
+Les arguments \argn{forme substituable \no 1}, \argn{forme substituable \no 2}~etc., sont à renseigner sur la base d'une valeur de type alphanumérique représentant un ou plusieurs mots, éventuellement un paragraphe.
+
+Les deuxième, troisième, ...neuvième arguments peuvent ne pas être renseignés, sur la base de la règle suivante : tout argument non renseigné entre deux arguments renseignés doit figurer sous la forme \argovoid{} (tout argument non renseigné positionné après le dernier argument renseigné pouvant ne pas être mentionné).
+
+Le fait de renseigner un argument auquel est associée une propriété de condition \quo{neutre} (\seeref{CtDoc_Commandes_SetMiniCondiProp-_Utilisation}) est sans effet lors de la compilation.
+
+\subsubsection{Utilisation}
+
+L'on place une instruction \cmdn{miniconditext} à chaque endroit du document source où l'on souhaite que l'une des formes substituables spécifiées dans les arguments \argn{forme substituable \no 1}, \argn{forme substituable \no 2} etc., figure dans le document généré en fonction de l'espace de condition qui sera défini.
+
+Dans un document source, il y aura autant d'instructions \cmdn{miniconditext} que de formes substituables devant être gérées conditionnellement. Les formes substituables spécifiées dans les arguments \argn{forme substituable \no 1}, \argn{forme substituable \no 2} etc. pourront être, selon les cas et les besoins, soit identiques, soit différentes d'une instruction \cmdn{miniconditext} à une autre.
+
+\note{Forme minimale d'utilisation} La forme minimale d'utilisation de la \xcmdn{miniconditext} est :
+
+\codestm*{\cmd{miniconditext}[\argm{\argn{forme substituable}}]}
+
+Cela revient, dans ce cas, à pouvoir gérer l'affichage ou l'absence d'affichage d'une forme substituable donnée.
+
+\note{Formes substituables et propriétés de condition}
+La \xcmdn{miniconditext} est, de toutes les commandes fournies par le \xpack{conditext}, celle qui est la moins intuitive.
+
+D'une part, en effet, dans un contexte de mini-gestion conditionnelle, la notion de domaine de condition n'existe pas à proprement parler ; plus exactement, \val{miniconditext} est un domaine de condition en soi.
+
+D'autre part, à chacun des 9 arguments de la \xcmdn{miniconditext} est associée une propriété de condition, dont la particularité essentielle réside dans le fait d'être \emph{globale} à la commande elle-même (et donc \emph{à l'ensemble} des instructions relatives à cette commande).
+
+Ces 9 propriétés au total n'apparaissent pas dans la signature de la commande, mais il convient de toujours les garder à l'esprit puisque ce sont elles qui caractérisent chaque forme substituable.
+
+C'est également sur la base de ces propriétés de condition que l'on définit l'espace de condition permettant de désigner laquelle des 9 formes substituables doit figurer dans le document généré, pour chaque instruction \cmdn{miniconditext} placée dans le document source. Dans la version actuelle du \xpack{conditext}, il ne peut exister \emph{qu'un seul espace de condition  par préambule} (\seeref{CtDoc_Commandes_SetMiniCondiSpace}).
+
+Par défaut, la sémantique des 9 propriétés de condition est linguistique (\seeref{CtDoc_Commandes_MiniConditext_Multilingue}) mais l'on peut également redéfinir ces propriétés de condition pour les adapter à un usage spécifique (\seeref{CtDoc_Commandes_SetMiniCondiProp-_Multilingue}).
+
+\note{Mini-gestion conditionnelle multilingue}\label{CtDoc_Commandes_MiniConditext_Multilingue}
+Par défaut, la \xcmdn{miniconditext} est prévue pour gérer un contenu conditionnel multilingue.
+
+En d'autres termes, les propriétés de condition associées aux arguments de la commande ont par défaut une sémantique linguistique, et chaque argument de la commande correspond ainsi à une langue donnée : le français pour \argn{forme substituable \no 1}, l'anglais pour \argn{forme substituable \no 2}, l'allemand pour \argn{forme substituable \no 3}, l'espagnol pour \argn{forme substituable \no 4}, l'italien pour \argn{forme substituable \no 5}, le portuguais pour \argn{forme substituable \no 6}, le néerlandais pour \argn{forme substituable \no 7}, le danois pour \argn{forme substituable \no 8} et le norvégien pour \argn{forme substituable \no 9}.
+
+Il est possible de modifier l'ordre des langues ou les langues elles-mêmes en redéfinissant les propriétés de condition (\seeref{CtDoc_Commandes_SetMiniCondiProp-_Multilingue}).
+
+\subsection{Redéfinition des propriétés de condition pour une mini-gestion conditionnelle}\label{CtDoc_Commandes_SetMiniCondiProp-}
+À chacun des 9 arguments de la \xcmdn{miniconditext} est associée une propriété de condition, qui sert à caractériser la forme substituable correspondant à cet argument. Chacune de ces 9 propriétés de condition est, dans son association avec l'un des arguments, \emph{globale} à la commande elle-même.
+
+Par défaut, chacun des arguments de la \xcmdn{miniconditext} est associé à une propriété de condition à sémantique linguistique. Ces propriétés de condition ont les noms respectifs suivants, dans l'ordre des arguments de la \xcmdn{miniconditext} : \val{french}, \val{english}, \val{german}, \val{spanish}, \val{italian}, \val{portuguese}, \val{dutch},\val{danish}, \val{norsk}.
+
+Dans un contexte de mini-gestion conditionnelle multilingue, ce sont ces noms que l'on utilise pour définir l'espace de condition concerné (\seeref{CtDoc_Commandes_SetMiniCondiSpace}).
+
+Il est possible de modifier l'ordre des langues et/ou les langues elles-mêmes, \seeref{CtDoc_Commandes_SetMiniCondiProp-_Multilingue}.
+
+Dès lors que l'on souhaite mettre en oeuvre une mini-gestion conditionnelle dans un contexte autre que multilingue, il est nécessaire de modifier les propriétés de condition, au moyen des commandes suivantes\cmdbookmark{setminicondiprop-} : \cmdn{setminicondipropi}, \cmdn{setminicondipropii}, \cmdn{setminicondipropiii}, \cmdn{setminicondipropiv}, \cmdn{setminicondipropv}, \cmdn{setminicondipropvi}, \cmdn{setminicondipropvii}, \cmdn{setminicondipropviii} et \cmdn{setminicondipropix}.
+
+Chacune de ces commandes sert à modifier -- l'on dira désormais \emph{redéfinir} -- une propriété de condition sur la base d'un indice de position en chiffres romains, correspondant à celui de l'argument auquel est associée la propriété de condition dans la \xcmdn{miniconditext}. Ainsi, la \xcmdn{setminicondipropi} redéfinit la propriété de condition associée au premier argument, la \xcmdn{setminicondipropii} redéfinit la propriété de condition associée au deuxième argument et ainsi de suite.
+
+Une \xcmdn{setminicondiprop-} (où \code{-} représente \code{i}, \code{ii}, \code{iii}, \code{iv}, \code{v}, \code{vi}, \code{vii}, \code{viii} ou \code{ix}) s'utilise sous la forme :
+
+\cmdheader{setminicondiprop-}{\argm{\argn{propriété de condition redéfinie}}}
+
+\subsubsection{Argument et syntaxe}
+L'\xargn{propriété de condition redéfinie} est à renseigner sur la base d'une valeur de type alphabétique, sans espace ni caractères accentués ou à diacritiques.
+
+Si l'\xargn{propriété de condition redéfinie} est laissé vide, un message d'erreur sera déclenché lors de la compilation.
+
+\subsubsection{Utilisation}\label{CtDoc_Commandes_SetMiniCondiProp-_Utilisation}
+Lorsque l'on utilise une \xcmdn{setminicondiprop-}, il n'y a pas création d'une nouvelle propriété de condition, mais \emph{redéfinition} d'une des propriétés de condition existant par défaut, par modification du nom, à l'exclusion de tout autre identifiant.
+
+Pour redéfinir les propriétés de condition, il faut toujours respecter le schéma d'instructions suivant :
+
+\begin{itemize}
+    \item d'abord, une instruction \cmdn{resettingminicondiprops} ;
+    \item ensuite, les instructions \cmdn{setminicondiprop-}.
+\end{itemize}
+
+La \xcmdn{resettingminicondiprops}\cmdbookmark{resettingminicondiprops} est une commande particulière qui effectue certaines initialisations indispensables avant que les propriétés de condition puissent être redéfinies. Elle accepte un argument~\val{*}, réservé à la redéfinition des propriétés de condition de sémantique linguistique (\seeref{CtDoc_Commandes_SetMiniCondiProp-_Multilingue}).
+
+De par sa fonction particulière, l'instruction \cmdn{resettingminicondiprops} est indissociable des instructions \cmdn{setminicondiprop-}. Elle doit être obligatoirement placée \emph{avant} les instructions \cmdn{setminicondiprop-}, \cmdn{miniconditext} et \cmdn{setminicondispace}. En cas de non formulation, un message d'erreur sera déclenché lors de la compilation.
+
+\note{Principes de la redéfinition/propriétés de condition neutres}
+En fonction des besoins, la redéfinition des propriétés de condition peut être \emph{totale ou partielle}. L'on ne formule que les instructions \cmdn{setminicondiprop-} relatives aux propriétés de condition qui doivent être redéfinies.
+
+Cela signifie qu'il y a aura autant d'instructions \cmdn{setminicondiprop-} que de propriétés de condition à redéfinir. Pour rappel, toute instruction de type \cmd{setminicondiprop-}[\argmvoid{}] déclenchera un message d'erreur lors de la compilation.
+
+Lorsque la \xcmdn{resettingminicondiprops} est utilisée sans étoile, toute propriété de condition non redéfinie (aucune instruction \cmdn{setminicondiprop-} correspondante) est considérée comme \quo{neutre}. Si une forme substituable est renseignée dans un argument de \cmdn{miniconditext} auquel est associée une propriété de condition neutre, cette forme substituable ne sera pas prise en compte lors de la génération du document.
+
+Si une propriété de condition est redéfinie avec un nom déjà utilisé pour une autre propriété de condition, un message d'erreur sera déclenché lors de la compilation.
+
+Si \argn{propriété de condition redéfinie} fait elle-même l'objet d'une modification dans une ou plusieurs instructions, l'utilisateur veillera à ce que cette modification soit répercutée dans \cmdn{setminicondispace} si besoin est.
+
+Similairement, le fait de retirer une instruction \cmd{setminicondiprop-} nécessite de retirer également toute forme substituable préalablement saisie dans l'argument correspondant de \cmdn{miniconditext}.
+
+Il convient d'être particulièrement attentif au fait que la redéfinition des propriétés de condition a des implications sémantiques (les formes substituables spécifiées dans les arguments \argn{forme substituable \no 1}, \argn{forme substituable \no 2} etc. de la \xcmdn{miniconditext}) et fonctionnelles (la propriété de condition spécifiée avec la \xcmdn{setminicondispace}).
+
+La modification des propriétés de condition doit se faire de manière raisonnée, selon une sémantique d'ensemble. Ainsi, même si les commandes \cmdn{setminicondiprop-} l'autorisent, a priori, faire coexister des propriétés de condition d'une certaine sémantique avec d'autres de sémantique différente est source potentielle de confusion, avec les éventuels effets indésirables ou inattendus que cela peut entraîner. De même -- sauf pour un usage exotique -- il conviendra d'éviter les redéfinitions discontinues et de privilégier à tout prix de redéfinir les propriétés de condition dans l'ordre des indices.
+
+\subsubsection{Redéfinition de propriétés de condition de sémantique linguistique}\label{CtDoc_Commandes_SetMiniCondiProp-_Multilingue}
+Il est possible d'adapter la mini-gestion conditionnelle multilingue à des besoins précis, en redéfinissant tout ou partie des langues par défaut. Dans l'actuelle version du \xpack{conditext}, modifier l'ordre des langues revient à redéfinir les langues dans le nouvel ordre souhaité.
+
+De manière générale, toute langue redéfinie doit l'être impérativement sous la forme d'une des appellations linguistiques en vigueur dans le \xpack{babel} ; autrement, un message d'erreur sera déclenché lors de la compilation.
+
+Deux manières de faire existent, selon que l'on fait précéder les instructions \cmdn{setminicondiprop-} de l'instruction \cmdn{resettingminicondiprops} avec ou sans étoile :
+
+Lorsque les modifications à apporter s'avèrent importantes (toutes ou une grande partie des langues à redéfinir), l'usage de la \xcmdn{resettingminicondiprops} \emph{sans étoile} est recommandée, dans la mesure où le type de réinitialisation effectuée permet une lisibilité optimale : à une instruction \cmdn{setminicondiprop-} formulée correspond une langue effective et utilisable, et toute propriété de condition non redéfinie est considérée comme une absence de langue à la compilation. Si une forme substituable est renseignée dans un argument de \cmdn{miniconditext} auquel n'est associée aucune langue, cette forme substituable n'est pas prise en compte lors de la génération du document.
+
+Lorsque les modifications à apporter s'avèrent peu importantes (quelques langues à redéfinir, ou la permutation d'une langue avec une autre), l'on peut utiliser la \xcmdn{resettingminicondiprops} \emph{avec étoile} : dans ce cas, toute propriété de condition non redéfinie \emph{conserve l'intitulé de langue par défaut}. Cela étant, si elle permet une certaine efficacité, l'instruction \cmd{resettingminicondiprops*} n'est cependant pas exempte de défauts, notamment une lisibilité moindre pouvant favoriser certaines confusions lors des redéfinitions.
+
+L'usage de la \xcmdn{resettingminicondiprops} avec l'argument~\val{*} doit être réservé aux propriétés de condition de sémantique linguistique ; autrement, cela ne peut être que source d'effets indésirables ou inattendus.
+
+\subsection{Définition d'une espace de condition pour une mini-gestion conditionnelle}\label{CtDoc_Commandes_SetMiniCondiSpace}
+L'on définit un espace de condition pour mini-gestion conditionnelle au moyen de la \xcmdn{setminicondispace}\cmdbookmark{setminicondispace}, sous la forme suivante :
+
+\cmdheader{setminicondispace}{\argm{\argn{propriété de condition}}}
+
+\subsubsection{Argument et syntaxe}
+L'\xargn{propriété de condition} est à renseigner sur la base d'une valeur de type alphabétique, sans espace ni caractères accentués ou à diacritiques.
+
+Si l'\xargn{propriété de condition redéfinie} est laissé vide, un message d'erreur sera déclenché lors de la compilation.
+
+Toute propriété de condition spécifiée doit correspondre à l'une des 9 propriétés de condition associées aux arguments de la \xcmdn{conditext} (soit définie par défaut, soit redéfinie avec une \xcmdn{setminicondiprop-}, \seeref{CtDoc_Commandes_SetMiniCondiProp-}) ; dans le cas contraire, un message d'erreur sera systématiquement déclenché lors de la compilation.
+
+\subsubsection{Utilisation}
+Un espace de condition pour mini-gestion conditionnelle se définit sur la base d'une des 9 propriétés de condition associées aux arguments de la \cmdn{miniconditext}. C'est cette propriété de condition qui, rapportée à un test de correspondance de type \quo{égal à} strict, permet de désigner, pour chaque instruction \cmdn{miniconditext} formulée dans le document source, la forme substituable devant figurer dans le document généré.
+
+Les 9 propriétés de condition spécifiques à la mini-gestion conditionnelles sont \emph{globales} à la \xcmdn{miniconditext} et, par conséquent, \emph{à toutes} les instructions \cmdn{miniconditext} formulées dans le document source. Il ne peut donc exister qu'une seule instruction \cmdn{setminicondispace} effective dans le préambule. Si plusieurs instructions sont spécifiées, le compilateur ne prendra en compte que la dernière de ces instructions, avec le risque d'effets indésirables ou inattendus.
+
+Il est toutefois possible -- bien qu'il ne s'agisse pas d'une pratique régulière -- de passer outre cette limitation de principe, en plaçant des instructions \cmdn{setminicondispace} à même le document source : chacune de ces instructions devient alors effective tant qu'une autre n'est pas rencontrée. Ainsi, d'une certaine façon, plusieurs espaces de condition pour mini-gestion conditionnelle peuvent coexister linéairement parlant (au risque d'effets indésirables ou inattendus).
+
+\subsubsection{Espaces de condition couplés}\label{CtDoc_Commandes_SetMiniCondiSpace_EspacesCouples}
+Dans un contexte de gestion de contenu conditionnel \emph{multilingue}, l'usage de la \xcmdn{setcondispace} avec l'argument~\val{*} (\seeref{CtDoc_Commandes_SetCondiSpace_Etoile}) permet de définir, relativement à une \emph{même langue} spécifiée en \xargn{propriété de condition} de \cmdn{setcondispace}, à la fois un espace de condition pour les formes substituables gérées par l'\xenvn{conditext} \emph{et} un espace de condition pour les formes substituables gérées par la \xcmdn{miniconditext}.
+
+En d'autres termes, une instruction \cmd{setminicondispace} est formulée implicitement en même temps que l'instruction \cmdn{setcondispace} elle-même.
+
+L'argument~\val{*} peut s'avérer efficace dans les cas où les deux types de contenus substituables coexistent de manière interdépendante dans un même document source. L'usage de l'étoile a toutefois son revers : l'instruction \cmdn{setminicondispace} n'apparaissant pas explicitement, cela peut être source de confusion.
+
+De plus, dans la mesure où il ne peut exister qu'une seule instruction \cmdn{setminicondispace} dans le préambule, il ne peut exister qu'une seule instruction \cmdn{setcondispace*}. Si plusieurs instructions de ce type sont spécifiées, le compilateur ne prendra en compte que la dernière de ces instructions, avec le risque d'effets indésirables ou inattendus.
+
+\part{Tutoriel : exemples commentés}\label{CtDoc_Tuto}
+L'une des principales applications du texte conditionnel résidant dans la production de documents multilingues, c'est ce genre de document que le \xpack{conditext} permet de gérer par défaut, sans nécessiter de préalable d'aucune sorte.
+
+Dans ce tutoriel, nous commencerons précisément avec un exemple de document multilingue, qui nous familiarisera avec les notions de formes substituables, de domaines de condition, de propriétés de condition et d'espaces de condition. Ce premier exemple sera l'occasion de présenter quelques bonnes pratiques d'utilisation quant aux principales commandes du paquet.
+
+Nous passerons ensuite à un exemple où nous créerons cette fois des domaines de condition et des propriétés de condition. Nous verrons également avec ce deuxième exemple comment l'on peut imbriquer des formes substituables dans d'autres formes substituables et gérer ainsi une certaine \quo{profondeur} de contenu conditionnel.
+
+Enfin, dans un troisième exemple, en deux parties, nous apprendrons à utiliser un ensemble de commandes permettant une mini-gestion conditionnelle, portant sur des formes substituables minimales.
+
+\note{Remarque} Pour les besoins de certains de ces exemples, nous serons amenés à créer quelques commandes personnalisées. À cette occasion, nous adopterons la syntaxe propre au \xpack{xparse}, assez intuitive et dont la lisibilité est un atout dans le cadre d'un tutoriel. Dans nos exemples, l'instruction pour créer les commandes concernées aura toujours la forme suivante :
+
+\codestm*{\cmd{NewDocumentCommand}[\cmdn{\argn{nom de la commande}}\argm{\argn{arguments}}\argm{\argn{code}}]}
+
+\resumepar où \argn{arguments} représente les arguments qui doivent figurer dans le code : \val{m} (pour \quo{mandatory}) et \val{o} (pour \quo{optional}). Un argument optionnel peut avoir une valeur par défaut ; dans ce cas, il est représenté par \val{O}\argm{\argn{valeur par défaut}}.
+
+Tous les exemples de document source présentés dans le tutoriel sont directement utilisables et compilables ; la manière dont ils sont présentés n'a, en tant que telle, rien d'impératif.
+
+\section{Exemple commenté \no 1 : un document en version multilingue}
+Imaginons -- de manière quelque peu artificielle il est vrai -- que nous ayons à rédiger dans un seul et même document source, un texte en version française, anglaise, allemande, espagnole et italienne, avec pour objectif de générer ensuite un document par version linguistique de ce texte.
+
+Pour des raisons de commodité, nous prendrons ici pour texte l'article premier de la \titcit{Déclaration des droits de l'homme}, décliné respectivement en français, anglais, allemand, espagnol et italien. À noter toutefois que le \xpack{conditext} permet de gérer des textes conditionnels de plusieurs dizaines à plusieurs milliers de signes.
+
+\tutostep
+Voici le document source correspondant à notre exemple :
+
+\begin{codeblock}
+\codestm{\cmd{documentclass}[\argm{article}]}
+\codestm{\cmd{usepackage}[\argo{english,german,spanish,italian,french}\argm{babel}]}
+\codestm{\cmd{usepackage}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{document}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{french}]}
+    \begin{subcodeblock}
+    \codestm{Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{english}]}
+    \begin{subcodeblock}
+    \codestm{All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{german}]}
+    \begin{subcodeblock}
+    \codestm{Alle Menschen sind frei und gleich an Würde und Rechten geboren. Sie sind mit Vernunft und Gewissen begabt und sollen einander im Geist der Brüderlichkeit begegnen.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{spanish}]}
+    \begin{subcodeblock}
+    \codestm{Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{italian}]}
+    \begin{subcodeblock}
+    \codestm{Tutti gli esseri umani nascono liberi ed eguali in dignità e diritti. Essi sono dotati di ragione e di coscienza e devono agire gli uni verso gli altri in spirito di fratellanza.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{end}[\argm{document}]}
+\end{codeblock}
+
+L'on remarquera tout d'abord que chaque version linguistique du texte est placée dans un environnement nommé \envn{conditext}, et se voit spécifier le nom de la langue dans laquelle elle est rédigée, sous la forme d'un argument de type obligatoire.
+
+Cet argument correspond à une \conc{propriété de condition}, c'est-à-dire une caractérisation fonctionnelle sur la base de laquelle l'on pourra ensuite désigner quelle version de texte doit être générée. Dans le cas de notre exemple, il s'agit de propriétés à sémantique linguistique, prédéfinies et fournies par le \xpack{conditext}. Il est possible de créer et utiliser des propriétés de condition de toute nature, comme nous le verrons \seeref{CtDoc_Tuto_Multicondition}.
+
+Dans le cas d'un contenu conditionnel multilingue, l'\xenvn{conditext} n'utilise qu'un seul argument. En principe, il existe un second argument, optionnel celui-là, servant à spécifier le domaine de condition, mais pour l'instant, il suffit de retenir que c'est l'argument obligatoire qui permet de spécifier la propriété de condition.
+
+De manière générale, tout texte que l'on souhaite gérer comme \emph{forme substituable} doit être placé dans un \xenvn{conditext}. Dans un même document source, il peut être spécifié autant d'environnements \envn{conditext} que souhaité, y compris avec des propriétés de condition (et des domaines de condition) identiques.
+
+Ainsi, dans notre exemple, l'on pourrait faire figurer toute la \titcit{Déclaration des droits de l'homme}, avec chacun des articles présenté en version linguistique distincte (nous verrons plus bas que, s'il peut sembler a priori plus pratique de regrouper tous les articles d'une même version linguistique dans un même \xenvn{conditext}, le partitionnement permet dans certains cas une gestion conditionnelle plus précise).
+
+Les propriétés de condition de notre exemple ont respectivement la valeur \val{french}, \val{english}, \val{german}, \val{spanish} et \val{italian}. Lorsqu'il s'agit de texte conditionnel multilingue, les propriétés de condition doivent impérativement correspondre aux appellations linguistiques utilisées par le \xpack{babel}. Il est indispensable que ce paquet soit déclaré dans le préambule, accompagné des langues susceptibles d'être spécifiées comme propriétés de condition. Pour les besoins de notre exemple, le préambule contient donc la déclaration suivante :
+
+\begin{codeblock}
+    \codestm{\cmd{usepackage}[\argo{english,german,spanish,italian,french}\argm{babel}]}
+\end{codeblock}
+
+\resumepar (faute de quoi, le compilateur produit un message d'erreur).
+
+\tutostep
+Si nous compilons le document source en l'état, le document généré... est vide (ou ne s'affiche pas, selon l'éditeur \Latex utilisé). Ceci est logique, en ce sens où il manque en effet l'instruction permettant de désigner quelle forme substituable doit figurer sur le document. En l'absence de cette instruction, aucun contenu d'\xenvn{conditext} ne figure dans le document généré.
+
+Partons de l'idée de générer un document avec la version italienne de l'article premier de la \titcit{Déclaration des droits de l'homme}. Pour ce faire, dans le préambule, à la suite de la déclaration des paquets, nous allons ajouter la ligne suivante :
+
+\begin{codeblock}
+\codestm{\cmd{setcondispace}[\argm{italian}]}
+\end{codeblock}
+
+Si nous compilons à nouveau le document source, c'est désormais le texte suivant qui figure conformément à nos attentes dans le document généré :
+
+\begin{ltext}
+\ltextline{Tutti gli esseri umani nascono liberi ed eguali in dignità e diritti. Essi sono dotati di ragione e di coscienza e devono agire gli uni verso gli altri in spirito di fratellanza.}\end{ltext}
+
+Si nous souhaitons maintenant générer un document avec la version française, il suffit de modifier l'instruction initiale en :
+
+\begin{codeblock}
+    \codestm{\cmd{setcondispace}[\argm{french}]}
+\end{codeblock}
+
+\resumepar et de recompiler le document source. L'on obtient alors :
+
+\begin{ltext}
+\ltextline{Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité.}\end{ltext}
+
+\resumepar Et ainsi de suite...
+
+L'instruction \cmdn{setcondispace} définit un \emph{espace de condition}. Dans les deux cas précédents, ce sont les valeurs \val{italian} et \val{french} qui sont spécifiées en argument de \cmdn{setcondispace} afin de sélectionner : dans le premier cas, la forme substituable correspondant au contenu de l'\xenvn{conditext} ayant \val{italian} spécifié en argument, et dans le deuxième cas, la forme substituable correspondant au contenu de l'\xenvn{conditext} ayant \val{french} spécifié en argument.
+
+Plus précisément, un espace de condition repose sur un test de correspondance de type \quo{égal à} strict, entre une propriété de condition spécifiée en argument d'une instruction \envn{setcondispace} et une propriété de condition spécifiée en argument d'une instruction \cmdn{conditext}. Si aucune correspondance n'existe, l'instruction \cmdn{setcondispace} est sans effet (tout se passe comme s'il n'y avait pas d'instruction formulée) ; sinon, la correspondance existante permet de désigner une ou plusieurs formes substituables pour figurer dans le document généré.
+
+Dans le cas d'une gestion conditionnelle multilingue, la \xcmdn{setcondispace} n'utilise qu'un seul argument (la propriété de condition). En principe, un second argument, optionnel, permet de spécifier le domaine de condition -- le test de correspondance portant alors à la fois sur le domaine de condition et la propriété de condition.
+
+\tutostep
+Les instructions \envn{conditext} et \cmdn{setcondispace} de notre exemple répondent à notre besoin initial. Imaginons maintenant -- à nouveau, de manière assez artificielle -- que nous ayons à générer les versions anglaise, allemande et espagnole du texte dans un seul et même document, sans les versions française et italienne.
+
+La solution est simple : il suffit dans ce cas de spécifier autant d'instructions \cmd{condispace} que de langues concernées. Dans le préambule, à la place de \cmd{setcondispace}[\argm{italian}], nous aurons donc :
+
+\begin{codeblock}
+    \codestm{\cmd{setcondispace}[\argm{english}]}
+    \codestm{\cmd{setcondispace}[\argm{german}]}
+    \codestm{\cmd{setcondispace}[\argm{spanish}]}
+\end{codeblock}
+
+Désormais, le document généré contient le texte :
+
+\begin{ltext}
+\ltextline{All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.}
+\ltextline{}
+\ltextline{Alle Menschen sind frei und gleich an Würde und Rechten geboren. Sie sind mit Vernunft und Gewissen begabt und sollen einander im Geist der Brüderlichkeit begegnen.}
+\ltextline{}
+\ltextline{Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros.}
+\end{ltext}
+
+Ainsi qu'on peut le constater, il peut être formulé plusieurs instructions \cmd{setcondispace} en fonction des besoins. En principe, ces instructions peuvent être indifféremment dans un ordre ou dans un autre ; ainsi, \cmd{setcondispace}[\argm{german}] aurait très bien pu précéder \cmd{setcondispace}[\argm{english}] sans provoquer une présentation différente du texte dans le document généré. En fait, le texte qui figure dans le document généré respecte toujours l'ordre et la disposition adoptés dans le document source ; d'un certain point de vue, c'est l'une des limites (actuelles ?) du \xpack{conditext}.
+
+\tutostep
+Nous allons maintenant étoffer notre exemple de départ, en insérant, à la suite de chaque version française, anglaise, allemande, espagnole et italienne de l'article premier de la \titcit{Déclaration des droits de l'homme}, le texte de l'article 2 décliné dans les mêmes langues. Le document source est désormais le suivant, hors préambule :
+
+\begin{codeblock}
+\codestm{\cmd{begin}[\argm{document}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{french}]}
+    \begin{subcodeblock}
+    \codestm{Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{french}]}
+    \begin{subcodeblock}
+    \codestm{Chacun peut se prévaloir de tous les droits et de toutes les libertés proclamés dans la présente Déclaration, sans distinction aucune, notamment de race, de couleur, de sexe, de langue, de religion, d'opinion politique ou de toute autre opinion, d'origine nationale ou sociale, de fortune, de naissance ou de toute autre situation.\\De plus, il ne sera fait aucune distinction fondée sur le statut politique, juridique ou international du pays ou du territoire dont une personne est ressortissante, que ce pays ou territoire soit indépendant, sous tutelle, non autonome ou soumis à une limitation quelconque de souveraineté.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{english}]}
+    \begin{subcodeblock}
+    \codestm{All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{english}]}
+    \begin{subcodeblock}
+    \codestm{Everyone is entitled to all the rights and freedoms set forth in this Declaration, without distinction of any kind, such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status.\\Furthermore, no distinction shall be made on the basis of the political, jurisdictional or international status of the country or territory to which a person belongs, whether it be independent, trust, non-self-governing or under any other limitation of sovereignty.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{german}]}
+    \begin{subcodeblock}
+    \codestm{Alle Menschen sind frei und gleich an Würde und Rechten geboren. Sie sind mit Vernunft und Gewissen begabt und sollen einander im Geist der Brüderlichkeit begegnen.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{german}]}
+    \begin{subcodeblock}
+    \codestm{Jeder hat Anspruch auf die in dieser Erklärung verkündeten Rechte und Freiheiten ohne irgendeinen Unterschied, etwa nach Rasse, Hautfarbe, Geschlecht, Sprache, Religion, politischer oder sonstiger Überzeugung, nationaler oder sozialer Herkunft, Vermögen, Geburt oder sonstigem Stand.\\Des weiteren darf kein Unterschied gemacht werden auf Grund der politischen, rechtlichen oder internationalen Stellung des Landes oder Gebiets, dem eine Person angehört, gleichgültig ob dieses unabhängig ist, unter Treuhandschaft steht, keine Selbstregierung besitzt oder sonst in seiner Souveränität eingeschränkt ist.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{spanish}]}
+    \begin{subcodeblock}
+    \codestm{Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{spanish}]}
+    \begin{subcodeblock}
+    \codestm{Toda persona tiene los derechos y libertades proclamados en esta Declaración, sin distinción alguna de raza, color, sexo, idioma, religión, opinión política o de cualquier otra índole, origen nacional o social, posición económica, nacimiento o cualquier otra condición.\\Además, no se hará distinción alguna fundada en la condición política, jurídica o internacional del país o territorio de cuya jurisdicción dependa una persona, tanto si se trata de un país independiente, como de un territorio bajo administración fiduciaria, no autónomo o sometido a cualquier otra limitación de soberanía.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{italian}]}
+    \begin{subcodeblock}
+    \codestm{Tutti gli esseri umani nascono liberi ed eguali in dignità e diritti. Essi sono dotati di ragione e di coscienza e devono agire gli uni verso gli altri in spirito di fratellanza.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{\cmd{begin}[\argm{conditext}\argm{italian}]}
+    \begin{subcodeblock}
+    \codestm{Ad ogni individuo spettano tutti i diritti e tutte le libertà enunciate nella presente Dichiarazione, senza distinzione alcuna, per ragioni di razza, di colore, di sesso, di lingua, di religione, di opinione politica o di altro genere, di origine nazionale o sociale, di ricchezza, di nascita o di altra condizione.\\Nessuna distinzione sarà inoltre stabilita sulla base dello statuto politico, giuridico o internazionale del paese o del territorio cui una persona appartiene, sia indipendente, o sottoposto ad amministrazione fiduciaria o non autonomo, o soggetto a qualsiasi limitazione di sovranità.}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{end}[\argm{document}]}
+\end{codeblock}
+
+Le document source contient maintenant deux environnements \envn{conditext} par langue concernée, l'un pour l'article premier et l'autre pour l'article 2 de la \titcit{Déclaration des droits de l'homme}.
+
+D'après ce que nous avons vu précédemment, si par exemple le document généré doit contenir les deux premiers articles respectivement en français et en espagnol, il suffit de formuler dans le préambule les instructions
+
+\begin{codeblock}
+    \codestm{\cmd{setcondispace}[\argm{french}]}
+    \codestm{\cmd{setcondispace}[\argm{spanish}]}
+\end{codeblock}
+
+\resumepar et l'on obtient alors dans le document généré :
+
+\begin{ltext}
+\ltextline{Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité.}
+\ltextline{}
+\ltextline{Chacun peut se prévaloir de tous les droits et de toutes les libertés proclamés dans la présente Déclaration, sans distinction aucune, notamment de race, de couleur, de sexe, de langue, de religion, d'opinion politique ou de toute autre opinion, d'origine nationale ou sociale, de fortune, de naissance ou de toute autre situation.\\De plus, il ne sera fait aucune distinction fondée sur le statut politique, juridique ou international du pays ou du territoire dont une personne est ressortissante, que ce pays ou territoire soit indépendant, sous tutelle, non autonome ou soumis à une limitation quelconque de souveraineté.}
+\ltextline{}
+\ltextline{Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros.}
+\ltextline{}
+\ltextline{Toda persona tiene los derechos y libertades proclamados en esta Declaración, sin distinción alguna de raza, color, sexo, idioma, religión, opinión política o de cualquier otra índole, origen nacional o social, posición económica, nacimiento o cualquier otra condición.\\Además, no se hará distinción alguna fundada en la condición política, jurídica o internacional del país o territorio de cuya jurisdicción dependa una persona, tanto si se trata de un país independiente, como de un territorio bajo administración fiduciaria, no autónomo o sometido a cualquier otra limitación de soberanía.}
+\end{ltext}
+
+Il peut sembler peu judicieux d'avoir dans notre document source autant d'environnements \envn{conditext} qu'il est d'articles et de versions d'article, alors que l'on pourrait ne créer qu'un environnement pour les articles en langue française, un autre pour les articles en langue anglaise etc. Cette organisation textuelle s'avère cependant nécessaire chaque fois qu'il s'agit de gérer les formes substituables au plus près.
+
+Supposons justement qu'à partir de notre document source, pour une raison donnée, nous devions présenter dans le document généré uniquement l'article~2 de la \titcit{Déclaration des droits de l'homme} en français et en espagnol. Telles quelles, les instructions \cmdn{setcondispace} spécifiées précédemment ne le permettent pas -- et le permettraient encore moins si les articles étaient regroupés par langue dans un même environnement.
+
+En fait, l'\xenvn{conditext} accepte une étoile en troisième argument, que l'on utilise sous la forme atypique suivante :
+
+\begin{codeblock}
+    \codestm{\cmd{begin}[\argm{conditext}\argm{french}]*}
+    \codestm{Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité.\cmd{end}[\argm{conditext}]}
+    \codestm{}
+    \codestm{\cmd{begin}[\argm{conditext}\argm{spanish}]*}
+    \codestm{Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros.\cmd{end}[\argm{conditext}]}
+\end{codeblock}
+
+\resumepar Dans ce cas précis, l'étoile indique que l'article~2 de la \titcit{Déclaration des droits de l'homme} en français et en espagnol doit être ignoré par les instructions respectives \cmd{setcondispace}[\argm{french}] et \cmd{setcondispace}[\argm{spanish}].
+
+D'une façon plus générale, l'astérisque d'un \xenvn{conditext} -- dont la position atypique signifie que c'est la \emph{prise en compte de la propriété de condition} qui est affectée -- permet : soit de ne pas faire figurer dans le document généré une forme substituable normalement désignée pour y figurer, soit à l'inverse de faire figurer dans le document généré une forme substituable qui n'est en principe pas désignée pour y figurer.
+
+\tutostep
+Nous voici désormais familiarisés avec l'\xenvn{conditext} et la \xcmdn{setcondispace}, deux dispositifs fondamentaux du \xpack{conditext}. Avant d'aller plus loin et d'aborder la création de domaines de condition et de propriétés de condition, indispensable dès que l'on a un besoin d'une gestion de contenu conditionnelle spécifique, ajoutons encore deux points.
+
+Ainsi que cela a été précisé au début de cet exemple, tant qu'aucun espace de condition n'est défini, aucun contenu d'\xenvn{conditext} ne figure dans le document généré. Ceci correspond en fait à un comportement par défaut proposé par le \xpack{conditext}. Il est possible de le modifier en déclarant le \xpack{conditext} avec l'\xvalopt{defaultdisplayall} sous la forme :
+
+\codestm*{\cmd{usepackage}[\argo{defaultdisplayall}\argm{conditext}]}
+
+En outre -- même si cette pratique n'est pas véritablement régulière, et encore moins efficace dans un document source de taille importante comportant beaucoup d'instructions \envn{conditext} --, il est possible d'utiliser l'argument~\val{*} propre aux environnements \envn{conditext} \emph{sans définir d'espace de condition}, afin de forcer \quo{directement} l'affichage ou le non affichage d'une ou plusieurs formes substituables dans le document généré.
+
+\section{Exemple commenté d'utilisation \no 2 : un document à gestion conditionnelle multiple}\label{CtDoc_Tuto_Multicondition}
+Pour les besoins de ce nouvel exemple, nous partons sur l'idée que nous avons à rédiger un document préparatoire relatif à un projet d'application informatique, comportant des illustrations, avec du contenu textuel fixe et du contenu textuel différencié par département (ici, le développement, la conception de la base de données et la conception graphique). Un document devra être généré pour chacun de ces départements avec en outre, pour chaque département concerné, une version avec illustrations et un version sans illustration. Nous sommes dans le cas typique d'une gestion conditionnelle multiple.
+
+Pour des raisons de commodité, nous représenterons le texte sous la forme de quelques paragraphes en latin simulé. Les illustrations correspondront à des fichiers image, simulés eux aussi, et supposés être placés dans le même répertoire que celui du document source.
+
+\tutostep
+À part pour la gestion conditionnelle multilingue (que nous avons abordée dans l'exemple précédent) et pour une gestion conditionnelle généraliste (qui ne sera pas abordée dans ce tutoriel), \pack{conditext} ne fournit aucun autre élément prédéfini, mais offre la possibilité d'en créer à volonté pour répondre aux besoins de gestion de contenu conditionnel les plus spécifiques.
+
+En un premier temps, nous allons créer les domaines de condition et les propriétés de condition nécessaires à la gestion conditionnelle de notre exemple.
+
+Pour rappel, un domaine de condition est une thématique fonctionnelle sous laquelle l'on peut regrouper les formes substituables qui sont liées par une même sémantique. Il nous faut deux domaines de condition, l'un pour une thématique \quo{départements} et l'autre pour une thématique \quo{présentation}. Nous les créons au moyen des instructions suivantes, placées dans le préambule :
+
+\begin{codeblock}
+    \codestm{\cmd{newcondifield}[\argm{departement}]}
+    \codestm{\cmd{newcondifield}[\argm{presentation}]}
+\end{codeblock}
+
+La forme des noms \val{departement} et \val{presentation} (de même que celle des intitulés de propriétés de condition définis plus bas) n'est peut-être pas la plus judicieuse possible mais elle suffit pour notre exemple. De manière générale, le choix de l'intitulé d'un domaine de condition ou d'une propriété de condition est laissé à l'appréciation de l'utilisateur, avec cela que l'on ne peut utiliser que des caractères alphabétiques, avec ou sans majuscules, sans espace, sans caractères accentués ou à diacritiques.
+
+Passons maintenant aux propriétés de condition. Pour rappel, une propriété de condition permet de caractériser fonctionnellement chaque forme substituable d'un domaine de condition donné. Nous créons celles relatives aux départements au moyen des instructions suivantes :
+
+\begin{codeblock}
+    \codestm{\cmd{newcondiprop}[\argm{departement}\argm{develop}]}
+    \codestm{\cmd{newcondiprop}[\argm{departement}\argm{bdonnees}]}
+    \codestm{\cmd{newcondiprop}[\argm{departement}\argm{graphisme}]}
+\end{codeblock}
+
+\resumepar Il y a une propriété de condition par département, puisque dans le cadre de notre exemple, la gestion conditionnelle par départements implique que toute forme substituable du domaine de condition \val{departement} soit susceptible de concerner soit le développement, soit la conception de la base de données, soit encore la conception graphique. Lorsque l'on crée une propriété de condition, outre le nom de la propriété en tant que telle, il faut \emph{systématiquement spécifier le domaine de condition} auquel l'on souhaite rattacher la propriété de condition concernée.
+
+La gestion conditionnelle avec et sans illustration nécessite, elle, une réflexion préliminaire. L'on pourrait être tenté en effet de définir d'emblée deux propriétés de condition, l'une pour caractériser les formes substituables avec illustration, et l'autre, les formes substituables sans illustration. Or, dans ce cas, cela reviendrait à devoir par la suite définir un espace de condition testant les formes substituables avec illustration et une espace de condition testant les formes substituables sans illustration, soit un test en doublon inversé, inutile et surtout source potentielle de confusion.
+
+De manière générale, dans le cas d'une gestion conditionnelle binaire (avec/sans etc.), une seule propriété de condition s'avère la plupart du temps suffisante. Relativement au domaine de condition \val{presentation}, nous ne créons donc qu'une seule propriété de condition au moyen de l'instruction suivante :
+
+\begin{codeblock}
+    \codestm{\cmd{newcondiprop}[\argm{presentation}\argm{illustr}]}
+\end{codeblock}
+
+En résumé, la création de domaines de condition s'effectue au moyen de la \xcmdn{newcondifield} ; celle des propriétés de condition, au moyen de la \xcmdn{newcondiprop}.
+
+À noter que les instructions \cmdn{newcondifield} et \cmdn{newcondiprop} doivent obligatoirement figurer avant toute autre instruction : si, dans un \xenvn{conditext} ou une commande telle que \cmdn{setcondispace}, l'on spécifie un domaine de condition ou une propriété de condition non créée préalablement, un message d'erreur sera déclenché lors de la compilation.
+
+\tutostep
+Voici maintenant le document source de notre exemple, incluant les précédentes instructions :
+
+\begin{codeblock}
+\codestm{\cmd{documentclass}[\argm{article}]}
+\codestm{\cmd{usepackage}[\argo{french}\argm{babel}]}
+\codestm{\cmd{usepackage}[\argm{graphicx}]}
+\codestm{\cmd{usepackage}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{newcondifield}[\argm{departement}]}
+\codestm{\cmd{newcondifield}[\argm{presentation}]}
+\codestm{\cmd{newcondiprop}[\argm{departement}\argm{develop}]}
+\codestm{\cmd{newcondiprop}[\argm{departement}\argm{bdonnees}]}
+\codestm{\cmd{newcondiprop}[\argm{departement}\argm{graphisme}]}
+\codestm{\cmd{newcondiprop}[\argm{presentation}\argm{illustr}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{document}]
+\codestm{}
+\codestm{\lipsum[1][1-5]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}]}
+    \begin{subcodeblock}
+    \codestm{\cmd{includegraphics}[\argm{image1}]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argo{departement}\argm{bdonnees}]}
+    \begin{subcodeblock}
+    \codestm{\lipsum[2][1-3]}
+    \codestm{}
+    \codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}]}
+        \begin{subcodeblock}
+        \codestm{\cmd{includegraphics}[\argm{image2}]}
+        \end{subcodeblock}
+    \codestm{\cmd{end}[\argm{conditext}]}
+    \codestm{}
+    \codestm{\lipsum[2][4-5]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argo{departement}\argm{develop}]}
+    \begin{subcodeblock}
+    \codestm{\lipsum[3][1-3]}
+    \codestm{}
+    \codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}]}
+        \begin{subcodeblock}
+        \codestm{\cmd{includegraphics}[\argm{image3}]}
+        \end{subcodeblock}
+    \codestm{\cmd{end}[\argm{conditext}]}
+    \codestm{}
+    \codestm{\lipsum[3][4-5]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argo{departement}\argm{develop}]}
+    \begin{subcodeblock}
+    \codestm{\lipsum[4][1-5]}
+    \end{subcodeblock}
+\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argo{departement}\argm{graphisme}]}
+    \begin{subcodeblock}
+    \codestm{\lipsum[5][1-3]}
+    \codestm{}
+    \codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}]}
+        \begin{subcodeblock}
+        \codestm{\cmd{includegraphics}[\argm{image4}]}
+        \end{subcodeblock}
+    \codestm{\cmd{end}[\argm{conditext}]}
+    \codestm{}
+    \codestm{\lipsum[5][4-5]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\lipsum[6][1-3]}
+\codestm{}
+\codestm{\cmd{end}[\argm{document}]}
+\end{codeblock}
+
+\resumepar (Le \xpack{graphicx} est nécessaire pour pouvoir utiliser la \xcmdn{includegraphics} permettant l'insertion des images dans le document.)
+
+Remarquons avant tout que les environnements \envn{conditext} relatifs à la gestion conditionnelle des illustrations sont \emph{imbriqués} dans les environnements \envn{conditext} relatifs à la gestion conditionnelle des textes à destination des différents départements.
+
+L'on peut ainsi à volonté et dans les limites de l'utilité, imbriquer différents environnements \envn{conditext}. La sémantique d'imbrication et son niveau de \emph{profondeur} sont laissés à l'appréciation de l'utilisateur -- la seule contrainte étant que l'on ne peut imbriquer des environnments \envn{conditext} avec un même domaine de condition, sous risque d'effets inattendus ou indésirables.
+
+Pour l'instant, aucun espace de condition n'est défini, ce qui signifie que si le document source est compilé tel quel, seuls, les premier et dernier paragraphes figureront dans le document généré, puisqu'ils ne sont placés dans aucun \xenvn{conditext} (pour rappel, par défaut, en l'absence d'un espace de condition défini, aucune forme substituable ne figure dans le document généré).
+
+\tutostep
+Supposons que nous ayons à générer un document comportant le texte spécifique au développement, accompagné de son illustration. Deux espaces de condition nécessitent d'être créés, l'un pour gérer le texte spécifique au développement et l'autre, pour gérer l'illustration, soit :
+
+\begin{codeblock}
+    \codestm{\cmd{setcondispace}[\argo{departement}\argm{develop}]}
+    \codestm{\cmd{setcondispace}[\argo{presentation}\argm{illustr}]}
+\end{codeblock}
+
+De la sorte, après compilation, le document généré contient, conformément à nos attentes :
+
+\begin{ltext}
+\ltextline{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus
+elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dic-
+tum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id,
+vulputate a, magna. Donec vehicula augue eu neque.}
+\ltextline{}
+\ltextline{(image1)}
+\ltextline{}
+\ltextline{Nulla malesuada porttitor diam. Donec felis erat, congue non, vo-
+lutpat at, tincidunt tristique, libero. Vivamus viverra fermentum felis.}
+\ltextline{}
+\ltextline{(image3)}
+\ltextline{}
+\ltextline{Donec nonummy pellentesque ante. Phasellus adipiscing semper elit.}
+\ltextline{}
+\ltextline{Quisque ullamcorper placerat ipsum. Cras nibh. Morbi vel justo vi-
+tae lacus tincidunt ultrices. Lorem ipsum dolor sit amet, consectetuer
+adipiscing elit. In hac habitasse platea dictumst.}
+\ltextline{}
+\ltextline{Suspendisse vel felis. Ut lorem lorem, interdum eu, tincidunt sit amet,
+laoreet vitae, arcu. Aenean faucibus pede eu ante.}
+\end{ltext}
+
+Si nous ne souhaitons aucune illustration dans le document généré, il suffit alors de retirer l'instruction \cmd{setcondispace}[\argo{presentation}\argm{illustr}].
+
+Maintenant, pour une raison donnée, nous pourrions vouloir exclure l'illustration accompagnant le contenu textuel spécifique au développement, mais conserver celle qui accompagne le contenu textuel fixe. Deux solution existent dans ce cas, la première étant plus \quo{lisible} que la seconde :
+
+Soit l'on maintient l'instruction \cmd{setcondispace}[\argo{presentation}\argm{illustr}] et l'on utilise l'étoile en troisième argument de l'\xenvn{conditext} qui gère l'illustration de la forme substituable relative au développement, sous la forme :
+
+\begin{codeblock}
+\codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}*]}
+    \begin{subcodeblock}
+    \codestm{\cmd{includegraphics}[\argm{image3}]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\end{codeblock}
+
+Soit l'on retire l'instruction \cmd{setcondispace}[\argo{presentation}\argm{illustr}] et l'on utilise l'étoile en troisième argument de l'\xenvn{conditext} qui gère l'illustration du contenu textuel \emph{fixe}, sous la forme  :
+
+\begin{codeblock}
+\codestm{\cmd{begin}[\argm{conditext}\argo{presentation}\argm{illustr}*]}
+    \begin{subcodeblock}
+    \codestm{\cmd{includegraphics}[\argm{image1}]}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\end{codeblock}
+
+De manière générale, lorsque l'on est amené à modifier individuellement la prise en compte d'un domaine et d'une propriété de condition dans une instruction \envn{conditext}, il est préférable pour des raisons de lisibilité de le faire dans un contexte d'espace de condition défini, plutôt qu'en l'absence d'espace de condition.
+
+\tutostep
+Ce présent exemple nous a familiarisés avec la création de domaines de condition et de propriétés de condition, ainsi qu'avec la pratique d'instructions \envn{conditext} imbriquées.
+
+Avant de poursuivre avec un troisième et dernier exemple, et d'y aborder l'utilisation de la commande la plus particulière du \xpack{conditext}, voici quelques remarques complémentaires.
+
+Dans les documents longs à contenu conditionnel, les formes substituables peuvent être nombreuses, et par la même occasion, un certain nombre d'instructions \envn{conditext} est susceptible de figurer dans le document source, impliquant une saisie fastidieuse lorsqu'il s'agit notamment de spécifier un même domaine de condition de multiples fois.
+
+Certes, l'on peut utiliser, dans ce cas comme dans bien d'autres d'ailleurs, les fonctions copier-coller de l'éditeur \Latex utilisé. Toutefois, le \xpack{conditext} propose la possibilité d'utiliser un \conc{domaine de condition implicite}, à raison d'un par document source -- ce qui, outre d'exonérer l'utilisateur d'une saisie fastidieuse, rend aussi le code plus lisible dans la plupart des cas.
+
+Pour reprendre notre exemple, si nous souhaitons ne pas avoir à saisir (et ne pas voir figurer) le domaine de condition \val{departement} dans les instructions \envn{conditext}, nous pouvons ajouter l'instruction suivante dans le préambule :
+
+\begin{codeblock}
+    \codestm{\cmd{setimplicitcondifield}[\argm{departement}]}
+\end{codeblock}
+
+Désormais, toutes les instructions \envn{conditext} permettant de gérer les formes substituables propres aux différents départements pourront avoir la forme suivante :
+
+\begin{codeblock}
+    \codestm{\cmd{begin}[\argm{conditext}\argm{develop}]}
+\end{codeblock}
+
+\resumepar ou
+
+\begin{codeblock}
+    \codestm{\cmd{begin}[\argm{conditext}\argm{bdonnees}]}
+\end{codeblock}
+
+\resumepar ou
+
+\begin{codeblock}
+    \codestm{\cmd{begin}[\argm{conditext}\argm{graphisme}]}
+\end{codeblock}
+
+À noter que, dans un tel cas de figure, il reste toujours possible, bien qu'inutile, de spécifier \val{departement} explicitement.
+
+Cela étant, dans la mesure où il ne peut exister qu'un seul domaine de condition implicite par document source, à supposer que -- toujours dans le cas de notre exemple --, nous soyons amenés à devoir gérer un contenu conditionnel multilingue en plus de ceux liés aux départements et aux illustrations, nous devrons alors \emph{spécifier \val{language} explicitement} comme domaine de condition dans les instructions \envn{conditext} et \cmdn{setcondispace} concernées par la gestion conditionnelle multilingue.
+
+Le domaine de condition \val{language} est un domaine de condition prédéfini fourni avec le \xpack{conditext}. Par défaut, c'est lui est est spécifié comme domaine de condition implicite ; toute définition d'un domaine de condition implicite autre que \val{language} (comme ici avec \val{departement}) revient donc à modifier ce comportement par défaut.
+
+\section{Exemple commenté d'utilisation \no 3 : une mini-gestion conditionnelle}
+\subsection{}
+Imaginons que nous ayons à rédiger un texte utilisant un certain nombre d'expressions techniques récurrentes, comme \quo{texte conditionnel}, \quo{domaine de condition} etc. Dans ce genre de cas, la solution très souvent adoptée pour faciliter la saisie consiste à créer une commande d'abréviation, telle que par exemple \cmdn{tc} qui, lors de la compilation, permettra d'afficher \quo{texte conditionnel} dans le document généré.
+
+Or, la limite de ces commandes d'abréviation se rencontre dès que l'on est amené à devoir gérer un contenu conditionnel multilingue. Ainsi, en l'état, notre \xcmdn{tc} n'est exploitable que dans un texte en français. À la rigueur, l'on pourrait créer autant de commandes d'abréviation pour une expression donnée qu'il y aurait de langues concernées, mais, dans un long document multilingue et pour un nombre important d'expressions différentes, l'utilisation de ces commandes (sans parler de leur administration en cas de modification) deviendrait très vite aussi fastidieuse que la saisie répétée de l'expression elle-même, qui est pourtant ce que nous souhaitons éviter.
+
+La \xcmdn{miniconditext} permet de remédier à cette limite.
+
+\tutostep
+Partons sur l'idée que nous avons pour objectif de générer, à partir d'un seul document source à contenu conditionnel multilingue -- français, anglais, espagnol et italien pour les besoins de notre exemple --, différents documents contenant chacun une des versions linguistiques du texte.
+
+Dans le cas de notre exemple, plutôt qu'une commande définie sous la forme \cmd{NewDocumentCommand}[\cmdn{tc}\argmvoid{}\argm{texte conditionnel}] et déclinée en français, anglais, espagnol et italien, nous allons pouvoir, grâce à la \xcmdn{miniconditext}, inscrire différents \quo{niveaux} linguistiques à l'interne même d'une seule commande d'abréviation. Choisissons \cmdn{tcml} (\cmdnx{ml} pour \quo{multilingue}) comme nom de la commande et définissons-la de la manière suivante :
+
+\begin{codeblock}
+\codestm{\cmd{NewDocumentCommand}[\cmdn{tcml}\argmvoid{}]\argmbegin{}}
+    \begin{subcodeblock}
+    \codestm{\cmd{miniconditext}[\argm{texte conditionnel}]}
+    \codestm{\argo{conditional text}}
+    \codestm{\argovoid{}}
+    \codestm{\argo{texto condicional}}
+    \codestm{\argo{testo condizionale}\argmend{}}
+    \end{subcodeblock}
+\end{codeblock}
+
+Précisons avant tout que le code qui précède est supposé placé dans le préambule.
+
+Cela étant, l'on remarquera en premier lieu que l'expression en français est spécifiée en tant qu'argument obligatoire de \cmdn{miniconditext} ; que les expressions en anglais, espagnol et italien sont spécifiées en tant qu'arguments optionnels de \cmdn{miniconditext} ; et qu'un argument vide figure entre l'argument correspondant à l'expression en anglais et l'argument correspondant à l'expression en espagnol.
+
+En fait, nous utilisons ici les modalités par défaut de \cmdn{miniconditext}, destinées à une gestion conditionnelle multilingue (nous verrons plus bas comment l'on peut utiliser \cmdn{miniconditext} dans d'autres contextes).
+
+Chaque argument permet de spécifier une forme substituable dans une langue donnée, sur la base de 9 arguments au total -- tous optionnels sauf le premier --, correspondant respectivement et dans l'ordre, aux langues française, anglaise, allemande, espagnole, italienne, portuguaise, néerlandaise, danoise et norvégienne. Bien que non explicites dans la syntaxe de \cmdn{miniconditext}, l'on doit toujours avoir à l'esprit les correspondances entre les arguments et les langues pour pouvoir dûment spécifier les formes substituables.
+
+L'argument vide qui figure dans le code correspond donc à la langue allemande ; il est laissé vide puisque nous n'avons pas besoin de gérer cette langue (ni les langues portuguaise, néerlandaise etc.) dans le document source. À noter que, de façon générale, tout argument optionnel non renseigné placé entre un ou plusieurs arguments renseignés doit figurer sous la forme \argovoid{}.
+
+\tutostep
+Notre \xcmdn{tcml} ainsi définie peut désormais être utilisée à volonté, comme dans le document source ci-après.
+
+Pour constituer ce document source, nous avons utilisé un petit texte sous traductions anglaise, espagnole et italienne fournies par le site \site*{Reverso}, mais il pourrait tout aussi bien s'agir de textes différents d'une langue à l'autre puisque la \xcmdn{tcml} y serait utilisée à l'identique.
+
+\begin{codeblock}
+\codestm{\cmd{documentclass}[\argm{article}]}
+\codestm{\cmd{usepackage}[\argo{english,spanish,italian,french}\argm{babel}]}
+\codestm{\cmd{usepackage}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{NewDocumentCommand}[\cmdn{tcml}\argmvoid{}]\argmbegin{}}
+    \begin{subcodeblock}
+    \codestm{\cmd{miniconditext}[\argm{texte conditionnel}]}
+    \codestm{\argo{conditional text}}
+    \codestm{\argovoid{}}
+    \codestm{\argo{texto condicional}}
+    \codestm{\argo{testo condizionale}\argmend{}}
+    \end{subcodeblock}
+\codestm{}
+\codestm{\cmd{setcondispace}[\argm{spanish}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{document}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{french}]}
+    \begin{subcodeblock}
+    \codestm{Vous pouvez créer un champ \cmd{tcml}[\argmvoid{}] qui affiche le mot "pages" au lieu du mot "page" dès lors que le document comporte plusieurs pages. Pour afficher un \cmd{tcml}[\argmvoid{}] basé sur le nombre de pages...}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{english}]}
+    \begin{subcodeblock}
+    \codestm{You can create a \cmd{tcml}[\argmvoid{}] field that displays the word "pages" instead of "page" if your document contains more than one page. To display \cmd{tcml}[\argmvoid{}] based on the number of pages...}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{spanish}]}
+    \begin{subcodeblock}
+    \codestm{Puede crear un campo de \cmd{tcml}[\argmvoid{}] que muestre la palabra "páginas" en lugar de "página" si el documento contiene más de una página. Para mostrar un \cmd{tcml}[\argmvoid{}] basado en el número de páginas...}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{conditext}\argm{italian}]}
+    \begin{subcodeblock}
+    \codestm{È possibile creare un campo \cmd{tcml}[\argmvoid{}] che visualizza la parola "pagine" invece della parola "pagina" se il documento ha più pagine. Per visualizzare un \cmd{tcml}[\argmvoid{}] basato sul numero di pagine...}
+    \end{subcodeblock}
+\codestm{\cmd{end}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{end}[\argm{document}]}
+\end{codeblock}
+
+Si nous compilons en l'état, nous obtenons bien un document comportant le texte espagnol, conformément à l'instruction \cmd{setcondispace}[\argm{spanish}] figurant dans le préambule. Toutefois, \quo{texto condicional} ne figure pas pour autant. En fait, il manque l'instruction spécifique permettant d'intégrer l'expression dans le texte.
+
+L'on désigne quelle forme substituable spécifiée dans \cmdn{miniconditext} doit figurer dans le document généré, au moyen de la \xcmdn{setminicondispace}. Ainsi que son nom l'indique, \cmdn{setminicondispace} sert à définir un espace de condition permettant de désigner une forme substituable parmi celles saisies dans \cmdn{miniconditext}.
+
+Dans le cadre de notre exemple, nous devons ajouter, avant ou après \cmd{setcondispace}[\argm{spanish}] mais \emph{après} la définition de la \xcmdn{tcml}, l'instruction suivante :
+
+\begin{codeblock}
+\codestm{\cmd{setminicondispace}[\argm{spanish}]}
+\end{codeblock}
+
+De la sorte, le document généré correspond désormais à :
+
+\begin{ltext}
+\ltextline{Puede crear un campo de texto condicional que muestre la palabra "páginas" en lugar de "página" si el documento contiene más de una página. Para mostrar un texto condicional basado en el número de páginas...}
+\end{ltext}
+
+Les instructions \cmdn{setcondispace} et \cmdn{setminicondispace} modifiées de la façon suivante :
+
+\begin{codeblock}
+\codestm{\cmd{setcondispace}[\argm{english}]}
+\codestm{\cmd{setminicondispace}[\argm{english}]}
+\end{codeblock}
+
+permettront à leur tour de générer un document contenant :
+
+\begin{ltext}
+\ltextline{You can create a conditional text field that displays the word "pages" instead of "page" if your document contains more than one page. To display conditional text based on the number of pages...}
+\end{ltext}
+
+\resumepar Et ainsi de suite.
+
+À noter que, dans une instruction \cmdn{setminicondispace} utilisée pour une gestion conditionnelle multilingue, il faut toujours désigner la forme substituable qui doit figurer dans le document au moyen de l'appellation linguistique propre au \xpack{babel} (ici, respectivement \val{spanish} et \val{english}).
+
+Il n'est pas possible de définir plusieurs \quo{mini-espaces de condition}. Si plusieurs instructions \cmdn{setminicondispace} coexistent dans le préambule, c'est la dernière qui sera prise en compte, avec le risque éventuel d'effets inattendus ou indésirables.
+
+\subsection{}
+L'on peut également utiliser \cmdn{miniconditext} dans des contextes de gestion conditionnelle autres qu'une gestion conditionnelle multilingue. Nous allons aborder dans cette dernière partie du tutoriel, la mise en oeuvre d'une mini-gestion conditionnelle spécifique.
+
+Cette mise en oeuvre sera aussi un peu plus complexe que toutes celles que nous avons pu aborder dans les précédents exemples, dans la mesure où elle illustre la manière dont on peut exploiter certains formatages typographiques plus ou moins sophistiqués dans le cadre d'une mini-gestion conditionnelle.
+
+Imaginons que nous ayons à rédiger un rapport d'activité, dont le texte doit pouvoir contenir à divers endroits des commentaires à l'attention de différents services (comptabilité, communication), de manière distincte. En d'autres termes, notre objectif est, à partir d'un même document source, de pouvoir générer trois documents : l'un, qui sera à usage général ;  l'autre accompagné de notes à l'attention du service comptabilité (avec usage de la couleur pourpre), le dernier accompagné de notes à l'attention service communication (avec usage de la couleur bleue).
+
+La mini-gestion conditionnelle, avec les commandes qui lui sont propres, est à même de répondre à ce besoin, moyennant certains aménagements.
+
+Ceci implique d'abord de bien comprendre le fonctionnement de la \xcmdn{miniconditext}. Ainsi que nous l'avons vu précédemment, la \xcmdn{miniconditext} possède un argument obligatoire et 8 autres arguments optionnels, chacun de ces arguments servant à spécifier une forme substituable. Il n'y a pas à proprement parler de domaine de condition lorsque l'on utilise la \xcmdn{miniconditext} ; plus exactement, \val{miniconditext} est un domaine de condition en soi.
+
+D'autre part, les propriétés de condition sont invariablement au nombre de 9, à raison d'une par argument, et ont par défaut une sémantique linguistique (respectivement et par ordre d'argument : \val{french}, \val{english},  \val{german},  \val{spanish},  \val{italian},  \val{portuguese},  \val{dutch},  \val{danish} et \val{norsk}).
+
+C'est essentiellement sur les propriétés de condition que doivent porter les modifications, ainsi que nous allons le voir maintenant en détail.
+
+\tutostep
+Voici le document source de notre exemple ; pour des raisons de commodité, nous représentons le texte sous la forme de quelques paragraphes en latin simulé :
+
+\begin{codeblock}
+\codestm{\cmd{documentclass}[\argm{article}]}
+\codestm{\cmd{usepackage}[\argo{french}\argm{babel}]}
+\codestm{\cmd{usepackage}[\argm{xcolor}]}
+\codestm{\cmd{usepackage}[\argm{soul}]}
+\codestm{\cmd{usepackage}[\argm{conditext}]}
+\codestm{}
+\codestm{\cmd{resettingminicondiprops}}
+\codestm{\cmd{setminicondipropi}[\argm{general}]}
+\codestm{\cmd{setminicondipropii}[\argm{compta}]}
+\codestm{\cmd{setminicondipropiii}[\argm{com}]}
+\codestm{}
+\codestm{\cmd{NewDocumentCommand}[\cmdn{notecompta}\argm{m O\argm{merci de bien vouloir fournir le graphique correspondant}}]\argmbegin{}}
+    \begin{subcodeblock}
+    \codestm{\cmd{miniconditext}[\argm{\#1}]}
+    \codestm{\argo{\cmd{ul}[\argm{\#1}]\cmd{textcolor}[\argm{purple}\argm{\$\cmd{rightarrow}\$ \cmd{emph}[\argm{\#2}]}]}\argmend{}}
+    \end{subcodeblock}
+\codestm{}
+\codestm{\cmd{NewDocumentCommand}[\cmdn{notecom}\argm{m O\argm{merci de bien vouloir fournir un image}}]\argmbegin{}}
+    \begin{subcodeblock}
+    \codestm{\cmd{miniconditext}[\argm{\#1}]}
+    \codestm{\argovoid{}}
+    \codestm{\argo{\cmd{ul}[\argm{\#1}]\cmd{textcolor}[\argm{blue}\argm{\$\cmd{rightarrow}\$ \cmd{emph}[\argm{\#2}]}]}\argmend{}}
+    \end{subcodeblock}
+\codestm{}
+\codestm{\cmd{setminicondispace}[\argm{general}]}
+\codestm{}
+\codestm{\cmd{begin}[\argm{document}]
+\codestm{}
+    \begin{subcodeblock}
+    \codestm{\cmd{notecom}[\argm{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque.}]}
+    \codestm{}
+    \codestm{Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae, ultricies et, \cmd{notecompta}[\argm{tellus}]. Donec aliquet, tortor sed accumsan bibendum, erat ligula aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit mollis.}
+    \codestm{}
+    \codestm{Nulla malesuada porttitor diam. Donec felis erat, congue non, volutpat at, tincidunt tristique, libero. Vivamus viverra  \cmd{notecompta}[\argm{vel fermentum felis}\argo{disposez-vous d'un graphique eps concernant cet élément ?}].}
+    \end{subcodeblock}
+\codestm{}
+\codestm{\cmd{end}[\argm{document}]}}
+\end{codeblock}
+
+(Le \xpack{xcolor} est nécessaire pour attribuer les couleurs mauve et bleue, et le \xpack{soul}, pour souligner certains mots.)
+
+\tutostep
+Nous avons d'abord préparé les propriétés de condition correspondant à notre besoin. Dans le cadre d'une mini-gestion conditionnelle, dès lors que l'on souhaite utiliser la \xcmdn{miniconditext} dans un contexte autre que multilingue, il faut redéfinir les propriétés de condition par défaut (de sémantique linguistique). Cette redéfinition se fait au moyen des instructions suivantes :
+
+\begin{codeblock}
+\codestm{\cmd{resettingminicondiprops}}
+\codestm{\cmd{setminicondipropi}[\argm{general}]}
+\codestm{\cmd{setminicondipropii}[\argm{compta}]}
+\codestm{\cmd{setminicondipropiii}[\argm{com}]}
+\end{codeblock}
+
+Il existe une commande de redéfinition par propriété de condition, soit 9 au total, chacune identifiée par chiffres romains (de \cmdnx{i} à \cmdnx{ix}, donc) : la \xcmdn{setminicondipropi} permet de redéfinir la propriété de condition attachée au premier argument, La \xcmdn{setminicondipropii} permet de redéfinir la propriété de condition attachée au deuxième argument, etc.
+
+Dans le cadre de notre exemple, seules, les trois premières propriétés de condition doivent être redéfinies -- une pour chaque service concerné -- en fonction desquelles seront générées les différentes versions du document
+
+La forme des noms \val{general}, \val{compta} et \val{com} n'est peut-être pas la plus judicieuse possible mais elle suffit pour notre exemple. De manière générale, le choix d'un intitulé de propriété de condition est laissé à l'appréciation de l'utilisateur, avec cela que l'on ne peut utiliser que des caractères alphabétiques, avec ou sans majuscules, sans espace, sans caractères accentués ou à diacritiques.
+
+Quel que soit le nombre de propriétés de condition à redéfinir, Il faut toujours impérativement \emph{commencer par l'instruction} \cmdn{resettingminicondiprops}, qui réinitialise les 9 propriétés de condition avant leur redéfinition. À noter que, dans la présente version du \pack{conditext}, la \xcmdn{miniconditext} ne peut être utilisée qu'avec un seul jeu de propriétés de condition par document source.
+
+Le premier argument de la commande \cmdn{miniconditext} auquel est associée la propriété de condition \val{general} sera une valeur par défaut, non directement exploitée ; nous aurions pu ici ne redéfinir que les première et deuxième propriétés de condition (l'une \val{compta} et l'autre \val{com}) mais l'existence d'une propriété de condition ayant une valeur par défaut, rend le code plus lisible, et permet en outre l'usage -- certes non essentiel -- d'un espace de condition par défaut.
+
+\tutostep
+Nous avons défini ensuite deux commandes similaires, nommées respectivement \cmdn{notecompta} et \cmdn{notecom}, chacune intégrant une instruction \cmdn{miniconditext}.
+
+Le principe de fonctionnalité est le même dans les deux cas : il s'agit de pouvoir mettre en relief des mots, des groupes de mots, voire des paragraphes dans le document généré en les accompagnant de commentaires à l'attention du service comptabilité ou du service communication selon les cas. À noter que ces commandes n'ont d'autre prétention que celle d'illustrer un usage de \cmdn{miniconditext}) et ne présentent aucune subtilité de conception particulière.
+
+Nous déclarons chacune des commandes avec 2 arguments, l'un obligatoire (représenté dans le code par \val{m} et \val{\#1}) correspondant à la forme substituable à mettre en relief, et l'autre facultatif avec valeur par défaut (représenté dans le code par \val{O} et \val{\#2}) correspondant au commentaire accompagnant la forme substituable mise en relief. Pour les besoins de notre exemple, si l'argument facultatif de la \xcmdn{notecompta} n'est pas renseigné, le commentaire \quo{merci de bien vouloir fournir le graphique correspondant} figurera par défaut ; de même, en ce qui concerne l'argument facultatif de la \xcmdn{notecom}, le commentaire par défaut sera \quo{merci de bien vouloir fournir un image}.
+
+Dans l'une et l'autre commande, le premier argument de \cmdn{miniconditext}, auquel est associée la propriété de condition \val{general}, sert de valeur par défaut.
+
+La \xcmdn{notecompta} utilise le deuxième argument de \cmdn{miniconditext}, auquel est associée la propriété de condition \val{compta}. Le code placé dans cet argument est intégralement consacré au formatage de la forme substituable qui doit être mise en relief (\val{\#1}) et au formatage du commentaire (\val{\#2}). La forme substituable sera soulignée (instruction \cmdn{ul} propre au \xpack{soul}), et sera suivie, précédée d'une flèche, d'un commentaire en italiques (instruction \cmdn{emph}) et en mauve (instruction \cmdn{xcolor}).
+
+La \xcmdn{notecom} utilise le troisième argument de de \cmdn{miniconditext}, auquel est associée la propriété de condition \val{com}. Le code placé dans cet argument est le même que celui de \cmdn{notecompta}, avec le bleu à la place du mauve pour le texte du commentaire.
+
+Dans le texte de notre exemple, nous avons placé une instruction \cmdn{notecom} intégrant le premier paragraphe dans son ensemble, sans commentaire explicite (c'est la formule par défaut qui figurera dans le document généré à l'attention du service communication). Le deuxième paragraphe contient une instruction \cmdn{notecompta}, intégrant un seul mot, sans commentaire explicite (c'est donc, comme dans le cas précédent, la formule par défaut qui figurera dans le document généré, à l'attention du service comptabilité). Dans le troisième et dernier paragraphe, est placée une instruction \cmdn{notecompta}, intégrant plusieurs mots et cette fois, avec un commentaire personnalisé.
+
+\tutostep
+Si, maintenant, nous compilons le document source sans instruction \cmdn{setminiconditext}, ou comme ici avec l'instruction \cmd{setminicondispace}[\argm{general}], nous obtenons le document suivant, dans sa version à usage général comme attendu :
+
+\begin{ltext}
+\ltextline{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque.}
+\ltextline{Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae, ultricies et, tellus. Donec aliquet, tortor sed accumsan bibendum, erat ligula aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit mollis.}
+\ltextline{Nulla malesuada porttitor diam. Donec felis erat, congue non, volutpat at, tincidunt tristique, libero. Vivamus viverra vel fermentum felis.}
+\end{ltext}
+
+\resumepar Avec l'instruction \cmd{setminicondispace}[\argm{compta}], le document généré sera :
+
+ \begin{ltext}
+\ltextline{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque.}
+\ltextline{Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae, ultricies et, \ul{tellus} \textcolor{purple}{$\rightarrow$ \emph{merci de bien vouloir fournir le graphique correspondant}}. Donec aliquet, tortor sed accumsan bibendum, erat ligula aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit mollis.}
+\ltextline{Nulla malesuada porttitor diam. Donec felis erat, congue non, volutpat at, tincidunt tristique, libero. Vivamus viverra \ul{vel fermentum felis} \textcolor{purple}{$\rightarrow$ \emph{disposez-vous d'un graphique eps concernant cet élément ?}}.}
+\end{ltext}
+
+\resumepar et avec l'instruction \cmd{setminicondispace}[\argm{com}] :
+
+ \begin{ltext}
+\ltextline{\ul{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque} \textcolor{blue}{$\rightarrow$ \emph{merci de bien vouloir fournir un image}}.}
+\ltextline{Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae, ultricies et, tellus. Donec aliquet, tortor sed accumsan bibendum, erat ligula aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit mollis.}
+\ltextline{Nulla malesuada porttitor diam. Donec felis erat, congue non, volutpat at, tincidunt tristique, libero. Vivamus viverra vel fermentum felis.}
+\end{ltext}
+
+Vous voici arrivés à la fin de ce tutoriel. Son auteur espère qu'il vous aura permis de vous familiariser agréablement avec le \xpack{conditext}, ses différentes commandes et ses possibilités. Dans ce domaine comme dans d'autres, rien ne vaut la pratique. Vous pourrez à loisir consulter la partie \titref{CtDoc_Commandes} de cette documentation pour obtenir la description détaillée d'une commande, certaines précisions d'utilisation etc.
+
+Que ce paquet puisse vous faciliter la tâche relativement à la gestion de contenus conditionnels sous \Latex, voilà le simple mais sincère souhait de son auteur.
+
+\end{document}

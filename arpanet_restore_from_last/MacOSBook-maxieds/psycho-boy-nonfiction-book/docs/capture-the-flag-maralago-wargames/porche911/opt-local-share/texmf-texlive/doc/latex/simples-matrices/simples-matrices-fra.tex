@@ -1,0 +1,586 @@
+%%
+%% This is file `simples-matrices-fra.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% simples-matrices.dtx  (with options: `doc,FRA')
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file.
+%% 
+%% File: simples-matrices.dtx
+%% Copyright (C) 2022 Yvon Henel aka Le TeXnicien de surface
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+\RequirePackage{expl3}[2020/01/12]
+\GetIdInfo$Id: simples-matrices.dtx 1.0.1 2022-07-03 TdS $
+  {}
+\documentclass[full]{l3doc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,main=french]{babel}
+\usepackage{xparse}
+\usepackage{simples-matrices}
+\newcommand\BOP{\discretionary{}{}{}}
+\usepackage{xspace}
+\usepackage{csquotes}
+\usepackage{fancyvrb,fancyvrb-ex}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{delarray}
+\usepackage{nicematrix}
+
+\providecommand\darg[3]{ \texttt{#1} \meta{#2} \texttt{#3} }
+
+\colorlet{keyword20}{cyan} %!75!black
+\colorlet{keyword30}{teal}
+\colorlet{keycolor}{green!50!black}
+\colorlet{dollarcolor}{violet}
+\colorlet{cmdmuette}{blue}
+\colorlet{cmdcausante}{red}
+
+\lstset{frame=single,%
+  language=[LaTeX]{TeX},%
+  showspaces=false,%
+  breaklines=true,%
+  breakatwhitespace=true,%
+  basicstyle=\ttfamily\bfseries,%
+  alsoletter={*-$},%
+  texcsstyle=*[2]\color{cmdcausante},%
+  texcs=[2]{matrice,declarermatrice*,lamatrice,matid,matnulle,MatriceInterieur,LaMatriceInterieur},%
+  texcsstyle=*[3]\color{cmdmuette},%
+  texcs=[3]{declarermatrice,simplesmatricessetup},%
+  keywordstyle=[20]\color{keyword20},%
+  keywordstyle=[30]\color{keyword30},%
+  keywordstyle=[40]\color{keycolor},%
+  keywordstyle=[50]\color{dollarcolor},%
+  keywords=[20]{tabular,array,matrix,matrix*,NiceArray},%
+  keywords=[30]{x,S,T,I,J,C,O,D},%
+  keywords=[40]{out-of-box,prefix,envir,typeord,argopt},%
+  keywords=[50]{$},%
+  escapeinside={\%*@}{@*)}%
+}
+
+\newcommand{\MacroPres}[2]{\textcolor{#1}{\textbf{\cs{#2}}}}
+\newcommand{\csmute}{\MacroPres{cmdmuette}}
+\newcommand{\csprint}{\MacroPres{cmdcausante}}
+\newcommand{\ObjetPres}[2]{\textcolor{#1}{\textbf{\texttt{#2}}}}
+\newcommand{\keyname}{\ObjetPres{keycolor}}
+\newcommand{\envir}{\ObjetPres{keyword20}}
+\newcommand{\TypeMat}{\ObjetPres{keyword30}}
+
+\newcommand{\UnExemple}{%
+  \par \medskip \par \noindent
+  \begin{minipage}[c]{0.66\linewidth}
+    \lstinputlisting[gobble=0, frame=single, numbers=left, numberstyle={\small}]{code00.tex}
+  \end{minipage}
+  \hspace{\stretch{1}}
+  \begin{minipage}[c]{0.32\linewidth}
+    \small
+    \input{code00}
+  \end{minipage}
+  \par \medbreak}
+
+\newcommand*{\vliste}{liste\xspace}
+
+ \newcommand{\VoirEx}[1]{(voir exemple en page~\pageref{#1})}
+
+\begin{document}
+\title{Guide de l'utilisateur de \pkg{simples-matrices}\thanks{Ce fichier décrit
+    la version~\ExplFileVersion, dernière révision~\ExplFileDate.\\
+    \emph{En souvenir de ma grand-mère maternelle}, Adrienne \textsc{Binaut}
+    (1908-03-23 -- 1997-06-08).}  }
+\author{Yvon Henel\thanks{E-mail:
+    \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+    {le.texnicien.de.surface@yvon-henel.fr}}}
+\maketitle
+\noindent\hrulefill
+
+\begin{abstract}
+Une extension pour écrire des matrices en donnant les coefficients par ligne
+sous la forme d'une liste de valeurs séparées par des virgules.
+
+Une macro permet de définir des matrices nommées et une autre permet d'écrire
+les matrices nommées. L'extension fournit également quelques raccourcis pour les
+matrices identité et les matrices nulles.
+\end{abstract}
+
+\noindent\hrulefill
+
+ \begin{otherlanguage}{english}
+\begin{abstract}
+A package to write matrices which are defined with a list of comma separated
+coefficients read by row.
+
+A macro enables the definition of a named matrix, another enables the writing of
+a named matrix. This package provides also some shortcuts for identity matrices
+and null matrices.
+
+The name of this package and of its macros are French based for there are
+already too many macros using the word ``matrix'' itself. The French
+``\foreignlanguage{french}{simples matrices}'' means ``simple
+matrices''. \emph{Just a letter apart!}
+
+The English documentation for the final user of the package
+\pkg{simples-matrices} is available in the file \texttt{simples-matrices-eng}.
+\end{abstract}
+\end{otherlanguage}
+
+\noindent\hrulefill
+
+\tableofcontents{}
+
+\vspace{3\baselineskip}
+
+L'extension \pkg{simples-matrices} utilise \pkg{xparse} et \pkg{l3keys2e} pour
+définir ses macros et gérer les clés d'option. Elle charge également
+\pkg{amsmath} pour obtenir une présentation convenable des matrices.
+
+\textbf{Attention}: vous devez fournir l'environnement mathématique adéquat pour
+utiliser les macros qui écrivent les matrices. Seule la version non-étoilée de
+\csmute{declarermatrice} peut être utilisée en dehors du mode mathématique.
+
+\section{Les macros}
+\label{sec:macros}
+
+L'extension \pkg{simples-matrices} offre neuf macros de document.
+
+
+Dans le texte principal (syntaxes et exemples), le nom d'une macro de cette
+extension est écrit en rouge si la macro produit du texte dans le document,
+autrement il est écrit en bleu.
+
+\subsection{Macros principales}
+\label{sec:principales}
+
+Les six macros principales sont les suivantes:
+\begin{function}{\matrice}
+  \begin{syntax}
+    \csprint{matrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+  où \meta{prefixe} a la même fonction que la clé \keyname{prefix} (voir page~\pageref{key-prefix});
+  \meta{\vliste de paires de clé-valeur} --- optionnel et vide par défaut ---
+  peut être utilisé pour redéfinir l'environnement de type \envir{matrix};
+  \meta{type} est une chaine de caractère dont l'utilisation sera expliquée
+  ci-dessous --- voir~\ref{sec:matrix-type} --- et \meta{\vliste des
+    coefficients} est la \vliste des coefficients de la matrice donnés ligne par
+  ligne.
+\end{function}
+
+ Avec
+\lstinline+$\matrice{1, 2, 3, 4}$+
+ on obtient
+\(\matrice{1, 2, 3, 4}\).
+
+ Avec
+\lstinline+$\matrice(b)[3]{1, 2, 3, 4, 5, 6}$+
+ on obtient
+\(\matrice(b)[3]{1, 2, 3, 4, 5, 6}\).
+
+
+\begin{function}{\declarermatrice}
+  \begin{syntax}
+    \csmute{declarermatrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+\end{function}
+
+\begin{function}{\declarermatrice*}
+  \begin{syntax}
+    \csprint{declarermatrice*}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+  où \meta{nom} est le nom de la matrice pour utilisation future. Les autres
+  arguments, optionnels ou obligatoires, ont la même signification que
+  ci-dessus. La version étoilée définit et écrit la matrice. La version
+  non-étoilée ne fait que la définir.
+
+  La définition est globale mais on peut redéfinir une matrice nommée existante
+  avec la même fonction. \textbf{Aucun contrôle} n'est exercé pour s'assurer que
+  l'on n'est pas en train de redéfinir une matrice nommée précédemment définie.
+
+  Avec la macro \csmute{declarermatrice}, les deux premiers arguments optionnels
+  n'ont aucun effet car la définition de la matrice n'en tient pas compte \VoirEx{sec:declar}.
+\end{function}
+
+\begin{function}{\lamatrice}
+  \begin{syntax}
+    \csprint{lamatrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}
+  \end{syntax}
+  écrit la matrice nommée de nom \meta{nom}.
+  Les deux arguments optionnels ont la même signification que ci-dessus \VoirEx{sec:declar}.
+\end{function}
+
+\begin{function}{\MatriceInterieur}
+  \begin{syntax}
+    \csprint{MatriceInterieur}
+  \end{syntax}
+  donne l'intérieur de la dernière matrice écrite --- via \csprint{matrice} ou
+  \csprint{declarermatrice*} --- ou définie --- via \csmute{declarermatrice}. On
+  peut l'utiliser dans un environnement du genre \envir{array} \VoirEx{sec:matint}.
+\end{function}
+
+\begin{function}{\LaMatriceInterieur}
+  \begin{syntax}
+    \csprint{LaMatriceInterieur}\marg{nom}
+  \end{syntax}
+  donne l'intérieur de la matrice de nom \meta{nom}. On peut l'utiliser dans un
+  environnement du genre \envir{array} \VoirEx{sec:matint}.
+\end{function}
+
+
+\subsection{Valuer les clés}
+\label{sec:setting-keys}
+
+On peut changer les valeurs des clés de \pkg{simples-matrices} avec
+\begin{function}{\simplesmatricessetup}
+  \begin{syntax}
+    \csmute{simplesmatricessetup}\marg{\vliste de paires de clé-valeur}
+  \end{syntax}
+  où \meta{\vliste de paires de clé-valeur} est l'habituelle \vliste de paires de
+  clé-valeur valuant une ou plusieurs des trois clés de cette extension
+  telles que présentées ci-dessous en page~\pageref{sec:clefs}.
+
+  Pour suivre une convention désormais bien établie le nom de cette macro
+  consiste en le nom de l'extension --- réduite à ces lettres \TeX{}iennes ---
+  suivi de l'anglais \emph{setup}. Je demande pardon pour cette étrange mixture
+  linguistique.
+\end{function}
+
+\subsection{Raccourcis}
+\label{sec:shortcuts}
+
+L'extension propose deux macros \emph{raccourcis}:
+
+\begin{function}{\matid}
+  \begin{syntax}
+    \csprint{matid}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{coefficient}\marg{nombre de colonnes}
+  \end{syntax}
+  qui imprime la matrice identité --- par défaut --- avec
+  \meta{nombre de colonnes} colonnes.
+  Si \meta{coefficient} est fourni, on obtient une matrice diagonale
+  dont tous les coefficients non-nuls sont égaux à \meta{coefficient}.
+
+  Les deux premiers arguments optionnels ont la même fonction que dans les
+  macros précédentes.
+\end{function}
+
+\begin{function}{\matnulle}
+  \begin{syntax}
+    \csprint{matnulle}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{coefficient}\marg{nombre de colonnes}
+  \end{syntax}
+  imprime la matrice nulle \meta{nombre de colonnes} colonnes --- par défaut ---
+  ou une matrice de \meta{nombre de colonnes} colonnes dont tous les
+  coefficients sont égaux à \meta{coefficient}.
+
+  Les deux premiers arguments optionnels ont la même fonction que dans les
+  macros précédentes.
+\end{function}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matid{3}$\qquad $\matid[9]{3}$
+\par \medskip
+$\matnulle{3}$\qquad $\matnulle[2]{3}$
+\end{VerbatimOut}
+\UnExemple{}
+
+
+\section{Les options de l'extension}
+\label{sec:clefs}
+
+L'extension utilise le système de clefs-valeurs pour ses options. Elle possède
+quatre clés: \keyname{envir}, \keyname{prefix}, \keyname{typeord} et \keyname{argopt}.
+
+\begin{description}
+\item[\keyname{envir} (\textit{\texttt{chaine de caractères}})] est la partie
+  finale du nom de l'environnement utilisé pour imprimer la matrice. Sa valeur
+  initiale est \texttt{matrix}.\label{key-envir}
+
+\item[\keyname{prefix} (\textit{\texttt{chaine de caractères}})] contient les
+  caractères placés devant \texttt{envir} pour fournir le nom complet de
+  l'environnement utilisé pour imprimer la matrice. Sa valeur initiale est
+  \texttt{p}. Cela fait que l'environnement par défaut est \envir{pmatrix}
+  fourni par \pkg{amsmath}.\label{key-prefix}
+
+\item[\keyname{typeord} (\textit{\texttt{chaine de caractères}})] définit la
+  valeur ordinaire --- c.-à-d. par défaut --- de l'argument optionnel
+  \meta{type}. La valeur initiale de la clé est \TypeMat{C}.\label{key-typeord}
+
+\item[\keyname{argopt} (\textit{\texttt{liste de lexèmes}}, anglais:
+  \foreignlanguage{english}{token list})] est vide par défaut. Voir
+  page~\pageref{sec:delarray} pour son utilisation.\label{key-argopt}
+\end{description}
+
+De plus, une clé supplémentaire existe qui est une métaclé:
+\keyname{out-of-box}.
+
+ Avec
+\lstinline|\simplesmatricessetup{out-of-box}|
+ on obtient le même effet qu'avec
+\lstinline|\simplesmatricessetup{prefix=p,|\BOP\lstinline| envir=matrix,|%
+  \BOP\lstinline| argopt=,|\BOP\lstinline| typeord=C}|.
+
+\section{Exemples}
+\label{sec:exemples}
+\subsection{Sans extension particulière}
+\label{sec:amsmath}
+
+C'est-à-dire en chargeant uniquement \pkg{amsmath} comme le fait cette extension.
+
+\subsubsection{Déclaration et utilisation}
+\label{sec:declar}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\declarermatrice{A}{1, 2, 300, 400}
+$\declarermatrice*{B}{a, b, c, d}$
+\quad $\lamatrice{A}$ \par \bigskip
+$\lamatrice(V){A}$
+\quad $\lamatrice(b){B}$
+\end{VerbatimOut}
+\UnExemple{}
+
+Sur la première ligne de l'exemple, la matrice~\texttt{A} est définie mais pas
+écrite. Ensuite, sur la seconde ligne, la matrice~\texttt{B} est définie et
+écrite. Nous pouvons ensuite appeler les matrices~\texttt{A} ou~\texttt{B} à
+l'aide de \csprint{lamatrice}.
+
+
+\subsubsection{L'argument \og \texttt{type}\fg}
+\label{sec:matrix-type}
+
+L'avant dernier argument --- optionnel --- des macros \csprint{matrice},
+\csmute{declarermatrice} et \csprint{declarermatrice*} vaut par défaut
+\TypeMat{O}. Dans ce cas, c'est la valeur de la clé \keyname{typeord} qui est
+utilisée pour déterminer le \emph{type} des données de la matrice,
+voir~\pageref{sec:matrix-type-key}.
+
+Sinon, il peut prendre une valeur numérique qui est le nombre de colonnes de la
+matrice ou encore une chaine de caractères --- à ce jour, une seule lettre ---
+parmi: \TypeMat{C}, \TypeMat{D}, \TypeMat{I}, \TypeMat{J}, \TypeMat{S}, \TypeMat{T} et
+\TypeMat{x}.
+
+\medskip{}
+
+ \TypeMat{C} signifie matrice \textbf{carrée}.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice{1, 2, 3, 4, 5, 6, 7, 8, 9}
+ \quad
+ \matrice[C]{1, 2, 3, 4, 5, 6, 7, 8, 9}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+ \TypeMat{D} signifie matrice \textbf{diagonale}.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice{1, 2, 3, 4}\quad
+ \matrice[D]{1, 2, 3, 4}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+\TypeMat{I} signifie matrice triangulaire \textbf{inférieure}; \TypeMat{J}
+signifie matrice triangulaire inférieure avec des zéros sur la diagonale.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[I]{1, 2, 3}\quad
+ \matrice[J]{1, 2, 3}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+\TypeMat{S} signifie matrice triangulaire \textbf{supérieure}; \TypeMat{T}
+signifie matrice triangulaire supérieure avec des zéros sur la diagonale.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[S]{1, 2, 3}\quad
+ \matrice[T]{1, 2, 3}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+\TypeMat{x} signifie \texttt{xcas}\footnote{Système de calcul formel libre
+  disponible ici:
+  \url{https://www-fourier.univ-grenoble-alpes.fr/~parisse/giac_fr.html}}. Avec
+cette valeur, on peut copier-coller de \texttt{xcas} dans le document \LaTeX{}.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[x]{[[7,1,3],[1,0,3],[5,1,2]]}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+\pagebreak[3]
+Un nombre donne le nombre de colonnes de la matrice.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[2]{1, 2, 3, 4, 5, 6}
+ \quad
+ \matrice[3]{1, 2, 3, 4, 5, 6}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+
+\subsubsection{Utilisation de la clé \og \keyname{typeord}\fg}
+\label{sec:matrix-type-key}
+
+Dans ce document, la clé \keyname{typeord} a comme valeur initiale~\TypeMat{C}.
+
+\medskip{}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{typeord=3}
+$\matrice{1, 2, 3, 4, 5, 6}$\quad
+\simplesmatricessetup{typeord=2}
+$\matrice{1, 2, 3, 4, 5, 6}$\quad
+\simplesmatricessetup{typeord=C}
+$\matrice{1, 2, 3, 4}$
+\end{VerbatimOut}
+\UnExemple{}
+
+Le code précédent n'est, bien entendu, donné qu'à titre d'illustration. Pour une
+déclaration de type ne concernant qu'une seule matrice, on aura intérêt à
+utiliser l'argument optionnel. Cependant si on veut rédiger un cours sur les
+matrices triangulaires supérieures\dots{}
+
+\subsubsection{Utilisation des macros \csprint{(La)MatriceInterieur}}
+\label{sec:matint}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\declarermatrice{B}[4]{
+ \hline ein, zwei, drei, vier,
+ \hline unos, dos, tres, cuatro,
+ \hline unu, du, tri, kvar}%
+\declarermatrice{A}[3]{
+ one, two, three,
+ un, deux, trois,
+ uno, due, tre}%
+\begin{tabular}{*{3}{l}}
+  \MatriceInterieur %*@\label{anonyme}@*)
+\end{tabular}
+\par \bigskip *** \par \bigskip
+\begin{tabular}{*{3}{l}}
+  \LaMatriceInterieur{A} %*@\label{parnom}@*)
+\end{tabular}
+\par \bigskip
+\begin{tabular}{|*{4}{l|}}
+  \LaMatriceInterieur{B}\hline
+\end{tabular}
+\end{VerbatimOut}
+\UnExemple{}
+
+En lignes~\ref{anonyme} et~\ref{parnom}, nous accédons aux mêmes
+\emph{entrailles} car la matrice~\texttt{A} est la dernière définie avant la
+ligne~\ref{anonyme}.
+
+
+\subsection{Changer l'aspect}
+\label{sec:aspect}
+
+On peut charger d'autres extensions qui permettent de présenter des matrices
+comme \pkg{mathtools}, \pkg{delarray} ou \pkg{nicematrix}. Dans ce cas on peut
+changer l'aspect de nos matrices grace aux clés d'option \keyname{envir},
+\keyname{prefix} et \keyname{argopt}.
+
+Ce document charge les trois extensions \pkg{mathtools}, \pkg{delarray} et
+\pkg{nicematrix} pour présenter les exemples suivants.
+
+
+\subsubsection{Avec \pkg{mathtools}}
+\label{sec:mathtools}
+
+Comme déjà signalé, il y a deux façons d'utiliser les clés d'option: à l'aide de
+\csmute{simplesmatricessetup} ou en utilisant l'argument optionnel
+\darg{\string<}{\vliste de paires de clé-valeur}{\string>}.  Je montre les deux.
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{
+  envir=matrix*, prefix=p, argopt=[r]}
+$\matrice{1, 2, 30, 40}$ \quad
+\simplesmatricessetup{out-of-box}
+$\matrice{1, 2, 30, 40}$
+\par \medskip
+$\matrice(b)<envir=matrix*,argopt=[l]> {1, 2, 30, 40}$
+\end{VerbatimOut}
+\UnExemple{}
+
+\subsubsection{Avec \pkg{delarray}}
+\label{sec:delarray}
+
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{
+  envir=array, prefix=,
+  argopt=[c][{l r}\}}
+$\matrice{1, 2, 30, 40}$ \quad
+$\matid()<envir=array,
+  argopt={[c][{@{}c c c@{}}\}}>{3}$
+\end{VerbatimOut}
+\UnExemple{}
+\simplesmatricessetup{out-of-box}
+
+\subsubsection{Avec \pkg{nicematrix}}
+\label{sec:nicematrix}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matrice<prefix=b, envir=NiceArray,
+argopt={ {cc||rl} }>{1, 2, 3, 4, 5, 6,
+  7, 8, 9, 10, 11, 12, 13, 14, 15, 16}$
+\end{VerbatimOut}
+\UnExemple{}
+
+Dans ce cas il faut doubler les accolades entourant les descripteurs de colonnes
+de l'environnement \envir{array} car \LaTeX{} retire un niveau d'accolades en
+valuant la clé.
+
+\medskip{}
+
+Dans l'exemple suivant, pour la deuxième matrice, il n'est pas nécessaire
+d'entourer la valeur de \keyname{argopt} d'une paire d'accolades (voir
+ligne~\ref{sansaccol}) --- même si ça n'est pas dangereux (voir
+ligne~\ref{avecaccol}) --- car la présence de \texttt{[margin]} empêche \LaTeX{}
+de supprimer une paire d'accolades.
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matrice<prefix=b, envir=NiceArray,
+argopt={{l c r}}>{1, 2, 3, 40, 50, 60,
+  700, 800, 900}$
+\par \medskip
+$\matrice<prefix=b, envir=NiceArray,
+argopt={l c r}[margin]>{1, 2, 3, %*@\label{sansaccol}@*)
+  40, 50, 60, 700, 800, 900}$
+\par \medskip
+$\matrice<prefix=b, envir=NiceArray,
+argopt={{l c r}[margin]}>{1, 2, 3, %*@\label{avecaccol}@*)
+  40, 50, 60, 700, 800, 900}$
+\end{VerbatimOut}
+\UnExemple{}
+
+ \section{Remerciements}
+Mille mercis à Denis \textsc{Bitouzé} pour ses remarques à propos de l'état
+initial de cette documentation. C'est grâce à lui que quelques couleurs sont
+apparues sur ces pages.
+
+\vspace{\stretch{2}}
+
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+\begin{center}
+  \textsl{Le TeXnicien de Surface scripsit.}
+\end{center}
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+
+\vspace*{\stretch{2}}
+
+\end{document}
+\endinput
+%%
+%% End of file `simples-matrices-fra.tex'.

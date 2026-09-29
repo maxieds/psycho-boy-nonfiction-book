@@ -1,0 +1,4030 @@
+\documentclass{ltxdoc}
+
+% *------------------------------*
+% |8````````````````````````````2|
+% |`````____````____`````````````|
+% |````|MFMF\  /MFMF|````````````|
+% |````|MF|MF\/MF|MF|````````````|
+% |````|MF|\MFMF/|MF|_______`````|
+% |````|MF|``````|MFMFMFMFMF|````|
+% |````|MF|``````|MF|````````````|
+% |````|MF|``````|MF|___`````````|
+% |``````````````|MFMFMF|````````|
+% |``````````````|MF|````````````|
+% |``````````````|MF|````````````|
+% |``````````````|MF|````````````|
+% |3````````````````````````````5|
+% *------------------------------*
+
+\usepackage{pmdraw}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage{hyperref}
+
+\begin{document}
+
+\hypersetup{colorlinks, linkcolor=blue, urlcolor=blue}
+
+\title{The \textsf{pmdraw} package\thanks{This document
+  corresponds to \textsf{pmdraw}~v1.7, 2025-01-28.}}
+\author{Matthias Fresacher \\ \texttt{matthias.ypg37@slmail.me}}
+
+\maketitle
+
+\begin{abstract}
+The \texttt{pmdraw} package allows you to draw elements of the diagram monoids, commonly referred to as diagrams. The package provides a lot of flexibility to draw most diagrams and can be customised as needed.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+\section{Introduction}
+
+\subsection{Motivation}
+
+Diagram monoids and their closely related algebras are well studied objects with applications in theoretical physics and representation theory in mathematics. The elements of these monoids are called diagrams because they can be drawn graphically as a graph following certain conventions.
+
+My PhD thesis examines properties of these diagram monoids and hence I needed to draw a large number of diagrams in a neat and consistent way. This thesis work formed the basis of this package with only customisability and the manual needed to be added to complete this package.
+
+\subsection{Acknowledgments}
+
+Most importantly, I thank James East, my PhD supervisor for allowing me to get a little sidetracked in my PhD research and develop and publish this package rather than work on my thesis like I should have.
+
+This package has at its core the basic drawing macro of a diagram as used by James East and Nik Ru\v{s}kuc in their 2022 publication {\it Classification of congruences of twisted partition monoids} in Advances in Mathematics. I thank them both for allowing me to build on their work.
+
+I thank everybody that has helped me proof read, spot bugs, provide feedback, suggest improvements or has otherwise contributed to this package. Those that are happy to be named are (in chronological order):
+\begin{itemize}
+    \item Nik Ru\v{s}kuc
+    \item Luka Carroll
+\end{itemize}
+
+This package heavily uses commands that can accept an arbitrary number of arguments as inputs. I thank \texttt{egreg} for their template upon which my commands are based (\url{https://tex.stackexchange.com/a/72915}).
+
+As this was my first time using keys, I thank David Carlisle for their very helpful example (\url{https://tex.stackexchange.com/a/542555}).
+
+As it turns out, passing my keys to the \verb`\draw` command of \texttt{tikz} is a little more tricky than one might expect. I thank Andrew Stacey for their solution (\url{https://tex.stackexchange.com/a/64237}).
+
+I thank Partha~D.~for their ready to use out of the box macro for adding grid lines to a \texttt{tikz} drawing (\url{https://tex.stackexchange.com/a/467908}).
+
+I also thank everybody on \url{https://tex.stackexchange.com} who has answered a questions or solved a problem. There are too many to list you all. Thank you.
+
+\section{Bugs and known problems}
+
+\subsection{Bugs}
+
+If you discover a bug, please be so kind and send me a minimum working example of the bug in action and I will work on fixing it.
+
+I would like this package to be as perfect as it can be but I will need your help with this as there simply are too many keys to test every combination or use case.
+
+The following are a list of currently known bugs that will be addressed:
+\begin{enumerate}
+    \item When the radius of the arc for non-transversal edges is too large compared to the distance between the two nodes, the arcs overlap. The current solution is to manually specify a \texttt{level} or \texttt{height} that makes the arcs smaller.
+    \item Baseline adjustments are hard coded so when changing \texttt{scale}, \texttt{row sep} or text size, for example, the vertical position of diagrams is likely to be incorrect. The current solution is to manually adjust the \texttt{baseline} within the \texttt{tikz} key.
+    \item In a product diagram, if \texttt{row sep} is used in the bottom diagram, the spacing between diagrams is incorrect.
+\end{enumerate}
+
+\subsection{Incompatibilities}
+
+The following are a list of known problems or incompatibilities that are not scheduled to be resolved anytime soon:
+\begin{enumerate}
+    \item Whilst not strictly an incompatibility, when using \texttt{beamer}, frames have to be \texttt{fragile}.
+\end{enumerate}
+
+\section{Usage}
+
+To use the package, one must understand that all diagrams are created from a basic building block called a brick.
+
+\subsection{Bricks}
+
+\DescribeMacro{brick}
+A \texttt{brick} is a diagram that contains no dots. For example,
+\begin{center}
+    \pmdBrick[ % Options
+        degree=5
+    ]{ % Upper non-transversal edges
+        {1}{2}
+        {2}{5}
+    }{ % Lower non-transversal edges
+        {1}{2}
+        {3}{4}
+    }{ % Transversal edges
+        {1}{1}
+        {3}{4}
+    }
+\end{center}
+is a brick whilst
+\begin{center}
+    \pmdDiagram{
+        { % Brick 1
+            [ % Options
+                degree=5
+            ]{ % Upper non-transversal edges
+                {2}{3}
+                {4}{5}
+            }{ % Lower non-transversal edges
+                {2}{3}
+                {4}{5}
+            }{ % Transversal edges
+                {1}{1}
+            }
+        }{ % Brick 2
+            [ % Options
+                degree=2
+            ]{ % Upper non-transversal edges
+                {1}{2}
+            }{ % Lower non-transversal edges
+                {1}{2}
+            }{ % Transversal edges
+                \pmdEmpty
+            }
+        }
+    }
+\end{center}
+is not a brick.
+\DescribeMacro{<brick>}
+The syntax for a brick contains four components and is as follows:
+\begin{center}
+    \texttt{<brick>~=~[<options>]\{<Uedges>\}\{<Ledges>\}\{<Tedges>\}}
+\end{center}
+where
+\DescribeMacro{brick/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: brick/options}.
+
+\DescribeMacro{<Uedges>}
+is a list of upper non-transversal edges. An upper non-transversal edges has three components \texttt{<Uedges>~=~[<options>]\{<Svertex>\}\{<Tvertex>\}} where
+\DescribeMacro{Uedges/<options>}\DescribeMacro{Ledges/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: NT edge/options},
+\DescribeMacro{<Svertex>}
+\texttt{\{<Svertex>\}} is the starting vertex and
+\DescribeMacro{<Tvertex>}
+\texttt{\{<Tvertex>\}} is the terminating vertex of the edge. Both \texttt{\{<Svertex>\}} and \texttt{\{<Tvertex>\}} are a \( x \)-coordinate and it is assumed that \( \texttt{\{<Svertex>\}} < \texttt{\{<Tvertex>\}} \).
+
+\DescribeMacro{list}
+A \texttt{list} of upper non-transversal edges is simply each upper non-transversal edge written after the other. For example a list with one upper non-transversal edges is
+\begin{verbatim}
+    {1}{2}
+\end{verbatim}
+whilst one with three upper non-transversal edges may be
+\begin{verbatim}
+    {1}{2}[level=1]{3}{4}{5}{6}
+\end{verbatim}
+For ease of reading this will coded as
+\begin{verbatim}
+    {1}{2}
+    [level=1]{3}{4}
+    {5}{6}
+\end{verbatim}
+\DescribeMacro{\pmdEmpty}
+Should a list be empty, the command \verb`\pmdEmpty` should be used.
+
+\DescribeMacro{<Ledges>}
+is a list of lower non-transversal edges. A lower non-transversal edges has the same three components as an upper non-transversal edge, namely \texttt{<Ledges>~=~[<options>]\{<Svertex>\}\{<Tvertex>\}}.
+
+\DescribeMacro{<Tedges>}
+is a list of transversal edges. A transversal edges has three components \texttt{<Tedges>~=~[<options>]\{<Tvertex>\}\{<Bvertex>\}} where
+\DescribeMacro{Tedges/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: T edge/options},
+\DescribeMacro{<Tvertex>}
+\texttt{\{<Tvertex>\}} is the top vertex and
+\DescribeMacro{<Bvertex>}
+\texttt{\{<Bvertex>\}} is the bottom vertex of the edge. Both \texttt{\{<Tvertex>\}} and \texttt{\{<Bvertex>\}} are a \( x \)-coordinate.
+
+An example \texttt{<brick>} and the resultant diagram is:
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+    {4}{5}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+    {4}{5}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\subsection{Draw commands}
+
+This package has three draw commands.
+
+\DescribeMacro{\pmdBrick}
+draws a brick and has the syntax \verb`\pmdBrick<brick>`.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+    {4}{5}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+    {4}{5}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{\pmdDiagram}
+draws arbitrarily many bricks separated by dots and has the syntax
+\begin{verbatim}
+\pmdDiagram[<options>]{<bricks>}
+\end{verbatim}
+where
+\DescribeMacro{diagram/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: diagram/options} and
+\DescribeMacro{<bricks>}
+\texttt{<bricks>} is a list of \texttt{<brick>}-s, with each brick enclosed in curly brackets.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+It should be noted that \verb`\pmdBrick` is simply a wrapper for a single brick that calls \verb`\pmdDiagram` with no diagram options. This means that, for example, the \texttt{grid} key is not available for \verb`\pmdBrick` and \verb`\pmdDiagram` must be used instead to access the \texttt{grid} key.
+
+For edges that go across multiple bricks, know that the coordinate positions of the vertices extends infinitely in both directions. If using default settings, the dots between bricks occupies one vertex position. To help with counting and identifying the correct coordinate position, the \texttt{grid} flag may also be used, see Section~\ref{sec: diagram/options all}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=3,
+            brace={
+                left=2,
+                right=6,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{6}
+            {3}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{-1}
+            {2}{-2}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=3,
+            brace={
+                left=2,
+                right=6,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{6}
+            {3}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{-1}
+            {2}{-2}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{\pmdProduct}
+draws two diagrams on top of each other as is the case during multiplication or concatenation and has the syntax
+\begin{verbatim}
+\pmdProduct[<options>]{<Aedges>}{<Tbricks>}{<Bbricks>}
+\end{verbatim}
+where
+\DescribeMacro{diagram/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: diagram/options}.
+
+\DescribeMacro{<Aedges>}
+is a list of edges that are added during the concatenation process. An added edge has two components, namely \texttt{<Aedges>~=~\{<Svertex>\}\{<Tvertex>\}}, where \texttt{\{<Svertex>\}} is the starting vertex and \texttt{\{<Tvertex>\}} is the terminating vertex of the collection of added edges. Both \texttt{\{<Svertex>\}} and \texttt{\{<Tvertex>\}} are a \( x \)-coordinate and it is assumed that \( \texttt{\{<Svertex>\}} < \texttt{\{<Tvertex>\}} \).
+
+\DescribeMacro{<Tbricks>}
+is a list of bricks that correspond to the top diagram, with each brick enclosed in curly brackets.
+
+\DescribeMacro{<Bbricks>}
+is a list of bricks that correspond to the bottom diagram, with each brick enclosed in curly brackets.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct{ % Added edges
+    {1}{5}
+    {7}{8}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {1}{2}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct{ % Added edges
+    {1}{5}
+    {7}{8}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {1}{2}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{\pmdProductTriple}
+draws three diagrams on top of each other as is the case during multiplication or concatenation of three diagrams and has the syntax
+\begin{verbatim}
+\pmdProductTriple[<options>]{<ATedges>}{<ABedges>}{<Tbricks>}}{<Mbricks>}{<Bbricks>}
+\end{verbatim}
+where
+\DescribeMacro{diagram/<options>}
+the \texttt{<options>} are described in Section~\ref{sec: diagram/options}.
+
+\DescribeMacro{<ATedges>}\DescribeMacro{<ABedges>}
+is a list of edges that are added during the concatenation process. \texttt{<ATedges>} is the list of edges between the top and middle diagrams, whilst \texttt{<ABedges>} is the list of edges between the middle and bottom diagrams. An added edge has two components, namely \texttt{<ATedges>~=~\{<Svertex>\}\{<Tvertex>\}} and \texttt{<ABedges>~=~\{<Svertex>\}\{<Tvertex>\}}, where \texttt{\{<Svertex>\}} is the starting vertex and \texttt{\{<Tvertex>\}} is the terminating vertex of the collection of added edges. Both \texttt{\{<Svertex>\}} and \texttt{\{<Tvertex>\}} are a \( x \)-coordinate and it is assumed that \( \texttt{\{<Svertex>\}} < \texttt{\{<Tvertex>\}} \).
+
+\DescribeMacro{<Tbricks>}
+is a list of bricks that correspond to the top diagram, with each brick enclosed in curly brackets.
+
+\DescribeMacro{<Mbricks>}
+is a list of bricks that correspond to the top diagram, with each brick enclosed in curly brackets.
+
+\DescribeMacro{<Bbricks>}
+is a list of bricks that correspond to the bottom diagram, with each brick enclosed in curly brackets.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProductTriple{ % Top added edges
+    {1}{5}
+    {7}{8}
+}{ % Bottom added edges
+    {1}{5}
+    {7}{8}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }
+}{ % Middle diagram
+   % Continued on next page ...
+\end{verbatim}
+        \end{minipage}
+    \end{minipage}
+\end{center}
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+   % ... continued from previous page (note repeated line)
+}{ % Middle diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{3}
+            {3}{2}
+            {4}{5}
+            {5}{4}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{2}
+            {2}{1}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {1}{2}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProductTriple{ % Top added edges
+    {1}{5}
+    {7}{8}
+}{ % Bottom added edges
+    {1}{5}
+    {7}{8}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }
+}{ % Middle diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{3}
+            {3}{2}
+            {4}{5}
+            {5}{4}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{2}
+            {2}{1}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {1}{2}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{center}
+
+\section{Options}
+
+\subsection{Brick options} \label{sec: brick/options}
+
+The following are all of the keys that are available for bricks.
+
+\subsubsection{Vertex options}
+
+\DescribeMacro{degree}
+specifies the degree, that is, the number of vertices in the top and bottom row of the diagram. Must be a positive integer and must be provided unless using \texttt{degree top} and \texttt{degree bottom}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{degree top} \DescribeMacro{degree bottom}
+specifies the degree, that is, the number of vertices in the top (bottom) row of the diagram. Must be a positive integer and must be provided as a pair \texttt{degree top} and \texttt{degree bottom}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree top=5,
+    degree bottom=4
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree top=5,
+    degree bottom=4
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{blank top} \DescribeMacro{blank bottom}
+specifies the number of blank vertices to the left of the top (bottom) row of the diagram. Default is zero.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    blank top=1,
+    degree top=4,
+    degree bottom=5
+]{ % Upper non-transversal edges
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    blank top=1,
+    degree top=4,
+    degree bottom=5
+]{ % Upper non-transversal edges
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+It should also be noted that the \texttt{blank top} and \texttt{blank bottom} can also be used to create more space between bricks and the dots between bricks by setting a large number. Likewise if set to \( -1 \) and the dots is redefined to not draw, the space between bricks can be removed altogether. See Examples~13-15.
+
+\DescribeMacro{row sep}
+specifies the vertical separation between rows of vertices. Default is two. If using edge options such as \texttt{levels}, \texttt{row sep} must be given before \texttt{levels}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    row sep=4
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    row sep=4
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{vertices}
+passes through options to the \verb`\draw` command of vertices. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    vertices=blue
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    vertices=blue
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{no vertex bottom 1}
+\DescribeMacro{ \vdots}
+\DescribeMacro{no vertex bottom 9}
+\DescribeMacro{no vertex top 1}
+\DescribeMacro{ \vdots}
+\DescribeMacro{no vertex top 9}
+specifies a vertex that is not drawn. Any of the nine available keys can be used in any order. It can be used to draw single vertices that are different to the others. If more than nine vertices need to be excluded, simply draw multiple bricks next to each other. The default is -1.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    no vertex top 1=2,
+    no vertex top 2=3,
+    no vertex bottom 1=4,
+    decorate after={
+        \fill[red] (4,0) circle (.1);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    no vertex top 1=2,
+    no vertex top 2=3,
+    no vertex bottom 1=4,
+    decorate after={
+        \fill[red] (4,0) circle (.1);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{vertices options}
+allows for the redefinition of the command that draws the vertices. It has two arguments, the \( x \) and \( y \)-position of the vertex. The default is
+\begin{verbatim}
+\fill[apply style/.expand once=\pmdraw@drawVertexOptions] (#1,#2) circle (.17);
+\end{verbatim}
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    vertices options={
+        \draw[very thick] (#1,#2) circle (.25);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    vertices options={
+        \draw[very thick] (#1,#2) circle (.25);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{labels}\DescribeMacro{labels top}\DescribeMacro{labels bottom}
+flags that allow for the drawing of labels for the vertices. Use \texttt{labels} for labels on both the top and bottom or set individually. The default is no labels.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    labels bottom
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    labels bottom
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{labels start}\DescribeMacro{labels top start}\DescribeMacro{labels bottom start}
+sets the starting value of the labels for the vertices. The default is one.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels top start=3,
+    labels bottom start=-2
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels top start=3,
+    labels bottom start=-2
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{no labels bottom 1}
+\DescribeMacro{ \vdots}
+\DescribeMacro{no labels bottom 9}
+\DescribeMacro{no labels top 1}
+\DescribeMacro{ \vdots}
+\DescribeMacro{no labels top 9}
+specifies a vertex for which no label is drawn. Any of the nine available keys can be used in any order. It can be used to insert single unique labels that are different to the others. If more than nine labels need to be excluded, simply draw multiple bricks next to each other. The default is -1.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    no label top 1=2,
+    no label top 2=3,
+    no label bottom 1=4,
+    decorate after={
+        \draw (3,2) node[above=6pt,red] {\(x\)};
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    no label top 1=2,
+    no label top 2=3,
+    no label bottom 1=4,
+    decorate after={
+        \draw (3,2) node[above=6pt,red] {\(x\)};
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{labels top draw}\DescribeMacro{labels top node}\DescribeMacro{labels bottom draw}\DescribeMacro{labels bottom node}
+passes through options to the \verb`\draw` and \verb`node` command of the labels of vertices. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels top node=red,
+    labels bottom node={right=2pt}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels top node=red,
+    labels bottom node={right=2pt}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{labels top options}\DescribeMacro{labels bottom options}
+allows for the redefinition of the command that draws the labels of the vertices. They have three arguments, the \( x \) and \( y \)-position of the vertex and the label value. The default for the top is
+\begin{verbatim}
+\draw[apply style/.expand once=\pmdraw@drawLabelTDrawOptions] (#1,#2)
+    node[above=6pt,apply style/.expand once=\pmdraw@drawLabelTNodeOptions] {\(#3\)};
+\end{verbatim}
+and for the bottom
+\begin{verbatim}
+\draw[apply style/.expand once=\pmdraw@drawLabelBDrawOptions] (#1,#2)
+    node[below=6pt,apply style/.expand once=\pmdraw@drawLabelBNodeOptions] {\(#3'\)};
+\end{verbatim}
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels bottom options={
+        \draw (#1,#2) node[below=6pt,blue] {\(#3''\)};
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    labels,
+    labels bottom options={
+        \draw (#1,#2) node[below=6pt,blue] {\(#3''\)};
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{no dots}
+The \texttt{no dots} flag removes the drawing of dots to the left of the current brick in diagrams. Default is to draw dots except for the first brick.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            no dots
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            % no dots
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+
+\DescribeMacro{dots draw}\DescribeMacro{dots node}
+passes through options to the \verb`\draw` and \verb`node` command of the dots. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            dots node=red
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            dots node=red
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{vertices top phantom}\DescribeMacro{vertices bottom phantom}
+These flags allow for all of the top or bottom vertices to be hidden using the \texttt{phantom} command. Simply wraps the vertex drawing macros with a \texttt{phantom} command. This hiding will also apply to the labels of that row (top or bottom) of vertices. To only hide a selected number of vertices, use seperate bricks. The default is false.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    vertices top phantom,
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    vertices top phantom
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{vertices top uncover}\DescribeMacro{vertices bottom uncover}
+allows for all of the top or bottom vertices to be uncovered in a \texttt{beamer} presentation\footnote{Make sure to use a \texttt{fragile} frame.} using the command \verb`\uncover<n->{text}`. Simply passes the slide uncover information \verb`<n->` to the embedded \texttt{uncover} command within the vertex drawing macros. This uncover will also apply to the labels of that row (top or bottom) of vertices. To only uncover a selected number of vertices, use seperate bricks. The default is~\texttt{1-}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    vertices top uncover={2,4-7,9-},
+    vertices bottom uncover={3-}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    vertices top uncover={2,4-7,9-},
+    vertices bottom uncover={3-}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+
+\subsubsection{Edge options}
+
+These options should be read in conjunction with Section~\ref{sec: edge/options}.
+
+\DescribeMacro{levels}
+specifies how many horizontal levels there are for non-transversal edges. Default is one.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{levels top} \DescribeMacro{levels bottom}
+specifies how many horizontal levels there are for upper (lower) non-transversal edges. Default is one.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    levels top=3,
+    levels bottom=2
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    levels top=3,
+    levels bottom=2
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{levels sep}
+specifies the vertical separation between horizontal levels for non-transversal edges. Default is evenly spaced within the space available for the given number of \texttt{levels}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3,
+    levels sep=0.3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3,
+    levels sep=0.3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{levels sep top} \DescribeMacro{levels sep bottom}
+specifies the vertical separation between horizontal levels for upper (lower) non-transversal edges. Default is evenly spaced within the space available for the given number of \texttt{levels}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3,
+    levels sep top=0.4,
+    levels sep bottom=0.15
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3,
+    levels sep top=0.4,
+    levels sep bottom=0.15
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{edges}\DescribeMacro{edges non-transversal}\DescribeMacro{edges upper}\DescribeMacro{edges lower}\DescribeMacro{edges transversal}
+pass through options to the \verb`\draw` command of their respective edge types. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    edges upper=blue,
+    edges lower={red, dotted, very thick},
+    edges transversal=dashed
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    edges upper=blue,
+    edges lower={red, dotted, very thick},
+    edges transversal=dashed
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{edges first}
+flag ensures edges are drawn before vertices. The default is vertices are drawn first.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    edges lower={red, very thick},
+    edges first
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    edges lower={red, very thick},
+    edges first
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{transversals first}
+flag ensures transversal edges are drawn before non-transversal edges. The default is non-transversal edges are drawn first.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    edges lower={red, very thick},
+    transversals first
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    edges lower={red, very thick},
+    transversals first
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{edges phantom}
+This flag allows for all edges to be hidden using the \texttt{phantom} command. Simply wraps the edge drawing macros with a \texttt{phantom} command. The default is false.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    edges phantom
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    edges phantom
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{edges uncover}
+allows for all edges to be uncovered in a \texttt{beamer} presentation\footnote{Make sure to use a \texttt{fragile} frame.} using the command \verb`\uncover<n->{text}`. Simply passes the slide uncover information \verb`<n->` to the embedded \texttt{uncover} command within the edge drawing macros. The default is~\texttt{1-}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    edges uncover={2,4-7,9-}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    edges uncover={2,4-7,9-}
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\subsubsection{Brace}
+
+\DescribeMacro{brace}
+specifies instructions for the drawing of a brace with the brace keys. These are described in Section~\ref{sec: brace}. The default is no brace is drawn.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{brace draw}\DescribeMacro{brace node}
+passes through options to the \verb`\draw` and \verb`node` command of the brace. Must be given before the \texttt{brace} key. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace draw=thin,
+            brace node={pos=0.25},
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace draw=thin,
+            brace node={pos=0.25},
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\subsubsection{Decorations}
+
+\DescribeMacro{decorate before}\DescribeMacro{decorate after}
+provides a hook to draw additional \texttt{tikz} elements before and after the brick is drawn. The default is empty.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    decorate after={
+        \draw[
+            very thick,
+            red,
+            rounded corners=5pt
+        ] (0.6, -0.4) rectangle (1.4, 2.4);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5,
+    decorate after={
+        \draw[
+            very thick,
+            red,
+            rounded corners=5pt
+        ] (0.6, -0.4) rectangle (1.4, 2.4);
+    }
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+These hooks can also be used for more sophisticated manipulation of diagrams be inserting not just \texttt{tikz} elements but arbitrary code before and after draw a brick.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=4
+        ]{ % Upper non-transversal edges
+            {2}{3}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            {1}{1}
+            {4}{4}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=3,
+            decorate before={\begin{scope}[red,shift={(1,1)},rotate=30]},
+            decorate after={\end{scope}}
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{2}
+            {2}{3}
+            {3}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=4
+        ]{ % Upper non-transversal edges
+            {2}{3}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            {1}{1}
+            {4}{4}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=3,
+            decorate before={\begin{scope}[red,shift={(1,1)},rotate=30]},
+            decorate after={\end{scope}}
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{2}
+            {2}{3}
+            {3}{1}
+        }
+    }
+}
+\end{center}
+
+\subsubsection{Drawing order} \label{sec: order}
+
+For clarity, this is the default drawing order for a brick:
+\begin{enumerate}
+    \item \texttt{decorate before}
+    \item Top row of vertices
+    \item Bottom row of vertices
+    \item Upper non-transversal edges
+    \item Lower non-transversal edges
+    \item Transversal edges
+    \item \texttt{decorate after}
+\end{enumerate}
+
+This order can be altered using the \texttt{edges first} and \texttt{transversals first} flags.
+
+For the drawing order of a diagram and product diagram, see the \texttt{decorate before} and \texttt{decorate after} keys in Section~\ref{sec: diagram/options all}.
+
+\subsection{Edge options} \label{sec: edge/options}
+
+\subsubsection{Non-transversal edge options} \label{sec: NT edge/options}
+
+\DescribeMacro{level}
+specifies the horizontal level of a non-transversal edges. Default is one.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5,
+    levels=3
+]{ % Upper non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Lower non-transversal edges
+    [level=3]{1}{5}
+    [level=2]{1}{4}
+    [level=1]{2}{3}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{height}
+specifies a manually set horizontal height of a non-transversal edges. Default is to use levels.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{5}
+    [height=1.75]{1}{4}
+}{ % Lower non-transversal edges
+    [height=1.25]{1}{5}
+    {1}{4}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{5}
+    [height=1.75]{1}{4}
+}{ % Lower non-transversal edges
+    [height=1.25]{1}{5}
+    {1}{4}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{edge draw}
+passes through options to the \verb`\draw` command of the edge. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    [edge draw=red]{2}{3}
+    {4}{5}
+    }{ % Lower non-transversal edges
+    [edge draw=dotted]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    \pmdEmpty
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    [edge draw=red]{2}{3}
+    {4}{5}
+}{ % Lower non-transversal edges
+    [edge draw=dotted]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    \pmdEmpty
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{options}
+allows for the redefinition of the command that draws the non-transversal edge. It has two arguments, the start and end \( x \)-position of the edge. The default for an upper non-transversal is
+\begin{verbatim}
+    \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#1,\pmdraw@rowSep) arc (180:270:\pmdraw{edgeHeight});% Draw left arch
+    \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#1+\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) 
+            -- (#2-\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight});
+            % Draw straight line
+    \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#2-\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) 
+            arc (270:360:\pmdraw{edgeHeight});% Draw right arc
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+\end{verbatim}
+and for a lower non-transversal
+\begin{verbatim}
+    \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#1,0) arc (180:90:\pmdraw{edgeHeight});% Draw left arch
+    \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#1+\pmdraw{edgeHeight},\pmdraw{edgeHeight}) 
+            -- (#2-\pmdraw{edgeHeight},\pmdraw{edgeHeight});% Draw straight line
+    \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptions,
+        apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+        (#2-\pmdraw{edgeHeight},\pmdraw{edgeHeight}) 
+            arc (90:0:\pmdraw{edgeHeight});% Draw right arc
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+\end{verbatim}
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [options={
+        \draw[blue, very thick] (#1,0) -- (#2,0);
+    }]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [options={
+        \draw[blue, very thick] (#1,0) -- (#2,0);
+    }]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{center}
+
+\DescribeMacro{phantom}
+This flag allows for the edge to be hidden using the \texttt{phantom} command. Simply wraps the edge drawing macros with a \texttt{phantom} command. The default is false.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    [phantom]{1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [phantom]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    [phantom]{1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [phantom]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{uncover}
+allows for that edge to be uncovered in a \texttt{beamer} presentation\footnote{Make sure to use a \texttt{fragile} frame.} using the command \verb`\uncover<n->{text}`. Simply passes the slide uncover information \verb`<n->` to the embedded \texttt{uncover} command within the edge drawing macros. This uncover is nested inside the \texttt{edges uncover} and hence the limitations of nested uncovers are present here. For example, an individual edge will not uncover until the \texttt{edges uncover} has been uncovered. In such instances only use individual uncovers for each edge. The default is~\texttt{1-}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    [uncover={2,4-7,9-}]{1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [uncover={3-}]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    [uncover={2,4-7,9-}]{1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    [uncover={3-}]{1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\subsubsection{Transversal edge options} \label{sec: T edge/options}
+
+\DescribeMacro{height}
+draws transversal edges with a horizontal component and specifies the manually set horizontal height of the transversal edges. Default is to use non-horizontal transversal edges.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [height=1]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [height=1]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{edge draw}
+passes through options to the \verb`\draw` command of the edge. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    }{ % Lower non-transversal edges
+    {4}{5}
+    {3}{4}
+}{ % Transversal edges
+    [edge draw=red]{1}{1}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+}{ % Lower non-transversal edges
+    {4}{5}
+    {3}{4}
+}{ % Transversal edges
+    [edge draw=red]{1}{1}
+    {3}{2}
+    [edge draw=dashed]{4}{5}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{options}
+allows for the redefinition of the command that draws the transversal edge. It has two arguments, the \( x \)-position of the edge in the top row of vertices and the \( x \)-position of the edge in the bottom row of vertices. The default is
+\begin{verbatim}
+    \ifnum\pmdraw@ifTedgeHorizontal=0% If drawing a straight line edge
+        \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+            apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+            (#1,\pmdraw@rowSep) -- (#2,0);% Draw straight line
+    \else% If transversal edge is drawn horizontally
+        \ifnum#1>#2% If edge goes from top right to bottom left
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) arc 
+                (180:90:\pmdraw{Tlevel});% Draw bottom arch
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+                (#2+\pmdraw{Tlevel},\pmdraw{Tlevel}) -- 
+                (#1-\pmdraw@rowSep+\pmdraw{Tlevel}, \pmdraw{Tlevel});% Draw straight line
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+                (#1-\pmdraw@rowSep+\pmdraw{Tlevel},\pmdraw{Tlevel}) arc 
+                (270:360:{\pmdraw@rowSep-\pmdraw{Tlevel}});% Draw top arc
+        \else% If edge goes from top left to bottom right
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+                (#2,0) arc (0:90:\pmdraw{Tlevel});% Draw bottom arch
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+                (#2-\pmdraw{Tlevel},\pmdraw{Tlevel}) -- 
+                (#1+\pmdraw@rowSep-\pmdraw{Tlevel}, \pmdraw{Tlevel});% Draw straight line
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptions,
+                apply style/.expand once=\pmdraw@drawEdgeDrawOptions] 
+                (#1+\pmdraw@rowSep-\pmdraw{Tlevel},\pmdraw{Tlevel}) arc 
+                (270:180:{\pmdraw@rowSep-\pmdraw{Tlevel}});% Draw top arc
+        \fi%
+        \renewcommand{\pmdraw@ifTedgeHorizontal}{0}% Reset flag to default
+    \fi%
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+\end{verbatim}
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [options={
+                \draw (#2,0) -- (#2+1,1); % Draw bottom line
+                \draw (#2+1,1) -- (#1-1, 1); % Draw straight line
+                \draw (#1-1,1) -- (#1,2); % Draw top line
+            }]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [options={
+                \draw (#2,0) -- (#2+1,1); % Draw bottom line
+                \draw (#2+1,1) -- (#1-1, 1); % Draw straight line
+                \draw (#1-1,1) -- (#1,2); % Draw top line
+            }]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{phantom}
+This flag allows for the edge to be hidden using the \texttt{phantom} command. Simply wraps the edge drawing macros with a \texttt{phantom} command. The default is false.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    [phantom]{1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    [phantom]{1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\DescribeMacro{uncover}
+allows for that edge to be uncovered in a \texttt{beamer} presentation\footnote{Make sure to use a \texttt{fragile} frame.} using the command \verb`\uncover<n->{text}`. Simply passes the slide uncover information \verb`<n->` to the embedded \texttt{uncover} command within the edge drawing macros. This uncover is nested inside the \texttt{edges uncover} and hence the limitations of nested uncovers are present here. For example, an individual edge will not uncover until the \texttt{edges uncover} has been uncovered. In such instances only use individual uncovers for each edge. The default is~\texttt{1-}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    [uncover={2,4-7,9-}]{1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdBrick[ % Options
+    degree=5
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    [uncover={2,4-7,9-}]{1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+\subsection{Brace} \label{sec: brace}
+
+\DescribeMacro{brick/brace}
+As part of a diagram, it may be useful to draw a brace. The options of a brace are as follows:
+
+\DescribeMacro{left}\DescribeMacro{right}
+specifies the \( x \)-position of the start/left and end/right of the brace. Both must be provided.
+
+\DescribeMacro{label}
+specifies the label to be printed with the brace. Default is empty.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{above}
+The \texttt{above} flag draws the brace above the diagram. Default is below.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n},
+                above
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n},
+                above
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{options}
+allows for the redefinition of the command that draws the brace. It has three arguments, the \( x \)-position start and end of the brace, as well as the label of the brace. The default is
+\begin{verbatim}
+    \ifnum\pmdraw@ifProdDiag=1 % If drawing a product diagram 
+                               % or if placing brace above diagram
+        \draw[
+            very thick,
+            decorate,
+            decoration={calligraphic brace,amplitude=6pt},
+            apply style/.expand once=\pmdraw@drawBraceDrawOptions
+        ] (#1-0.17,\pmdraw@rowSep+0.5) -- (#2+0.17,\pmdraw@rowSep+0.5) 
+        node[
+            pos=0.5,
+            above=6pt,
+            apply style/.expand once=\pmdraw@drawBraceNodeOptions
+        ] {\(#3\)}; % Draw brace on top of diagram
+    \else % If not drawing a product diagram or if placing brace below diagram
+        \draw[
+            very thick,
+            decorate,
+            decoration={calligraphic brace,mirror,amplitude=6pt},
+            apply style/.expand once=\pmdraw@drawBraceDrawOptions
+        ] (#1-0.17,-0.5) -- (#2+0.17,-0.5) 
+        node[
+            pos=0.5,
+            below=6pt,
+            apply style/.expand once=\pmdraw@drawBraceNodeOptions
+        ] {\(#3\)}; % Draw brace on bottom of diagram
+    \fi%
+\end{verbatim}
+it should be noted that the flag \verb`\pmdraw@ifProdDiag` is both used for when drawing a product diagram but also when placing the brace above the diagram as this clearly must be the default for the top diagram in a product diagram.
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n},
+                options={
+                    \draw[
+                        red,
+                        very thick,
+                        decorate,
+                        decoration={calligraphic brace,mirror,amplitude=6pt}
+                    ] (#1-0.17,-0.5) --  (#2+0.17,-0.5)
+                        node[pos=0.25,below=6pt]{\(#3\)};
+                }
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n},
+                options={
+                    \draw[
+                        red,
+                        very thick,
+                        decorate,
+                        decoration={calligraphic brace,mirror,amplitude=6pt}
+                    ] (#1-0.17,-0.5) --  (#2+0.17,-0.5)
+                        node[pos=0.25,below=6pt]{\(#3\)};
+                }
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\subsection{Diagram options} \label{sec: diagram/options}
+
+\subsubsection{For all (product) diagrams}  \label{sec: diagram/options all}
+
+The following options can be used for both diagrams (\verb`\pmdDiagram`) and product diagrams (\verb`\pmdProduct`).
+
+\DescribeMacro{row sep}
+same as \texttt{row sep} option in bricks but applied to all bricks within (product) diagram.
+
+\DescribeMacro{tikz}
+passes through options to \texttt{tikz} environment. Specifically, the options in \verb`\begin{tikzpicture}[<options>]`. The default is no argument. However there are some default options passed to \texttt{tikz} automatically. These are an adjustment to the \texttt{baseline} depending on the current typesetting mode and a \texttt{grid} key if the grid is activated.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram[ % Options
+    tikz={scale=2}
+]{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram[ % Options
+    tikz={scale=2}
+]{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=4,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{dots options}
+allows for the redefinition of the command that draws dots between bricks. It has two arguments, the \( x \) and \( y \)-position of the dots. The default is
+\begin{verbatim}
+    \draw[apply style/.expand once=\pmdraw@drawDotsDrawOptions]
+        (#1,#2) node[apply style/.expand once=\pmdraw@drawDotsNodeOptions] {\(\dots\)};
+\end{verbatim}
+An example use is
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram[ % Options
+    dots options={
+        \draw[red] (#1,#2) node {\(\dots\dots\)};
+    }
+]{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=5,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            blank top=1,
+            blank bottom=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {2}{2}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram[ % Options
+    dots options={
+        \draw[red] (#1,#2) node {\(\dots\dots\)};
+    }
+]{
+    { % Brick 1
+        [ % Options
+            degree=2,
+            brace={
+                left=1,
+                right=5,
+                label={n}
+            }
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree=1,
+            blank top=1,
+            blank bottom=1
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {2}{2}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{grid}
+As it can get confusing where things are drawn and the different coordinate scopes between all the bricks and diagrams, the \texttt{grid} flag draws the base coordinate grid that the first drawn brick is based on. This should help with all coordinate related inquiries. Default is no grid.
+
+It should be noted that the \texttt{grid} key is not available for \verb`\pmdBrick` and \verb`\pmdDiagram` must be used instead when needing a grid for a single brick only.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdDiagram[ % Options
+    grid
+]{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6,
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [height=1]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdDiagram[ % Options
+    grid
+]{
+    { % Brick 1
+        [ % Options
+            degree top=5,
+            degree bottom=6
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {3}{4}
+            {5}{6}
+        }{ % Transversal edges
+            [height=1]{10}{2}
+            {1}{1}
+        }
+    }{ % Brick 2
+        [ % Options
+            degree top=3,
+            blank bottom=1,
+            degree bottom=2
+        ]{ % Upper non-transversal edges
+            {1}{2}
+        }{ % Lower non-transversal edges
+            {2}{3}
+        }{ % Transversal edges
+            \pmdEmpty
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{decorate before}\DescribeMacro{decorate after}
+same as \texttt{decorate before} and \texttt{decorate after} in bricks but these are drawn before (after) all bricks are drawn. For clarity, this is default drawing order for a diagram:
+\begin{enumerate}
+    \item \texttt{diagram/decorate before}
+    \item Brick loop:
+    \begin{enumerate}
+        \item \texttt{brick/decorate before}
+        \item Draws brick
+        \item \texttt{brick/decorate after}
+    \end{enumerate}
+    \item \texttt{diagram/decorate after}
+\end{enumerate}
+And this is default drawing order for a product diagram:
+\begin{enumerate}
+    \item \texttt{diagram/decorate before}
+    \item Draws added edges
+    \item Top diagram:
+    \begin{enumerate}
+        \item Brick loop:
+        \begin{enumerate}
+            \item \texttt{brick/decorate before}
+            \item Draws brick
+            \item \texttt{brick/decorate after}
+        \end{enumerate}
+    \end{enumerate}
+    \item Bottom diagram:
+    \begin{enumerate}
+        \item Brick loop:
+        \begin{enumerate}
+            \item \texttt{brick/decorate before}
+            \item Draws brick
+            \item \texttt{brick/decorate after}
+        \end{enumerate}
+    \end{enumerate}
+    \item \texttt{diagram/decorate after}
+\end{enumerate}
+
+For the drawing order of a brick see Section~\ref{sec: order}.
+
+\subsubsection{For product diagrams only} \label{sec: prod only}
+
+The following options can only be used for product diagrams (\verb`\pmdProduct`).
+
+\DescribeMacro{diagram sep}
+specifies the vertical separation between the bottom row of vertices in top diagram and the top row of vertices in bottom diagram. Also controls the length of the added edges. Default is one.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct[ % Options
+    diagram sep=2
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct[ % Options
+    diagram sep=2
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{vertex sep}
+increases the vertical separation between the bottom row of vertices in top diagram and the top row of vertices in bottom diagram without altering the length of the added edges. Useful for things when adjusting the \texttt{row sep} of the bottom diagram for example. Default is zero.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct[ % Options
+    vertex sep=1
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5,
+            row sep=3
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct[ % Options
+    vertex sep=1
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5,
+            row sep=3
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{edges added}
+passes through options to the \verb`\draw` command of the added edges. The default is no argument.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct[ % Options
+    edges added={red,very thick}
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct[ % Options
+    edges added={red,very thick}
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{edges added phantom}
+This flag allows for the added edges to be hidden using the \texttt{phantom} command. Simply wraps the edge drawing macros with a \texttt{phantom} command. The default is false.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct[ % Options
+    edges added phantom
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct[ % Options
+    edges added phantom
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\DescribeMacro{edges added uncover}
+allows for the added edges to be uncovered in a \texttt{beamer} presentation\footnote{Make sure to use a \texttt{fragile} frame.} using the command \verb`\uncover<n->{text}`. Simply passes the slide uncover information \verb`<n->` to the embedded \texttt{uncover} command within the added edge drawing macros. The default is~\texttt{1-}.
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdProduct[ % Options
+    edges added uncover={2,4-7,9-}
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+\begin{center}
+\pmdProduct[ % Options
+    edges added uncover={2,4-7,9-}
+]{ % Added edges
+    {1}{5}
+}{ % Top diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            \pmdEmpty
+        }{ % Lower non-transversal edges
+            \pmdEmpty
+        }{ % Transversal edges
+            {1}{1}
+            {2}{2}
+            {3}{3}
+            {4}{4}
+            {5}{5}
+        }
+    }
+}{ % Bottom diagram
+    { % Brick 1
+        [ % Options
+            degree=5
+        ]{ % Upper non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Lower non-transversal edges
+            {2}{3}
+            {4}{5}
+        }{ % Transversal edges
+            {1}{1}
+        }
+    }
+}
+\end{center}
+
+\subsection{Global options}
+
+The following are all of the commands that change all diagrams after the command is given.
+
+\DescribeMacro{\pmdSetDefault}
+sets the default style of all diagrams and has the syntax \verb`\pmdSetDefault{<keys>}`, where the input keys are one of the following:
+\begin{itemize}
+    \item \texttt{brick} -- see Section~\ref{sec: brick/options},
+    \item \texttt{NTedges} -- non-transversal edges, see Section~\ref{sec: NT edge/options},
+    \item \texttt{Tedges} -- transversal edges, see Section~\ref{sec: T edge/options},
+    \item \texttt{brace} -- see Section~\ref{sec: brace},
+    \item \texttt{diagram} -- see Section~\ref{sec: diagram/options}.
+\end{itemize}
+Only the keys (both families, for example brick, and individual keys, for example degree) that are to be changed need to be given. Unspecified keys will retain their existing default values.
+
+The follow is an example use:
+\begin{center}
+    \begin{minipage}{\dimexpr0.85\textwidth-2\fboxrule-2\fboxsep\relax}
+        \begin{minipage}[c]{0.4\linewidth}
+\begin{verbatim}
+\pmdSetDefault{% Set default keys
+    brick={% Brick keys
+        degree=5,
+        vertices=blue
+    },
+    Tedges={% Transversal edge keys
+        edge draw=red
+    }
+}
+
+\pmdBrick[ % Options
+    % degree=5% Not needed anymore
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+\end{verbatim}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.4\linewidth}
+\pmdSetDefault{% Set default keys
+    brick={% Brick keys
+        degree=5,
+        vertices=blue
+    },
+    Tedges={% Transversal edge keys
+        edge draw=red
+    }
+}
+
+\pmdBrick[ % Options
+    % degree=5% Not needed anymore
+]{ % Upper non-transversal edges
+    {1}{2}
+    {2}{5}
+}{ % Lower non-transversal edges
+    {1}{2}
+    {3}{4}
+}{ % Transversal edges
+    {1}{1}
+    {3}{4}
+}
+        \end{minipage}
+    \end{minipage}%
+\end{center}
+
+By default, any keys that are provided in a specific instance of a diagram completely override the default value of those keys for that specific instance of a diagram. However, the following keys work differently in that the default value is loaded and then the specific instance of that key in a diagram is appended to the list of options given:
+\begin{itemize}
+    \item \texttt{brick} keys:
+    \begin{itemize}
+        \item \texttt{vertices},
+        \item \texttt{edges},
+        \item \texttt{edges non-transversal},
+        \item \texttt{edges upper},
+        \item \texttt{edges lower},
+        \item \texttt{edges transversal}.
+    \end{itemize}
+    \item \texttt{diagram} keys:
+    \begin{itemize}
+        \item \texttt{edges added}.
+    \end{itemize}
+\end{itemize}
+This means that, for example, if the default \texttt{brick/edges} key is set to \texttt{red} and for a specific diagram the \texttt{brick/edges} key is set to \texttt{thick}, the resulting edge will be \verb`{red, thick}`. In short, this works in the default way that \texttt{tikz} handles multiple options, including repeated options, given to a \verb`\draw` command. Options are appended in the following order:
+\begin{enumerate}
+    \item Global default value,
+    \item Diagram value,
+    \item Brick value,
+    \item Edge value (if key is for an edge).
+\end{enumerate}
+The following keys cannot be changed using the \verb`\pmdSetDefault` command:
+\begin{itemize}
+    \item \texttt{brick} keys:
+    \begin{itemize}
+        \item \texttt{vertices options},
+        \item \texttt{labels bottom options},
+        \item \texttt{labels top options},
+        \item \texttt{no dots},
+        \item \texttt{brace}.
+    \end{itemize}
+    \item \texttt{NTedges} keys:
+    \begin{itemize}
+        \item \texttt{options}.
+    \end{itemize}
+    \item \texttt{Tedges} keys:
+    \begin{itemize}
+        \item \texttt{height},
+        \item \texttt{options}.
+    \end{itemize}
+    \item \texttt{brace} keys:
+    \begin{itemize}
+        \item \texttt{label},
+        \item \texttt{options}.
+    \end{itemize}
+    \item \texttt{diagram} keys:
+    \begin{itemize}
+        \item \texttt{dots options}.
+    \end{itemize}
+\end{itemize}
+Instead their default commands should be changed as a work around. For example, the key \texttt{labels bottom options} can be set to a different default value by finding the corresponding default command in the style file, \verb`\pmdraw@drawLabelBottomDefault` for this example, and redefining that command to the new default value sought.
+
+It should be noted that for some of these keys the above mentioned work around does not work. An example of this is for the \texttt{height} key as this is defined more complexly than just via a single command.
+
+Due to the use of the \texttt{xkeyval} package which only has the ability to save one value for a key, it is not possible to have more than one default option defined. A substantial rewrite of the package would be needed to have an arbitrary number of predefined styles that can quickly be used.
+
+\DescribeMacro{\pmdSetToOriginalDefault}
+sets the style of all diagrams to the default original style of the package. In effect it undoes any and all changes made with \verb`\pmdSetDefault`.
+
+\section{Future features/work}
+
+I have attempted to make most use cases easy to use with dedicated functionality that does not require significant \LaTeX\ knowledge whilst at the same time provide more advanced interfaces to allow for hopefully almost complete customisability for those who put in the effort.
+
+Having said that, please do let me know if there are features or improvements you will like to see added.
+
+The following are some of the aims for the future for this package:
+\begin{enumerate}
+    \item Fix bugs.
+    \item Add warning and error messages to log.
+    \item Allow all brick keys to work as diagram keys that apply to all bricks in a diagram. This will require setting up a flag for each key so that the diagram key sets the brick key but the brick key is not reset after drawing the first brick. This process also will need to be able to handle when a single brick has a custom special different key value and that this is reset to the digram key value and not the global default key value.
+    \item Allow appropriate diagram keys to work as brick keys. Notably the \texttt{grid} key.
+    \item The creation of user profiles that allows for fast and efficient setting of default key values that are different to the package defaults. Hence within a diagram, there can be a number of different diagram styles that can be accessed with one command. That is, in the options for a diagram, have this profile key.
+    \item Allow for adjusting the horizontal spacing of vertices. Need to think about making that a simple scale factor so that integer interface for edge positions is the same but then hooks will have very messy coordinates or keep it as absolute coordinates with messy edges. Alternatively, do both, allowing the user to choose which option to do and somehow distinguish between the two in the background.
+    \item Create \texttt{pmdMirror} command that mirrors all upper non-transversals into lower non-transversals.
+    \item Create \texttt{invert} key for bricks, diagrams and product diagrams that inverts everything. Probably easiest done with a \texttt{scope} environment around everything and \texttt{yscale=-1}.
+    \item For product diagram, have interface where you input diagram instead of bricks so that you have access to diagram options.
+    \item Create a transversal edge key \texttt{identity} so that all edges in between the two values are straight vertical edges. Thus eliminating the need to write out each edge manually.
+    \item Create \texttt{shift} key for edges that shifts horizontal position.
+    \item Decouple the uncover of labels from \texttt{vertices top uncover}/\texttt{vertices bottom uncover}.
+    \item Decouple the phantom of labels from \texttt{vertices top phantom}/\texttt{vertices bottom phantom}.
+    \item For all of the keys in Section~\ref{sec: prod only}, create a top and bottom version to be used in \texttt{pmdProductTriple}.
+\end{enumerate}
+
+\section{Examples}
+
+This section is simply a collection of example diagrams. The code for them can be found in the \texttt{examples} folder. Perhaps you will find them useful as a starting point for your diagrams or to see what this package is capable of.
+
+\usetikzlibrary{patterns}
+
+\foreach \example in {1,...,25}{
+    \paragraph{Example~\example}
+    \begin{center}
+        \input{examples/example-\example}
+    \end{center}
+}
+
+\end{document}

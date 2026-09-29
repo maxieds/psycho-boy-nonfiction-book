@@ -1,0 +1,480 @@
+\newpage
+\section{Class \Iclass{ellipse}} % (fold)
+\label{sec:class_ellipse}
+
+{\color{red} CETTE SECTION EST OBSOLÈTE. Il est préférable d'utiliser la classe \code{conic}
+}
+
+\subsection{Attributes of an ellipse} % (fold)
+\label{sub:attributes_of_an_ellipse}
+The first attributes are the three points that define the ellipse:  : the \Iattr{ellipse}{center} , the \Iattr{ellipse}{vertex} and the\Iattr{ellipse}{covertex}. The first method to define an ellipse is to give its center, then the point named \tkzname{vertex} which defines the major axis and finally the point named \tkzname{covertex} which defines the minor axis.
+
+
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Ellipse attributes.}\label{ellipse:att}
+\begin{tabular}{ll}
+\toprule
+\textbf{Attributes}     & \textbf{Application}\\
+\Iattr{ellipse}{center} & center of the ellipse\\
+\Iattr{ellipse}{vertex} & point of the major axis and of the ellipse\\
+\Iattr{ellipse}{covertex} & point of the minor axis and of the ellipse\\
+\Iattr{ellipse}{type}& The type is 'ellipse'\\
+\Iattr{ellipse}{Rx}& Radius from center to vertex\\
+\Iattr{ellipse}{Ry}& Radius from center to covertex\\
+\Iattr{ellipse}{slope}& Slope of the line passes through the foci\\
+\Iattr{ellipse}{Fa}& First focus\\
+\Iattr{ellipse}{Fb}& Second focus\\
+\Imeth{ellipse}{south} & See next example \ref{ssub:attributes_of_an_ellipse} \\
+\Imeth{ellipse}{north} &   \\
+\Imeth{ellipse}{west}  &   \\
+\Imeth{ellipse}{east}  &   \\
+\bottomrule %
+\end{tabular}
+\egroup
+
+
+\subsubsection{Attributes of an ellipse: example} % (fold)
+\label{ssub:attributes_of_an_ellipse}
+\begin{minipage}{.45\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.C   = point: new (3 , 2)
+   z.A   = point: new (5 , 1)
+   L.CA  = line : new (z.C,z.A)
+   z.b   = L.CA.north_pa
+   L     = line : new (z.C,z.b)
+   z.B   = L : point (0.5)
+   E     = ellipse: new (z.C,z.A,z.B)
+   a     = E.Rx
+   b     = E.Ry
+   z.F1  = E.Fa
+   z.F2  = E.Fb
+   slope = math.deg(E.slope)
+   z.E   = E.east
+   z.N   = E.north
+   z.W   = E.west
+   z.S   = E.south
+   z.Co  = E.covertex
+   z.Ve  = E.vertex
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.55\textwidth}
+   \directlua{%
+init_elements()
+   z.C  = point: new (3 , 2)
+   z.A  = point: new (5 , 1)
+   L.CA = line : new (z.C,z.A)
+   z.b  = L.CA.north_pa
+   L    = line : new (z.C,z.b)
+   z.B  = L : point (0.5)
+   E    = ellipse: new (z.C,z.A,z.B)
+   a    = E.Rx
+   b    = E.Ry
+   z.F1 = E.Fa
+   z.F2 = E.Fb
+   slope    = math.deg(E.slope)
+   z.E  = E.east
+   z.N  = E.north
+   z.W  = E.west
+   z.S  = E.south
+   z.Co = E.covertex
+   z.Ve = E.vertex
+   }
+   \begin{tikzpicture}
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2}
+   \tkzGetNodes
+   \tkzDrawCircles[teal](C,A)
+   \tkzDrawEllipse[red](C,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{slope})
+   \tkzDrawPoints(C,A,B,b,W,S,F1,F2)
+   \tkzLabelPoints(C,A,B)
+   \tkzDrawLine[add = .25 and .25](A,W)
+   \tkzLabelSegment[pos=1.25,above,sloped](A,W){slope = \pgfmathprintnumber{\tkzUseLua{slope}}}
+   \tkzLabelPoint[below](S){South}
+   \tkzLabelPoint[below left](F1){Focus 1}
+   \tkzLabelPoint[below left](F2){Focus 2}
+   \tkzLabelPoint[above right](Ve){Vertex ; East}
+   \tkzLabelPoint[above right](Co){Covertex ; North}
+   \end{tikzpicture}
+\end{minipage}
+
+\begin{Verbatim}
+\begin{tikzpicture}
+   \pgfkeys{/pgf/number format/.cd,fixed,precision=2}
+   \tkzGetNodes
+   \tkzDrawCircles[teal](C,A)
+   \tkzDrawEllipse[red](C,\tkzUseLua{a},\tkzUseLua{b},
+   \tkzUseLua{slope})
+   \tkzDrawPoints(C,A,B,b,W,S,F1,F2)
+   \tkzLabelPoints(C,A,B)
+   \tkzDrawLine[add = .25 and .25](A,W)
+   \tkzLabelSegment[pos=1.5,above,sloped](A,W){%
+    slope = \pgfmathprintnumber{\tkzUseLua{slope}}}
+   \tkzLabelPoint[below](S){South}
+   \tkzLabelPoint[below left](F1){Focus 1}
+   \tkzLabelPoint[below left](F2){Focus 2}
+   \tkzLabelPoint[above right](Ve){Vertex ; East}
+   \tkzLabelPoint[above right](Co){Covertex ; North}
+\end{tikzpicture}
+\end{Verbatim}
+
+
+% \caption{Class Ellipse}
+% subsection attributes_of_an_ellipse (end)
+
+
+\subsection{Methods of the class ellipse} % (fold)
+\label{sub:methods_of_the_class_ellipse}
+Before reviewing the methods and functions related to ellipses, let's take a look at how you can draw ellipses with \pkg{tkz-elements}. The \tkzcname{tkzDrawEllipse} macro requires 4 arguments: the center of the ellipse, the long radius (on the focus axis), the short radius and the angle formed by the focus axis.
+The last three arguments must be transferred from \tkzNameEnv{tkzelements} to \tkzNameEnv{tikzpicture}.
+To do this, you'll need to use a  macro: \tkzcname{tkzUseLua} defined in \pkg{tkz-elements}. Refer to \ref{ssub:other_transfers} or \ref{sub:transfer_from_lua_to_tex} or  next examples. 
+
+
+\bgroup
+\catcode`_=12 
+\small
+\captionof{table}{Ellipse methods.}\label{ellipse:met}
+\begin{tabular}{ll}
+\toprule
+\textbf{Methods} & \textbf{Example}     \\
+\midrule 
+\Imeth{ellipse}{new (pc, pa ,pb)  }   &  E = ellipse: new ( center, vertex, covertex )   \\
+\midrule
+\Imeth{ellipse}{foci (f1,f2,v)} &  E = ellipse: foci ( focus 1, focus 2, vertex )    \\
+\Imeth{ellipse}{radii (c,a,b,sl) }     &   E = ellipse: radii ( center, radius a, radius b, slope )  \\
+\Imeth{ellipse}{in\_out (pt) }   & pt in/out of the ellipse  \\
+\Imeth{ellipse}{tangent\_at (pt) }     &  [ ex. \ref{ssub:method_point} ]  \\
+\Imeth{ellipse}{tangent\_from (pt) }    &  [ex. \ref{ssub:method_point} ]   \\
+\Imeth{ellipse}{point (t)  }   &  vertex = point (0) covertex = point (0.25) [ex. \ref{ssub:method_point} ]  \\
+\Imeth{ellipse}{orthoptic\_circle () }    &  [ex. \ref{ssub:steiner_inellipse_and_circumellipse}]   \\
+\bottomrule
+\end{tabular}
+
+\egroup
+
+\subsubsection{Method \Imeth{ellipse}{new}} % (fold)
+\label{ssub:method_imeth_ellipse_new}
+The main method for creating a new ellipse is \Imeth{ellipse}{new}. The arguments are three: \Iattr{ellipse}{center}, \Iattr{ellipse}{vertex} and \Iattr{ellipse}{covertex}
+For attributes  [\ref{sec:class_ellipse}].
+
+\begin{minipage}{0.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.C      = point: new (3 , 2)
+   z.A      = point: new (5 , 1)
+   z.B      = z.C : homothety(0.5,
+              z.C : rotation (math.pi/2,z.A))
+   E        = ellipse: new (z.C,z.A,z.B)
+   a        = E.Rx
+   b        = E.Ry
+   slope = math.deg(E.slope)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawCircles[teal](C,A)
+   \tkzDrawEllipse[red](C,\tkzUseLua{a},
+         \tkzUseLua{b},\tkzUseLua{slope})
+   \tkzDrawPoints(C,A,B)
+   \tkzLabelPoints(C,A,B)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+init_elements()
+z.C    = point: new (3 , 2)
+z.A    = point: new (5 , 1)
+z.B    = z.C : homothety(0.5,
+         z.C : rotation (math.pi/2,z.A))
+E     = ellipse: new (z.C,z.A,z.B)
+a     = E.Rx
+b     = E.Ry
+slope = math.deg(E.slope)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawCircles[teal](C,A)
+\tkzDrawEllipse[red](C,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{slope})
+\tkzDrawPoints(C,A,B)
+\tkzLabelPoints(C,A,B)
+\end{tikzpicture}
+\end{minipage}
+
+The macro \tkzcname{tkzUseLua (variable)} is used to transfer values to \TIKZ\ or \pkg{tkz-euclide}.
+% subsubsection method_imeth_ellipse_new (end)
+
+
+\subsubsection{Method \Imeth{ellipse}{foci}} % (fold)
+\label{ssub:function_tkzname_ellipse__foci}
+The first two points are the foci of the ellipse, and the third one is the vertex. We can deduce all the other characteristics from these points. 
+\emph{The function launches the |new| method, defining all the characteristics of the ellipse.}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A      = point: new (0 , 0)
+   z.B      = point: new (5 , 1)
+   L.AB     = line : new (z.A,z.B)
+   z.C      = point: new (.8 , 3)
+   T.ABC    = triangle: new (z.A,z.B,z.C)
+   z.N      = T.ABC.eulercenter
+   z.H      = T.ABC.orthocenter
+   z.O      = T.ABC.circumcenter
+   _,_,z.Mc = get_points (T.ABC: medial ())
+   L.euler  = line: new (z.H,z.O)
+   C.circum = circle: new (z.O,z.A)
+   C.euler  = circle: new (z.N,z.Mc)
+   z.i,z.j  = intersection (L.euler,C.circum)
+   z.I,z.J  = intersection (L.euler,C.euler)
+   E        = ellipse: foci (z.H,z.O,z.I)
+   L.AH     = line: new (z.A,z.H)
+   z.X      = intersection (L.AH,C.circum)
+   L.XO     = line: new (z.X,z.O)
+   z.R,z.S  = intersection (L.XO,E)
+   a,b      = E.Rx,E.Ry
+   ang      = math.deg(E.slope)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \directlua{%
+init_elements()
+     z.A   = point: new (0 , 0)
+     z.B   = point: new (5 , 1)
+     L.AB  = line : new (z.A,z.B)
+     z.C   = point: new (.8 , 3)
+     T.ABC     = triangle: new (z.A,z.B,z.C)
+     z.N = T.ABC.eulercenter
+     z.H = T.ABC.orthocenter
+     z.O = T.ABC.circumcenter
+     _,_,z.Mc  = get_points (T.ABC: medial ())
+     L.euler   = line: new (z.H,z.O)
+     C.circum  = circle: new (z.O,z.A)
+     C.euler   = circle: new (z.N,z.Mc)
+     z.i,z.j   = intersection (L.euler,C.circum)
+     z.I,z.J   = intersection (L.euler,C.euler)
+     E     = ellipse: foci (z.H,z.O,z.I)
+     L.AH  = line: new (z.A,z.H)
+     z.X   = intersection (L.AH,C.circum)
+     L.XO  = line: new (z.X,z.O)
+     z.R,z.S   = intersection (L.XO,E)
+     a,b   = E.Rx,E.Ry
+     ang   = math.deg(E.slope)
+  }
+  
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawCircles[cyan](O,A N,I)
+    \tkzDrawSegments(X,R A,X)
+    \tkzDrawEllipse[red](N,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{ang})
+    \tkzDrawLines[add=.2 and .5](I,H)
+    \tkzDrawPoints(A,B,C,N,O,X,H,R,S,I)
+    \tkzLabelPoints[above](C,X)
+    \tkzLabelPoints[above right](N,O)
+    \tkzLabelPoints[above left](R)
+    \tkzLabelPoints[left](A)
+    \tkzLabelPoints[right](B,I,S,H)
+    \end{tikzpicture}
+  \end{center}
+
+
+\end{minipage}
+
+\begin{Verbatim}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawCircles[cyan](O,A N,I)
+   \tkzDrawSegments(X,R A,X)
+   \tkzDrawEllipse[red](N,\tkzUseLua{a},
+      \tkzUseLua{b},\tkzUseLua{ang})
+   \tkzDrawLines[add=.2 and .5](I,H)
+   \tkzDrawPoints(A,B,C,N,O,X,H,R,S,I)
+   \tkzLabelPoints[above](C,X)
+   \tkzLabelPoints[above right](N,O)
+   \tkzLabelPoints[above left](R)
+   \tkzLabelPoints[left](A)
+   \tkzLabelPoints[right](B,I,S,H)
+   \end{tikzpicture}
+  \end{Verbatim}
+% subsubsection function_tkzname_ellipse__foci (end)
+
+\subsubsection{Method \Imeth{ellipse}{point} and \Imeth{ellipse}{radii}} % (fold)
+\label{ssub:ellipse_method_point}
+ The method \Imeth{ellipse}{point} defines a point $M$ of the ellipse whose coordinates are $(a\times  cos(phi), b\times sin(phi))$. |phi| angle between (center,vertex) and (center,M)
+
+ \emph{With \code{lua}, the radian is used as unit for angles. }
+  
+\vspace{6pt}
+\begin{minipage}{0.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.C         = point: new (2 , 3)
+   z.A         = point: new (-1 , -2)
+   a           = 4
+   b           = 3
+   ang         = math.deg(-math.pi/4)
+   E           = ellipse: radii (z.C,a,b,-math.pi/4)
+   z.V         = E : point (0)
+   z.K         = E : point (1)
+   z.CoV       = E : point (0.25)
+   z.X         = E : point (0.5)
+   L           = E :tangent_at (z.V)
+   z.x,z.y     = get_points(L)
+   L.ta,L.tb   = E :tangent_from (z.A)
+   z.M         = L.ta.pb
+   z.N         = L.tb.pb
+   L.K         = E :tangent_at (z.K)
+   z.ka,z.kb   = get_points(L.K)
+}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+init_elements()
+z.C         = point: new (2 , 3)
+z.A         = point: new (-1 , -2)
+a           = 4
+b           = 3
+ang         = math.deg(-math.pi/4)
+E           = ellipse: radii (z.C,a,b,-math.pi/4)
+z.V         = E : point (0)
+z.K         = E : point (1)
+z.CoV       = E : point (0.25)
+z.X         = E : point (0.5)
+L           = E :tangent_at (z.V)
+z.x,z.y     = get_points(L)
+L.ta,L.tb   = E :tangent_from (z.A)
+z.M         = L.ta.pb
+z.N         = L.tb.pb
+L.K         = E :tangent_at (z.K)
+z.ka,z.kb   = get_points(L.K)
+}
+\begin{tikzpicture}[scale = .6]
+\tkzGetNodes
+\tkzDrawSegments(C,V C,CoV)
+\tkzDrawLines(x,y A,M A,N ka,kb)
+\tkzLabelSegment(C,V){$a$}
+\tkzLabelSegment[right](C,CoV){$b$}
+\tkzDrawEllipse[teal](C,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{ang})
+\tkzDrawPoints(C,V,CoV,X,x,y,M,N,A,K)
+\tkzLabelPoints(C,V,A,M,N,K)
+\tkzLabelPoints[above left](CoV)
+\end{tikzpicture}
+\end{minipage}
+
+\begin{Verbatim}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawSegments(C,V C,CoV)
+   \tkzDrawLines(x,y A,M A,N ka,kb)
+   \tkzLabelSegment(C,V){$a$}
+   \tkzLabelSegment[right](C,CoV){$b$}
+   \tkzDrawEllipse[teal](C,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{ang})
+   \tkzDrawPoints(C,V,CoV,X,x,y,M,N,A,K)
+   \tkzLabelPoints(C,V,A,M,N,K)
+   \tkzLabelPoints[above left](CoV)
+\end{tikzpicture}
+\end{Verbatim}
+% subsubsection method_point (end)
+% subsection methods_of_the_class_ellipse (end)
+
+\subsubsection{Example: drawing ellipse} % (fold)
+\label{ssub:example_drawing_ellipse}
+
+ It is possible to replace the line
+ 
+ |\tkzDrawEllipse[teal](C,\tkzUseLua{a},\tkzUseLua{b},\tkzUseLua{ang})|
+
+ by |\tkzDrawLuaEllipse[teal](C,A,B)|. Macro arguments: ellipse center, vertex and covertex.
+
+\vspace{6pt}
+\begin{Verbatim}
+\begin{tkzelements}
+z.C   = point: new (0,0)
+z.A   = point:new(4,2)
+L.CA  = line : new (z.C,z.A)
+z.b   = L.CA.north_pa
+L     = line : new (z.C,z.b)
+z.B   = L : point (0.5)
+E     = ellipse: new (z.C,z.A,z.B) a = E.Rx
+b     = E.Ry
+z.F1  = E.Fa
+z.F2  = E.Fb
+slope = math.deg(E.slope)
+z.E   = E.east
+z.N   = E.north
+z.W   = E.west
+z.S   = E.south
+z.Co  = E.covertex
+z.Ve  = E.vertex
+z.M   = E : point (.125)
+\end{tkzelements}
+ \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLuaEllipse[red](C,A,B)    
+  %\tkzDrawEllipse[red](C,\tkzUseLua{a},
+  \tkzUseLua{b},\tkzUseLua{slope})
+   \tkzDrawPoints(C,A,B,W,S,F1,F2,M)
+   \tkzLabelPoints(C,A,B)
+   \tkzDrawLine[add = .25 and .25](A,W)
+   \tkzLabelSegment[pos=1,above,sloped](A,W){slope =  
+   \pgfmathprintnumber{\tkzUseLua{slope}}}
+   \tkzLabelPoint[below](S){South}
+   \tkzLabelPoint[below left](F1){Focus 1}
+   \tkzLabelPoint[below left](F2){Focus 2}
+   \tkzLabelPoint[above right](Ve){Vertex = East}
+   \tkzLabelPoint[above right](Co){Covertex = North}
+ \end{tikzpicture}
+\end{Verbatim}
+
+\begin{tkzelements}
+z.C   = point: new (0,0)
+z.A   = point:new(4,2)
+L.CA  = line : new (z.C,z.A)
+z.b   = L.CA.north_pa
+L     = line : new (z.C,z.b)
+z.B   = L : point (0.5)
+E     = ellipse: new (z.C,z.A,z.B) a = E.Rx
+b     = E.Ry
+z.F1  = E.Fa
+z.F2  = E.Fb
+slope = math.deg(E.slope)
+z.E   = E.east
+z.N   = E.north
+z.W   = E.west
+z.S   = E.south
+z.Co  = E.covertex
+z.Ve  = E.vertex
+z.M   = E : point (.125)
+\end{tkzelements}
+ 
+\begin{center}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawLuaEllipse[red](C,A,B)    
+  \tkzDrawPoints(C,A,B,W,S,F1,F2,M)
+  \tkzLabelPoints(C,A,B)
+  \tkzDrawLine[add = .25 and .25](A,W)
+  \tkzLabelSegment[pos=1,above=12pt,sloped](A,W){slope =  
+  \pgfmathprintnumber{\tkzUseLua{slope}}}
+  \tkzLabelPoint[below](S){South}
+  \tkzLabelPoint[below left](F1){Focus 1}
+  \tkzLabelPoint[below left](F2){Focus 2}
+  \tkzLabelPoint[above right](Ve){Vertex = East}
+  \tkzLabelPoint[above right](Co){Covertex = North}
+\end{tikzpicture}
+\end{center}
+
+ 
+% subsubsection example_drawing_ellipse (end)
+% section class_ellipse (end)
+\endinput

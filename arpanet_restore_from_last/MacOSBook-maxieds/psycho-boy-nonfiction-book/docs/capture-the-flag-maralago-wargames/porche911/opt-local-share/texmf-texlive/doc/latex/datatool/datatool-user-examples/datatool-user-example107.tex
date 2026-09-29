@@ -1,0 +1,50 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 107 Loading and Saving Data (Be Careful of Category Codes)
+% Label: "ex:loadcustomers"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents}[noheader,overwrite]{customers.csv}
+Id,Organisation,Surname,Forename,Email,Age
+1,,Parrot,Polly,pp@example.com,42
+2,University of Somewhere,Canary,Mabel,mc@example.com
+3,University of Somewhere,Zebra,Zoë,zz@example.com,21
+4,Zinnia Florestry,Arara,José,ja@example.com,42
+5,,Duck,Dickie,dd@example.com,
+6,Newt Fellowship,Axolotl,Lizzie,la@example.com
+7,Avian Emporium,Canary,Fred,fc@example.com,19
+8,Newt Fellowship,,Molgina,m@example.com
+9,,Mander,Sally
+10,Élite Emporium,Fant,Eli,ef@example.com,101
+\end{filecontents}
+
+\usepackage{datatool}
+\DTLsetup{default-name=customers}
+\DTLread{customers} 
+\begin{document}
+\DTLaction[key=Email,value=fc@example.com]{select row}
+Row: \number\dtlrownum.
+% Save as DBTEX v3.0:
+\DTLwrite[format=dbtex-3,overwrite=allow]{customers-v3} 
+
+% Read this new file back:
+\DTLread[format=dbtex,name=customers-v3]{customers-v3}
+\DTLaction[
+ name=customers-v3,
+ key=Email,value=fc@example.com
+]{select row}
+Row: \number\dtlrownum.
+
+
+% Save original as DBTEX v2.0:
+\DTLwrite[format=dbtex-2,overwrite=allow]{customers-v2} 
+
+% `customers' database needs to be deleted as DBTEX v2.0 has the name hard-coded:
+\DTLaction{delete}
+% Read this new file back:
+\DTLread[format=dbtex]{customers-v2}
+% Row will no longer be found as DBTEX v2.0 changes category code of `@':
+\DTLaction[key=Email,value=fc@example.com]{select row}
+Row: \number\dtlrownum. 
+\end{document}

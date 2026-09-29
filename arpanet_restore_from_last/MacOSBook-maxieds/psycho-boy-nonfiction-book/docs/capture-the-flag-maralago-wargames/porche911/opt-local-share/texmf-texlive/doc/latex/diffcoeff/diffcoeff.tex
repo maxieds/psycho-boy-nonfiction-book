@@ -1,0 +1,3383 @@
+%% LyX 2.4.0~beta5 created this file.  For more info, see https://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{report}
+\usepackage{lmodern}
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[latin9]{inputenc}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\synctex=-1
+\usepackage{color}
+\definecolor{shadecolor}{rgb}{1, 0.667969, 0.5}
+\usepackage{babel}
+\usepackage{cprotect}
+\usepackage{wrapfig}
+\usepackage{booktabs}
+\usepackage{framed}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{esint}
+\usepackage[pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=true,pdfborder={0 0 1},backref=section,colorlinks=true,pdfpagemode=FullScreen]
+ {hyperref}
+\hypersetup{
+ pdfborderstyle=}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+\newcommand{\noun}[1]{\textsc{#1}}
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{centred}%
+  {\begin{center}}{\end{center}}
+\newenvironment{example}%
+{\begin{center}\ttfamily}{\end{center}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage[def-file=diffcoeff5,spaced=-1]{diffcoeff}
+
+% nabla in numer, d in denom
+\difdef { f, s } { n } 
+  {
+    op-symbol     = \nabla,
+    op-symbol-alt = \mathrm{d}
+  }
+% no sub nudge (a sea of white space)
+\difdef { fp } { wsp } 
+  { sub-nudge = 0 mu }
+% align op left; no italic nudge 
+\difdef { f } { left0 } 
+  {
+    *op-set-left  = true,
+    *italic-nudge = 0 mu
+  }
+% align op left; italic nudge
+\difdef { fp } { left } 
+  {
+    op-symbol      = \partial,
+    op-order-nudge = 1 mu,
+    *op-set-left  = true,
+    *italic-nudge = 3 mu
+  }
+% partial variant of \diff
+\difdef { f } { p }
+  {
+    op-symbol      = \partial,
+    op-order-nudge = 1 mu
+  }
+% partial, 3mu sep of terms
+\difdef { fp, sp } { 3mu } 
+  {  multi-term-sep  = 3 mu }
+% D jacobian
+\difdef { j } { D } 
+  { op-symbol = D }
+% square bracket jabobian
+\difdef { j } { [ } 
+  { 
+    lvwrap-Ldelim = \onemu\mleft [,
+    lvwrap-Rdelim = \mright ] 
+  }
+% differential d^n x
+\difdef { l } { dn }{ style = d^ }
+\NewDocumentCommand \dn { m m } 
+  { \dl.dn.[#1]{#2} }
+% mimicking the \Braket command
+% of the braket package
+\difdef{ s }{ bk }
+  { 
+      slash-tok = ,
+      op-symbol =  ,
+      multi-term-sep = 3mu\middle|\mskip3mu ,
+      outer-Ldelim=\left\langle ,
+      outer-Rdelim=\right\rangle
+  }
+\NewDocumentCommand \Braket { m }
+  { 
+    \difoverride {\negmu}
+  	\difs.bk.{}{#1}[] 
+  }
+
+\ifdefined\showcaptionsetup
+ % Caption package is used. Advise subfig not to load it again.
+ \PassOptionsToPackage{caption=false}{subfig}
+\fi
+\usepackage{subfig}
+\makeatother
+
+\begin{document}
+\title{\texttt{diffcoeff}~\\
+ a \LaTeX{} package to ease\texttt{ }the~\\
+ writing of differential coefficients \\
+ Version 5.4}
+\author{Andrew Parsloe\\
+{\small (ajparsloe@gmail.com)}}
+\maketitle
+\begin{abstract}
+\noindent\verb`diffcoeff` is a \LaTeX{} package to ease the writing
+of ordinary, partial and other derivatives of arbitrary algebraic
+or numeric order. For mixed partial derivatives, the total order of
+differentiation is calculated by the package. Optional arguments allow
+for points of evaluation (ordinary derivatives), or variables held
+constant (partial derivatives), and the placement of the differentiand
+in numerator or appended. Besides $\diff yx$, forms like $\difs yx$
+and $\difcp yx$ are also available, as well as derivatives built
+from $D$, $\Delta$, $\delta$, and configurable jacobians and differentials.
+Other notations like line elements ($\dl.+.{x,y,z}^{2}$) and bra-kets
+are easily produced. 
+
+Version 5 of \verb`diffcoeff` more fully embraces the configurability
+offered by \verb`xtemplate` than earlier versions. Some incompatibilities
+have arisen, but all is not lost: version 4 is still available with
+the command
+
+\verb`\usepackage[<options>]{diffcoeff}[=v4]`
+\end{abstract}
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+
+\subsubsection*{For users of version 4}
+
+The \verb`\diff` and \verb`\diffp` commands of version 4 of \verb`diffcoeff`
+remain, but lack the `spacing switch' \verb`!` (which on reflection
+was a mistake) and, more noticeably, the `slash switch' \verb`/`.
+Slash-fraction derivatives are now created with the \verb`\difs`
+and \verb`\difsp` commands. New commands \verb`\difc` and \verb`\difcp`
+produce derivatives in `compact notation' like $\difc yx$ and $\difcp yx$.
+The order-override option (for mixed partial derivatives) has been
+changed to use angle brackets (for clarity) or a command \verb`\difoverride`.
+The sequential order of differentiand and variable(s) of differentiation
+can now be reversed, when the differentiand is appended, by using
+a second star, e.g., \verb`\diffp**`. The two-argument \verb`\diffdef`
+command of earlier versions has been replaced by the three-argument
+command \verb`\difdef`, the additional argument determining which
+one or more of the \verb`f`, \verb`s`, \verb`c`, \verb`fp`, \verb`sp`
+or \verb`cp` forms the defined variant applies to. The differential
+command \verb`\dl` has been rewritten and is now fully template-configurable
+(allowing easy writing of line elements like $\dl.+.{x,y,z}^{2}$),
+and the jacobian command \verb`\jacob` is also configurable. Indeed
+version 5 of \verb`diffcoeff` more fully embraces the configurability
+offered by the \verb`xtemplate` package than previous versions, bringing
+other notations -- like those of the \verb`braket` package -- within
+its compass.
+
+\subsubsection*{ISO defaults}
+
+The \verb`ISO` package option is redundant. Unlike the default set-up
+in version 4, the defaults in version 5 of \verb`diffcoeff` are chosen
+to reflect ISO recommendations (see the standard ISO 80000-2). In
+particular this means upright `d's and subscripted parentheses enclosing
+a derivative to indicate a point of evaluation. This document is written
+with those defaults. For those (like the author) who prefer math-italic
+`d's and a subscripted vertical rule to indicate a point of evaluation,
+the means of creating `variant forms' or changing the defaults is
+readily available; see §§\ref{sec:Variant-forms}, \ref{sec:ChangingDefaults}. \end{shaded}%
+\end{minipage}
+
+\tableofcontents{}
+
+\chapter{Introduction}
+
+\verb`diffcoeff.sty` is written in the \verb`expl3` language of
+\LaTeX 3, now part of standard \LaTeX{} since February 2020. A \LaTeX{}
+distribution from or later than that date is assumed. The package
+also requires the packages \verb`xtemplate` (part of the \verb`l3packages`
+bundle) and \verb`mleftright`. The package is loaded in the usual
+way by entering 
+\begin{verbatim}
+    \usepackage{diffcoeff}
+\end{verbatim}
+in the preamble of your document or, if package options are being
+used,\footnote{Angle brackets indicate possible user input (\emph{without} the angle
+brackets).}
+\begin{verbatim}
+    \usepackage[<options>]{diffcoeff} 
+\end{verbatim}
+The interface of \verb`diffcoeff` with version 5 has changed from
+earlier versions. If you want the familiar behaviour of version 4,
+add to these commands a trailing optional argument like this,
+\begin{verbatim}
+    \usepackage[<options>]{diffcoeff}[=v4]
+\end{verbatim}
+(with no space after the `=' sign!). Of course you will not get
+the new features of version 5. Working with version 4 is described
+in the document \verb`diffcoeff4.pdf`.
+
+\section{Package options}
+
+\label{sec:Package-options}There are four package options, which
+are entered in a comma-separated list in the optional argument of
+the \verb`\usepackage` command. The \emph{second} and \emph{fourth}
+are new with version 5 of \verb`diffcoeff`.
+\begin{enumerate}
+\item The first package option is the \verb`spaced` option which takes
+three values:
+\begin{enumerate}
+\item \verb`spaced=1` inserts a small space before the differentiand; this
+is the default so that entering \verb`spaced` is equivalent to \verb`spaced=1`;
+\item \verb`spaced=0` inserts no space before the differentiand; \verb`diffcoeff`
+is initialized to \verb`spaced=0` so that if the spaced option is
+not used \verb`spaced=0` is assumed;
+\item \verb`spaced=-1` inserts a small space before the differentiand \emph{if
+it contains more than one token}, and no space otherwise. The present
+document uses \verb`spaced=-1`.
+\end{enumerate}
+This option is discussed in §\ref{subsec:Spacing-before-derivand}.
+\item For the second package option, by entering \verb`mleftright` in the
+options list the command \verb`\mleftright` is automatically inserted
+in the preamble. The effect is to change all occurrences of \verb`\left`,
+\verb`\right` in the document to \verb`\mleft`, \verb`\mright`
+so that the spacing around scalable delimiters modified by \verb`\left`,
+\verb`\right` is reduced; see the box below and §\ref{subsec:mleftright}.
+The present document does not use this package option. 
+\item The third package option requires the \verb`<filename>` of a file
+with extension \verb`.def`, \verb`<filename>.def`, containing definitions
+of variant forms of derivative (see §\ref{sec:Variant-forms}):
+\begin{verbatim}
+    \usepackage[def-file=<filename>]{diffcoeff}
+\end{verbatim}
+This is discussed in §\ref{subsec:The-.def-file}. The present document
+uses the package option \verb`def-file=diffcoeff5`.
+\item The fourth package option \verb`DIF` is a comma list of \emph{key=value}
+statements amending the built-in defaults for the `grandparent'
+template \verb`DIF`; see §\ref{subsec:Changing-DIF-defaults}. The
+present document does not use this package option.
+\end{enumerate}
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+To see the effect of the \verb`mleftright` package, consider the
+expression
+\begin{centred}
+\verb`\[ \ln \left(\frac xy\right),\quad\sin\left(x^2\right). \]`
+$\Longrightarrow$ \[ \ln \left(\frac xy\right),\quad\sin\left(x^2\right). \]
+\end{centred}
+in which there is significant whitespace before and after the parentheses.
+The package \verb`mleftright` enables this whitespace to be reduced
+by using \verb`\mleft`, \verb`\mright` in place of \verb`\left`,
+\verb`\right`:
+\begin{centred}
+\verb`\[ \ln \mleft(\frac xy\mright),\quad\sin\mleft(x^2\mright). \]`
+$\Longrightarrow$ \[ \ln \mleft(\frac xy\mright),\quad\sin\mleft(x^2\mright). \]
+\end{centred}
+\end{shaded}%
+\end{minipage}
+
+\noindent{}%
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+If you put \verb`\mleftright` in the preamble, which is what the
+\verb`mleftright` package option does, then all occurrences of \verb`\left`,
+\verb`\right` in the document will be affected. \verb`\left`, \verb`\right`
+can be restored to their normal behaviour by the command \verb`\mleftrightrestore`.
+Rather than use \verb`\mleft`, \verb`\mright` explicitly, as in
+the example, the same effect can be obtained by using \verb`\left`,
+\verb`\right` and preceding the expression with the command \verb`\mleftright`:
+\begin{verbatim}
+  \mleftright 
+  \[ \ln \left(\frac xy\right),\quad\sin \left(x^2\right). \]
+  \mleftrightrestore
+\end{verbatim}
+$\Longrightarrow$   \mleftright 
+  \[ \ln \left(\frac xy\right),\quad\sin \left(x^2\right). \]
+  \mleftrightrestore \end{shaded}%
+\end{minipage}\medskip{}
+For the present document, the call is
+\begin{verbatim}
+    \usepackage[def-file=diffcoeff5,spaced=-1]{diffcoeff}
+\end{verbatim}
+
+\section{A Rogues' Gallery of derivatives}
+
+\label{sec:Rogues'-gallery}Browsing through some (rather old) calculus
+textbooks and texts on statistical mechanics, relativity and classical
+mechanics I find the following choice examples of derivatives `disporting
+every which way'.
+\begin{itemize}
+\item Multi-character variables of differentiation un-parenthesized:
+\begin{equation}
+\diffp{\frac{\psi}{\Theta}}{\frac{1}{\Theta}},\quad\diffp{E/T}{1/T},\quad\diff{\ln f}{\ln x_{0}},\quad\diffp\psi{a_{i},\frac{1}{\Theta}},\quad\diffp{\mathcal{L}}{\eta_{,i}^{(r)}}.\label{eq:eg1}
+\end{equation}
+\item Multi-character variables of differentiation parenthesized in \emph{higher-order}
+derivatives, where the parentheses do not or (sometimes) do include
+the operator: 
+\begin{equation}
+\diffp[2]q{\frac{1}{\Theta}},\quad\diffp[2]q{1/\Theta},\quad\diffp[2]\varepsilon{a_{i}},\quad\diff.(dv).[2]{\phi^{i}(x^{i})}{x^{i}}.\label{eq:eg3}
+\end{equation}
+Should the $\mathrm{d}$ or $\partial$ be included within the parentheses,
+as in the last of (\ref{eq:eg3}), or not, as in the others? Logic
+says `yes'; practice suggests (generally) `no'.
+\item Indicating a point of evaluation is similarly varied: 
+\begin{equation}
+\diffp.|.\phi\varepsilon[\varepsilon=\varepsilon_{0}],\quad\diff.|.[2]\phi\varepsilon[\varepsilon=\varepsilon_{0}],\quad\diffp.].{b^{\beta}}{a^{\alpha}}[b=0],\quad\diff uv[v=0].\label{eq:eg4}
+\end{equation}
+ISO 80000-2 (item 2.11.13) favours the last of these -- parentheses
+-- for ordinary derivatives. Presumably, partial derivatives should
+follow suit, although parentheses are also used to indicate variables
+held constant: 
+\begin{equation}
+\diffp*{\frac{P}{T}}U[V],\quad\diffp S{N_{2}}[U,V,N_{1}],\quad\difsp ST[V]\,.\label{eq:eg5}
+\end{equation}
+\item Other symbols besides $\mathrm{d}$ and $\partial$ are used to denote
+derivative-like quantities. From introductory calculus and from classical
+mechanics and thermodynamics come $\delta$ and $\Delta$, from fluid
+mechanics comes $\mathrm{D}$: 
+\begin{equation}
+\diff.gd.yx,\quad\diff.D'.\rho t,\quad\diff.gD.UT[V],\quad\difs.gD.UT,\quad\diff.gd.{\mathcal{L}}{\eta^{(r)}}.\label{eq:eg6}
+\end{equation}
+\item There are those, like the International Organization for Standardization
+(ISO), who stipulate (or prefer) an upright $\mathrm{d}$ for their
+derivatives, and there are those (like the author, through sixty years
+of habit) who prefer a math-italic $d$: 
+\begin{equation}
+\diff yx,\qquad\diff.d'.yx,\label{eq:eg11}
+\end{equation}
+and of course also in slash-fraction form $\difs yx$, $\difs.d'.yx$.
+Subscripted forms of derivative are also used -- for example, $\difcp Fx$,
+or in the discussion of differential equations one sometimes comes
+across expressions like 
+\[
+\difc.bD.[2]y{x}+2\difc.bD.y{x}-4=0.
+\]
+\item When the differentiand is too big or awkward to sit in the numerator
+and is appended to the operator, the $\mathrm{d}$ or $\partial$
+in the numerator is generally centred -- but not always. In texts
+prior to the age of computerised typesetting one will sometimes find
+the symbol pushed to the \emph{left}: 
+\begin{equation}
+\diffp.left.*{\diffp.left.{x^{i^{*}}}{x^{k^{*}}}}{x^{l^{*}}},\quad\diff.left0.*{\left(\frac{m\mathbf{q}_{x}}{\sqrt{1-q^{2}}}\right)}{t}.\label{eq:eg12}
+\end{equation}
+The keen-eyed will note an italic adjustment with the first expression,
+so that the $\partial$s in the numerators are indented a little (to
+line up -- more or less -- in a slanting column with the $\partial$s
+in the denominators).
+\item Then there is the case when the operator in the numerator differs
+from that in the denominator. For instance, in tensor calculus acceleration
+is sometimes written 
+\[
+\diff.n.{v^{i}}t=\diff{v^{i}}t+\Gamma_{k\hphantom{i}h}^{\hphantom{k}i}v^{h}\diff{y^{k}}t
+\]
+where $\nabla v^{i}$ is the `absolute differential' of the velocity
+$v^{i}$.
+\end{itemize}
+The \verb`diffcoeff` package has the generative power to cope with
+all these variations -- see §\ref{sec:Variant-forms} -- although
+it is unlikely an author should need to call on this capacity to anything
+like the extent required for this Rogues' Gallery.
+
+\chapter{Syntax and use}
+
+\verb`diffcoeff` aims to ease the writing of derivatives (sometimes
+also called differential coefficients). There are long-established
+shorthands available in a few cases: $\dot{x}$ and $\ddot{x}$ for
+the time derivatives of a function $x$ of time $t$; $y'$ and $y''$
+for the derivatives of a function $y$ (usually) of $x$. But mostly
+derivatives are expressed in fraction form and require more keystrokes
+to compose. It is here that \verb`diffcoeff` is aimed. It uses three
+pairs of commands: \verb`\diff` and \verb`\diffp` to write (upright)
+fraction forms of ordinary and partial derivatives like $\diff yx$,
+$\diffp yx$, generally intended for display-style environments; \verb`\difs`
+and \verb`\difsp` for slash-fraction forms of ordinary and partial
+derivatives like $\difs yx$, $\difsp yx$, generally intended for
+text-style environments; and \verb`\difc` and \verb`\difcp` to write
+compact forms of ordinary and partial derivatives like $\difc yx$
+and $\difcp yx$. (Of these, the `s' forms replace the slash argument
+for the \verb`\diff`, \verb`\diffp` commands in version 4 of \verb`diffcoeff`,
+and the `c' form is new to version 5.\cprotect\footnote{Suggested by a question on \TeX{} StackExchange: \url{https://tex.stackexchange.com/questions/652223/write-a-derivative-operator-without-denominator-using-diffcoef/652298#652298}})
+
+\subsubsection*{Note}
+
+I refer throughout to the quantity or function being differentiated
+as the \emph{differentiand} or \emph{derivand }(in line with \emph{integrand},
+\emph{operand}, etc.) and shall sometimes use \verb`\difx` (resp.
+\verb`\difxp`) to make general statements about any or all of \verb`\diff`,
+\verb`\difs` or \verb`\difc` (resp.\verb`\diffp`, \verb`\difsp`,
+\verb`\difcp`).
+
+\section{Syntax}
+
+All commands, \verb`\difx`, \verb`\difxp`, share the same syntax.
+With options present the syntax is
+\begin{verbatim}
+    \difx.name.*[order-spec]<override>{differentiand}
+        {variable(s)}[pt of eval]
+
+    \difx.name.**[order-spec]<override>{variable(s)}
+        {differentiand}[pt of eval]
+\end{verbatim}
+The syntax is identical for \verb`\difxp`. The seven arguments have
+the following meanings:
+\begin{itemize}
+\item \verb`name` (optional) A dot-delimited name to distinguish a variant
+form (non-default form) of derivative; not discussed further until
+§\ref{chap:Templates-defaults-variants} below, and specifically,
+§\ref{sec:Variant-forms}.
+\item \verb`*` (optional) The presence of a star (asterisk) signals: \emph{append}
+the differentiand; its absence means the differentiand appears in
+the numerator of an upright- or slash-fraction form derivative; no
+effect for compact-form derivatives unless (see next) a second \verb`*`
+is present; see §\ref{subsec:Appending-the-differentiand}.
+\item \verb`*` (optional) The presence of a \emph{second} star signals
+that the argument specifying the variable(s) of differentiation comes
+\emph{before} the argument specifying the differentiand; this is sometimes
+convenient when a complicated or lengthy differentiand is appended;
+see §\ref{subsec:Transposing-the-argument}.
+\item \verb`order-spec` (optional) The order of differentiation when differentiating
+in a single variable, or a comma list of orders of differentiation
+for a mixed partial derivative; see §\ref{subsec:Higher-order-derivatives}
+and §\ref{subsec:Mixed-partial-derivatives}.
+\item \verb`override` (optional) The total order of differentiation when
+it cannot be calculated by \texttt{diffcoeff} or is wanted in a different
+form from that calculated by \texttt{diffcoeff}; see §\ref{subsec:Order-override-command}.
+\item \verb`differentiand` (mandatory) The function being differentiated.
+\item \verb`variable(s)` (mandatory) The variable of differentiation or
+a comma list of variables of differentiation (for a mixed partial
+derivative).
+\item \verb`pt of eval` (optional) Point of evaluation or, for partial
+derivatives, variable or variables held constant; \emph{no space}
+before the left square bracket; see §\ref{subsec:Point-of-evaluation}.
+\end{itemize}
+Both mandatory arguments may be empty, but require empty brace pairs
+to indicate as much. (Omitting the differentiand makes sense for all
+forms of derivative, \verb`\difx`, \verb`\difxp`, but omitting the
+variable or variables of differentiation is sensible only for the
+compact forms, \verb`\difc`, \verb`\difcp` -- see §\ref{subsec:Compact=002013form-derivatives}.)
+
+\section{General use}
+
+\label{sec:General-use}Writing \verb`\diff{y}{x}` will produce $\diff{y}{x}$
+in an inline math environment (i.e., placed between \verb`\( \)`
+or \verb`$ $`) or 
+\[
+\diff{y}{x}
+\]
+in display style (placed, for instance, between {\ttfamily\verb`\[ \]`}
+). In fact \verb`\diff yx` (omitting the braces) will produce these
+results, with a saving on keystrokes. The braces are needed only when
+an argument -- the variable of differentiation, or the differentiand
+-- is multi-token:
+\begin{centred}
+\verb`\[ \diff{\ln x}x \]` $\Longrightarrow$ \[ \diff{\ln x}x\]
+\end{centred}
+\begin{itemize}
+\item If you want math-italic `$\mathrm{d}$'s as default, see §\ref{sec:ChangingDefaults}
+on changing default settings. As noted earlier, upright `d's conform
+to the standard ISO 80000-2 and are used in this document.
+\end{itemize}
+For inclusion in a line of text you might prefer to use a slash-fraction
+form of derivative. That is achieved with the \verb`\difs` command:
+\verb`$ \difs yx $` produces $ \difs yx $. If you want still more
+compactness, you can use the \verb`\difc` (`c' for \emph{compact})
+command: \verb`$ \difc yx $` produces the form $ \difc yx $.
+
+Partial derivatives follow the same pattern as ordinary derivatives.
+The commands this time are \texttt{\textbackslash}\verb`diffp`,
+\verb`\difsp` and \verb`\difcp` for (upright) fraction, slash fraction
+and compact forms of partial derivative. Thus \verb`\diffp{F}{x}`,
+or \verb`\diffp Fx` with a saving on keystrokes, produce $\diffp Fx$
+in text style and 
+\[
+\diffp{F}{x}
+\]
+in display style. (As for \verb`\diff`, the omission of braces is
+possible when dealing with a single-token differentiand or differentiation
+variable.) For inline use, \verb`\difsp Fx`, displays as $\difsp Fx$
+and \verb`\difcp` displays as $\difcp Fx$. Given that \verb`\partial`
+takes 8 keystrokes to type, all forms\emph{ }economise on keystrokes. 
+
+\subsection{Spacing before the differentiand}
+
+\label{subsec:Spacing-before-derivand}There are (at least) two different
+ways in which we think of derivatives. We are all familiar with the
+argument presented in elementary calculus books where a curve is shown,
+and also a point on the curve through which a chord has been drawn.
+The chord is the hypotenuse of a small right-angled triangle, the
+other sides having lengths $\delta x$ and $\delta y$ and being parallel
+to the coordinate axes. The slope of the chord is $\diff.gd.yx$.
+By drawing smaller and smaller chords through the point, the ratio
+$\diff.gd.yx$ approaches the slope of the tangent to the curve at
+the point. We write 
+\[
+\diff yx
+\]
+for the limit of $\diff.gd.yx$. It is natural following this line
+of argument to think of $\dl y$ and $\dl x$ as tiny lengths, like
+$\delta y$ and $\delta x$, in which case it would be quite wrong
+to insert space between the $\mathrm{d}$ and the $y$ (let alone
+the $\mathrm{d}$ and the $x$). $\dl y$ is a single object, called
+a differential, and we write expressions like 
+\[
+\dl y=\diff yx\dl x
+\]
+and justly call the fraction in this expression a \emph{differential
+coefficient}. 
+
+But there is another way of viewing differentiation: as a process
+producing (or \emph{deriving}) one function, $y'(x)$, from another,
+$y(x)$. Here the sense is of applying $\diff{}x$ to a quite separate
+object, the function $y(x)$. Although we include $y(x)$ in the numerator
+it is distinct from the $d$ and should be separated from it by a
+small space:\footnote{I thank \noun{Hans Schülein} for first raising this issue with me
+and for subsequent thoughtful comments.}
+\[
+y'(x)=\diff{y(x)}x.
+\]
+Here the fraction on the right is another name for the derived function
+$y'$ and is justly called the \emph{derivative} of $y$. As you can
+see a small space has been inserted between the $\mathrm{d}$ and
+the $y$ in the numerator. By default the space is \verb`3 mu` but
+with the ability to stretch by \verb`1 mu` or shrink by\texttt{ }\verb`2 mu`
+--\texttt{ }\verb`3 mu plus 1 mu minus 2 mu`\texttt{ }in \TeX -speak\footnote{Or even \texttt{3muplus1muminus2mu}.}
+-- as \TeX{} adjusts lines to fit on the page. (A `mu' is a `math
+unit' and is one eighteenth of a quad.) The size of the space inserted
+by default can be easily changed; see §\ref{sec:Variant-forms} and
+§\ref{sec:ChangingDefaults}. 
+\begin{itemize}
+\item You may want all or most of your derivatives to have this space before
+the derivand. The \verb`spaced=1` package option switches this behaviour
+on. However, I have used the \verb`spaced=-1` option for the present
+document which inserts space only if the derivand contains \emph{more
+than one token}. Thus \verb`y(x)` will have space inserted before
+it, but \verb`y` alone will not. This (I think) maintains the distinction
+between a differential coefficient, thought of as a ratio of tiny
+lengths, and a derivative, thought of as an operator applied to a
+function. \verb`spaced=0` inserts no space before the derivand.
+\item In version 4 of \verb`diffcoeff` an argument was added to the \verb`\diff`
+command to manually introduce a space (the \verb`!` switch) before
+the differentiand. This was a mistake and has been removed. If you
+wish to adjust the spacing, there are plenty of (short) commands in
+\LaTeX{} and \verb`diffcoeff` to do the job; see immediately below,
+§\ref{subsec:Spacing-commands}.
+\end{itemize}
+Slash-form derivatives also allow space before the derivand. By default
+this is \verb`2 mu plus 1 mu minus 2 mu`, slightly reduced from the
+fraction-form value to avoid visually detaching the initial `d'
+operator from the derivative as a whole. The value can be changed;
+see §\ref{sec:Variant-forms} and §\ref{sec:ChangingDefaults}. For
+the present document, with \verb`spaced=-1`, multi-token derivands
+have the space inserted, single-token derivands do not:
+\begin{centred}
+\verb`$ \difs{\ln\sin x}x, \quad \difs st $` $\Longrightarrow$ $ \difs{\ln\sin x}x,  \quad \difs st $.
+\end{centred}
+For \emph{compact-form} derivatives the space before the derivand
+is \emph{always} inserted, irrespective of the setting of the \verb`spaced`
+package option, since the subscript precludes the entire symbol ever
+being viewed as a differential -- it is always an operator operating
+on a function. The inserted space, \verb`1 mu plus 1 mu minus 1 mu`
+by default, can be changed should you wish; see §\ref{sec:Variant-forms}
+and §\ref{sec:ChangingDefaults}:
+\begin{centred}
+\verb`$ \difc{\ln\sin x}x, \quad \difc st $` $\Longrightarrow$ $ \difc{\ln\sin x}x, \quad \difc st $.
+\end{centred}
+(The space is less for compact forms since the subscript already provides
+some visual separation.) The \verb`spaced` package option has the
+same effects on partial derivatives. Thus with \verb`spaced=1` or
+\verb`spaced=-1`, \verb`3 mu plus 1 mu minus 2 mu` of space is inserted
+before the differentiand \verb`F(x,y)` in the first member of the
+following example, space of \verb`2 mu plus 1 mu minus 2 mu` in the
+second, and space of \verb`1 mu plus 1 mu minus 1 mu` in the third:
+\begin{centred}
+\verb`\[ \diffp{F(x,y)}x,\;\difsp{F(x,y)}x,\;\difcp{F(x,y)x, \]`
+\end{centred}
+$\Longrightarrow$ \[ \diffp{F(x,y)}x,\;\difsp{F(x,y)}x,\;\difcp{F(x,y)}x. \]
+
+\noindent But for single-token differentiands in this document the
+space is not inserted for upright and slash-form derivatives:
+\begin{centred}
+\verb`\[ \diffp Fx,\quad \difsp Fx. \]` $\Longrightarrow$ \[ \diffp Fx,\quad \difsp Fx. \]
+\end{centred}
+If you always want the space present, use \verb`spaced=1`; if you
+never want the space for upright- or slash-form derivatives, or wish
+to insert such space always `by hand', use \verb`spaced=0`.
+
+\subsubsection{Spacing commands}
+
+\label{subsec:Spacing-commands}\LaTeX{} has its own explicit spacing
+commands. In particular \verb`\,` which is \verb`3 mu` (a thin space)
+and \verb`\!` which is \verb`-3 mu` (a negative thin space) are
+convenient in math mode. The \verb`diffcoeff` package adds four simple
+spacing commands to `fill in (most of) the gap' between these two.
+These are 
+\begin{description}
+\item [{\texttt{\textbackslash negmu}}] insert spacing of \verb`-1 mu`; 
+\item [{\texttt{\textbackslash nilmu}}] insert spacing of \verb`0 mu`
+(cf. use of an empty brace pair \texttt{\textbf{\{\}}} );
+\item [{\texttt{\textbackslash onemu}}] insert spacing of \verb`1 mu`; 
+\item [{\texttt{\textbackslash twomu}}] insert spacing of \verb`2 mu`. 
+\end{description}
+It is also worth recalling here the reduced spacing around scalable
+delimiters that results from using \verb`\mleft`, \verb`\mright`
+in place of \verb`\left`, \verb`\right`; see §\ref{sec:Package-options}
+for the \verb`mleftright` package option, and the example at §\ref{subsec:mleftright}.
+
+\subsection{Higher order derivatives}
+
+\label{subsec:Higher-order-derivatives}An optional argument allows
+the order of differentiation to be specified. The order need not be
+a number; an algebraic order of differentiation is perfectly acceptable
+as is a mix of the two:
+\begin{centred}
+\verb`\[ \diff[2]yx, \quad \diff[n+1]yx. \]` $\Longrightarrow$ \[ \diff[2]yx, \quad \diff[n+1]yx. \]
+\end{centred}
+As mentioned, the braces can be and have been omitted around the $x$
+and $y$ since they are single tokens. The square brackets around
+the optional order-of-differentiation argument are essential. In slash
+form, 
+\begin{centred}
+\verb`$ \difs[2]yx, \quad \difs[n+1]yx $` $\Longrightarrow$ $ \difs[2]yx, \quad \difs[n+1]yx, $
+\end{centred}
+the latter of which is a bit of an eyesore. In compact form, 
+\begin{centred}
+\verb`$ \difc[2]yx,\quad\difc[n+1]yx $` $\Longrightarrow$ $\difc[2]yx,\quad\difc[n+1]yx$.
+\end{centred}
+Note that entering \verb`1` as the optional argument has no effect: 
+\begin{centred}
+\verb`$ \diff[1]yx,\;\difs[1]yx,\;\difc[1]yx $` $\Longrightarrow$
+$\diff[1]yx,\;\difs[1]yx,\;\difc[1]yx $.
+\end{centred}
+For partial derivatives when differentiating in only one variable
+the pattern is the same:
+\begin{centred}
+\verb`\[ \diffp[2]yx, \quad \diffp[n+1]yx. \]` $\Longrightarrow$
+\[ \diffp[2]yx, \quad \diffp[n+1]yx. \]
+\end{centred}
+For the slash forms, 
+\begin{centred}
+\verb`$ \difsp[2]yx,\quad \difsp[n+1]yx $` $\Longrightarrow$ $ \difsp[2]yx,\quad \difsp[n+1]yx. $
+\end{centred}
+and in compact form,
+\begin{centred}
+\verb`$ \difcp[2]yx,\quad \difcp[n+1]yx $` $\Longrightarrow$ $ \difcp[2]yx,\quad \difcp[n+1]yx. $
+\end{centred}
+For partial differentiation in more than one variable -- so-called
+\emph{mixed} partial derivatives -- see §\ref{subsec:Mixed-partial-derivatives}. 
+
+\subsubsection{Alternative method (colon notation)}
+
+From version 5.3 of \texttt{diffcoeff} it is also possible to specify
+the order by the method shown here:
+\begin{centred}
+\verb`\[ \diffp y{x:2}, \quad \diffp y{x:n+1}. \]` $\Longrightarrow$
+\[ \diffp y{x:2}, \quad \diffp y{x:n+1}. \]
+\end{centred}
+A colon separates the variable from its order of differentiation.
+This is more relevant when there is more than one variable subject
+to different orders of differentiation -- so-called mixed partial
+derivatives.
+
+\subsection{Appending the differentiand}
+
+\label{subsec:Appending-the-differentiand}Some differentiands are
+too big or awkward to be placed neatly in the numerator of a derivative
+and it is natural to \emph{append} them to a preceding differential
+operator. One could leave the numerator argument empty in the \verb`\diff`
+or \verb`\diffp` command and follow the command with the differentiand,
+but \verb`diffcoeff` offers a better way: star the \verb`\diff`
+or \verb`\diffp` command. This tells \verb`diffcoeff` to append
+the differentiand. Thus suppose the differentiand is a polynomial,
+say $ax^{2}+bx+c$. Add a star (an asterisk) to the \verb`\diff`
+command:
+\begin{centred}
+\verb`\[ \diff*{(ax^2+bx+c)}x \]` $\Longrightarrow$ \[\diff*{(ax^{2}+bx+c)}x.\]
+\end{centred}
+Or, for a partial derivative, one might want to indicate in the differentiand
+all the variables on which it depends:
+\begin{centred}
+\verb`\[ \diffp*[2]{\Phi(x,y,z)}x \]` $\Longrightarrow$ \[ \diffp*[2]{\Phi(x,y,z)}x. \]
+\end{centred}
+A virtue of using an asterisk to append the differentiand is that
+if one isn't sure whether to append or not, it is an easy matter to
+simply insert or delete the asterisk to compare the results. 
+
+For instance, a second derivative is an iterated derivative -- one
+in which a derivative forms the differentiand of another . Thus
+\begin{centred}
+\verb`\[ \diff[2]yx = \diff*{\diff yx}x \]` $\Longrightarrow$ \[ \diff[2]yx=\diff*{\diff yx}x .\]
+\end{centred}
+\noindent This result is more elegant to my eye than what results
+when removing the asterisk,
+\begin{centred}
+\noindent\verb`\[ \diff[2]yx = \diff{\diff yx}x \]` $\Longrightarrow$
+\[ \diff[2]yx=\diff{\diff yx}x ,\]
+\end{centred}
+\noindent although whether the \emph{meaning} is clearer is moot.
+
+Since the differentiand is appended \emph{by default} in compact-form
+derivatives, starring such a derivative has no effect other than when
+a second asterisk is used to transpose the order of arguments.
+
+\subsubsection{Transposing the argument order}
+
+\label{subsec:Transposing-the-argument}If a \emph{second} asterisk
+follows the first, the order of the arguments specifying the differentiand
+on the one hand and variable or variables of differentiation on the
+other are reversed. Thus it is clearer to the eye to write
+\begin{centred}
+\verb`\[ \diff**x{(ax^2+bxy+cy^2)} \]` $\Longrightarrow$ \[\diff**x{(ax^2+bxy+cy^2)}\] 
+\end{centred}
+than \verb`\[ \diff*{(ax^2+bxy+cy^2)}x \]`, where the eye has to
+search for the variable of differentiation. This is especially the
+case if the differentiand contains more than one variable and includes
+commands like \verb`\frac` or \verb`\sqrt` requiring braced arguments:
+\begin{centred}
+\verb`\[ \diffp**x{\frac1{\sqrt{x^2-y^2}}} \]` $\Longrightarrow$
+\[ \diffp**x{\frac1{\sqrt{x^2-y^2}}} \]
+\end{centred}
+For compact-form derivatives the initial, appending asterisk is always
+implicitly present. However, it must be \emph{explicitly} present
+for the second asterisk to take effect:
+\begin{centred}
+\verb`\[ \difcp yx,\quad \difcp*yx,\quad \difcp**yx \]` $\Longrightarrow$
+\[ \difcp yx,\quad \difcp*yx,\quad \difcp**yx \]
+\end{centred}
+
+\subsubsection{Operator parenthesizing}
+
+In slash style with the star option, the polynomial example becomes
+\begin{centred}
+\verb`$ \difs*{(ax^2+bx+c)}x $` $\Longrightarrow$ $ \difs*{(ax^2+bx+c)}x $
+\end{centred}
+\noindent where parentheses have been automatically inserted around
+the differential operator. Similarly, for slash-style partial derivatives,
+\begin{centred}
+\verb`\( \difsp*[n]{f(x)}x \)` $\Longrightarrow$ \( \difsp*[n]{f(x)}x \)
+\end{centred}
+\noindent parentheses are again inserted automatically around the
+differential operator. Like other elements of automatic formatting,
+this behaviour is user-adjustable; see §§\ref{sec:Variant-forms},
+\ref{sec:ChangingDefaults}.
+
+\subsection{Point of evaluation/variables held constant}
+
+\label{subsec:Point-of-evaluation}If you want to specify a point
+at which a derivative is evaluated, append a final optional argument:
+\begin{centred}
+\verb`\[ \diff[2]yx[0] \]` $\Longrightarrow$ \[ \diff[2]yx[0] \]
+\end{centred}
+\noindent Note that there must be \emph{no space} before the left
+square bracket of the trailing argument, otherwise it will be treated
+as part of the wider mathematical expression of which the derivative
+is part and typeset as such. (This should not cause a \LaTeX{} error.) 
+\begin{itemize}
+\item If you prefer to use subscripted \emph{square} brackets 
+\[
+\diffp.].{F(x,y)}x[(0,0)]
+\]
+or a subscripted vertical rule after the derivative
+\[
+\diffp.|.{F(x,y}x[(0,0)]
+\]
+to indicate a point of evaluation, then this can easily be done; see
+specifically §\ref{subsec:variantPoint-of-evaluation} (or §\ref{sec:ChangingDefaults}
+on changing default settings). Parentheses are the ISO recommendation;
+see ISO 80000-2. 
+\end{itemize}
+Because the slash form spreads the derivative out horizontally, parentheses
+are the natural way in this case to indicate a point of evaluation:
+\begin{centred}
+\verb`$ \difs{\ln sin x}{sin x}[x=\pi/3] $` $\Longrightarrow$ $ \difs{\ln\sin x}{\sin x}[x=\pi/3]$.
+\end{centred}
+\noindent A vertical rule can easily become too remote from the opening
+$\mathrm{d}$ of the differential coefficient: $\difs.|.{\ln\sin x}{\sin x}[x=\pi/3]$.
+Parentheses tie the whole cluster of symbols together.
+
+One reason to query the ISO preference for subscripted parentheses
+to indicate a point of evaluation is that subscripted parentheses
+are used with partial derivatives to indicate variables held constant.
+This occurs frequently in thermodynamics for example. In the following
+well-known relation in thermodynamics, the differentiands are appended
+and the trailing argument is used to indicate the variables held constant: 
+\begin{centred}
+\verb`\[ \diffp*{\frac PT}U[V] = \diffp*{\frac 1T}V[U] \]` $\Longrightarrow$
+\[ \diffp*{\frac PT}U[V] = \diffp*{\frac 1T}V[U]. \]
+\end{centred}
+\noindent This is much easier to write than building the expressions
+`by hand', starting with \verb`\left(` and finishing with \verb`_U`.
+
+\subsubsection{Superscripts}
+
+It is easy to add a superscript to a derivative to indicate evaluation
+at two points and the difference between the values:
+\begin{centred}
+\verb`\[ \diff {\sin x}x[0]^{\mkern-10mu\pi/2} \]` ${\displaystyle \Longrightarrow}$
+\[ \diff{\sin x}x[0]^{\mkern-9mu\pi/2} \]
+\end{centred}
+but to my eye either square brackets or a vertical rule are clearer
+for this purpose (and do not involve nudging the subscript or superscript
+closer to the right delimiter); see §\ref{sec:Variant-forms}.
+
+\subsubsection{Empty trailing argument}
+
+\noindent If the trailing argument is included but left empty it will,
+with the default set-up, wrap the derivative in parentheses but with
+no subscript. This fact can be exploited. Thus, for a particle of
+mass $m$ moving along a line, distance $x$ at time $t$, the kinetic
+energy is:
+\begin{centred}
+\noindent\verb`$ \tfrac 12 m \difs xt[]^2 $` $\Longrightarrow$
+$\tfrac{1}{2}m\difs xt[]^{2}$.
+\end{centred}
+Or, again exploiting the parentheses resulting from an empty trailing
+argument, Lagrange's equations of motion in analytic mechanics can
+be written,
+\begin{centred}
+\verb`\[ \diffp L{q_k}-\diff**t{ \diffp L{\dot{q}_k}[] } = 0 \]`
+$\Longrightarrow$\[\diffp L{q_k}-\diff**t{\diffp L{\dot{q}_k}[]} = 0.  \]
+\end{centred}
+\noindent (See §\ref{subsec:Transposing-the-argument} for the double
+asterisk.) Like the author, you may feel that there is too much whitespace
+between $\diff{}t$ and the left parenthesis in this expression. One
+obvious remedy is to insert a negative thin space \verb`\!` before
+the second \verb`\diffp` command. Another is to use the package \verb`mleftright`.
+
+\subsubsection{Use of the package \texttt{mleftright}}
+
+\label{subsec:mleftright}The \verb`mleftright` package `tightens'
+the spacing around \verb`\left`, \verb`\right` delimiters. The user
+either by explicitly replaces \verb`\left`, \verb`\right` by \verb`\mleft`
+and \verb`\mright` or uses the command \verb`\mleftright` which
+effectively turns subsequent occurrences of \verb`\left`, \verb`\right`
+into \verb`\mleft`, \verb`\mright`; \verb`\mleftrightrestore` returns
+\verb`\left`, \verb`\right` to their original selves. This process
+can be `short-circuited' by using the \verb`diffcoeff` package
+option \verb`mleftright` that inserts \verb`\mleftright` in the
+preamble; see §\ref{sec:Package-options}.
+
+However, that package option is not used in this document. Nonetheless
+\verb`mleftright` is a required package of version 5 of \verb`diffcoeff`
+and its commands are available for use. Hence to reduce the whitespace
+I can write
+\begin{verbatim}
+    \mleftright
+    \[ \diffp L{q_k}-\diff**t{\diffp L{\dot{q}_k}[]} = 0. \]
+    \mleftrightrestore
+\end{verbatim}
+$\Longrightarrow$ \mleftright
+\[ \diffp L{q_k}-\diff**t{\diffp L{\dot{q}_k}[]} = 0. \]
+\mleftrightrestore
+
+\noindent which is better, but better still to my eye is to also add
+a negative thin space \verb`\!` before the second \verb`\diffp`
+command:
+\begin{verbatim}
+    \mleftright
+    \[ \diffp L{q_k}-\diff**t{ \!\diffp L{\dot{q}_k}[] } = 0 \]
+\end{verbatim}
+\noindent$\Longrightarrow$ \mleftright\[\diffp L{q_k}-\diff**t{\!\diffp L{\dot{q}_k}[]} = 0.  \]
+
+\noindent The problem is that in addition to the space around \verb`\left`,
+\verb`\right` pairs (which is reduced by issuing the command \verb`\mleftright`),
+there is also the space inserted by \verb`diffcoeff` before a multi-token
+differentiand. The user should be aware of this, and may wish to define
+a `variant form' (see §\ref{sec:Variant-forms}) that introduces
+no space before an appended differentiand.
+
+\subsection{Mixed partial derivatives}
+
+\label{subsec:Mixed-partial-derivatives}The new thing with partial
+derivatives, not present with ordinary derivatives, is so-called \emph{mixed}
+partial derivatives, where differentiation occurs in more than one
+variable. If each variable is differentiated only to the first order,
+then it is easy to specify the derivative. Suppose $F$ is a function
+of three variables, $x$, $y$ and $z$. Then
+\begin{centred}
+\verb`\[ \diffp F{x,y,z},\quad\diffp{F(x,y,z)}{x,y,z}. \]` $\Longrightarrow$
+\[ \diffp F{x,y,z},\quad \diffp{F(x,y,z)}{x,y,z}. \]
+\end{centred}
+(The \verb`spaced=-1` package option inserts space before the multi-token
+differentiand in the second of these.)
+
+The variables of differentiation are listed in order in a comma list
+-- \verb`{x,y,z}` -- forming the second mandatory argument. The
+total order of differentiation (3 in this example) was inserted automatically.
+It did not need to be specified or calculated `by hand' -- \verb`diffcoeff`
+did the calculation. 
+
+The slash form is
+\begin{centred}
+\verb`$ \difsp F{x,y,z} $` $\Longrightarrow$ $ \difsp F{x,y,z}$,
+\end{centred}
+as expected, and the compact form is 
+\begin{centred}
+\verb`$ \difcp F{x,y,z} $` $\Longrightarrow$ $ \difcp F{x,y,z}$.
+\end{centred}
+One might wonder about even more compact notations like $\partial_{xyz}^{\onemu3}F$
+for this example but it becomes messy if different orders of differentiation
+are involved for different variables.
+
+To differentiate variables to higher order, their orders need to be
+specified explicitly. To do so use a comma list for the optional argument
+or, since version 5.3, use the alternative method of §\ref{subsec:Alternative-method}:
+\begin{centred}
+\verb`\[ \diffp[2,3]F{x,y,z}, \]` $\Longrightarrow$ \[ \diffp[2,3]F{x,y,z}, \]
+
+\verb`$ \difcp F{x:2,y:3,z} $` $\Longrightarrow$ $ \difcp F{x:2,y:3,z}$.
+\end{centred}
+\noindent Notice that the overall order of the derivative -- 6 --
+in the first of these is again automatically calculated and inserted
+as a superscript on the $\partial$ symbol in the numerator. 
+
+In the example, the comma list of orders has only \emph{two} members,
+although there are \emph{three} variables. It is assumed that the
+orders given in the comma list apply in sequence to the variables,
+the first order to the first variable, the second to the second variable,
+and so on, and that any subsequent orders not listed in the optional
+argument are, by default, 1. Thus we need to specify only 2 and 3
+in the example; the order of differentiation of $z$ is 1 by default.
+But you \emph{cannot} use an order specification like \verb`[,,2]`;
+instead write {\ttfamily\verb`[1,1,2]`} (which is the natural
+thing to do in any case).\textbf{ }It is only the \emph{tail} of an
+order specification which can be omitted. In the other direction,
+if there are more orders of differentiation specified than there are
+variables, the list of orders is truncated to match the number of
+variables. 
+
+\subsubsection{Algebraic orders of differentiation}
+
+Orders of differentiation do not need to be numerical. They can also
+be algebraic:
+\begin{centred}
+\verb`\[ \diffp[2m-1,m+1,2]F{x,y,z} \]` $\Longrightarrow$ \[ \diffp[2m-1,m+1,2]F{x,y,z}\]
+\end{centred}
+The total order of differentiation is still calculated by \verb`diffcoeff`.
+Or again,
+\begin{centred}
+\verb`\[ \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z} \]` $\Longrightarrow$
+\[ \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z}. \]
+\end{centred}
+
+\subsubsection{Alternative method (colon notation)}
+
+\label{subsec:Alternative-method}When there are two or more variables
+of differentiation, particularly when subject to different orders
+of differentiation, it may be easier to see which order is associated
+with which variable if they are paired together in the variable argument.
+To do so, separate the order from the variable by a colon,\footnote{I thank \noun{Christophe Bal} for this suggestion.}
+like this:
+\begin{centred}
+\verb`\[ \diffp{F(x,y,z)}{x,y:km+1,z:m+k-1} \]` $\Longrightarrow$
+\[ \diffp{F(x,y,z)}{x,y:km+1,z:m+k-1}. \]
+\end{centred}
+In the example, note that it suffices to write \verb`x` rather than
+\verb`x:1`. 
+
+If, in a fit of absent-mindedness, one specifies the orders of differentiation
+by both methods, it is the orders in the variable argument that prevail:
+\begin{centred}
+\verb`\[ \diffp[1,2,3]{F(x,y,z)}{x:4,y:5,z:6} \]` $\Longrightarrow$
+\[ \diffp[1,2,3]{F(x,y,z)}{x:4,y:5,z:6} \]
+\end{centred}
+
+\subsubsection{Order-override option and command}
+
+\label{subsec:Order-override-command}With version 5.3 of \texttt{diffcoeff}
+the order-override option has been reinstated, having been replaced
+in versions 5.0 to 5.2 by a command \verb`\difoverride` (see below).
+In version 4 and earlier this optional argument was square-bracket
+delimited. It is now \emph{angle-bracket }delimited (using the `less
+than' and `greater than' symbols, \verb`< >`).\footnote{I thank \noun{Christophe Bal} for urging the availability of this
+argument and the use of angle brackets.} The reason for angle brackets is both for visual distinction and
+because the alternative method of specifying the order of differentiation
+(by means of colons in the variable specification; see immediately
+above §\ref{subsec:Alternative-method}) requires the override option
+to be distinguishable from the order specification. 
+
+In the penultimate example above, the total order of differentiation
+$m+k+km+1$ factorizes to $(k+1)(m+1)$. \verb`diffcoeff` is not
+a computer algebra system and does not do such factorizations but
+you can still express the total order in this form by using the override
+option, entering the factorized form between angle brackets before
+the differentiand:
+\begin{verbatim}
+    \[ \diffp<(k+1)(m+1)>{F(x,y,z)}{x,y:km+1,z:m+k-1}. \]
+\end{verbatim}
+$\Longrightarrow$     \[ \diffp<(k+1)(m+1)>{F(x,y,z)}{x,y:km+1,z:m+k-1}. \]
+
+When the override option is used, the algorithm that calculates the
+total order is sidestepped. It does not get called at all. In this
+way not only can the total order be presented in whatever manner one
+wishes but essentially arbitrary material can be attached as a superscript
+to the $\partial$ symbol in the numerator. (For compact-form derivatives,
+which do not use a total order of differentiation, the override option
+is irrelevant.)
+
+\paragraph{Order-override command:}
+
+\noindent Alternatively, you can use the \verb`\difoverride` command
+in place of the override option. You might prefer to do this to avoid
+cluttered expressions. The command takes one (mandatory) argument,
+the total order of differentiation, which it stores: 
+\begin{verbatim}
+    \[
+      \difoverride{(k+1)(m+1)}
+      \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z}
+      \difoverride{},\quad
+      \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z}
+    \]
+\end{verbatim}
+$\Longrightarrow$     \[
+      \difoverride{(k+1)(m+1)}
+      \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z}
+      \difoverride{},\quad
+      \diffp[1,km+1,m+k-1]{F(x,y,z)}{x,y,z}
+    \]
+
+\noindent Note that in the example \verb`\difoverride` has been used
+\emph{within }the math environment. This is good practice. It prevents
+the contents of the command erroneously overriding the orders of later
+derivatives in other math environments; but it does mean cancelling
+the override (with the statement \verb`\diffoverride{}`) in \emph{this}
+environment if a second derivative is present, to prevent the second
+derivative also displaying the factorized form.
+
+\subsubsection{Parentheses}
+
+Auto-calculation of the total order accommodates the simple use of
+parentheses:
+\begin{centred}
+\verb`\[ \diffp[2m-(k+1),2(k+1)-m]{F(x,y,z)}{x,y,z} \]` $\Longrightarrow$
+\[ \diffp[2m-(k+1),2(k+1)-m]{F(x,y,z)}{x,y,z} \]
+\end{centred}
+This is an example of the use of \emph{dynamic} parentheses: the left
+parenthesis in each case is preceded by a number or a sign. In evaluating
+the total order \verb`diffcoeff` multiplies out the expression (or
+that is the effect).
+
+On the other hand, an order specification like \verb`[f(n+1),f(n-1)]`
+is an example of the use of \emph{static} parentheses where they are
+part of the familiar `function of' notation -- in this case a function
+$f$ of some variable, say $x$, evaluated at $x=n\pm1$. \verb`diffcoeff`
+\emph{always} interprets a left parenthesis preceded by something
+that is neither number nor sign in this way. It does not try to multiply
+out such expressions when calculating the total order.
+
+The following example combines both uses -- and includes a nested
+pair of (dynamic) parentheses:
+\begin{centred}
+\verb`\[\diffp[2(f(n)-(m-1)),5-(f(n)+m)]F{x,y}\]` $\Longrightarrow$
+\[\diffp[2(f(n)-(m-1)),5-(f(n)+m)]F{x,y}\]
+\end{centred}
+Where confusion arises is with specifications like \verb`[m(k-1)+1,m(k+1)-1]`
+where \verb`m` could be interpreted as either a function or a variable.
+As stated, \verb`diffcoeff` \emph{always} interprets a left parenthesis
+preceded by something that is not a number or a sign as signalling
+`function of'. Hence:
+\begin{centred}
+\verb`\[\diffp[m(k-1)+1,m(k+1)-1]F{x,y}\]` $\Longrightarrow$ \[\diffp[m(k-1)+1,m(k+1)-1]F{x,y}\]
+\end{centred}
+\noindent If, in fact, \verb`m` is intended as a \emph{variable}
+then the order-override option or command is there to rescue the situation:
+\begin{verbatim}
+    \[ \diffp<2mk>F{x:m(k-1)+1,y:m(k+1)-1} \]
+\end{verbatim}
+$\Longrightarrow$     \[ \diffp<2mk>F{x:m(k-1)+1,y:m(k+1)-1} \]
+
+\subsubsection{Error messages}
+
+The order-override command is also needed when calculation of the
+total order is beyond the abilities of \verb`diffcoeff`. The package
+is \emph{not} a computer algebra system. It can cope with order specifications
+where variables are followed by diverse arithmetic operators: \verb`n^2`,
+\verb`m\times n`, \verb`m/2` and the like cause no problems. But
+a \emph{number} can be followed \emph{only} by a sign or a variable
+or a left parenthesis. Anything beyond this will raise an error. For
+instance
+\begin{centred}
+\verb`\[ \diffp[2^k]F{x,y} \]` 
+\end{centred}
+produces a message beginning `\texttt{! Package diffcoeff Error:}'
+and continuing,
+\begin{verbatim}
+    number followed by ^ in the order spec. [2^k,1] on
+    line xx. Calculation of the total order of 
+    differentiation fails in this case. Use the 
+    override option (or \difoverride command) to 
+    enter the total order. See the diffcoeff 
+    documentation for further information.
+\end{verbatim}
+(The \verb`xx` will be replaced by a specific line number in each
+case. Line breaking may also differ from case to case.) To avoid such
+errors and enable compilation to proceed, do as the message suggests
+-- use the override option (or \verb`\difoverride` command). For
+(a slightly more complicated) example,
+\begin{centred}
+\verb`\[ \diffp[2^n+1,2^n-1]<2^{n+1}>F{x,y} \]` $\Longrightarrow$
+\[ \diffp[2^n+1,2^n-1]<2^{n+1}>F{x,y} \]
+\end{centred}
+There are limitations on what order specifications the \verb`diffcoeff`
+package can `digest', but in real life that is unlikely to be significant.
+Mixed partial derivatives are used far less often than the pure derivatives,
+and when they \emph{are} used it is nearly always to low numerical
+orders like 1 or 2. For those rare other cases, \verb`\difoverride`
+is always available. 
+
+\subsubsection{Comma list of variables of differentiation}
+
+\label{subsec:Comma-list-of-vars}In tensor calculus differentiations
+are almost always in terms of super- or subscripted coordinates. In
+many other contexts this is the case too -- the reciprocal of the
+temperature in thermodynamics or generalized coordinates in analytical
+mechanics. This is why a comma list is used in \verb`diffcoeff` for
+specifying variables of differentiation for mixed partial derivatives.
+Although it would be nice to write the minimal \verb`{xy}` rather
+than \verb`{x,y}` when two variables $x$ and $y$ are involved,
+the extra writing is trivial and the comma list allows a simpler handling
+of multi-character variables. For instance in tensor calculus we get
+expressions like
+\begin{centred}
+\verb`\[ \diffp{A_i}{x^j,x^k} \]` $\Longrightarrow$ \[ \diffp{A_i}{x^j,x^k}. \]
+\end{centred}
+\noindent It is easier to write \verb`{x^j,x^k}` here than, say,
+\verb`{{x^j}{x^k}}` to distinguish the variables. It's also easier
+to read, particularly if the indices themselves get ornamented and
+need surrounding braces:
+\begin{centred}
+\verb`\[ \diffp{A_i}{x^{j'},x^{k'}} \]` $\Longrightarrow$ \[ \diffp{A_i}{ x^{j'},x^{k'} }. \]
+\end{centred}
+\noindent Compare that variable specification with \verb`{{x^{j'}}{x^{k'}}}`.
+Admittedly some extra whitespace would help here, but the point stands:
+the comma list requires fewer nested braces -- unless a variable
+of differentiation includes a comma, for then the comma needs to be
+enclosed in braces. There are plenty of instances of this out in the
+world (see, e.g., the last equation of (\ref{eq:eg1})) but it is
+overall a rare occurrence.
+
+\subsubsection{Spacing in the denominator}
+
+\label{subsec:Minutiae-of-spacing}In Chapter 18 of the \emph{The
+\TeX book}, Knuth suggests inserting a thin space, {\ttfamily\verb`\,`}
+(or {\ttfamily\verb`3 mu`}), between differentials in appropriate
+contexts, giving as an example $dx\,dy=r\,dr\,d\theta$. In the denominator
+of a derivative, however, that degree of extra spacing -- to my eye
+-- seems too great, interfering with seeing the derivative `as a
+whole', 
+\[
+\diffp.3mu.F{x,y,z},
+\]
+especially for the slash-form of derivative: $\difsp.3mu.F{x,y,z}$.
+Some spacing is desirable, but less. By default \verb`diffcoeff`
+inserts \verb`2 mu` (with stretch and shrink) between the differentials:
+$\difsp F{x,y,z}$.
+
+Should a differentiation occur to higher order and so a variable acquire
+a superscript, an adjustment is made to the extra spacing. By default
+\verb`1 mu` is subtracted from the default spacing. Thus in 
+\[
+\diffp[2]F{x,y,z},
+\]
+Spacing of \verb`2 mu` is inserted between the $\partial y$ and
+$\partial z$, but because the superscript already provides some separation
+between them, only \verb`1 mu` is inserted between $\partial x^{2}$
+and $\partial y$. The values used for the spacing and its adjustment
+in the presence of a superscript can be changed by the user; see Chapter~\ref{chap:Templates-defaults-variants}. 
+
+When the variables themselves are super- or subscripted, as happens
+in tensor calculus, no automatic adjustment is made. Any fine-tuning
+must be done by the user using explicit spacing commands -- like
+\verb`\negmu` (a space of \verb`-1 mu`); see §\ref{subsec:Spacing-commands}:
+\begin{centred}
+\verb`\[ \diffp{A_i}{ x^j\negmu,x^k } \]` $\Longrightarrow$ \[ \diffp{A_i}{ x^j\negmu,x^k }.\]
+\end{centred}
+\noindent The \verb`\negmu` decreases the spacing between the terms
+from the default \verb`2 mu` (with stretch and shrink) to \verb`1 mu`.
+
+\subsection{Multi-token variables: parenthesizing}
+
+Differentiating a function of a function may involve a multi-character
+differentiation variable. For instance, to differentiate $\ln\sin x$
+in $x$ means forming the product
+\begin{centred}
+\verb`\[ \diff{\ln\sin x}{\sin x}\diff{\sin x}x \]` $\Longrightarrow$
+\[\diff{\ln\sin x}{\sin x}\diff{\sin x}x.\]
+\end{centred}
+Forming the \emph{second} derivative of $\ln\sin x$ will now involve
+forming, among other quantities,
+\begin{centred}
+\noindent\verb`\[\diff[2]{\ln\sin x}{\sin x}\]` $\Longrightarrow$
+\[\diff[2]{\ln\sin x}{\sin x}\]
+\end{centred}
+\noindent Parentheses have been inserted automatically by \verb`diffcoeff`
+around $\sin x$ in the denominator to avoid any visual hint that
+we are differentiating in the sine of $x^{2}$.
+
+\emph{That} is the problem: with a long (multi-character) variable,
+the superscript in a higher order derivative may look as if it applies
+to only part -- the last character -- of a multi-character variable.
+To solve that problem, \verb`diffcoeff` inserts parentheses around
+the variable -- for \emph{higher-order} derivatives, but not for
+first-order derivatives where the problem does not arise. You may
+prefer \verb`diffcoeff` not to parenthesize by default. Changing
+the default setting is easily accomplished; see §\ref{sec:ChangingDefaults}.
+
+And if you do want parentheses, are they in the right place? Logically,
+no. They should include the $d$: $(d\sin x)^{2}$ -- it is the differential
+$d\sin x$ that is of the second order. But as the examples in the
+Rogues' Gallery show -- see particularly (\ref{eq:eg3}) -- the
+inclination seems to be to do otherwise. This may be because one wants
+in any case to parenthesize the variable to show that the `d' symbol
+attaches to the whole variable and not just its \emph{first} character.
+A second, outer pair of parentheses then seems too fussy and detracts
+from comprehending the symbol `at a glance': 
+\[
+\diff.(dv).[2]{f(x)}{(x/k)}.
+\]
+Customary but illogical notations are familiar in mathematics --
+think of the position of the superscripts in an identity like $\sin^{2}\theta+\cos^{2}\theta=1$.
+In any case,  the manner of this wrapping in parentheses -- if any
+-- of long variables for \emph{higher order} derivatives is customisable
+(§\ref{sec:ChangingDefaults}).
+
+For first order derivatives parenthesizing does not occur automatically.
+If you want the variable of differentiation to be parenthesized, you
+need to do it yourself:
+\begin{centred}
+\verb`\[\diff {f(x)}{x/k}, \quad \diff {f(x)}{(x/k)}.\]` $\Longrightarrow$
+\[ \diff {f(x)}{x/k}, \quad\diff {f(x)}{(x/k)}.\]
+\end{centred}
+To my eye, in this particular case, the parenthesized version seems
+necessary. The discussion applies equally to ordinary and partial
+derivatives. In thermodynamics and statistical mechanics one may want
+to differentiate in the reciprocal of the temperature, $1/\Theta$
+say:
+\begin{centred}
+\verb`\[ \diffp[2]q{\frac 1\Theta} \]` $\Longrightarrow$ \[ \diffp[2]q{\frac 1\Theta}.\]
+\end{centred}
+\noindent As noted, when differentiating to first order, parenthesizing
+is up to the user:
+\begin{centred}
+\verb`\[ \diffp q{(\frac 1\Theta),V} \]` $\Longrightarrow$ \[ \diffp q{(\frac 1\Theta),V}. \]
+\end{centred}
+
+\chapter{Templates, defaults \& variants}
+
+\label{chap:Templates-defaults-variants} \verb`diffcoeff` is built
+on the facilities offered by the \verb`xtemplate` package (included
+in the \LaTeX 3 bundle {\ttfamily\verb`l3packages`}). The
+stuff of \verb`xtemplate` is \emph{templates}, their definition,
+their manipulation. For \verb`diffcoeff` a template is a list of
+parameter values determining what a derivative looks like in the pdf.
+The parameters may be broad-brush settings like whether the derivative
+is built from \verb`\frac` or the slash \verb`/` or in compact form,
+or whether the operator symbol is \verb`d` or \verb`\partial` (or
+\verb`\nabla` or \verb`\delta` or \ldots ), or the parameters may
+be finer-grained, determining minutiae of spacing, easily missed at
+a casual glance but giving some cumulative overall effect.\emph{ }Access
+to the parameters is gained through the command \verb`\difdef`\footnote{In version 5; it has \emph{three} arguments and replaces the two-argument
+command \texttt{\textbackslash diffdef} in version 4 of \texttt{diffcoeff}.}, one argument of which is a \emph{key=value} list\emph{ }of parameter
+values. Each such list is given a name (the second argument of \verb`\difdef`)
+and is `turned into a derivative' by placing the name between dots
+as the first argument of the appropriate \verb`\difx`, \verb`\difxp`
+commands\footnote{And -- see Chapter~\ref{chap:Differentials-and-jacobians} -- of
+the differential and jacobian commands, \texttt{\textbackslash dl}
+and \texttt{\textbackslash jacob}.}. All this is discussed in §\ref{sec:Variant-forms} below.
+
+\section{Template structure}
+
+To write a derivative one doesn't want to have to type a long list
+of \emph{key=value} statements each time. The \emph{default} values
+given to keys is crucial. Only some of the defaults appropriate for,
+say, an upright fraction ordinary derivative are going to be relevant
+for a slash-fraction partial derivative let alone a compact form partial
+derivative. This suggests creating a primary template as a `super-repository'
+of default values and from this creating secondary or child templates
+in which (only) \emph{some }of the defaults are changed -- and, if
+necessary, creating from these child templates children of their own
+(grandchild templates) in which again some further defaults are adjusted. 
+
+In \verb`diffcoeff`, the template that is the `primogenitor' of
+the lines of default inheritance is named \verb`DIF`. It is the repository
+of all possible keys used in all possible forms of derivative (at
+least in \verb`diffcoeff`!) and so has keys appropriate to upright-fraction,
+slash-fraction and compact forms of derivative; it has keys appropriate
+to multi-variable partial derivatives and single-variable ordinary
+derivatives, but it is not actually used to form derivatives. That
+is the role of its child templates \verb`DIFF`, \verb`DIFS` and
+\verb`DIFC` corresponding to derivatives of upright-fraction, slash-fraction
+and compact forms. These child templates inherit the defaults of \verb`DIF`
+save for some settings explicitly changed in the child template relevant
+to the specific forms of fraction specified by each. 
+
+Apart from the operator symbol, most of the settings in the child
+templates \verb`DIFF`, \verb`DIFS` and \verb`DIFC` are also appropriate
+for partial derivatives. From a code design point of view, there is
+a certain neatness at not  multiplying the number of templates in
+play, but actual use -- for instance, forming the `Rogues' gallery'
+of §\ref{sec:Rogues'-gallery} -- suggests the further step of creating
+additional templates specifically for \emph{partial} derivatives\emph{
+}in the three fraction forms. Apart from the operator symbol, the
+templates \verb`DIFFP`, \verb`DIFSP` and \verb`DIFCP` inherit nearly
+all the defaults of their parents \verb`DIFF`, \verb`DIFS` and \verb`DIFC`
+respectively. 
+
+Again, actual use suggests two further templates, both direct children
+of \verb`DIF`, for the creation of jacobians, template \verb`DIFJ`,
+and differentials, template \verb`DIFL`, with default values appropriate
+to each. In all \verb`diffcoeff` uses nine templates, the arrows
+in Table~\ref{tab:DIF-defaults} indicating lines of inheritance
+of default values. Only the child and grandchild templates of \verb`DIF`
+are used for actual construction of derivatives (and jacobians and
+differentials). \verb`DIF` itself `sits above the fray'.
+
+\begin{table}
+\centering{}\caption{\protect\label{tab:Template-inheritance}Template inheritance}
+\begin{tabular}{ccccc}
+\multicolumn{5}{c}{\texttt{DIF}}\tabularnewline
+$\hphantom{\mathtt{DIF}}$ $\swarrow$ & $\,\,\,\sswarrow$ & $\downarrow$ & $\ssearrow\,\,\,$ & $\searrow$ $\hphantom{\mathtt{IFL}}$\tabularnewline
+\texttt{DIFC} & \texttt{DIFS} & \texttt{DIFF} & \texttt{DIFJ} & \texttt{DIFL}\tabularnewline
+$\downarrow$ & $\downarrow$ & $\downarrow$ &  & \tabularnewline
+\texttt{DIFCP} & \texttt{DIFSP} & \texttt{DIFFP} &  & \tabularnewline
+\end{tabular}
+\end{table}
+
+
+\section{Default values for template \texttt{DIF}}
+
+\label{sec:Default-values-DIF}Table~\ref{tab:DIF-defaults} lists
+the keys available for forming derivatives and the default values
+assigned in the `grandparent' template, the primogenitor, \verb`DIF`.
+Different forms of derivative demand different defaults for some keys.
+Where a key is relevant for more than one style of derivative the
+default value is chosen according to the following precedence scheme: 
+\begin{enumerate}
+\item \emph{ordinary upright}-fraction derivatives in \emph{display}-style
+environments
+\item \emph{ordinary slash}-fraction derivatives in \emph{text}-style environments
+\item \emph{ordinary compact}-form derivatives in \emph{text}-style environments
+\end{enumerate}
+\noindent{}%
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+\noindent Users of version 4 of \texttt{diffcoeff} will notice similarities
+with and differences from that earlier version. Some key names remain
+(\verb`op-symbol`), some names have changed (\verb`multi-term-sep`
+for \verb`denom-term-sep`), keys beginning with an asterisk, \verb`*`,
+lack a following hyphen (\verb`*derivand-sep` rather than \verb`*-derivand-sep`),
+some keys have vanished (the \verb`/` keys), and there are some new
+keys (\verb`lvwrap-Ldelim`, \verb`lvwrap-Rdelim`). The redesign
+of the user interface -- \verb`\difs`, \verb`\difsp` for the \verb`/`
+switch, the new compact form commands \verb`\difc`, \verb`\difcp`,
+and bringing the jacobian and differential within the \verb`DIF`
+template structure -- meant revisiting and rethinking the list of
+keys. In the end it seemed simpler (less confusing) to treat this
+as a completely new list rather than an amendment of the earlier one.\end{shaded}%
+\end{minipage}
+
+\medskip{}
+The first column in table~\ref{tab:DIF-defaults} lists key names,
+the second column default values, and the third column to which form
+or forms of derivative the key is \emph{relevant --} meaning that
+assigning a different value to the key can change the appearance of
+the corresponding derivative in some way. The identifiers have these
+meanings:
+\begin{description}
+\item [{f,~fp}] upright fraction ordinary derivative, partial derivative;
+\item [{s,~sp}] slash fraction ordinary derivative, partial derivative;
+\item [{c,~cp}] compact ordinary derivative, partial derivative;
+\item [{j}] jacobian;
+\item [{l}] differential.
+\end{description}
+In Table~\ref{tab:DIF-defaults} and following tables, all values
+specifying a space require the unit (\verb`mu`) to be included; a
+number alone does not suffice. (A `mu' is a `math unit', 1/18
+of a quad. A thin space \texttt{\textbackslash ,} is 3 mu.) `Elastic'
+spaces with stretch and shrink can be compacted, like \verb`3muplus1muminus2mu`
+for \verb`3 mu plus 1 mu minus 2 mu`.
+
+Available keys and their defaults are the following (if you are dissatisfied
+with some choices, they can be changed; see the discussion at §\ref{sec:ChangingDefaults}):
+
+\begin{table}
+\centering{}\caption{{\small\texttt{DIF}} {\small defaults}\protect\label{tab:DIF-defaults}}
+\begin{center}
+\begin{tabular}{lrl}
+\toprule 
+{\small key} & {\small default} & {\small relevance}\tabularnewline
+\midrule
+{\small style} & {\small\texttt{frac}} & {\small f, fp, s, sp, c, cp, j}\tabularnewline
+slash-tok & {\small\texttt{/}} & {\small\phantom{{\small f, fp,}} s, sp, \phantom{{\small c, cp,}}
+j}\tabularnewline
+slash-sep & {\small\texttt{0 mu}} & {\small\phantom{{\small f, fp,}} s, sp, \phantom{{\small c, cp,}}
+j}\tabularnewline
+{\small derivand-sep} & {\small\texttt{3 mu plus 1 mu minus 2 mu}} & {\small f, fp, s, sp, c, cp}\tabularnewline
+{\small op-symbol} & {\small\texttt{\textbackslash mathrm\{d\}}} & {\small f, fp, s, sp, c, cp, j, l}\tabularnewline
+{\small op-symbol-alt} & {\small\texttt{op-symbol}} & {\small f, fp, s, sp, \phantom{{\small c, cp,}} j}\tabularnewline
+{\small op-order-nudge} & {\small\texttt{0 mu}} & {\small f, fp, s, sp, c, cp, \phantom{j,} l }\tabularnewline
+{\small var-sup-nudge} & {\small\texttt{1 mu}} & {\small f, fp, s, sp, \phantom{{\small c, cp,} j,} l}\tabularnewline
+{\small multi-term-sep} & {\small\texttt{2 mu plus 1 mu minus 1 mu}} & {\small f, fp, s, sp, c, cp, \phantom{j,} l}\tabularnewline
+{\small term-sep-adjust} & {\small\texttt{-1 mu}} & {\small f, fp, s, sp, c, cp, \phantom{j,} l}\tabularnewline
+{\small long-var-wrap} & {\small\texttt{d(v)}} & {\small f, fp, s, sp, \phantom{{\small c, cp,} j,} l}\tabularnewline
+{\small lvwrap-Ldelim} & {\small\texttt{\textbackslash mleft (}} & {\small f, fp, s, sp, \phantom{{\small c, cp,}} j, l}\tabularnewline
+{\small lvwrap-Rdelim} & {\small\texttt{\textbackslash mright )}} & {\small f, fp, s, sp, \phantom{{\small c, cp,}} j, l}\tabularnewline
+{\small lvwrap-sup-nudge} & {\small\texttt{-2 mu}} & {\small f, fp, s, sp, \phantom{{\small c, cp, j,}} l}\tabularnewline
+{\small outer-Ldelim} & {\small\texttt{\textbackslash left (}} & {\small f, fp, s, sp, c, cp, j, l}\tabularnewline
+{\small outer-Rdelim} & {\small\texttt{\textbackslash right )}} & {\small f, fp, s, sp, c, cp, j, l}\tabularnewline
+{\small elbowroom} & {\small\texttt{0 mu}} & {\small f, fp, s, sp, c, cp, j, l}\tabularnewline
+{\small sub-nudge} & {\small\texttt{-5 mu}} & {\small f, fp, s, sp, c, cp}\tabularnewline
+{\small op-sub-nudge} & {\small\texttt{0 mu}} & {\small\phantom{{\small f, fp, s, sp,}} c, cp}\tabularnewline
+{\small{*}derivand-sep} & {\small\texttt{derivand-sep}} & {\small f, fp, s, sp, c, cp}\tabularnewline
+{\small{*}op-set-left} & {\small\texttt{false}} & {\small f, fp, \phantom{{\small s, sp, c, cp,}} j}\tabularnewline
+{\small{*}italic-nudge} & {\small\texttt{0 mu}} & {\small f, fp, \phantom{{\small s, sp, c, cp,}} j}\tabularnewline
+{\small{*}inner-wrap} & {\small\texttt{false}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+{\small{*}inner-Ldelim} & {\small\texttt{(}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+{\small{*}inner-Rdelim} & {\small\texttt{)}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+{\small{*}outer-Ldelim} & {\small\texttt{\textbackslash big {[}}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+{\small{*}outer-Rdelim} & {\small\texttt{\textbackslash big {]}}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+{\small{*}sub-nudge} & {\small\texttt{0 mu}} & {\small\phantom{{\small f, fp,}} s, sp}\tabularnewline
+\bottomrule
+\end{tabular}
+\par\end{center}
+\end{table}
+
+\begin{description}
+\item [{style}] the fraction form of derivative; 
+\begin{itemize}
+\item for upright-fraction derivatives, \verb`\diff`, \verb`\diffp`, a
+choice of \verb`frac`, \verb`tfrac` or \verb`dfrac`:
+\begin{itemize}
+\item \verb`frac` results in a fraction formed from \verb`\frac`, scalable
+\item \verb`tfrac` results in a fraction formed from \verb`\tfrac`, not
+scalable
+\item \verb`dfrac` results in a fraction formed from \verb`\dfrac`, not
+scalable
+\item default in templates \verb`DIFF`, \verb`DIFFP` = \verb`frac`
+\end{itemize}
+\item for slash-fraction derivatives,\verb`\difs`, \verb`\difsp`, a choice
+of \verb`/`, \verb`auto`, \verb`big`, \verb`Big`, \verb`bigg`
+or \verb`Bigg` 
+\begin{itemize}
+\item \verb`/` forms the slash fraction with \verb`/`, not scalable
+\item \verb`auto` forms the slash fraction with \verb`\left. \middle/ \right.`,
+scalable
+\item \verb`big`, \verb`Big`, \verb`bigg` and \verb`Bigg` form the slash
+fraction with \verb`\big/`, \verb`\Big/`, \verb`\bigg/` and \verb`\Bigg/`
+respectively, not scalable
+\item default in templates \verb`DIFS`, \verb`DIFSP` = \verb`/`
+\end{itemize}
+\item for compact-form derivatives, \verb`\difc`, \verb`\difcp`,  and
+differentials, a choice of \verb`_` or \verb`dl` or \verb`d^`
+\begin{itemize}
+\item \verb`_` forms derivatives of compact form like $\difc yx$, $\difcp[1,2]{z}{x,y}$ 
+\item \verb`d^` is a synonym for \verb`_` 
+\item \verb`dl` forms differentials like $\difc.dl.{}x$ and $\difcp.dl.[2]{}{x,y,z}$ 
+\item default in templates \verb`DIFC`, \verb`DIFCP` = \verb`_`
+\end{itemize}
+\item overall default in template \verb`DIF` = \verb`frac`
+\end{itemize}
+\item [{slash-tok}] token or tokens used for the slash fraction; (see §\ref{subsec:Other-notations}
+for a different assignment) default \verb`/`
+\item [{slash-sep}] space inserted on either side of the \textbf{slash-tok};
+ default \verb`0 mu`
+\item [{derivand-sep}] horizontal space added before the differentiand
+if the \verb`spaced` package option is set to \verb`1`, or before
+a multi-tokened differentiand if the \verb`spaced` package option
+is set to \verb`-1`; note that compact-form derivatives \emph{always
+}have this space inserted; default (appropriate for an upright-fraction
+derivative) = \verb`3mu plus 1mu minus 2mu`
+\item [{op-symbol}] the operator symbol; for ordinary derivatives generally
+one of \verb`d` or \verb`\mathrm{d}`, for partial derivatives \verb`\partial`;
+default = \verb`\mathrm{d}`
+\item [{op-symbol-alt}] if different from \textbf{op-symbol} then used
+in the denominator of a fraction-form derivative while \verb`op-symbol`
+is used in the numerator; e.g. for the acceleration $\diff.n.{v^{i}}t$,
+\verb`op-symbol = \nabla` and \verb`op-symbol-alt = d`; defaults
+to \textbf{op-symbol} default
+\item [{op-order-nudge}] extra horizontal space added between the op-symbol
+and the superscripted order of differentiation in higher order derivatives;
+for  math-italic forms compare $d^{2}$ with $d^{\mkern1mu 2}$, $\partial^{2}$
+with $\partial^{\mkern1mu 2}$ where the first symbol in each case
+has no extra space and the second has an extra \verb`1 mu`; since
+\textbf{op-symbol }defaults to an upright `d', default = \verb`0 mu`
+\item [{var-sup-nudge}] extra horizontal space added between a variable
+in the denominator of a derivative and the superscripted order of
+differentiation in higher order derivatives (cf \textbf{op-order-nudge});
+default = \verb`1 mu`
+\item [{multi-term-sep}] horizontal spacing inserted between the differentials
+in, for example, the denominator of a mixed partial derivative to
+avoid a solid cluster like $\partial x\partial y\partial z$; with
+the default \verb`2 mu` this is spread a little, $\difcp.dl.{}{x,y,z}$;
+default = \verb`2 mu plus 1 mu minus 1 mu`
+\item [{term-sep-adjust}] adjustment (usually a reduction) to \textbf{multi-term-sep}
+when differentiation in a variable occurs to an order other than 1;
+if, e.g., $\difcp.dl.[2]{}{x,y,z}$ is the denominator of a mixed
+partial derivative in three variables, because of the superscript
+the spacing between $\partial x^{2}$ and $\partial y$ is reduced
+by\textbf{ term-sep-adjust} from the spacing between $\partial y$
+and $\partial z$; default = {\ttfamily\verb`-1 mu`}
+\item [{long-var-wrap}] to avoid ambiguity in higher order derivatives
+it may aid clarity to wrap multi-token variables of differentiation
+in parentheses; the choices are 
+\begin{description}
+\item [{\texttt{dv\phantom{()}}}] no wrapping, e.g. $\mathrm{d}x_{i}^{2}$
+or $\partial\frac{1}{\Theta}^{2}$, 
+\item [{\texttt{d(v)}}] wrap the variable only, e.g. $\mathrm{d}(x_{i})^{2}$
+or  $\partial(\frac{1}{\Theta})^{2}$,
+\item [{\texttt{(dv)}}] wrap both op-symbol and variable, e.g. $(\mathrm{d}x_{i})^{2}$
+or $(\partial\frac{1}{\Theta})^{2}$;
+\item [{\texttt{\phantom{(dv)}}}] default = \verb`d(v)`
+\end{description}
+\item [{lvwrap-Ldelim}] left delimiter when wrapping a long variable in
+a higher order derivative; also applies to the left delimiter used
+in a jacobian; default = \verb`\mleft (`
+\item [{lvwrap-Rdelim}] right delimiter when wrapping a long variable in
+a higher order derivative; also applies to the right delimiter used
+in a jacobian; default = \verb`\mright )`
+\item [{lvwrap-sup-nudge}] horizontal adjustment to the superscript position
+when a multi-token variable is wrapped in (e.g.) parentheses and its
+order of differentiation is not \verb`1`; default = \verb`-2 mu`
+\item [{outer-Ldelim}] the left member of a delimiter pair wrapping the
+derivative, the right member of which is subscripted to indicate a
+point of evaluation or variables held constant; ISO recommends parentheses
+for this purpose, hence default = {\ttfamily\verb`\left (`} 
+\item [{outer-Rdelim}] the right member of a delimiter pair wrapping the
+derivative and subscripted to indicate a point of evaluation or variables
+held constant; ISO recommends parentheses for this purpose, hence
+default = {\ttfamily\verb`\right )`}
+\item [{elbowroom}] adjustment to the whitespace between \textbf{outer-Ldelim},
+\textbf{outer-Rdelim }and the enclosed derivative; negative values
+reduce the space; default = {\ttfamily\verb`0 mu`}
+\item [{sub-nudge}] horizontal adjustment of the subscript's placing relative
+to the \textbf{outer-Rdelim}iter for a point of evaluation or variable
+held constant; a negative value compensates for the curving inwards
+of a large right parenthesis; default = {\ttfamily\verb`-5 mu`}
+\item [{op-sub-nudge}] horizontal adjustment of the position of the subscript
+in derivatives of compact form relative to the operator; since \verb`\mathrm{d}`
+is the default operator, default = \verb`0 mu`
+\item [{{*}derivand-sep}] when the derivand is appended, horizontal space
+added before the differentiand (derivand) depending on the setting
+of the \verb`spaced` package option; default = \textbf{derivand-sep}
+default
+\item [{{*}op-set-left}] a choice of {\ttfamily\verb`true`}
+or {\ttfamily\verb`false`} indicating whether the op-symbol
+is left-aligned or not when the differentiand is appended; generally
+it is centred; applies only to upright-fraction forms of the derivative;
+default = {\ttfamily\verb`false`}
+\item [{{*}italic-nudge}] if \textbf{{*}op-set-left} is \verb`true`, makes
+an italic adjustment in the numerator, so that the op-symbols in numerator
+and denominator align in the same slanting column; for \verb`d` or
+\verb`\partial` an appropriate value might be \verb`3 mu`; because
+of the default \verb`\mathrm{d}`, default = \verb`0 mu`
+\item [{{*}inner-wrap}] when the differentiand is appended, a choice of
+\verb`true` or \verb`false` dictating whether the differential operator
+is wrapped in parentheses, as here $\difsp*{F(x,y)}x$, or not; for
+a slash-fraction derivative \verb`true` is an appropriate default,
+but the overall default, appropriate for an upright-fraction derivative,
+= \verb`false`
+\item [{{*}inner-Ldelim}] if \textbf{{*}inner-wrap} is \verb`true`, the\textbf{
+}left member of a delimiter pair around the differential operator;
+default = \verb`(`
+\item [{{*}inner-Rdelim}] if \textbf{{*}inner-wrap} is \verb`true`, the\textbf{
+}right member of a delimiter pair around the differential operator
+; default = \verb`)`
+\item [{{*}outer-Ldelim}] if \textbf{{*}inner-wrap} is \verb`true`, the
+left member of a delimiter pair around both the differential operator
+and appended differentiand, the right member of which may be subscripted
+to indicate a point of evaluation or variables held constant; to avoid
+too many parentheses, given the default values of {*}\textbf{inner-Ldelim},
+{*}\textbf{inner-Rdelim}, default = \verb`\bigl [`
+\item [{{*}outer-Rdelim}] if \textbf{{*}inner-wrap} is \verb`true`, the
+right member of a delimiter pair around the differential operator
+and appended differentiand; may be  subscripted to indicate a point
+of evaluation or variables held constant; to avoid too many parentheses,
+given the default values of \textbf{{*}inner-Ldelim}, \textbf{{*}inner-Rdelim},
+default = \verb`\bigr ]`
+\item [{{*}sub-nudge}] if \textbf{{*}inner-wrap} is \verb`true`, horizontal
+adjustment of the subscript's placing relative to the \textbf{{*}outer-Rdelim}iter
+for a point of evaluation or variable held constant; a negative value
+compensates for the curving inwards of a large right parenthesis;
+since the default \textbf{{*}outer-Rdelim} is a square bracket,\textbf{
+}default = \verb`0 mu`
+\end{description}
+
+\subsection{Ordinary upright-fraction derivatives; template \texttt{DIFF}}
+
+The defaults assigned in template \verb`DIF` are inherited by template
+\verb`DIFF` without change. Template \verb`DIFF` is therefore strictly
+unnecessary but, with templates \verb`DIFS` and \verb`DIFC` in mind,
+was created for the sake of a consistent naming scheme. 
+
+The \verb`\diff` command uses the values in the \verb`DIFF` template
+to form an upright-fraction derivative. Only keys with an `f' in
+the third column of Table~\ref{tab:DIF-defaults} are used in this
+process. Keys without an `f' play no part in the process and their
+default values are ignored. See §\ref{subsec:DIFF-(upright-fraction-derivative)}
+for the complete list of \emph{relevant} \verb`DIFF` defaults.
+
+\begin{table}
+\caption{Defaults differing from the parent template}
+
+\begin{centering}
+\subfloat[\texttt{DIFS}\label{tab:DIFS-defaults}]{\centering{}%
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule
+{\small style} & {\small\texttt{/}}\tabularnewline
+{\small derivand-sep} & {\small\texttt{2muplus1muminus2mu}}\tabularnewline
+{\small outer-Ldelim} & {\small\texttt{(}}\tabularnewline
+{\small outer-Rdelim} & {\small\texttt{)}}\tabularnewline
+{\small sub-nudge} & {\small\texttt{0 mu}}\tabularnewline
+{\small{*}inner-wrap} & {\small\texttt{true}}\tabularnewline
+\bottomrule
+\end{tabular}}\hfil\subfloat[\texttt{DIFC}\label{tab:DIFC-defaults}]{\centering{}%
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule
+{\small style} & {\small\texttt{\_}}\tabularnewline
+{\small derivand-sep} & {\small\texttt{1muplus1muminus1mu}}\tabularnewline
+{\small multi-term-sep} & {\small\texttt{1 mu}}\tabularnewline
+{\small term-sep-adjust} & {\small\texttt{0 mu}}\tabularnewline
+{\small outer-Ldelim} & {\small\texttt{\textbackslash bigl (}}\tabularnewline
+{\small outer-Rdelim} & {\small\texttt{\textbackslash bigr )}}\tabularnewline
+sub-nudge & {\small\texttt{-2 mu}}\tabularnewline
+\bottomrule
+\end{tabular}}
+\par\end{centering}
+\centering{}\subfloat[\texttt{DIFFP}\label{tab:DIFFP-defaults}]{\centering{}%
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule 
+{\small op-symbol} & {\small\texttt{\textbackslash partial}}\tabularnewline
+{\small op-order-nudge} & {\small\texttt{1 mu}}\tabularnewline
+{\small{*}italic-nudge} & {\small\texttt{3 mu}}\tabularnewline
+\bottomrule
+\end{tabular}}\hfil\subfloat[\texttt{DIFSP, DIFCP}\label{tab:DIFSP-DIFCP-defaults}]{\centering{}%
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule 
+{\small op-symbol} & {\small\texttt{\textbackslash partial}}\tabularnewline
+{\small op-order-nudge} & {\small\texttt{1 mu}}\tabularnewline
+\bottomrule
+\end{tabular}}
+\end{table}
+
+
+\subsection{Ordinary slash-fraction derivatives; template \texttt{DIFS}}
+
+When you use the command \verb`\difs` to form a slash-fraction derivative
+it is the keys in template \verb`DIF` with an `s' in the third
+column of Table~\ref{tab:DIF-defaults} which are used. Table~\ref{tab:DIFS-defaults}
+records those keys used for this purpose which are assigned default
+values \emph{different} from those in \verb`DIF`. See §\ref{subsec:DIFS-(slash-fraction-derivative)}
+for the complete list of \emph{relevant} \verb`DIFS` defaults.
+
+\subsection{Ordinary compact-form derivatives; template \texttt{DIFC}}
+
+When you use the command \verb`\difc` to form a compact derivative
+it is the keys in template \verb`DIF` with a `c' in the third column
+of Table~\ref{tab:DIF-defaults} which are used. Table~\ref{tab:DIFC-defaults}
+records those keys used for this purpose which are assigned default
+values \emph{different} from those in \verb`DIF`. See §\ref{subsec:DIFC-(compact-derivative)}
+for the complete list of \emph{relevant} \verb`DIFC` defaults.
+
+\subsection{Partial derivatives; templates \texttt{DIFFP}, \texttt{DIFSP}, \texttt{DIFCP}}
+
+The default values given in the tables so far apply to ordinary derivatives.
+For \emph{partial} derivatives, only a few defaults change. These
+are listed in Tables~\ref{tab:DIFFP-defaults}, \ref{tab:DIFSP-DIFCP-defaults}.
+All other keys take the default values of the respective parent templates,
+\verb`DIFF`, \verb`DIFS` and \verb`DIFC`. 
+
+\section{Variant forms: the \texttt{\textbackslash difdef} command}
+
+\label{sec:Variant-forms}You may be dissatisfied with the scheme
+of default values listed in the preceding tables and wish to `Re-mould
+it nearer to the Heart's Desire'. How to do so is discussed in §\ref{sec:ChangingDefaults}
+below. In \emph{this} section it is assumed that the user is largely
+satisfied with the assigned defaults but has need to write an occasional
+derivative that deviates from the default form. For instance, to write
+the range of different examples displayed in the Rogues' Gallery (§\ref{sec:Rogues'-gallery})
+I had to make extensive use of such \emph{variant forms} of derivative.
+I needed forms that displayed different ways of indicating a point
+of evaluation, a form that showed a math-italic `d' rather than
+the default upright `d', forms that displayed different parenthesizing
+styles for higher-order derivatives with multi-token variable names,
+and so on.
+
+The process of defining and using such variants is a two-step process.
+The `using' part is easy: you simply put the name of the variant
+form between dots and append to the relevant \verb`\difx` or \verb`\difxp`
+command.
+
+The `defining' part makes use of a command \verb`\difdef`,
+\begin{verbatim}
+    \difdef{id-list}{variant-name}{key-value list}
+\end{verbatim}
+which has three \emph{mandatory} arguments: 
+\begin{enumerate}
+\item \verb`id-list` A comma-list of identifiers, one or more of \verb`f`,
+\verb`s`, \verb`c`, \verb`fp`, \verb`sp`, \verb`cp`, \verb`j`,
+\verb`l` distinguishing the respective templates \verb`DIFF`, \verb`DIFS`,
+\verb`DIFC`, \verb`DIFFP`, \verb`DIFSP`, \verb`DIFCP`, \verb`DIFJ`
+and \verb`DIFL` (for the last two see Chapter~\ref{chap:Differentials-and-jacobians}).
+\item \verb`variant-name` A (preferably brief) name for the variant form;
+it may include characters other than letters, like numbers, punctuation
+marks (excluding full stops), mathematical symbols like \verb`+`
+and \verb`=`, but not control sequences or active characters, nor
+\verb`%` , \verb`#` or braces.
+\item \verb`key-value list` A \emph{key=value} list where the settings
+differ from the default settings for the relevant template or templates
+(as determined by the \verb`id-list`).
+\end{enumerate}
+In the preamble to the present document I have included the following
+definition:
+\begin{verbatim}
+    \difdef { f } { p } 
+      {    
+        op-symbol      = \partial,
+        op-order-nudge = 1 mu
+      }
+\end{verbatim}
+This defines a variant, with name \verb`p`, of an ordinary upright-fraction
+derivative (the \verb`f` in the first argument) that displays as
+a partial derivative. To use the variant simply append the name, as
+a dot-delimited argument, to the \verb`\diff` command. For instance,
+repeating an earlier example from thermodynamics,
+\begin{centred}
+\verb`\[ \diff.p.*{\frac PT}U[V] = \diff.p.*{\frac 1T}V[U] \]` $\Longrightarrow$
+\[ \diff.p.*{\frac PT}U[V] = \diff.p.*{\frac 1T}V[U]\]
+\end{centred}
+\noindent The effect is exactly the same as previously and it would
+have been possible to define \verb`\diffp` as this variant by following
+the definition of the variant with the statement,
+\begin{verbatim}
+    \NewDocumentCommand \diffp { } { \diff.p. }
+\end{verbatim}
+\verb`diffcoeff` has not followed this path, instead choosing to
+put the status and configurability of partial derivatives on the same
+footing as ordinary derivatives.
+
+\noindent{}%
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+The command \verb`\difdef` in version 5 of \verb`diffcoeff` takes
+\emph{three} mandatory arguments for defining variant forms of derivative.
+Do not confuse with the command \verb`\diffdef` of earlier versions
+of \verb`diffcoeff` which took \emph{two }mandatory arguments for
+this purpose. The additional argument is required to identify which
+one or more of the fraction forms \verb`f`, \verb`s`, \verb`c`,
+\verb`fp`, \verb`sp`, \verb`cp` of the commands \verb`\difx`,
+\verb`\difxp`, the variant applies to. In earlier versions this was
+not necessary since there was only the one primary derivative command
+\verb`\diff`.\end{shaded}%
+\end{minipage}
+
+\medskip{}
+
+The present document comes with a number of variant definitions. These
+are divided into two groups. One, in the preamble, contains definitions,
+like the example just given, designed to illustrate various effects
+in this document -- as in the Rogues' Gallery. These preamble definitions
+are listed in §\ref{sec:Preamble-definitions}. The other, in the
+associated file \verb`diffcoeff5.def`, contains definitions that
+may be of more general usefulness; these are listed in §\ref{sec:The-file-diffcoeff5.def}.
+
+\subsection{The \texttt{.def} file}
+
+\label{subsec:The-.def-file}A \verb`.def` file (in \verb`diffcoeff`)
+is a text file containing a list of definitions of variant derivatives
+after the fashion of the example above. The reason for placing such
+variant definitions in a file is that they can be easily transferred
+from document to document by means of the \verb`def-file` package
+option. If the name of your \verb`.def` file is \verb`myfile`, then
+invoking \verb`diffcoeff` with the call
+\begin{verbatim}
+    \usepackage[def-file=myfile]{diffcoeff}
+\end{verbatim}
+makes the definitions in \verb`myfile.def` available to your current
+document -- provided \verb`diffcoeff` can find the file.
+
+The question is: where to put the \verb`.def` file? The directory
+of the current document is an obvious candidate and for the current
+document serves well, but it does mean copying the \verb`.def` file
+from directory to directory to work on \emph{different} documents.
+To make a definition file available for \emph{all} documents, place
+it in the \verb`texmf` tree, preferably not the one created by your
+\TeX{} distribution, but your own \emph{personal} \verb`texmf` tree.
+Provided your \TeX{} distribution knows about your personal \verb`texmf`
+tree and the files it contains, then a \verb`.def` file placed within
+it will be accessible to all documents.
+\begin{center}
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+
+\subsubsection*{Personal \texttt{texmf} tree?}
+
+This is a directory created by you for `waifs and strays' of the \TeX{}
+system that are not included in standard distributions like MiK\TeX{}
+or \TeX Live. For instance, it is the place for personal packages
+designed for your own particular circumstances or preferences, and
+is structured like the standard \texttt{texmf} hierarchy but placed
+in another location so that there is no chance of its being overwritten
+when your \TeX{} distribution is updated. But that distribution needs
+to be alerted to the existence of your personal \texttt{texmf} tree
+and any new files added to it. For MiK\TeX , open the MiK\TeX{} console,
+click on \textsf{Settings} (in the column on the left) and then the
+\textsf{Directories} tab. Click the \textsf{+} button and navigate
+to your personal texmf tree to add it to the MiK\TeX{} search path,
+using the arrow keys to place it as high in the search path as possible.
+Having added it, you will then need to refresh the filename database
+by clicking on the \textsf{Tasks} menu and selecting the obvious entry.
+I am not familiar with \TeX Live but presume an analogous process
+will apply there.\end{shaded}%
+\end{minipage}
+\par\end{center}
+
+\begin{center}
+\medskip{}
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+
+\subsubsection*{\texttt{diffcoeff.def}}
+
+In earlier versions of \verb`diffcoeff`, if there was no explicit
+\verb`def-file=<filename>` package option statement, then a file
+\verb`diffcoeff.def` was sought and if found loaded. This is no longer
+the case. Version 5 of \verb`diffcoeff` searches for a \verb`.def`
+\emph{only if it is explicitly named} in a package option statement.
+(This decision was made at least in part to avoid conflict with a
+\verb`diffcoeff.def` file from an earlier version of \verb`diffcoeff`
+tucked away in some non-obvious place and producing obscure errors
+in the current version 5.) \end{shaded}%
+\end{minipage}
+\par\end{center}
+
+\subsubsection{Log file message}
+
+If the\verb`.def` file named in the package option statement cannot
+be located by \TeX , a message to that effect is sent to the terminal
+and log file, but \verb`diffcoeff` continues loading.
+
+\subsection{Examples of variants}
+
+The dot-delimited name argument must always be the \emph{first} argument
+of the \verb`\difx` or \verb`\difxp` command, even preceding an
+asterisk (star) signalling `append the differentiand'. Now for some
+examples.
+
+\paragraph{Acceleration}
+
+In tensor calculus acceleration is sometimes written $\difs.n.{v^{i}}t$,
+where different operator symbols occur in numerator and denominator.
+In the preamble to this document I have included the definition
+\begin{verbatim}
+    \difdef { f, s } { n }
+      { 
+        op-symbol     = \nabla,
+        op-symbol-alt = \mathrm{d}
+      }
+\end{verbatim}
+to give both upright- (the \verb`f`) and slash-fraction (the \verb`s`)
+forms of the acceleration. Appending the dot-delimited name \verb`n`
+to \verb`\difs`, \verb`$ \difs.n.{v^i}t $` $\Longrightarrow$ $ \difs.n.{v^i}t $,
+and appending the dot-delimited name \verb`n` to \verb`\diff`,
+\begin{centred}
+\verb`\[ \diff.n.{v^i}t. \]` $\Longrightarrow$ \[ \diff.n.{v^i}t. \]
+\end{centred}
+
+\paragraph{Detached subscripts}
+
+To show the effect of the key \verb`sub-nudge`, the preamble contains
+the definition
+\begin{verbatim}
+    \difdef { fp } { wsp } 
+      { sub-nudge = 0 mu }
+\end{verbatim}
+The name \verb`wsp` is a contraction of `whitespace'. The defintion
+applies only to an upright-fraction form of partial derivative (the
+\verb`fp` in the optional argument). By giving \verb`sub-nudge`
+a zero value in the \verb`wsp` variant, the subscript is cast adrift
+(perhaps to float away?) on a sea of whitespace. The default setting,
+\verb`sub-nudge=-5 mu`, maintains visual connection between subscript
+and right parenthesis:
+
+\verb`\[ \diffp.wsp.Fx[0],\quad \diffp Fx[0] \]` $\Longrightarrow$
+\[ \diffp.wsp.Fx[0],\quad \diffp Fx[0] \]
+
+\paragraph{Lagrange's equations}
+
+An earlier example used Lagrange's equations of motion, which showed
+a problem with the amount of whitespace introduced before a differentiand
+bounded by a \verb`\left`, \verb`\right` pair. The file \verb`diffcoeff5.def`
+contains the definition
+\begin{verbatim}
+    \difdef { f, fp } { *0 }
+      { 
+        *derivand-sep = 0 mu ,
+        outer-Ldelim  = \mleft ( ,
+        outer-Rdelim  = \mright )
+      }
+\end{verbatim}
+The first thing to notice is that the name of the variant, \verb`*0`,
+is not formed from letters (there are other examples below). Now Lagrange's
+equations are rendered (just right to my eye!)
+\begin{centred}
+\verb`\[ \diffp L{q_{k}}-\diff.*0.**t{\diffp L{\dot{q}_{k}}[]}=0 \]`
+\[
+\diffp L{q_{k}}-\diff.*0.**t{\diffp L{\dot{q}_{k}}[]}=0.
+\]
+\end{centred}
+
+\subsubsection{Editing variant forms}
+
+\noindent{}%
+\noindent\begin{minipage}[t]{1\columnwidth}%
+\begin{shaded}%
+
+\paragraph*{Bug in \texttt{xtemplate}}
+
+If you wish to successfully \emph{edit} a variant form that has (already)
+been defined -- by you or in \verb`diffcoeff` or in the \verb`.def`
+file\emph{ }-- then you will need a version of \verb`xtemplate`
+from 2022-12-17 or later. Earlier versions contained a bug that didn't
+otherwise affect the workings of \verb`diffcoeff` but did prevent
+changes being made to already defined variants.\end{shaded}%
+\end{minipage}\medskip{}
+
+You may wish to edit an already defined variant form -- perhaps to
+give a \emph{negative} value to \verb`*derivand-sep` in the last
+example. You don't need to repeat the full definition. It suffices
+to change the setting only of the relevant key or keys:
+\begin{verbatim}
+    \difdef { f, fp } { *0 }
+      { *derivand-sep = -3 mu }
+\end{verbatim}
+which gives for Lagrange's equations (too tight to my eye!)
+\[
+\difdef{f,fp}{*0}{*derivand-sep=-3mu}\diffp L{q_{k}}-\diff.*0.**t{\diffp L{\dot{q}_{k}}[]}=0.
+\]
+
+
+\subsubsection{Parenthesizing multi-token variables}
+
+To illustrate the different modes of parenthesizing `long' variables
+in higher order derivatives, I have put these two definitions in \verb`diffcoeff5.def`:
+\begin{verbatim}
+    \difdef { f, fp } { (dv) } 
+      { long-var-wrap = (dv) } 
+
+    \difdef { f, fp }{ dv } 
+      { long-var-wrap = dv }
+\end{verbatim}
+The three possibilities for wrapping multitoken variables can now
+be illustrated:
+\begin{verbatim}
+    \[ \diffp[2]f{x^{i}},\quad
+       \diffp.dv.[2]f{x^{i}},\quad
+       \diffp.(dv).[2]f{x^{i}} \] 
+\end{verbatim}
+$\Longrightarrow$ \[ \diffp[2]f{x^i},\quad\diffp.dv.[2]f{x^i},\quad\diffp.(dv).[2]f{x^i} \]
+
+To my eye parenthesizing seems unnecessary in this case, but in the
+following desirable (as in the first, default, setting):
+\begin{verbatim}
+    \[ \diffp[2]F{1/T},\quad
+       \diffp.dv.[2]F{1/T},\quad
+       \diffp.(dv).[2]F{1/T} \] 
+\end{verbatim}
+$\Longrightarrow$ \[ \diffp[2]F{1/T},\quad\diffp.dv.[2]F{1/T},\quad\diffp.(dv).[2]F{1/T} \]
+
+\subsubsection{Point of evaluation}
+
+\label{subsec:variantPoint-of-evaluation}Although ISO recommends
+subscripting parentheses to indicate a point of evaluation, some (like
+the author) prefer to subscript a vertical rule and save subscripted
+parentheses for the case of variables held constant in partial derivatives.
+The file \verb`diffcoeff5.def` contains the definition 
+\begin{verbatim}
+    \difdef { f, fp, s, sp } { | } 
+      {
+        outer-Ldelim  = \left . ,
+        outer-Rdelim = \right |,
+        sub-nudge   = 0 mu
+      }
+\end{verbatim}
+where the `pipe' character is used for the name of the variant. 
+\begin{centred}
+\verb`\[ \diffp.|.{F(x,y)}x[x=1] \]` $\Longrightarrow$     \[ \diffp.|.{F(x,y)}x[x=1] \]
+\end{centred}
+For slash fractions, I think parentheses give a better result than
+a vertical rule:
+\begin{centred}
+\verb`$ \difs yx[0],\quad \difs.|.yx[0] $` $\Longrightarrow$ $\difs yx[0],\quad \difs.|.yx[0]$
+\end{centred}
+They tie the whole expression together. However, it is easy to create
+expressions that suffer from `parenthesis overload':
+\begin{centred}
+\verb`$ \difs{F(x)}{(2x)}[x=0],\quad\difs.|.{F(x)}{(2x)}[x=0] $`
+$\Longrightarrow$ $\difs{F(x)}{(2x)}[x=0],\quad\difs.|.{F(x)}{(2x)}[x=0]$
+\end{centred}
+The vertical rule is better in this case, but best of all in this
+case (to my eye) is the use of \emph{square} brackets. The file \verb`diffcoeff5.def`
+contains the definition
+\begin{verbatim}
+    \difdef { f, fp, s, sp } { ] } 
+      {
+        outer-Ldelim = \left [ ,
+        outer-Rdelim = \right ],
+        elbowroom    = 1 mu,
+        sub-nudge    = 0 mu
+      }
+\end{verbatim}
+giving the result 
+\begin{centred}
+\verb`$ \difs.].{F(x)}{(2x)}[x=0] $` $\Longrightarrow$ $ \difs.].{F(x)}{(2x)}[x=0] $,
+\end{centred}
+which both avoids `parenthesis overload' and is `tied together'
+by the square brackets (and at least gives a nod in the direction
+of the ISO standard).
+
+\subsubsection{Upright text-style derivatives}
+
+\verb`diffcoeff` assumes that derivatives of upright-fraction form
+will be used mainly in display-style expressions and that the slash
+form will be used mainly for inline use. But if one does want to use
+the fraction form in an inline expression, then \verb`$ \diffp ST $`
+displaying as $ \diffp ST $ is fine, but adding a trailing optional
+argument, \verb`$ \diffp ST[V] $`, to indicate (in the present example)
+a variable held constant is not: $\diffp ST[V]$. Clearly the subscript
+is too close to the right parenthesis and (to my eye) there is too
+much `elbowroom' between the derivative and the enclosing parentheses.
+Hence the file \verb`diffcoeff5.def` contains the following definition
+for text-style upright fraction derivatives:
+\begin{verbatim}
+    \difdef { f, fp } { t }
+      {
+        style           = tfrac  ,
+        derivand-sep    = 1 mu plus 1 mu minus 1 mu,
+        multi-term-sep  = 0 mu   ,
+        term-sep-adjust = 0 mu   ,
+        wrap-sup-nudge  = 0 mu   ,
+        outer-Ldelim    = \bigl (,
+        outer-Rdelim    = \bigr ),
+        elbowroom       = -2 mu  ,
+        sub-nudge       = -3 mu
+      }
+\end{verbatim}
+With this definition, the variant form \verb`$ \diffp.t.ST[V] $`
+displays as $\diffp.t.ST[V]$. The subscript now is better positioned
+and there is a better fit between parentheses and derivative. Note
+that the \verb`style=tfrac` entry in the definition means \verb`\diffp.t.`
+will not scale in a display-style environment and may give a ridiculous
+result if used inappropriately:
+\begin{centred}
+\verb`\[ \frac AB\diffp.t.yx \]` $\Longrightarrow$ \[ \frac AB\diffp.t.yx \]
+\end{centred}
+For a non-scaling display-style derivative using \verb`\dfrac`, given
+the defaults in templates \verb`DIFF` and \verb`DIFFP`, the definition
+would be much simpler,
+\begin{verbatim}
+    \difdef { f, fp } { d } { style = dfrac }
+\end{verbatim}
+but there seems little point in so doing.
+
+\subsubsection{Slash-fraction styles}
+
+The default slash-fraction form \verb`$ \difs yx $` displaying as
+$ \difs yx $ does not scale. It is intended for inline use, but sometimes
+you may want a slash fraction of a different size -- perhaps a fraction
+is present in the differentiand or in the variable of differentiation.
+The file \verb`diffcoeff5.def` contains a definition of a scaling
+slash fraction (name \verb`0`) and a slightly larger-than-default
+slash fraction (name \verb`1`):
+\begin{verbatim}
+    \difdef { s, sp } { 0 }
+      {
+        style         = auto     ,
+        outer-Ldelim  = \left [  ,
+        outer-Rdelim  = \right ] ,
+        sub-nudge     = 0 mu     ,
+        *inner-Ldelim = \mleft ( ,
+        *inner-Rdelim = \mright ),
+        *outer-Ldelim = \left [  ,
+        *outer-Rdelim = \right ]
+      }
+    \difdef { s, sp } { 1 }
+      {
+        style          =  big   ,
+        outer-Ldelim   = \bigl (,
+        outer-Rdelim   = \bigr ),
+        sub-nudge      = -2   mu,
+        *inner-Ldelim  = \bigl (,
+        *inner-Rdelim  = \bigr ),
+        *outer-Ldelim  = \bigl [,
+        *outer-Rdelim  = \bigr ]
+      }
+\end{verbatim}
+The names arise from the sequence \verb`\big/`, \verb`\Big/`, \verb`\bigg/`,
+\verb`\Bigg/`, hence \verb`1`, \verb`2`, \verb`3`, \verb`4`,
+which leaves \verb`0` for the scaling form (which is built around
+\verb`\left.`, \verb`\middle/`, \verb`\right.`). \verb`diffcoeff5.def`
+does not contain definitions for the \verb`2`, \verb`3`, \verb`4`
+variants, only the two shown, because the larger sizes give ridiculous
+results. For the scaling variant, it is also easy to produce eyesores:
+\begin{centred}
+\verb`\[ \difsp.0.{\frac1Y}{\frac1X} \]` $\Longrightarrow$ \[ \difsp.0.{\frac1Y}{\frac1X} \]
+\end{centred}
+But for small size increases, the results can be pleasing. To the
+author's eye, both \verb`0` and \verb`1` variants give better results
+than the default:
+\begin{centred}
+\verb`$ \difsp.1.{F(x,y)}{\tfrac1x}[0] $` $\Longrightarrow$ $ \difsp.1.{F(x,y)}{\tfrac1x}[0] $
+
+\verb`$ \difsp.0.{F(x,y)}{\tfrac1x}[0] $` $\Longrightarrow$ $\difsp.0.{F(x,y)}{\tfrac1x}[0]\vphantom{\bigg|} $
+
+\verb`$ \difsp{F(x,y)}{\tfrac1x}[0] $` $\Longrightarrow$ $ \difsp{F(x,y)}{\tfrac1x}[0] $
+\end{centred}
+Subscripted \emph{square} brackets are chosen for the scaling variant
+so that the setting \verb`sub-nudge=0 mu` is appropriate at all scales.
+They provide good visual contrast with the parentheses of $F(x,y)$.
+
+\subsubsection{Compact--form derivatives}
+
+\label{subsec:Compact=002013form-derivatives}Two styles are available
+for compact-form derivatives, derivative style, \verb`style=_`, and
+differential style, \verb`style=dl`. The first is the default style;
+the orders of differentiation are applied to the operator symbol,
+in this example \verb`\partial`: 
+\begin{centred}
+\verb`$ \difcp[3,2]f{x,y,z} $` $\Longrightarrow$ $ \difcp[3,2]{f}{x,y,z} $
+\end{centred}
+What happens if no differentiation variable is specified, only an
+empty brace pair?
+\begin{centred}
+\verb`$ \difc[3]f{} $` $\Longrightarrow$ $ \difc[3]f{} $
+\end{centred}
+Note that this is the behaviour from version 5.2 of \verb`diffcoeff`.
+In version 5.1, a \emph{nested }brace pair, \verb`{{}}`, was required;
+a brace pair alone halted compilation. If you want to write `differentials
+of differentials' then this is a possible way of doing so; but see
+also the third example in §\ref{subsec:Variant-differentials}.
+
+Suppose now we define a variant form (as is done in \verb`diffcoeff5.def`),
+\begin{verbatim}
+    \difdef { cp } { dl } { style = dl }
+\end{verbatim}
+and use it to form a similar expression but without the differentiand
+this time, an empty argument in its place:
+\begin{centred}
+\verb`$ \difcp.dl.[3,2]{}{x,y,z} $` $\Longrightarrow$ $ \difcp.dl.[3,2]{}{x,y,z} $
+\end{centred}
+In this \verb`dl` style, the orders of differentiation are applied
+to the \emph{variables}. This allows discussion of, for example, the
+denominator of a mixed partial derivative -- perhaps a remark about
+minutiae of spacing. (See §\ref{sec:Differentials} on differentials
+which perhaps more conveniently similarly allow the writing of, for
+example, $\dl[3]x$.)
+
+\subsubsection{D, \textbackslash delta, \textbackslash Delta derivatives}
+
+\label{subsec:D-delta-Delta}In introductory calculus texts a derivative-like
+symbol is created with the lowercase Greek delta, $\delta$ . An uppercase
+Greek delta, $\Delta$, is often used in a derivative-like symbol
+for an average. In fluid dynamics the \emph{material} (also \emph{substantive}
+or \emph{total}\,) derivative uses an uppercase $\mathrm{D}$ in
+place of $\mathrm{d}$. Texts on differential equations often use
+a $\mathrm{D}$ operator. The file \verb`diffcoeff5.def` contains
+the definitions
+\begin{verbatim}
+    \difdef { f, s } { gd }
+      { op-symbol = \delta }
+    \difdef { f, s } { gD }
+      { op-symbol = \Delta }
+    \difdef { f, s } { D }
+      { op-symbol = \mathrm{D} }
+    \difdef { c } { bD } 
+      { 
+        op-symbol    = \mathbf{D}, 
+        op-sub-nudge = -2mu
+      }
+\end{verbatim}
+(where the `g' in the first two suggests `greek'), meaning one
+can write expressions like \verb`$ \difs.gd.yx $` $\Longrightarrow$
+$ \difs.gd.yx $, or \verb`$ \difs.gD.yx $` $\Longrightarrow$ $ \difs.gD.st$
+(for the average speed), or
+\begin{centred}
+\verb`\[ \diff.D.{\rho}t=\diffp\rho t + \mathbf{u\cdot}\nabla\rho \]`$\Longrightarrow$
+\[ \diff.D.{\rho}t=\diffp\rho t + \mathbf{u\cdot}\nabla\rho \]
+\end{centred}
+\noindent for the total derivative of $\rho$ (perhaps in fluid dynamics),
+or
+\begin{centred}
+\noindent\verb`$ \difc.bD.[2]y{x\,}+2\difc.bD.y{x\,}-4=0 $` $\Longrightarrow$
+$ \difc.bD.[2]y{x\,}+2\difc.bD.y{x\,}-4=0 $
+\end{centred}
+for an example in the study of differential equations.
+
+\subsection{Other notations}
+
+\label{subsec:Other-notations}\verb`diffcoeff` and this document
+are about defining \emph{derivatives} but it is worth pointing out
+that other notations can be built from the \verb`diffcoeff` constituents,
+in particular from the slash fraction forms. For example, some other
+token than \verb`/`, or indeed series of tokens, can be used to link
+numerator and denominator. It could be \verb`\vert` or \verb`\Vert`,
+displaying as $\vert$ and $\Vert$ respectively, or \verb`\otimes`
+(requiring for example \verb`\usepackage{stmaryrd}` in the preamble),
+displaying as $\otimes$, or the sequence of tokens \verb`\otimes\ldots\otimes`
+displaying as $\otimes\ldots\otimes$. The critical key is \verb`slash-tok`,
+with possible extra spacing on either side through the key \verb`slash-sep`.
+Or, one may want to void the \verb`op-symbol` key by giving it an
+empty value or do something like \verb`op-symbol=\mathbf`, or give
+\verb`outer-Ldelim`, \verb`outer-Rdelim` special values, e.g.,\verb`\langle`,
+\verb`\rvert`.
+
+In the preamble I have included the following definition, in order
+to mimic the \verb`\Braket` command of the \verb`braket` package,
+\begin{verbatim}
+    \difdef{ s }{ bk }
+      {
+        slash-tok = ,
+        op-symbol = ,
+        multi-term-sep = 3mu\middle|\mskip3mu ,
+        outer-Ldelim = \left\langle ,
+        outer-Rdelim = \right\rangle
+      }
+\end{verbatim}
+and supplemented it with the definition:
+\begin{verbatim}
+    \NewDocumentCommand \Braket { m }
+      { 
+        \difoverride {\negmu}
+        \difs.bk.{}{#1}[] 
+      }
+\end{verbatim}
+Testing the new command, \verb`\Braket`, gives this display:
+\begin{centred}
+\verb`\[ \Braket{\phi,\diffp[2]{}t,\psi} \]` $\Longrightarrow$ \[\Braket{\phi,\diffp[2]{}t,\psi} \]
+\end{centred}
+Comparison with the \verb`\Braket` command of the \verb`braket`
+package, which uses \verb`|` as the separator in the argument rather
+than commas, shows the displayed results to be the same (as far as
+I can judge).
+
+\section{Defaults: setting your own}
+
+\label{sec:ChangingDefaults}The use of variant forms of derivative
+assumes the user is reasonably satisfied with the default values of
+the various templates. The user may not be. You may want different
+defaults. That is again accomplished by means of the \verb`\difdef`
+command. The procedure is identical with that for defining a variant
+except that \emph{no} \verb`variant-name` is supplied; an empty argument
+is used instead. 
+
+For example, suppose you wish to indicate a point of evaluation for
+ordinary upright-fraction derivatives by means of a subscripted vertical
+rule rather than parentheses. In §\ref{subsec:variantPoint-of-evaluation}
+we have seen how to create a variant form with this property but now
+we want to make it the default in the template \verb`DIFF`. That
+is easy -- simply omit any content from the second argument:
+\begin{verbatim}
+    \difdef { f } {} 
+      {
+        outer-Ldelim = \left . ,
+        outer-Rdelim = \right |,
+        sub-nudge    = 0 mu
+      }
+\end{verbatim}
+\noindent If this is placed in the preamble of your document or in
+your \verb`.def` file (see §\ref{subsec:The-.def-file}) then the
+command  \verb`\diff yx[0]` will produce 
+\[
+\diff.|.yx[0]
+\]
+by default. By leaving the second argument empty the \verb`\difdef`
+command has changed the default value of those templates indicated
+by the list of identifiers in the first argument -- in the present
+case only the template \verb`DIFF`. In particular, note that the
+new default is \emph{not} inherited by \verb`DIFFP`. Inheritance
+occurs \emph{only} at load time. How to change defaults that will
+be inherited is discussed below in §\ref{subsec:Changing-DIF-defaults}.
+
+If you wish to change other defaults of other templates follow the
+same procedure. In the first argument of the \verb`\difdef` command
+insert a comma-list of the derivative identifiers (\verb`f`, \verb`s`,
+\verb`c`, \verb`fp`, \verb`sp`, \verb`cp`, \verb`j` or \verb`l`)
+that you want the new defaults to apply to, \emph{leave the second
+argument empty}, and in the third argument provide the \emph{key=value}
+list of new defaults.
+
+For instance, you might prefer math-italic `d's rather than the
+upright ISO recommendation, and you want this to apply across \emph{all}
+ordinary-derivative templates. The most straightforward way of achieving
+that would be through the definition
+\begin{verbatim}
+    \difdef { f, s, c, l } {} 
+      {
+        op-symbol      = d ,
+        op-order-nudge = 1 mu
+      }
+\end{verbatim}
+which includes the list of identifiers \verb`f, s, c, l` in the first
+argument (the \verb`l` referring to the template \verb`DIFL` of
+the differential -- see §\ref{sec:Differentials}) and leaves the
+second argument empty. Thereafter, all ordinary derivatives will be
+graced with math-italic rather than upright `d's.
+
+\subsection{Changing defaults in \texttt{DIF}}
+
+\label{subsec:Changing-DIF-defaults}You might wonder if this last
+effect could not have been obtained more simply by changing the default
+in the `primogenitor' template \verb`DIF` -- perhaps leave both\emph{
+first }and second\emph{ }arguments empty in the \verb`\difdef` command.
+That, however, has no effect. The \verb`\difdef` command does nothing
+if the first argument is empty. Inheritance occurs only once, at time
+of birth -- \emph{load time} -- and not thereafter. If you want
+to make a change affecting a number of templates by changing a default
+in \verb`DIF`, then it has to be done at the time when \verb`diffcoeff`
+is loaded. 
+
+There are two ways to do this. The first is to create a text file
+with the specific name \verb`diffcoeff.DIF` with the desired settings.
+For example, if we want math-italic `d's and a subscripted vertical
+rule for points of evaluation, then the file might look like
+\begin{verbatim}
+    op-symbol      = d,
+    op-order-nudge = 1 mu,
+    outer-Ldelim   = \left . ,
+    outer-Rdelim   = \right |,
+    sub-nudge      = 0 mu
+\end{verbatim}
+By locating the file in a place where your \TeX{} distribution can
+find it -- either in the directory of the current document or in
+your personal \verb`texmf` tree (see the earlier discussion at §\ref{subsec:The-.def-file},
+and in particular the need to alert your \TeX{} distro to the presence
+of the file) -- \verb`diffcoeff.DIF` will be read at load time and
+the new defaults not only incorporated into template \verb`DIF` but
+inherited by all child and grandchild templates unless explicitly
+countermanded (for example by \verb`op-symbol = \partial` and similar
+statements in the definitions of those templates).
+
+The second method is to use the package option \verb`DIF`. For instance
+loading \verb`diffcoeff` with the call
+\begin{verbatim}
+    \usepackage
+      [ DIF = 
+          {
+            op-symbol = d,
+            op-order-nudge  = 1 mu,
+            outer-Ldelim    = \left . ,
+            outer-Rdelim    = \right |,
+            sub-nudge       = 0 mu 
+          }
+      ]{diffcoeff}
+\end{verbatim}
+will overwrite the built-in defaults with these new values, which
+will be inherited by child (and grandchild) templates unless explicitly
+countermanded. Notice that since \verb`DIF` is a comma list it requires
+braces around the list of \emph{key=value} statements\emph{.} 
+
+If both methods of changing the template \verb`DIF` are employed,
+the order of use is, first, read and act on the file \verb`diffcoeff.DIF`,
+then read and act on the package option \verb`DIF`. (In other words,
+to avoid complicating the preamble, preferably use the file \verb`diffcoeff.DIF`;
+use the package option \verb`DIF` only for fine-tuning -- perhaps
+a setting specific to that particular document.)
+
+\chapter{Differentials and jacobians}
+
+\label{chap:Differentials-and-jacobians}In addition to the six derivative
+commands, \verb`\difx` and \verb`\difxp`,  the \verb`diffcoeff`
+package has two further commands, \verb`\dl` and \verb`\jacob`,
+for writing differentials and jabobian determinants respectively.
+These commands use the settings of the templates \verb`DIFL` and
+\verb`DIFJ`, and both are correspondingly configurable by means of
+the \verb`\difdef` command.
+
+\section{Differentials}
+
+\label{sec:Differentials}Forms like $\dl x$ occur not only as components
+of derivatives but also in other contexts like the expression for
+a total differential,
+\[
+\dl P=\diffp Px\dl x+\diffp Py\dl y+\diffp Pz\dl z,
+\]
+or in integrals, like $\int\sin x\dl x$, or multi-variable integrals
+like 
+\[
+\iiintop_{-\infty}^{\infty}V(x,y,z)\dl{x,y,z},
+\]
+or, with subscripted variables, rendered more cryptically as
+\[
+\iiintop_{-\infty}^{\infty}V(x_{1},x_{2},x_{3})\dl[3]x,\text{ or }\iiintop_{-\infty}^{\infty}V(x_{1},x_{2},x_{3})\dl.dn.[3]x.
+\]
+They also occur in differential geometry and elsewhere in the form
+of line elements like 
+\begin{centred}
+$\dl.+.{x,y,z}^2$ \quad{}and\quad{} $c^2\dl.-.{t,x,y,z}^2$.
+\end{centred}
+Surely we want the `d's in these expressions to correspond to their
+form (upright or math italic) in derivatives? 
+
+To this end, \verb`diffcoeff` provides a command \verb`\dl` to write
+the `d' in a differential in a manner consistent with the default
+form used in derivatives. In the present document, the default form
+is upright and so
+\begin{centred}
+\verb`$ \dl x $` $\Longrightarrow$ $ \dl x. $
+\end{centred}
+\noindent (From version 5.4 of \texttt{diffcoeff}, following the pattern
+of \verb`\diff`, \verb`\difs` and \verb`\difc`, the command \verb`\difl`
+is also available: \verb`$ \difl x $` $\Longrightarrow$ $ \difl x $.)
+To use the command before a multi-token variable of differentiation,
+put the variable in braces:
+\begin{centred}
+\verb`$ \dl{\vec{x}},\quad \dl{\mathbf{x}} $` $\Longrightarrow$
+$ \dl{\vec{x}},\quad \dl{\mathbf{x}} $.
+\end{centred}
+For the first triple integral above, writing the differentials required
+not three but just the \emph{one} command:
+\begin{centred}
+\verb`$ \dl{x,y,z} $` $\Longrightarrow$ $ \dl{x,y,z} $.
+\end{centred}
+For the second triple integral, $\dl[3]x$ was just \verb`\dl[3]x`,
+and for the third I used a dot-delimited argument producing a variant
+form of the differential \verb`\dl.dn.[3]x` (which could be compacted
+further into a macro if it were to be used often); see §\ref{subsec:Variant-differentials}
+below.
+
+To write the line elements I again made use of a variant form of the
+differential (and again see §\ref{subsec:Line-elements}):
+\begin{centred}
+\verb`$ \dl.+.{x,y,z}^2 $` $\Longrightarrow$ $ \dl.+.{x,y,z}^2 $,
+
+\verb`$ c^2\dl.-.{t,x,y,z}^2 $` $\Longrightarrow$ $ c^2\dl.-.{t,x,y,z}^2 $.
+\end{centred}
+
+\subsection{Template \texttt{DIFL}}
+
+\begin{wraptable}{o}{0.5\columnwidth}%
+
+\centering{}\caption{\texttt{DIFL} defaults\protect\label{tab:DIFL-defaults}}
+\begin{center}
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule
+{\small style} & {\small\texttt{dl}}\tabularnewline
+{\small outer-Ldelim} & {\small\texttt{\textbackslash ,}}\tabularnewline
+{\small outer-Rdelim} & \tabularnewline
+\bottomrule
+\end{tabular}
+\par\end{center}\end{wraptable}%
+The differential command \verb`\dl` gives access to a template \verb`DIFL`
+which inherits the default values of the fundamental template \verb`DIF`
+with the (few) changes shown in Table~\ref{tab:DIFL-defaults}. In
+prior versions of \texttt{diffcoeff} the \verb`style` key was fixed
+at the value \verb`dl`; from the current version, 5.4, it can also
+take the value \verb`d^`. With the default style \verb`dl`, \verb`$\dl[2]x$`
+$\Longrightarrow$ $\dl[2]x$; with style \verb`d^`, \verb`$\dl[3]x$`
+$\Longrightarrow$ $\dl.dn.[3]x$, a form sometimes used when abbrviating
+the product of differentials in a multiple integral. The \verb`outer-Ldelim`
+key inserts a thin space before the differential; the \verb`outer-Rdelim`
+key does nothing. For the differential, both \verb`outer-Ldelim`
+and \verb`outer-Rdelim` are \emph{always inserted}. This differs
+from the derivative for which \verb`outer-Ldelim` and \verb`outer-Rdelim`
+are inserted only if there is a trailing optional argument. It is
+as if the differential command \verb`\dl` had a built-in empty trailing
+optional argument.
+
+That so few of the \verb`DIF` defaults are changed in \verb`DIFL`
+indicates that much of the machinery of derivative formation is irrelevant
+for forming a differential. A list of \emph{relevant} keys for the
+creation of differentials -- those that have some effect on the appearance
+of the thing -- can be found at §\ref{subsec:DIFL-(differential)}.
+
+\subsection{Syntax and options}
+
+\label{subsec:DifferentialsSyntaxOptions}If all options are present
+the differential command has the syntax
+\begin{verbatim}
+    \dl.name.[order-spec]{variable(s)}^{exponent}
+\end{verbatim}
+where the arguments have the following significance:
+\begin{enumerate}
+\item \verb`name` (optional) A dot-delimited name to distinguish a variant
+form (non-default form) of differential; see §\ref{subsec:Variant-differentials}
+below.
+\item \verb`order-spec` (optional) The power or comma-list of powers to
+which the differential or differentials will be raised. If all powers
+are \verb`1` then no specification is needed; indeed, if fewer powers
+are specified than there are variables, all `missing' powers are
+assumed to be \verb`1`; see the discussion for mixed partial derivatives,
+§\ref{subsec:Mixed-partial-derivatives}.
+\item \verb`variable(s)` (mandatory) The variable or comma-list of variables
+the differential operator applies to. \verb`\dl x`, \verb`\dl{\vec{x}}`,
+\verb`\dl{x,y,z}` are all valid variable specifications, displaying
+as $\dl x$, $\dl{\vec{x}}$ and $\dl{x,y,z}$ respectively.
+\item \verb`exponent` (optional) An exponent to which all differentials
+will be raised; overrides the \verb`order-spec` ; see §\ref{subsec:Line-elements}
+for examples of use.
+\end{enumerate}
+Only the third argument is mandatory, although it may be empty. As
+with derivatives, the square-bracket delimited order spec. can be
+replaced with colon-modified arguments in the variable specification:
+\begin{centred}
+\verb`$ \dl[3]x,\quad \dl{x:3} $` $\Longrightarrow$ $ \dl[3]x,\quad \dl{x:3} $.
+\end{centred}
+
+\subsection{Variant forms of differential}
+
+\label{subsec:Variant-differentials}The first argument of the differential
+command \verb`\dl` is the optional \verb`name` which is used --
+like the corresponding argument in the derivative commands -- to
+define \emph{variant forms}.
+
+To create such variant forms, the \verb`\defdif` command is again
+used, but with \verb`l` (lowercase \verb`L`) used as the identifier
+in the first argument. For example, you may want a `partial' differential,
+using \verb`\partial` in place of \verb`d`. It seems natural to
+give this the name \verb`p`:
+\begin{verbatim}
+    \difdef { l } { p }
+      { op-symbol = \partial }
+\end{verbatim}
+In fact just this definition can be found in the file \verb`diffcoeff5.def`,
+so that
+\begin{centred}
+\verb`$ \dl.p.x $` $\Longrightarrow$ $\dl.p.x$
+\end{centred}
+which is seven keystrokes in all versus ten (space included) for \verb`\partial x`.
+Defining \verb`\dlp` by writing
+\begin{centred}
+\verb`\NewDocumentCommand \dlp {} { \dl.p. }`.
+\end{centred}
+saves another keystroke. However, I doubt the few keystrokes saved
+justify the trouble of defining such a variant. The real reason one
+might do so is to ease the writing of expressions like $\dl.p.[3,2]{x,y,z}$
+-- perhaps in a document like the present one to discuss the minutiae
+of spacing in the denominators of mixed partial derivatives. 
+\begin{centred}
+\verb`$\dl.p.[3,2]{x,y,z},\quad \dl.p.{x:3,y:2,z}$` $\Longrightarrow$
+$\dl.p.[3,2]{x,y,z},\quad \dl.p.{x:3,y:2,z}$
+\end{centred}
+As you can see from the example, just as for mixed partial derivatives,
+if more than one variable is specified but the \verb`order-spec`
+contains fewer than that number of entries, \verb`diffcoeff` assumes
+the missing entries are \verb`1`. 
+
+A second example of a variant form of differential is provided by
+the definition
+\begin{verbatim}
+   \difdef { l } { b }
+      { op-symbol = \mathrm{d}\mathbf }
+\end{verbatim}
+which can be found in the file \verb`diffcoeff5.def`. If you distinguish
+vectors, say, by boldface type, then you can avoid writing \verb`\mathbf`
+for differentials of vectors by using the variant form \verb`\dl.b.`:
+\begin{centred}
+\verb`$ \dl.b.x,\quad \dl.b.{x,y,z} $` $\Longrightarrow$ $ \dl.b.x ,\quad \dl.b.{x,y,z} $.
+\end{centred}
+A third example is of a differential raised to a power in which the
+superscript is attached to the \verb`d`, as provided by the definition
+\begin{verbatim}
+    \difdef { l } { dn } { style = d^ }
+\end{verbatim}
+With this definition
+\begin{verbatim}
+   \[ \iiintop_{-\infty}^{\infty}
+        V(x_{1},x_{2},x_{3})\dl.dn.[3]x.
+\end{verbatim}
+$\Longrightarrow$ \selectlanguage{english}%
+\[ \iiintop_{-\infty}^{\infty}
+   V(x_{1},x_{2},x_{3})\dl.dn.[3]x. \]If you are going to need this form of differential often, you could
+save some keystrokes with a macro definition like
+\begin{centred}
+\selectlanguage{english}%
+\verb`\NewDocumentCommand \dn { m m } { \dl.dn.[#1]{#2} }`
+\end{centred}
+In fact I have added this and the associated \selectlanguage{english}%
+\verb`\difdef` command to the preamble of the present document, so that it suffices
+to write \selectlanguage{english}%
+\verb`\dn3x` to obtain $\dn3x{}$. 
+\selectlanguage{english}%
+
+\subsubsection{Line elements}
+
+\label{subsec:Line-elements}Variant forms can be used to write line
+elements of Pythagorean or Minkowskian form. The definition
+\begin{verbatim}
+    \difdef { l } { + }
+      {
+        multi-term-sep  = 0 mu +,
+        term-sep-adjust = 0 mu  ,
+        outer-Ldelim      =
+      }
+\end{verbatim}
+which can be found in the file \verb`diffcoeff5.def`, inserts a \verb`+`
+sign between terms in the variable specification. Notice that the
+value assigned to the key \verb`multi-term-sep` begins with \verb`0 mu`.
+A dimension here \emph{initially} is essential. Also note that the
+thin space inserted by default before a differential by means of the
+\verb`outer-Ldelim` setting is now removed. But the intriguing feature
+of the definition is what follows the \verb`0 mu` in the \verb`multi-term-sep`
+value: a \verb`+` sign. Applying this variant to \verb`{x,y,z}`
+the result is $ \dl.+.{x,y,z} $, which may be mildly interesting
+but definitely becomes so when we add an exponent to the variable
+spec.: 
+\begin{centred}
+\verb`$ \dl.+.{x,y,z}^2 $` $\Longrightarrow$ $ \dl.+.{x,y,z}^2 $.
+\end{centred}
+The exponent acts as if an order specification \verb`[2,2,2]` had
+been included. If an order specification \emph{is }included, whatever
+the values listed, the trailing exponent overrides it.
+
+Similarly, the file \verb`diffcoeff5.def` contains an identical definition
+save that the plus sign is replaced by a minus. This enables the writing
+of a Minkowski metric:
+\begin{centred}
+\verb`$ c^2\dl.-.{t,x,y,z}^2 $` $\Longrightarrow$ $ c^2\dl.-.{t,x,y,z}^2 $.
+\end{centred}
+
+\subsection{Changing defaults}
+
+To change the \emph{default} values of the \verb`DIFL` template use
+the \verb`\difdef` command but leave its second argument, the \verb`name`
+argument, empty. For instance if you want slightly less space by default
+before a differential than the thin space (\verb`\,` or \verb`3 mu`)
+specified in the \verb`DIFL` template -- say you want \verb`2 mu`
+-- then write
+\begin{verbatim}
+    \difdef { l } {} { outer-Ldelim = \twomu }
+\end{verbatim}
+and ensure that this is in your \verb`.def` file or in the preamble
+of your document. If you want a rubber length, say \verb`3 mu plus 1 mu minus 2 mu`
+(which can also be written more compactly as \verb`3muplus1muminus2mu`),
+then write (notice the \verb`\mskip`)
+\begin{verbatim}
+    \difdef { l } {} 
+      { outer-Ldelim = \mskip 3muplus1muminus2mu }
+\end{verbatim}
+The crucial point is to leave the second argument of \verb`\difdef`,
+the \verb`variant name`, empty. That changes the \emph{default} values
+in \verb`DIFL` of the keys listed in the third argument of \verb`\difdef`.
+
+\subsection{Rationale}
+
+But why bother with the differential command at all? It only seems
+to complicate the simple typing of \verb`d` followed by \verb`x`.
+Admittely typing \verb`\dl x` requires fewer keystrokes than typing
+\verb`\mathrm{d}x` (or even \verb`\mathrm dx`), but there are other,
+more substantive, reasons why one might prefer an explicit command.
+\begin{enumerate}
+\item \emph{Consistency} with the derivative.
+\item \emph{Spacing} is inserted automatically before the differential,
+and between differentials in (e.g.) multiple integrals.
+\item \emph{Parsing integrals} for some other package or program is much
+easier to do when looking for a concluding differential command \verb`\dl`
+than when looking for \verb`d` or \verb`\mathrm{d}` or \verb`\mathnormal{d}`
+(or whatever) followed by an arbitrary variable name.
+\item \emph{Configurability}. There are values other than the defaults that
+can be given to keys to give novel effects for variant forms of differential
+-- see the examples \verb`\dl.b.`, \verb`\dl.+.` and \verb`\dl.-.`
+above. 
+\end{enumerate}
+
+\section{Jacobians}
+
+\label{subsec:Jacobians}\verb`diffcoeff` provides a command {\ttfamily\verb`\jacob`}
+for writing jacobians -- not the determinant as such but the symbol
+conventionally used to denote the determinant. For example
+\begin{centred}
+\verb`\[ \jacob{u,v}{x,y},\quad \jacob{u,v,w}{x,y,z}. \]` $\Longrightarrow$
+\[ \jacob{u,v}{x,y},\quad \jacob{u,v,w}{x,y,z}. \]
+\end{centred}
+The comma lists can contain any number of variables, even one or none,
+nor need the numbers in numerator and denominator be equal. \verb`\jacob`
+does \emph{not} check such things. (It may be possible to exploit
+this fact when defining variant forms of jacobian, or other notations
+-- like the \verb`\Braket` example in §\ref{subsec:Other-notations}.)
+
+From version 5.4 of \texttt{diffcoeff}, following the pattern of \verb`\diff`,
+\verb`\difs` and \verb`\difc`, the command \verb`\difj` is also
+available and is equivalent to \verb`\jacob`. 
+
+\begin{wraptable}[8]{o}{0.45\columnwidth}%
+\centering{}\vspace{2ex}
+\caption{\texttt{DIFJ} defaults\protect\label{tab:DIFJ-defaults}}
+\begin{center}
+\begin{tabular}{lr}
+\toprule 
+{\small key} & {\small default}\tabularnewline
+\midrule
+{\small op-symbol} & {\small\texttt{\textbackslash partial}}\tabularnewline
+{\small outer-Ldelim} & \tabularnewline
+{\small outer-Rdelim} & \tabularnewline
+\bottomrule
+\end{tabular}
+\par\end{center}\end{wraptable}%
+~~
+
+\subsection{Template \texttt{DIFJ}}
+
+Jacobians are configurable. Like  other commands of \verb`diffcoeff`,
+\verb`\jacob` gives access to a template, in this case \verb`DIFJ`,
+which is a child of the fundamental template \verb`DIF` and inherits
+most of its default values with only a few changes as shown in Table~\ref{tab:DIFJ-defaults}.
+Note that the keys \verb`outer-Ldelim` and \verb`outer-Rdelim` are
+both empty and, as with the differential, are \emph{always inserted}
+-- which is why they are empty by default.
+
+The lack of entries in Table~\ref{tab:DIFJ-defaults} is because
+many keys are irrelevant for forming jacobians -- it doesn't matter
+what their default values are. For a list of \emph{relevant} keys
+-- ones that have some effect on the appearance of a jacobian --
+see §\ref{subsec:DIFJ-(jacobian)}.
+
+\subsection{Syntax and variant forms}
+
+The \verb`\jacob` command has only three arguments. The syntax is
+simple: 
+\begin{verbatim}
+    \jacob.name. {numer} {denom}
+\end{verbatim}
+The arguments have the following significance:
+\begin{enumerate}
+\item \verb`name` (optional) The dot-delimited name of a variant form of
+jacobian.
+\item \verb`numer` (mandatory) A comma list of variables forming the numerator
+of the jacobian.
+\item \verb`denom` (mandatory) A comma list of variables forming the denominator
+of the jacobian.
+\end{enumerate}
+The default form of jacobian is an upright fraction with \verb`\partial`
+operators and parentheses around the variable lists in both numerator
+and denominator. 
+
+If you want a jacobian in, say, slash-fraction form then once again
+the \verb`\difdef` command is used. The file \verb`diffcoeff5.def`
+contains the definition
+\begin{verbatim}
+    \difdef { j } { s } { style = / }
+\end{verbatim}
+To access this style, use the name -- which is at your discretion
+but here I have chosen \verb`s` (\verb`/` also suggests itself)
+-- between dots after the \verb`\jacob` command:
+\begin{centred}
+\verb`$ \jacob.s.{u,v,w}{x,y,z} $` $\Longrightarrow$ $ \jacob.s.{u,v,w}{x,y,z}. $
+\end{centred}
+If you want to change the operator symbol from \verb`\partial` to
+\verb`D`, as I have seen used, then the definition is:
+\begin{verbatim}
+    \difdef { j } { D } { op-symbol = D }
+\end{verbatim}
+(Again the name is at your discretion but \verb`D` seems obvious.)
+I have added this to the preamble of the present document, so that
+\begin{centred}
+\verb`\[ \jacob.D.{u,v,w}{x,y,z} \]` $\Longrightarrow$ \[ \jacob.D.{u,v,w}{x,y,z}.\]
+\end{centred}
+If you want square brackets rather than parentheses around the variable
+lists, then \verb`lvwrap-Ldelim` and \verb`lvwrap-Rdelim` (perhaps
+not intuitively) are the keys to change: 
+\begin{verbatim}
+    \difdef { j } { [ } 
+      { 
+        lvwrap-Ldelim = \onemu\mleft [,
+        lvwrap-Rdelim = \mright ] 
+      }
+\end{verbatim}
+the \verb`\onemu` giving, to my eye, better spacing between the \verb`\partial`
+symbols and the left brackets. This definition, too, has been added
+to the preamble so that
+\begin{centred}
+\verb`\[ \jacob.[.{u,v,w}{x,y,z} \]` $\Longrightarrow$ \[ \jacob.[.{u,v,w}{x,y,z}. \]
+\end{centred}
+
+\subsection{Changing defaults}
+
+To change the \emph{default} values of the \verb`DIFJ` template leave
+the second argument of the \verb`\difdef` command -- the \verb`variant-name`
+-- empty. For instance, if you want square brackets to be your default
+setting, the \verb`\difdef` command would be 
+\begin{verbatim}
+    \difdef { j } {} 
+      { 
+        lvwrap-Ldelim = \onemu\mleft [,
+        lvwrap-Rdelim = \mright ] 
+      }
+\end{verbatim}
+The only difference from the previous definition is the absence of
+the name from the second argument, which is now empty. If this definition
+were added to the preamble or to the \verb`.def` file of your current
+document then writing \verb`\jacob{u,v,w}{x,y,z}` would give the
+same result as obtained above with the variant \verb`\jacob.[.{u,v,w}{x,y,z}`.
+
+\chapter{Reference}
+
+\label{chap:Reference}For convenience I list here the commands of
+\verb`diffcoeff`, the template defaults, and the files and preamble
+definitions associated with this document.
+
+\section{Commands}
+
+\verb`\diff`, \verb`\diffp`, \verb`\difs`, \verb`\difsp`, \verb`\difc`,
+\verb`\difcp` (sometimes summarised as \verb`\difx` and \verb`\difxp`),
+ordinary and partial derivatives of upright-fraction, slash-fraction
+and compact forms respectively, with arguments (all optional unless
+otherwise indicated) and their delimiters:
+\begin{enumerate}
+\item \verb`.name.` name of variant form of derivative;
+\item \verb`*` append-differentiand switch;
+\item \verb`*` reverse order of mandatory arguments 6 and 7 when differentiand
+is appended, available only if first star is also present; 
+\item \verb`[order(s)]` order of differentiation, or comma list of orders
+of differentiation (for mixed partial derivatives);
+\item \verb`<override>` total order of differentiation override (for mixed
+partial derivatives);
+\item \verb`{differentiand}` (mandatory) function being differentiated;
+\item \verb`{variable(s)}` (mandatory) differentiation variable or, for
+mixed partial derivatives, comma list of differentiation variables;
+\item \verb`[pt of eval/const vars]` point of evaluation or, for partial
+derivatives, variables held constant.
+\end{enumerate}
+\begin{description}
+\item [{\texttt{\textbackslash difoverride}}] order-override command with
+one mandatory argument:
+\end{description}
+\begin{enumerate}
+\item \verb`{total order}` total order of differentiation; may be (and
+generally is) empty.\newpage{}
+\end{enumerate}
+\begin{description}
+\item [{\texttt{\textbackslash jacob}}] (also \verb`\difj`) jacobian
+with arguments and delimiters:
+\end{description}
+\begin{enumerate}
+\item \verb`.name.` (optional) name of variant form of jacobian;
+\item \verb`{numer}` (mandatory) comma list of variables forming the numerator;
+\item \verb`{denom}` (mandatory) comma list of variables forming the denominator.
+\end{enumerate}
+\begin{description}
+\item [{\texttt{\textbackslash dl}}] (also \verb`\difl`) differential
+with arguments and delimiters:
+\begin{enumerate}
+\item \verb`.name.` (optional) name of variant form of differential;
+\item \verb`[order(s)]` (optional) order of differential or comma list
+of orders of differentials;
+\item \verb`{variable(s)}` (mandatory) variable or comma list of variables;
+\item \verb`^{exponent}` (optional) exponent that overrides the \verb`order(s)`
+specification, raising each differential to this power.
+\end{enumerate}
+\item [{\texttt{\textbackslash difdef}}] with arguments (all mandatory)
+and delimiters: 
+\begin{enumerate}
+\item \verb`{id(s)}` comma list of one, some or all of the identifiers
+\verb`f`, \verb`s`, \verb`c`, \verb`fp`, \verb`sp`, \verb`cp`,
+\verb`j`, \verb`l` identifying upright fraction, slash fraction
+and compact ordinary derivatives; upright fraction, slash fraction
+and compact partial derivatives, and jacobians and differentials;
+\item \verb`{name}` name for a variant form of derivative; as well as letters
+may include numbers and other keyboard characters, but not braces,
+\verb`%` or \verb`#`;
+\item \verb`{settings}` comma list of changed \emph{key=value} settings.
+\end{enumerate}
+\item [{\texttt{\textbackslash negmu}}] insert a $-1$ mu space 
+\item [{\texttt{\textbackslash nilmu}}] insert a $0$ mu space 
+\item [{\texttt{\textbackslash onemu}}] insert a $1$ mu space 
+\item [{\texttt{\textbackslash twomu}}] insert a $2$ mu space
+\end{description}
+
+\section{Templates}
+
+The following lists record the default values of the templates used
+by \verb`diffcoeff`. For templates other than \verb`DIF`, only \emph{relevant
+}keys have been listed -- those which affect the appearance of the
+derivative (or jacobian or differential).
+
+\subsection{\texttt{DIF} (primogenitor)}
+\begin{verbatim}
+    style            = frac,
+    slash-tok        = /,
+    slash-sep        = 0 mu,
+    derivand-sep     = 3 mu plus 1 mu minus 2 mu,
+    op-symbol        = \mathrm{d},
+    op-symbol-alt    = \KeyValue{ op-symbol },
+    op-order-nudge   = 0 mu,
+    var-sup-nudge    = 1 mu,
+    multi-term-sep   = 2 mu plus 1 mu minus 1 mu,
+    term-sep-adjust  = -1 mu,
+    long-var-wrap    = d(v),
+    lvwrap-Ldelim    = \mleft (,
+    lvwrap-Rdelim    = \mright ),
+    lvwrap-sup-nudge = -2 mu,
+    outer-Ldelim     = \left (,
+    outer-Rdelim     = \right ),
+    elbowroom        = 0 mu,
+    sub-nudge        = -5 mu,
+    op-sub-nudge     = 0 mu,
+    *derivand-sep    = \KeyValue{ derivand-sep },
+    *op-set-left     = false,
+    *italic-nudge    = 0 mu,
+    *inner-wrap      = false,
+    *inner-Ldelim    = (,
+    *inner-Rdelim    = ),
+    *outer-Ldelim    = \big [,
+    *outer-Rdelim    = \big ],
+    *sub-nudge       = 0 mu
+\end{verbatim}
+
+\subsection{\texttt{DIFF} (upright-fraction derivative)}
+
+\label{subsec:DIFF-(upright-fraction-derivative)}Relevant keys and
+default values for template \verb`DIFF`. 
+\begin{verbatim}
+    style            = frac,
+    derivand-sep     = 3 mu plus 1 mu minus 2 mu,
+    op-symbol        = \mathrm{d},
+    op-symbol-alt    = \KeyValue { op-symbol },
+    op-order-nudge   = 0 mu,
+    var-sup-nudge    = 1 mu,
+    multi-term-sep   = 2 mu plus 1 mu minus 1 mu,
+    term-sep-adjust  = -1 mu,
+    long-var-wrap    = d(v),
+    lvwrap-Ldelim    = \mleft (,
+    lvwrap-Rdelim    = \mright ),
+    lvwrap-sup-nudge = -2 mu,
+    outer-Ldelim     = \left (,
+    outer-Rdelim     = \right ),
+    elbowroom        = 0 mu,
+    sub-nudge        = -5 mu,
+    *derivand-sep    = \KeyValue { derivand-sep },
+    *op-set-left     = false,
+    *italic-nudge    = 0 mu 
+\end{verbatim}
+
+\subsubsection{\texttt{DIFFP}}
+
+\verb`DIFF` defaults as above with the following changes (a marginal
+\verb`>>` indicates where a setting differs from that in \verb`DIFF`): 
+\begin{verbatim}
+>>  op-symbol        = \partial,
+>>  op-order-nudge   = 1 mu,
+>>  *italic-nudge    = 3 mu
+\end{verbatim}
+
+\subsection{\texttt{DIFS} (slash-fraction derivative)}
+
+\label{subsec:DIFS-(slash-fraction-derivative)}Relevant keys and
+default values for template \verb`DIFS`. A marginal \verb`>` indicates
+where a setting differs from that in \verb`DIF`. 
+\begin{verbatim}
+>   style            = /,
+    slash-tok        = /,
+    slash-sep        = 0 mu,
+>   derivand-sep     = 2 mu plus 1 mu minus 2 mu,
+    op-symbol        = \mathrm{d},
+    op-symbol-alt    = \KeyValue { op-symbol },
+    op-order-nudge   = 0 mu,
+    var-sup-nudge    = 1 mu,
+    multi-term-sep   = 2 mu plus 1 mu minus 1 mu,
+    term-sep-adjust  = -1 mu,
+    long-var-wrap    = d(v),
+    lvwrap-Ldelim    = \mleft (,
+    lvwrap-Rdelim    = \mright ),
+    lvwrap-sup-nudge = -2 mu,
+>   outer-Ldelim     = (,
+>   outer-Rdelim     = ),
+    elbowroom        = 0 mu,
+>   sub-nudge        = 0 mu,
+    *derivand-sep    = \KeyValue { derivand-sep },
+>   *inner-wrap      = true, 
+    *inner-Ldelim    = (,
+    *inner-Rdelim    = ),
+    *outer-Ldelim    = \big [,
+    *outer-Rdelim    = \big ],
+    *sub-nudge       = 0 mu
+\end{verbatim}
+
+\subsubsection{\texttt{DIFSP}}
+
+\verb`DIFS` defaults as above with the following changes (a marginal
+\verb`>>` indicates where a setting differs from that in \verb`DIFS`):
+\begin{verbatim}
+>>  op-symbol        = \partial,
+>>  op-order-nudge   = 1 mu 
+\end{verbatim}
+
+\subsection{\texttt{DIFC} (compact derivative)}
+
+\label{subsec:DIFC-(compact-derivative)}Relevant keys and default
+values for template \verb`DIFC`. A marginal \verb`>` indicates where
+a setting differs from that in \verb`DIF`. 
+\begin{verbatim}
+>   style            = _ ,
+>   derivand-sep     = 1 mu plus 1 mu minus 2 mu,
+    op-symbol        = \mathrm{d},
+    op-order-nudge   = 0 mu,
+>   multi-term-sep   = 1 mu,
+>   term-sep-adjust  = 0 mu,
+>   outer-Ldelim     = \bigl (,
+>   outer-Rdelim     = \bigr ),
+    elbowroom        = 0 mu,
+>   sub-nudge        = -2 mu,
+    op-sub-nudge     = 0 mu,
+    *derivand-sep    = \KeyValue { derivand-sep }
+\end{verbatim}
+
+\subsubsection{\texttt{DIFCP}}
+
+\verb`DIFC` defaults as above with these changes (a marginal \verb`>>`
+indicates where a setting differs from that in \verb`DIFC`):
+\begin{verbatim}
+>>  op-symbol        = \partial,
+>>  op-order-nudge   = 1 mu 
+\end{verbatim}
+
+\subsection{\texttt{DIFJ} (jacobian)}
+
+\label{subsec:DIFJ-(jacobian)}Relevant keys and default values for
+template \verb`DIFJ`. A marginal \verb`>` indicates where a setting
+differs from that in \verb`DIF`. 
+\begin{verbatim}
+    style            = frac,
+    slash-tok        = /,
+    slash-sep        = 0 mu,
+>   op-symbol        = \partial,
+    op-symbol-alt    = \KeyValue{ op-symbol },
+    lvwrap-Ldelim    = \mleft (,
+    lvwrap-Rdelim    = \mright ),
+>   outer-Ldelim     = ,
+>   outer-Rdelim     = ,
+    elbowroom        = 0 mu ,
+    *op-set-left     = false,
+    *italic-nudge    = 0 mu 
+\end{verbatim}
+
+\subsection{\texttt{DIFL} (differential)}
+
+\label{subsec:DIFL-(differential)}Relevant keys and default values
+for template \verb`DIFL`. A marginal \verb`>` indicates where a
+setting differs from that in \verb`DIF`. 
+\begin{verbatim}
+    op-symbol        = \mathrm{d},
+    op-order-nudge   = 0 mu,
+    var-sup-nudge    = 1 mu,
+    multi-term-sep   = 2 mu plus 1 mu minus 1 mu,
+    term-sep-adjust  = -1 mu,
+>   long-var-wrap    = dv,
+    lvwrap-Ldelim    = \mleft (,
+    lvwrap-Rdelim    = \mright ),
+    lvwrap-sup-nudge = -2 mu,
+>   outer-Ldelim     = \, ,
+>   outer-Rdelim     = ,
+    elbowroom        = 0 mu
+\end{verbatim}
+
+\section{The file \texttt{diffcoeff5.def}}
+
+\label{sec:The-file-diffcoeff5.def}
+\begin{verbatim}
+% file `diffcoeff5.def'
+% definitions for variant forms
+% 2023/04/10
+% Andrew Parsloe ajparsloe@gmail.com
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% material derivative
+\difdef { f, s } { D }
+  { op-symbol = \mathrm{D} }
+% math italic
+\difdef { f, s, c } { d' } 
+  {
+    op-symbol      = d,
+    op-order-nudge = 1 mu 
+  }
+\difdef { f, s, c } { D' } 
+  {
+    op-symbol  = D,
+    op-order-nudge = 1 mu
+  }
+% Greek 
+\difdef { f, s } { gd }
+  { op-symbol = \delta }
+\difdef { f, s } { gD }
+  { op-symbol = \Delta }
+% spaceless appending
+\difdef { f, fp } { *0 }
+  { 
+    *derivand-sep = 0 mu     ,
+    outer-Ldelim  = \mleft ( ,
+    outer-Rdelim  = \mright )
+  }
+% tfrac, nonscalable
+\difdef { f, fp } { t }
+  {
+    style             = tfrac  ,
+    derivand-sep      = 1 mu plus 1 mu minus 1 mu,
+    multi-term-sep    = 0 mu   ,
+    term-sep-adjust   = 0 mu   ,
+    lvwrap-sup-nudge  = 0 mu   ,
+    outer-Ldelim      = \bigl (,
+    outer-Rdelim      = \bigr ),
+    elbowroom         = -2 mu  ,
+    sub-nudge         = -3 mu
+  }
+% slash fractions: 0=scalable,
+% 1=big, 2=Big, 3=bigg, 4=Bigg
+% but > 1 gives eyesores
+\difdef { s, sp } { 0 }
+  {
+    style         = auto     ,
+    outer-Ldelim  = \left [  ,
+    outer-Rdelim  = \right ] ,
+    sub-nudge     = 0 mu    ,
+    *inner-Ldelim = \mleft ( ,
+    *inner-Rdelim = \mright ),
+    *outer-Ldelim = \left [  ,
+    *outer-Rdelim = \right ]
+  }
+\difdef { s, sp } { 1 }
+  {
+    style          =  big   ,
+    outer-Ldelim   = \bigl (,
+    outer-Rdelim   = \bigr ),
+    sub-nudge      = -2 mu  ,
+    *inner-Ldelim  = \bigl (,
+    *inner-Rdelim  = \bigr ),
+    *outer-Ldelim  = \bigl [,
+    *outer-Rdelim  = \bigr ]
+  }
+% vrule point of evaluation 
+\difdef { f, fp, s, sp } { | } 
+  {
+    outer-Ldelim = \left . ,
+    outer-Rdelim = \right |,
+    sub-nudge    = 0 mu
+  }
+% sq. bracket pt of eval.
+\difdef { f, fp, s, sp } { ] } 
+  {
+    outer-Ldelim = \left [ ,
+    outer-Rdelim = \right ],
+    elbowroom    = 1 mu,
+    sub-nudge    = 0 mu
+  }
+% long var wrap
+\difdef { f, fp } { (dv) } 
+  { long-var-wrap = (dv) }
+\difdef { f, fp } { dv } 
+  { long-var-wrap = dv }
+% compact, D operator
+\difdef { c } { D }
+  { 
+    op-symbol    = \mathrm{D}, 
+    op-sub-nudge = -2mu
+  }
+\difdef { c } { D' }
+  { 
+    op-symbol    = D, 
+    op-sub-nudge = -2mu
+  }
+% bold
+\difdef { c } { bD } 
+  { 
+    op-symbol    = \mathbf{D}, 
+    op-sub-nudge = -2mu
+  }
+% differential style
+\difdef { c, cp } { dl } 
+  { style = dl }
+%%%%%%%%%%% differential %%%%%%%%%%
+% partial
+\difdef { l } { p }
+  { op-symbol = \partial }
+% bold
+\difdef { l } { b }
+  { op-symbol = \mathrm{d}\mathbf }
+
+% line elements: Pythagoras (+)
+\difdef { l } { + }
+  {
+    multi-term-sep  = 0 mu +,
+    term-sep-adjust = 0 mu  ,
+    outer-Ldelim    =
+  }
+% Minkowski (-)
+\difdef { l } { - }
+  {
+    multi-term-sep  = 0 mu -,
+    term-sep-adjust = 0 mu  ,
+    outer-Ldelim    =
+  }
+%%%%%%%%%% jacobian %%%%%%%%%%
+% slash fraction
+\difdef { j } { s }
+  { style = / }
+\end{verbatim}
+
+\section{Preamble definitions}
+
+\label{sec:Preamble-definitions}The preamble to the present document
+contains the command
+\begin{verbatim}
+\usepackage[def-file=diffcoeff5,spaced=-1]{diffcoeff}
+\end{verbatim}
+and definitions:
+\begin{verbatim}
+% nabla in numer, d in denom
+\difdef { f, s } { n } 
+  {
+    op-symbol     = \nabla,
+    op-symbol-alt = \mathrm{d}
+  }
+% no sub nudge (a sea of white space)
+\difdef { fp } { wsp } 
+  { sub-nudge = 0 mu }
+% align op left; no italic nudge 
+\difdef { f } { left0 } 
+  {
+    *op-set-left  = true,
+    *italic-nudge = 0 mu
+  }
+% align op left; italic nudge
+\difdef { fp } { left } 
+  {
+    op-symbol      = \partial,
+    op-order-nudge = 1 mu,
+    *op-set-left  = true,
+    *italic-nudge = 3 mu
+  }
+% partial variant of \diff
+\difdef { f } { p }
+  {
+    op-symbol      = \partial,
+    op-order-nudge = 1 mu
+  }
+% partial, 3mu sep of terms
+\difdef { fp, sp } { 3mu } 
+  {  multi-term-sep  = 3 mu }
+% D jacobian
+\difdef { j } { D } 
+  { op-symbol = D }
+% square bracket jabobian
+\difdef { j } { [ } 
+  { 
+    lvwrap-Ldelim = \onemu\mleft [,
+    lvwrap-Rdelim = \mright ] 
+  }
+% differential d^n x
+\difdef { l } { dn }{ style=d^ }
+\NewDocumentCommand \dn { m m } 
+  { \dl.dn.[#1]{#2} }
+% mimicking the \Braket command
+% of the braket package
+\difdef{ s }{ bk }
+  { 
+      slash-tok = ,
+      op-symbol =  ,
+      multi-term-sep = 3mu\middle|\mskip3mu ,
+      outer-Ldelim=\left\langle ,
+      outer-Rdelim=\right\rangle
+  }
+\NewDocumentCommand \Braket { m }
+  { 
+    \difoverride {\negmu}
+    \difs.bk.{}{#1}[] 
+  }
+\end{verbatim}
+
+\section{\texttt{\textbackslash DeclareChildTemplate}}
+
+\verb`xtemplate` provides only a single function, \verb`\DeclareRestrictedTemplate`,
+for creating a child template from a parent. \emph{All} the keys of
+the child template are present in the parent. The child inherits not
+only the keys of the parent but the default settings of those keys.
+Some of those settings are `marked' so that they cannot be changed
+by any \emph{instance} of the child (the \emph{restricted} keys) . 
+
+Unfortunately there is no similar function available in \verb`xtemplate`
+at present by which one can create a child with \emph{new} as well
+as restricted default values. I found I could achieve this functionality
+with the following code cobbled together from publicly declared functions
+in \verb`xtemplate`. 
+\begin{verbatim}
+% Child template with both new and restricted defaults
+% #1 object; #2 parent template; #3 child template; 
+% #4 restricted, #5 new defaults (both key=value)
+\NewDocumentCommand \DeclareChildTemplate { m m m m m }
+  { 
+    \DeclareRestrictedTemplate {#1} {#2} {#3} {}
+    \EditTemplateDefaults {#1} {#3} {#5}
+    \DeclareRestrictedTemplate {#1} {#3} {#3} {#4}
+  }
+\end{verbatim}
+The first \verb`\DeclareRestrictedTemplate` call creates the child
+template \verb`#3` from the parent template \verb`#2`, inheriting
+all its keys and default values. \emph{No} restrictions are imposed
+at this stage because the following \verb`\EditTemplateDefaults`
+would immediately cancel them. That statement specifies the \emph{new}
+defaults \verb`#5` of the child -- those that differ from the parent.
+The default settings \verb`#4` of the parent that are restricted
+to particular values in the child are imposed by the second \verb`\DeclareRestrictedTemplate`
+call through the aritifice of treating the child template \verb`#3`
+as a child of itself. In that way its new defaults are not lost.
+
+\section{Version history}
+
+Version 5 was conceived as a new package (under the name \verb`diffcoefx`)
+and only at the end, after discussion with CTAN maintainers, changed
+to version 5.0 of \verb`diffcoeff`. 
+\begin{enumerate}
+\item Version 5.0 (2023-01-02) of \verb`diffcoeff`
+\begin{enumerate}
+\item splits the \verb`\diff` command of version 4 into three pairs of
+commands: \verb`\diff` and \verb`\diffp` for upright-fraction derivatives;
+\verb`\difs` and \verb`difsp` for slash-fraction derivatives, and
+\verb`\difc` and \verb`\difcp` for `compact form' derivatives;
+\item replaces the order-override option by a new command \verb`\difoverride`
+(to avoid cluttering formulas with a second square-bracket delimited
+optional argument before the differentiand);
+\item adds a second star option to reverse the order of differentiand and
+variable(s) of differentiation when the differentiand is appended;
+\item replaces the two-argument \verb`\diffdef` command of earlier versions
+with the three-argument command \verb`\difdef` command, the additional
+argument determining which one or more of the \verb`f`, \verb`s`,
+\verb`c`, \verb`fp`, \verb`sp` or \verb`cp` forms the defined
+variant applies to;
+\item rewrites the differential command \verb`\dl` which is now template-configurable
+(e.g. allowing easy writing of line elements like $\dl.+.{x,y,z}^{2}$);
+\item rewrites the jacobian command \verb`\jacob` which is now template-configurable;
+\item uses ISO defaults;
+\item includes version conflict messages.
+\end{enumerate}
+\item Version 5.1 (2023-01-16)
+\begin{enumerate}
+\item adds a now-redundant \verb`ISO` package option and related version
+conflict message;
+\item makes some corresponding tweaks to documentation (including this version
+5 history).
+\end{enumerate}
+\item Version 5.2 (2023-01-24)
+\begin{enumerate}
+\item Simplifies the treatment of the empty argument of an absent differentiation
+variable;
+\item initializes (clears) two sequence variables that otherwise caused
+error when \verb`scrbook` class was used;
+\item amends documentation.
+\end{enumerate}
+\item Version 5.3 (2023-04-10)
+\begin{enumerate}
+\item Fixes a bug when \verb`\dl` was used in a particular way in \texttt{beamer}
+(e.g. \verb`\[\alert{\dl x}\]`). 
+\item Provides an alternative method of specifying orders of differentiation
+by means of colon separators in the variable argument.
+\item Reinstates (from v.4) the order-override option as an alternative
+to \verb`\difoverride` but now angle-bracket delimited.
+\end{enumerate}
+\item Version 5.4 (2023-11-08)
+\begin{enumerate}
+\item Adjusts both code and documentation about the differential to enable
+forms like $\dn[3]x$ (sometimes used in multiple integrals).
+\end{enumerate}
+\end{enumerate}
+
+\end{document}

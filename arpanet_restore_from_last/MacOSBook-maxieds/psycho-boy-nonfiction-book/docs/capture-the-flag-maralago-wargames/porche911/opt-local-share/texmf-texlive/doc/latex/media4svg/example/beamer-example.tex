@@ -1,0 +1,212 @@
+\documentclass[dvisvgm,hypertex,aspectratio=169]{beamer}
+
+\usetheme{default}
+\makeatletter
+\defbeamertemplate*{frametitle}{mydefault}{%
+  \nointerlineskip%
+  \usebeamerfont{frametitle}\vskip0.8ex\baselineskip=0.9\baselineskip\insertframetitle\par%
+  \ifx\insertframesubtitle\@empty\else\vrule width 0pt height \ht\strutbox%
+    {\usebeamerfont{framesubtitle}\insertframesubtitle\par}\fi%
+  \vskip-0.9ex%
+}
+\makeatother
+\setbeamersize{text margin left=0.0333\paperheight,text margin right=0.0333\paperheight}
+
+\usefonttheme{serif}
+\usepackage[british]{babel}
+
+\usepackage{media4svg}
+\usepackage{menukeys,siunitx,calc,fancyvrb,booktabs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% slide navigation via keyboard and mouse click/mouse wheel, mouse cursor
+% autohide on idle; navigation symbols <--, -->
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fontawesome5}
+\setbeamertemplate{navigation symbols}{}
+\AddToHook{shipout/before}{\xdef\currentPageNumber{\inteval{\ReadonlyShipoutCounter+1}}}
+\AddToHook{shipout/foreground}{%
+  \put(0,0){%
+    \raisebox{-\dimexpr\height+0.5ex\relax}[0pt][0pt]{\makebox[\paperwidth][r]{%
+      \normalsize\color{structure!40!}%
+      \ifnum\currentPageNumber>1%
+        \href{\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber-1\relax}.svg}{\faArrowLeft}%
+      \else%
+        \textcolor{lightgray}{\faArrowLeft}%
+      \fi\hspace{0.5ex}%
+      \ifnum\currentPageNumber<\PreviousTotalPages%
+        \href{\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber+1\relax}.svg}{\faArrowRight}%
+      \else%
+        \textcolor{lightgray}{\faArrowRight}%
+      \fi%
+      \hspace{0.5ex}%
+    }}%
+  }%
+  \special{dvisvgm:raw
+    <style>svg{cursor: none}</style>%
+    <defs>%
+    <script type="text/javascript">%
+    <![CDATA[%
+      var cursorTimer;%
+      var downOnLink=false;%
+      var downOnRoot=false;%
+      function islink(tg){return (tg.tagName=='a') ? true : tg.parentNode ? islink(tg.parentNode) : false;};%
+      function ismmedia(tg){return (tg.tagName=='video'||tg.tagName=='audio') ? true : tg.parentNode ? ismmedia(tg.parentNode) : false;};%
+      document.addEventListener('mousemove', function(e){%
+        if(islink(e.target)||ismmedia(e.target)||e.target.getAttribute('class')=='annot'){%
+          e.target.style.cursor='pointer';}else{e.target.style.cursor='default';}%
+        try{clearTimeout(cursorTimer);}catch(err){};%
+        cursorTimer=setTimeout(function(){e.target.style.cursor='none';},3000);%
+      });%
+      window.addEventListener('contextmenu', function(e){% capture right click
+        if(!islink(e.target)&&!ismmedia(e.target)) e.preventDefault();%
+      });%
+      document.addEventListener('mousedown', function(e){%
+        if(islink(e.target)||ismmedia(e.target)) downOnLink=true;%
+        else downOnRoot=true;%
+      });%
+      document.addEventListener('mouseup', function(e){%
+        if(downOnLink||!downOnRoot){downOnLink=false;return;}%
+        downOnRoot=false;%
+        \ifnum\currentPageNumber<\PreviousTotalPages
+          if(!e.shiftKey&&e.button==0) document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber+1\relax}.svg');%
+        \fi%
+        \ifnum\currentPageNumber>1
+          if(e.shiftKey||e.button>1) document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber-1\relax}.svg');%
+        \fi%
+      });%
+      document.addEventListener('wheel', function(e){%
+        \ifnum\currentPageNumber<\PreviousTotalPages
+          if(e.deltaY>0){%
+            document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber+1\relax}.svg');%
+          }%
+        \fi%
+        \ifnum\currentPageNumber>1
+          if(e.deltaY<0){%
+            document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber-1\relax}.svg');%
+          }%
+        \fi%
+      });%
+      document.addEventListener('keydown',function(e){%
+          \ifnum\currentPageNumber<\PreviousTotalPages
+            if(e.key=='PageDown'||e.key=='ArrowDown'||e.key=='ArrowRight')%
+                document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber+1\relax}.svg');%
+          \fi%
+          \ifnum\currentPageNumber>1
+            if(e.key=='PageUp'||e.key=='ArrowUp'||e.key=='ArrowLeft')%
+              document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{\the\numexpr\currentPageNumber-1\relax}.svg');%
+          \fi%
+          if(e.key=='Home')
+            document.location.replace('\jobname-\zeroPad{\PreviousTotalPages}{1}.svg');%
+          if(e.key=='End')
+            document.location.replace('\jobname-\PreviousTotalPages.svg');%
+        });%
+    ]]>%
+    </script>%
+    </defs>%
+  }%
+}%
+% helper macro \zeroPad : zero-pads integer according to template,
+% e. g. 123 --> 00123 if template is `99999`
+% #1: arbitrary integer number as template specifying the
+%     width, e. g. `987654' for a width of 6 digits
+% #2: the number to be formatted
+\def\zeroPad#1#2{\zeroPadI{\zeroTemplate{0}{#1}}{#2}}
+%low level macros used by \zeroPad
+\def\zeroPadI#1#2{% #1: string of zeros specifying width, #2 number
+  \ifnum1#2<1#1
+    \zeroPadI{#1}{0#2}%
+  \else%
+    #2%
+  \fi%
+}%
+\def\zeroTemplate#1#2{% create template (string of zeros) from given num
+  \ifnum10#1>1#2
+    #1%
+  \else%
+    \zeroTemplate{0#1}{#2}%
+  \fi%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Presentation example with embedded video}
+\subtitle{---The \Verb+media4svg+ package---}
+\author{AlexG}
+\date{\today}
+
+\begin{document}
+\selectlanguage{british}
+
+\begin{frame}[fragile]
+\titlepage\footnotesize
+\makebox[0.3\linewidth]{\hrulefill}\\[1ex]
+Put the Web browser to fullscreen with \keys{F11}, navigate with \keys{PageDn} \& \keys{PageUp}, left \& right mouse click or mouse wheel.\\[2ex]
+To build this presentation from the source, run:
+\begin{Verbatim}
+dvilualatex beamer-example
+dvilualatex beamer-example
+dvisvgm --bbox=papersize --font-format=woff2 --zoom=-1 --page=- --linkmark=none \
+                                                                     beamer-example
+\end{Verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Video file}
+Examples of embedded local video files. Recommended file formats are \Verb+mp4/h264+, \Verb+webm+ and \Verb+ogg+. Some Web browsers require the video to be explicitly muted in order to autoplay.\\[2ex]
+\begin{Verbatim}
+\includemedia[width=26em,height=14.625em]{}{example-movie.mp4}
+\end{Verbatim}
+\begin{Verbatim}
+\includemedia[width=19.5em,height=14.625em,loop,autoplay,muted]{}{random.mp4}
+\end{Verbatim}
+\vspace{2ex}
+\includemedia[width=20em,height=11.25em]{}{example-movie.mp4}\quad
+\includemedia[width=15em,height=11.25em,loop,autoplay,muted]{}{random.mp4}
+\end{frame}
+
+\begin{frame}[fragile]{Remote video}
+Video streamed from URL and YouTube player with two videos played in a loop.\\[2ex]
+
+\begin{Verbatim}
+\includemedia[width=20em,height=11.25em,url,controls]{}{%
+  https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm}
+\end{Verbatim}
+\begin{Verbatim}
+\includemedia[width=20em,height=11.25em,youtube,loop,
+                                  autoplay,muted]{}{OSPyXTjIrnk,9HQfauGJaTs}
+\end{Verbatim}
+\includemedia[width=18em,height=10.125em,url,controls]{}{https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm}
+\includemedia[width=18em,height=10.125em,youtube,loop,autoplay,muted]{}{OSPyXTjIrnk,9HQfauGJaTs}
+\end{frame}
+
+\begin{frame}[fragile]{Player control}
+The standard player controls (option `\Verb+controls+') occupy some space of the media display and it might not be advisable to enable them for that reason. Nevertheless, interactivity is still provided through touch or left mouse button click, and through the keyboard as summarized in the table.\\[0.5ex]
+
+Click on the media to start playback. To pause playback, press the left mouse button on the media. Release it to resume playback. To pause playback permanently, press the left mouse button on the media and move the mouse out while keeping the button pressed. On mobile devices, tap on the media to toggle between Play and Pause.\\[1ex]
+
+\begin{columns}[t,onlytextwidth]
+\begin{column}{0.5\linewidth}
+  \begin{tabular}{ll}\toprule
+  Command & Shortcut\\\midrule
+  Toggle Play/Pause & \keys{\SPACE}\\
+  Increase volume & \keys{\arrowkeyup}\\
+  Decrease volume & \keys{\arrowkeydown}\\
+  Unmute audio & \keys{Ctrl+\arrowkeyup}\\
+  Mute audio & \keys{Ctrl+\arrowkeydown}\\
+  Toggle Full-Screen & \keys{F11}\\\bottomrule
+  \end{tabular}
+\end{column}
+\begin{column}{0.5\linewidth}
+  \begin{tabular}{ll}\toprule
+  Command & Shortcut\\\midrule
+  Seek back \qty{1}{\percent} & \makebox[\widthof{\keys{\SPACE}}][l]{\keys{\arrowkeyleft}}\\
+  Seek forward \qty{1}{\percent} & \keys{\arrowkeyright}\\
+  Seek back \qty{10}{\percent} & \keys{Ctrl+\arrowkeyleft}\\
+  Seek forward \qty{10}{\percent} & \keys{Ctrl+\arrowkeyright}\\
+  Seek to beginning & \keys{Home}\\
+  Seek to end & \keys{End}\\\bottomrule
+  \end{tabular}
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

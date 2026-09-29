@@ -1,0 +1,94 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 93 Loops and Alignment
+% Label: "ex:constructtab"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+\usepackage{colortbl}
+\usepackage{datatool} 
+
+% Load data from studentmarks.csv file:
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv}
+% Commands to construct the tabular content:
+\ExplSyntaxOn
+% define variables:
+\int_new:N \l_my_row_int
+\tl_new:N \l_my_content_tl
+\tl_new:N \l_my_forename_tl
+\tl_new:N \l_my_surname_tl
+\tl_new:N \l_my_mean_tl
+% command to initialise:
+\cs_new:Nn \my_init_content: 
+{
+ \tl_set:Nn \l_my_content_tl { \begin{tabular} { lr } }
+ \int_zero:N \l_my_row_int
+}
+% command to finish off:
+\cs_new:Nn \my_finish_content: 
+ {
+  \tl_put_right:Nn \l_my_content_tl { \end{tabular} }
+ }
+% command to append a row:
+\cs_new:Nn \my_add_row:nn 
+{
+ \fp_compare:nNnF { #2 } < { 50 } 
+ { \int_if_zero:nF { \l_my_row_int }
+ {
+  \tl_put_right:Nn \l_my_content_tl { \\ }
+  }
+  \int_incr:N \l_my_row_int
+  \fp_compare:nNnT { #2 } > { 70 } 
+  {
+  \tl_put_right:Nn \l_my_content_tl { \rowcolor { yellow } }
+  }
+  \tl_put_right:Nx \l_my_content_tl { #1 & #2 }
+  }
+}
+% define document command:
+\NewDocumentCommand { \meanscorestab } { } 
+{
+% construct tabular:
+ \my_init_content:
+% iterate over the default database:
+ \DTLmapdata
+ {
+% get the surname and forename for the current row:
+  \DTLmapgetvalues
+  {
+  \l_my_surname_tl = Surname ,
+  \l_my_forename_tl = Forename
+  }
+% calculate the mean:
+   \DTLaction
+  [
+  keys={Assign1-},
+  datum={round=1},
+  return={ \l_my_mean_tl = mean },
+  options=mean
+  ]
+  {row ~ aggregate}
+  \my_add_row:nn
+  { \l_my_forename_tl \c_space_tl \l_my_surname_tl }
+  { \l_my_mean_tl }
+  }
+% finish construction:
+ \my_finish_content: % expand the content:
+ \l_my_content_tl }
+\ExplSyntaxOff 
+\begin{document}
+\meanscorestab 
+\end{document}

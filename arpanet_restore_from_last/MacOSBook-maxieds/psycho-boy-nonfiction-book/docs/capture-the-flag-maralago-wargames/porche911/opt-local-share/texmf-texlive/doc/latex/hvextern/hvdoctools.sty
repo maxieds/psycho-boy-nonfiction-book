@@ -1,0 +1,100 @@
+%% $Id: hvdoctools.sty 559 2022-05-27 06:59:29Z herbert $
+%%
+%% This file is distributed under the terms of the LaTeX Project Public
+%% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+%% Either version 1.3 or, at your option, any later version.
+%%
+% Copyright 2019 Herbert Voss hvoss@tug.org
+%%
+\ProvidesPackage{hvdoctools}[%
+  2019/11/27 v.0.01 (Herbert Voss) macros for package documentation (hv)] 
+%
+\NeedsTeXFormat{LaTeX2e}
+
+\RequirePackage{makeidx}\makeindex
+
+\def\Lfile#1{\texttt{#1}\index{#1@\texttt{#1} (file)}}
+\def\Lext#1{\texttt{.#1}\index{#1@\texttt{.#1} (file extension)}}
+\def\Ldim#1{\texttt{\textbackslash#1}\index{#1@\texttt{\textbackslash#1} (length)}}
+\def\Lcs#1{\texttt{\textbackslash#1}\index{#1@\texttt{\textbackslash#1}}}
+\def\nxLcs#1{\texttt{\textbackslash#1}}
+\def\Lenv#1{\texttt{#1}\index{#1@\texttt{#1} (environment)}}
+\def\Lpack#1{\texttt{#1}\index{#1@\texttt{#1} (package)}}
+\let\LPack\Lpack
+\def\Lprog#1{\texttt{#1}\index{#1@\texttt{#1} (program)}}
+\def\Lcolor#1{\texttt{#1}\index{#1@\texttt{#1} (color)}}
+\def\Loption#1{\texttt{#1}\index{#1@\texttt{#1} (package option)}}
+\def\Lkeyword#1{\texttt{#1}\index{#1@\texttt{#1} (keyword)}\index{Keyword!#1@\texttt{#1}}}
+\def\Lkeyval#1{\texttt{#1}\index{#1@\texttt{#1} (value)}}
+\def\Lskip#1{\texttt{\textbackslash#1}\index{#1@\texttt{\textbackslash#1} (skip)}}
+\def\Lkeyset#1{\expandafter\Lkeyset@i#1\@nil}
+\def\Lkeyset@i#1=#2\@nil{\texttt{#1=#2}%
+  \index{#1@\texttt{#1} (keyword)}\index{Keyword!#1@\texttt{#1}}
+  \index{#2@\texttt{#2} (value)}\index{Value!#2@\texttt{#2}}}
+  
+\def\LKeyset#1{\expandafter\LKeyset@i#1\@nil}
+\def\LKeyset@i#1=#2\@nil{\texttt{#1=#2}%
+  \index{#1@\texttt{#1} (keyword)}\index{Keyword!#1@\texttt{#1}}}
+\newsavebox\boxdef
+\newenvironment{BDef}
+  {\begin{lrbox}{\boxdef}
+      \def\arraystretch{1.0}
+      \begin{tabular}{@{}l@{}l@{}l@{}}}
+  {\end{tabular}\end{lrbox}
+    {\BCmd\fbox{\usebox\boxdef}\endBCmd}
+    \aftergroup\@afterindentfalse\aftergroup\@afterheading
+  }
+\def\Lclass#1{\texttt{#1}\index{#1@\texttt{#1} (doc class)}}
+
+\newskip\BDefaboveskip
+\newskip\BDefbelowskip
+\newskip\BDefinlineskip
+\setlength\BDefaboveskip{0pt plus 2pt}% first-level list topsep
+\setlength\BDefbelowskip{10pt}
+\setlength\BDefinlineskip{6pt}
+
+\newenvironment{BCmd}{
+  \@beginparpenalty-\@lowpenalty
+  \topsep\BDefaboveskip
+  \fboxsep3pt
+  \flushleft}
+ {\@endparpenalty\@M
+  \@topsepadd\BDefbelowskip
+  \endflushleft}
+
+\newenvironment{BCmd*}{%
+  \@beginparpenalty\@M
+  \topsep\BDefinlineskip
+  \fboxsep3pt
+  \flushleft}
+ {\@endparpenalty5000
+  \endflushleft}
+
+\def\OptArgs{\colorbox{black!20}{\texttt{[Options]}}\kern1pt}
+\def\OptArg{\@ifnextchar*\OptArg@i{\OptArg@ii*}}% star version without braces
+\def\OptArg@i*#1{\colorbox{black!20}{\texttt{#1}}\kern1pt}
+\def\OptArg@ii*#1{\colorbox{black!20}{\texttt{[#1]}}\kern1pt}
+\def\DBS{{\ttfamily\textbackslash\textbackslash}}
+
+\newcommand\Larg [1]{{\normalfont\itshape#1\/}}
+\newcommand\Larga[1]{$\langle$\Larg{#1}$\rangle$}% angles
+\newcommand\Largb[1]{\lcb\Larg{#1}\rcb}          % curly brace
+\newcommand\Largs[1]{\lsb\Larg{#1}\rsb}          % square brackets
+\newcommand\Largr[1]{\lrb\Larg{#1}\rrb}          % round brackets
+\newcommand\LBEG[1]{{\normalfont\ttfamily\bs{}begin\lcb#1\rcb}\xLenv{#1}}
+\newcommand\LmBEG[1]{{\normalfont\ttfamily\bs{}begin\lcb#1\rcb}\xLmenv{#1}}
+\newcommand\LEND[1]{{\normalfont\ttfamily\bs{}end\lcb#1\rcb}\xLenv{#1}}
+\newcommand\LmEND[1]{{\normalfont\ttfamily\bs{}end\lcb#1\rcb}\xLmenv{#1}}
+
+\DeclareRobustCommand\bs{{\normalfont\ttfamily\textbackslash}}  % \let\bslash=\bs
+\DeclareRobustCommand\lcb{{\normalfont\ttfamily\textbraceleft}}
+\DeclareRobustCommand\rcb{{\normalfont\ttfamily\textbraceright}}
+\DeclareRobustCommand\lsb{{\normalfont\ttfamily[}}
+\DeclareRobustCommand\rsb{{\normalfont\ttfamily]}}
+\DeclareRobustCommand\lrb{{\normalfont\ttfamily(}}
+\DeclareRobustCommand\rrb{{\normalfont\ttfamily)}}
+\DeclareRobustCommand\false{{\ttfamily false}}
+\DeclareRobustCommand\true{{\ttfamily true}}
+
+
+\endinput

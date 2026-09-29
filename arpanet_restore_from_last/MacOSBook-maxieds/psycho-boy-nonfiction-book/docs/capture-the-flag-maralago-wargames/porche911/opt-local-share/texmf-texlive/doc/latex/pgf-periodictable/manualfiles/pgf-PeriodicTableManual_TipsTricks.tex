@@ -1,0 +1,58 @@
+\vfill%
+\subsection{Control overall width of table}
+\tikz{\node[text width=\linewidth-6mm,draw=green!70,rounded corners=2pt,fill=black!10!green!10,inner sep=3mm] {%
+Is there a simple way to set the periodic table to text width, column width, etc.?
+};}%
+\\ [6pt]Yes, there is. It can be done using the \textsf{\large\textbackslash resizebox} command provided by the graphicx package (and also by the graphics package). For example:
+\\ [2pt]\tikz{\node[text width=\linewidth-8pt,inner xsep=4pt,align=left,fill=black!10,rounded corners=2pt] %
+{\begin{minipage}{\linewidth}%
+\begin{verbatim}
+\resizebox{\linewidth}{!}{\pgfPT}
+\end{verbatim}
+\end{minipage}};}%
+\\ or
+\\ [2pt]\tikz{\node[text width=\linewidth-8pt,inner xsep=4pt,align=left,fill=black!10,rounded corners=2pt] %
+{\begin{minipage}{\linewidth}%
+\begin{verbatim}
+\resizebox{\linewidth}{!}{\pgfPT[show title=false]}
+\end{verbatim}
+\end{minipage}};}%
+\\ [2pt]will produce a Periodic Table with the width of the current \textsf{\large\textbackslash linewidth}, whatever is its value (the text width, the column width, the width of a minipage,\ldots), and with the proper scaling of its height.
+\\ There is no need of loading the graphicx package since pgf-PeriodicTable loads the tikz package, which in turn loads the graphicx package.
+\\ [2pt]\tikz{\path[draw=green!70,rounded corners=2pt,fill=black!10!green!10,rounded corners=2pt] (0,0) rectangle ++(\textwidth,-4.5pt);}%
+\subsection{Compact Periodic Table}
+\tikz{\node[text width=\linewidth-6mm,draw=green!70,rounded corners=2pt,fill=black!10!green!10,inner sep=3mm] {%
+Is there a way to put groups 1 and 2 really next to group 13 to 18? That would make the whole thing more compact. I sometimes need just the representative elements for teaching purposes.
+};}%
+\\ [6pt]Although it is not common usage, it can be done:
+\\ [2pt]\tikz{\node[text width=\linewidth-8pt,inner xsep=4pt,align=left,fill=black!10,rounded corners=2pt] %
+{\begin{minipage}{\linewidth}%
+\begin{verbatim}
+\documentclass[border=10pt]{standalone}
+\usepackage{pgf-PeriodicTable}
+\usepgfPTlibrary{colorschemes}
+\pgfPTGroupColors{example}{G1=blue!50!white,G2=green!90!white}
+\pgfPTsetLanguage{de}
+\begin{document}
+% \pgfPTstyle[show title=false, back color scheme=example,show legend=false]
+% \pgfPT[Z list = G1]\foreach \n in {2,13,14,15,16,17,18} {%
+%                               \pgfPT[show period numbers=false,Z list = G\n]%
+%                               }% make sure there are no spaces between \pgfPT
+% or
+% \pgfPTstyle[show title=false,show period numbers=false,back color scheme=example,
+%                 show legend=false]
+% \pgfPT[show period numbers,Z list = G1]\pgfPT[Z list = G2]\pgfPT[Z list = p]% make
+%                                                                 sure there are no spaces between \pgfPT
+% or
+    \pgfPTstyle[show title=false,show period numbers=false,back color scheme=example,
+                    show legend=false]
+    \pgfPT[show period numbers,Z list = s]\pgfPT[Z list = p]
+\end{document}
+\end{verbatim}
+\end{minipage}};}%
+\newpage%
+\begin{center}
+\scalebox{.6}{\includegraphics{manualfiles/pgfPT_user_compactPT.pdf}}
+\end{center}
+\tikz{\path[draw=green!70,rounded corners=2pt,fill=black!10!green!10,rounded corners=2pt] (0,0) rectangle ++(\textwidth,-4.5pt);}%
+\endinput

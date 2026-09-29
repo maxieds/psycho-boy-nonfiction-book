@@ -1,0 +1,97 @@
+\RequirePackage{expkv-def,enverb}
+
+%% key setup
+\enverbsetup{key-set=expkv/enverb}
+\ekvdefinekeys{expkv/enverb}
+  {
+    ,boolTF same-line = \ekvdoc@enverb@ifsameline
+    ,unknown-choice same-line =
+      \let\ekvdoc@enverb@ifsameline\@firstoftwo\edef\ekvdoc@enverb@codeshare{\unexpanded{#1}}
+    ,initial same-line = 0.75
+    ,invboolTF other-line = \ekvdoc@enverb@ifsameline
+    ,nmeta below = {same-line=false, no-aboveskip, no-belowskip}
+    ,nmeta undo-below = {same-line=true, aboveskip, belowskip}
+    ,store same-line-lst = \ekvdoc@enverb@options@lst@same
+    ,store same-line-tcb = \ekvdoc@enverb@options@tcb@same
+    ,initial same-line-lst = {aboveskip=0pt,belowskip=0pt}
+    ,initial same-line-tcb = {nobeforeafter,box align=center}
+    ,store other-line-lst = \ekvdoc@enverb@options@lst@other
+    ,store other-line-tcb = \ekvdoc@enverb@options@tcb@other
+    ,meta slst = same-line-lst={#1}
+    ,meta stcb = same-line-tcb={#1}
+    ,meta olst = other-line-lst={#1}
+    ,meta otcb = other-line-tcb={#1}
+    ,store lst = \ekvdoc@enverb@options@lst
+    ,store tcb = \ekvdoc@enverb@options@tcb
+    ,boolTF no-lst  = \ekvdoc@enverb@ifno@lst
+    ,also nmeta no-lst = below
+    ,boolTF no-tcb  = \ekvdoc@enverb@ifno@tcb
+    ,also nmeta no-tcb = below
+    ,nmeta undo-no-tcb = {no-tcb=false, undo-below}
+    ,store inter   = \ekvdoc@enverb@inter
+    ,data  gappend = \ekvdoc@enverb@append
+    ,dataT pre-tcb = \ekvdoc@enverb@pretcb
+    ,store after   = \ekvdoc@enverb@after
+    ,nmeta store   = gappend=\ekvdoc@enverb@store
+    ,noval no-store = \let\ekvdoc@enverb@append\@secondoftwo
+    ,nmeta restore = {o: pre-tcb=\ekvdoc@enverb@store,after=\ekvdoc@enverb@clear@store}
+    ,code aboveskip = \edef\ekvdoc@enverb@aboveskip{\vskip\unexpanded{#1}\relax}
+    ,code belowskip = \edef\ekvdoc@enverb@belowskip{\vskip\unexpanded{#1}\relax}
+    ,default aboveskip = \medskipamount
+    ,default belowskip = \medskipamount
+    ,initial aboveskip
+    ,initial belowskip
+    ,noval no-aboveskip = \let\ekvdoc@enverb@aboveskip\@empty
+    ,noval no-belowskip = \let\ekvdoc@enverb@belowskip\@empty
+  }
+\protected\def\ekvdoc@enverb@clear@store{\global\let\ekvdoc@enverb@store\@empty}
+\ekvdoc@enverb@clear@store
+
+\newcommand\ekvdoc@enverb@gaddo[2]
+  {\xdef#1{\unexpanded\expandafter{#1}\unexpanded\expandafter{#2}}}
+\newcommand\ekvdoc@enverb@pre[2]
+  {\edef#1{\unexpanded{#2}\unexpanded\expandafter{#1}}}
+\NewCommandCopy\Enverb\enverb
+\def\enverb{\Enverb{}}
+\def\endenverb
+  {%
+    \ekvdoc@enverb@append\ekvdoc@enverb@gaddo\@gobble\enverbBody
+    \par
+    \ekvdoc@enverb@aboveskip
+    \ekvdoc@enverb@ifno@lst{}%
+      {%
+        \ekvdoc@enverb@ifsameline
+          {\noindent\begin{minipage}[c]{\ekvdoc@enverb@codeshare\linewidth}}%
+          {}%
+        \ExpandArgs{ne}\enverbListing{lstlisting}
+          {[{%
+            \ekvdoc@enverb@options@lst,%
+            \ekvdoc@enverb@ifsameline
+              \ekvdoc@enverb@options@lst@same
+              \ekvdoc@enverb@options@lst@other
+          }]}%
+        \ekvdoc@enverb@ifsameline{\end{minipage}}{}%
+      }%
+    \ekvdoc@enverb@inter
+    \ekvdoc@enverb@ifno@tcb{}%
+      {%
+        \expanded{\noexpand\begin{exresult}
+          [{%
+            \ekvdoc@enverb@options@tcb,%
+            \ekvdoc@enverb@ifsameline
+              \ekvdoc@enverb@options@tcb@same
+              \ekvdoc@enverb@options@tcb@other
+          }]}%
+          {%
+            \linewidth
+            \ekvdoc@enverb@ifsameline{-\ekvdoc@enverb@codeshare\linewidth}{}%
+          }%
+          \ekvdoc@enverb@pretcb{\ekvdoc@enverb@pre\enverbBody}%
+          \enverbExecute
+        \end{exresult}%
+      }%
+    \par
+    \ekvdoc@enverb@belowskip
+    \ekvdoc@enverb@after
+    \@endpetrue
+  }

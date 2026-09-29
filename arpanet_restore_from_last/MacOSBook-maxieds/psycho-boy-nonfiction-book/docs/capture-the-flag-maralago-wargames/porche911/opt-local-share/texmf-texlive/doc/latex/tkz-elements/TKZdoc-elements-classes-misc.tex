@@ -1,0 +1,507 @@
+\clearpage\newpage
+ \section{Math constants and functions} % (fold)
+ \label{sec:math_functions}
+
+\bgroup
+\catcode`_=12 
+\small
+\captionof{table}{Math constants and functions.}\label{misc}
+\begin{tabular}{ll}
+\toprule
+\textbf{contants or functions} & \textbf{Comments}\\
+\midrule
+\Igfct{math}{tkzphi}     &  constant $\varphi  = (1+math.sqrt(5))/2 $\\
+\Igfct{math}{tkzinvphi}   &  constant $1/\varphi  = 1/tkzphi$\\
+\Igfct{math}{tkzsqrtphi}    &  constant $\sqrt{\varphi}= math.sqrt(tkzphi)$    \\
+%round(num, idp)    &  \\
+%tkzround( num, idp )   &   \\
+% Cramer33(a1,a2,a3,b1,b2,b3,c1,c2,c3) &  \\
+% Cramer22(a1,a2,b1,b2)  &   \\
+\Igfct{math}{length (a,b) }     &  point.abs(a-b) [\ref{sub:report_de_distance}]  \\
+\Igfct{math}{islinear (z1,z2,z3) }   & Are the points aligned? (z2-z1) $\parallel$ (z3-z1) ?  \\
+\Igfct{math}{isortho (z1,z2,z3)} &  (z2-z1) $\perp$ (z3-z1)  ? boolean\\
+\Igfct{math}{get\_angle (z1,z2,z3)} & the vertex is z1 [\ref{sub:get_angle}] \\
+\Igfct{misc}{bisector (z1,z2,z3)} & L.Aa = bisector (z.A,z.B,z.C) from A [\ref{sub:get_angle}] \\
+\Igfct{misc}{bisector\_ext (z1,z2,z3)} & L.Aa = bisector_ext (z.A,z.B,z.C) from A \\
+\Igfct{misc}{altitude (z1,z2,z3)} & altitude from z1 \\
+\Igfct{package}{set\_lua\_to\_tex (list)}   & set\_lua\_to\_tex('a','n') defines |\a| and |\n|   \\
+%parabola (a,b,c)   & to get   \\
+\Igfct{math}{angle\_normalize (an) }   &  to get a value between 0 and $2\pi$ \\
+\Igfct{misc}{barycenter (\{z1,n1\},\{z2,n2\}, ...)} & barycenter of list of points  \\
+\Igfct{math}{solve\_quadratic (a,b,c) }   & gives the solution of $ax^2+bx+c =0$  a,b,c real or complex  [\ref{ssub:function_solve__quadratic}] \\
+\Igfct{misc}{midpoint (z1,z2)} & midpoint of the segment [\ref{ssub:euler_ellipse}] \\
+\Igfct{misc}{midpoints (z1,z2,...,zn)} & midpoints of z1z2, z2z3 etc. z1zn [\ref{sub:varignon_s_theorem}]\\
+\bottomrule
+\end{tabular}
+\egroup
+
+\subsection{Length of a segment} % (fold)
+\label{sub:length_of_a_segment}
+|length(z.A,z.B)| is a shortcut for |point.abs(z.A-z.B)|. This avoids the need to use complexes.
+It's also a shortcut for L.AB = line:new(z.A,z.B) and l = L.AB.length. Depending on the context, you'll need to choose the most appropriate method.
+
+% subsection length_of_a_segment (end)
+
+\subsection{Midpoint and midpoints} % (fold)
+\label{sub:midpoint_and_midpoints}
+As with length, a shortcut is available, e.g. |z.M = midpoint(z.A,z.B)|. If a straight line is required, then use: |z.M = L.AB.mid|.
+
+The aim here is to determine the midpoints of a polygon. For example, considering a triangle $abc$, we can obtain the middles of the sides, after defining the triangle |T.abc = triangle:new(z.a,z.b,z.c)|, the middles are the vertices of the medial triangle |z.ma,z.mb,z.mc = T.abc : medial()|.
+
+\code{midpoints} is a shortcut for defining midpoints without using triangles:
+
+ |z.mc,z.ma,z.mb = midpoints(z.a,z.b,z.c)|. 
+ 
+ The medial triangle can be omitted with |z.mc,z.ma,z.mb = midpoints(get_points(T.abc))|.
+% subsection midpoint_and_midpoints (end)
+
+\subsection{Bisector} % (fold)
+\label{sub:bisector}
+As shown in the previous table, |bisector (z1,z2,z3)| defines the bisector of vertex |z1|.
+% subsection bisector (end)
+
+\subsection{Barycenter} % (fold)
+\label{sub:misc_barycenter}
+
+Explanations are given here: \ref{sub:barycenter}
+% subsection barycenter (end)
+
+\subsection{Harmonic division with tkzphi } % (fold)
+\label{sub:harmonic_division_with_tkzphi}
+\begin{Verbatim}
+\directlua{%
+   init_elements()
+   z.a = point: new(0,0)
+   z.b = point: new(8,0)
+   L.ab = line: new (z.a,z.b)
+   z.m,z.n = L.ab: harmonic_both (tkzphi)
+}
+\begin{tikzpicture}[scale =.5]
+   \tkzGetNodes
+   \tkzDrawLine[add= .2 and .2](a,n) 
+   \tkzDrawPoints(a,b,n,m)
+   \tkzLabelPoints(a,b,n,m)
+\end{tikzpicture}
+\end{Verbatim}
+
+
+\directlua{%
+   init_elements()
+   z.a = point: new(0,0)
+   z.b = point: new(8,0)
+   L.ab = line: new (z.a,z.b)
+   z.m,z.n = L.ab: harmonic_both (tkzphi)
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale =.25]
+     \tkzGetNodes
+     \tkzDrawLine[add= .1 and .1](a,n) 
+     \tkzDrawPoints(a,b,n,m)
+     \tkzLabelPoints(a,b,n,m)
+  \end{tikzpicture}
+\end{center}
+
+
+% subsection harmonic_division_with_tkzphi (end)
+
+\subsection{Function islinear or is\_linear} % (fold)
+\label{sub:function_islinear}
+\begin{minipage}{0.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.a = point: new (1, 1)
+ z.b = point: new (2, 2)
+ z.c = point: new (4, 4)
+ if islinear (z.a,z.b,z.c) then
+     z.d = point: new (0, 0)
+  else 
+      z.d = point: new (-1, -1)
+   end
+}
+\begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawPoints(a,...,d)
+    \tkzLabelPoints(a,...,d)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+   init_elements()
+   z.a = point: new (1, 1)
+   z.b = point: new (2, 2)
+   z.c = point: new (4, 4)
+   if islinear (z.a,z.b,z.c) then
+       z.d = point: new (0, 0)
+    else 
+        z.d = point: new (-1, -1)
+   end
+}
+ 
+\begin{center}
+  \begin{tikzpicture}
+      \tkzGetNodes
+      \tkzDrawPoints(a,...,d)
+      \tkzLabelPoints(a,...,d)
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsection function_islinear (end)
+
+\subsection{Transfer from lua to \TEX} % (fold)
+\label{sub:transfer_from_lua_to_tex}
+It's possible to transfer variable from Lua to \TEX{} with the macro 
+\tkzcname{tkzUseLua}.
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A            = point : new (0 , 0)
+   z.B            = point : new (3 , 2)
+   z.C            = point : new (2 , 5)
+   L.AB           = line : new (z.A,z.B)
+   d              = L.AB : distance (z.C)
+   l              = L.AB.length
+   z.H            = L.AB : projection (z.C)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLines(A,B C,H)
+\tkzDrawPoints(A,B,C,H)
+\tkzLabelPoints(A,B,C,H)
+\tkzLabelSegment[above right,draw](C,H){$CH = \tkzUseLua{d}$}
+\tkzLabelSegment[below right,draw](A,B){$AB = \tkzUseLua{l}$}
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+   z.A            = point : new (0 , 0)
+   z.B            = point : new (3 , 2)
+   z.C            = point : new (2 , 5)
+   L.AB           = line : new (z.A,z.B)
+   d              = L.AB : distance (z.C)
+   l              = L.AB.length
+   z.H            = L.AB : projection (z.C)
+}
+
+\begin{center}
+  \begin{tikzpicture}
+  \tkzGetNodes
+  \tkzDrawLines(A,B C,H)
+  \tkzDrawPoints(A,B,C,H)
+  \tkzLabelPoints(A,B,C,H)
+  \tkzLabelSegment[above right,draw](C,H){$CH = \tkzUseLua{d}$}
+  \tkzLabelSegment[below right,draw](A,B){$AB = \tkzUseLua{l}$}
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsection transfer_from_lua_to_tex (end)
+
+\subsection{Normalized angles : Slope of lines (ab), (ac) and (ad)} % (fold)
+\label{sub:normalized_angles}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.a      = point: new(0, 0)
+   z.b      = point: new(-3, -3)
+   z.c      = point: new(0, 3)
+   z.d      = point: new(2, -2)
+   angle    = point.arg (z.b-z.a)
+   tex.print('slope of (ab) : '..tostring(angle)..'\\\\')
+   tex.print('slope normalized of (ab) : '..tostring(angle\_normalize(angle))..'\\\\')
+   angle    = point.arg (z.c-z.a)
+   tex.print('slope of (ac) : '..tostring(angle)..'\\\\')
+   tex.print('slope normalized of (ac) : '..tostring(angle\_normalize(angle))..'\\\\')
+   angle    = point.arg (z.d-z.a)
+   tex.print('slope of (ad) : '..tostring(angle)..'\\\\')
+   tex.print('slope normalized of (ad) : '..tostring(angle\_normalize(angle))..'\\\\')
+}
+
+\end{Verbatim}
+\directlua{%
+init_elements()
+z.a = point: new(0, 0)
+z.b = point: new(-3, -3)
+z.c = point: new(0, 3)
+z.d = point: new(2, -2)
+angle = point.arg (z.b-z.a)
+tex.print('slope of (ab) : '..tostring(angle)..'\\\\')
+tex.print('slope normalized of (ab) : '..tostring(angle_normalize(angle))..'\\\\')
+angle = point.arg (z.c-z.a)
+tex.print('slope of (ac) : '..tostring(angle)..'\\\\')
+tex.print('slope normalized of (ac) : '..tostring(angle_normalize(angle))..'\\\\')
+angle = point.arg (z.d-z.a)
+tex.print('slope of (ad) : '..tostring(angle)..'\\\\')
+tex.print('slope normalized of (ad) : '..tostring(angle_normalize(angle))..'\\\\')
+}
+
+\begin{minipage}{.5\textwidth}
+\begin{Verbatim}
+  \begin{tikzpicture}[scale = .75]
+     \tkzGetNodes
+     \tkzDrawLines[red](a,b a,c a,d)
+     \tkzDrawPoints(a,b,c,d)
+     \tkzLabelPoints(a,b,c,d)
+  \end{tikzpicture}
+\end{Verbatim}
+
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \begin{center}
+    \begin{tikzpicture}[scale = .75]
+       \tkzGetNodes
+       \tkzDrawLines[red](a,b a,c a,d)
+       \tkzDrawPoints(a,b,c,d)
+       \tkzLabelPoints(a,b,c,d)
+    \end{tikzpicture}
+  \end{center}
+\end{minipage}
+
+% subsection normalized_angles (end)
+
+\subsection{Get angle} % (fold)
+\label{sub:get_angle}
+
+The function  |get_angle (a,b,c)| gives the angle normalized of $(\overrightarrow{ab},\overrightarrow{ac})$.
+
+\begin{minipage}{0.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.a   = point: new(0, 0)
+   z.b   = point: new(-2, -2)
+   z.c   = point: new(0, 3)
+   angcb = tkzround ( get_angle (z.a,z.c,z.b),3)
+   angbc = tkzround ( get_angle (z.a,z.b,z.c),3)
+}
+
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawLines[red](a,b a,c)
+   \tkzDrawPoints(a,b,c)
+   \tkzLabelPoints(a,b,c)
+   \tkzMarkAngle[->](c,a,b)
+   \tkzLabelAngle(c,a,b){\tkzUseLua{angcb}}
+   \tkzMarkAngle[->](b,a,c)
+   \tkzLabelAngle(b,a,c){\tkzUseLua{angbc}}
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+  init_elements()
+  z.a   = point: new(0, 0)
+  z.b   = point: new(-2, -2)
+  z.c   = point: new(0, 3)
+  angcb = tkzround ( get_angle (z.a,z.c,z.b),3)
+  angbc = tkzround ( get_angle (z.a,z.b,z.c),3)
+}
+
+
+\begin{center}
+  \begin{tikzpicture}[scale = 1.2]
+  \tkzGetNodes
+  \tkzDrawLines[red](a,b a,c)
+  \tkzDrawPoints(a,b,c)
+  \tkzLabelPoints(a,b,c)
+  \tkzMarkAngle[->](c,a,b)
+  \tkzLabelAngle(c,a,b){\tkzUseLua{angcb}}
+  \tkzMarkAngle[->](b,a,c)
+  \tkzLabelAngle(b,a,c){\tkzUseLua{angbc}}
+  \end{tikzpicture}
+\end{center}
+
+
+\end{minipage}
+% subsection get_angle (end)
+
+\subsection{Dot or scalar product} % (fold)
+\label{sub:dot_or_scalar_product}
+
+\begin{minipage}{0.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A    = point: new(0,0)
+   z.B    = point: new(5,0)
+   z.C    = point: new(0,3)
+   T.ABC  = triangle: new (z.A,z.B,z.C)
+   z.A_1,
+   z.B_1,
+   z.C_1  = get_points (T.ABC: anti ())
+   x  = dot_product (z.A,z.B,z.C)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(A,B,C)
+   \tkzDrawPoints(A,B,C,A_1,B_1,C_1)
+   \tkzLabelPoints(A,B,C,A_1,B_1,C_1)
+   \tkzDrawPolygon[blue](A_1,B_1,C_1)
+   \tkzText[right](0,-1){dot product =\tkzUseLua{x}}
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+init_elements()
+ z.A    = point: new(0,0)
+ z.B    = point: new(5,0)
+ z.C    = point: new(0,3)
+ T.ABC  = triangle: new (z.A,z.B,z.C)
+ z.A_1,
+ z.B_1,
+ z.C_1  = get_points (T.ABC: anti ())
+ x  = dot_product (z.A,z.B,z.C)
+}
+
+\begin{center}
+  \begin{tikzpicture}[ scale  = .6]
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C)
+     \tkzDrawPoints(A,B,C,A_1,B_1,C_1)
+     \tkzLabelPoints(A,B,C,A_1,B_1,C_1)
+     \tkzDrawPolygon[blue](A_1,B_1,C_1)
+     \tkzText[right](0,-1){dot product =\tkzUseLua{x}}
+     \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+
+The scalar product of the vectors $\overrightarrow{AC}$ and $\overrightarrow{AB}$ is equal to $\tkzUseLua{x}$, so these vectors are orthogonal.
+% subsection dot_or_scalar_product (end)
+
+\subsection{Alignment or orthogonality} % (fold)
+\label{sub:alignment_or_orthogonality}
+
+With the functions |islinear| and |isortho|. |islinear(z.a,z.b,z.c)| gives |true| idf the points $a$, $b$ and $c$ are aligned.
+
+|isortho(z.a,z.b,z.c)| gives |true| if the line $(ab)$ is orthogonal to the line $(ac)$.
+% subsection alignment_or_orthogonality (end)
+
+\subsection{Bisector and altitude} % (fold)
+\label{sub:bisector_and_altitude}
+These functions are useful if you don't need to create a useful triangle object for the rest of your code.
+
+\begin{minipage}{.5\textwidth}
+   \begin{Verbatim}
+\directlua{%
+init_elements()
+   z.a   = point: new (0, 0)
+   z.b   = point: new (5, -2)
+   z.c   = point: new (2, 3)
+   z.i   = bisector (z.a,z.c,z.b).pb
+   z.h   = altitude (z.b,z.a,z.c).pb
+   angic = tkzround ( get_angle (z.a,z.i,z.c),2)
+   angci = tkzround ( get_angle (z.a,z.b,z.i),2)
+   z.e = bisector_ext (z.a,z.b,z.c).pb
+}
+
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawPolygon(a,b,c)
+   \tkzDrawSegments(a,i b,h a,e)
+   \tkzDrawPoints(a,b,c,i,h)
+   \tkzLabelPoints(a,b)
+   \tkzLabelPoints[above](c,i,h)
+   \tkzMarkAngle[->](i,a,c)
+   \tkzLabelAngle[font=\tiny,pos=.75](i,a,c){\tkzUseLua{angci}}
+   \tkzMarkAngle[<-](b,a,i)
+   \tkzLabelAngle[font=\tiny,pos=.75](b,a,i){\tkzUseLua{angic}}
+\end{tikzpicture}
+   \end{Verbatim}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\directlua{%
+init_elements()
+   z.a   = point: new (0, 0)
+   z.b   = point: new (5, -2)
+   z.c   = point: new (2, 3)
+   z.i   = bisector (z.a,z.c,z.b).pb
+   z.h   = altitude (z.b,z.a,z.c).pb
+   angic = tkzround ( get_angle (z.a,z.i,z.c),2)
+   angci = tkzround ( get_angle (z.a,z.b,z.i),2)
+   z.e = bisector_ext (z.a,z.b,z.c).pb
+}
+
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(a,b,c)
+     \tkzDrawSegments(a,i b,h a,e)
+     \tkzDrawPoints(a,b,c,i,h)
+     \tkzLabelPoints(a,b)
+     \tkzLabelPoints[above](c,i,h)
+     \tkzMarkAngle[->](i,a,c)
+     \tkzLabelAngle[font=\tiny,pos=.75](i,a,c){\tkzUseLua{angci}}
+     \tkzMarkAngle[<-](b,a,i)
+     \tkzLabelAngle[font=\tiny,pos=.75](b,a,i){\tkzUseLua{angic}}
+  \end{tikzpicture}
+\end{center}
+
+\end{minipage}
+% subsection bisector_and_altitude (end)
+
+\subsection{Other functions} % (fold)
+\label{sub:other_functions}
+
+Not documented because still in beta version: |parabola|, |Cramer22|, |Cramer33|.
+
+% subsection other_functions (end)
+
+\subsubsection{Function solve\_quadratic} % (fold)
+\label{ssub:function_solve__quadratic}
+
+This function solves the equation $ax^2+bx+c= 0$ with real or complex numbers.
+
+\begin{minipage}{.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+    tex.sprint('Solve : $x^2+1=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(1,0,1)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+    tex.print('\\\\')
+    tex.sprint('Solve : $x^2+2x-3=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(1,2,-3)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+    tex.print('\\\\')
+    a = point (0,1)
+    b = point (1,1)
+    c = point (-1,1)
+    tex.sprint('Solve : $ix^2+(1+i)x+(-1+i)=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(a,b,c)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+}
+\end{Verbatim}
+\end{minipage}
+
+\directlua{%
+init_elements()
+    tex.sprint('Solve : $x^2+1=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(1,0,1)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+    tex.print('\\\\')
+    tex.sprint('Solve : $x^2+2x-3=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(1,2,-3)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+    tex.print('\\\\')
+    a = point (0,1)
+    b = point (1,1)
+    c = point (-1,1)
+    tex.sprint('Solve : $ix^2+(1+i)x+(-1+i)=0$ The solution set is  ')
+    r1,r2 = solve_quadratic(a,b,c)
+    tex.print('\\{'..tostring(r1)..' , '..tostring(r2)..'\\}')
+}
+
+% subsubsection function_solve__quadratic (end)
+% section math_functions (end)
+
+\endinput
+

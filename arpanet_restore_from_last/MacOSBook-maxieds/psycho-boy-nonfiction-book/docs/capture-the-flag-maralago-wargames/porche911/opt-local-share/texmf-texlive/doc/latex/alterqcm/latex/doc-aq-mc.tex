@@ -1,0 +1,209 @@
+\section{Complementary macros}
+
+\subsection{\tkzcname{AQmessage} : two-column message} 
+
+It allows to insert in the table on the two columns, additional information for the candidate. 
+
+In the following table, it is necessary to give indications and clarifications on the statement. This is done using the command \tkzcname{AQmessage}. I have used the package \tkzname{tkz-tab.sty} for this message as well as \emph{\texttt{AQmessage}} for some proposals, in order to make the proposal fit on several lines. This is necessary if one does not want to leave the table or if one does not want to restrict the space given to the questions.
+This shows that many environments can be used in questions, messages and proposals at the same time.
+
+\begin{NewMacroBox}{AQmessage}{{\var{texte}}}
+
+\begin{tabular}{@{}Il Il Il@{}}  \toprule \thead
+argument                 & default & definition     \\ \midrule
+\tbody
+\TAline{texte}  {}     {corps du message}      
+\bottomrule
+\end{tabular}
+
+\medskip
+\emph{This macro uses only one argument~: the text of the message. It can contain any kind of environment except, unfortunately, an array designed with \tkzname{tablor}. However, it is possible to import an array designed with \tkzname{tablor} with the macro \tkzcname{includegraphics}\footnotemark.}
+\end{NewMacroBox}\Imacro{includegraphics}
+
+\footnotetext{package macro \tkzname{graphicx}}
+
+\begin{alterqcm}[lq=80mm,pre=false]
+\AQmessage{\begin{minipage}{15cm}
+\vspace*{6pt}
+ Let $f$ be a function defined and derivable over the interval $]-5~;~+\infty[$ whose table of variations is given below :
+\begin{center}\begin{tikzpicture}
+\def\tkzTabDefaultWritingColor{brown}
+\def\tkzTabDefaultBackgroundColor{orange!20}  
+\tkzTabInit{$x$/1,$f(x)$/3} {$-5$,$-1$,$0$,$2$,$+\infty$}
+\tkzTabVar{-/$-\infty$ /,+/$-3$/,-/$-5$/,+/4/,-/{4,5}/}
+\end{tikzpicture}\end{center}
+ We designate by $\mathcal{C}$ the curve representative of $f$.
+ \vspace*{6pt}    
+\end{minipage} 
+}
+\AQquestion{In the interval $]-5~;~+\infty[$, the equation $f(x) = -2$ admits }
+{{only one solution},
+{two solutions},
+{four solutions}}
+\end{alterqcm}
+
+\begin{tkzexample}[code only]
+ \begin{alterqcm}[lq=95mm,pre=false]
+  \AQmessage{ Let $f$ be a function defined and derivable on the interval%.
+   $]-5~;~+\infty[$ whose table of variations is given below:
+   \begin{center}\begin{tikzpicture}
+      \tkzTabInit{$x$/1,$f(x)$/3} {$-5$,$-1$,$0$,$2$,$+\infty$}
+      \tkzTabVar{-/$-\infty$ ,+/$-3$,-/$-5$,+/$4$,-/${4,5}$}%
+   \end{tikzpicture}\end{center}
+  It is designated by $\mathcal{C}$  the curve representative of $f$.}
+\AQquestion{Over the interval $]-5~;~+\infty[$,the equation $f(x) = -2$ admits}
+  {{only one solution},
+   {two solutions},
+   {four solutions}}
+ \end{alterqcm}\end{tkzexample}
+
+
+\subsection{\tkzcname{AQms} : use of invisible line}
+
+\begin{NewMacroBox}{AQms}{(height,depth)}
+  \begin{tabular}{@{}Il Il Il@{}}  \toprule \thead
+  argument                 & default & definition                    \\ \midrule
+  \tbody
+  \TAline{height}  {}     {line height}    
+  \TAline{depth}  {}     {line depth}  
+  \bottomrule
+  \end{tabular}
+  
+\medskip
+\emph{It's an invisible line useful if it is necessary to make more space around a proposal.}
+
+\textcolor{red}{\emph{\texttt{ It should not be used!}}}
+  
+\end{NewMacroBox}
+\footnotetext{ see the macro \tkzcname{strut}}
+
+\begin{tkzexample}[code only,width=\textwidth-1pt]
+ \def\AQms(#1,#2){\vrule height #1pt depth #2pt width 0pt} 
+ \end{tkzexample}
+
+\begin{tkzexample}[width=8cm]
+  \begin{minipage}[]{7.5cm}
+  \begin{alterqcm}%
+  [lq=4cm]
+  \AQquestion{Question}
+   {%
+  {Proposition 1},
+  {Proposition 2\AQms(16,14)},
+  {Proposition 3}}
+  \end{alterqcm}
+  \end{minipage}
+\end{tkzexample}
+
+\subsection{\tkzcname{InputQuestionList} : Multiple choice from a list of files}
+
+\begin{NewMacroBox}{InputQuestionList}{\var{path}\var{prefix}\var{list of integers}}
+
+\begin{tabular}{@{}Il Il Il@{}}  \toprule \thead
+  argument                 & default & definition                    \\ \midrule
+  \tbody
+\TAline{path}  {}  {path that leads to the folder containing the files}       \TAline{prefix}  {} {file names  : <prefix><integer>.tex}          
+\TAline{list of integers}{}{list of integers corresponding to the files} 
+\bottomrule
+ \end{tabular}
+  
+  \medskip  
+\emph{This macro allows you to insert questions recorded in files into a table. A file can contain one or more questions with the corresponding propositions. \tkzname{path} is the path to the folder containing the files. \tkzname{prefix} is used to name the files, an integer uniquely determines the file.}
+
+\end{NewMacroBox}
+
+Let's say the file \tkzname{qcm-1.tex}
+
+\begin{tkzltxexample}[]
+\AQquestion{What was the precursor language of the C language?}
+{{Fortran},
+ {language B},
+ {Basic}}
+\end{tkzltxexample}
+
+\medskip
+Either the file \tkzname{qcm-2.tex}
+
+\begin{tkzltxexample}[]
+\verbdef\argprop|int a = 3 ^ 4 ;|
+\AQquestion{\argprop}
+{{raises 3 to the power of 4},
+ {makes an exclusive OR between 3 and 4},
+ {is not a C}}
+\end{tkzltxexample}
+
+\bigskip
+Suppose we create a series of files in a folder \textbf{|iut|} with the following names \newline
+ \tkzname{qcm-1.tex}, \tkzname{qcm-2.tex}, \ldots ,\tkzname{qcm-$n$.tex}. The prefix to name these files is \tkzname{qcm-}.
+
+The path to this folder is for example 
+|/examples/latex/iut/|.
+
+The result is:
+
+\newcommand*{\listpath}{/Users/ego/Desktop/waiting/alterqcm_new/examples/iut/}
+
+\begin{alterqcm}[lq=80mm]
+ \InputQuestionList{\listpath}{qcm-}{2,1}
+\end{alterqcm}
+
+\begin{tkzexample}[code only]
+\newcommand*{\listpath}{/Users/ego/Desktop/waiting/alterqcm_new/examples/iut/}
+\begin{alterqcm}[lq=80mm]
+   \InputQuestionList{\listpath}{qcm-}{2,1}
+\end{alterqcm}
+\end{tkzexample}
+
+\subsection{The command \tkzcname{AQannexe}} 
+
+
+\begin{NewMacroBox}{AQannexe}{\oarg{local options}\var{start}\var{end}\var{col}}
+\begin{tabular}{@{}Il Il Il@{}}  \toprule \thead
+arguments        & default & definition                    \\ \midrule
+\tbody
+\TAline{start}    {}           {first row number}   
+\TAline{end}      {}           {last row number}  
+\TAline{col}      {}           {number of proposals}     
+ \bottomrule
+\end{tabular}
+
+\medskip
+\emph{This macro uses three arguments. These are three integers. \tkzname{start} is the row of the first row, \tkzname{end} is the final row and \tkzname{col} is the number of propositions. } 
+
+\medskip
+\begin{tabular}{@{}Il Il Il@{}}  \toprule \thead
+Options     & default & definition        \\ \midrule
+\tbody
+\TOline{VF}         {false}          { true or false; displays T and F }    
+\TOline{propstyle}  {\BS arabic}     { proposal numbering style }          \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\emph{\tkzname{VF} allows to display V and F to identify the proposals but it is necessary that \tkzname{col} is equal to two}
+
+\medskip
+
+\end{NewMacroBox}
+
+\begin{tkzltxexample}[]
+  \documentclass{article} 
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+  \usepackage{alterqcm,fullpage}
+  \thispagestyle{empty}
+
+  \begin{document}
+  NAME:
+
+  FIRST NAME:
+
+  \vspace{1cm}{ \Large
+  \AQannexe{1}{10}{2}\hspace{2cm}
+  \AQannexe[propstyle=\alph]{11}{20}{3}}
+  \end{document}
+\end{tkzltxexample}
+
+\AQannexe{1}{10}{2}\hspace{2cm}
+\AQannexe[propstyle=\alph]{11}{20}{3}
+\endinput

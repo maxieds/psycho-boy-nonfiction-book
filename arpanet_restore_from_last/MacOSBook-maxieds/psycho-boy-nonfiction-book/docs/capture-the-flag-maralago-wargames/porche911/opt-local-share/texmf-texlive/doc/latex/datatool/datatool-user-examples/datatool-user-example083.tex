@@ -1,0 +1,99 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 83 Display Stripy Two Database Rows Per Tabular Row
+% Label: "ex:displaydbstripyrepeatcols"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{colortbl}
+\usepackage{datatool}
+\DTLsetup{store-datum,default-name=scores}
+% define database:
+\DTLaction{new}
+% add columns in desired order:
+\DTLaction[key=forename,value={First Name}]{add column}
+\DTLaction[key=surname,value={Surname}]{add column}
+\DTLaction[key=regnum,value={Student Number}]{add column}
+\DTLaction[key=gender]{add column}
+\DTLaction[key=parent]{add column}
+\DTLaction[key=score,value={Score (\%)}]{add column}
+\DTLaction[key=award]{add column}
+% 1st row:
+\DTLaction[
+ assign={ forename = Jane, surname = Brown,
+  regnum = 102647, score = 75, award = {\$1,830},
+  gender = F, parent = {Ms Brown}
+ }
+]{new row}
+% 2nd row:
+\DTLaction[
+ assign={ forename = John, surname = {Smith, Jr},
+  regnum = 102689, score = 68, award = {\$1,560},
+  gender = M, parent = {Mr and Mrs Smith}
+ }
+]{new row}
+% 3rd row:
+\DTLaction[
+ assign={ forename = Quinn, surname = Ó Coinn,
+  regnum = 103294, score = 91, award = {\$3,280},
+  parent = {Mr and Mrs Ó Coinn}
+ }
+]{new row}
+% 4th row:
+\DTLaction[
+ assign={ forename = Evelyn, surname = O'Leary,
+  regnum = 107569, score = 81.5, award = {\$2,460},
+  gender = n, parent = {Prof O'Leary}
+ }
+]{new row}
+% 5th row:
+\DTLaction[
+ assign={ forename = Zoë, surname = Adams,
+  regnum = 105987, score = 52, award = {\$1,250},
+  gender = f, parent = {Mr and Mrs Adams}
+ }
+]{new row}
+% 6th row:
+\DTLaction[
+ assign={ forename = Clare, surname = Vernon,
+  regnum = 104356, score = 45, award = {\$500},
+  gender = Female, parent = {Mr Vernon}
+ }
+]{new row}
+% 7th row:
+\DTLaction[
+ assign={ forename = Roger, surname = Brady,
+  regnum = 106872, score = 58, award = {\$1,350},
+  gender = m, parent = {Dr Brady and Dr Mady}
+ }
+]{new row}
+% 8th row:
+\DTLaction[
+ assign={
+  forename = Andy, surname = Brown, regnum = 103569,
+  score = 42, award = {\$980},
+  gender = male, parent = {Mr Brown and Prof Sepia}
+ }
+]{new row} 
+\ExplSyntaxOn
+\RenewDocumentCommand \DTLdisplaydbAddItem { m m m m m m m m }
+{
+ \datatool_if_row_start:nnT { #5 } { #7 } 
+ { % first column
+   \int_compare:nNnTF { \int_mod:nn { #5 } { 2 * \l_datatool_display_per_row_int } } = { \c_one_int }
+  { \tl_put_right:Nn #1 { \rowcolor { blue } }
+  }
+  { \tl_put_right:Nn #1 { \rowcolor { green } }
+  }
+  }
+ \tl_put_right:Nn #1 { #3 { #2 } }
+}
+\ExplSyntaxOff 
+\begin{document}
+\DTLaction[
+ options={
+  per-row=2,
+  only-keys={forename,surname,score}
+ }
+]{display} 
+\end{document}

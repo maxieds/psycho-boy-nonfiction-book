@@ -1,0 +1,40 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 92 Editing a Database with \DTLforeach
+% Label: "ex:foreachedit"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+ \begin{filecontents}[noheader,overwrite]{studentmarks.csv}
+Surname,Forename,StudentNo,Assign1,Assign2,Assign3
+"Smith, Jr",John,102689,68,57,72
+"Brown",Jane,102647,75,84,80
+"Brown",Jane,102646,64,92,79
+"Brown",Andy,103569,42,52,54
+"Adams",Zoë,105987,52,48,57
+"Brady",Roger,106872,68,60,62
+"Verdon",Clare,104356,45,50,48
+\end{filecontents}
+
+\usepackage{datatool}
+\DTLsetup{store-datum,default-name=marks}
+\DTLread{studentmarks.csv} 
+\begin{document}
+\DTLforeach{marks}{}{% 
+ \DTLaction[
+  keys={Assign1-},
+  options={mean},
+  datum={round=1},% round the result
+  return={\Mean=mean}
+ ]
+ {current row aggregate}
+ \DTLifnull{\Mean}% test the return value
+ {}% row aggregate failed!
+ {% average calculated successfully
+ \DTLappendtorow{Average}{\Mean}% 
+ }
+} 
+
+\DTLsortdata{marks}{Average=desc}
+\DTLdisplaydb{marks} 
+\end{document}

@@ -1,0 +1,733 @@
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% skillsdoc.tex
+%
+% This is the user's guide for the skills package, 
+% by Pierre-Amiel Giraud.
+%
+% The skills package itself is in the file skills.sty.
+
+
+%%% Copyright (c) 2020
+% Pierre-Amiel Giraud
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX 
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Pierre-Amiel Giraud.
+%
+% This work consists of the files skills.sty and skillsdoc.tex.
+
+% The user's guide for skills.sty is in the file skillsdoc.tex.
+
+
+%%% Pierre-Amiel Giraud
+%%% History and Geography Teacher
+%%% Chambery Middle School
+%%% 33140 Villenave d'Ornon (France)
+%%% pierre-amiel.giraud@ac-bordeaux.fr
+
+% The newest version of this package should always be available
+% from my Gitlab page: https://framagit.org/pagiraud/skills/
+
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+
+\documentclass[12pt]{exam}
+
+\usepackage{luatextra}
+\setmainfont{Linux Libertine O}
+\usepackage{polyglossia}
+\usepackage{microtype}
+
+\usepackage{amssymb}
+
+\usepackage{makeidx}
+
+\usepackage[counter=section]{skills}
+\skilldef{writing}{L1.1}{Writing to argue and write to communicate and share ideas}
+\skilldef{vocabulary}{H3.2}{Learning specific vocabulary and using it in context}
+\skilldef{situationInTime}{C1.1}{Situating in time and elaborating chronological landmarks}
+\renewcommand{\skillcounter}{section}
+
+\usepackage[colorlinks]{hyperref}
+
+% In case we're not using hyperref.sty:
+\providecommand{\texorpdfstring}[2]{#1}
+% The following can be used in \section commands
+% without generating pdf warnings:
+\newcommand{\bs}{\texorpdfstring{\char`\\}{}}
+
+\newcommand{\docversion}{1.0.0}
+\newcommand{\docdate}{October 21, 2020}
+%\newcommand{\docdate}{Draft: \today}
+
+%--------------------------------------------------------------------
+%
+% Changes since version 2.4 are described in the comments
+% near the beginning of the file exam.cls.
+%
+%--------------------------------------------------------------------
+
+\makeindex
+
+\newcommand{\indc}[1]{\index{#1@\texttt{\char`\\#1}}}
+\newcommand{\indcsub}[2]{\index{#1@\texttt{\char`\\#1}!#2}}
+\newcommand{\indcstart}[1]{\index{#1@\texttt{\char`\\#1}|(}}
+\newcommand{\indcstop}[1]{\index{#1@\texttt{\char`\\#1}|)}}
+
+\newcommand{\indt}[1]{\index{#1@\texttt{#1}}}
+\newcommand{\indtsub}[2]{\index{#1@\texttt{#1}!#2}}
+\newcommand{\indtstart}[1]{\index{#1@\texttt{#1}|(}}
+\newcommand{\indtstop}[1]{\index{#1@\texttt{#1}|)}}
+
+%---------------------------------------------------------------------
+\newenvironment{example}%
+   {\bigskip\filbreak
+    \subsubsection{Example:}
+   }%
+   {}
+
+\def\samplehead#1#2#3#4{%
+  \begin{trivlist}
+    \item[]
+    \leavevmode
+    \hbox to \textwidth{%
+      \rlap{\parbox[b]{\textwidth}{\raggedright#1\strut}}%
+      \hfil\parbox[b]{\textwidth}{\centering#2\strut}\hfil
+      \llap{\parbox[b]{\textwidth}{\raggedleft#3\strut}}%
+    }% hbox
+    #4
+  \end{trivlist}
+}
+
+\def\samplefoot#1#2#3#4{%
+  \begin{trivlist}
+    \item[]
+    \leavevmode
+    #1
+    \vskip 3pt
+
+    \hbox to \textwidth{%
+      \rlap{\parbox[t]{\textwidth}{\raggedright#2}}%
+      \hfil\parbox[t]{\textwidth}{\centering#3}\hfil
+      \llap{\parbox[t]{\textwidth}{\raggedleft#4}}%
+    }% hbox
+  \end{trivlist}
+}
+
+% \makeatletter
+%   \@ifundefined{AmS}{\def\AmS{{\protect\the\textfont\tw@
+%     A\kern-.1667em\lower.5ex\hbox{M}\kern-.125emS}}}
+%     {}
+% \makeatother
+
+
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+
+\begin{document}
+
+\title{Using the skills package}
+
+\author{Pierre-Amiel Giraud\\
+  History \& geography teacher\\
+  Chambery Middle School\\
+  33140 Villenave d'Ornon (France)\\
+  pierre-amiel.giraud@ac-bordeaux.fr\\[\bigskipamount]
+  Copyright \copyright~2020\\
+  Pierre-Amiel Giraud}
+
+\date{\docdate}
+
+\maketitle
+
+\begin{center}
+  \small
+  This is the user's guide for version~\docversion{} of the
+  \verb"skills" package. 
+\end{center}
+
+\tableofcontents
+%--------------------------------------------------------------------
+\section{Introduction}
+
+The file \verb"skills.sty" provides the \verb"skills" package,
+which attempts to make it easy for even a \LaTeX{} novice to prepare
+proficiency tests, especially in combination with the \verb|exam| document
+class.
+
+Here, what is called a proficiency test is an exam where questions are assigned
+one or more skills, and where the proficiency of the pupil is evaluated for each skill.
+It seems it can also be called, depending on the context and the country, skills assessment
+or skill-based assessment. As far as I know, proficiency tests are more often used in French-speaking areas, where they are called "\textit{évaluations par compétences}". This package has
+been designed with the French approach in mind. If you are using proficiency tests
+but this package doesn't fill your needs, your suggestions or code contributions are welcome.
+
+The \verb|skills| package has also been designed to be best used within the \verb|exam| document class. Thus, almost all command names are very similar. However, the package can be used within a variety of document classes: only a very small subset of the package commands is specific to the \verb|exam| document class.
+
+Some other packages, such as the \verb|competences| packages by Christophe Bares, follow the
+same goal but with different approaches. They might be of some interest if the present
+\verb|skills| package doesn't fill your needs.
+
+The latest version of \verb"skills.sty" (possibly a
+%
+beta\index{beta test} test version) should always be available at
+\verb"https://framagit.org/pagiraud/skills/"\index{web page}.
+
+%--------------------------------------------------------------------
+\subsection{License}
+
+\begin{itemize}
+\item This work may be distributed and/or modified under the
+  %
+  \index{Latex Project Public License@\LaTeX{} Project Public License}
+  %
+  conditions of the \LaTeX{} Project Public
+  License\index{license},\index{LPPL} either version~1.3 of this
+  license or (at your option) any later version.  The latest version
+  of this license is in \verb"http://www.latex-project.org/lppl.txt"
+  and version 1.3 or later is part of all distributions of \LaTeX{}
+  version 2003/12/01 or later.
+\item This work has the LPPL maintenance status ``maintained''.
+\item  The Current Maintainer of this work is Pierre-Amiel Giraud
+\item This work consists of the files \verb"skills.sty" and
+  \verb"skillsdoc.tex".
+\end{itemize}
+
+\subsection{Version Notes}
+
+\begin{description}
+	\item[v1.0.0] Initial release
+\end{description}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+\section{Usage instructions}
+\label{sec:Usage}
+
+This section details how to use the package and the commands it provides,
+from basic usage to customization. Some features are only available when
+the package is loaded within the \verb|exam| document class. They will be
+indicated as such.
+%--------------------------------------------------------------------
+\subsection{Loading the \texttt{skills} package}
+\label{sec:UsageLoadingPackage}
+
+To use the \verb|skills| package, you must load it, like every package,
+with the command
+\begin{center}
+  \verb"\usepackage{skills}"
+\end{center}
+
+\subsubsection*{Package options (advanced use only)}
+The package has only three options:
+\begin{itemize}
+	\item \verb|makenoidxglossaries| (default)
+	\item \verb|donotmakenoidxglossaries|
+	\item \verb|counter=<value>|
+\end{itemize}
+
+The \verb|donotmakenoidxglossaries| option is of any use only if you want to
+use the \verb|glossaries| package, upon which \verb|skills| is based,
+in your document. It deactivates the \verb|\makenoidxglossaries| command included in the \verb|skills.sty| file,
+so that you can handle your glossaries with the indexing option of your
+choice. Please refer to the \verb|glossaries| package documentation for
+more details.
+
+So, if you want to use the \verb|glossaries| and the \verb|skills| packages
+together in your document, it is advised to load the \verb|skills| package 
+as follows:
+\begin{center}
+	\verb|\usepackage[donotmakenoidxglossaries]{skills}|
+\end{center}
+
+The \verb|counter| option is to be used only if you to change the default counter for grouping the skills in the skills table (question for the \verb|exam| class, \verb|section| for other classes). The section counter was chosen because it is probably the most widespread logical counter (as opposed to the page counter). This very document, written with the \verb|exam| class, loads the \verb|skills| package with
+
+\begin{verbatim}
+	\usepackage[counter=section]{skills}
+\end{verbatim}
+
+Indeed, multiple \verb|questions| environments are used all along the documentation, and using question as a counter would needlessly clutter the skills table. Any available counter can be used.
+%--------------------------------------------------------------------
+\subsection{Defining skills}
+\label{sec:UsageDefiningSkills}
+
+Skills must be defined in the preamble, using the \verb|skilldef| command:
+\begin{center}
+	\verb|\skilldef{label}{reference}{description}|
+\end{center}
+
+The first argument, \verb|label|, is a simple keyword that will be used in your document
+to indicate that you are evaluating mastery of this skill. The \verb|reference|
+is the code of the skill in your competency framework. Finally, \verb|description| is the
+place where you can put the title of your skill along with some description.
+
+Defining a skill doesn't imply that it will be used. Thus, you can define your whole
+competency framework (or a significant subset) in a file and then simply load it
+with the \verb|\input| command in every proficiency test you make: all skills will
+be available for declaration, but only those explicitly declared in the document body
+will appear on the output file.
+
+For the sake of example, we will define three skills that will be used all along this
+manual:
+
+\begin{verbatim}
+	\skilldef{writing}{L1.1}{Writing to argue and write to communicate
+	and share ideas}
+	\skilldef{vocabulary}{H3.2}{Learning specific vocabulary and using
+	it in context}
+	\skilldef{situationInTime}{C1.1}{Situating in time and elaborating
+	chronological landmarks}
+\end{verbatim}
+
+%--------------------------------------------------------------------
+\subsection{Declaring skills}
+\label{sec:UsageDeclaringSkills}
+
+There are two ways for declaring skills. The first, and the simplest, is available
+only if the loaded document class is \verb|exam|. The second one is class agnostic.
+
+\subsubsection{The easy way (\texttt{exam} document class only)}
+\label{sec:UsageDeclaringSkillsExamClass}
+
+When the \verb|skills| package is used together with the \verb|exam| document class,
+the \verb|skillquestions| environment and the \verb|\skillquestion| command become
+available to the user.
+
+They behave like the \verb|questions| environment and \verb|\question| command from
+the \verb|exam| document class, except they have one more optional argument, used for
+declaring skills:
+
+\begin{center}
+	\begin{verbatim}
+			\begin{skillquestions}[optional list of comma separated skills]
+		\skillquestion[optional list of comma separated skills][optional number of
+		points for the question] Some question
+		\end{skillquestions}
+	\end{verbatim}
+\end{center}
+
+The skills declared as arguments to the \verb|skillquestions| environment are global:
+they are not linked to any specific question in the exam, but are rather evaluated throughout
+the exam and will be flagged as such in the skills table (see subsection~\ref{sec:UsageSkillsTable}). Those declared as arguments
+to a \verb|\skillquestion| command are evaluated only in the questions where they are declared.
+
+Some details need specific attention:
+\begin{itemize}
+	\item The label chosen when defining a skill is used to declare it in the exam.
+	\item If you don't want to declare global skills or if, for any reason, you don't want to declare skills for a question, you should omit the square brackets containing them: don't use empty brackets.
+	\item Don't use spaces in the skills list: write \verb|writing,vocabulary|, not \verb|writing, vocabulary|.
+	\item A skill can't be declared as global and question specific in the same exam. If you try to
+	do so, the question-level declaration will overwrite the global one.
+	\item The \verb|skillquestions| environment and the \verb|\skillquestion| command are only wrappers around the \verb|questions| environment and the \verb|question| command from the \verb|exam| document class. As such, they can be freely mixed: \verb|\question| and \verb|\skillquestion| can be used together both within the \verb|questions| and \verb|skillquestions| environments. Points of \verb|\question| and \verb|skillquestion| add up nicely.
+\end{itemize}
+
+A very basic example, using the three previously defined skills, could thus be:
+
+\begin{verbatim}
+	\begin{skillquestions}[writing]
+	\skillquestion A first question without any skill declared
+	\skillquestion[situationInTime,vocabulary] A second question with two skills
+	\skillquestion[vocabulary][2] A third question with one skill and 2 points.
+	\question[3] A last question without any skill declared but 3 points.
+	\end{skillquestions}
+\end{verbatim}
+
+And would results in:
+	\begin{skillquestions}[writing]
+	\skillquestion A first question without any skill declared
+	\skillquestion[situationInTime,vocabulary] A second question with two skills
+	\skillquestion[vocabulary][2] A third question with one skill and 2 points.
+	\question[3] A last question without any skill declared but 3 points.
+\end{skillquestions}
+
+\bigskip
+
+As you can see, the declared global skill isn't printed: it will be shown only in the skills table (see subsection~\ref{sec:UsageSkillsTable}), which summarizes all declared skills in the exam.
+
+\subsubsection{The other but also easy way (any document class)}
+\label{sec:UsageDeclaringSkillsAnyClass}
+
+Skills and global skills can also be declared with the \verb|\skills| and \verb|\globalskills| commands:
+
+\begin{center}
+	\verb|\skills{list of comma separated skills}|
+	\verb|\globalskills{list of comma separated skills}|
+\end{center}
+
+As for \verb|skillquestion| and \verb|skillquestions|, the separator must be only a comma:don't
+use spaces. In the default configuration (see subsection~\ref{sec:CustomizeWhere} for customization), the skills will appear right
+were you write them. If you type:
+
+\begin{verbatim}
+	Some text \skills{vocabulary} that goes on and on and on.
+\end{verbatim}
+
+You will get:
+
+\bigskip
+Some text \skills{vocabulary} that goes on and on and on.
+\bigskip
+
+So, the \verb|\skills| command can be used in any class. That includes the \verb|exam| document class,
+if you want, for instance, to declare skills at the \verb|subquestion| or \verb|part| level. This won't
+have any effect on the way skills are grouped in the skills table. By default, they are grouped per question in the \verb|exam| class and per section for other document classes.
+
+The \verb|\globalskills| command doesn't print anything. If you type:
+
+\begin{verbatim}
+	Some text \globalskills{writing} that goes on and on and on.
+\end{verbatim}
+
+You will get:
+
+\bigskip
+Some text \globalskills{writing} that goes on and on and on.
+\bigskip
+
+But the place where you put the \verb|\globalskills| command has a direct effect on the skills table, as the skills appear in the order they are firstly declared. What's more, typing the \verb|globalskills| command anywhere in the document will likely result in undesired commas in the skills table. Therefore, as a rule of thumb, all global skills should be declared at once, in the same \verb|\globalskills| command:
+
+\begin{itemize}
+	\item right after \verb|\begin{document}| if you want the global skills to be printed at the beginning of the skills table;
+	\item  right before \verb|\end{document}| if you want them to be printed at the end of the skills table.
+\end{itemize}
+
+The \verb|\globalskills| command shouldn't be used at all in the \verb|exam| class, at least in the \verb|skillquestions| environment is used.
+
+%margins.  For the full story, see section~\ref{sec:points}.
+
+
+%--------------------------------------------------------------------
+\subsection{Printing the skills table}
+\label{sec:UsageSkillsTable}
+
+There would be very little interest in defining then declaring skills evaluated in an exam if they are not listed somewhere. With the \verb|skills| package, this is done with the command:
+
+\begin{center}
+	\verb|\skillstable[optional sorting argument]|
+\end{center}
+
+So, for most users, a simple \verb|\skillstable| is enough. If you are unhappy with the default sorting (skills sorted in the order they are firstly declared in the document), which is equivalent of typing \verb|\skillstable[use]|, some other options are available: word, letter, standard, def, nocase, case. For more information on these, please refer to the \verb|glossaries| package documentation (chapter 10, Displaying a glossary).
+
+Here, if I type:
+
+\begin{verbatim}
+	\skillstable
+\end{verbatim}
+
+I get:
+
+\bigskip
+
+\noindent
+\skillstable
+
+\bigskip
+
+The global skills can easily be seen as no question number appears in the Questions column.
+
+If the \verb|\globalskills| command is used to declare global skills, the place of the skills in the table is determined by the place the command is put in the document (see subsection~\ref{sec:UsageDeclaringSkillsAnyClass}). If the global skills are
+declared with the optional argument of the \verb|skillquestions| environment, by default, they are put after the other skills in the table, but this can be changed by typing:
+
+\begin{center}
+	\verb|\renewcommand{\putglobalskills}{before}|
+\end{center}
+
+%---------------------------------------------------------------------
+%--------------------------------------------------------------------
+\section{Customizing the display of the skills}
+\label{sec:Customize}
+
+For now, we have only seen how to setup a proficiency test, without modifying
+the default appearance, that is:
+
+\begin{itemize}
+	\item In the \verb|\skills| and \verb|\skillquestion| commands, if several skills are
+	declared, a blank space is used as a separator.
+\end{itemize}
+
+%--------------------------------------------------------------------
+\subsection{The separator in the \texttt{\textbackslash skills} and \texttt{\textbackslash skillquestion} commands}
+\label{sec:CustomizeSeparator}
+
+The default blank space can be changed by renewing the \verb|\skillssep| command. For instance, if you want the skills to be separated with a comma followed by a blank space, type:
+
+\begin{verbatim}
+	\renewcommand{\skillssep}{, }
+\end{verbatim}
+
+\renewcommand{\skillssep}{, }
+
+And now, if you type:
+
+\begin{verbatim}
+	\skills{vocabulary,situationInTime}
+\end{verbatim}
+
+You get:
+
+\bigskip
+\skills{vocabulary,situationInTime}
+\bigskip
+
+\renewcommand{\skillssep}{ }
+%--------------------------------------------------------------------
+\subsection{Where the skills will be printed}
+\label{sec:CustomizeWhere}
+
+The default is that the skills references will be inserted at the beginning of the question with \verb|\skillquestion| or right where the \verb|\skills| command is used, but, for one-sided documents
+
+\begin{itemize}
+	\item the command \verb|\skillsinmargin| (or, equivalently, the command \verb|\skillsinleftmargin|) will cause the skills references to be set in the left margin,
+	\item the command \verb|\skillsinrightmargin| will cause the skills references to be set in the right margin,
+	\item the commands \verb|\noskillsinmargin| and \verb|\noskillsinrightmargin| are equivalent, and either of them will revert to the default situation.
+\end{itemize}
+
+For two-sided documents, \verb|\skillsinmargin| and \verb|\skillsinleftmargin| print skills in the inner margin, while \verb|\skillsinrightmargin| prints them in the outer margin.
+
+If you chose to print the skills references inline (default), you can move where they appear simply by changing the place you type the \verb|\skills| command. For instance, if you want to print the skills at the end of a question, in the \verb|exam| class, you can type:
+
+\begin{verbatim}
+\begin{questions}
+    \skillquestion A very good question. \skills{vocabulary}
+\end{questions}
+\end{verbatim}
+
+You will get:
+
+\bigskip
+\begin{skillquestions}
+	\skillquestion A very good question. \skills{vocabulary}
+\end{skillquestions}
+\bigskip
+
+When the skills are set in a margin, they start on the line they were declared. Sometimes, for instance if you declare bot points and skills for a \verb|\skillquestion| to be shown in the same margin, the skills and points overlap, so you need to move vertically the skills using:
+
+\begin{center}
+	\verb|\skillsinmarginvadjust{some length}|
+\end{center}
+
+Let's see an example:
+\begin{verbatim}
+\begin{questions}
+    \pointsinrightmargin
+    \skillsinrightmargin
+    \skillquestion[vocabulary][2] Some question
+    \skillsinmarginvadjust{\baseline}
+    \skillquestion[vocabulary][2] Some question
+\end{questions}
+\end{verbatim}
+
+\bigskip
+\begin{questions}
+	\pointsinrightmargin
+	\skillsinrightmargin
+	\skillquestion[vocabulary][2] Some question
+	\skillsinmarginvadjust{\baselineskip}
+	\skillquestion[vocabulary][2] Some question
+\end{questions}
+\bigskip
+
+\verb|\skillsinmarginvadjust| can be changed as often as you need.
+
+%-----------------------------------------------------------------
+\subsection{Surronunding the skills: parentheses, brackets, a box, and more}
+\label{CustomizeSurrounding}
+
+By default, skills references are enclosed in parentheses. The package provides two ways for changing this.
+
+\subsubsection{Very quick way}
+Following the syntax used in the \verb|exam| class (but not requiring you to use it), you can very quickly change the way skills are enclosed.
+
+For instance, if you want to have the skills references enclosed in brackets:
+
+\begin{center}
+	\verb|\bracketedskills|
+\end{center}
+
+For example, if you give the command \verb|\bracketedskills|, typing some questions will produce something as follows:
+
+\begin{questions}
+	\bracketedskills
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+If you prefer having the skills enclosed in a box instead of in parentheses, give the command
+
+\begin{center}
+	\verb|\boxedskills|
+\end{center}
+
+For example, if you give the command \verb|\boxedskills|, then the questions typed above will produce
+
+\begin{questions}
+	\boxedskills
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+If you give the commands \verb|\boxedskills| and \verb|\skillsinmargin|, then the above questions will produce
+
+\begin{questions}
+	\boxedskills
+	\skillsinmargin
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+If you want the skills to be not enclosed at all, you can give the command:
+
+\begin{verbatim}
+	\onlyskills
+\end{verbatim}
+
+If you give the commands \verb|\onlyskills| and \verb|\skillsinrightmargin|, then the above questions will produce
+
+\begin{questions}
+	\onlyskills
+	\skillsinrightmargin
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+Other combinations of these commands will produce similar effects.
+
+If you want to switch back and forth between formats during the proficiency test, you can do so by giving one of the commands
+
+\begin{center}
+	\begin{tabular}{l}
+		\verb"\bracketedskills"\\
+		\verb"\nobracketedskills"\\
+		\verb"\boxedskills"\\
+		\verb"\noboxedskills"\\
+		\verb"\onlyskills"\\
+		\verb"\notonlyskills"
+	\end{tabular}
+\end{center}
+
+whenever you want to switch. The commands \verb|\nobracketedskills|, \verb|\noboxedskills| and \verb|\notonlyskills| are equivalent: they all return to the default of putting parentheses around the skills references.
+
+\subsubsection{Using the \texttt{\textbackslash skillsenclosement} command}
+
+It is possible to enclose the skills references with any string of characters, using the \verb|\skillsenclosement| command:
+
+\begin{center}
+	\verb|\skillsenclosement{opening string}{closing string}|
+\end{center}
+
+Actually, \verb|\bracketedskills| and \verb|\onlyskills| definitions are
+
+\begin{verbatim}
+	\newcommand{\bracketedskills}{\skillsenclosement{[}{]}}
+	\newcommand{\onlyskills}{\skillsenclosement{}{}}
+\end{verbatim}
+
+But one can be more imaginative with, for instance
+
+\begin{verbatim}
+	\skillsenclosement{**}{**}
+\end{verbatim}
+
+or even
+
+\begin{verbatim}
+	\skillsenclosement{oO}{Oo}
+\end{verbatim}
+
+This last example would produce
+
+\begin{questions}
+	\skillsenclosement{oO }{ Oo}
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+The \verb|\boxedskills| command uses another mechanism: after triggering an \verb|\onlyskills|, it puts a \verb|\fbox| or a \verb|\parbox| in a \verb|\fbox| around the skills, depending on whether the latter are printed inline or in a margin. It means one can use \verb|\skillsenclosement| after \verb|\boxedskills|. For instance, typing the following commands
+
+\begin{verbatim}
+	\boxedskills
+	\skillsenclosement{oO }{ Oo}
+\end{verbatim}
+
+before the questions printed above would produce
+
+\begin{questions}
+	\boxedskills
+	\skillsenclosement{oO }{ Oo}
+	\skillquestion[vocabulary] Why is there air?
+	\skillquestion[vocabulary,situationInTime] What if there were no air?
+\end{questions}
+
+%--------------------------------------------------------------------
+\subsection{The skills table}
+\label{sec:CustomizeSkillsTable}
+We have already talked about the \verb|\putglobalskills| command (see subsection~\ref{sec:UsageSkillsTable}).
+
+It is also possible to rename the columns of the table by renewing some commands before typing \verb|\skillstable|:
+
+\begin{itemize}
+		\item \verb|\renewcommand{\descriptionname}{Some name}| for the first column (default: Skill)
+		\item \verb|\renewcommand{\pagelistname}{Some name}| for the second column (default: Questions)
+		\item \verb|\renewcommand{\skilllevelname}{Some name}| for the third column (default: Proficiecncy)\\
+\end{itemize}
+
+If you are using the package \verb|polyglossia| or \verb|babel| with French as main language, these names are localized by the \verb|skills| package as "Compétences", "Questions" and "Maîtrise".
+
+It is also possible to totally change the look of the skills table with the command
+
+\begin{verbatim}
+	\renewglossarystyle{skillstable}{A new skills table look}
+\end{verbatim}
+
+This requires some knowledge about the \verb|glossaries| package. Please refer to its documentation, especially section 15.2 (Defining your own glossary style).
+
+%---------------------------------------------------------------------
+%--------------------------------------------------------------------
+\section{Technical informations}
+\label{sec:Technical}
+
+\subsection{Loaded packages}
+\label{sec:TechnicalPackages}
+
+The \verb|skills| package loads some other packages, namely and unordered: \verb|glossaries|, \verb|marginnote|, \verb|xparse|, \verb|tabularx|, \verb|etoolbox|, \verb|iftex| and \verb|kvoptions|.
+
+They are all loaded without any option.
+
+\subsection{Possible improvements (this is not a roadmap)}
+\label{sec:TechnicalImprovements}
+
+In next versions, if any, some improvements will be made:
+\begin{itemize}
+	\item A code cleanup is needed, because I started coding the package with the assumption that the naming convention for commands in the \LaTeX world was all lowercase. Then, I understood that the convention consisted rather in using lowercase names for user commands and camel case names for other commands.
+	\item A deeper code refactoring would replace \LaTeX commands by plain TeX control sequences and limit the dependency to external packages. This lower dependency would also help mitigating the probability of side effects.
+	\item Allowing for multiple skills tables on the same document, for instance on a per part or per section basis.
+	\item Offering some competency framework, that could be chosen with a key/value system as a package option.
+\end{itemize}
+
+%--------------------------------------------------------------------
+
+% The following is necessary to avoid warnings, since we have multiple
+% questions environments in this documentation file:
+\makeatletter
+\@pointschangedfalse
+\makeatother
+
+
+
+
+\end{document}
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------

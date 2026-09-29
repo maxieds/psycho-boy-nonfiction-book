@@ -1,0 +1,615 @@
+%% fitchdoc.tex
+%% Macros for Fitch-style natural deduction (documentation)
+%% Copyright 2002-2023 Peter Selinger
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   https://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Richard Zach <rzach@ucalgary.ca>
+%
+% This work consists of the files fitch.sty and fitchdoc.tex.
+
+% Original Author: Peter Selinger, Dalhousie University
+% Created: Jan 14, 2002
+% Modified: Dec 17, 2023
+% Version: 1.0
+% Copyright: (C) 2002-2023 Peter Selinger, Richard Zach
+% Filename: fitch.sty
+% Documentation: fitchdoc.tex
+% https://github.com/OpenLogicProject/fitch/
+
+\documentclass{ltxdoc}
+
+\usepackage{fitch,graphicx,showexpl}
+
+\lstset{%
+  basicstyle=\ttfamily\small,
+  commentstyle=\itshape\ttfamily\small,
+  showspaces=false,
+  showstringspaces=false,
+  breaklines=true,
+  breakautoindent=true,
+  captionpos=t
+}
+
+\addtolength{\oddsidemargin}{-1cm}
+\addtolength{\textwidth}{2cm}
+
+\newcommand\NewIn[1]{\leavevmode
+  \marginpar{\hfill\fbox{\fbox{New in #1}}\hspace*{1em}}\ignorespaces}
+
+\title{\texttt{fitch.sty}: Fitch-style natural deduction macros}
+
+\author{Peter Selinger\\Dalhousie University \and Richard
+Zach\\University of Calgary\thanks{The current maintainer of this
+package is \href{https://richardzach.org}{Richard Zach}. The package
+repository is at \url{https://github.com/OpenLogicProject/fitch/},
+where you can also report any
+\href{https://github.com/OpenLogicProject/fitch/issues}{issues} with
+it.}}
+
+\date{Version 1.0\\ December 17, 2023}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+
+This document describes how to use the {\tt fitch.sty} macros for
+typesetting Fitch-style natural deduction derivations. To load the
+macros, simply put |\usepackage{fitch}| into the preamble of your
+{\LaTeX} file. 
+
+Here is a natural deduction derivation, together with the code that
+produced it:
+
+\begin{LTXexample}
+$\begin{nd}
+  \hypo {1}  {P\vee Q}
+  \hypo {2}  {\neg Q}
+  \open
+  \hypo {3} {P}
+  \have {4} {P}        \r{3}
+  \close
+  \open
+  \hypo {aa} {Q}
+  \have {6} {\neg Q}   \r{2}
+  \have {7} {\bot}     \ne{aa,6}
+  \have {8} {P}        \be{7}
+  \close
+  \have {9} {P}        \oe{1,3-4,aa-8}
+\end{nd}$
+\end{LTXexample}
+
+A derivation consists of \emph{lines}, and each line contains a {\em
+line label} and a \emph{formula}. Some lines also carry a {\em
+justification}. Moreover, each line is either a \emph{hypothesis} or a
+\emph{derived formula}. Usually, derived formulas carry a
+justification, whereas hypotheses do not; however, the macros do not
+enforce this.
+
+Proofs set using |fitch.sty| will have lines numbered automatically in
+the output. It is possible to override the automatic numbering (see
+Section~\ref{subsec-customline}). You can refer to line numbers in the
+text using |\ndref| (see Section~\ref{subsec-ndref}). Various
+dimensions, formatting of justifications and line references, and the
+shorthand macros used to produce rule names can be customized (see
+Section~\ref{sec-customization}).
+
+\NewIn{1.0} Several new commands and customization options have been
+introduced in v1.0. It is mostly backwards compatible with earlier
+versions, but see section~\ref{compat}. In particular, if you
+redefined any internal |fitch| commands, you will have to change |nd*|
+to |nd@|.
+
+\section{Usage}\label{sec-usage}
+
+\DescribeEnv{nd}\DescribeEnv{nd} Derivations are typeset
+inside the |nd| environment. By default, the standard |array|
+environment is used to do this, so the |nd| environment must must be
+used in math mode, i.e., it should be surrounded by |$...$| or
+|\[...\]|.
+
+\NewIn{1.0} The environment |fitchproof| typesets the proof on its own
+in text, not math mode. Proofs will be set flush left, with the
+default |\partopsep| spacing surrounding lists added. You do not have
+to insert |$| to switch to math mode for |fitchproof|---by default.
+However, it only works if you generate proofs using the |tabular|
+environment, e.g., by loading |fitch| with the |arrayenv=tabular|
+option.
+
+\DescribeMacro{\hypo}\DescribeMacro{\have}
+The commands |\hypo| and |\have| are used
+to typeset one line of the derivation; |\hypo| is used for
+hypotheses, and |\have| for derived formulas. Both commands take
+a label and a formula as an argument. Note that the labels used to
+identify lines in the derivation need not be actual line numbers; for
+instance, in the above example, we used the label $aa$ instead of $5$.
+In the output, lines are automatically numbered consecutively. Labels
+may not contain any punctuation characters or spaces.
+
+\DescribeMacro{\open}\DescribeMacro{\close}
+Subderivations are opened and closed with the commands |\open| and
+|\close|. Finally, the following commands are provided for
+annotating lines with justifications:
+\begin{center}
+\begin{tabular}[t]{@{}ll@{}}
+  |\r|  & reiteration \\
+  |\ii| & implication introduction \\
+  |\ie| & implication elimination \\
+  |\ai| & and introduction \\
+  |\ae| & and elimination \\
+  |\oi| & or introduction \\
+  |\oe| & or elimination 
+\end{tabular} 
+\qquad
+\begin{tabular}[t]{ll}
+  |\ni| & not introduction \\
+  |\ne| & not elimination \\
+  |\be| & bottom elimination \\
+  |\nne| & double negation elimination \\
+  |\Ai| & forall introduction \\
+  |\Ae| & forall elimination \\
+  |\Ei| & exists introduction \\
+  |\Ee| & exists elimination \\
+\end{tabular} 
+\end{center}
+\NewIn{1.0} These commands and what they produce can be customized,
+see Section~\ref{sec-customization}.
+
+Each such command takes a \emph{reference list} as an argument. A
+reference list is a string made from labels, commas, and hyphens, for
+instance |1,3a-3b,4a-4d|.
+
+\section{Details}
+
+\subsection{Guards}
+
+Some natural deduction derivations with quantifiers use \emph{guards}, as in
+the following example:
+
+\begin{LTXexample}
+$
+\begin{nd}
+  \hypo {1} {\exists x\forall y.P(x,y)}
+  \open[v]
+  \open[u]
+  \hypo {2} {\forall y.P(u,y)}
+  \have {3} {P(u,v)}                     \Ae{2}
+  \have {4} {\exists x.P(x,v)}           \Ei{3}
+  \close
+  \have {5} {\exists x.P(x,v)}           \Ee{1,2-5}
+  \close
+  \have {6} {\forall y\exists x.P(x,y)}  \Ai{2-5}
+\end{nd}
+$
+\end{LTXexample}
+
+The guards $v$ and $u$ in line 2 were typeset by giving optional
+arguments to the |\open| commands of the respective
+subderivations. 
+
+\DescribeMacro{\guard}
+For most purposes, the above way of specifying guards is sufficient.
+However, there is another method, which allows a more flexible
+placement of guards: before any line, you can give the command
+|\guard{u}| to add a guard $u$ to the top-level subderivation at
+that line, or |\guard[n]{u}| to add a guard to the $n$th
+enclosing subderivation at that line. Thus, the above example could
+have also been typeset by inserting the two commands |\guard{u}| and
+|\guard[2]{v}| just after the second |\open| statement.
+
+% For backward compatibility, there is a third way of specifying guards
+% by giving an optional second argument to the |\hypo| and
+% |\have| commands. The use of this feature is discouraged.
+
+\subsection{Label and reference list details}\label{subsec-ndref}
+
+Labels for lines given to the |\have| and |\hypo| commands need not be
+numeric, although the package will \emph{output} them as consecutive
+numbers (see Section~\ref{subsec-customline} for how to adjust the
+numbering). Labels, however, may not contain commas, periods,
+semicolons, hyphens, parentheses, or spaces. In a reference list,
+spaces are ignored (even within a label!), whereas commas, periods,
+semicolons, parentheses, and hyphens are copied to the output. All
+other characters are interpreted as part of a label. Attempting to
+reference a label which has not been previously defined by any |\hypo|
+or |\have| command produces a \NewIn{0.6} warning message of the form:
+\begin{verbatim}
+  ! Package fitch Warning: Undefined line reference: lab17.
+\end{verbatim}
+(In earlier versions, this resulted in an error, not a warning.)
+
+\DescribeMacro{\ndref}
+Labels defined in an |nd| environment can be referenced in the
+text with the |\ndref| command. This command takes a reference
+list as an argument, and produces the corresponding output. However,
+it is only possible to reference labels \emph{after} the corresponding
+derivation has been typeset. There is currently no convenient way of
+defining forward references. Also, if a label is used more than once,
+|\ndref| will always refer to the most recent time it was used.
+
+\subsection{Generic justifications}
+
+\DescribeMacro{\by}
+Non-standard justifications can be created with the |\by|
+command. This command takes two arguments: a name and a reference
+list. For instance, the command |\by{De Morgan}{lab3,lab4}| might
+produce the output ``\mbox{De Morgan, 3, 4}''. Note that the justification
+is typeset in text mode.
+
+In the default justification format, a comma is automatically inserted
+between the name and the reference list, unless the reference list is
+empty. The formatting of justifications can be changed, see
+Section~\ref{sec-customization}. If the second argument (the reference
+list) is empty, only the first argument (without formatting or
+punctuation) is printed. \NewIn{1.0} If the first argument is empty,
+only the reference list is printed.
+
+Since the |\by| command outputs its first argument without additional
+formatting when the second argument is empty, you can use |\by{...}{}|
+to produce arbitrary text in the justification. You can use the
+|\ndref| command here.
+\begin{LTXexample}
+$
+\begin{nd}
+  \hypo {a} {A \Rightarrow B} 
+    \by{Premise}{}
+  \hypo {b} {A} \by{Premise}{}
+  \have {c} {B}
+    \by{\ndref{a,b}
+      (but \emph{how?})}{}
+  \have {d} {A \wedge B} \by{}{b,c}
+\end{nd}
+$
+\end{LTXexample}
+
+\subsection{Scope}
+
+The commands |\hypo|, |\have|, |\open|, |\close|, |\by|, |\r|, |\ii|, and so
+forth are only available inside an |nd| environment. These commands
+may have a different meaning elsewhere in the same document. The only
+commands provided by the |fitch.sty|  package which are visible
+outside an |nd| environment are the command |\ndref| described in
+Section~\ref{subsec-ndref}, the commands |\ndrules|, |\ndjustformat|,
+|\ndrefformat|, and |\nddim|, and the dimension |\ndindent| described
+in Section~\ref{sec-customization}.
+
+\subsection{Breaking it across pages}\label{subsec-break}
+
+\DescribeEnv{ndresume}
+\DescribeEnv{fitchproof*}
+The |nd| environment is derived from the {\LaTeX} |array|
+environment, and thus it does not break across pages automatically. 
+However, if a derivation is too long to fit on a single page, it is
+possible to split it manually into physically independent, but
+logically consecutive subparts. For this purpose, the |ndresume|
+environment is provided to continue a previously interrupted
+derivation. 
+\NewIn{1.0} The environment |fitchproof*| works the same way, except typesets the
+proof just like the |fitchproof| environment (no need for math mode,
+flush left, spacing before and after). However, like |fitchproof|, it
+requires the |arrayenv=tabular| option. Here is an example:
+
+\begin{LTXexample}
+\begin{fitchproof}[arrayenv=tabular]
+  \hypo {1}  {P\vee Q}
+  \hypo {2}  {\neg Q}
+  \open
+  \hypo {3} {P}
+  \have {4} {P}      \r{3}
+  \close
+  \open
+  \hypo {aa} {Q}
+  \have {6} {\neg Q} \r{2}
+\end{fitchproof}
+Derivations can be interrupted and 
+resumed at any point.
+\begin{fitchproof*}[arrayenv=tabular]
+  \have {7} {\bot}  \ne{aa,6}
+  \have {8} {P}     \be{7}
+  \close
+  \have {9} {P}     \oe{1,3-4,aa-8}
+\end{fitchproof*}
+\end{LTXexample}
+
+\NewIn{1.0} You can also have derivations break across pages
+automatically. In order to do this, you have to load the
+\href{https://ctan.org/pkg/longtable}{|longtable|} package, and load
+|fitch| with the |arrayenv=longtable| option. Since the |longtable|
+environment works in text (not math) mode, you should then only use
+|fitchproof|, or the |nd| environment but \emph{not} in text mode.
+Note that the |longtable| package does not work in 2-column mode or
+inside a |multicolumn| environment. You can always produce a proof
+inside a |multicolumn| environment by passing |arrayenv=tabular| as an
+option to the |nd| or |fitchproof| environment.
+
+
+\subsection{Custom line numbers}\label{subsec-customline}
+
+One often needs to write derivation schemas, rather than derivations.
+This often requires the use of symbolic constants such as $n$, $n+1$,
+etc, instead of actual line numbers. The |\have| and |\hypo|
+commands have an optional first argument which is a symbolic constant.
+For instance, |\have[n]| will cause the current line to be
+numbered with the symbolic constant $n$. Subsequent lines are
+automatically numbered $n+1$ etc. An initial offset can be given as a
+second optional argument, as in |\have[n][-1]|, which will cause
+the current line to be numbered $n-1$, the following line $n$, etc. In
+an explicit offset is given, the symbolic constant can also be absent:
+for instance, the command |\have[][7]| resets the current line
+number to $7$. The following example illustrates this behavior:
+
+\begin{LTXexample}
+$
+\begin{nd}[justsep=1em]
+  \hypo          {1} {P\vee Q}
+  \open
+  \hypo          {2} {P}
+  \have [\vdots] {3} {\vdots}
+  \have [n][-1]  {4} {A\wedge B}
+  \close
+  \open
+  \hypo          {5} {Q}
+  \have [\vdots] {6} {\vdots}
+  \have [m]      {7} {A\wedge B}
+  \close
+  \have          {8} {A\wedge B}
+      \oe{1,2-(4),5-7}
+  \have [\vdots] {9} {\vdots}
+  \have [][100] {10} {A} \ae{8}
+\end{nd}
+$
+\end{LTXexample}
+
+Note that in the justification for line $m+1$, parentheses had to be
+put around the label $4$. There is currently no way of doing this
+automatically. 
+
+{\bf Exercise.} How does one typeset an empty line number?
+
+{\bf Solution.} Since |\have[]| has a special meaning as explained
+above, we need to use |\have[~]| instead.
+
+\subsection{Continuation lines}\label{subsec-continuation}
+
+Sometimes one has to typeset a very long formula that does not fit on
+a single line. As of version 0.5 of the {\tt fitch.sty} macros, it is
+possible to break a formula into several lines using |\\| as a
+line separator. Continuation lines are automatically indented, as
+shown in the following example.
+
+\begin{LTXexample}
+$
+\begin{nd}
+  \hypo{1}  {A\wedge B}
+  \hypo{2}  {A\wedge B\Rightarrow{} \\
+             C\wedge D}
+  \have{3}  {C\wedge D}  \ie{1,2}
+  \have{4}  {A\wedge B\wedge{} \\
+             C\wedge D}  \ai{1,3}
+\end{nd}
+$
+\end{LTXexample}
+
+\DescribeMacro{\hypocont}
+\DescribeMacro{\havecont}
+Alternatively, the |\havecont| and |\hypocont|  commands can
+be used to specify each continuation line separately, as the following
+example illustrates.
+
+\begin{LTXexample}
+$
+\begin{nd}
+  \hypo{1}  {A\wedge B}
+  \hypo{2}  {A\wedge B\Rightarrow{}}
+  \hypocont {C\wedge D}
+  \have{3}  {C\wedge D}         \ie{1,2}
+  \have{4}  {A\wedge B\wedge{}} \ai{1,3}
+  \havecont {C\wedge D}
+\end{nd}
+$
+\end{LTXexample}
+
+This latter style gives slightly more flexibility in the placement of
+justifications, since each line and continuation line can have its own
+justification and its own guard (via the |\guard| command).  It
+also allows a derivation to be interrupted between a line and its
+continuation, as discussed in Section~\ref{subsec-break}.
+
+\section{Customization}\label{sec-customization}
+
+The relative sizes of the various elements of a natural deduction
+proof are preset to reasonable values depending on the size of the
+currently selected font. However, it will sometimes be necessary to
+customize these dimensions. The customizable dimensions are given in
+the following diagram.
+\begin{center}
+  \includegraphics{fitchdoc-dimen}
+\end{center}
+In addition, \meta{linethickness} determines the thickness of scope
+lines, and \meta{cindent} the extra indentation of continuation lines
+(as discussed in Section~\ref{subsec-continuation}). The default
+dimensions are:
+\begin{center}
+\begin{tabular}{ll@{\qquad}ll}
+  \meta{height} & 4.5ex &
+  \meta{topheight} & 3.5ex\\
+  \meta{depth} & 1.5ex &
+  \meta{labelsep} & 1em\\
+  \meta{indent} & 1.6em &
+  \meta{hsep} & .5em\\
+  \meta{justsep} & 2.5em &
+  \meta{linethickness} & .2mm\\
+  \meta{cindent} & 1em
+\end{tabular}
+\end{center}
+
+\NewIn{1.0} To change these default dimensions, pass a list of
+key-value pairs as package options, as optional arguments to the
+|nd| or |fitchproof| environment, or use the |\setkeys|
+command:
+\begin{verbatim}
+  \usepackage[justsep=1em]{fitch}
+  \begin{nd}[rules=myrules]
+  \begin{fitchproof}[linethickness=1pt]
+  \setkeys{fitch}{hsep=1em,indent=1em}\end{verbatim}
+
+In addition, the macros used to generate the table containing the
+proof, to format justifications, format line number references, and to
+initialize macros to produce justifications in the proof can be
+customized:
+\begin{center}
+  \begin{tabular}{ll}
+  option & default\\\hline
+  |rules=|\meta{macroname} & |ndrules|\\
+  |justformat=|\meta{macroname} & |ndjustformat|\\
+  |refformat=|\meta{macroname} & |ndrefformat|\\
+  |arrayenv=|\meta{envname} & |array|
+  \end{tabular}
+\end{center}
+For compatibility with earlier versions of |fitch.sty|, the default
+for \meta{arrayenv} is |array|, i.e., the table containing the proof
+is generated using an |array| environment, and must therefore occur
+inside math mode. The |fitchproof| and |fitchproof*| environments
+assume that you use a text table command instead, such as |tabular|.
+Hence, you should \emph{not} use |fitchproof| in math mode, and you
+must use the option |arrayenv=tabular| (when loading |fitch|, as an
+optional argument to |fitchproof|, or using
+|\setkeys{fitch}{arrayenv=tabular}|. Any other table environment that
+takes the same table format argument as |array| and |tabular| can be
+used here, e.g., the |longtable| environment from the |longtable|
+package (which must be loaded separately).
+
+The package defines the macros
+\DescribeMacro{\ndrules}\cmd{\ndrules}, which defines the rule
+macros given at the end of Section~\ref{sec-usage}, using
+\begin{verbatim}
+  \def\ndrules{%
+  \def\ii{\by{$\Rightarrow$I}}%
+  \def\ie{\by{$\Rightarrow$E}}%
+  \def\Ai{\by{$\forall$I}}%
+  \def\Ae{\by{$\forall$E}}%
+  \def\Ei{\by{$\exists$I}}%
+  \def\Ee{\by{$\exists$E}}%
+  \def\ai{\by{$\wedge$I}}%
+  \def\ae{\by{$\wedge$E}}%
+  \def\ai{\by{$\wedge$I}}%
+  \def\ae{\by{$\wedge$E}}%
+  \def\oi{\by{$\vee$I}}%
+  \def\oe{\by{$\vee$E}}%
+  \def\ni{\by{$\neg$I}}%
+  \def\ne{\by{$\neg$E}}%
+  \def\be{\by{$\bot$E}}%
+  \def\nne{\by{$\neg\neg$E}}%
+  \def\r{\by{R}}}
+\end{verbatim}
+\DescribeMacro{\ndjustformat}
+The macro \cmd{\ndjustformat} is defined as
+\begin{verbatim}
+  \newcommand{\ndjustformat}[2]{#1, #2}
+\end{verbatim}
+The first argument takes the rule name, the second the reference list.
+It is used to typeset the justification.
+
+\DescribeMacro{\ndrefformat}
+The macro \cmd{\ndrefformat} is defined as
+\begin{verbatim}
+  \newcommand{\ndrefformat}[1]{#1}
+\end{verbatim}
+It is used to typeset the line numbers in justifications.
+
+\cmd{\ndrules}, \cmd{\ndjustformat}, and \cmd{\ndrefformat} can
+be redefined using \cmd{\renewcommand}, or you can define your own
+commands to provide the rule names, the justification format, and line
+number format, and pass the names (without initial |\|) as an option
+to the \cmd{\usepackage} or individual \cmd{\nd} or \cmd{\fitchproof}
+commands.
+\begin{LTXexample}
+\newcommand{\myjust}[2]
+  {#2 by \textsf{#1}}
+\newcommand{\myrules}{
+  \ndrules % include standard rules
+  \def\ds{\by{DS}}}
+\renewcommand{\ndrefformat}[1]{(#1)}
+$
+\begin{nd}[rules=myrules,
+  justformat=myjust,
+  indent=1.5cm,
+  linethickness=1.5pt,
+  justsep=1cm]
+  \hypo {1} {A\vee B}
+  \hypo {2} {\neg B}
+  \open
+  \hypo {a} {B}
+  \have {3} {A}          \ds{1,2}
+  \have {b} {A \wedge B} \ai{a,3}
+\end{nd}
+$
+\end{LTXexample}
+
+The boolean option |outerline| can be set to false to suppress the
+leftmost scope line. This may be useful when printing inference rules,
+e.g.,
+\begin{LTXexample}
+$
+\begin{nd}[outerline=false,
+  labelsep=0pt]
+  \open
+  \hypo [n]{1} {A}
+  \have [~]{2} {\raisebox{-1ex}{\vdots}}
+  \have [m]{3} {B}
+  \close
+  \have [~]{b} {A \Rightarrow B} \ii{1-3}
+\end{nd}
+$
+\end{LTXexample}
+
+\section{Obsolete commands and backwards compatibility}\label{compat}
+
+\DescribeMacro{\nddim}
+The dimensions can also be changed with the
+|\nddim| command. The syntax of the command is as follows:
+\begin{center}
+  \cmd{\nddim}\marg{height}\marg{topheight}\marg{depth}\marg{labelsep}
+  \marg{indent}\marg{hsep}\marg{justsep}\marg{linethickness},
+\end{center}
+where each of the eight parameters is a dimension. This still works,
+but using the key-value pair options is the preferred method.
+
+\NewIn{1.0}\DescribeMacro{\ndindent} In versions before v1.0, the recommended way
+to change the extra indentation used on continuation lines was to
+change dimension |\ndindent| directly using |\setlength|. As of v1.0,
+you should use the |cindent| option instead.
+
+The original code ``hid'' the internal macros by naming
+them |\nd*...|. In v1.0 this has been changed to the standard
+|\nd@...|. Any low-level redefinition of |fitch| internals that uses
+|*| will break in v1.0.
+
+\section{Other comments}
+
+The goal was to design a flexible package which would not impose any
+constraints on the form of derivations, while making typesetting easy.
+With this package, it is in fact possible to typeset incomplete,
+ill-formed, or invalid derivations. Sometimes it is pedagogically necessary
+to do so.
+
+There are no arbitrary limits on the size or nesting depth of a derivation,
+except for the obvious requirement of fitting horizontally on the
+printed page.
+
+\section{Copyright and license}
+
+This document and the accompanying |fitch.sty| macros are {\copyright}
+2002--2023 by Peter Selinger and Richard Zach and distributed under
+the terms of the \href{https://www.latex-project.org/lppl/}{LPPL}.
+
+\end{document}

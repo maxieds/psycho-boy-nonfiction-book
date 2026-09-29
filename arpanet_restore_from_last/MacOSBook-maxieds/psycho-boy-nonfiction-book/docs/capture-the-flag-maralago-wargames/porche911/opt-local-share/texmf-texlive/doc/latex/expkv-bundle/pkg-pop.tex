@@ -1,0 +1,439 @@
+\genericekv\expkvp{-pop}
+
+The \expkvp\ is mainly written to lay the basis for \expkvc's and \expkvd's
+key-defining front ends. Historically the two packages shared pretty similar
+code. To unify this and reduce the overall code amount some auxiliary package
+was originally planned, but then I realised that with little to no overhead
+(apart from documentation) this can also be provided to users. Well, and then I
+thought, why not make the whole thing expandable as well. And here we are.
+
+So what's the idea? This package provides a \textbf{p}refix \textbf{o}riented
+\textbf{p}arser\footnote{Naming packages is hard, especially when the name
+should fit a particular naming scheme. Big thanks to samcarter for helping
+me: \url{https://topanswers.xyz/tex?q=1985}. The author apologises that there is
+no \texttt{expkv-pnk}, \texttt{expkv-rok}, \texttt{expkv-jaz} or any other music
+themed name in \expkvbundle.} with two kinds of prefixes. The first is called a
+\prefix, of which an item can have arbitrary many, the second a \type, of which
+every item has only one. To distinguish the concept of an optional \prefix\ from
+the generic term \enquote{prefix} I'll use this formatting whenever the special
+kind of prefix is meant.
+
+Another peculiarity of \expkvp\ compared to the other packages in
+\expkvbundle\ is that it doesn't separate \Nkey{}s from \Vkey{}s as
+strictly. Instead a |NoVal|-marker is used as the value. If this is not what you
+want you can use \cs{ekvpValueAlwaysRequired} (see there).
+
+
+\subsection{Parsing Rules}
+
+A parser is processing only the \key\ of a \kv\ pair. The \key\ is split at
+spaces (braces might be lost by this process!). Each split off piece is checked
+whether it's a defined prefix. If it's a \type\ parsing of the \key\ stops and
+the remainder is considered a \meta{name}. If it's a \prefix\ it'll be recorded
+and parsing goes on. If it's neither parsing is also stopped (and the last
+parsed space delimited part is put back -- braces might've been lost at this
+step). If a no-type rule has been defined (\cs{ekvpDefNoType}) that one is
+executed else an error is thrown.
+
+The \prefix\ or \type\ has to match after being |\detokenize|d, whereas the
+\meta{name} will be unchanged (except for stripping off the prefixes). If only a
+\key\ is given (so no =\val\ used) the same is done, and instead of \val\ a
+no-value marker is used (if that accidentally ends up in the input stream this
+looks like this: \csname c\string_novalue\string_tl\endcsname; this is the same
+as the marker used by \pkg{expl3} for those familiar with it).
+
+A \prefix\ has two parts to it, a \meta{pre} and a \meta{post} code, whereas a
+\type\ only results in a \type-action (or the no-type action if that's defined
+and no \type\ found). The parsing result can also be seen in
+\autoref{fig:p:result}.
+
+\begin{figure}[b]
+  \centering
+  \def\plevel#1{\raisebox{1ex}{#1}}%
+  \def\ts#1{\textsubscript{$#1$}}%
+  \begingroup
+    \ttfamily
+    pre\ts1
+    \plevel
+      {%
+        pre\ts2
+        \plevel
+          {%
+            \ldots\space
+            \plevel
+              {%
+                pre\ts n
+                \plevel{\type-action}
+                post\ts n
+              }%
+            \ldots\space
+          }%
+        post\ts2
+      }%
+    post\ts{1}%
+  \endgroup
+  \caption
+    {%
+      Structure of a single \kv\ pair's parsing result with $n$~\prefix{}es%
+      \label{fig:p:result}%
+    }
+\end{figure}
+
+Please note that \expkvp's parsers are fully expandable as long as your
+\prefixes\ and \types\ are. Additionally \expkvp\ doesn't provide means to
+define parsers, \prefixes, or \types\ |\protected|. As a result, make sure
+you'll always call |\ekvpParse| inside of a |\protected| macro if you need
+anything that's unexpandable or else your code might not do what you intended
+since some states may not be updated when expandable code tries to access them.
+The macro |\ekvpProtect| can help to overcome this issue, but it's more of a
+last resort than a clean solution.
+
+\subsection{Defining Parsers}
+
+\begin{function}{\ekvpNewParser}
+  \begin{syntax}
+    \cs{ekvpNewParser}\marg{parser}
+  \end{syntax}
+  Defines a new parser called \meta{parser}. Every parser has to be defined this
+  way. Throws an error if the parser is already defined.
+\end{function}
+
+\begin{function}{\ekvpDefType}
+  \begin{syntax}
+    \cs{ekvpDefType}\marg{parser}\marg{type}\marg{code}
+  \end{syntax}
+  Defines a \type\ that is called \meta{type} for the parser \meta{parser}. If
+  the \type\ is parsed the \meta{code} will be used as a \type-action. Inside of
+  \meta{code} you can use |#1| to refer to the \meta{name} (the remainder of the
+  \key\ after stripping off all the prefixes), |#2| to use the unaltered \key,
+  and |#3| to access the \val\ which was given to your \key.
+\end{function}
+
+\begin{function}{\ekvpDefPrefix}
+  \begin{syntax}
+    \cs{ekvpDefPrefix}\marg{parser}\marg{prefix}\marg{pre}\marg{post}
+  \end{syntax}
+  Defines a \prefix\ that is called \meta{prefix} for the parser \meta{parser}.
+  If the \prefix\ is encountered the code in \meta{pre} will be put before the
+  \type-action and the code in \meta{post} will be put behind it.
+  If multiple \prefix{}es are used the \meta{pre} of the first will be put first
+  and the \meta{post} of the first will be put last. Inside of \meta{pre} and
+  \meta{post} |#1| is replaced with the found \type, |#2| the \meta{name}, and
+  |#3| the unaltered \key. If no valid type was found and the no-type rule
+  defined with \cs{ekvpDefNoType} is executed the argument |#1| will be empty.
+\end{function}
+
+\begin{function}{\ekvpDefAutoPrefix}
+  \begin{syntax}
+    \cs{ekvpDefAutoPrefix}\marg{parser}\marg{pre}\marg{post}
+  \end{syntax}
+  You can also define a \prefix-like rule that is executed on each element
+  automatically. So the \meta{pre} and \meta{post} code of this will be inserted
+  for every valid element of the \kv\ list. Just like for \cs{ekvpDefPrefix} you
+  can access the \type\ with |#1|, the \meta{name} with |#2|, and the unaltered
+  \key\ with |#3|.
+\end{function}
+
+\begin{function}{\ekvpDefPrefixStore}
+  \begin{syntax}
+    \cs{ekvpDefPrefixStore}\marg{parser}\marg{prefix}\meta{cs}\marg{pre}\marg{post}
+  \end{syntax}
+  This is a shortcut to define a \prefix\ named \meta{prefix} for \meta{parser}
+  that'll store \meta{pre} inside of \meta{cs} (which should be a single control
+  sequence) before the \type-action and afterwards store \meta{post} in it. Both
+  definitions (in \meta{pre} and in \meta{post}) are put inside |\ekvpProtect|.
+\end{function}
+
+\begin{function}{\ekvpDefPrefixLet}
+  \begin{syntax}
+    \cs{ekvpDefPrefixLet}\marg{parser}\marg{prefix}\meta{cs}\meta{pre}\meta{post}
+  \end{syntax}
+  This is similar to \cs{ekvpDefPrefixStore}, but instead of storing in the
+  \meta{cs} it'll be let to the single tokens specified by \meta{pre} and
+  \meta{post}. If either \meta{pre} or \meta{post} contains more than a single
+  token the remainder is put after the |\let| statement. Both assignments (in
+  \meta{pre} and in \meta{post}) are put inside |\ekvpProtect|.
+\end{function}
+
+\begin{function}{\ekvpLet}
+  \begin{syntax}
+    \cs{ekvpLet}\marg{parser_1}\marg{type}\marg{name_1}\oarg{parser_2}\marg{name_2}
+  \end{syntax}
+  Copies the definition of a \prefix\ or \type. The \meta{type} should be one of
+  |prefix|, or |type|. The \prefix\ or \type\ \meta{name_1} for \meta{parser_1}
+  will be let equal to the \prefix\ or \type\ \meta{name_2} of \meta{parser_2}.
+  If you omit the optional \meta{parser_2} it will default to \meta{parser_1}.
+\end{function}
+
+
+\subsection{Changing Default Behaviours}
+
+\begin{function}{\ekvpValueAlwaysRequired}
+  \begin{syntax}
+    \cs{ekvpValueAlwaysRequired}\marg{parser}
+  \end{syntax}
+  By default a special no-value marker will be provided for \val\ if no value
+  was given to a key. If this is used instead an error will be thrown that a
+  value is required.
+\end{function}
+
+\begin{function}{\ekvpDefNoValue}
+  \begin{syntax}
+    \cs{ekvpDefNoValue}\marg{parser}\marg{code}
+  \end{syntax}
+  This is a third alternative to the default behaviour and
+  \cs{ekvpValueAlwaysRequired}. With this macro you can stop normal parsing if
+  no value was specified and instead run \meta{code}. Inside of \meta{code} the
+  unprocessed \Nkey\ is available as |#1|. No further processing of this \kv\
+  list element takes place.
+\end{function}
+
+\begin{function}{\ekvpUseNoValueMarker}
+  \begin{syntax}
+    \cs{ekvpUseNoValueMarker}\marg{parser}\marg{marker}
+  \end{syntax}
+  This macro changes the no-value marker from the package default to
+  \meta{marker}. Note that macros like \cs{ekvpAssertValue} don't work with
+  markers different from the default one.
+\end{function}
+
+\begin{function}{\ekvpDefNoValuePrefix}
+  \begin{syntax}
+    \cs{ekvpDefNoValuePrefix}\marg{parser}\marg{pre}\marg{post}
+  \end{syntax}
+  It is also possible to handle \Nkey{}s as if this was some special \prefix.
+  So if a \Nkey\ is encountered you'll have \meta{pre} and \meta{post} put
+  before and behind the \type-action (as the outermost \prefix). The no-value
+  marker will be forwarded as \val. If you want to change a parser's marker and
+  use this you have to use \cs{ekvpUseNoValueMarker} before calling
+  \cs{ekvpDefNoValuePrefix}, and you must not use \cs{ekvpDefNoValue} or
+  \cs{ekvpValueAlwaysRequired} before using \cs{ekvpDefNoValuePrefix} (both
+  result in undefined behaviour).
+\end{function}
+
+\begin{function}{\ekvpDefNoType}
+  \begin{syntax}
+    \cs{ekvpDefNoType}\marg{parser}\marg{code}
+  \end{syntax}
+  This defines an action if no valid \type\ was found, otherwise this behaves
+  like \cs{ekvpDefType} with the same arguments |#1| (\meta{name}), |#2|
+  (unaltered \key), and |#3| (\val) in \meta{code}. If this isn't used for the
+  \meta{parser} instead an error will be thrown whenever no \type\ is found.
+\end{function}
+
+
+\subsection{Markers}
+
+\expkvp\ will place three markers for each list element that was parsed and
+defines an auxiliary to gobble up to that marker. After each marker an
+additional group is placed containing the current list element (excluding the
+\val). The gobblers gobble that group as well. Those markers are:
+
+\begin{function}{\ekvpEOP,\ekvpGobbleP}
+  Is placed after all the \prefix{}es' \meta{pre} code, directly before the
+  \type-action.
+\end{function}
+
+\begin{function}{\ekvpEOT,\ekvpGobbleT}
+  Is placed after the \type-action, directly before the last \prefix's
+  \meta{post} code.
+\end{function}
+
+\begin{function}{\ekvpEOA,\ekvpGobbleA}
+  Is placed at the end of the complete result of the current element, so after
+  all the \prefix{}es' \meta{post} code.
+\end{function}
+
+
+\subsection{Helpers in Actions}
+
+\begin{function}{\ekvpIfNoVal}
+  \begin{syntax}
+    \cs{ekvpIfNoVal}\marg{arg}\marg{true}\marg{false}
+  \end{syntax}
+  This will expand to \meta{true} if the \meta{arg} is the special no-value
+  marker, otherwise \meta{false} is left in the input stream.
+\end{function}
+
+\begin{function}{\ekvpAssertIf,\ekvpAssertIfNot}
+  \begin{syntax}
+    \cs{ekvpAssertIf}\oarg{marker}\marg{if}\marg{message}
+  \end{syntax}
+  This macro will run the \TeX-if test specified by \meta{if} (should expand to
+  any \TeX-style if, e.g., \cs[no-index]{iftrue} or
+  \cs[no-index]{ifx}\meta{A}\meta{B}). If the test is true everything's fine,
+  else an error message is thrown using \meta{message} followed by the current
+  element and everything up to \meta{marker} is gobbled (\meta{marker} can be
+  any of |EOT|, which is the default, |EOP|, or |EOA|). The |Not| variant will
+  invert the logic, so if the \TeX-style if is true this will throw the error.
+\end{function}
+
+\begin{function}{\ekvpAssertTF,\ekvpAssertTFNot}
+  \begin{syntax}
+    \cs{ekvpAssertTF}\oarg{marker}\marg{if}\marg{message}
+  \end{syntax}
+  This is pretty similar to \cs{ekvpAssertIf}, but \meta{if} should be a test
+  that uses its first argument if it's true and its second otherwise (so an
+  error is thrown if the second argument is used, nothing happens otherwise).
+  The |Not| variant is again inversed.
+\end{function}
+
+\begin{function}{\ekvpAssertValue,\ekvpAssertNoValue}
+  \begin{syntax}
+    \cs{ekvpAssertValue}\oarg{marker}\marg{arg}
+  \end{syntax}
+  Asserts that \meta{arg} is not the no-value marker (\cs{ekvpAssertValue}) or
+  is the no-value marker (\cs{ekvpAssertNoValue}), otherwise throws an error and
+  gobbles everything up to \meta{marker} (like \cs{ekvpAssertIf}).
+\end{function}
+
+\begin{function}{\ekvpAssertOneValue,\ekvpAssertTwoValues}
+  \begin{syntax}
+    \cs{ekvpAssertOneValue}\oarg{marker}\marg{arg}
+  \end{syntax}
+  Asserts that \meta{arg} contains exactly one or two values (which could both
+  be either single tokens or braced groups -- spaces between the two values in
+  the \cs{ekvpAssertTwoValues} case are ignored), if the number of values
+  doesn't match an error is thrown and everything up to \meta{marker} gobbled.
+\end{function}
+
+\begin{function}{\ekvpProtect}
+  \begin{syntax}
+    \cs{ekvpProtect}\marg{code}
+  \end{syntax}
+  This macro protects \meta{code} from further expanding in every context a
+  |\protected| macro wouldn't expand. It needs at least two steps of expansion.
+  When a |\protected| macro would expand this will remove the braces around
+  \meta{code} and \TeX\ will process \meta{code} the same way it normally would.
+  After the first step of expansion it'll leave two macros, and after each
+  further full expansion these two macros stay there. Since \expkvp\ offers no
+  method to define \prefixes\ or \types\ |\protected| you can instead use this
+  macro. But if your parser needs any assignments you should nest the
+  |\ekvpParse| call in a |\protected| macro anyway.
+\end{function}
+
+\subsection{Using Parsers}
+
+\begin{function}{\ekvpParse}
+  \begin{syntax}
+    \cs{ekvpParse}\marg{parser}\kvarg
+  \end{syntax}
+  Parses the \kv\ list as defined for \meta{parser}. This expands in exactly two
+  steps, and returns inside of |\unexpanded|, so doesn't expand any further in
+  an |\edef| or |\expanded|. After the two steps it'll directly leave the code
+  as though every \prefix's \meta{pre} and \meta{post} code and the \type-action
+  were input directly along with the different markers.
+\end{function}
+
+\subsection{The Boring Macros}
+Just for the sake of completeness.
+\begin{function}{\ekvpDate,\ekvpVersion}
+  Store the date and version, respectively.
+\end{function}
+
+\subsection{Examples}
+\begin{example}{Defining a parser similar to \expkvd}
+  \ekvset{enverb}{store,no-tcb}%
+  Let's define a parser that is similar to \expkvd's |\ekvdefinekeys|. First we
+  define a new parser named |exdef|:
+  \begin{enverb}
+    \ekvpNewParser{exdef}
+  \end{enverb}
+  We'll need to provide our prefixes, |long| and |protected|. The following
+  initialises them and defines their action.
+  \begin{enverb}
+    \newcommand*\exLong{}
+    \newcommand*\exProtected{}
+    \ekvpDefPrefixLet{exdef}{long}\exLong\long\empty
+    \ekvpDefPrefixLet{exdef}{protected}\exProtected\protected\empty
+  \end{enverb}
+  Now we define a few types, I'll go with |noval|, |store|, and |code| for
+  starters. We exploit the fact that |\ekvdef| and |\ekvdefNoVal| will expand
+  the first argument, so we can simply store the set name in a macro.
+  \begin{enverb}
+    \ekvpDefType{exdef}{code}
+      {%
+        \ekvpAssertValue{#3}%
+        \exProtected\exLong\ekvdef\exSetName{#1}{#3}%
+      }
+    \ekvpDefType{exdef}{noval}
+      {%
+        \ekvpAssertValue{#3}%
+        \ekvpAssertIfNot{\ifx\exLong\long}{`long' not accepted}%
+        \exProtected\ekvdefNoVal\exSetName{#1}{#3}%
+      }
+    \ekvpDefType{exdef}{store}
+      {%
+        \ekvpAssertOneValue{#3}%
+        \ifdefined#3\else
+          \let#3\empty
+        \fi
+        \protected\exLong\ekvdef\exSetName{#1}{\edef#3{\unexpanded{##1}}}%
+      }
+  \end{enverb}
+  Now we need a user facing macro that puts the pieces together (this uses
+  |\NewDocumentCommand| instead of |\newcommand| because the former defines
+  macros |\protected|).
+  \begin{enverb}
+    \NewDocumentCommand\exdefinekeys{m +m}
+      {\def\exSetName{#1}\ekvpParse{exdef}{#2}}
+  \end{enverb}
+  Now we got that sorted so we can use our little parser:
+  \ekvset{enverb}{no-store,undo-no-tcb}%
+  \begin{enverb}[restore]
+    \newif\ifbar
+    \exdefinekeys{exampleset}
+      {
+         long store foo = \myfoo
+        ,protected noval bar = \bartrue
+        ,code baz = baz was called with \detokenize{#1}
+      }
+    \ekvset{exampleset}{foo=Foobar,bar,baz=\empty}
+    \ifbar bar was true so: \myfoo\fi
+  \end{enverb}
+\end{example}
+
+\begin{example}{Visualising the expandability of \cs[no-index]{ekvpParse}}
+  \ekvset{enverb}{store,no-tcb}%
+  With this example we want to take a closer look at the expansion of
+  |\ekvpParse|. So please bear with me if this doesn't make much sense
+  otherwise. One of the issues is that \prefixes\ are a somewhat unordered
+  concept, and only \types\ must come last. We could juggle with flags (an
+  expandable data-storage, see \autoref{sec:c:flags}) to overcome this somehow
+  just to define some pseudo-syntax here, but I guess that's not worth it.
+  Anyhow, here goes nothing.\par
+  First we need a parser
+  \begin{enverb}
+    \ekvpNewParser{exexp}
+  \end{enverb}
+  and a \prefix. We could define one that ensures the name starts of with
+  a letter. We also want each element to start a new line, which we do using an
+  auto prefix.
+  \begin{enverb}
+    \newcommand\ifletter{}
+    \long\def\ifletter#1#2\stop{\ifcat a\noexpand#1}
+    \ekvpDefPrefix{exexp}{letter}
+      {\ekvpAssertIf{\ifletter#2\stop}{not a letter}}
+      { (really a letter)}
+    \ekvpDefAutoPrefix{exexp}{\noindent}{\par}
+  \end{enverb}
+  Finally we define a \type\ and a |NoType| rule:
+  \begin{enverb}
+    \ekvpDefType{exexp}{*}{$#1\cdot#3 = \the\numexpr#1*#3\relax$}
+    \ekvpDefNoType{exexp}{the #3th letter is #1}
+  \end{enverb}
+  Now we want to see whether the thing is expandable:
+  \ekvset{enverb}{no-store,undo-no-tcb}%
+  \begin{enverb}[restore,below]
+    \raggedright
+    \edef\foo{\ekvpParse{exexp}{letter e = 5, * 4 = \empty3}}
+    1st full expansion
+    \texttt{\meaning\foo}\par
+    \medskip
+    \edef\foo{\foo}
+    2nd full expansion
+    \texttt{\meaning\foo}\par
+    \medskip
+    \foo
+  \end{enverb}
+\end{example}

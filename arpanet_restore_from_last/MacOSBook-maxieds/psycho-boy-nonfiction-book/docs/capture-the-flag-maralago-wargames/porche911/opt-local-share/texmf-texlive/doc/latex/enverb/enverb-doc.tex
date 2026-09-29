@@ -1,0 +1,87 @@
+\IfFileExists{enverb.sty}{\RequirePackage{enverb}}{}
+
+\PassOptionsToPackage{full}{textcomp}
+\documentclass{l3doc}
+
+\usepackage[oldstylenums,nott]{kpfonts}
+\usepackage{randtext,xcolor,array}
+\usepackage{xistercian}
+\usepackage{accsupp}
+\usepackage{csquotes}
+\usepackage{multicol}
+%\usepackage{microtype}
+
+\input{preamble-logo}
+\input{preamble-examples}
+
+\newcommand\keydefault[1]{\hfill\textcolor{enverbgrey}{default: #1}}
+
+\let\metaORIG\meta
+\protected\def\meta #1{\texttt{\metaORIG{#1}}}
+\renewcommand*\thefootnote{\cistercian{footnote}}
+\hypersetup{linkcolor=red!80!black,urlcolor=purple!80!black}
+\makeatletter
+\@ifdefinable\gobbledocstriptag{\def\gobbledocstriptag#1>{}}
+\protected\def\savefootnotestuff
+  {%
+    \let\mysavethefootnote\thefootnote
+    \let\mysave@makefnmark\@makefnmark
+    \let\mysave@makefntext\@makefntext
+  }
+\def\restorefootnotestuff{\texorpdfstring\restorefootnotestuff@{}}
+\def\restorefootnotestuff@
+  {%
+    \global\let\thefootnote\mysavethefootnote
+    \global\let\@makefnmark\mysave@makefnmark
+    \global\let\@makefntext\mysave@makefntext
+  }
+\makeatother
+
+\begin{document}
+\savefootnotestuff
+\title
+  {%
+    \restorefootnotestuff
+    The \envlogo\ package\\[\medskipamount]
+    \Large read an environment verbatim%
+  }
+\GetFileInfo{enverb.sty}
+\date{\filedate\space\fileversion}
+\author{Jonathan P. Spratte\thanks{\protect\randomize{jspratte@yahoo.de}}}
+
+\maketitle
+
+\begin{abstract}
+  \noindent\parfillskip=0pt
+  The \envlogo\ package provides a simple yet effective way to collect the
+  verbatim contents of an environment into a macro, which the user can then pick
+  up to implement additional functionality, for instance a simple output routine
+  or rescanning the contents into code listings or for typesetting alike.
+  Arbitrary contents can be placed on either end of each line allowing flexible
+  line-oriented processing.
+\end{abstract}
+
+\tableofcontents
+
+\begin{documentation}
+\section{Documentation}
+Originally I was unsatisfied by the degree of freedom and customisation present
+in the available verbatim-environment providing packages like \pkg{listings},
+\pkg{minted}, \emph{etc.}, when one wants to document \TeX\ code and show the
+results next to it (or I didn't bother to dig through their manuals). Also I
+didn't like them producing temporary files so long as that's not necessary. As a
+result I implemented what was basically the first version of \envlogo\ for one
+of my other packages.
+
+\input{doc-enverb}
+\input{doc-using-contents}
+\input{doc-keys}
+\input{doc-examples}
+\end{documentation}
+
+\clearpage
+\begin{implementation}
+  \section{Implementation}
+  \DocInput{enverb.dtx}
+\end{implementation}
+\end{document}

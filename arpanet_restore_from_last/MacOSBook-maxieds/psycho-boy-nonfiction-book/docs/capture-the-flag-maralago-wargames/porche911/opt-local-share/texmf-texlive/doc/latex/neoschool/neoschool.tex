@@ -1,0 +1,1629 @@
+\documentclass[
+    margin=2cm
+]{neoschool}
+
+\title{The \texttt{neoschool} Class}
+\author{Version : 1.0.0 \quad\textemdash{}\quad Author : Razik Ikhlef}
+\date{2025/01/04}
+
+\begin{document}
+\maketitle
+
+The \texttt{neoschool} class provides secondary school
+teachers with a comprehensive set of tools to create their educational
+documents (assessments, course materials, exercise sheets with
+solutions, etc.). To meet various needs, it offers eight predefined
+color themes, diverse class options for layout and typography,
+specialized environments, dedicated commands, and different preformatted
+header styles for each type of document. It integrates dozens of
+commonly used LaTeX packages (see list below), which significantly
+reduces the preamble and avoids compatibility issues as much as
+possible. It's multilingual, supporting French, English, and German.
+
+\tableofcontents
+
+\section{Loaded Packages}
+
+The following packages are automatically loaded by the
+\texttt{neoschool} class:
+
+\texttt{adforn}, \texttt{adjustbox}, \texttt{algpseudocode},
+\texttt{amssymb}, \texttt{babel}, \texttt{bookmark}, \texttt{calc},
+\texttt{changespace}, \texttt{cuted}, \texttt{environ},
+\texttt{fancyvrb}, \texttt{fontawesome5}, \texttt{forest},
+\texttt{iftex}, \texttt{ifthen}, \texttt{kvoptions}, \texttt{lastpage},
+\texttt{marginnote}, \texttt{microtype}, \texttt{mismath} (which loads
+\texttt{mathtools}), \texttt{multicol}, \texttt{needspace},
+\texttt{pdftexcmds}, \texttt{pgffor}, \texttt{pgfplots},
+\texttt{qrcode}, \texttt{scrlayer-scrpage}, \texttt{silence},
+\texttt{siunitx}, \texttt{tabularray}, \texttt{tasks},
+\texttt{tcolorbox} (with the \texttt{most} option loading
+\texttt{listings} and \texttt{minted} packagess), \texttt{textcase},
+\texttt{tikz}, \texttt{tikzpagenodes}, \texttt{tikzsymbols},
+\texttt{ulem} (with \texttt{normalem} option), \texttt{xcolor} (with
+\texttt{table}, \texttt{svgnames}, \texttt{dvipsnames}, and
+\texttt{x11names} options), \texttt{xhfill}, \texttt{xkeyval},
+\texttt{xsim} (with \texttt{use-files} and \texttt{clear-aux} options),
+\texttt{xstring}.
+
+Compilation in \texttt{pdflatex} loads \texttt{fonttenc} (with
+\texttt{T1} option), \texttt{inputenc} (with \texttt{utf8} option),
+\texttt{newpxtext}, and \texttt{newpxmath}. Compilation in
+\texttt{lualatex} makes available \texttt{fontspec}, \texttt{luacas},
+\texttt{lua-ul}, \texttt{luacolor} packagess and applies
+\texttt{TeX\ Gyre\ PagellaX} and \texttt{TeX\ Gyre\ Heros} fonts in
+addition to \texttt{newpxmath}.
+
+The \texttt{graphics} option loads \texttt{graphicx} and
+\texttt{wrapfig}, the \texttt{draft} option loads \texttt{blindtext} and
+\texttt{lipsum}, and the \texttt{mathastext} option loads the
+\texttt{mathastext} packages.
+
+The \texttt{math} option loads \texttt{annotate-equations}, \texttt{bm},
+\texttt{cancel}, \texttt{mathrsfs}, \texttt{nncomma}, \texttt{numprint},
+\texttt{tdsfrmath} (with \texttt{suite} and \texttt{taupe} options),
+\texttt{tkz-euclide}, \texttt{witharrows}, and \texttt{xlop}.
+
+The \texttt{notes} option enables colored and framed notes in the left
+and right margins alternately and loads the \texttt{todonotes}
+packages.
+
+The \texttt{apmep} option, which allows direct compilation of
+examination papers from the association of the same name, defines a set
+of mathematical commands and loads \texttt{esvect},
+\texttt{fourier-ons}, \texttt{numprint} (with \texttt{np} option),
+\texttt{pstricks} (and many packages from the \texttt{pstricks}
+ecosystem), \texttt{tabularx}, and \texttt{textcomp}.
+
+The \texttt{mathics} option enables computer algebra via
+\texttt{mathics} (free version of \texttt{mathematica}) and loads
+\texttt{asymptote} and \texttt{latexalpha2} packagess.
+
+\section{Configuration Options}
+
+\subsection{Language}
+
+\begin{itemize}
+\item
+  \textbf{english, french, german}: Activates translations and
+  conventions for each language. These options affect theorem and
+  environment titles, typography, and mathematical conventions.
+\item
+  \textbf{nofrenchlist}: Disables French-style lists (restores dots
+  instead of dashes).
+\item
+  \textbf{frenchlistaspar}: Treats lists as paragraphs in French.
+\item
+  \textbf{frenchmath}: Applies French mathematical conventions (upright
+  capitals and Greek letters).
+\end{itemize}
+
+\subsection{Global Appearance}
+
+\subsubsection{Predefined Themes}
+
+The \textbf{theme} = \texttt{theme-name} option sets the document's color theme.
+Available themes are: \texttt{cyprus}, \texttt{kassio}, \texttt{frost},
+\texttt{spring}, \texttt{arbutus}, \texttt{duo}, \texttt{navy}, \texttt{royal}.
+Most of them are inspired by the \textit{ef-themes} for \textit{Emacs} by
+Protesilaos Stavrou.
+
+\subsubsection{Color Modes}
+
+\begin{itemize}
+\item
+  \textbf{normal}: Uses different colors for each type of environment.
+\item
+  \textbf{unicolor}: Uses a single color for all environments:
+
+  \begin{itemize}
+    \item
+    The title color is used as the base
+  \item
+    Variations are obtained through transparency
+  \end{itemize}
+\item
+  \textbf{print}: Converts all colors to black for printing.
+\item
+  \textbf{gradientheadpalette}: Uses a gradient of the title color for
+  other headings (sections, subsections, theorem titles, etc.).
+\end{itemize}
+
+\subsubsection{Custom Colors}
+
+\begin{itemize}
+\item
+  \textbf{globalcolor} = \texttt{color}: Sets the text
+  color.
+\item
+  \textbf{titlecolor} = \texttt{color} or
+  \textbf{titlehexcolor} = \texttt{hex code}: Sets the
+  title color.
+\item
+  \textbf{headcolor} = \texttt{color}: Sets the section
+  header color.
+\item
+  \textbf{subcolor} = \texttt{color}: Sets the
+  subsection color.
+\item
+  \textbf{subsubcolor} = \texttt{color}: Sets the
+  subsubsection color.
+\item
+  \textbf{headfootcolor} = \texttt{color}: Sets the
+  header and footer color.
+\end{itemize}
+
+\subsubsection{Display Options}
+
+\begin{itemize}
+\item
+  \textbf{noframe}: Removes environment frames.
+\item
+  \textbf{noback}: Removes colored backgrounds.
+\item
+  \textbf{nocodeframe}: Removes code block frames.
+\item
+  \textbf{scale}: Harmonizes font dimensions in
+  \texttt{lualatex}.
+\end{itemize}
+
+\subsection{Abstract Customization}
+
+The \texttt{abstracttitle} option allows customization
+of the \texttt{abstract} environment title:
+
+\begin{code}{latex}
+\documentclass[abstracttitle=Summary]{neoschool}
+
+% In the document
+\begin{abstract}
+    Abstract content...
+\end{abstract}
+\end{code}
+
+\subsection{Typography}
+
+\begin{itemize}
+\item
+  \textbf{sfbody}: Activates sans-serif font for body text.
+\item
+  \textbf{sfall}: Activates sans-serif font for the entire document.
+\item
+  \textbf{mathastext}: Uses text font for mathematics.
+\item
+  \textbf{mainface} = \texttt{font}: Main document
+  font.
+\item
+  \textbf{mainfaceoptions} = \texttt{options}: Main
+  font options.
+\item
+  \textbf{sansface} = \texttt{font}: Sans-serif font.
+\item
+  \textbf{sansfaceoptions} = \texttt{options}:
+  Sans-serif font options.
+\item
+  \textbf{monoface} = \texttt{font}: Monospace font.
+\item
+  \textbf{monofaceoptions} = \texttt{options}:
+  Monospace font options.
+\item
+  \textbf{mathface} = \texttt{font}: Mathematical font.
+\item
+  \textbf{mathfaceoptions} = \texttt{options}:
+  Mathematical font options (only in
+  \texttt{pdflatex}).
+\item
+  \textbf{facefamily} = \texttt{family}: Complete font
+  family.
+\item
+  \textbf{facefamilyoptions} = \texttt{options}: Font
+  family options.
+\end{itemize}
+
+\subsection{Layout}
+
+\subsubsection{Margins and Spacing}
+
+\begin{itemize}
+\item
+  \textbf{margin} = \texttt{length}: Sets horizontal
+  margin width (2.5cm default); vertical margins adjust accordingly.
+\item
+  \textbf{notes} = \texttt{length}: Activates
+  \emph{todonotes} in margins and sets their width.
+\item
+  \textbf{noindent}: Removes paragraph indentation.
+\item
+  \textbf{indent} = \texttt{length}: Sets indentation
+  width (1em default).
+\item
+  \textbf{compact}:
+
+  \begin{itemize}
+    \item
+    Reduces paragraph spacing
+  \item
+    Decreases environment margins
+  \item
+    Compresses line spacing
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Output Options}
+
+\begin{itemize}
+\item
+  \textbf{2a5toa4}: Displays two copies of A5 page on A4 in landscape.
+\item
+  \textbf{2a4toa3}: Displays two copies of A4 page on A3 in landscape.
+\item
+  \textbf{4a5toa3}: Displays four copies of A5 page on A3.
+\item
+  \textbf{2toa3}: Displays two different A4 pages on A3 in landscape.
+\item
+  \textbf{bookleta5}: Generates A5 booklet (four pages per A4 sheet).
+\item
+  \textbf{bookleta4}: Generates A4 booklet (four pages per A3 sheet).
+\end{itemize}
+
+\subsubsection{Headers and Footers}
+
+\begin{itemize}
+\item
+  \textbf{fullheader}: Activates complete header and footer.
+
+  \begin{itemize}
+    \item
+    Header: document type on left, title in center, class level on
+    right.
+  \item
+    Footer: date on left, institution in center, pagination on right.
+  \end{itemize}
+\item
+  \textbf{headrule}: Adds line under header.
+\item
+  \textbf{footrule}: Adds line above footer.
+\item
+  \textbf{headfootrule}: Activates both lines.
+\end{itemize}
+
+\section{Document Styles}
+
+\subsection{Title Styles}
+
+\subsubsection{Exam Styles}
+
+\begin{itemize}
+\item
+  \textbf{exam}: Complete style for exams with detailed header.
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[exam]{neoschool}
+
+\neoheader{
+    type = Test,
+    school = Poincarré High School,
+    level = Senior Year,
+    duration = 2h,
+    calculator = true  % or false or exam
+}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{shortexam}: Compact style for exams with simplified header.
+\item
+  \textbf{mockexam}: Style for mock exams with standardized cover page.
+\end{itemize}
+
+\subsubsection{Assessment Styles}
+
+\begin{itemize}
+\item
+  \textbf{eval}: Standard style for assessments.
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[eval]{neoschool}
+
+\neoheader{
+    type = Quiz,
+    school = Alan Turing Middle School,
+    level = 8th Grade
+}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{evalicons}: Adds icons to \texttt{eval}
+  header.
+\item
+  \textbf{evalgrade}: Adds grading banner.
+\item
+  \textbf{evaliconsgrade}: Complete style with icons and grading.
+\item
+  \textbf{shorteval}: Compact style for assessments.
+\end{itemize}
+
+\subsubsection{Bubble Styles}
+
+\begin{itemize}
+\item
+  \textbf{bubbles}: Style with colored bubble background.
+\item
+  \textbf{shortbubbles}: Compact version of bubble style.
+\end{itemize}
+
+\subsubsection{Other Title Styles}
+
+\begin{itemize}
+\item
+  \textbf{titleornament}: Adds ornaments below title.
+\item
+  \textbf{titlerule}: Adds line under title.
+\item
+  \textbf{titlemidrule}: Adds center line under title.
+\item
+  \textbf{titlefullrule}: Adds full-width line under title.
+\item
+  \textbf{fancybox}: Title with elegant gray box.
+\item
+  \textbf{onlytitleleft}: Displays only title, left-aligned.
+\item
+  \textbf{onlytitle}: Displays only title, centered.
+\item
+  \textbf{onlytitleright}: Displays only title, right-aligned.
+\item
+  \textbf{shorttitle}: Compact title style.
+\item
+  \textbf{shortlesson}: Compact style for lessons.
+\end{itemize}
+
+\subsection{Header Configuration}
+
+The document header can be configured with the
+\texttt{\textbackslash neoheader} command:
+
+\begin{code}{latex}
+\neoheader{
+    type = {Document Type},
+    school = {School Name},
+    academy = {Academy Name},
+    level = {Grade Level},
+    duration = {Duration},
+    calculator = {true/false/exam},
+    leftcontent = {\faIcon{...}},
+    rightcontent = {\faIcon{...}},
+}
+\end{code}
+
+\subsection{Title Formatting Options}
+
+\subsubsection{Global Styles}
+
+\begin{itemize}
+\item
+  \textbf{headstyle} = \texttt{style}: Font style for
+  all headers (\texttt{sffamily} default).
+
+  \begin{itemize}
+    \item
+    Sections, subsections, etc.
+  \item
+    Theorem and exercise headers.
+  \end{itemize}
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[headstyle=rmfamily]{neoschool}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{headweight} = \texttt{weight}: Weight for all
+  headers (\texttt{bfseries} default).
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[
+  headstyle=sffamily,
+  headweight=mdseries
+]{neoschool}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{headshape} = \texttt{shape}: Shape for all
+  headers (\texttt{scshape} default).
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[
+  headstyle=sffamily,
+  headshape=upshape
+]{neoschool}
+\end{code}
+
+\subsubsection{Main Title Style}
+
+\begin{itemize}
+\item
+  \textbf{titlestyle} = \texttt{style}: Style for main
+  title (inherits from \texttt{headstyle}).
+\item
+  \textbf{titleweight} = \texttt{weight}: Weight for
+  main title (inherits from \texttt{headweight}).
+\item
+  \textbf{titleshape} = \texttt{shape}: Shape for main
+  title (\texttt{upshape} default).
+\item
+  \textbf{titlealign} = \texttt{alignment}: Title
+  alignment (\texttt{center} default).
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[
+    titlestyle=sffamily,
+    titleweight=bfseries,
+    titleshape=upshape,
+    titlealign=left
+]{neoschool}
+\end{code}
+
+\subsubsection{Section Style}
+
+\begin{itemize}
+\item
+  \textbf{sectionnumstyle} = \texttt{style}: Numbering
+  style.
+
+  \begin{itemize}
+    \item
+    \texttt{circle}: Circled number.
+  \item
+    \texttt{box}: Boxed number.
+  \item
+    \texttt{dash}: Dash after number.
+  \item
+    \texttt{plain}: Simple number.
+  \end{itemize}
+\item
+  \textbf{sectiontextstyle} = \texttt{style}: Text
+  style.
+
+  \begin{itemize}
+    \item
+    \texttt{sc}: Small caps.
+  \item
+    \texttt{upper}: Uppercase.
+  \item
+    \texttt{lower}: Lowercase.
+  \end{itemize}
+\item
+  \textbf{sectionstyle} = \texttt{style}: Global
+  section style.
+
+  \begin{itemize}
+    \item
+    \texttt{ornaments}: With decorative ornaments.
+  \item
+    \texttt{underline}: Underlined.
+  \item
+    \texttt{normal}: Simple style.
+  \item
+    \texttt{highlighted}: With highlighting.
+  \item
+    \texttt{shadedline}: With shaded line.
+  \end{itemize}
+\item
+  \textbf{sectionalign} = \texttt{alignment}: Section
+  alignment.
+
+  \begin{itemize}
+    \item
+    \texttt{left}: Left-aligned.
+  \item
+    \texttt{center}: Centered.
+  \item
+    \texttt{right}: Right-aligned.
+  \end{itemize}
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[
+    sectionnumstyle=circle,
+    sectiontextstyle=upper,
+    sectionstyle=highlighted,
+    sectionalign=left
+]{neoschool}
+\end{code}
+
+\subsubsection{Header/Footer Style}
+
+\begin{itemize}
+\item
+  \textbf{headfootstyle} = \texttt{style}:
+  Header/footer style (based on \texttt{headstyle}).
+\end{itemize}
+
+\begin{code}{latex}
+\documentclass[headfootstyle=sffamily]{neoschool}
+\end{code}
+
+\subsubsection{Complete Configuration
+Example}
+
+\begin{code}{latex}
+\documentclass[
+    % Global style
+    headstyle=sffamily,
+    headweight=bfseries,
+    headshape=scshape,
+    
+    % Main title
+    titlestyle=sffamily,
+    titleweight=bfseries,
+    titleshape=upshape,
+    titlealign=center,
+    
+    % Sections
+    sectionnumstyle=circle,
+    sectiontextstyle=upper,
+    sectionstyle=highlighted,
+    sectionalign=left,
+    
+    % Headers/footers
+    headfootstyle=sffamily
+]{neoschool}
+\end{code}
+
+\section{Content Layout}
+
+\subsection{Absolute Object
+Positioning}
+
+The \texttt{\textbackslash positionobject} command allows precise
+placement of elements on the page:
+
+\begin{code}{latex}
+\positionobject{x-shift}{y-shift}{scale}{content}
+
+\begin{itemize}
+\item \texttt{x-shift}: Horizontal offset from top-left corner.
+\item \texttt{y-shift}: Vertical offset from top-left corner.
+\item \texttt{scale}: Scale factor for content.
+\item \texttt{content}: Element to position (image, text, etc.).
+\end{itemize}
+
+% Example: Image in top-right corner
+\positionobject{15cm}{1cm}{0.5}{\includegraphics{logo.png}}
+
+% Example: Special footer text
+\positionobject{2cm}{25cm}{1}{Special footer note}
+\end{code}
+
+\subsection{Two-Column Layout}
+
+The \textbf{\textbackslash splitcontent} command divides content horizontally:
+
+\begin{code}{latex}
+% Example with custom values
+\splitcontent[0.6][0.05]{
+    This part takes up 60%
+    of total width
+}{
+    This part takes up 35%
+    (5% space between)
+}
+
+% Example with default values (50% / 50%)
+\splitcontent{
+    First column
+}{
+    Second column
+}
+\end{code}
+
+\subsection{Side-by-Side
+Environments}
+
+The \texttt{sidebyside} environment creates two-column
+boxes with consistent styling:
+
+\begin{code}{latex}
+\begin{sidebyside}[options]
+    % Left content
+    \tcblower
+    % Right content
+\end{sidebyside}
+\end{code}
+
+Options are those of \texttt{tcolorbox}.
+
+\begin{code}{latex}
+\begin{sidebyside}[
+    title=Comparison,
+    colback=exampleColor!5,
+    colbacklower=exampleColor!10
+]
+    First version
+    \tcblower
+    Improved version
+\end{sidebyside}
+\end{code}
+
+\subsection{Text and Image
+Combination}
+
+The \textbf{\textbackslash textwithimage} command combines text and image:
+
+\begin{code}{latex}
+% Star (*) reverses image position (right by default)
+
+% Image on right (30% width)
+\textwithimage{0.3}{0.95}{
+    This text describes the adjacent image...
+}{images/figure.png}
+
+% Image on left (40% width)
+\textwithimage*{0.4}{0.9}{
+    Description to the right of the image...
+}{images/schema.png}
+\end{code}
+
+\subsection{QR Codes and Content}
+
+The \textbf{\textbackslash withqrcode} command integrates a QR code with associated
+content:
+
+\begin{code}{latex}
+% Star (*) places QR code on right (left by default)
+
+% QR code on left (2cm default)
+\withqrcode{https://example.com}{
+    Scan for more information
+}
+
+% 3cm QR code on right
+\withqrcode*[3cm]{https://exercises.com}{
+    Access online exercises
+}
+\end{code}
+
+\subsection{Grids and Papers}
+
+\subsubsection{Custom Grids}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash grid}: Small square grid.
+\end{itemize}
+
+\begin{code}{latex}
+\grid[blue]{10cm}{5cm}  % Blue grid 10 x 5 cm
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash customgrid}: Grid with custom spacing.
+\end{itemize}
+
+\begin{code}{latex}
+\customgrid[red][4mm][4mm]{12cm}{8cm}  % Red grid, 4mm mesh
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash frenchgrid}: Seyes-style grid.
+\end{itemize}
+
+\begin{code}{latex}
+\frenchgrid{15cm}{10cm}  % French-style notebook grid
+\end{code}
+
+\subsubsection{Full Pages}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash notebook}: Notebook-style page with horizontal lines and red
+  margin.
+\end{itemize}
+
+\begin{code}{latex}
+\notebook  % Activates lined notebook style
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash nbminorgrid}: Page fully covered with small squares.
+\end{itemize}
+
+\begin{code}{latex}
+\nbminorgrid  % Activates fine grid
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash nbmajorgrid}: Page fully covered with large squares.
+\end{itemize}
+
+\begin{code}{latex}
+\nbmajorgrid  % Activates Seyes grid
+\end{code}
+
+\subsection{Simple Boxes}
+
+The \texttt{neobox} environment provides a quick way to create simple boxes. It comes in two variants: \texttt{neobox} with frame and \texttt{neobox*} without visible frame:
+
+\begin{code}{latex}
+% Standard box
+\begin{neobox}[colframe=blue,colback=blue!5]
+    Text in a box...
+\end{neobox}
+
+% Frameless box with colored background
+\begin{neobox*}[colback=gray!10]
+    Text on gray background...
+\end{neobox*}
+\end{code}
+
+\section{Exercises}
+
+\subsection{Exercises and
+Assessments}
+
+\subsubsection{Exercise Configuration}
+
+The \texttt{exercise} environment accepts the following
+options:
+
+\begin{itemize}
+\item
+  \textbf{points} = \texttt{number}: Points for the
+  exercise.
+\item
+  \textbf{level} = \texttt{number}: Difficulty level
+  (displayed as stars).
+\item
+  \textbf{subtitle} = \texttt{text}: Exercise subtitle
+  or description.
+\item
+  \textbf{icon} = \texttt{icon}: Custom icon (uses Font
+  Awesome library).
+\item
+  \textbf{topic} = \texttt{theme}: Related theme or
+  chapter.
+\item
+  \textbf{subject} = \texttt{subject}: Related subject.
+\item
+  \textbf{ID} = \texttt{identifier}: Unique identifier
+  for referencing.
+\item
+  \textbf{template} = \texttt{style}: Specific display
+  style for this exercise.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{exercise}[
+    points=4,
+    level=2,
+    subtitle=Derivatives,
+    icon=\faPencil,
+    topic=Analysis,
+    subject=Mathematics,
+    ID=der01,
+    template=elegant-box
+]
+    Calculate the derivative of the function $f$ defined on $]0 ; +\infty[$
+    by $f(x)=x^2\ln(x)$.
+\end{exercise}
+
+The \texttt{solution} environment must immediately follow its corresponding \texttt{exercise} environment. Exercise solutions are not displayed by default.
+
+\begin{solution}
+    We use the product rule...
+\end{solution}
+
+% To reference the exercise elsewhere:
+As seen in exercise~\exercisenumber{der01}.
+\end{code}
+
+\subsubsection{Global Options}
+
+\begin{itemize}
+\item
+  \textbf{exerciseicons}: Activates icons for all exercises.
+\item
+  \textbf{answers}: Automatically displays all exercise solutions.
+\item
+  \textbf{shuffle}: Randomizes answer choices in multiple choice
+  questions.
+\item
+  \textbf{sectionthmcounter}: Numbers exercises by section.
+\item
+  \textbf{sharedexcounter}: Shares counter with theorems.
+\end{itemize}
+
+\subsubsection{Exercise Templates}
+
+The class offers numerous predefined styles for exercises:
+
+\begin{itemize}
+\item
+  \textbf{box}: Standard box with border and title.
+\item
+  \textbf{elegant-box}: Box with colored sidebar.
+\item
+  \textbf{shaded-box}: Box with shading and banner title.
+\item
+  \textbf{slanted-box}: Box with slanted banner title.
+\item
+  \textbf{sober-box}: Minimalist box with colored title.
+\item
+  \textbf{classic-box}: Classic box with banner title.
+\item
+  \textbf{classy-box}: Sophisticated box with decorative title.
+\item
+  \textbf{rect-box}: Simple rectangular box.
+\item
+  \textbf{rect-box-outlined}: Rectangular box with outline.
+\item
+  \textbf{num-box}: Compact numbered box.
+\item
+  \textbf{num-box-outlined}: Numbered box with outline.
+\item
+  \textbf{ex-num-box}: Numbered ``Ex.'' box.
+\item
+  \textbf{ex-num-box-outlined}: Numbered ``Ex.'' box with outline.
+\item
+  \textbf{box-hrule}: Box with horizontal rule.
+\item
+  \textbf{box-hrule-out}: Box with horizontal rule and outline.
+\item
+  \textbf{box-hrule-in}: Box with inner horizontal rule.
+\item
+  \textbf{boxed}: Simple box with title.
+\item
+  \textbf{boxed-out}: Box with outline and title.
+\item
+  \textbf{inline}: Inline text with title.
+\item
+  \textbf{section}: Section-style title.
+\item
+  \textbf{subsection}: Subsection-style title.
+\item
+  \textbf{terminal}: Console style with terminal icon.
+\item
+  \textbf{block}: Minimalist style.
+\item
+  \textbf{hrule}: With horizontal rule.
+\end{itemize}
+
+To set a template for the entire document, use the
+\texttt{\textbackslash xsimsetup} command in the preamble:
+
+\begin{code}{latex}
+\xsimsetup{
+    exercise/template = elegant-box,    % exercise template
+    solution/template = sol-box         % solution template
+}
+\end{code}
+
+\subsubsection{Multiple Choice Questions}
+
+\begin{itemize}
+\item
+  \textbf{choices}: For single-answer MCQs.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{exercise}[points=2,ID=mcq01]
+    What is the derivative of $e^x$?
+    \begin{choices}
+        \choice $x e^x$
+        \choice[\correct] $e^x$
+        \choice $e^{x-1}$
+        \choice $\ln(x)$
+    \end{choices}
+\end{exercise}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{checkboxes}: For multiple-answer MCQs.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{exercise}[points=3,ID=mcq02]
+    Which of these numbers are prime?
+    \begin{checkboxes}
+        \checkbox[\correct*] 2
+        \checkbox[\correct*] 3
+        \checkbox 4
+        \checkbox[\correct*] 5
+    \end{checkboxes}
+\end{exercise}
+\end{code}
+
+\section{Math Environments}
+
+\subsection{Theorem Styles}
+
+The following styles are available for all theorem-type environments:
+\textbf{amslikethm} (minimalist style), \textbf{boxedthm},
+\textbf{classicthm}, \textbf{classythm}, \textbf{elegantthm},
+\textbf{shadedthm}, \textbf{slantedthm}, \textbf{soberthm}.
+
+Common options:
+
+\begin{itemize}
+\item
+  \textbf{title} = \texttt{text}: Theorem title.
+\item
+  \textbf{label} = \texttt{name}: Label for
+  referencing.
+\item
+  \textbf{colback} = \texttt{color}: Background color.
+\item
+  \textbf{colframe} = \texttt{color}: Frame color.
+\item
+  \textbf{coltitle} = \texttt{color}: Title color.
+\item
+  \textbf{fonttitle} = \texttt{commands}: Title style.
+\end{itemize}
+
+\subsection{Numbering Options}
+
+\begin{itemize}
+\item
+  \textbf{sectionthmcounter}: Counters relative to each section.
+\item
+  \textbf{sharedthmcounter}: Counter shared between all environments.
+\item
+  \textbf{theoremgroup}: Groups certain theorem environments.
+\item
+  \textbf{thmgroupcounter}: Activates counter for groups.
+\end{itemize}
+
+\subsection{Mathematical
+Environments}
+
+\begin{itemize}
+\item
+  \textbf{theorem}: For theorems.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{theorem}[title=Pythagorean Theorem,label=pyth]
+    In a right triangle, the square of the
+    hypotenuse equals the sum of squares
+    of the other two sides.
+\end{theorem}
+
+% Referencing:
+According to theorem~\ref{thm:pyth}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{lemma}: For lemmas.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{lemma}[title=Preparatory Lemma,label=prep]
+    Lemma content...
+\end{lemma}
+
+% Referencing:
+According to lemma~\ref{lem:prep}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{corollary}: For corollaries.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{corollary}[
+    title=Pythagorean Converse,
+    label=pythrecip
+]
+    If $a^2 + b^2 = c^2$, then the triangle is
+    right-angled at $A$.
+\end{corollary}
+
+% Referencing:
+According to corollary~\ref{cor:pythrecip}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{proposition}: For propositions (\textbf{propo} for
+  referencing).
+\item
+  \textbf{property}: For properties (\textbf{prop} for referencing).
+\item
+  \textbf{definition}: For definitions (\textbf{def} for referencing).
+\item
+  \textbf{method}: For methods (\textbf{meth} for referencing).
+\item
+  \textbf{activity}: For activities (\textbf{act} for referencing).
+\item
+  \textbf{application}: For applications (\textbf{appl} for
+  referencing).
+\item
+  \textbf{remark}: For remarks.
+\item
+  \textbf{remarks}: For a series of remarks.
+\item
+  \textbf{example}: For examples.
+\item
+  \textbf{examples}: For a series of examples.
+\end{itemize}
+
+\section{Listings}
+
+The \texttt{neoschool} class offers two options for
+code handling.
+
+\begin{itemize}
+\item
+  \textbf{listings} (default): Uses the
+  \texttt{listings} package.
+\item
+  \textbf{minted}: Uses the \texttt{minted} package
+  (requires Python and the \texttt{Pygments} library).
+\end{itemize}
+
+\subsection{\texttt{listings} Option}
+
+\subsubsection{Available Code Styles}
+
+\begin{itemize}
+\item
+  \textbf{lststyle} = \texttt{style}: Coloring style.
+
+  \begin{itemize}
+    \item
+    \texttt{colorful}: Complete coloring (default).
+  \item
+    \texttt{minimal}: Minimalist style.
+  \item
+    \texttt{academic}: ``Academic'' style with line
+    numbers.
+  \item
+    \texttt{modern}: ``Modern'' style with colored
+    background.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Custom Code Boxes}
+
+The class defines the \texttt{code} environment with
+the following structure:
+
+\begin{lstlisting}[language=TeX]
+\begin{code}[options]{language}[title][box-style]
+    source code...
+\end{code}
+\end{lstlisting}
+
+Box styles: \textbf{box-minimal}, \textbf{box-fancy},
+\textbf{box-classic}, \textbf{box-elegant}, \textbf{box-diagonal},
+\textbf{box-bevel}, \textbf{box-corner}, \textbf{box-rounded},
+\textbf{box-downhill}, \textbf{box-bottomtitle},
+\textbf{box-bottomtitlef}.
+
+\begin{lstlisting}[language=TeX]
+\begin{code}[numbers=left]{python}[Function Example][box-fancy]
+def hello(name):
+    print(f"Hello, {name}!")
+\end{code}
+\end{lstlisting}
+
+\subsubsection{Preconfigured Languages and
+Styles}
+
+\begin{itemize}
+\item
+  Python
+\item
+  Java
+\item
+  C++
+\item
+  JavaScript
+\item
+  SQL
+\item
+  LaTeX
+\item
+  Bash
+\item
+  Assembly
+\item
+  Lisp
+\item
+  JSON
+\item
+  YAML
+\item
+  TOML
+\item
+  CSV
+\item
+  Markdown
+\end{itemize}
+
+\subsubsection{Additional Commands}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash codeinline}: Inline code.
+\end{itemize}
+
+\begin{code}{latex}
+\codeinline[python]{print("Hello")}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash codeinput}: Code loaded from file.
+\end{itemize}
+
+\begin{code}{latex}
+\codeinput[options]{language}{file.py}[title][box-style]
+\end{code}
+
+\subsection{\texttt{minted} Option}
+
+When the \textbf{minted} option is activated, code environments use
+\texttt{Pygments} for syntax highlighting. The
+\texttt{code} environment is also available with the
+\texttt{minted} option, using the same syntax:
+
+\begin{code}{latex}
+\usemintedstyle{tango}
+\begin{code}[linenos,highlightlines={2,3}]{python}[Function][box-fancy]
+def greet(name):
+    message = f"Hello, {name}!"
+    print(message)
+    return message
+\end{code}
+\end{code}
+
+\section{Notes and Annotations}
+
+\subsection{Margin Notes}
+
+Notes can be placed in the margin with different options:
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash tdnote}: Colored and framed notes in the margin, alternating
+  between left and right.
+\end{itemize}
+
+\begin{code}{latex}
+\tdnote{Important point to remember}
+\tdnote[backgroundcolor=blue!5]{Note with light blue background}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash boxnote}/\textbf{\textbackslash tdmark}: Since the \texttt{todonote}
+  package doesn't allow direct note placement in environments, use an
+  anchor point (\textbf{\textbackslash tdmark}) with the same label as the note content
+  (\textbf{\textbackslash boxnote}).
+\end{itemize}
+
+\begin{code}{latex}
+\boxnote[thm1]{This theorem is important}
+\begin{theorem}
+    \tdmark[thm1]  % Reference point for note (same label)
+    Theorem content...
+\end{theorem}
+\end{code}
+
+Available note options:
+
+\begin{itemize}
+\item
+  \textbf{backgroundcolor} = \texttt{color}: Background
+  color.
+\item
+  \textbf{color} = \texttt{color}: Text color.
+\item
+  \textbf{bordercolor} = \texttt{color}: Border color.
+\item
+  \textbf{width} = \texttt{length}: Note width.
+\item
+  \textbf{linecolor} = \texttt{color}: Reference line
+  color.
+\end{itemize}
+
+\subsection{Admonitions}
+
+Admonition environments highlight important information. Each type has
+its default color and icon.
+
+\begin{itemize}
+\item
+  \textbf{note}: General remarks.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{note}[Important Note][\faInfo]
+    Points to remember...
+\end{note}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{info}: Additional information.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{info}[Further Reading]
+    Additional information...
+\end{info}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{warning}: Warnings.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{warning}[Caution!][\faExclamationTriangle]
+    Critical points to remember...
+\end{warning}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{important}: Essential points.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{important}[Key Point]
+    Fundamental concept...
+\end{important}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{tip}: Tips and tricks.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{tip}[Calculation Tip][\faLightbulb]
+    A faster method...
+\end{tip}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{reminder}: Points to remember.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{reminder}[Memorize]
+    Essential formulas...
+\end{reminder}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{summary}: Summaries.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{summary}[In Brief]
+    Main chapter points...
+\end{summary}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{toolbox}: Toolbox.
+\end{itemize}
+
+\begin{code}{latex}
+\begin{toolbox}[Required Tools]
+  \begin{itemize}
+    \item Calculator
+    \item Ruler
+    \item Compass
+  \end{itemize}
+\end{toolbox}
+\end{code}
+
+All admonitions accept three optional parameters: - An optional title -
+A custom icon - Customization options (colors, borders)
+
+\section{Grading and Correction}
+
+\subsection{Grading Tools}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash gradingstrip}: Grading banner (grade and comments).
+\end{itemize}
+
+\begin{code}{latex}
+\gradingstrip
+
+% Banner with specified total
+\gradingstrip[20]
+\end{code}
+
+The \textbf{totalpoints} option sets the default total points.
+
+\begin{code}{latex}
+\documentclass[totalpoints=20]{neoschool}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash mrk}, \textbf{\textbackslash mrks}: Points in margin.
+\end{itemize}
+
+\begin{code}{latex}
+\mrk[Well done!]{1}     % Right margin with comment
+\mrk*{1}                # Left margin
+
+% Multiple points
+\mrks{3}                % 3 points right margin
+\mrks*[Scale]{3}        % 3 points left margin with text
+\end{code}
+
+\subsection{Answer Areas}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash answerfield}: Answer area with colored background.
+\end{itemize}
+
+\begin{code}{latex}
+\answerfield{3}
+
+% Area 80% width, 5 lines
+\answerfield[0.8\linewidth]{5}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash answerframe}: Framed answer area.
+\end{itemize}
+
+\begin{code}{latex}
+\answerframe{3}
+
+% Frame 80% width, 5 lines
+\answerframe[0.8\linewidth]{5}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash vardots}: Variable-length dotted line.
+\end{itemize}
+
+\begin{code}{latex}
+\vardots
+
+% 5cm dotted line
+\vardots[5cm]
+\end{code}
+
+\subsection{Markers and Symbols}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash cmark}: Check mark symbol (✓)
+\item
+  \textbf{\textbackslash xmark}: Error symbol (✗)
+\item
+  \textbf{\textbackslash unchecked}: Empty checkbox
+\item
+  \textbf{\textbackslash done}: Checked box with ✓
+\item
+  \textbf{\textbackslash wontfix}: Checked box with ✗
+\end{itemize}
+
+\begin{code}{latex}
+\begin{itemize}
+    \unchecked Goal 1 to complete
+    \done      Goal 2 completed
+    \wontfix   Goal 3 abandoned
+\end{itemize}
+\end{code}
+
+\subsection{Skills and Assessment}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash competencies}: Skills assessment table.
+\end{itemize}
+
+\begin{code}{latex}
+\competencies{
+    Calculate derivatives\\
+    Study variations\\
+    Solve equations
+}
+\end{code}
+
+The table automatically displays: - 4 mastery levels with emojis -
+Checkboxes for assessment
+
+\section{Math Commands and Special
+Tools}
+
+\subsection{Math Commands}
+
+\subsubsection{Highlighting and Coloring}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash mhl}: Highlighting math expressions.
+\end{itemize}
+
+\begin{code}{latex}
+$\mhl{x^2}$
+
+% Custom highlighting
+$\mhl[blue!20]{f'(x)}$
+
+% In multi-line equations
+\begin{align*}
+    f(x) &= x^2 + \mhl{2x} + 1 \\
+    f'(x) &= 2x + \mhl{2}
+\end{align*}
+\end{code}
+
+\begin{itemize}
+\item
+  \textbf{\textbackslash mc}: Coloring math expressions.
+\end{itemize}
+
+\begin{code}{latex}
+$\mc{f(x)}$
+
+% Custom color
+$\mc[red]{g(x)}$
+
+% In equation
+\[ \mc{f'(x)} = \lim_{h \to 0} \mc[blue]{\frac{f(x+h)-f(x)}{h}} \]
+\end{code}
+
+\subsubsection{APMEP Support}
+
+When the \textbf{apmep} option is activated, the following commands
+become available:
+
+\begin{itemize}
+\item
+  Vector commands:
+\end{itemize}
+
+\begin{code}{latex}
+\vect{u}         % Vector u with arrow
+\vectt{AB}       % Vector AB with spacing
+\end{code}
+
+\begin{itemize}
+\item
+  Reference frames and coordinates:
+\end{itemize}
+
+\begin{code}{latex}
+\Oij             % Frame (O; i,j)
+\Oijk            % Frame (O; i,j,k)
+\Ouv             % Frame (O; u,v)
+\end{code}
+
+\begin{itemize}
+\item
+  Special commands:
+\end{itemize}
+
+\begin{code}{latex}
+\euro            % Euro symbol
+\cg              % Left bracket
+\cd              % Right bracket
+\pg              % Greater than or equal
+\pp              % Less than or equal
+\barre{x}        % Overlined x
+\ds              % \displaystyle
+\end{code}
+
+\subsection{Special Tools}
+
+\subsubsection{Trees and Graphs}
+
+\begin{itemize}
+\item
+  Trees with \texttt{forest} package:
+\end{itemize}
+
+\begin{code}{latex}
+\begin{neotree}
+A
+    [B
+        [D]
+        [E]
+    ]
+    [C
+        [F]
+        [G]
+    ]
+\end{neotree}
+
+% With edge weights
+\begin{neotree}
+A
+    [B, w=\frac{1}{3}
+        [D]
+        [E]
+    ]
+    [C, w=\frac{2}{3}]
+\end{neotree}
+\end{code}
+
+\begin{itemize}
+\item
+  Graphs (only with \texttt{lualatex} compilation):
+\end{itemize}
+
+\begin{code}{latex}
+\neograph{
+    A -- {B, C, D, F},
+    B -- {C, D, F},
+    C -> ["3"] D,
+    D -- [bend left=10] {E},
+    E -- [bend left=10] {D},
+    E -- [bend left=10] {F},
+    F -- [bend left=10] {E},
+    A -- [loop] A
+}
+\end{code}
+
+\subsubsection{Math Grid}
+
+The \texttt{mathgrid} environment allows arranging
+equations in a grid:
+
+\begin{code}{latex}
+\begin{mathgrid}{3}
+    \neoline
+    \neocol{
+        T &= 7xx+9x\\
+          &= (7+9)x \\
+          &= 16x
+    }
+    \neocol{
+        U &= 8x^{2}-5x^{2}+x^{2}\\
+          &= (8-5+1)x^{2} \\
+          &= 4x^{2}
+    }
+    \neocol{
+        V &= 5a^{2}-6a\\
+          &= a(5a-6)
+    }
+    \neoline
+    \neocol[2]{
+        W &= 5a^{2}-6a+3+7a^{2}+a-6\\
+          &= (5+7)a^{2}+(-6+1)a+(3-6)\\
+          &= 12a^{2}-5a-3
+    }
+    \neocol{
+        A &= 2x + 3x\\
+          &= 5x
+    }
+\end{mathgrid}
+\end{code}
+
+
+\end{document}

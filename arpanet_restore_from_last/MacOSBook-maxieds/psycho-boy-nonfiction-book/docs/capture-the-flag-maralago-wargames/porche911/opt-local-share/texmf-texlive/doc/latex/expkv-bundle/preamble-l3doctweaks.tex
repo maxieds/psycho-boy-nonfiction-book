@@ -1,0 +1,39 @@
+\ExplSyntaxOn
+\cs_new_protected:Npn \__expkvdoc_patchfootnote:% >>=
+  {
+    \cs_set:Npx \footnote
+      {
+        \exp_not:n { \ClassError {expkvdoc} {Footnote~ in~ function} {} }
+        \exp_not:o { \footnote }
+      }
+  }% =<<
+\AddToHook{env/function/begin}{\__expkvdoc_patchfootnote:}
+
+\group_begin:
+\cs_set_protected:Npn \__expkvdoc_tmp:nN #1#2
+  {
+    \__kernel_tl_set:Nx #2 { \tl_to_str:n {#1} }
+    \tl_replace_all:NVn #2 \c_underscore_str { / }
+    \tl_remove_all:NV   #2 \c_backslash_str
+    \tl_put_left:Nn #2 { doc/function// }
+  }
+\cs_if_eq:NNTF \__expkvdoc_tmp:nN \__codedoc_get_hyper_target:nN
+  {
+    \cs_gset:Npn \__codedoc_get_hyper_target:nN #1#2
+      {
+        \__kernel_tl_set:Nx #2 { \tl_to_str:n {#1} }
+        \tl_replace_all:Nxn #2 { \c_underscore_str } { / }
+        \tl_remove_all:Nx   #2 { \c_backslash_str }
+        \tl_put_left:Nx #2 { doc/function/ \g__expkvdoc_module_str / }
+      }
+  }
+  {
+    \ClassWarning{expkvdoc}
+      {
+        Didn't~ patch~ l3doc's~ hyper~ targets.~ You~ might~ get~ duplicate~
+        labels.
+      }
+  }
+\group_end:
+
+\ExplSyntaxOff

@@ -1,0 +1,36 @@
+\AddToHook{env/syntax/begin}{\let\prefixes\prefixline}
+\newcount\prefixes@num
+\newcommand\enfprefix{\textcolor{black}}
+\newcommand\allprefix{\textcolor{gray}}
+\newcommand\notprefix{\textcolor{red!80!black}}
+\@ifdefinable\prefixline
+  {\protected\def\prefixline{\hfill\afterassignment\prefixes@\prefixes@num=}}
+\ExplSyntaxOn
+\newcommand\prefixes@place[1]
+  {%
+    \numexpr
+      \int_mod:nn { \int_div_truncate:nn \prefixes@num {#1} } { 10 }
+    \relax
+  }
+\ExplSyntaxOff
+\newcommand\printprefix[2]
+  {%
+    \ifcase\prefixes@place{#1}\or
+      \enfprefix{#2}\or
+      \allprefix{#2}\or
+      \notprefix{#2}\fi
+  }
+\protected\def\prefixes@
+  {%
+    \ifnum\prefixes@num>10
+      \printprefix{1000}{new}
+      \printprefix {100}{also}
+      \printprefix  {10}{protected}
+      \printprefix   {1}{long}%
+    \else
+      \ifcase\prefixes@num\or
+        \enfprefix{long}\or
+        \allprefix{long}\or
+        \notprefix{long}\fi
+    \fi
+  }

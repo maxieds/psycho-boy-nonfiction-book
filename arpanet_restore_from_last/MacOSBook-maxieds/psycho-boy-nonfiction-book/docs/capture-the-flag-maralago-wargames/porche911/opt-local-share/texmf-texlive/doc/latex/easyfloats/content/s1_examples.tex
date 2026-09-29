@@ -1,0 +1,230 @@
+% !TeX root = ../easyfloats.tex
+
+\section{Examples}
+\label{examples}
+
+Let's start with a few examples.
+Environments, commands and keys defined by this package are links (both in the code and in the text).
+Clicking on them will get you to their explanation in \cref{documentation}.
+
+\Cref{motivation} gives a motivation why this package is useful.
+There is a list of related packages in \cref{used-packages,other-packages}.
+Package names link to the rather short description in that list.
+
+The examples have been tested with \input{../test/generated/latex_version}\unskip.
+
+
+\subsection{Table}
+\label{table}
+Use the \env{tableobject} environment for inserting tables.
+Pass caption and label as keyword arguments.
+You can't mess up the order of caption and label and you get a warning if you forget to specify them.
+You don't need two environments (one for the float, one for the table---`tableobject` can do both).
+\pkg{booktabs} (and \pkg{array}) are loaded automatically (if not disabled, see \cref{package-options}).
+
+The last argument, `cl`, is not an argument of the `tableobject` environment but of the standard \LaTeX\ `tabular` environment which is started by the `tableobject` environment because it is specified with `env`.
+It specifies the columns of the table: The `l` stands for one left aligned column and the `c` for one centered column.
+An `r` would stand for a right aligned column and a \xc.p{<width>}. for a column which breaks the cell contents to a specified width.
+The \pkg{siunitx} package defines `S` for a column which aligns numbers and in the `tabularx` environment defined by the \pkg{tabularx} package `X` is available for a `p` column which automatically takes as much space as there is available.
+You can use the `\newcolumntype` command (defined by the \pkg{array} package) to define your own column types, e.g.\ `\newcolumntype{M}{>{$}c<{$}}` to define a column type `M` for centered math content.
+See the \pkg{array} package documentation~\autocite[chapter~1]{array} for more column specification options.
+
+`&` is the column separator and `\\` specifies the end of a row.
+
+The table is formatted with `\toprule`, `\midrule` and `\bottomrule` as explained in the \pkg{booktabs} documentation~\autocite[chapter~2]{booktabs}.
+
+\inputexamplecode{../test/exp-table}
+
+You can reduce typing effort even further by using the `table head` key, see \cref{longtable}.
+
+If you are not familiar with how to reference a label, see \cref{vref}.
+
+
+\subsection{Graphic}
+\label{graphic}
+Use the \cmd{\includegraphicobject} command to insert a graphic.
+It is a wrapper around \pkg{graphicx}' `\includegraphics` command taking the same arguments.
+No need for a surrounding `figure` environment.
+I have extended the allowed optional keyword argument to also accept caption, label and more, see \cref{includegraphicobject-command}.
+`details` are appended to the caption below the figure but not in the list of figures.
+Select with the \pkgoptn{graphicx} or \pkgoptn{graphbox} package options whether you want to use the commonly used \pkg{graphicx} package or it's extension \pkg{graphbox}.
+
+\inputexamplecode{../test/exp-graphic}
+
+The graphic automatically gets the label \formatlabel{fig:graphics/ctan_lion}, based on the file name and the specified prefix.
+You can override the automatically generated label by passing the key `label` to the optional argument.
+If you omit \key{caption} the file name \formatcaption{graphics/ctan_lion} is used.
+See `auto label`, `auto caption`, `auto label strip path`, `auto caption strip path` and `auto label prefix`.
+
+If you are not familiar with how to reference a label, see \cref{vref}.
+
+
+\subsection{Subfigures}
+\label{exp:subfigures}
+The following example shows a figure consisting of two graphics displayed side by side, each having their own caption and label.
+The graphics have a distance of one quad, i.e. 1\,em, and fill the entire width of the line.
+(em is a unit of distance relative to the font.
+If you are unfamiliar with the units supported by \TeX\ you can read up on them in \mycite[pages 57 and~60]{texbook} or \mycite[chapters 8.2.1 and~4.3.1]{texbytopic}.
+
+I am loading the \pkg{calc} package in order to use an expression as `subobject linewidth`.
+(Alternatively you could use the \eTeX\ primitive `\dimexpr`.)
+As I want to put two graphics next to each other, each of them should be half of the available line width minus half of the distance between them wide.
+Additionally I need to subtract a tiny bit more in order to compensate for rounding errors in the division which would cause an uninteded line break with the initial setting `align = \centering`.
+(The rounding errors would not need to be compensated if you set the value of `align` to an empty string).
+
+Pay attention to *not* insert an empty line between the subobjects, otherwise they will be placed below each other instead of side by side.
+If you want them to be placed below each other you can use the `ver` option.
+
+By default subobjects do not show up in the list of figures.
+You can change that with `\captionsetup[sub]{list=true}`.
+`\captionsetup` is explained in the \pkg{caption} package documentation~\autocite{caption}.
+
+\inputexamplecode{../test/exp-subgraphic}
+
+Each of the subfigures gets it's own label, generated based on the given prefix and the file name: \formatlabel{fig:ctan_lion} and \formatlabel{fig:tex_engines}.
+You can override the automatically generated labels with the \key[/subobject]{label} key if needed.
+How to reference the labels is shown in \cref{vref}.
+
+If you want to use the full width for graphics in subobjects but less than the full width for graphics in main objects you can achieve that with
+%If you want a different width for `\includegraphicsubobject` and `\includegraphicobject` you could achieve that with
+\begin{examplecode}
+\objectset[figure]{graphic width = .8\linewidth}
+\AtBeginSubobject{\AtBeginGraphicObject{%
+	\objectset{graphic width = \linewidth}%
+}}
+\end{examplecode}
+
+
+\subsection{Other subobjects}
+\label{subobjects-2}
+
+Use the \env{subobject} environment to combine two (or more) subobjects to one big object.
+The `contains subobjects` option causes the `env` option to be applied to the subobjects instead of the containing object.
+I am decreasing the `subobject linewidth` because the tables fill only a small part of the width
+so the distance between them would be too big if each was centered on `.5\linewidth`.
+(If you don't want to set the `subobject linewidth` to an explicit value take a look at the `subcaptionbox` option and the example provided there.
+ Setting `subobject sep` to the desired distance and aligning the subojects with `subpage align=\raggedleft` and `subpage align=\raggedright` does not work well because `\raggedleft` and `\raggedright` do not affect the caption. The alignment of the caption could be changed with `\captionsetup{justification=raggedleft,singlelinecheck=false}` but then the caption would not be centered relative to the tabular.)
+
+Pay attention to *not* insert an empty line between the subobjects, otherwise they will be placed below each other instead of side by side.
+If you want them to be placed below each other you can use the `ver` option.
+
+By default subobjects do not show up in the list of tables.
+You can change that with `\captionsetup[sub]{list=true}`.
+`\captionsetup` is explained in the \pkg{caption} package documentation~\autocite{caption}.
+
+\inputexamplecode{../test/exp-subobject}
+
+
+\subsection{Longtable}
+\label{longtable}
+If you are undecided whether to use floating `tabular`s or \env{longtable}s which can break across pages you can use the following approach.
+Changing between them is as easy as changing `env=longtable` to `env=tabular` once.
+The table head and foot are set by the key `table head` and are by default formatted with the \pkg{booktabs} package.
+(If you don't like this you can change the definition of `table head` with `table head style`.)
+The column specification cannot be given as a separate argument (like in the example above) but must be set with the `arg` key
+because otherwise the column specification would be after the table head.
+
+\inputexamplecode{../test/exp-longtable}
+
+
+\subsection{Local definitions in tables}
+\label{local-definitions-in-tables}
+
+If you want to define a command locally for one table you cannot put it's definition in the first cell because each cell is a separate group
+(meaning that the definition will be forgotten at the end of the cell).
+Instead I provide the `exec` key whose value is executed inside of the object but before `env`.
+If you want to tinker around with catcodes keep in mind that arguments are always read entirely before expansion and execution.
+The \eTeX\ primitive `\scantokens` can be useful to define active characters.
+If you are unfamiliar with how \TeX\ processes a file you can read up on it in \mycite[section~1]{texbytopic}.
+
+\inputexamplecode{../test/exp-exec}
+
+
+\subsection{New object style~\slash\ `tikzobject`}
+\label{new-object-style-tikzobject}
+
+You can easily define new object environments.
+For more information see \cref{new-object-styles-and-types}.
+
+\inputexamplecode{../test/exp-tikzobject}
+
+If you are interested in three dimensional drawing see also the \TikZ\ library \tikzlibrary{perspective} \autocite[section~63 Three Point Perspective Drawing Library]{tikz}.
+
+
+\subsection{New float type `diagram`}
+\label{exp:new-object-type}
+
+I am using `\AtEndPreamble` defined by the \pkg{etoolbox} package to defer loading of \pkg{cleveref} after \pkg{hyperref}.
+For more information about \pkg{cleveref} and \pkg{varioref} see \cref{vref}.
+
+I am defining `\listofdiagrams` analogous to `\listoffigures` and `\listoftables` with the help of the `\listof` command defined by the \pkg{float} package (which is loaded automatically by \pkg{easyfloats}).
+
+For more information see \cref{new-object-styles-and-types}.
+
+\inputexamplecode{../test/exp-new-object-style}
+
+
+\subsection{Split object}
+\label{split-object-example}
+
+If a float gets too big you can split it up with the `\splitobject` command so that the object can be broken across a page break.
+I am using `\DeclareCaptionLabelFormat` and `\captionsetup` to add the prefix \enquote{Continued} to the caption of the continuation as shown in the package \pkg{caption} documentation~\autocite[section~3.3
+Continued floats]{caption}.
+
+\inputexamplecode{../test/exp-splitobject}
+
+
+\subsection{Custom options}
+\label{custom-options}
+This package uses the \pkg{pgfkeys} package to define the options which can be passed to the environments and commands defined by this package.
+Therefore you can use the usual pgfkeys handlers to add custom options.
+The following example defines a new key `center subcaptions` which centers the captions of all subobjects.
+For more information see \cref{options} and the \mycite[Utilities/Key Management]{tikz}.
+
+\inputexamplecode{../test/exp-custom-option}
+
+
+\subsection{Nonfloating objects}
+\label{nonfloating-objects}
+If your professor absolutely won't allow floating objects you can easily disable them globally
+(for all objects based on the \env{object} environment defined by this package which is internally used by \env{tableobject} and \cmd{\includegraphicobject}).
+
+\begin{examplecode}
+\objectset{placement=H}
+\end{examplecode}
+
+
+\subsection{How to reference objects}
+\label{vref}
+When you insert floating objects you probably want to reference them in the text.
+Although this package does not change anything about referencing I have added an example for the sake of completeness.
+
+The standard \LaTeX\ commands are `\ref{<label>}` (to insert the number of a figure/table/whatever) and `\pageref{<label>}` (to insert the page number).
+The \pkg{hyperref} package automatically turns them into links.
+The \pkg{varioref} package defines new commands `\vref{<label>}` and `\Vref{<label>}` which automatically add a reference to the page if the label is on a different page.
+The \pkg{cleveref} package redefines `\vref{<label>}` and `\Vref{<label>}` to automatically insert the type of object in front of the reference so that you don't need to write out \enquote{figure\string~}.
+
+`\Vref{<label>}` is to be used at the beginning of the sentence and `\vref{<label>}` is to be used inside of a sentence.
+The distinction is important for capitalization and whether to use an abbreviation.
+You can disable abbreviations by loading the \pkg{cleveref} package with the `noabbrev` option.
+
+Note that \pkg{cleveref} must be loaded last, even after \pkg{hyperref} which should usually be loaded last.
+
+\inputexamplecode{../test/exp-vref}
+
+Warning: Using \pkg{varioref} can lead to not converging behavior.
+For example: You use `\vref{sec:foo}` in section~1 to reference `\label{sec:foo}` at the beginning of section~2.
+In the first run it prints \enquote{??} as reference because it does not know the referenced object yet. The reference is on page~1 and section~2 begins at the end of page~2.
+In the second run it therefore prints \enquote{section~2 on the following page}. Section~2 moves to the beginning of page~3 because the reference text is now longer.
+In the third run it therefore prints \enquote{section~2 on page~3}. Section~2 moves back to page~2 because the reference text is now shorter.
+In the fourth run it therefore prints \enquote{section~2 on the following page} again. And section~2 moves to the beginning of page~3 again.
+Every time you compile the document the beginning of section~2 will be somewhere else and the reference will never be correct.
+This may cause other references (e.g. `\pageref{LastPage}` (defined by the \pkg{lastpage} package) to jump as well.
+The same can happen when referencing an earlier label.
+
+You don't need to worry about this until the very end because this behavior may get resolved while inserting, deleting or rewriting contents or formatting the document.
+But if this still happens when you have finished everything else you can solve this by inserting a `\clearpage` or replacing the `\vref` with a `\fullref`.
+`\fullref{<label>}` is defined by the \pkg{varioref} package and is by default equivalent to `\cref{<label>} on \cpageref{<label>}` (if \pkg{cleveref} is loaded---if not it's default is equivalent to `\ref{<label>} on page~\pageref{<label>}`).
+Using `\clearpage` may be preferable in order to keep the referencing manner consistent.
+
+See also the \pkg{varioref} documentation, section~7 \sectionname{A few warnings}.

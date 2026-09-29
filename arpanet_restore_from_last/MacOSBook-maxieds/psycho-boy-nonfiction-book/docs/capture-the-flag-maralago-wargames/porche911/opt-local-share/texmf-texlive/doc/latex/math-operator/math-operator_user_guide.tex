@@ -1,0 +1,400 @@
+%%
+%% This is file `math-operator_user_guide.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% math-operator_code.dtx  (with options: `user')
+%% 
+%% This file is from version 1.0 of the free and open-source
+%% LaTeX package "math-operator," released February 2025.
+%% 
+%% Copyright 2025 Conrad Kosowsky
+%% 
+%% This file may be used, distributed, and modified under the
+%% terms of the LaTeX Public Project License, version 1.3c or
+%% any later version. The most recent version of this license
+%% is available online at
+%% 
+%%           https://www.latex-project.org/lppl/
+%% 
+%% This work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this software may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% Happy TeXing!
+%% 
+\documentclass[12pt,twoside]{article}
+\makeatletter
+\usepackage[margin=72.27pt]{geometry}
+\usepackage[factor=700,stretch=14,shrink=14,step=1]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist{topsep=\smallskipamount,itemsep=\z@,
+  parsep=0pt,partopsep=0pt}
+\usepackage[colorlinks=true,allcolors=blue,implicit=false]{hyperref}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage{shortvrb}
+\MakeShortVerb{|}
+\def\meta#1{$\langle${\rmfamily\itshape #1}$\rangle$}
+
+\c@topnumber=1
+\c@bottomnumber=1
+
+\def\showop#1#2#3{\noindent
+  \hbox to 1.625in{\texttt{\string#1}\hfil}\hbox to 1.625in{#2\hfil}\hbox to 3.25in{#3\hfil}%
+  \par}
+\topsep=\smallskipamount
+
+\begin{document}
+
+\def\documentname{User Guide}
+\newdimen\MacroIndent
+\input math-operator_heading.tex
+\def\section#1#2{\@@section*{#1}\vskip-\medskipamount#2\par\bigskip}
+
+\noindent \LaTeX\ users will no doubt be familiar with the control sequences that produce special functions and operators such as |\sin|, |\cos|, or |\sup|. However, the \LaTeX\ kernel defines only about 30 such commands, and many less common but still widely used special functions remain undefined as a result. The \textsf{math-operator} package addresses this situation by defining control sequences for some hundred and fifty special functions and operators, divided into nine groups, and the package also provides an interface to define even more. The first three pages of this user guide describe how to use the package, and the remainder of the document lists the control sequences in each group. For documentation of the package code, please see |math-operator_code.pdf|, which is included with the \textsf{math-operator} installation and is available on \textsc{ctan}. I encourage users who are interested in this package to also consult the \textsf{amsopn} and \textsf{moremath} packages as they may be more useful for you.\footnote{\LaTeX3 Project and American Mathematical Society, ``amsopn---Typeset mathematical operator names,'' \href{https://ctan.org/pkg/amsopn}{\texttt{https://ctan.org/pkg/amsopn}}; Marcel Ilg, ``moremath---Additional commands for typesetting maths,'' \href{https://ctan.org/pkg/moremath}{\texttt{https://ctan.org/pkg/moremath}}.} Users who are looking specifically for operators in quantum mechanics should consult the \textsf{linop} and \textsf{phfqit} packages.\footnote{Johannes Weytjens, ``linop---Typeset linear operators as they appear in quantum theory or linear algebra,'' \href{https://ctan.org/pkg/linop}{\texttt{https://ctan.org/pkg/linop}}; Philippe Faist, ``phfqit---Macros for typesetting Quantum Information Theory,'' \href{https://ctan.org/pkg/phfqit}{\texttt{https://ctan.org/pkg/phfqit}}.}
+
+Users can load \textsf{math-operator} with the standard |\usepackage| syntax, and for each operator group, the package defines either all or no control sequences from that group during loading. Each operator group corresponds to two optional package arguments---one argument means define the control sequences of that group, and the other argument means avoid doing so. Table~1 lists the nine operator groups and their corresponding arguments. For every group, the package argument to define control sequences is a shortened version of the group name, and the package argument to avoid doing so is the same keyword prefaced by |no-|. By default, \textsf{math-operator} defines all control sequences that appear later in this document.
+
+\begin{figure}[tb]
+\centerline{\bfseries\strut Table 1: Optional Arguments for \textsf{math-operator}}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lll}\toprule
+Group & To define commands (default) & To avoid defining commands\\\midrule
+Blackboard bold & |blackboard| & |no-blackboard|\\
+Category theory & |category| & |no-category|\\
+Jacobi elliptic functions & |jacobi| & |no-jacobi|\\
+Linear algebra & |linear| & |no-linear|\\
+The command \vrb\overbar & |overbar| & |no-overbar|\\
+Probability distributions & |probability| & |no-probability|\\
+Special functions & |special| & |no-special|\\
+Standard math operators & |standard| & |no-standard|\\
+Trigonometric functions & |trigonometry| & |no-trigonometry|\\\bottomrule
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[t]
+\centerline{\bfseries\strut Table 2: Commands to Define New Operators}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lll}\toprule
+& Medium weight & Bold weight\\\midrule
+Treated as \vrb\mathord & |\DeclareMathText| & |\DeclareBoldMathText|\\
+Treated as \vrb\mathop & |\DeclareMathOperator| & |\DeclareBoldMathOperator|\\\bottomrule
+\end{tabular*}
+\end{figure}
+
+Users who want to create their own operators or redefine the commands in this package should use one of the four control sequences in Table~2. The entries in Table~2 should appear only in the document preamble, and their syntax is identical and looks like
+\begin{trivlist}
+\item\ttfamily\hskip2em |\DeclareMathOperator|\meta{optional |*|}|{|%
+  \meta{control sequence}|}{|\meta{operator text}|}|
+\end{trivlist}
+When you use one of these macros, \textsf{math-operator} defines the \meta{control sequence} to produce \meta{operator text} in math mode. The optional asterisk controls the placement of superscripts and subscripts. Without an asterisk (the default version of the command), any superscripts and subscripts will render normally, but with an asterisk, they will appear above and below the operator. For example, to make a control sequence |\erf| for the error function, the |sty| file for \textsf{math-operator} contains
+\begin{trivlist}
+\item \ttfamily \hskip 2em |\DeclareMathOperator{\erf}{erf}|
+\end{trivlist}
+The syntax and implementation of these macros is very similar to the \textsf{amsopn} package.
+
+The entries of Table~2 differ in the appearance of the resulting operator. The commands in the first column produce operators with medium text, and the commands in the second column produce operators with bold text. The difference between the rows is more subtle and boils down to the automatic spacing before and after the operator.\footnote{\TeX's eight classes of math subformulas are beyond the scope of this user guide, but in summary, the horizontal position of different characters in an equation depends on their math classes. See Donald Knuth, \textit{The TEXbook} (Addison Wesley, 1986), 170; David Salomon, \textit{The Advanced TEXbook} (Springer, 1995), 256–258.} The macros from the first row instruct \TeX\ to treat the operator like an ordinary variable, so they are most appropriate for sets and categories. The macros from the second row instruct \TeX\ to horizontally position the operator like a summation or integral sign, and they are appropriate for functions and probability distributions. But if you are not overly fastidious, for most uses of this package other than category theory, you will probably be fine to just use |\DeclareMathOperator|.
+
+The macros in Table~2 will happily redefine any operator commands, but they will not overwrite other control sequences unless you specifically tell them to do so. The count variable |\operatordefmode| controls the package behavior in this regard as follows:
+\begin{itemize}
+\item Negative: redefine the control sequence
+\item 0: silently ignore (message written in the |log| file)
+\item 1: issue a warning and do not redefine
+\item 2 or greater: raise an error
+\end{itemize}
+By default, \textsf{math-operator} sets |\operatordefmode| to 1, so you will see a warning on the terminal or console if you try to convert a control sequence that is already defined into a math operator. However, if you really want to redefine a control sequence to be a math operator, you can say
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\operatordefmode=-1|
+\end{trivlist}
+before calling a command from Table~2.
+
+One operator group warrants additional explanation. The package argument |overbar| corresponds to the single control sequence |\overbar|, which adds a horizontal line above a math subformula. The line will be wider than |\bar| but narrower than |\overline|, and the syntax is
+\begin{trivlist}
+\item\hskip2em\ttfamily |\overbar|\meta{optional $*$}|[|\meta{optional decimal}|]{|\meta{math}|}|
+\end{trivlist}
+The \meta{decimal} should be between 0 and 1, and it controls the width of the overline. Specifically, |\overbar| typesets \meta{math}, creates a horizontal line that is \meta{decimal} times the width of the math subformula, and places the line above the typeset subformula. By default, \meta{decimal} is 0.8. With an asterisk, |\overbar| positions the overline halfway over the subformula. For example, the code
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\overbar*[0.9]{xyz}|
+\end{trivlist}
+will put an overline above $xyz$ that is 90\% the length of $xyz$ and position it exactly halfway between the start of the $x$ and the end of the $z$.
+
+When |\overbar| does not have an asterisk (the default version of the command), the count variable |\operatorbaroffset| controls the horizontal placement of the line. As is standard in \TeX, this variable should take values between 0 and 1000, and \textsf{math-operator} divides |\operatorbaroffset| by 1000 to form a fraction. It then places the overline that fraction of the way across the top of the subformula. The default value is 800. For example, saying
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\operatorbaroffset=0|
+\end{trivlist}
+will make all following |\overbar| lines appear completely on the left side of the subformula, and an asterisk is equivalent to setting |\operatorbaroffset| to 500.
+
+Finally, the package defines two other user-level commands. Because it may redefine |\P|, \textsf{math-operator} always defines |\pilcrow| to typeset the \P\ symbol in text and math modes. The macro |\operatorhyphen| will typeset a hyphen when used in the definition of an operator control sequence or in a local font-change command for math such as |\mathrm| or |\mathbf|. Using |\operatorhyphen| in any other situation will result in an error.
+
+\bigskip
+
+\centerline{***}
+
+\vskip-\bigskipamount
+\vskip-\medskipamount
+\vskip\z@
+
+\section{Blackboard Bold}{Note: to use the blackboard-bold commands listed here, you must load a package that defines \vrb\mathbb\space such as \textsf{amssymb} or \textsf{mathfont}, and that command should provide access to blackboard-bold characters. If you do not do so before using these control sequences, you'll get an error.}
+
+\showop\N{$\mathbb N$}{Natural numbers}
+\showop\Z{$\mathbb Z$}{Integers}
+\showop\Q{$\mathbb Q$}{Rational numbers}
+\showop\R{$\mathbb R$}{Real numbers}
+\showop\C{$\mathbb C$}{Complex numbers}
+\showop\H{$\mathbb H$}{Quaternions (or half-plane)\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\H\ will still behave normally. If you want to change the \vrb\H\ operator somehow, you should redefine \vrb\mathH, not \vrb\H.}
+\showop\O{$\mathbb O$}{Octonions\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\O\ will still behave normally. If you want to change the \vrb\O\ operator somehow, you should redefine \vrb\mathO, not \vrb\O.}
+\showop\P{$\mathbb P$}{Probability}
+\showop\E{$\mathbb E$}{Expectation}
+
+\section{Categories}{I am not a category theorist, and serious category theorists who use this package will undoubtedly want to define more categories in their own documents using \vrb\DeclareBoldMathText. If I missed any common categories that should be on this list, I am very open to expanding it.}
+
+\showop{\Ab}{\textbf{Ab}}{Category of abelian groups}
+\showop{\Alg}{\textbf{Alg}}{Category of algebras}
+\showop{\Cat}{\textbf{Cat}}{Category of small categories}
+\showop{\CRing}{\textbf{CRing}}{Category of commutative rings}
+\showop{\Field}{\textbf{Field}}{Category of fields}
+\showop{\FinGrp}{\textbf{FinGrp}}{Category of finite groups}
+\showop{\FinVect}{\textbf{FinVect}}{Category of finite-dimensional vector spaces}
+\showop{\Grp}{\textbf{Grp}}{Category of groups}
+\showop{\Haus}{\textbf{Haus}}{Category of Hausdorff spaces}
+\showop{\Man}{\textbf{Man}}{Category of manifolds}
+\showop{\Met}{\textbf{Met}}{Category of metric spaces}
+\showop{\Mod}{\textbf{Mod}}{Category of modules}
+\showop{\Mon}{\textbf{Mon}}{Category of monoids}
+\showop{\Ord}{\textbf{Ord}}{Category of preordered sets}
+\showop{\Ring}{\textbf{Ring}}{Category of rings}
+\showop{\Set}{\textbf{Set}}{Category of sets}
+\showop{\Top}{\textbf{Top}}{Category of topological spaces}
+\showop{\Vect}{\textbf{Vect}}{Category of vector spaces}
+\showop{\cocone}{cocone}{Cocone}
+\showop{\colim}{colim}{Colimit}
+\showop{\cone}{cone}{Cone}
+\showop{\op}{$^{\operator@font op}$}{Opposite category}
+
+\vfil
+
+\section{Jacobi Elliptic Functions}{Pretty straightforward. If you load \textsf{math-operator} with |jacobi|, you won't be able to use \vrb\sc\ to change to a small-caps font. (But you shouldn't use \vrb\sc\ anyway because it's deprecated.)}
+
+\showop{\cd}{cd}{}
+\showop{\cn}{cn}{}
+\showop{\cs}{cs}{}
+\showop{\dc}{dc}{}
+\showop{\dn}{dn}{}
+\showop{\ds}{ds}{}
+\showop{\nc}{nc}{}
+\showop{\nd}{nd}{}
+\showop{\ns}{ns}{}
+\showop{\sc}{sc}{}
+\showop{\sd}{sd}{}
+\showop{\sn}{sn}{}
+
+\section{Linear Algebra}{Some matrix groups and operations.}
+
+\showop{\adj}{adj}{Adjugate matrix}
+\showop{\coker}{coker}{Cokernel}
+\showop{\GL}{GL}{General linear group}
+\showop{\nullity}{nullity}{Nullity}
+\showop{\Orthogonal}{O}{Orthogonal group}
+\showop{\proj}{proj}{Projection (onto a vector)}
+\showop{\rank}{rank}{Rank}
+\showop{\SL}{SL}{Special linear group}
+\showop{\SO}{SO}{Special orthogonal group}
+\showop{\SU}{SU}{Special unitary group}
+\showop{\Sp}{Sp}{Symplectic group}
+\showop{\spanop}{span}{Span}
+\showop{\tr}{tr}{Trace}
+\showop{\T}{$^{\operator@font T}$}{Transpose}
+\showop{\Unitary}{U}{Unitary group}
+
+\section{Overlining}{Loading \textsf{math-operator} with the |overbar| option tells the package to define \vrb\overbar. Below are two examples of this macro with \vrb\bar\space and \vrb\overline\space for comparison.}
+
+{\columnsep\z@
+\multicolsep\z@
+\begin{multicols}{2}
+\tabcolsep\z@
+
+\setbox\@tempboxa\hbox{%
+  \setbox\@tempboxa\hbox{$a$}%
+  \@tempdima\wd\@tempboxa
+  \@tempdimb\ht\@tempboxa
+  \rlap{\box\@tempboxa}%
+  \hskip 0.16\@tempdima
+  $\overline{\vrule height \@tempdimb width \z@ depth \z@
+    \hskip 0.8\@tempdima}\m@th$}
+
+\noindent\begin{tabular}{p{0.5\columnwidth}l}
+|\bar a| & $\bar a$\\
+|\overbar a| & \box\@tempboxa\\
+|\overline a| & $\overline a$
+\end{tabular}
+
+\columnbreak
+
+\setbox\@tempboxa\hbox{%
+  \setbox\@tempboxa\hbox{$X$}%
+  \@tempdima\wd\@tempboxa
+  \@tempdimb\ht\@tempboxa
+  \rlap{\box\@tempboxa}%
+  \hskip 0.16\@tempdima
+  $\overline{\vrule height \@tempdimb width \z@ depth \z@
+    \hskip 0.8\@tempdima}\m@th$}
+
+\noindent\begin{tabular}{p{0.5\columnwidth}l}
+|\bar X| & $\bar X$\\
+|\overbar X| & \box\@tempboxa\\
+|\overline X| & $\overline X$
+\end{tabular}
+
+\end{multicols}\par}
+
+\section{Probability Distributions}{A selection of the most common probability distributions. For the normal distribution, if you type \vrb\Normal\ without the asterisk, you will see $\mathcal N$, and if you include the asterisk after \vrb\Normal, then \textsf{math-operator} will write out ``Normal.''}
+
+\showop{\Bernoulli}{Bernoulli}{}
+\showop{\Betaop}{Beta}{}
+\showop{\Binomial}{Binomial}{}
+\showop{\Boltzmann}{Boltzmann}{}
+\showop{\Burr}{Burr}{}
+\showop{\Categorical}{Categorical}{}
+\showop{\Cauchy}{Cauchy}{}
+\showop{\ChiSq}{$\chi^2$}{Chi-squared}
+\showop{\Dagum}{Dagum}{}
+\showop{\Exponential}{Exponential}{}
+\showop{\Erlang}{Erlang}{}
+\showop{\Gammaop}{Gamma}{}
+\showop{\Gompertz}{Gompertz}{}
+\showop{\InvChiSq}{Inv-$\chi^2$}{Inverse chi-squared}
+\showop{\InvGamma}{Inv-Gamma}{Inverse gamma}
+\showop{\Kolmogorov}{Kolmogorov}{}
+\showop{\LogLogistic}{Log-Logistic}{}
+\showop{\LogNormal}{Log-Normal}{}
+\showop{\Logistic}{Logistic}{}
+\showop{\Lomax}{Lomax}{}
+\showop{\MaxwellBoltzmann}{Maxwell-Boltzmann}{}
+\showop{\Multinomial}{Multinomial}{}
+\showop{\NegBinomial}{Neg-Binomial}{Negative binomial}
+\showop{\Normal\meta{optional $*$}}{$\mathcal N$ or Normal}{}
+\showop{\Pareto}{Pareto}{}
+\showop{\Poisson}{Poisson}{}
+\showop{\Weibull}{Weibull}{}
+\showop{\Zipf}{Zipf}{}
+
+\section{Special Functions}{Common special functions from applied math.}
+
+\showop{\Ai}{Ai}{Airy function of the first kind}
+\showop{\Bi}{Bi}{Airy function of the second kind}
+\showop{\Ci}{Ci}{Cosine integral function}
+\showop{\ci}{ci}{Cosine integral function (variant)}
+\showop{\Chi}{Chi}{Hyperbolic cosine integral function}
+\showop{\Ei}{Ei}{Exponential integral function}
+\showop{\erf}{erf}{Error function}
+\showop{\erfinv}{erf$^{-1}$}{Inverse error function}
+\showop{\erfc}{erfc}{Complementary error function}
+\showop{\erfcinv}{erfc$^{-1}$}{Inverse complementary error function}
+\showop{\Li}{Li}{Polylogarithm function}
+\showop{\li}{li}{Logarithmic integral function}
+\showop{\Log}{Log}{Logarithm (principal value)}
+\showop{\sgn}{sgn}{Sign function}
+\showop{\Si}{Si}{Sine integral function}
+\showop{\si}{si}{Sine integral function (variant)}
+\showop{\Shi}{Shi}{Hyperbolic sine integral function}
+
+\section{Standard Operators}{Common mathematical operations. More pure mathy than the special functions.}
+
+\showop{\argmax}{arg$\,$max}{Arguments of the maxima}
+\showop{\argmin}{arg$\,$min}{Arguments of the minima}
+\showop{\Aut}{Aut}{Automorphism group}
+\showop{\c}{$^{\begingroup\operator@font c\endgroup}$}{Complement\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\c\ will still behave normally. If you want to change the \vrb\c\ operator somehow, you should redefine \vrb\mathc, not \vrb\c.}
+\showop{\cf}{cf}{Cofinality}
+\showop{\cl}{cl}{Closure}
+\showop{\conv}{conv}{Convex hull}
+\showop{\corr}{corr}{Correlation}
+\showop{\cov}{cov}{Covariance}
+\showop{\curl}{curl}{Curl}
+\showop{\divop}{div}{Divergence}
+\showop{\grad}{grad}{Gradient}
+\showop{\Hom}{Hom}{Collection of morphisms}
+\showop{\id}{id}{Identity}
+\showop{\Im}{Im}{Imaginary part}
+\showop{\varIm}{$\Im$}{Imaginary part\footnotemark}\footnotetext{In the \LaTeX\ kernel, \texttt{\string\Im} produces $\Im$, but I decided to change that since Im is more standard than $\Im$.}
+\showop{\img}{img}{Image}
+\showop{\interior}{int}{Interior}
+\showop{\lcm}{lcm}{Least common multiple}
+\showop{\Proj}{Proj}{Projective spectrum}
+\showop{\Re}{Re}{Real part}
+\showop{\varRe}{$\Re$}{Real part\footnotemark}\footnotetext{In the \LaTeX\ kernel, \texttt{\string\Re} produces $\Re$, but I decided to change that since Re is more standard than $\Re$.}
+\showop{\Res}{Res}{Residue}
+\showop{\Spec}{Spec}{Spectrum}
+\showop{\supp}{supp}{Support}
+\showop{\Var}{Var}{Variance}
+
+\section{Trigonometry}{All inverse, hyperbolic, and inverse hyperbolic trigonometric functions that are not in the \LaTeX\ kernel.}
+
+\showop{\csch}{csch}{Hyperbolic cosecant}
+\showop{\sech}{sech}{Hyperbolic secant}
+\showop{\arccsc}{arccsc}{Inverse cosecant}
+\showop{\arcsec}{arcsec}{Inverse secant}
+\showop{\arccot}{arccot}{Inverse cotangent}
+\showop{\arcsinh}{arcsinh}{Inverse hyperbolic sine}
+\showop{\arccosh}{arccosh}{Inverse hyperbolic cosine}
+\showop{\arctanh}{arctanh}{Inverse hyperbolic tangent}
+\showop{\arccsch}{arccsch}{Inverse hyperbolic cosecant}
+\showop{\arcsech}{arcsech}{Invesse hyperbolic secant}
+\showop{\arccoth}{arccoth}{Inverse hyperbolic tangent}
+\showop{\arsinh}{arsinh}{Inverse hyperbolic sine}
+\showop{\arcosh}{arcosh}{Inverse hyperbolic cosine}
+\showop{\artanh}{artanh}{Inverse hyperbolic tangent}
+\showop{\arcsch}{arcsch}{Inverse hyperbolic cosecant}
+\showop{\arsech}{arsech}{Inverse hyperbolic secant}
+\showop{\arcoth}{arcoth}{Inverse hyperbolic cotangent}
+\showop{\sininv}{sin$^{-1}$}{Inverse sine}
+\showop{\cosinv}{cos$^{-1}$}{Inverse cosine}
+\showop{\taninv}{tan$^{-1}$}{Inverse tangent}
+\showop{\cscinv}{csc$^{-1}$}{Inverse cosecant}
+\showop{\secinv}{sec$^{-1}$}{Inverse secant}
+\showop{\cotinv}{cot$^{-1}$}{Inverse cotangent}
+\showop{\sinhinv}{sinh$^{-1}$}{Inverse hyperbolic sine}
+\showop{\coshinv}{cosh$^{-1}$}{Inverse hyperbolic cosine}
+\showop{\tanhinv}{tanh$^{-1}$}{Inverse hyperbolic tangent}
+\showop{\cschinv}{csch$^{-1}$}{Inverse hyperbolic cosecant}
+\showop{\sechinv}{sech$^{-1}$}{Inverse hyperbolic secant}
+\showop{\cothinv}{coth$^{-1}$}{Inverse hyperbolic cotangent}
+
+\end{document}
+\endinput
+%%
+%% End of file `math-operator_user_guide.tex'.

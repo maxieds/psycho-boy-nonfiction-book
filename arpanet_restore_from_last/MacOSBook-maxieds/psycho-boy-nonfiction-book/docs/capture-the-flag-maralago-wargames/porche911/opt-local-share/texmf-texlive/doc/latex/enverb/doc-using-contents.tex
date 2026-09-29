@@ -1,0 +1,40 @@
+\subsection{Using Verbatim Environment Contents}
+\begin{function}{\enverbBody}
+  \begin{syntax}
+    \cs{enverbBody}
+  \end{syntax}
+  This macro holds the contents of the last scanned \cs{enverb}-body,
+  assignments to it by the package are all local.
+\end{function}
+
+\begin{function}{\enverbExecute}
+  \begin{syntax}
+    \cs{enverbExecute}
+  \end{syntax}
+  This function executes the current contents of \cs{enverbBody} as though they
+  would be part of your input at this place (using |\scantokens|, it is tried as
+  good as possible to tackle |\scantokens|'s shortcomings; also it is assumed
+  that you didn't change the |eol| key, or else the newlines aren't carried over
+  but whatever your |eol| value set is used). The entire contents are
+  |\detokenize|d once before |\scantokens| does its magic (shouldn't affect the
+  verbatimly read material, but is deemed a sensible safety measure if something
+  unexpected happens; this also assumes that anything you placed inside |bol| or
+  |eol| is rescanned into the same stuff once |\detokenize|d).\par
+  The function isn't fully expandable, the contents are executed at the current
+  group level.
+\end{function}
+
+\begin{function}{\enverbListing}
+  \begin{syntax}
+    \cs{enverbListing} \marg{env} \marg{args}
+  \end{syntax}
+  This function is meant to reuse the current contents of \cs{enverbBody} inside
+  another verbatim environment. The used mechanism is tested to work with
+  \env{verbatim}, and environments defined by \pkg{fancyvrb}, \pkg{listings} and
+  \pkg{minted} (provided you use the default |eol| setting). \meta{env} is the
+  environment name in which the contents should be nested, and \meta{args} is
+  material to be placed after the |\begin| statement (just as you input them,
+  with the outer braces from this argument removed).\par
+  Just like |\enverbExecute| this |\detokenize|s the current content of
+  \cs{enverbBody} as well as your \meta{args} and uses |\scantokens|.
+\end{function}

@@ -1,0 +1,644 @@
+%% $Id: gentium-otf-doc.tex 1059 2025-01-08 08:06:10Z herbert $
+\listfiles
+\documentclass[ngerman,spanish,polish,english,a4paper,paper=a4,DIV=14]{scrartcl}
+\usepackage[
+  sans=FiraSans-Regular.otf,
+  sansFeatures={Scale=MatchUppercase},
+  mono=DejaVu Sans Mono,
+  monoFeatures={Scale=MatchLowercase,FakeStretch=0.88},
+  math=STIXTwo Math,
+  mathFeatures={math-style=TeX}]{gentium-otf}
+\newfontface\NotoMono[Scale=MatchLowercase,FakeStretch=0.88]{NotoSansMono-Regular.ttf }
+\usepackage{babel}
+%\usepackage[rmargin=1cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xltabular}
+\usepackage{listings}
+\usepackage{showexpl}
+\usepackage{xcolor,url,blindtext}
+\newcommand\Macro[1]{\texttt{\textbackslash#1}}
+\usepackage{hvextern,unicodefonttable}
+\usepackage[colorlinks]{hyperref}
+\lstset{basicstyle=\ttfamily\small}
+\setkeys{hv}{moveToExampleDir,ExampleDir=Examples,showFilename,verbose}
+
+\usepackage[imakeidx]{xindex}
+\makeindex[title=Index]
+
+\newenvironment{demoquote}
+               {\begingroup
+                \setlength{\topsep}{0pt}
+                \setlength{\partopsep}{0pt}
+                \list{}{\rightmargin\leftmargin}%
+                \item\relax}
+               {\endlist\endgroup}
+
+\def\Lcs#1{\texttt{\textbackslash#1}\index{#1@\texttt{\textbackslash#1}}}
+\def\Largb#1{\texttt{\{}\textit{#1}\texttt{\}}}
+\def\Lpack#1{\texttt{#1}\index{#1@\texttt{#1}}\index{Package!#1@\texttt{#1}}}
+\def\testfeature#1#2#3{{\fontspec[RawFeature={+#2}]{#1}#3\relax}}
+\def\Loption#1{\texttt{#1}\index{#1@\texttt{#1}}\index{Option!#1@\texttt{#1}}}
+\def\SUP{\addfontfeatures{RawFeature={+sups}}}
+
+\usepackage{multicol,luacode}
+\setlength{\columnsep}{0.3cm}
+\setlength{\columnseprule}{0.1pt}
+
+\makeatletter
+\blind@addtext{polish}{%
+  \def\blindtext@text{%
+Honoru myśliwych zaraza Rymsza Libijskich wszystkich Wożny przerywał szczodroty 
+opowiadań. Cesarskich znaczy rączy muchom malarstwie spisem różowemi zacnie 
+urządzał. Nasze Praga stare żeś Żyje cnoty Tabor. Mówcy pokój Również śmieléj 
+wionęła jarzynach liczne drogą jastrząb słowo zabawy odjechał życie. Dano 
+ojcu Wyprowadzają kuca dramatycznych myśliwskiém bór pęk żyt maja Wiec. Nię 
+Taka Albo tace Usta pęk ucha. }}
+\makeatother
+
+
+\title{Gentium---a complete Greek font with Latin and Cyrillic}
+\author{Herbert Voß\thanks{\protect\url{hvoss@tug.org}}}
+\usepackage{parskip}
+\parindent=0pt
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+
+\newpage
+\section{The font files}
+
+The \LaTeX\  package \Lpack{gentium-otf} supports the following TrueType fonts:
+\begin{verbatim}
+GentiumPlus-Regular.ttf            GentiumBookPlus-Regular.ttf  
+GentiumPlus-Bold.ttf               GentiumBookPlus-Bold.ttf 
+GentiumPlus-Italic.ttf             GentiumBookPlus-Italic.ttf
+GentiumPlus-BoldItalic.ttf         GentiumBookPlus-BoldItalic.ttf
+\end{verbatim}
+
+The fonts are free available (\url{https://software.sil.org/gentium/})
+and also part of any up-to-date distribution, like \TeX Live, MiK\TeX\, or mac\TeX. 
+
+\section{Package options}
+
+
+Possible optional arguments are
+
+\noindent
+\begin{tabular}{@{} >{\ttfamily}l l@{}}
+book            &  The book variant of the fonts\\
+ScaleRM         & scaling for the serif font, preset to 1\\
+defaultfeatures & presetting of features only for rmfamily\\
+sans & Sans serif font\\
+sansFeatures & Features for the sans serif font\\
+mono & Mono font\\
+monoFeatures & Features for the mono font\\
+math & Math font\\
+mathFeatures & Features for the math font\\
+\end{tabular}
+
+The Gentium Font comes only with a roman family. If you do not want to load
+additional font-packages for a sans-serif, mono and math font, you can define
+these fonts with optional arguments. This documentation is typeset with
+
+\begin{verbatim}
+\usepackage[
+  sans=FiraSans-Regular.otf,
+  sansFeatures={Scale=MatchUppercase},
+  mono=DejaVu Sans Mono,
+  monoFeatures={Scale=MatchLowercase,FakeStretch=0.88},
+  math=STIXTwo Math,
+  mathFeatures={math-style=TeX}]{gentium-otf}
+\end{verbatim}
+
+\newpage
+
+\section{Main font definition}
+
+The main font is defined as:
+
+\begin{verbatim}
+\setmainfont{GentiumPlus}[ 
+  RawFeature     = {\gentium@figurealign;\gentium@figurestyle},
+  Scale          = \gentiumRM@scale ,
+  UprightFont    = *-Regular,
+  ItalicFont     = *-Italic,
+  ItalicFeatures = { SmallCapsFont = *-Italic },
+  SlantedFont    = *-Regular,
+  SlantedFeatures= {FakeSlant=0.2},
+  BoldFont       = *-Bold,
+  BoldFeatures   = { SmallCapsFont = *-Bold },
+  BoldItalicFont = *-BoldItalic,
+  BoldItalicFeatures = { SmallCapsFont = *-BoldItalic },
+  BoldSlantedFont= *-Bold,
+  BoldSlantedFeatures= {FakeSlant=0.2, SmallCapsFont = *-bold },
+  SmallCapsFont  = *-Regular,
+%  SmallCapsFeatures={RawFeature=+smcp},
+  SmallCapsFeatures={Letters=SmallCaps}, 
+  Extension      = .ttf  
+]
+\end{verbatim}
+
+All available features are listed on \url{https://software.sil.org/gentium/features/}.
+
+\newpage
+\section{The default font}
+\enlargethispage{3cm}
+\selectlanguage{polish}%
+\begin{xltabular}{\linewidth}{XX}
+\bfseries GentiumPlus & \bfseries GentiumBookPlus\\\hline
+Regular\\
+\fontspec{GentiumPlus-Regular.ttf}
+\blindtext
+&
+\fontspec{GentiumBookPlus-Regular.ttf}
+\blindtext
+\\\hline
+\strut Bold\\
+\fontspec{GentiumPlus-Bold.ttf}
+\blindtext
+&
+\fontspec{GentiumBookPlus-Bold.ttf}
+\blindtext
+\\\hline
+Italic\\
+\fontspec{GentiumPlus-Italic.ttf}
+\blindtext
+&
+\fontspec{GentiumBookPlus-Italic.ttf}
+\blindtext
+\\\hline
+BoldItalic\\
+\fontspec{GentiumPlus-BoldItalic.ttf}
+\blindtext
+&
+\fontspec{GentiumBookPlus-BoldItalic.ttf}
+\blindtext
+\end{xltabular}
+
+
+\newpage
+\subsection{Small Caps }
+\enlargethispage{3cm}
+\begin{tabularx}{\linewidth}{XX}
+Default  -- \verb|\scshape| \bfseries GentiumPlus & Book -- \verb|\scshape|\\\hline
+Regular\\
+\fontspec{GentiumPlus-Regular.ttf}
+\scshape\blindtext
+&
+\fontspec{GentiumBookPlus-Regular.ttf}
+\scshape\blindtext
+\\\hline
+\strut Bold\\
+\fontspec{GentiumPlus-Bold.ttf}
+\scshape\blindtext
+&
+\fontspec{GentiumBookPlus-Bold.ttf}
+\scshape\blindtext
+\\\hline
+Italic\\
+\fontspec{GentiumPlus-Italic.ttf}
+\scshape\blindtext
+&
+\fontspec{GentiumBookPlus-Italic.ttf}
+\scshape\blindtext
+\\\hline
+BoldItalic\\
+\fontspec{GentiumPlus-BoldItalic.ttf}
+\scshape\blindtext
+&
+\fontspec{GentiumBookPlus-BoldItalic.ttf}
+\scshape\blindtext
+\end{tabularx}
+
+
+\newpage
+
+\subsection{Slanted -- done by FakeSlant}
+
+\begin{xltabular}{\linewidth}{XX}
+\verb|\itshape| \bfseries GentiumPlus &  \verb|\slshape| \bfseries GentiumBookPlus\\\hline
+Regular\\
+\itshape\blindtext
+&
+\slshape\blindtext
+\\\hline
+\strut Bold\\
+\itshape\bfseries\blindtext
+&
+\slshape\bfseries\blindtext
+\\\hline
+\strut SmallCaps\\
+\itshape\scshape\blindtext
+&
+\slshape\scshape\blindtext
+\\\hline
+\strut Bold SmallCaps\\
+\itshape\scshape\bfseries\blindtext
+&
+\slshape\scshape\bfseries\blindtext
+\\\hline
+\end{xltabular}
+
+
+\selectlanguage{english}%
+
+\newpage
+
+
+
+\section{The font features}
+
+
+\begin{lstlisting}[basicstyle=\ttfamily\small]
+bash-3.2$ otfinfo --features GentiumPlus-Regular.otf 
+aalt	Access All Alternates
+c2sc	Small Capitals From Capitals
+ccmp	Glyph Composition/Decomposition
+cv13	<unknown feature>
+cv14	<unknown feature>
+[...]
+cv92	<unknown feature>
+cv98	<unknown feature>
+frac	Fractions
+kern	Kerning
+liga	Standard Ligatures
+mark	Mark Positioning
+mkmk	Mark to Mark Positioning
+smcp	Small Capitals
+ss01	Stylistic Set 1
+ss04	Stylistic Set 4
+ss05	Stylistic Set 5
+ss07	Stylistic Set 7
+ss11	Stylistic Set 11
+ss12	Stylistic Set 12
+subs	Subscript
+sups	Superscript
+\end{lstlisting}
+
+%$
+
+
+\subsection{Capitals to Small Caps}
+
+The macro \Lcs{Lctosc}\Largb{arg} is for a local change of \emph{arg} and \Lcs{LCtoSC+} and \Lcs{LCtoSC-} for
+a global change of capitals to small caps.
+
+\begin{LTXexample}
+Gentium Font ŐŰÉÁÄ 
+\Lctosc{Gentium Font ŐŰÉÁÄ}\\
+\LCtoSC+ Gentium Font ŐŰÉÁÄ
+\end{LTXexample}
+
+\subsection{Capitals to Small Caps and small captitals}
+
+The macro \Lcs{Lctosmcp}\Largb{arg} is for a local change of \emph{arg} and \Lcs{LCtoSMCP+} and \Lcs{LCtoSMCP-}  for
+a global change of capitals to small caps.
+
+\begin{LTXexample}
+Gentium Font ŐŰÉÁÄ 
+\Lctosmcp{Gentium Font ŐŰÉÁÄ}\\
+\LCtoSMCP+ Gentium Font ŐŰÉÁÄ 
+\end{LTXexample}
+
+
+\subsection{Ligatures}
+
+The macros \Lcs{Lliga}\Largb{arg} (standard ligatures), \Lcs{Lhlig}\Largb{arg} (historical ligatures), 
+\Lcs{Ldlig}\Largb{arg} (discretionary ligatures)
+are for a local change of \emph{arg} and \Lcs{LLIGA+}/\Lcs{LLIGA-}, \Lcs{LHLIG+}/\Lcs{LHLIG-}, and \Lcs{LDLIG+}/\Lcs{LDIG-}  for
+a global change of capitals to small caps relative to the current group.
+
+\begin{LTXexample}
+No ligatures for the upright font!
+Schifffahrt ff, fi, ffi, fl
+
+\itshape but for the italic font!
+Schifffahrt ff, fi, ffi, fl
+{\LLIGA- ff, fi, ffi, fl, Schifffahrt}
+\end{LTXexample}
+
+\subsection{Fractions}
+
+There are two macros: \Lcs{Lfrac}\Largb{arg} for a local fraction setting and \Lcs{LFRAC+} and \Lcs{LFRAC-}  for a global
+setting relative to the current group.
+
+
+\begin{LTXexample}[pos=b]
+ default: 1/2 1/3 1/4 1/5 \ldots
+
+1/2 \Lfrac{1/3} 1/4 \Lfrac{1/5} 1/6 \Lfrac{1/7} 1/8 \Lfrac{1/9} 1/10 \Lfrac{5/1289}
+
+\LFRAC+
+1/2 456/789 1/2 456/789
+1/2 1/3 1/4 1/5 1/6 1/7 1/8 1/9 1/10 5/20 9/1289
+
+\LFRAC-
+ 1/2 1/3 1/4 1/5 1/6 \ldots
+\end{LTXexample}
+
+
+
+\subsection{Stylistic Sets}
+
+\begin{verbatim}
+ss01	Single-story a and g
+ss04	Barred-bowl forms
+ss05	Slant italic specials
+ss07	Low-profile diacritics
+ss11	Single-story a (only)
+ss12	Single-story g (only)
+\end{verbatim}
+
+
+
+There is a short command \Lcs{Lssxx}\Largb{text} for the six stylistic sets, 
+where xx is the number of the set (two digits)
+and \textit{text} the local argument:
+
+\iffalse
+\begin{LTXexample}[pos=b]
+default: aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣgĝğġģǧǵǥḡꞡᵍ\par
+ss01: \Lss01{aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣgĝğġģǧǵǥḡꞡᵍ}\par
+ss11: \Lss11{aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣ}\par
+ss12: \Lss12{ĝğġģǧǵǥḡꞡᵍ}\par
+ss04: đƀǥ \Lss04{đƀǥ}\par
+default: aãàáâäåāăǎǟǡǻȁȃȧḁẚảấầẩẫậắằẳẵạặⱥɐæfḟiìíîïĩīĭįǐȉȋḭḯỉịılĺḷḹḻḽꝉₗvṽṿꝟzźżžẑẓẕғӻfiffi\par
+ss05: \Lss05{aãàáâäåāăǎǟǡǻȁȃȧḁẚảấầẩẫậắằẳẵạặⱥɐæfḟiìíîïĩīĭįǐȉȋḭḯỉịılĺḷḹḻḽꝉₗvṽṿꝟzźżžẑẓẕғӻfiffi}\par
+ss07: áàâǎāãäȧ \Lss05{áàâǎāãäȧ} also for e,o,\ldots
+\end{LTXexample}
+\fi
+
+\let\myFont\NotoMono
+\fvset{fontfamily=myFont}
+
+
+\begin{externalDocument}[
+%  grfOptions={width=0.5\linewidth},
+  frame,compiler=lualatex,
+  crop,
+  force=true,
+  usefancyvrb,
+  runs=2,code,docType=latex,
+  frame,
+%  showFilename,
+%  align=\centering,
+%  lstOptions={columns=flexible}
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+\parindent=0pt
+%StartVisiblePreamble
+\usepackage{gentium-otf}
+%StopVisiblePreamble
+\begin{document}
+default: aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣgĝğġģǧǵǥḡꞡᵍ\par
+ss01: \Lss01{aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣgĝğġģǧǵǥḡꞡᵍ}\par
+ss11: \Lss11{aªàáâãäåāăąǎǟǡǻȁȃȧḁẚạảấầẩẫậắằẳẵặⱥₐᵃ◌ͣ}\par
+ss12: \Lss12{ĝğġģǧǵǥḡꞡᵍ}\par
+ss04: đƀǥ \Lss04{đƀǥ}\par
+ss05 is only valid for \verb|\itshape|\\
+{\itshape
+default: aãàáâäåāăǎǟǡǻȁȃȧḁẚảấầẩẫậắằẳẵạặⱥɐæfḟiìíîïĩīĭįǐȉȋḭḯỉịılĺḷḹḻḽꝉₗvṽṿꝟzźżžẑẓẕғӻfiffi\par
+ss05: \Lss05{aãàáâäåāăǎǟǡǻȁȃȧḁẚảấầẩẫậắằẳẵạặⱥɐæfḟiìíîïĩīĭįǐȉȋḭḯỉịılĺḷḹḻḽꝉₗvṽṿꝟzźżžẑẓẕғӻfiffi}}\par
+ss07: áàâǎāãäȧ \Lss05{áàâǎāãäȧ} also for e,o,\ldots
+\end{document}
+\end{externalDocument}
+
+For a global change of the stylistic set one can use the command \Lcs{LSSxx}, where xx
+is again the number of the set.
+
+\begin{externalDocument}[
+%  grfOptions={width=0.5\linewidth},
+  frame,compiler=lualatex,
+  crop,
+  usefancyvrb,
+  force=true,
+mpwidth=0.6\linewidth,
+  runs=2,code,docType=latex,
+  frame,
+%  showFilename,
+%  align=\centering,
+%  lstOptions={columns=flexible}
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage{gentium-otf}
+%StopVisiblePreamble
+\begin{document}
+đƀǥ $\rightarrow$ \LSS04 đƀǥ
+\end{document}
+\end{externalDocument}
+
+\subsection{Character variants}
+There is a short command \Lcs{Lcvxx}\Largb{text} for the characters, where xx is the number of 
+the alternative (two digits)
+and \textit{text} the local argument. The macro has an optional argument for passing other values
+than 1 to the option (see 43 and 62). Possible variants are:
+
+\begin{verbatim}
+cv13	B hook U+0181
+cv14	beta U+03B2 U+1D66 U+1D5D
+cv17	D hook U+018A
+cv19	ezh curl U+0293
+cv20	Ezh U+01B7 U+04E0
+cv25	rams horn U+0264
+cv28	H stroke U+0126
+cv37	J stroke hook U+0284
+cv43	Eng U+014A
+cv44	N left hook U+019D
+cv46	Open-O U+0186 U+0254 U+1D10 U+1D53 U+1D97
+cv47	OU U+0222 U+0223 U+1D3D U+1D15
+cv49	p hook U+01A5
+cv55	R tail U+2C64
+cv57	T hook U+01AC
+cv62	V hook U+01B2 U+028B U+1DB9
+cv68	Y hook U+01B3
+cv69	Clicks U+01C0 U+01C1 U+01C2 U+2980
+cv70	Modifier apostrophe U+02BC U+A78B U+A78C
+cv71	Modifier colon U+A789
+cv75	Vietnamese-style diacritics U+1EA4...U+1EAB U+1EAE...U+1EB5 U+1EBE U+1EBF U+1EC0...U+1EC5 
+                                    U+1ED0...U+1ED7
+cv76	Ogonek U+0328 U+0104 U+0105 U+0118 U+0119 U+012E U+012F U+0172 U+0173 U+01EA U+01EB U+01EC U+01ED
+cv77	Caron U+010F U+013D U+013E U+0165
+cv78	Porsonic circumflex U+0342 U+1F06 U+1F07 U+1F0E U+1F0F U+1F26 U+1F27 U+1F2E U+1F2F U+1F36 U+1F37 
+                            U+1F3E U+1F3F U+1F56 U+1F57 U+1F5F U+1F66 U+1F67 U+1F6E U+1F6F U+1F86 U+1F87 
+                            U+1F8E U+1F8F U+1F96 U+1F97 U+1F9E U+1F9F U+1FA6 U+1FA7 U+1FAE U+1FAF U+1FB6 
+                            U+1FB7 U+1FC0 U+1FC1 U+1FC6 U+1FC7 U+1FCF U+1FD6 U+1FD7 U+1FDF U+1FE6 U+1FE7 
+                            U+1FF6 U+1FF7
+cv79	Kayan diacritics U+0300 U+0301
+cv80	Cyrillic E U+042D U+044D
+cv81	Cyrillic shha U+04BB
+cv82	Cyrillic breve U+0306
+cv83	Capital adscript iota (prosgegrammeni) U+1F88...U+1F8F U+1F98.. U+1F99...U+1F9F U+1FA8...U+1FAF 
+                                               U+1FBC U+1FCC U+1FFC
+cv84	Serbian and Macedonian Cyrillic alternates U+0431 U+0433 U+0434 U+043F U+0442 U+0453
+cv90	Chinantec tones U+02CB U+02C8 U+02C9 U+02CA
+cv91	Tone numbers U+02E5 U+02E6 U+02E7 U+02E8 U+02E9 U+A712 U+A713 U+A714 U+A715 U+A716
+cv92	Hide tone contour staves U+02E5...U+02E9 U+A712...U+A716
+cv98	Empty set U+2205
+\end{verbatim}
+
+
+Don't worry about the tofu in the following listings. Monospace font don't have all
+glyphs. The output is okay!
+
+
+\begin{externalDocument}[
+  frame,compiler=lualatex,
+  crop,
+  force=true,
+  usefancyvrb,
+  runs=2,code,docType=latex,
+  frame,
+%  lstOptions={columns=flexible}
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage[math=STIXTwo Math]{gentium-otf}
+%StopVisiblePreamble
+\usepackage{parskip}
+\begin{document}
+13: Ɓ $\rightarrow$\Lcv13{Ɓ}; 14: βᵝᵦ $\rightarrow$\Lcv82{βᵝᵦ}; 17: Ɗ $\rightarrow$\Lcv17{Ɗ}; 
+19: ʓ $\rightarrow$\Lcv19{ʓ}; 20: Ʒ $\rightarrow$\Lcv20{Ʒ}; \par
+25: ɤ $\rightarrow$\Lcv25{ɤ};  [2]25: ɤ $\rightarrow$\Lcv[2]25{ɤ};
+28: Ħ $\rightarrow$\Lcv28{Ħ}; 37: ʄ $\rightarrow$\Lcv37{ʄ}; \par
+43: Ŋ $\rightarrow$\Lcv43{Ŋ}; [2]43: Ŋ $\rightarrow$\Lcv[2]43{Ŋ}; [3]43 Ŋ $\rightarrow$\Lcv[3]43{Ŋ};  \par
+44: Ɲ $\rightarrow$\Lcv44{Ɲ}; 46: Ɔɔᴐᵓᶗ $\rightarrow$\Lcv46{Ɔɔᴐᵓᶗ}; 47:  Ȣȣᴕᴽ $\rightarrow$\Lcv47{Ȣȣᴕᴽ}; 
+49: ƥ $\rightarrow$\Lcv49{ƥ}; 55: Ɽ $\rightarrow$\Lcv55{Ɽ}; 57: Ƭ $\rightarrow$\Lcv57{Ƭ};\par
+62: Ʋʋᶹ $\rightarrow$\Lcv62{Ʋʋᶹ}; [2]62: Ʋʋᶹ $\rightarrow$\Lcv[2]62{Ʋʋᶹ};\par
+69: ǀǁǂ⦀ $\rightarrow$\Lcv69{ǀǁǂ⦀}; 70: ʼꞋꞌ $\rightarrow$\Lcv70{ʼꞋꞌ}; 71: ꞉ $\rightarrow$\Lcv71{꞉}; \par
+75: ẤấẦầẨẩẪẫẮắẰằẲẳẴẵẾếỀềỂểỄễỐốỒồỔổỖỗ $\rightarrow$\Lcv75{ẤấẦầẨẩẪẫẮắẰằẲẳẴẵẾếỀềỂểỄễỐốỒồỔổỖỗ}; \par
+76: ĄąĘęĮįŲųǪǫǬǭ $\rightarrow$\Lcv76{Ąą Ęę Įį Ųų Ǫǫ Ǭǭ}; 77: ďĽľť $\rightarrow$\Lcv77{ďĽľť}; \par
+78: ἆἇᾆᾇᾶᾷἦἧᾖᾗῆῇἶἷῖῗὖὗῦῧὦὧᾦᾧῶῷἎἏᾎᾏἮἯᾞᾟἾἿὟὮὯᾮᾯ $\rightarrow$\Lcv78{ἆἇᾆᾇᾶᾷἦἧᾖᾗῆῇἶἷῖῗὖὗῦῧὦὧᾦᾧῶῷἎἏᾎᾏἮἯᾞᾟἾἿὟὮὯᾮᾯ};
+79: \makebox[0pt]{ò}́ $\rightarrow$\Lcv79{ò́}; \par% U+0300 U+0301
+80: Ээ $\rightarrow$\Lcv80{Ээ}; 81: һ $\rightarrow$\Lcv81{һ}; 82: Әә $\rightarrow$\Lcv82{Ә̆ә̆}; \par
+83: ᾼᾈᾉᾊᾋᾌᾍᾎᾏῌᾘᾙᾚᾛᾜᾝᾞᾟῼᾨᾩᾪᾫᾬᾭᾮᾯ $\rightarrow$\Lcv83{ᾼᾈᾉᾊᾋᾌᾍᾎᾏῌᾘᾙᾚᾛᾜᾝᾞᾟῼᾨᾩᾪᾫᾬᾭᾮᾯ}; \par
+84: бгдптѓ $\rightarrow$\Lcv84{бгдптѓ}; 84 (itshape): {\itshape бгдптѓ $\rightarrow$\Lcv84{бгдптѓ}}; \par
+90: ˋˈˉˊ $\rightarrow$\Lcv90{ˋˈˉˊ}; 91: ˥ ˦ ˧ ˨ ˩ ꜒ ꜓ ꜔ ꜕ ꜖ $\rightarrow$\Lcv91{˥ ˦ ˧ ˨ ˩ ꜒ ꜓ ꜔ ꜕ ꜖}; \par
+92: ˥ ˦ ˧ ˨ ˩ ꜒ ꜓ ꜔ ꜕ ꜖ (˩˦˥˧˨ ꜖꜓꜒꜔꜕) $\rightarrow$\Lcv92{˥ ˦ ˧ ˨ ˩ ꜒ ꜓ ꜔ ꜕ ꜖ (˩˦˥˧˨ ꜖꜓꜒꜔꜕)}; \par
+98: ∅ $\rightarrow$\Lcv98{∅}; 
+\end{document}
+\end{externalDocument}
+
+
+
+
+
+
+Instead of character variation 84 one can also set the script and the language:
+
+\begin{externalDocument}[
+  frame,compiler=lualatex,
+  crop,
+  usefancyvrb,
+  force=true,
+  runs=2,code,docType=latex,
+  frame,
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage{gentium-otf}
+%StopVisiblePreamble
+\begin{document}
+(upshape): 
+{бгдптѓ \addfontfeature{Script=Cyrillic,Language=Serbian}$\rightarrow$ бгдптѓ}
+
+(itshape): \itshape 
+бгдптѓ \addfontfeature{Script=Cyrillic,Language=Serbian}$\rightarrow$ бгдптѓ
+\end{document}
+\end{externalDocument}
+
+
+
+
+
+\subsection{Numerical alternates}
+Only valid for the digits and not for letters!
+
+\begin{LTXexample}
+01234\Lsub{a567a}89 01234\Lsup{a567a}89
+
+01234\LSUP+a56789 \LSUP-a01234
+
+01234\LSUB+a56789 \LSUB-a01234
+\end{LTXexample}
+
+\newpage
+
+\section{Examples}
+
+\begin{externalDocument}[
+  frame,compiler=lualatex,
+  crop,
+  usefancyvrb,
+  force=true,
+  runs=2,code,docType=latex,
+  frame,
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage[greek]{babel}
+\usepackage{gentium-otf}
+\usepackage{blindtext}
+%StopVisiblePreamble
+\begin{document}
+Από τις 140 χώρες που υπάρχουν στο κόσμο, μόνον 19 έχουν πραγματική δημοκρατία. 
+Τούτο σημαίνει ότι αυτό το θαυμάσιο και ευαίσθητο πολίτευμα είναι δύσκολο στην 
+εφαρμογή του. Και προϋποθέτει ειδικές συνθήκες, χωρίς τις οποίες δεν ημπορεί να 
+ανθίσει και να καρποφορήσει.
+
+Δημοκρατία θα ήθελαν να έχουν όλοι οι λαοί. Αλλά δεν την έχουν παρά μόνο εκείνοι 
+που, εκτός από την συνειδητοποίηση των προτερημάτων της, σέβονται και τους όρους 
+της λειτουργίας της.
+\end{document}
+\end{externalDocument}
+
+\begin{externalDocument}[
+  frame,compiler=lualatex,
+  crop,
+  usefancyvrb,
+  force=true,
+  runs=2,code,docType=latex,
+  frame,
+]{Gentium}
+\documentclass{article}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage[russian]{babel}
+\usepackage{gentium-otf}
+\usepackage{blindtext}
+%StopVisiblePreamble
+\begin{document}
+Из 140 стран мира только 19 имеют реальную демократию. 
+Это означает, что эта замечательная и чувствительная система трудно реализовать. 
+И это требует особых условий, без которых он не может цветут и принести фрукты.
+
+Демократия хотела бы, чтобы все народы имели. Но у них есть только те, кто, в дополнение 
+к реализации его достижений, также уважают условия его работы.
+\end{document}
+\end{externalDocument}
+
+
+\newpage
+
+\section{The glyph list}
+
+\displayfonttable{GentiumPlus-Regular.ttf}%[Scale=0.95]
+
+\displayfonttable{GentiumPlus-Italic.ttf}%[Scale=0.95]
+
+
+\printindex
+\end{document}
+
+
+ 

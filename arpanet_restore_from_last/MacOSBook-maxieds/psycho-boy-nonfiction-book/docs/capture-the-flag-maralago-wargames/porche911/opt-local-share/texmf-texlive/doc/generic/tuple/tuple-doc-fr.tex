@@ -1,0 +1,587 @@
+% !TeX TS-program = lualatex
+\documentclass[french,a4paper]{article}
+\usepackage[no-math]{fontspec}
+\usepackage[libertine]{newtxmath}
+\usepackage{libertineRoman}
+\DeclareSymbolFont{operators}{\encodingdefault}{\familydefault}{m}{n}
+\usepackage[scaled=0.8]{GoMono}
+\usepackage{babel,xcolor,enumitem,tuple}
+\usepackage[pdfborder={0 0 0.5}]{hyperref}
+\frenchsetup{og=«,fg=»,AutoSpaceFootnotes=false,AutoSpacePunctuation=true}
+\usepackage[bottom]{footmisc}
+\usepackage[margin=2cm]{geometry}
+\makeatletter
+\long\def\defactive#1#2{\catcode`#1=13 \begingroup\lccode`\~`#1 \lowercase{\endgroup\long\def~{#2}}}
+\newcommand\disable@lig[1]{\defactive#1{\leavevmode\kern\z@\string#1}}
+\def\code{\expandafter\code@i\string}
+\def\code@i#1{%
+	\begingroup
+	\par\nobreak\smallskip\parindent0pt
+	\leftskip.1\linewidth
+	\rightskip\leftskip
+	\defactive\^^I{\leavevmode\space\space\space\space}%
+	\defactive\<{\begingroup$\langle$\itshape}%
+	\defactive\>{$\rangle$\endgroup}%
+	\let\do\@makeother \dospecials
+	\ttfamily\small
+	\obeylines\obeyspaces
+	\def\code@ii##1#1{##1\par\smallbreak\endgroup}%
+	\code@ii
+}
+\long\def\grab@toks#1\relax{\gdef\right@content{#1}}
+
+\newcommand\exemple[1][60]{%
+	\par\nobreak\vskip2.5pt \noindent
+	\def\part@coeff{#1}%
+	\relax\leavevmode\null
+	\begingroup
+	\let\do\@makeother\dospecials
+	\defactive\ {\space}%
+	\defactive\%{\noexpand\color{gray}\char`\% }%
+	\defactive\^^M{\par\leavevmode\noexpand\color{black}}%
+	\defactive\^^I{\leavevmode\space\space\space\space}%
+	\@makeother:\disable@lig,\disable@lig-%
+	\exemple@@
+}
+
+\newcommand\exemple@@[1]{%
+	\def\@tempa##1#1{%
+		\xdef\left@content{##1}%
+		\endgroup
+		\begingroup
+			\fboxsep1pt \fboxrule 0.5pt
+			\fbox{%
+				\parbox[c]{\dimexpr0.\part@coeff\linewidth-\fboxsep-\fboxrule}{%
+					\vskip5pt
+					\ttfamily\footnotesize\left@content
+					\vskip5pt
+				}%
+				\parbox[c]{\dimexpr\linewidth-0.\part@coeff\linewidth-\fboxsep-\fboxrule}{%
+					\vskip5pt
+					\normalfont\footnotesize\noindent\newlinechar`\^^M \everyeof{\noexpand}%
+					\scantokens{##1}%
+					\vskip2.5pt
+				}%
+			}%
+			\vskip7.5pt\relax
+		\endgroup
+	}%
+	\@tempa
+}
+
+\begingroup
+\catcode`\<13 \catcode`\>13
+\gdef\verb{\relax\ifmmode\hbox\else\leavevmode\null\fi
+	\bgroup
+	\verb@eol@error \let\do\@makeother \dospecials
+	\verbatim@font\@noligs
+	\catcode`\<13 \catcode`\>13 \def<{\begingroup$\langle$\itshape}\def>{\/$\rangle$\endgroup}%
+	\@ifstar\@sverb\@verb}
+\endgroup
+\def\longfrtpldate@i#1/#2/#3.{\number#3\relax\space\ifcase #2 \or janvier\or février\or mars\or avril\or mai\or juin\or juillet\or aout\or septembre\or octobre\or novembre\or décembre\fi\space#1}
+\edef\longfrtpldate{\expandafter\longfrtpldate@i\tpldate.}
+\makeatother
+\setlist[enumerate]{topsep=1pt minus 0.75pt, partopsep=0.75pt plus0.5pt minus0.5pt, itemsep=0.5pt minus0.25pt }
+\setlist  [itemize]{topsep=1pt minus 0.75pt, partopsep=0.75pt plus0.5pt minus0.5pt, itemsep=0.5pt minus0.25pt }
+\def\tpl{\textsf\tplname}
+\begin{document}
+\parskip=5ptplus0.5ptminus0.75pt\relax
+\parindent=0pt
+\thispagestyle{empty}
+\tplsetmode{dec:long}
+\begin{titlepage}
+	\renewcommand\thefootnote{\fnsymbol{footnote}}
+	\begingroup
+	\centering
+	\null\vskip.25\vsize
+	{\large\bfseries L'extension pour \TeX{} et \LaTeX\par \Huge \tplname\par}
+	\bigbreak
+	v\tplversion
+	\smallbreak
+	\longfrtpldate
+	\vskip1.5cm
+	{Christian \bsc{Tellechea}\footnote{\href{mailto:unbonpetit@netc.fr}{unbonpetit@netc.fr}}}
+	\par
+	\endgroup
+	\vskip2cm
+	\leftskip=.2\linewidth \rightskip=.2\linewidth \small
+	Cette extension met à disposition des opérations courantes pour les tuples de nombres, de façon développable, avec une syntaxe «\verb|objet.méthode|» concise et facile à utiliser.
+\end{titlepage}
+
+\section{Aperçu}
+On considère la liste de nombres (que l'on appellera désormais « tuple ») :
+\code|12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4, 13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1|
+
+On peut définir un « objet » de type tuple, que l'on nomme par exemple «\verb|nn|» avec l'instruction :
+\code|\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}|
+
+Ce tuple « \texttt{nn} » sera utilisé tout au long de cette documentation et rappelé en commentaire dans tous les codes où il intervient.%
+\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}
+
+On peut en extraire son maximum :
+\exemple/1) \tplexe{nn.max} \par
+2) \edef\foo{\tplexe{nn.max}}\meaning\foo/
+
+On peut également calculer la médiane des 5 plus petites valeurs, ce qui suppose :
+\begin{enumerate}
+	\item d'ordonner le tuple (méthode \texttt{sorted}) ;
+	\item de ne retenir que les valeurs dont l'index est 0 à 4 (méthode \texttt{filter});
+	\item de trouver la médiane des 5 nombres retenus (méthode \texttt{med}).
+\end{enumerate}
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}
+1) \tplexe{nn.sorted.filter{idx<5}.med} \par
+2) \edef\foo{\tplexe{nn.sorted.filter{idx<5}.med}}\meaning\foo/
+
+On charge ce package hors \LaTeX{} par
+\code|\input tuple.tex|
+et sous \LaTeX{} par
+\code|\usepackage{tuple}|
+
+Ce package ne s'appuie sur aucun autre si ce n'est le module de \LaTeX3 «\texttt{l3fp}», qui fait désormais partie du noyau \LaTeX{}, pour notamment tirer parti de sa puissante macro \verb|\fpeval|.
+
+Si l'on n'utilise pas \LaTeX{}, \tpl{} va charger le fichier \texttt{expl3-generic.tex} afin de disposer du module \texttt{l3fp}.
+
+\section{Déclarer un objet tuple}
+La macro \verb|\newtuple{<nom>}{<liste de nombres>}| permet de construire un «objet» tuple auquel on accède ensuite par son \verb|<nom>|.
+
+Ce \verb|<nom>| admet tous les caractères alphanumériques \texttt{[az][AZ][09]}, espaces et ponctuations. Les espaces qui le précèdent ou le suivent sont supprimés. Il est également possible de mettre une macro\footnote{La macro ne sera jamais modifiée par le package \texttt{tuple} : en interne cette macro est détokenisée pour construire le nom plus complexe d'une macro.}.
+
+La \verb|<liste de nombres>| est développée au maximum puis détokénisée avant d'être exploitée par le constructeur de l'objet tuple. Les éléments vides sont ignorés.
+
+Par souci de simplification ou de vitesse\footnote{Les différences de vitesse ne sont pas énormes, mais elles existent, voir page \pageref{benchmark}}, le choix est donné à l'utilisateur de spécifier le type de nombre qui composent le tuple à l'aide la macro \verb|\tplsetmode| ;
+\begin{itemize}
+	\item \verb|\tplsetmode{int}| pour indiquer que tous les nombres sont des entiers signés entre $-2^{31}+1$ et $2^{31}-1$. Les comparaisons lors du tri sont faites avec \verb|\ifnum|, les opérations sur les nombres avec \verb|\numexpr|.
+	\item \verb|\tplsetmode{dec short}| pour indiquer des décimaux «courts», c'est-à-dire comprenant 8 chiffres en partie entière et 8 chiffres en partie décimale. Dans ce cas, les comparaison sont faites avec \verb|\ifdim| et les opérations sur les nombres par un moteur de calcul rudimentaire embarqué au sein de \verb|tuple|.
+	\item \verb|\tplsetmode{dec long}|, qui est le mode par défaut, spécifie des décimaux «longs» qui s'entendent au sens de \verb|l3fp|. Dans ce mode, les comparaisons et les opérations sont faites par \verb|l3fp|.
+\end{itemize}
+
+Quel que soit le mode sélectionné, les calculs finaux à destination de l'utilisateur (écart-type, moyenne, quartile, etc) sont effectués par \verb|l3fp|.\medbreak
+
+Il est possible de définir un tuple vide (c'est-à-dire ne contenant donc aucun nombre), mais beaucoup de méthodes renverront une erreur si elles sont exécutées sur une liste vide.
+
+Il est en revanche impossible de redéfinir un tuple déjà existant (il faut pour cela passer par la méthode \texttt{store}).
+
+\section{Les méthodes}
+Pour exécuter des méthodes sur un tuple, on doit utiliser la syntaxe
+\code|\tplexe{<nom du tuple>.<méthode 1>.<méthode 2>...<méthode n>}|
+Aucun espace entre le «\verb-.-» et le nom d'une méthode n'est admis. Il est donc illicite d'écrire «\verb*|. sorted|».
+
+Il existe 3 types de donnés pour le package \tpl{} :
+\begin{enumerate}
+	\item les nombres (et les données affichables) ;
+	\item les objets « tuples »;
+	\item le type « stockage » qui caractérise des méthodes non développables effectuant des assignations.
+\end{enumerate}
+
+Toutes les méthodes de ce package admettent en entrée un tuple (qui est le résultat des méthodes précédentes) et renvoient un résultat dont le type détermine à quel groupe appartient la méthode :
+\begin{itemize}
+	\item groupe 1 «\texttt{tuple} $\longrightarrow$ \texttt{nombre}»;
+	\item groupe 2 «\texttt{tuple} $\longrightarrow$ \texttt{tuple}». Les méthodes de ce groupe \emph{ne modifient pas} le tuple initial\footnote{Elles ne le peuvent pas sinon, elles perdraient leur caractère développable !}, elles agissent sur un tuple temporaire qu'il est évidemment possible de sauvegarder avec une méthode du groupe ci-dessous;
+	\item groupe 3 «\texttt{tuple} $\longrightarrow$ \texttt{stockage}»;
+\end{itemize}
+
+La macro \verb|\tplexe| et son argument forment un tout purement développable, sous réserve que les méthodes invoquées ne soient pas dans le groupe «\texttt{tuple} $\longrightarrow$ \texttt{stockage}».
+
+Si aucune méthode n'est spécifiée, une méthode générique implicite du groupe «\texttt{tuple} $\longrightarrow$ \texttt{nombre}», est exécutée et renvoie le tuple sous forme affichable.
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn}/
+
+\section{Les méthodes du groupe \texttt{tuple} $\longrightarrow$ \texttt{nombre}}
+\subsection{Les méthodes \texttt{len}, \texttt{sum}, \texttt{min}, \texttt{max}, \texttt{mean}, \texttt{med} et \texttt{stdev}}
+Toutes ces méthodes développables n'admettent pas d'argument et renvoient respectivement le nombre d'éléments, leur somme, le minimum, le maximum, la moyenne, la médiane et l'écart-type.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) len =   \tplexe{nn.len}\par
+2) sum =   \tplexe{nn.sum}\par
+3) min =   \tplexe{nn.min}\par
+4) max =   \tplexe{nn.max}\par
+5) mean =  \tplexe{nn.mean}\par
+5) med =   \tplexe{nn.med}\par
+6) stdev = \tplexe{nn.stdev}/
+
+\subsection{La méthode \texttt{quantile}}
+Cette méthode développable a pour syntaxe
+\code|quantile{<p>}|
+où \verb|<p>| doit être un nombre compris entre 0 et 1. La méthode renvoie le quantile correspondant à l'argument \verb|<p>|. La méthode utilisée est celle de la moyenne pondérée\footnote{Si $p$ est l'argument de la méthode, on définit $h=(n-1)p+1$ où $n$ est la longueur du tuple.\par La méthode renvoie le nombre égal à $x_{\lfloor h\rfloor}+(h-\lfloor h\rfloor)(x_{\lfloor h\rfloor}+x_{\lceil h\rceil})$, où $x_k$ est le $k$\ieme{} nombre du tuple ordonné.} ; il s'agit de l'interpolation linéaire du type «R7» décrite dans l'article de \href{https://en.wikipedia.org/wiki/Quantile}{wikipedia}.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.quantile{0.25}}\par
+2) \tplexe{nn.quantile{0.5}}\par
+2) \tplexe{nn.quantile{0.75}}\par/
+
+La méthode \verb|quantile{0.5}| est équivalente à la méthode \verb|med|.
+\medbreak
+Il est important de noter que les espaces avant/après les arguments d'une méthode sont ignorés. Il est donc licite d'écrire \verb*|.quantile {0.5} |.
+
+\subsection{La méthode \texttt{get}}
+Cette méthode développable a pour syntaxe
+\code|get{<index>}|
+
+Le premier index est 0 et le dernier est $n-1$ où $n$ est le nombre d'éléments du tuple. Par conséquent, l'argument de \texttt{get} doit être entre 0 et $n-1$. On peut également utiliser des index négatifs où $-1$ représente l'index du dernier élément, $-2$ celui de l'avant dernier et ainsi de suite jusqu'à $-n$.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1er élément     : \tplexe{nn.get{0}}\par
+13e élément     : \tplexe{nn.get{12}}\par
+dernier élément : \tplexe{nn.get{\tplexe{nn.len}-1}}\par
+dernier élément : \tplexe{nn.get{-1}}% mieux que ci-dessus|
+
+L'argument de \texttt{get} est évalué avant d'être exploité : il est donc possible d'y mettre la macro purement développable \verb|\tplexe| avec une méthode finale renvoyant un nombre entier.
+
+\subsection{La méthode \texttt{pos}}
+Cette méthode développable a pour syntaxe
+\code|pos{<nombre>}[<n>]|
+et renvoie l'index de l'occurrence \no\verb|<n>| du \verb|<nombre>| dans le tuple. Si le tuple ne contient pas cette occurrence, \verb|-1| est renvoyé. Si l'argument optionnel est omis, \verb|<n>| vaut 1.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+index de 12.7   : \tplexe{nn.pos{12.7}}\par
+index de 2.9    : \tplexe{nn.pos{2.9}}\par
+index de 2.9[2] : \tplexe{nn.pos{2.9}[2]}\par
+index de 2.9[3] : \tplexe{nn.pos{2.9}[3]}\par
+index de 31.8   : \tplexe{nn.pos{31.8}}|
+
+\subsection{La méthode \texttt{show}}
+Cette méthode n'admet pas d'argument et a pour but de convertir un objet tuple en résultat affichable. Pour ce faire :
+\begin{itemize}
+	\item pour chaque élément, la macro publique \verb|\tplformat|, admettant 2 arguments obligatoires, est exécutée. Le premier argument transmis est l'index de l'élément et le 2\ieme{} argument est l'élément lui-même ;
+	\item chaque résultat issu de la macro \verb|\tplformat| est séparé du suivant par le contenu de la macro \verb|\tplsep|.
+\end{itemize}
+
+Par défaut, ces deux macros ont le code suivant :
+\begin{verbatim}
+\def\tplformat#1#2{#2}% #1=index en cours #2=item en cours
+\def\tplsep{, }
+\end{verbatim}
+
+Le comportement par défaut est donc exactement le même que la méthode implicite qui est exécutée en dernier, et en particulier, la méthode est purement développable.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.show}/
+
+On peut reprogrammer ces 2 macros pour créer une mise en forme plus évoluée. On utilise ici la macro \verb|\tplfpcompare| qui est alias de la macro \verb|\fp_compare:nNnTF| du module \texttt{l3fp}, pour comparer un élément à une valeur donnée. Dans les 2 exemples donnés ci-dessous, la méthode n'est plus purement développable à cause de l'utilisation des macros \verb|\fbox| et \verb|\textcolor|.
+
+Mise dans une boite des 10 premiers éléments :
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\def\tplformat#1#2{\ifnum#1<10 \fbox{#2}\else#2\fi}
+\tplexe{nn.show}/
+
+Mise en rouge des éléments inférieurs à la moyenne :
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\edef\nnmean{\tplexe{nn.mean}}%
+\def\tplformat#1#2{\tplfpcompare{#2}<{\nnmean}
+	{\textcolor{red}{#2}}
+	{#2}%
+}%
+\def\tplsep{~; }%
+\tplexe{nn.show}/
+
+\section{Les méthodes du groupe \texttt{tuple} $\longrightarrow$ \texttt{tuple}}
+Chaque fois qu'un tuple est généré ou modifié, ses méthodes \texttt{len}, \texttt{sum}, \texttt{min}, \texttt{max}, \texttt{mean}, \texttt{med}, \texttt{stdev} et \texttt{sorted} sont mises à jour.
+\subsection{La méthode \texttt{sorted}}
+Cette méthode développable n'admet pas d'argument et retourne un objet tuple avec ses éléments rangés dans l'ordre croissant.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.sorted}|
+
+\subsection{La méthode \texttt{set}}
+Cette méthode développable a pour syntaxe
+\code|set{<index1>:<nombre1>,<index2>:<nombre2>,...}|
+Dans le tuple issu des méthodes précédentes, remplace le nombre à l'\verb|<index1>| par \verb|<nombre1>| et ainsi de suite si plusieurs assignations sont spécifiées dans une liste séparée par des virgules.
+
+Chaque \verb|<index>| doit être compris entre 0 et $n-1$, où $n$ est le nombre d'élément du tuple passé en entrée de la méthode. Les index négatifs de $-n$ à $-1$ sont également autorisés.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.set{1:10,5:50,-1:-666}}|
+
+\subsection{La méthode \texttt{add}}
+Cette méthode développable, qui ajoute une \verb|<insertion>| à un ou plusieurs index spécifiés, a pour syntaxe
+\code|add{<index1>:<insertion1>,<index2>:<insertion2>,...}|
+
+Il faut noter que dans cette syntaxe, une \verb|<insertion>| peut être
+\begin{itemize}
+	\item un nombre seul «\verb|add{<index>:<nombre>}|»
+	\item une liste csv de nombres qui \emph{doit} être entre accolades «\verb|add{<index>:{n1,n2,n3...}}|»
+	\item un tuple auquel on accède par \verb|\tplexe| : «\verb|add{<index>:{\tplexe{<nom tuple>}}}|».
+\end{itemize}
+
+En ce qui concerne les \verb|<index>|, ils peuvent être compris entre $0$ et $n$ où $n$ est le nombre d'éléments du tuple. Les index négatifs entre $-n-1$ et $-1$ sont également permis :
+\begin{itemize}
+	\item un \verb|<index>| égal à 0 ou à $-n-1$ place l'\verb|<insertion>| au début du tuple passé en entrée ;
+	\item un \verb|<index>| égal à $n$ ou $-1$ place l'\verb|<insertion>| à la fin du tuple ;
+	\item les \verb|<index>| \emph{ne sont pas} recalculés après chaque \verb|<insertion>|, mais seulement après la dernière. Il n'est donc pas équivalent d'écrire «\verb|.add{1:100,2:200}|» et «\verb|.add{1:100}.add{2:200}|». En effet, 200 sera à l'index 3 dans le premier cas alors qu'il sera à l'index 2 dans le second cas.
+\end{itemize}
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) ajout en 1er     : \tplexe{nn.add{0:{666,667}}}\par
+2) ajout index 11   : \tplexe{nn.add{11:{666,667}}}\par
+3) ajout en dernier : \tplexe{nn.add{-1:{666,667}}}|
+
+\exemple|\newtuple{X}{10,20,30,40,50,60}%
+\newtuple{Y}{1,2,3,4}%
+1) \tplexe{X.add{0:{\tplexe{Y}}}}\par
+2) \tplexe{X.add{2:{\tplexe{Y}}}}\par
+3) \tplexe{X.add{-1:{\tplexe{Y}}}}\par
+4) \tplexe{X.add{1:100,2:200}}\par
+5) \tplexe{X.add{1:100}.add{2:200}}|
+
+\subsection{La méthode \texttt{op}}
+Cette méthode développable, qui effectue une \verb|<opération>| sur tous les éléments du tuple, a pour syntaxe
+\code|op{<opération>}|
+
+L'\verb|<opération>| est une expression ne contenant pas d'accolades, évaluable par \verb|\fpeval| une fois que toutes les occurrences de «\texttt{val}» aient été remplacées par la valeur de chaque élément, et toutes les occurrences de «\texttt{idx}» par son index.
+
+\exemple|\newtuple{X}{10,20,30,40,50,60}%
+1) \tplexe{X.op{val+5}}\par
+2) \tplexe{X.op{val*val}}\par
+3) \tplexe{X.op{val+idx}}\par
+4) \tplexe{X.op{idx<4 ? val-1 : val+1 }}|
+
+\subsection{La méthode \texttt{filter}}
+Cette méthode développable, qui sélectionne certains éléments selon un ou plusieurs critères, a pour syntaxe
+\code|filter{<test>}|
+et où \verb|<test>| est un booléen ne contenant pas d'accolades, évaluable par \verb|\fpeval| une fois que toutes les occurrences de «\texttt{val}» aient été remplacées par la valeur de chaque élément, et toutes les occurrences de «\texttt{idx}» par son index.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.filter{val<10}}\par
+2) \tplexe{nn.filter{val>5 && val<10}}\par
+3) \tplexe{nn.filter{idx<3 || idx>13}}\par
+4) \tplexe{nn.filter{val!=6.3 && val!=2.9 && val!=4.1}}/
+
+\subsection{La méthode \texttt{comp}}
+Cette méthode développable compose deux tuples de même longueur avec une opération que l'utilisateur spécifie. Sa syntaxe est
+\code|comp{<opération>}{<nom tuple>}|
+où le tuple dont le nom est passé en deuxième argument \emph{doit} avoir la même longueur que le tuple passé en entrée de la méthode.
+
+L'\verb|<opération>| est une expression ne contenant pas d'accolades, évaluable par \verb|\fpeval| une fois que toutes les occurrences de «\texttt{xa}» aient été remplacées par la valeur de chaque élément du tuple d'entrée, et toutes les occurrences de «\texttt{xb}» par celle du tuple spécifié en 2\ieme{} argument.
+
+Produit de 2 tuples et leur «\texttt{somprod}» :
+\exemple/\newtuple{A}{2,-4,3,7,-1}%
+\newtuple{B}{-9,0,4,6,-2}%
+produit : \tplexe{A.comp{xa*xb}{B}}\par
+somprod : \tplexe{A.comp{xa*xb}{B}.sum}/
+
+Calcul de la plus petite distance au point A(2.5 ; -0.5) connaissant la liste des abscisses et la liste des ordonnées d'une trajectoire (ici elliptique) :
+\exemple/\newtuple{ListX}{4,2,0.5,1,3,6.5}%
+\newtuple{ListY}{2,1.5,0,-1.5,-2,0.5}%
+\tplexe{ListX.comp{sqrt((xa-2.5)**2+(xb+0.5)**2)}{ListY}.min}/
+
+\section{Les méthodes du groupe \texttt{tuple} $\longrightarrow$ \texttt{stockage}}
+Comme ces méthodes ne renvoient pas un résultat puisqu'elles effectuent une assignation, elle ne sont pas développables, et \emph{doivent} se trouver en dernière position. Si ce n'est pas le cas, toutes les méthodes qui les suivent seront ignorées.
+
+\subsection{La méthode \texttt{split}}
+Cette méthode coupe le tuple passé en entré à la méthode après l'index spécifié. La syntaxe est
+\code|split{<index>}{<tuple1>}{<tuple2>}|
+Le tuple passé en entrée de la méthode est coupé après l'\verb|<index>| : la partie avant la coupure est assignée, via \verb|\newtuple| au tuple de nom «\texttt{tuple1}» et la partie restant au tuple de nom «\texttt{tuple2}». Aucune vérification n'est faite sur l'existence des 2 tuples ; il est donc possible de remplacer silencieusement des tuples existants.
+
+L'\verb|<index>| doit se trouver entre 0 et $n-2$ s'il est positif ou entre $-n$ et $-2$ s'il est négatif, $n$ étant le nombre d'éléments du tuple passé en entré.
+
+\exemple/%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+\tplexe{nn.split{5}{n1}{n2}}%
+tuple avant : \tplexe{n1}\par
+tuple après : \tplexe{n2}/
+
+\subsection{La méthode \texttt{store}}
+Cette macro a pour but de stocker le résultat de la dernière méthode. Si ce résultat est un tuple, la syntaxe est
+\code|store{<nom tuple>}|
+et si le résultat est un nombre ou une donnée affichable venant de la méthode \texttt{show} :
+\code|store{<macro>}|
+
+Aucune vérification n'est faite sur l'existence du tuple ou de la macro. Il est donc possible de remplacer silencieusement un tuple déjà créé ou une macro existante.
+
+\exemple|%\newtuple{nn}{12.7, 6.3, 11.7, 2.9, 5.5, 8.1, 4.3, 9.4,
+%              13.6, 2.9, 6.9, 11.2, 5.1, 7.7, 10.1, 3, 4.1}%
+1) \tplexe{nn.sorted.filter{val>11}.store{nn1}}%
+   \tplexe{nn1}\par
+2) \tplexe{nn1.len.store\nnlen}%
+   \meaning\nnlen\par
+3) \def\tplformat#1#2{\fbox{#2}}\def\tplsep{ }%
+   \tplexe{nn1.show.store\nnshow}%
+   \meaning\nnshow\par
+4) \edef\nndisp{\tplexe{nn1}}%
+   \meaning\nndisp% méthode générique
+|
+
+Pour stocker le résultat de la méthode générique, il faut utiliser \verb|\edef| car \verb|\tplexe{<tuple>.store<macro>}| est incorrect puisque dans ce cas, la méthode \texttt{store} s'applique à un tuple.
+
+\section{Génération de tuples}
+Pour générer un tuple, on peut utiliser la macro développable \verb|\gentuple| qui est destinée à être appelée dans le 2\ieme{} argument de \verb|\newtuple|. Sa syntaxe est
+\code/\gentuple{<valeurs initiales>},\genrule<règle de génération>;\while||\until<condition>}/
+où :
+\begin{itemize}
+	\item les \verb|<valeurs initiales>| sont facultatives. Si elles sont présentes, elles \emph{doivent} être suivies d'une virgule. La macro \verb|\gentuple| détermine leur nombre $i$ par comptage ($i$ devant être au plus égal à 9). Ces valeurs initiales seront recopiées en début de tuple et par la suite, ont vocation à être utilisées dans la \verb|<règle de génération>| à des fins de récurrence;
+	\item la \verb|<règle de génération>| est une expression ne contenant pas d'accolades, évaluable par \verb|\fpeval| une fois que dans les $i$ valeurs précédentes, toutes les occurrences de \verb|\1| aient été remplacées par la valeur n°1, \verb|\2| par la valeur n°2, etc. De plus, chaque occurrence de \verb|\i| est remplacée par la valeur de l'index en cours.
+	\item la \verb|<condition>| est un booléen ne contenant pas d'accolades, évaluable par \verb|\fpeval| une fois que toutes les occurrences de «\texttt{val}» aient été remplacées par la valeur de l'élément calculé, et toutes les occurrences de «\verb|\i| par son index. Si le mot-clé après \verb|;| est \verb|\while|, la boucle est du type \verb|while<condition>...endwhile| alors que si ce mot-clé est \verb|\until|, il s'agit d'une boucle \verb|repeat...until<condition>|.
+\end{itemize}
+
+Génération des 10 premiers entiers pairs :
+\exemple|\gentuple{\genrule (\i+1)*2 ; \until \i=9 }\par
+ou\par
+\gentuple{\genrule (\i+1)*2 ; \while \i<10 }|
+
+Génération de 15 entiers aléatoires entre 1 et 10 :
+\exemple|\gentuple{\genrule randint(1,10) ; \until \i=14}|
+
+Génération des carrés d'entiers jusqu'à 500 :
+\exemple|\gentuple{\genrule\i*\i; \while val<500 }|
+
+Génération des 10 premiers termes la suite de Fibonacci :
+\exemple|\gentuple{1,1,\genrule\1+\2; \until \i=9 }|
+
+Génération des 10 premiers termes de $u_0=1$ ; $u_1=1$ ; $u_2=-1$ et $u_{n}=u_{n-3}u_{n-1}-u^2_{n-2}$ :
+\exemple|\gentuple{1,1,-1,\genrule\1*\3-\2*\2; \until \i=10}|
+
+Génération de la suite de Syracuse (connue aussi comme «suite $3n+1$») de 15 :
+\exemple|\gentuple{15,\genrule \1/2=trunc(\1/2) ? \1/2 : 3*\1+1 ; \until val=1}%
+\meaning\syr|
+
+Altitude maximale et longueur de la suite de Syracuse de 27 :
+\exemple|\newtuple{syr27}
+ {\gentuple{27,\genrule \1/2=trunc(\1/2) ? \1/2 : 3*\1+1 ; \until val=1}}%
+longueur = \tplexe{syr27.len}\par
+alt max  = \tplexe{syr27.max}|
+
+\section{Conclusion}
+\subsection{Motivation}
+D'une façon un peu étonnante, assez peu de choses existent pour manipuler et opérer sur des listes de nombres\footnote{Il y a bien un package \texttt{commalists-tools}, mais il est clairement trop limité. Comme tous les packages de son auteur qui floode le CTAN, il ne fait qu'aligner \emph{ad nauseam}, linéairement et sans véritable programmation, les macros de haut niveau des packages \texttt{tikz}, \texttt{listofitems}, \texttt{xstring}, \texttt{xint} et \texttt{simplekv}.}.
+
+Le principal défi a surtout été d'offrir des macros développables et aussi une syntaxe originale dans le monde de \TeX{} du type \verb|<objet>.<méthode 1>.<méthode 2>...<méthode n>|, où l'on peut enchainer les méthodes exécutées sur un «objet» qui est un tuple de nombres. J'ignore si des packages proposent ce genre de syntaxe, mais elle est finalement assez intuitive. Comme je suis assez peu familier avec la programmation de macros purement développables, j'ai voulu de nombreuses fois renoncer. Mais j'ai fini par trouver un trou de souris qui permet que le tout fonctionne à peu près, à l'exception des nombreux bugs qui doivent encore se cacher un peu partout.
+
+Je remercie ceux qui en trouvent de me le signaler par email, voire même de proposer de nouvelles fonctionnalités.
+
+\subsection{Vitesse d'exécution}
+Lorsqu'on met un pied dans l'optimisation de la vitesse d'exécution, surtout de macros purement développables, on n'en ressort pas ! C'est un puits sans fond de questionnements sur les arguments des macros, sur des petites ---~ou grosses~--- astuces qui font gagner du temps, et un casse tête sur la façon de jongler avec les arguments délimités et les retrouver ensuite !
+
+J'espère ne pas être tombé dans ce piège, car j'y suis à peine entré. De toutes façons, \TeX{} n'est pas fait pour du calcul massif, car c'est avant tout un logiciel de composition. Pour le calcul, des outils performants qui battent \TeX{} à plate couture existent à foison.
+
+Quoiqu'il en soit, «macro développable» va un peu à l'encontre de «vitesse d'exécution». À titre d'information, je mets ci-dessous les temps de compilation, en secondes, de la création de tuples contenant $n$ entiers aléatoires. Cela dépend de l'ordinateur utilisé, bien sûr, mais les ordres de grandeur sont bien révélateurs. On voit clairement qu'il est illusoire de dépasser le millier de nombres car le temps de création d'un tuple croit ensuite rapidement\footnote{Sans compter que le tuple est immédiatement recréé et recalculé après avoir été modifié par les méthodes \texttt{set}, \texttt{add}, \texttt{op}, \texttt{filter}, \texttt{split} et \texttt{comp}}. Ceci dit, qui utiliserait \TeX{} pour des calculs sur autant de nombres ?
+
+Ce tableau illustre les vitesses de création d'un tuple d'entiers signés aléatoires compris entre $-1000$ et $1000$. Pour rappel la création d'un tuple suppose le tri de ses éléments (par tri rapide), le calcul de la somme des nombres et celui de la somme des carrés. Les 3 modes peuvent ainsi être comparés pour des tuples plus ou moins grands.\label{benchmark}
+
+\begin{center}
+	\directlua{pdfelapsedtimer_basetime=0}
+	\protected\def\pdfresettimer{\directlua{pdfelapsedtimer_basetime = os.clock()}}
+	\protected\def\pdfelapsedtime{\numexpr\directlua{tex.print(math.floor((os.clock()-pdfelapsedtimer_basetime)*65536+0.5))}\relax}
+	\catcode`\_11
+	\def\doten#1{#1#1#1#1#1#1#1#1#1#1}
+	\def\falsenewtuple#1{}
+	\def\printtime{\fpeval{round((\the\pdfelapsedtime-\tare)/655360,3)} s}
+	\def\dotest#1{%
+		\tplsetmode{#1}%
+		\pdfresettimer%
+		\doten{\edef\test{\expandafter\tpl_newtuple_b\expandafter{\mytuple}}\let\mytest\empty}%
+		\printtime
+	}
+	\def\testnewtuple#1{% #1=nb éléments dans le tuple
+		\xdef\mytuple{\gentuple{\genrule randint(-1000,1000) ; \until \i==#1 }}%
+		\pdfresettimer
+		\doten{\edef\mytest{\expandafter\falsenewtuple\expandafter{\mytuple}}\let\mytest\empty}%
+		\xdef\tare{\the\pdfelapsedtime}%
+		#1%
+		&%
+		\dotest{int}
+		&%
+		\dotest{dec:short}
+		&%
+		\dotest{dec:long}
+	}
+	\def\gentab{%
+		\begin{center}
+		\begin{tabular}{|r|c|c|c|}\hline
+			Nb items&\texttt{int} & \texttt{dec:short} & \texttt{dec:long}\\\hline
+			\testnewtuple{25}  \\\hline
+			\testnewtuple{50}  \\\hline
+			\testnewtuple{100} \\\hline
+			\testnewtuple{200} \\\hline
+			\testnewtuple{400} \\\hline
+			\testnewtuple{800} \\\hline
+			\testnewtuple{1600}\\\hline
+		\end{tabular}
+		\end{center}
+	}
+	\catcode`\_8
+	\gentab
+\end{center}
+
+\subsection{Exemple : population des états}
+Le tuple \verb|\Wpop| contient la population de chaque état dans le monde, en millions d'habitants\footnote{Les données proviennent de \href{https://www.unfpa.org/data/world-population-dashboard}{https://www.unfpa.org/data/world-population-dashboard}} :
+\exemple/\newtuple\Wpop{
+43.4, 2.8, 46.3, 37.8, 0.1, 46.1, 2.8, 0.1, 26.7, 9.0, 10.5, 0.4, 1.5,
+174.7, 0.3, 9.5, 11.7, 0.4, 14.1, 0.8, 12.6, 3.2, 2.7, 217.6, 0.5, 6.6,
+23.8, 13.6, 0.6, 17.1, 29.4, 39.1, 5.9, 18.8, 19.7, 1425.2, 7.5, 0.7,
+52.3, 0.9, 6.2, 5.2, 29.6, 4.0, 11.2, 0.2, 1.3, 10.5, 26.2, 105.6, 5.9,
+1.2, 0.1, 11.4, 18.4, 114.5, 6.4, 1.8, 3.8, 1.3, 1.2, 129.7, 0.9, 5.5,
+64.9, 0.3, 0.3, 2.5, 2.8, 3.7, 83.3, 34.8, 10.3, 0.1, 0.4, 0.2, 18.4,
+14.5, 2.2, 0.8, 11.9, 10.8, 10.0, 0.4, 1441.7, 279.8, 89.8, 46.5, 5.1,
+9.3, 58.7, 2.8, 122.6, 11.4, 19.8, 56.2, 0.1, 4.3, 6.8, 7.7, 1.8, 5.2,
+2.4, 5.5, 7.0, 2.7, 0.7, 31.1, 21.5, 34.7, 0.5, 24.0, 0.5, 0.4, 5.0,
+1.3 ,129.4, 0.1, 3.5, 0.6, 38.2, 34.9, 55.0, 2.6, 31.2, 17.7, 0.3, 5.3,
+7.1 ,28.2, 229.2, 2.1, 5.5, 4.7, 245.2, 4.5, 10.5, 6.9, 34.7, 119.1,
+40.2 ,10.2, 3.3, 2.7, 51.7, 3.3, 1.0, 19.6, 144.0, 14.4, 0.0, 0.2, 0.1,
+0.2 ,0.03, 0.2, 37.5, 18.2, 7.1, 0.1, 9.0, 6.1, 0.0, 5.7, 2.1, 0.8, 18.7,
+61.0 ,11.3, 47.5, 21.9, 5.5, 49.4, 0.6, 10.7, 8.9, 24.3, 10.3, 71.9, 1.4,
+9.3 ,0.1, 1.5, 12.6, 86.3, 6.6, 0.0, 0.0, 49.9, 37.9, 9.6, 68.0, 69.4,
+341.8 ,0.1, 3.4, 35.7, 0.3, 29.4, 99.5, 0.6, 35.2, 21.1, 17.0}
+Nombre : \tplexe{\Wpop.len}\par
+Moyenne : \tplexe{\Wpop.mean}\par
+Médiane : \tplexe{\Wpop.med}\par
+Écart type : \tplexe{\Wpop.stdev}\par
+Quintile \#1 : \tplexe{\Wpop.quantile{0.2}}\par
+Quintile \#4 : \tplexe{\Wpop.quantile{0.8}}/
+\newtuple\Wpop{
+43.4, 2.8, 46.3, 37.8, 0.1, 46.1, 2.8, 0.1, 26.7, 9.0, 10.5, 0.4, 1.5,
+174.7, 0.3, 9.5, 11.7, 0.4, 14.1, 0.8, 12.6, 3.2, 2.7, 217.6, 0.5, 6.6,
+23.8, 13.6, 0.6, 17.1, 29.4, 39.1, 5.9, 18.8, 19.7, 1425.2, 7.5, 0.7,
+52.3, 0.9, 6.2, 5.2, 29.6, 4.0, 11.2, 0.2, 1.3, 10.5, 26.2, 105.6, 5.9,
+1.2, 0.1, 11.4, 18.4, 114.5, 6.4, 1.8, 3.8, 1.3, 1.2, 129.7, 0.9, 5.5,
+64.9, 0.3, 0.3, 2.5, 2.8, 3.7, 83.3, 34.8, 10.3, 0.1, 0.4, 0.2, 18.4,
+14.5, 2.2, 0.8, 11.9, 10.8, 10.0, 0.4, 1441.7, 279.8, 89.8, 46.5, 5.1,
+9.3, 58.7, 2.8, 122.6, 11.4, 19.8, 56.2, 0.1, 4.3, 6.8, 7.7, 1.8, 5.2,
+2.4, 5.5, 7.0, 2.7, 0.7, 31.1, 21.5, 34.7, 0.5, 24.0, 0.5, 0.4, 5.0,
+1.3 ,129.4, 0.1, 3.5, 0.6, 38.2, 34.9, 55.0, 2.6, 31.2, 17.7, 0.3, 5.3,
+7.1 ,28.2, 229.2, 2.1, 5.5, 4.7, 245.2, 4.5, 10.5, 6.9, 34.7, 119.1,
+40.2 ,10.2, 3.3, 2.7, 51.7, 3.3, 1.0, 19.6, 144.0, 14.4, 0.0, 0.2, 0.1,
+0.2 ,0.03, 0.2, 37.5, 18.2, 7.1, 0.1, 9.0, 6.1, 0.0, 5.7, 2.1, 0.8, 18.7,
+61.0 ,11.3, 47.5, 21.9, 5.5, 49.4, 0.6, 10.7, 8.9, 24.3, 10.3, 71.9, 1.4,
+9.3 ,0.1, 1.5, 12.6, 86.3, 6.6, 0.0, 0.0, 49.9, 37.9, 9.6, 68.0, 69.4,
+341.8 ,0.1, 3.4, 35.7, 0.3, 29.4, 99.5, 0.6, 35.2, 21.1, 17.0}
+
+On modifie \verb|\Wpop|, en ne retenant que les états «moyennement» peuplés. On considère arbitrairement leur population entre 10 et 100 millions d'habitants :
+\exemple/\tplexe{\Wpop.filter{val>=10 && val<=100}.store\Wpop}%
+Nombre : \tplexe{\Wpop.len}\par
+Moyenne : \tplexe{\Wpop.mean}\par
+Médiane : \tplexe{\Wpop.med}\par
+Écart type : \tplexe{\Wpop.stdev}\par
+Quintile \#1 : \tplexe{\Wpop.quantile{0.2}}\par
+Quintile \#4 : \tplexe{\Wpop.quantile{0.8}}
+
+Répartition sur 6 intervalles égaux :\par
+\begin{tabular}{lc}\\\hline
+	De 10 à 25 & \tplexe{\Wpop.filter{val<25}.len}\\
+	De 25 à 40 & \tplexe{\Wpop.filter{val>=25 && val<40}.len}\\
+	De 40 à 55 & \tplexe{\Wpop.filter{val>=40 && val<55}.len}\\
+	De 55 à 70 & \tplexe{\Wpop.filter{val>=55 && val<70}.len}\\
+	De 70 à 85 & \tplexe{\Wpop.filter{val>=70 && val<85}.len}\\
+	De 85 à 100& \tplexe{\Wpop.filter{val>=85}.len}\\\hline
+\end{tabular}/
+
+\subsection{TODO list}
+À implémenter plus ou moins rapidement :
+\begin{enumerate}
+	\item utiliser le tri par insertion pour trier les tuples presque triés obtenus suite aux méthodes \texttt{add}, \texttt{set}, \texttt{op} (risqué car dépend de l'opération !)
+	\item utiliser le tri fusion pour ajouter un tuple ou des nombres à un tuple ;
+	\item autres optimisation de la rapidité ?
+\end{enumerate}
+\end{document}

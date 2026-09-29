@@ -1,0 +1,67 @@
+% !TeX root = ../easyfloats.tex
+
+\usepackage{fontawesome}
+\usepackage{amsmath}
+
+
+% ------- version -------
+
+\newcommand\changesinversion[1]{\CheckVersion#1\relax\subsection[#1]{\FormatTag{#1}}}
+
+\newcommand\GitlabUrl{https://gitlab.com/erzo/latex-easyfloats/-}
+\newcommand\FormatTag[1]{#1\href{\GitlabUrl/tags/#1}{\,$^\text{\normalfont\faGitlab}$}}
+\def\CheckVersion#1#2\relax{%
+	\ifx #1v%
+		% ok
+	\else
+		\PackageWarning{change log}{Version number #1#2 is missing the v in front}{}%
+	\fi
+}
+
+
+% ------- changelog environment -------
+
+\ExplSyntaxOn
+\bool_new:N \l_changelog_in_list_bool
+
+\cs_new:Nn \changelog_item: {
+	\bool_if:NF \l_changelog_in_list_bool {
+		\bool_set_true:N \l_changelog_in_list_bool
+		\begin{itemize}
+	}
+	\item
+}
+
+\cs_new:Nn \changelog_end: {
+	\bool_if:NT \l_changelog_in_list_bool {
+		\end{itemize}
+		\bool_set_false:N \l_changelog_in_list_bool
+	}
+}
+
+\cctab_begin:N \c_code_cctab
+\char_set_catcode_active:N \^^M%
+\newenvironment{changelog}{%
+	\catcode`\^^M=\active%
+	\def^^M##1{%
+		\ifx ##1-%
+			\exp_after:wN \use_i:nn%
+		\else
+			\exp_after:wN \use_ii:nn%
+		\fi%
+			{\changelog_item:}%
+		{\ifx ##1^^M%
+			\exp_after:wN \use_i:nn%
+		\else
+			\exp_after:wN \use_ii:nn%
+		\fi%
+			{\changelog_end:}%
+			{~##1}%
+		}
+	}%
+	\cs_new:Npn\commit##1^^M{\unskip\href{\GitlabUrl/commit/##1}{\,$^\text{\faGitlab}$}^^M}%
+}{%
+	\changelog_end:
+}%
+\cctab_end:%
+\ExplSyntaxOff

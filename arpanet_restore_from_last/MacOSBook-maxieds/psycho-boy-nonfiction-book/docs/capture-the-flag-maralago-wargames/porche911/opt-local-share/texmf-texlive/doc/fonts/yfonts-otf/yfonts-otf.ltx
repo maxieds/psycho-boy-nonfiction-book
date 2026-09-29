@@ -1,0 +1,280 @@
+\DocumentMetadata{pdfstandard=A-2b, lang=en-GB}
+\documentclass[paper=a4]{scrartcl}
+% Packages
+\usepackage{graphics, array}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hypcap=false]{caption}
+\usepackage{shortvrb}
+\usepackage{yfonts-otf}
+\usepackage{fourier-otf}
+\setmonofont{Inconsolatazi4}[Scale=MatchLowercase,
+                             HyphenChar=None,StylisticSet={2,3}]
+\usepackage[german,british]{babel}
+\babeltags{de=german}
+\usepackage[english]{varioref}
+\usepackage{realscripts}
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{pdftitle={yfonts-otf User’s Guide},
+            pdfauthor={Daniel FLIPO},
+            colorlinks
+            }
+\newcommand*{\hlabel}[1]{\phantomsection\label{#1}}
+%
+\MakeShortVerb{\|}
+
+%verbatim : modifier  \verbatim@font
+\def\ColorVerb{\color{MidnightBlue}}
+\makeatletter
+\let\verbatim@fontORI\verbatim@font
+\def\verbatim@font{\ColorVerb\verbatim@fontORI}
+\makeatother
+
+\newcommand*{\pkg}[1]{\texttt{\ColorVerb #1}}
+\newcommand*{\opt}[1]{\texttt{\ColorVerb #1}}
+\newcommand*{\file}[1]{\texttt{\ColorVerb #1}}
+\newcommand*{\cmd}[1]{\texttt{\ColorVerb \textbackslash #1}}
+\newcommand*{\family}[1]{\textit{#1}}
+\newcommand*{\MF}{\textsf{Metafont}}
+
+\title{OpenType version of yfonts for Old German}
+\author{\href{mailto:daniel.flipo@free.fr}{Daniel \textsc{Flipo}}}
+\newcommand*{\version}{0.50}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+  This bundle provides OpenType versions of the Old German fonts \family{yfrak},
+  \family{ygoth} and \family{yswab} designed by Yannis Haralambous in \MF{}
+  (1990).
+
+  A style file \file{yfonts-otf.sty} is included to load these fonts easily;
+  it is meant as a replacement for LuaLaTeX and XeLaTeX of
+  \file{yfonts.sty}.
+
+  A Type\,1 version of these fonts has been provided by Thorsten Bronger (2002).
+
+  The \family{yinit} font (initials) is already available as in OpenType format,
+  thanks to Élie Roux.
+
+  Please beware of the \emph{experimental} status of the current
+  version~(\version).
+
+  All three fonts are covered by OFL licence, style file and documentation
+  are under LPPL-1.3 licence.
+\end{abstract}
+
+\section{Usage}
+
+\pkg{yfonts-otf.sty} loads \pkg{fontspec} and mimics what the
+\pkg{yfonts} package does for the  Type\,1 version: it defines three font
+families |\frakfamily|, |\gothfamily| and |\swabfamily| and the corresponding
+commands with arguments |\textgoth{}|, |\textfrak{}|, and |\textswab{}|.
+
+All three families are loaded with all ligatures activated, an |s|
+automatically prints a long~\textfrak{ſ} (initial and middle form) or a
+round~{\frakfamily{s\hspace{1sp}}} (final form)%
+\footnote{See section~\ref{sec:long-s} for details.}.
+Coding |"a|, |"e|, |"o|, |"u|, |"s| is only supported through Babel’s
+German shorthands to produce \textfrak{ä, ë, ö, ü, ß}.
+Nowadays, most keyboards give access to the Unicode characters |ä|,
+|ë|, |ö|, |ü| and |ß|, so typing them directly is a better alternative.
+
+In the \family{yfrak} family, the command |\etc| prints {\etc}
+a variant of the \textfrak{uſw} abbreviation while |\Jvar| prints {\Jvar}
+a variant of \textfrak{J} (suggestion of Daniel Sanders, mentioned by Yannis).
+
+The OpenType feature |Alternate=0| turns \textfrak{ä, ë, ö, ü} into
+{\frakfamily\addfontfeature{Alternate=0} ä, ë, ö, ü}.
+It works for the \family{yfrak} and \family{yswab} families but not for
+\family{ygoth} (variant not available in the original version).
+
+The \family{yswab} family offers |CharacterVariant=1| (|+cv01|) and
+|CharacterVariant=2| (|+cv02|) which respectively change the exclam and
+question marks:
+{\swabfamily !} into {\swabfamily\addfontfeature{CharacterVariant=1}!}
+and {\swabfamily ?} into {\swabfamily\addfontfeature{CharacterVariant=2}?}.
+
+Used with the \family{ygoth} family, the |StylisticSet=1| (|+ss01|)
+feature provides variants for the long~s and its ligatures:
+{\gothfamily ſ, ſi, ſſ, ſſi, ſt} are turned into
+{\gothfamily\addfontfeature{CharacterVariant=1} ſ, ſi, ſſ, ſſi, ſt}.
+
+\pagebreak[4]
+These features can be added locally anywhere in the document body, f.i.:\\
+|\frakfamily\addfontfeature{Alternate=0}|\\
+or using \pkg{yfonts-otf.sty}’s options \opt{varumlaut} and
+\opt{gothvarlongs}, f.i.:\\
+|\usepackage[varumlaut,gothvarlongs]{yfonts-otf}|\\
+\opt{varumlaut} applies globally to both \family{yfrak} and \family{yswab}
+families, \opt{gothvarlongs} applies only to \family{ygoth} family.
+
+It is also possible to use these fonts without loading \pkg{yfonts-otf.sty},
+then I recommend to call them by \emph{file name}, as XeTeX cannot find fonts in
+the texmf tree by \emph{font name}%
+\footnote{Unless they have been declared as \emph{System} fonts…}, f.i.:\\
+|\setmainfont{yfrak.otf}[|\texttt{\ColorVerb<options>}|]|
+or |\fontspec{yswab.otf}[|\texttt{\ColorVerb<options>}|]|, this
+will work with both LuaTeX and XeTeX.
+
+\section{Coding the long/round s}
+\label{sec:long-s}
+
+The traditional German rules for long ({\frakfamily ſ\kern1pt}) and
+round ({\frakfamily\shorts}) are somewhat complex,
+a summary can be found in the Unifraktur Maguntia Manual
+(\file{Dokumentation\_en\_fraktur.pdf}, \cite{UF}).
+
+\pkg{yfonts-otf} borrows the automatic choice from the Unifraktur Maguntia
+fonts. It uses OpenType features (|ss11|), according to the authors it fails
+in less than 1~\% of the occurences.
+When the algorithm fails, it is possible to force a round s
+(coding |s=| or |\shorts|)  or a long~ſ (coding {\ColorVerb ſ}\,%
+\footnote{On Unix systems the \opt{Compose} key can be used:
+    \opt{Compose f s}.}
+or |\longs|).
+
+Loading the \pkg{yfonts-otf} package activates the |ss11|
+feature unless option \opt{gothvarlongs} is added, then the |ss01| is
+activated instead (together with |cv01|) for the \family{ygoth} family so that
+the long~ſ and its ligatures are printed as
+{\gothfamily\addfontfeature{CharacterVariant=1} ſ, ſi, ſſ, ſſi, ſt}
+instead of {\gothfamily ſ, ſi, ſſ, ſſi, ſt} (default).
+
+Aliases are provided for these features:
+|Style=longs| for |StylisticSet=11| (|+ss11|) and
+|Style=gothvarlongs| for |StylisticSet=1| (|+ss01|).
+
+Experts might want to type {\ColorVerb ſ} (U+17F) or {\ColorVerb s}
+(U+073) to keep the full control of the {\ColorVerb s} form; this requires
+either to deactivate the |ss11| feature after loading the \pkg{yfonts-otf}
+package, or to use a direct |\setmainfont{}[]| or |\fontspec{}[]| call.
+Feature |CharacterVariant=1| (|+cv01|) may be used for the \family{ygoth}
+family to get the long~ſ variant
+{\gothfamily\addfontfeature{CharacterVariant=1} ſ, ſi, ſſ, ſſi, ſt}
+instead of {\gothfamily ſ, ſi, ſſ, ſſi, ſt}.
+
+%\newpage
+\section{List of optional ligatures}
+
+Ligatures are split into three groups which may be deactivated globally or
+inside a group with the command
+|\addfontfeature{RawFeature=-|\textit{\ColorVerb ligname}|}|%
+\footnote{\pkg{yonts-otf} specifically defines \cmd{ZWNJ} (\cmd{char"200C}) to
+  break unwanted ligatures: {\frakfamily ent\ZWNJ{}ziffern} (no {\frakfamily tz}
+  lig) can be coded \texttt{\ColorVerb ent\cmd{ZWNJ} ziffern} or
+  \texttt{\ColorVerb ent\cmd{ZWNJ}\{\}ziffern}.}
+
+\vspace{\baselineskip}
+|\frakfamily| : \let\ffam\frakfamily
+\begin{tabular}{>\rmfamily l|l| l}
+  \hline
+  Name & Default ($+$) & Optional ($-$) \\
+  \hline
+  rlig & \ffam ch, ck, st, tz
+       &\ffam\addfontfeature{RawFeature=-rlig} ch, ck, st, tz \\
+  liga &\ffam ff, fi, fl, ffi, ffl, sf, ſſ
+       &\ffam\addfontfeature{RawFeature=-liga}
+              ff, fi, fl, ffi, ffl, sf, ſſ \\
+  \hline
+\end{tabular}
+
+\vspace{.5\baselineskip}
+|\swabfamily| : \let\ffam\swabfamily
+\begin{tabular}{>\rmfamily l|l| l}
+  \hline
+  Name & Default ($+$) & Optional ($-$) \\
+  \hline
+  rlig &\ffam ch, ck, st, tz
+       &\ffam\addfontfeature{RawFeature=-rlig} ch, ck, st, tz \\
+  liga &\ffam ff, fi, fl, ffi, ffl, sf, ſſ
+       &\ffam\addfontfeature{RawFeature=-liga}
+              ff, fi, fl, ffi, ffl, sf, ſſ \\
+  \hline
+\end{tabular}
+
+\vspace{.5\baselineskip}
+|\gothfamily| : \let\ffam\gothfamily
+\begin{tabular}{>\rmfamily l|l| l}
+  \hline
+  Name & Default ($+$) & Optional ($-$) \\
+  \hline
+  rlig &\ffam ch, ck, st, {\addfontfeature{StylisticSet=1} st}, tz
+       &\ffam\addfontfeature{RawFeature=-rlig}
+              ch, ck, st, {\addfontfeature{StylisticSet=1} st}, tz\\
+  liga &\ffam ct, ff, fi, fl, ffi, ffl, ij, ll,
+       &\ffam\addfontfeature{RawFeature=-liga}
+              ct, ff, fi, fl, ffi, ffl, ij, ll,\\
+       &\ffam  ſſ, ſi, ſſi,
+         \addfontfeature{RawFeature=+cv01}ſſ, ſi, ſſi,
+       &\ffam\addfontfeature{RawFeature=-liga} ſſ, ſi, ſſi,
+         \addfontfeature{RawFeature=-liga;+cv01} ſſ, ſi, ſſi,
+       \\
+  hlig &\ffam ba, be, bo, da, de, do, ha, he, ho,
+       &\ffam\addfontfeature{RawFeature=-hlig}
+              ba, be, bo, da, de, do, ha, he, ho, \\
+       &\ffam pa, pe, po, pp, qq, va, ve, vu
+       &\ffam\addfontfeature{RawFeature=-hlig}
+              pa, pe, po, pp, qq, va, ve, vu\\
+  \hline
+\end{tabular}
+
+\section{Samples}
+
+A practical usage of these fonts can be found in file \file{Erlkonig.ltx} to
+be compiled with \pkg{lualatex}.
+It shows the beginning of Goethe’s Erlkönig poem typeset with each of them.
+
+\section{Compatibility with other packages}
+
+\begin{description}
+\item[\pkg{microtype}] is compatible with \pkg{yfonts-otf} (protusion,
+  expansion and letter spacing) but as we have no specific \file{mt-*.cfg}
+  config file yet for the yfonts\footnote{Contributions welcome!},
+  adding\\
+  |\DeclareMicrotypeAlias{yfrak.otf}{TU-basic}|\\
+  |\DeclareMicrotypeAlias{yswab.otf}{TU-basic}|\\
+  |\DeclareMicrotypeAlias{ygoth.otf}{TU-basic}|\\
+  after loading \pkg{microtype} is recommended to avoid (lots of) warnings
+  about missing characters.
+
+\item[\pkg{soul}] is old (2003) and not recommended for OpenType fonts.
+  Its command |\so{}| brakes ligatures (f.i. |\so{Wasser}|), for
+  letter spacing \pkg{microtype}’s command |\textls{}| should be preferred.
+  With LuaTeX, \pkg{lua-ul} is a much better choice for striking or
+  underlining.
+
+\end{description}
+
+\section{Acknowledgements}
+
+Great thanks to Keno Wehr for carefully testing the initial version and
+making valuable suggestions for improvements.
+
+\enlargethispage*{\baselineskip}
+\begin{thebibliography}{99}
+\bibitem{YH} Typesetting Old German: Fraktur, Schwabacher, Gotisch and
+  Initials, \\ \textit{Yannis Haralambous},
+  \href{https://www.tug.org/TUGboat/tb12-1/tb31hara.pdf}%
+  {TUGboat 12\#1 (1991), pages 129–138}.
+
+\bibitem{WS} The \pkg{yfonts} package for use with \LaTeXe,
+  \textit{Walter Schmidt}, (2019).
+
+\bibitem{UF} The \href{https://sourceforge.net/projects/unifraktur/}%
+  {Unifraktur Maguntia} TrueType fonts (2017).
+\end{thebibliography}
+
+%\vspace{\baselineskip}
+%\centerline{\Huge\decotwo}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: luatex
+%%% TeX-master: t
+%%% coding: utf-8
+%%% End:

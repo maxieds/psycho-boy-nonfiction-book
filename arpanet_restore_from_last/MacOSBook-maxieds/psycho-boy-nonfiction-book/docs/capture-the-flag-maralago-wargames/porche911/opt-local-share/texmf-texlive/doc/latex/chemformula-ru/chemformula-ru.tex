@@ -1,0 +1,83 @@
+\documentclass[a4paper]{article}
+\usepackage[]{geometry}
+\geometry{total={180mm, 267mm}, centering}
+
+\usepackage[russian]{babel}
+\usepackage[ch2Ch,cosh2ch]{chemformula-ru}
+\usepackage{array,multicol}
+
+\begin{document}
+
+\title{The \textsf{chemformula-ru} package}
+\author{Alexey Kuznetsov}
+\date{10.07.2024}
+\maketitle
+
+\begin{multicols}{2}
+The \textsf{chemformula} package defines the command\\[.5ex]
+\mbox{}\hfil\verb|\сh{|\textit{chemical formula}\verb|}|\\[.5ex]
+to type up chemical formulas:\\[.5ex]
+\mbox{}\hfil\verb|\ch{H3PO4}| $\to$ \ch{H3PO4}.\\[.5ex]
+Russian settings of the \textsf{babel} package \textsf{(russianb.ldf)} define the same command to print the hyperbolic cosine:\\[.5ex] 
+\mbox{}\hfil\verb|$\ch x$|\ $\to\ \Ch x$.\\[.5ex]
+Loading packages together leads to the error\\[1ex]
+\mbox{}\hfil\verb|! LaTeX Error: Command \ch already defined.|\\[1ex]
+The \textsf{chemformula-ru} package loads the \textsf{chemformula} and ``neutralizes'' the error by making the babel's command undefined.
+Two it's parameters configure printing of the hyperbolic cosine in Russian notation:\\[1ex]
+\begin{tabular}{>\sf l @{ ---\quad } p{.75\linewidth}}
+cosh2ch & overrides the \verb|\cosh| command for printing:\linebreak
+          \verb|$\cosh x$| $\to \cosh x$.  \\[1ex]
+ch2Ch & defines a new \verb|\Ch| command for printing:\linebreak
+         \verb|$\Ch x$| $\to \Ch x$.
+\end{tabular}\\[1ex]
+
+Пакет \textsf{chemformula} вводит команду\\[.5ex]
+\mbox{}\hfil\verb|\сh{|\textit{химическая фоормула}\verb|}|\\[.5ex]
+для верстки химических формул:\\[.5ex]
+\mbox{}\hfil\verb|\ch{H3PO4}| $\to$ \ch{H3PO4}.\\[.5ex]
+Русские настройки пакета \textsf{babel (russianb.ldf)} определяют одноименную команду для печати гиперболического косинуса:\\[-.85\baselineskip]
+\mbox{}\hfil\verb|$\ch x$|\ $\to\ \Ch x$.\\[.5ex]
+Cовместная загрузка пакетов ведет к ошибке\\[1ex]
+\mbox{}\hfil\verb|! LaTeX Error: Command \ch already defined.|\\[1ex]
+Пакет \textsf{chemformula-ru} загружает \textsf{chemformula} и <<нейтрализует>> ошибку, делая команду пакета \textsf{babel} неопределенной.
+Два его параметра настраивают печать гиперболического косинуса в русских нотациях:\\[1ex]
+\begin{tabular}{>\sf l @{ --- } p{.8\linewidth}}
+cosh2ch & переопределяет для печати команду \verb|\cosh|:\linebreak
+          \verb|$\cosh x$| $\to \cosh x$.  \\[1ex]
+ch2Ch & определяет для печати новую команду \verb|\Ch|:\linebreak
+         \verb|$\Ch x$| $\to \Ch x$.
+\end{tabular}
+\end{multicols}
+
+\thispagestyle{empty}
+
+\noindent\hrulefill
+
+\begin{verbatim}
+%% Redefine \cosh to print ch.
+\DeclareOption{cosh2ch}{\def\cosh@ch{%
+                        \DeclareRobustCommand\cosh{\mathop{\operator@font ch}\nolimits}}}
+
+%% Define new command \Ch to print ch.
+\DeclareOption{ch2Ch}{\def\ch@Ch{%
+                      \DeclareRobustCommand\Ch{\mathop{\operator@font ch}\nolimits}}}
+
+%% Pass all other options to the chemformula package.
+\DeclareOption*{\PassOptionsToPackage\CurrentOption{chemformula}}
+
+\ProcessOptions\relax
+
+\RequirePackage{chemformula}
+
+\BeforeBeginEnvironment{document}{
+   \let\@Chem@Formula\ch \let\ch\undefined
+   \AtBeginDocument{ 
+      \let\ch\@Chem@Formula 
+      \@ifundefined{cosh@ch}{\relax}{\cosh@ch}
+      @ifundefined{ch@Ch}{\relax}{\ch@Ch}
+   } }
+
+\endinput
+\end{verbatim}
+
+\end{document}

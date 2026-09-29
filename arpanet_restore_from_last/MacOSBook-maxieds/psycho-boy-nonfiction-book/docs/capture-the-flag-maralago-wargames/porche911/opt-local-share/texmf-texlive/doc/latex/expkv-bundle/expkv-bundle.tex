@@ -1,0 +1,357 @@
+\PassOptionsToPackage{full}{textcomp}
+\documentclass[exfoo=value, exbar, exfoo=\empty]{l3doc}
+
+% preamble >>=
+\makeatletter
+\let\save@onlypreamble\@onlypreamble
+\let\@onlypreamble\@gobble
+\usepackage[all]{expkv}
+\let\@onlypreamble\save@onlypreamble
+\makeatother
+\usepackage[oldstylenums,nott]{kpfonts}
+\input{glyphtounicode}
+\pdfgentounicode=1
+\usepackage{xfp} % required for an example
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{collcell}
+\usepackage{siunitx}
+\DeclareSIUnit\ops{ops}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{microtype}
+\usepackage{accsupp}
+\usepackage{enumitem}
+\usepackage{randtext}
+
+\usepackage{tcolorbox}%>>=
+\newtcolorbox{exresult}[2][]
+  {%
+     colback=ekvgrey!10!white%
+    ,colframe=ekvgrey%
+    ,fontupper=\small
+    ,width={\dimexpr#2\relax}%
+    ,#1%
+  }
+\newtcbox\exres[1][]
+  {
+     colback=ekvgrey!10!white
+    ,colframe=ekvgrey
+    ,size=small
+    ,nobeforeafter
+    ,tcbox raise base
+    ,fontupper=\small
+    ,#1
+  }
+%=<<
+
+\usepackage{listings}%>>=
+\input{preamble-lst.tex}
+%=<<
+
+\let\metaORIG\meta
+\protected\def\meta #1{\texttt{\metaORIG{#1}}}
+\let\margORIG\marg
+\protected\def\marg #1{\texttt{\margORIG{#1}}}
+\let\oargORIG\oarg
+\protected\def\oarg #1{\texttt{\oargORIG{#1}}}
+
+\input{preamble-examples.tex}
+\input{preamble-logos.tex}
+
+\makeatletter
+% shortcuts >>=
+\newcommand\Vkey{\texttt{Val}-\key}
+\newcommand*\Nkey{\texttt{NoVal}-\key}
+\newcommand\kv{\meta{key}=\penalty2000\meta{value}}
+\newcommand\kvarg{\{\kv, \ldots\}}
+\newcommand\key{\meta{key}}
+\newcommand\val{\meta{value}}
+\newcommand\set{\meta{set}}
+\newcommand\prefix{\texorpdfstring{\textit{prefix}}{prefix}}
+\newcommand\prefixes{\textit{prefixes}}
+\newcommand\type{\texorpdfstring{\textit{type}}{type}}
+\newcommand\types{\textit{types}}
+\newcommand\tkn[2]{\texttt{\char`#1}\textsubscript{#2}}
+\newcommand\expansion{\meta{expansion}}
+%\newcommand\expnotation{}
+%\edef\expnotation
+  %{\noexpand\texttt{exp\string|}\penalty\@M-\hskip\z@skip notation}
+\newcommand\singlecs[1]
+  {%
+    The \meta{cs} should be a single control sequence, such as
+    \cs[no-index]{#1}. \ignorespaces
+  }
+\newcommand\ekvdocsection[8]
+  {%
+    \clearpage
+    \chardef\ekvdoc@insection1
+    \section[{#7}]%
+      {%
+        #7%
+        \hfill
+        \begingroup\scriptsize\ttfamily
+          \begin{tabular}{@{}r@{}l@{}}%
+            #1{\string\input\{expkv#8\}}      & \rlap{#2{\ \% plain}}\\
+            #3{\string\usepackage\{expkv#8\}} & \rlap{#4{\ \% LaTeX}}\\
+            #5{\string\usemodule[expkv#8]}    & \rlap{#6{\ \% ConTeXt}}\\
+          \end{tabular}%
+        \endgroup
+        \label{sec:expkv#8}%
+      }%
+    \chardef\ekvdoc@insection0
+  }
+\chardef\ekvdoc@insection0
+\newcommand*\genericekv
+  {\ekvdocsection{}{\textcolor{gray}}{}{\textcolor{gray}}{}{\textcolor{gray}}}
+\newcommand*\latexekv
+  {\ekvdocsection\phantom\phantom{}{\textcolor{gray}}\phantom\phantom}
+%=<<
+
+\hypersetup{linkcolor=red!80!black,urlcolor=purple!80!black}
+
+\input{preamble-prefixes.tex}
+\input{preamble-noidx.tex}
+\input{preamble-enverb.tex}
+
+% vissp >>=
+\ExplSyntaxOn
+\cs_new_protected:Npn \vissp #1
+  {
+    \group_begin:
+      \tl_set:Nn \l_tmpa_tl {#1}
+      \tl_replace_all:Nnn \l_tmpa_tl { ~ } { \asciispace }
+      \l_tmpa_tl
+    \group_end:
+  }
+\ExplSyntaxOff
+% =<<
+
+\ekvcSplit\expkvorules% >>=
+  {
+     cd = \emph{nothing}
+    ,cu = \emph{nothing}
+    ,pd = \emph{nothing}
+    ,pu = \emph{nothing}
+  }
+  {%
+    \begin{description}
+      \item[Class:]
+        \begin{description}
+          \item[defined]   #1
+          \item[undefined] #2
+        \end{description}
+      \item[Package:]
+        \begin{description}
+          \item[defined]   #3
+          \item[undefined] #4
+        \end{description}
+    \end{description}%
+  }
+\ekvcSecondaryKeys\expkvorules
+  {
+     meta d = {cd={#1},pd={#1}}
+    ,meta u = {cu={#1},pu={#1}}
+  }% =<<
+
+\newcommand*\pmso[1] % poor man's strike out%>>=
+  {%
+    \leavevmode
+    \begingroup
+      \sbox0{#1}%
+      \rlap{\vrule height .6ex depth -.5ex width \wd0\relax}%
+      \usebox0\relax
+    \endgroup
+  }%=<<
+
+\@ifdefinable\gobbledocstriptag{\def\gobbledocstriptag#1>{}}
+
+\renewcommand*\partname{Part}
+
+% \addsec and friends >>=
+\newcommand*\addsec@[2]
+  {%
+    \c@secnumdepth=%
+    \expanded
+      {%
+        \m@ne
+        \unexpanded{#1{#2}}%
+        \c@secnumdepth=\the\c@secnumdepth\relax
+      }%
+  }
+\newcommand*\addsec  {\addsec@\section}
+\newcommand*\addssec {\addsec@\subsection}
+\newcommand*\addsssec{\addsec@\subsubsection}
+% =<<
+
+\newenvironment{syntaxexample}% >>=
+  {%
+    \quote
+    \ttfamily\small\frenchspacing
+    \parskip=\z@
+    \def\indent{\leavevmode\phantom{mm}}%
+  }
+  {\endquote}
+\newenvironment{syntaxexample*}
+  {\syntaxexample\obeylines}
+  {\endsyntaxexample}% =<<
+
+\newcommand\expkvdocPrintErrors[1][]
+  {%
+    \protected\long\def\expkvdoc@errfont##1%
+      {\texttt{\frenchspacing\textcolor{red!80!black}{##1}}}%
+    \protected\long\def\ekv@err@collect##1\par##2%
+      {\expkvdoc@errfont{! \detokenize{##2} Error: ##1}#1}%
+    \protected\long\def\expkvdoc@errm##1##2%
+      {\expkvdoc@errfont{! expkv##1 Error: ##2}#1}%
+    \def\ekv@errm{\expkvdoc@errm{}}%
+    \def\ekvc@errm{\expkvdoc@errm{-cs}}%
+    \def\ekvd@errm{\expkvdoc@errm{-def}}%
+    \def\ekvp@errm{\expkvdoc@errm{-pop}}%
+  }
+\makeatother
+
+\ExplSyntaxOn
+\str_new:N \g__expkvdoc_module_str
+\cs_new_protected:Npn \expkvdocfile #1% >>=
+  {
+    \expkvdoc_for_module:nn {#1}
+      {
+        \str_if_eq:nnTF {#1} {main}
+          { \lstset{style=expkv} }
+          { \lstset{style=expkv-#1} }
+        \addtocontents{exs}
+          {
+            \medskip
+            \noindent
+            \use:c { expkv \str_if_eq:nnF {#1} {main} { \str_head:n {#1} } }
+            \smallskip
+          }
+        \input{pkg-#1.tex}
+      }
+  }% =<<
+\cs_new_protected:Npn \expkvdocdtx #1% >>=
+  {
+    \expkvdoc_for_module:nn {#1}
+      {
+        \str_if_eq:nnTF {#1} {main}
+          { \DocInput{expkv.dtx} }
+          { \DocInput{expkv-#1.dtx} }
+      }
+  }% =<<
+\cs_new_protected:Npn \expkvdoc_for_module:nn #1#2% >>=
+  {
+    \use:e
+      {
+        \exp_not:n
+          {
+            \str_gset:Nn \g__expkvdoc_module_str {#1}
+            #2
+            \str_gset:Nn \g__expkvdoc_module_str
+          }
+            { \g__expkvdoc_module_str }
+      }
+  }% =<<
+\ExplSyntaxOff
+
+\input{preamble-l3doctweaks.tex}
+
+%=<<
+
+% for thanking Niranjan
+% code from https://tex.stackexchange.com/a/635125/117050
+\def\DevnagVersion{2.17}
+\usepackage{devanagari}
+
+\newif\ifexpkvDocImplementation%\expkvDocImplementationtrue
+
+\begin{document}
+\title{\expkvbundle}
+%\title% >>=
+  %{%
+    %\texorpdfstring
+      %{%
+        %\huge\expkvbundle
+        %\\[\medskipamount]
+        %\Large an {\expFormat}andable
+        %\meta{{\kvstyle k}\kern-.05em ey}=%
+        %\meta{{\kvstyle v}\kern-.05em alue}
+        %implementation and more%
+      %}
+      %{expkv-bundle - an expandable <key>=<value> implementation and more}%
+  %}% =<<
+\author
+  {%
+    Jonathan P. Spratte%
+    \thanks
+      {%
+        \protect\randomize{jspratte@yahoo.de};
+        Special thanks to {\protect\dn Enr\2jn} (Niranjan) for valuable
+        suggestions and additions to this documentation.%
+      }%
+  }
+\date{2024-12-26}
+\begingroup
+\renewcommand*\thefootnote{\fnsymbol{footnote}}
+\maketitle
+\endgroup
+
+\begin{abstract}%>>=
+  \noindent\parfillskip=0pt
+  The \expkvbundle\ provides at its core a \emph{fully expandable} \kv\ parser,
+  that is \emph{safe} for active commas and equals signs, \emph{reliable} to
+  only strip one set of braces after spaces are stripped, and blazingly
+  \emph{fast}, as of writing this only \pkg{keyval} is faster.
+  \par
+  \bigskip
+  This parser gets augmented by a family of packages. \expkvc\ allows to easily
+  define expandable macros using a \kv\ interface, making the expandable parser
+  available to the masses. \expkvd\ provides a \kv\ interface to
+  define common \key-types. With \expkvo\ you can parse package
+  and class options. \expkvp\ enables you to design your own prefix
+  oriented parsers for interface definitions.
+\end{abstract}%=<<
+
+\tableofcontents
+
+\clearpage
+
+\begin{documentation}% >>=
+\ifexpkvDocImplementation\part{Documentation}\fi
+
+\input{introduction.tex}
+\clearpage
+\input{impatient.tex}
+
+\expkvdocfile{main}
+\expkvdocfile{cs}
+\expkvdocfile{def}
+\expkvdocfile{opt}
+\expkvdocfile{pop}
+\clearpage
+\lstset{style=expkv-all}
+\input{comparison.tex}
+\end{documentation}% =<<
+
+\clearpage
+\listofexamples
+
+\ifexpkvDocImplementation
+  \clearpage
+  \begin{implementation}% >>=
+    \part{Implementation}
+    \expkvdocdtx{main}
+    \clearpage
+    \expkvdocdtx{cs}
+    \clearpage
+    \expkvdocdtx{def}
+    \clearpage
+    \expkvdocdtx{opt}
+    \clearpage
+    \expkvdocdtx{pop}
+  \end{implementation}% =<<
+\fi
+
+\clearpage
+\PrintIndex
+\end{document}

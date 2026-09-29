@@ -1,0 +1,295 @@
+\documentclass{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TCBTHEOREM stuff
+\usepackage{coloredtheorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% EXAMPLE document
+\usepackage[margin=1.6in]{geometry}
+\usepackage{fancyvrb}
+\usepackage{minted}
+\usepackage{amsfonts}
+\usepackage{kantlipsum}
+\usepackage{tabularx}
+\usepackage{xspace}
+\newcommand\tcthrm{\textsf{\cthfilename}\xspace}
+
+%% ALGPSEUDOCODEX stuff
+\usepackage{algorithm}
+\usepackage[
+  noEnd=false,
+  beginComment={$\triangleright$~\scriptsize},
+  beginLComment={$\triangleright$~},
+  endLComment={},
+]{algpseudocodex}
+
+\algnewcommand\Input{\textbf{Input:~}}
+\algrenewcommand\Output{\textbf{Output:~}}
+\algrenewcommand\algorithmicforall{\textbf{for each}}
+\algnewcommand\Vspace{% 
+  {\setlength\itemsep{-1ex}\item[]~}
+}
+\algnewcommand\Let[2]{\State \ensuremath{#1 \gets #2}}
+\algnewcommand\And{\ensuremath{\wedge}\xspace}
+\algnewcommand\Or{\ensuremath{\vee}\xspace}
+\algnewcommand\Not{\ensuremath{\neg}\xspace}
+
+\usepackage[colorlinks,linkcolor=blue!80]{hyperref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% MAIN DOCUMENT
+\begin{document}
+  \title{The \tcthrm package}
+  \author{João M. Lourenço\\\url{https://github.com/joaomlourenco/coloredtheorem}}
+  \date{\cthfiledate\ (v\cthfileversion)}
+
+  \maketitle
+  
+
+\section{Introduction}
+\label{sec:introduction}
+
+The \tcthrm package is a simple environment that allows to write stuff inside boxes from \texttt{tcolorbox}.  If necessary the boxes gracefully overflow to the next page.  This package takes no options and includes \texttt{tcolorbox} if necessary. You may include \texttt{tcolorbox} with your own favourite options prior to including this package.
+
+Akin to \mintinline{TeX}+\newtheorem+ from the \texttt{amsmath} package, the user should start by defining a new \emph{theorem/box} group and customize its aspect. Each new environment will have its own counter/numbering. Notice that \mintinline{TeX}+\label{…}+ and \mintinline{TeX}+\ref{…}+ work as expected.  There is also a command to generate the corresponding \emph{list of …}
+
+\section{Usage}
+\label{sec:usage}
+
+\definecolor{mycgreen}{RGB}{57,126,27}
+\newcommand\ca[1]{\textcolor{blue}{#1}}
+\newcommand\co[1]{\textcolor{blue!50}{#1}}
+\newcommand\cc[1]{\textcolor{red!50!black}{#1}}
+\newcommand\ck[1]{\textcolor{mycgreen}{#1}}
+
+\begin{itemize}
+  \item \mintinline{TeX}+\usepackage{coloredtheorem}+
+  \begin{itemize}
+      \item Load the \texttt{coloredtheorem} package.
+            This package will load \texttt{tcolorbox} if necessary.
+  \end{itemize}
+
+  \item \mintinline[escapeinside=||]{TeX}+\cthnewtheorem{|\ca{<envname>}|}{|\ca{<Name>}|}[|\co{<tcolorbox options>}|]+
+  \begin{itemize}
+    \item Create a new boxed \emph{algorithm-like} environment.
+    \begin{itemize}
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<envname>}|+ is the suffix for the
+            new environment being defined, e.g., \ca{\texttt{algoritm}}. The effective environment name will be \mintinline[escapeinside=||]{TeX}+|\ca{cth<envname>}|+, e.g., \ca{\texttt{cthalgorithm}}.
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<Name>}|+ is the (printable) name
+            or the new environment being defined, e.g., \emph{Algorithm}.
+      \item \mintinline[escapeinside=||]{TeX}+|\co{<tcolorbox options>}|+ default
+            options for the environment being defined (this argument is optional).
+            These options are passed straight to the \texttt{tcolorbox} environment,
+            so anything valid for \texttt{tcolorbox} is also valid here.
+    \end{itemize}
+  \end{itemize}
+
+ \item \begin{minted}[escapeinside=||]{TeX}
+\begin{|\ca{cth<envname>}|}[|\co{<AltCaption>}|]{|\ca{<Caption>}|}[|\co{<tcolorbox options>}|]
+  |\cc{<Contents>}|
+\end{|\ca{cth<envname>}|}
+\end{minted}
+  \begin{itemize}
+    \item Create a new \emph{algorithm-like} box with the given contents.
+    \begin{itemize}
+      \item \mintinline[escapeinside=||]{TeX}+|\co{<AltCaption>}|+ is the alternative
+            caption for the
+            \mintinline[escapeinside=||]{TeX}+\cthlistof|\ck{<envname>s}|+
+            (see below).
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<envname>}|+ is the suffix for environment name,
+            e.g., \verb+algorithm+.
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<Caption>}|+ is the caption/title of
+            the box.  If the caption is left empty, this box will not be listed with the
+            \mintinline[escapeinside=||]{TeX}+\cthlistof|\ck{<envname>s}|+
+            (see below).
+      \item \mintinline[escapeinside=||]{TeX}+|\co{<tcolorbox options>}|+ options to be
+            passed to the \verb+tcolorbox+ environment, which will override the defaults
+            given in \mintinline{TeX}+\cthnewalgorithm+  (this argument is optional).
+      \item \mintinline[escapeinside=||]{TeX}+|\cc{<Contents>}|+ the contents to by typeset inside the colored environment.
+    \end{itemize}
+  \end{itemize}
+
+ \item \begin{minted}[escapeinside=||]{TeX}
+\begin{|\ca{cth<envname>*}|}{|\ca{<Caption>}|}[|\co{<tcolorbox options>}|]
+  |\cc{<Contents>}|
+\end{|\ca{cth<envname>*}|}
+\end{minted}
+  \begin{itemize}
+    \item Create a new \emph{algorithm-like} box with the given contents.
+    \begin{itemize}
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<envname>}|+ is the suffix for environment name,
+            e.g., \verb+algorithm+.
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<Caption>}|+ is the caption/title of
+            the box.  This box will be unnumbered and will not be listed with the
+            \mintinline[escapeinside=||]{TeX}+\cthlistof|\ck{<envname>s}|+
+            (see below).
+      \item \mintinline[escapeinside=||]{TeX}+|\co{<tcolorbox options>}|+ options to be
+            passed to the \verb+tcolorbox+ environment, which will override the defaults
+            given in \mintinline{TeX}+\cthnewalgorithm+  (this argument is optional).
+      \item \mintinline[escapeinside=||]{TeX}+|\cc{<Contents>}|+ the contents to by typeset inside the colored environment.
+    \end{itemize}
+  \end{itemize}
+
+  \item \mintinline[escapeinside=||]{TeX}+\cthlistof|\ck{<envname>s}|+
+  \begin{itemize}
+      \item \mintinline[escapeinside=||]{TeX}+|\ca{<envname>}|+ is the environment name
+            suffix, e.g., \mintinline[escapeinside=||]{TeX}+\cthlistofalgorithms+.
+            Please notice that there is a `s' (plural) after
+            \mintinline[escapeinside=||]{TeX}+|\ca{<envname>}|+.
+  \end{itemize}
+\end{itemize}
+
+\section{Example}
+\label{sec:examples}
+
+Let's start by creating two new environments, one for \emph{algorithms} and another for \emph{examples}, both defaulting to a gray frame, the former with a yellowish background and the latter with a lighter gray background.
+
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\cthnewtheorem{|\ca{algorithm}|}{|\ca{Algorithm}|}[|\co{coltitle=}|black, |\co{colback=}|yellow!10,
+                                     |\co{colframe=}|black!15]
+\cthnewtheorem{|\ca{example}|}{|\ca{Example}|}[|\co{coltitle=}|black, |\co{colback}|=black!5,
+                                 |\co{colframe=}|black!30]  
+\end{minted}
+
+\cthnewtheorem{algorithm}{Algorithm}[coltitle=black, colback=yellow!10, colframe=black!15]
+\cthnewtheorem{example}{Example}[coltitle=black, colback=black!5, colframe=black!30]
+\cthnewtheorem{thought}{Though}[enhanced, coltitle=green!60!black, colbacktitle=green!10, 
+                                colback=green!10, frame hidden, boxrule=0pt, 
+                                attach title to upper={\\[0.5ex]}, 
+                                borderline west={1mm}{-2mm}{green!60!black}]
+
+And this is a shiny thought!
+\begin{cththought}{This is a tought}
+\kant[2]
+\end{cththought}
+
+The box with \autoref{alg:advance1}, which uses the default visual that was given when creating the environment with \mintinline{TeX}+\cthnewtheorem+ and gracefully overflows onto the next page, was created with:
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\begin{|\ca{cthalgorithm}|}{|\co{Advance a counter to the next value in a domain}|
+                     $\omega \in \mathbb{N}$.}
+  |\cc{Algorithm body here!}|
+\end{|\ca{cthalgorithm}|}
+\end{minted}
+
+\newcommand{\bracesemptyset}{\ensuremath{\lbrace\,\rbrace}}
+
+\begin{cthalgorithm}{Advance a counter to the next value in a domain $\omega \in \mathbb{N}$.}
+  \label{alg:advance1}
+\begin{algorithmic}[1]
+  \Statex \Input $\alpha$: The current value; and $\omega$: the domain.
+  \Statex \Output The next value of $\alpha$ within the domain $\omega$.
+  \LComment{\color{blue}
+            e.g., $\alpha = 3 \And \omega = \lbrace 8, 3, 2, 21, 5, 1 \rbrace \rightarrow 5$}
+
+  \Vspace
+
+  \Function{advance}{$\alpha$: int, $\omega$: set} $\rightarrow$ int \textbf{is}
+    % \Statex\Comment{As we are incrementing one by one on the operation IDs, the complexity of this function is linear in the value of the largest operation id.}
+    \Let {\alpha} {\alpha + 1}
+                    \Comment{try the next value}
+    \While{$\alpha \not\in \omega \And \omega \neq \bracesemptyset$}
+                    \Comment{if this value is not in the domain}
+      \Let {\alpha} {\alpha + 1}
+                    \Comment{try the next value}
+    \EndWhile
+    \If{$\omega \neq \bracesemptyset$}
+      \Let {\omega} {\omega \,\backslash \lbrace \alpha \rbrace}
+                    \Comment{remove the value from the domain}
+    \EndIf
+    \State \Return $\alpha$
+                    \Comment{\color{red} the next value (or the last value plus one if no more values)}
+  \EndFunction
+\end{algorithmic}
+\end{cthalgorithm}
+
+The box \autoref{expl:explstd}, which uses the default visual for the environment (as given to \mintinline{TeX}+\cthnewtheorem...+), was created with:
+
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\begin{|\ca{cthexample}|}{|\co{This is an example!}|}
+  |\cc{Example body here!}|
+\end{|\ca{cthexample}|}
+\end{minted}
+
+
+\begin{cthexample}{This is an example!}
+  \label{expl:explstd}
+  \emph{As is shown in the writings of Aristotle, the things in themselves (and it remains a mystery why this is the case) are a representation of time. Our concepts have lying before them the paralogisms of natural reason, but our a posteriori concepts have lying before them the practical emploument of our experience.}
+\end{cthexample}
+
+Now, let's create a new box for \autoref{alg:advance1}, but with a different customized visual, which will affect only this entry!  Notice that the customization argument is passed straight to the \texttt{tcolorbox} environment, so anything valid for \texttt{tcolorbox} is also valid here.  \autoref{alg:advance2} was created with the following code:
+
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\begin{|\ca{cthalgorithm}|}
+          {|\ca{Advance a counter to the next value in a domain}| $\omega \in
+                \mathbb{N}$|\ca{, but now with a customized visual. Also, notice}|
+                |\ca{that this algorithm breaks the page boundaries.}|}
+          [|\co{coltitle}=|white, |\co{colback}=|green!10, |\co{colframe}=|green!70!black,
+                |\co{colbacktitle}=|\sffamily\bfseries\large, |\co{fonttitle}|=red!50!white]
+  |\cc{Algorithm body here!}|
+\end{|\ca{cthalgorithm}|}
+\end{minted}
+
+\begin{cthalgorithm}{Advance a counter to the next value in a domain $\omega \in \mathbb{N}$, but now with a customized visual. Notice that this algorithm also breaks the page boundaries.}[coltitle=white, colback=red!10, colframe=red!50!black, fonttitle=\sffamily\bfseries\large, colbacktitle=red!70!black]
+  \label{alg:advance2}
+\begin{algorithmic}[1]
+  \Statex \Input $\alpha$: The current value; and $\omega$: the domain.
+  \Statex \Output The next value of $\alpha$ within the domain $\omega$.
+  \LComment{\color{blue}
+            e.g., $\alpha = 3 \And \omega = \lbrace 8, 3, 2, 21, 5, 1 \rbrace \rightarrow 5$}
+
+  \Vspace
+
+  \Function{advance}{$\alpha$: int, $\omega$: set} $\rightarrow$ int \textbf{is}
+    % \Statex\Comment{As we are incrementing one by one on the operation IDs, the complexity of this function is linear in the value of the largest operation id.}
+    \Let {\alpha} {\alpha + 1}
+                    \Comment{try the next value}
+    \While{$\alpha \not\in \omega \And \omega \neq \bracesemptyset$}
+                    \Comment{if this value is not in the domain}
+      \Let {\alpha} {\alpha + 1}
+                    \Comment{try the next value}
+    \EndWhile
+    \If{$\omega \neq \bracesemptyset$}
+      \Let {\omega} {\omega \,\backslash \lbrace \alpha \rbrace}
+                    \Comment{remove the value from the domain}
+    \EndIf
+    \State \Return $\alpha$
+                    \Comment{\color{red} the next value (or the last value plus one if no more values)}
+  \EndFunction
+\end{algorithmic}
+\end{cthalgorithm}
+
+And now an example with no caption and a different visual…  this example will not go into the \mintinline{TeX}+\listofexamples+ below!
+
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\begin{|\ca{cthexample}|}{}
+          [|\co{coltitle}=|black, |\co{colback}=|magenta!10, |\co{colframe}=|magenta!20]
+  |\cc{Example body here!}|
+\end{|\ca{cthexample}|}
+\end{minted}
+
+\begin{cthexample}{}[coltitle=black, colback=magenta!10, colframe=magenta!20]
+  \emph{\kant[4]}
+\end{cthexample}
+
+And yet another unnumbered example, this one using the alternative (star) syntax. This example will not go into the \mintinline{TeX}+\listofexamples+ below as well!
+
+\begin{minted}[bgcolor=red!5,fontsize=\small,escapeinside=||]{TeX}
+\begin{|\ca{cthexample*}|}
+          {|\ca{This is an unnumbered example with a title}|}
+          [|\co{coltitle}=|black, |\co{colback}=|yellow!10, |\co{colframe}=|yellow!20]
+  |\cc{Example body here!}|
+\end{|\ca{cthexample*}|}
+\end{minted}
+
+\begin{cthexample*}{This is an unnumbered example with a title}[coltitle=black, colback=yellow!10, colframe=yellow!20]
+  \emph{\kant[4]}
+\end{cthexample*}
+
+Now let's print the lists of algorithms and examples. Remember to add the prefix \ck{\texttt{cth}} to the \ck{\texttt{listof}}, i.e., \mintinline{TeX}+\cthlistofalgorithms+ and \mintinline{TeX}+\cthlistofexamples+!
+
+\cthlistofalgorithms
+
+\cthlistofexamples
+
+\end{document}

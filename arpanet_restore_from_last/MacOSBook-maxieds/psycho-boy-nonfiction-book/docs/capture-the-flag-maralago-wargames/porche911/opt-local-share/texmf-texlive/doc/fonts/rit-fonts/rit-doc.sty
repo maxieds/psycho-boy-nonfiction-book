@@ -1,0 +1,284 @@
+%% File: 'rit-doc.sty'
+%% (c) 2023, CV Radhakrishnan <cvr@river-valley.org> and
+%%           Rachana Inst Typography <info@rachana.org.in>
+%%
+%% This file has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainer of this work is the CV Radhakrishnan
+%% (cvr@river-valley.org).
+%% 
+%% The list of all files belonging to the distribution is given in
+%% the file `manifest.txt'.
+%% 
+%% 
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{rit-doc}[2023-06-01 v0.2
+    Extra definitions for TUGboat journal class (CVR)]
+\newif\ifprint \printfalse
+\newif\ifweb   \webfalse
+\newif\ifdoc   \docfalse
+\newif\ifcmr   \cmrfalse
+\newif\iflibertine \libertinefalse
+\DeclareOption{print}{\global\printtrue\global\webfalse}
+\DeclareOption{web}{\global\printfalse\global\webtrue}
+\DeclareOption{doc}{\global\doctrue}
+\DeclareOption{p}{\global\printtrue\global\webfalse}
+\DeclareOption{w}{\global\printfalse\global\webtrue}
+\DeclareOption{cmr}{\global\cmrtrue\global\libertinefalse}
+\DeclareOption{lin}{\global\libertinetrue\global\cmrfalse}
+\ExecuteOptions{web}
+\ProcessOptions
+%
+\RequirePackage{acro}
+\DeclareRobustCommand\myacro[1]{\FindAcFont\ac{#1}}
+\DeclareAcronym{jwra}{short=JWRA,
+  long=JWRA,short-format=\small}
+\DeclareAcronym{xml}{short=XML,
+  long=Extensible Markup Language,short-format=\small}
+\DeclareAcronym{pdf}{short=PDF,
+  long=Portable Document Format,short-format=\small}
+\DeclareAcronym{ctan}{short=CTAN,
+  long=Comprehensive \TeX{} Archive Network,short-format=\small}
+
+%\RequirePackage[numbers,sort&compress]{natbib}
+\RequirePackage{xspace}
+\RequirePackage{enumitem,amsfonts}
+\RequirePackage{etoolbox,expl3,xparse}
+%
+% luatexrenderer=none needed, if not characters
+% in the upper planes will not be listed in fonttable
+% using unicodefonttable.sty
+\RequirePackage[luatexrenderer=none]{polyglossia}
+\RequirePackage{xltxtra}
+\RequirePackage[svgnames,dvipsnames]{xcolor}
+\RequirePackage{booktabs,adjustbox}
+%\RequirePackage{tcolobox}
+%\tcbuselibrary{listings}
+%\tcbset{listing engine=listings}
+\ifprint
+  \colorlet{urlcolor}{black}
+  \colorlet{filecolor}{black}
+  \colorlet{linkcolor}{black}
+  \colorlet{citecolor}{black}
+  \colorlet{mla}{black}
+  \colorlet{mlb}{black}
+  \colorlet{itemcolor}{black}
+  \colorlet{scolor}{black}
+  \colorlet{cscolor1}{black}
+  \colorlet{cscolor2}{black}
+  \colorlet{cscolor3}{black}
+  \colorlet{cscolor4}{black}
+  \colorlet{stringcolor}{black}
+  \colorlet{idcolor}{black}
+  \colorlet{commentcolor}{black}
+  \colorlet{numcolor}{black}
+  \colorlet{rulecolor}{black}
+  \colorlet{lstcolor}{black}
+  \colorlet{lstbgcolor}{white}
+  \colorlet{strcolor}{black}
+  \colorlet{kwdcolor1}{black}
+  \colorlet{kwdcolor2}{black}
+  \colorlet{verbcolor}{black}
+  \colorlet{Mahogany}{black}
+  \colorlet{Blue}{black}
+  \colorlet{DarkBlue}{black}
+  \colorlet{black!20!cyan}{black}
+  \colorlet{blue!70}{black}
+  \colorlet{ForestGreen}{black}
+  \colorlet{BrickRed}{black}
+  \colorlet{DarkSlateGray}{black}
+  \colorlet{black!50}{black}
+  \colorlet{magenta}{black}
+  \colorlet{DarkViolet}{black}
+  \colorlet{DarkCyan}{black}
+  \colorlet{DarkGreen}{black}
+\else
+  \colorlet{scolor}{black!60}
+  \colorlet{urlcolor}{blue!80}
+  \colorlet{filecolor}{black!70}
+  \colorlet{linkcolor}{blue!80}
+  \colorlet{citecolor}{ForestGreen}
+  \colorlet{mla}{DarkSlateGrey}
+  \colorlet{mlb}{LightSlateGrey}
+  \colorlet{itemcolor}{DarkSlateGrey}
+  \colorlet{cscolor1}{ForestGreen}
+  \colorlet{cscolor2}{Red!80}
+  \colorlet{cscolor3}{blue!80}
+  \colorlet{cscolor4}{black}
+  \colorlet{strcolor}{black}
+  \colorlet{idcolor}{brown}
+  \colorlet{commentcolor}{black!40}
+  \colorlet{numcolor}{black!80}
+  \colorlet{rulecolor}{black!30}
+  \colorlet{lstcolor}{DarkSlateGrey}
+  \colorlet{lstbgcolor}{white}
+  \colorlet{stringcolor}{orange}
+  \colorlet{kwdcolor1}{DarkGreen}
+  \colorlet{kwdcolor2}{violet}
+  \colorlet{verbcolor}{violet}
+% 
+\fi
+\RequirePackage[colorlinks=true]{hyperref}
+\AtBeginDocument{\hypersetup{%xetex,
+    pdftitle={Metafont/MetaPost and a complex Indic script},
+    pdfauthor={CV Radhakrishnan, KV Rajeesh and KH Hussain},
+    pdfsubject={Font development using MetaPost},
+    pdfkeywords={RIT; Font; Indic Scripts; Malayalam; MetaPost; FontForge},
+    bookmarksopen=true,
+    urlcolor={urlcolor},
+    citecolor={citecolor},
+    linkcolor={linkcolor},
+    filecolor={filecolor},
+    pdfcreator={LaTeX, ltugboat, hyperref and fontspec},    
+    pdfproducer={XeTeX 0.99995 (TeX Live 2023)}}}
+\ifprint
+ \setmonofont[Scale=.85]{LMMono10-Regular}
+ \tolerance=1000
+ \emergencystretch=1em
+ \hbadness=3500
+ \def\lstfont{\ttfamily\fontsize{8.6}{10.0}\selectfont}
+\else
+ \defaultfontfeatures{Extension=.ttf,Path={./fonts/},}
+ \setmainfont[Script=Latin,Mapping=tex-text,
+    Ligatures=TeX,Numbers=OldStyle]{Linux-Libertine}[%
+    BoldFont={*-Bold},
+    ItalicFont={*-Italic},
+    BoldItalicFont={*-Bold-Italic},
+    SmallCapsFont={*},
+    UprightFont={*}]
+ \setmonofont[Ligatures=TeX,Scale=0.85]{MPLUSCodeLatin-Regular}
+ \newfontfamily\lstfont[Scale=.8]{MPLUSCodeLatin-Regular}
+ \tolerance=1000
+ \emergencystretch=1em
+ \fi
+
+ \newfontfamily\mlfont[Script=Malayalam,Mapping=tex-text,Color={mla},
+     HyphenChar="0000,Numbers=OldStyle]{RIT-Rachana-Regular}
+     [Extension=.ttf,Path={./fonts/}]
+     \let\rachana=\mlfont
+
+\def\pbrk{\ifprint\linebreak\fi}
+\def\wbrk{\ifweb\linebreak\fi}
+\def\pkg#1{\texttt{#1}\xspace}
+\def\verbatim@font{\normalfont\ttfamily\color{verbcolor}}
+
+% do not use horribly squashed Unicode ellipses.
+\ifx\tubdots\undefined \else \let\dots\tubdots \let\ldots\tubdots \fi
+
+\RequirePackage[procnames]{listings}
+\lstdefinestyle{inlinecode}{
+  basicstyle=\ttfamily\normalsize,
+  identifierstyle=\ttfamily\normalsize,
+  stringstyle=\ttfamily\normalsize,
+  commentstyle=\ttfamily\normalsize,
+  numberstyle=\ttfamily\normalsize,
+  keywordstyle={[0]\ttfamily\normalsize},
+  keywordstyle={[1]\ttfamily\normalsize},
+  keywordstyle={[2]\ttfamily\normalsize},
+  keywordstyle={[3]\ttfamily\normalsize},
+  keywordstyle={[4]\ttfamily\normalsize},
+  keywordstyle={[5]\ttfamily\normalsize},
+}
+\newcommand\inlinecode{\lstinline[style=inlinecode]}
+
+\def\lstlistingnamestyle{\bfseries} % bold for "Listing 1".
+
+
+ \lstset{columns={flexible},
+   language={[LaTeX]TeX},
+   basicstyle=\lstfont\color{lstcolor},
+ %   
+   moretexcs=[1]{bkauthor,bktitle,bktype,cpyear,bkcpright,%
+     bktitlebgcolor,bktitlefont,bktitleattrib,bktitlecolor,%
+     bktitlesep,bkauthorfont,bkauthorattrib,bkauthorcolor},
+   texcsstyle=[1]\lstfont\color{cscolor1},
+ %   
+   moretexcs=[2]{section,remark,proof,begin,end,%
+     email,title,keywords,xmlpi,eqef,neqef,cite},
+   texcsstyle=[2]\lstfont\color{cscolor2},
+ %   
+   moretexcs=[3]{colorlet,graphcoor,printcover,printimgcover,printgraphics},
+   texcsstyle=[3]\lstfont\color{cscolor3},
+ %
+   identifierstyle=\lstfont\color{idcolor},
+   stringstyle=\lstfont\color{strcolor},
+   commentstyle=\lstfont\color{commentcolor},
+ %
+   keywordstyle=[1]\lstfont\color{kwdcolor1},
+   morekeywords=[1]{document,frontmatter,abstract,keywords,keyword,%
+      equation,eqnarray,array,defn,thebibliography,}
+   keywordstyle=[2]{\lstfont\color{kwdcolor2}},
+   morekeywords=[2]{},
+ %  
+   showstringspaces=false,
+   backgroundcolor=\color{lstbgcolor},
+   frame=single,
+   framerule=0pt,
+   framesep=0pt,
+   belowcaptionskip=12pt,
+   rulecolor=\color{rulecolor},
+   frame=leftline,
+   stepnumber=1,
+   numbersep=6pt,
+ %   framesep=8pt,
+ %  numbers=left,
+   numberstyle=\tiny\selectfont\color{numcolor},
+ %   frameround=tttt,
+ %   procnamekeys=[1]{},
+ %   procnamestyle=[1]{\color{Maroon}\small},
+ %   %
+ %   procnamekeys=[2]{},
+ %   procnamestyle={\color{blue}\bfseries\small},
+   xleftmargin=0pt,
+   xrightmargin=0in,
+ }
+
+\ExplSyntaxOn
+\RenewDocumentCommand \descriptionlabel { m }
+  {
+    \skip_horizontal:N \labelsep
+    \normalfont\normalsize\ttfamily\selectfont
+    \color{itemcolor} #1:
+  }
+\def\tubsechook{\normalsize\color{scolor}}  
+\ExplSyntaxOff
+
+% Dependent vowel signs of Malayalam
+\def\vlA{\kern1pt\char "0D3E}
+\def\vli{\char "0D3F}
+\def\vlI{\char "0D40}
+\def\vlu{\kern.1pt\char "0D41}
+\def\vlU{\char "0D42}
+\def\vlr{\char "0D43}
+\def\vlR{\char "0D44}
+\def\vle{\char "0D46}
+\def\vlE{\char "0D47}
+\def\vlau{\char "0D57}
+\def\mlxx{\char "0D4D}
+\def\mlya{\char "0D2F}
+\def\mlra{\char "0D30}
+\def\mlla{\char "0D32}
+\def\mlva{\char "0D35}
+\def\zwnj{\char "200C}
+\def\zwj{\char "200D}
+\def\nbsp{\char "00A0}
+\def\dottc{\char "25CC}
+
+\def\theorgname{Rachana Institute of Typography}
+\def\theshortorg{\href{https://rachana.org.in}{rachana.org.in}}
+\def\theshortpkg{\url{rachana.org.in}}
+\def\orgname#1{\gdef\theorgname{#1}}
+\def\shortorg#1{\gdef\theshortorg{#1}}
+\def\shortpkg#1{\gdef\theshortpkg{#1}}
+
+\ifdoc
+  \let\rtitlenexttopage\theorgname
+  \let\rtitlex\theshortorg
+  \let\midrititle\theshortpkg
+\fi
+
+\endinput
+
+%
+% End of file rit-doc.sty'
+%

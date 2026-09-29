@@ -1,0 +1,50 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 140 Shaded Bar
+% Label: "ex:barcharteverybarshading"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+% sample CSV file:
+\begin{filecontents}[noheader,overwrite]{profits.csv}
+Year,Profit,Units
+1999,"-\$4,673",12467
+2000,"\$2,525.49",8965
+2001,"\$1,673.52",14750
+2002,"-\$1,320.01",14572
+2003,"\$5,694.83",13312
+2004,"\$-451.67",9764
+2005,"\$6,785.20",11235
+\end{filecontents}
+
+
+\usepackage{databar}
+% Load data from profits.csv file:
+\DTLsetup{store-datum,default-name=profits}
+\DTLread[csv-content=tex]{profits.csv} 
+\begin{document}
+\renewcommand\DTLBarStyle{% 
+ draw,shade,shading=axis,left color=red,right color=blue
+ }
+\DTLsetbarcolor{1}{}% no fill for bar 1
+ \DTLbarchart
+{
+ variable=\theProfit,
+ horizontal,
+ color-style=single,
+ max-depth=-5000,
+ max=10000,
+ bar-width=20pt,bar-gap=0.5,
+ axes,y-ticks,y-tick-gap=2500,
+ ylabel={Profits},
+ bar-label={\theYear},
+ upper-bar-label={\DTLbarvalue},
+ round=2,
+ y-tick-round=0
+}
+{profits}% database
+ {% assignment list
+ \theYear=Year,
+ \theProfit=Profit
+} 
+\end{document}

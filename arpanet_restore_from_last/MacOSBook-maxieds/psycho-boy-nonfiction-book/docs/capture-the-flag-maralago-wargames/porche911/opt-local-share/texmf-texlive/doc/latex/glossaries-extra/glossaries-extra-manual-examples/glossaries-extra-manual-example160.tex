@@ -1,0 +1,76 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 160 Using bib2gls: unit record counting
+% Label: "ex:bib2glsunitrecordcounting"
+% arara: pdflatex
+% arara: bib2gls: { recordcountunit: on }
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{scrreport}
+\pagestyle{empty}
+\begin{filecontents*}{abbrvs.bib}
+@string{ssi={server-side includes}}
+@string{html={hypertext markup language}} 
+
+@abbreviation{shtml,
+  short="shtml",
+  fulllong = ssi # " enabled " # html,
+  nestedlong = "\glsps{ssi} enabled \glsps{html}",
+  description={a combination of \gls{html} and \gls{ssi}}
+} 
+
+@abbreviation{html,
+  short ="html",
+  long = html,
+  description={a markup language for creating web pages}
+} 
+
+@abbreviation{ssi,
+  short="ssi",
+  long = ssi,
+  description={a simple interpreted server-side scripting language}
+}
+
+@abbreviation{xml,
+  short={xml},
+  long={extensible markup language},
+  description={a simple text-base format for representing structured information}
+}
+
+@abbreviation{mathml,
+  short={m\BibGlsNoCaseChange{ath}ml},
+  long={mathematical markup language},
+  description={an \gls{xml}-based language for describing mathematical notation}
+}
+\end{filecontents*}
+\usepackage[T1]{fontenc}
+\usepackage{kpfonts}
+\usepackage[colorlinks]{hyperref}
+\usepackage[record,postdot]{glossaries-extra} 
+
+\renewcommand{\chapterpagestyle}{empty}% to assist cropping
+\setabbreviationstyle{long-short-sc-desc} 
+
+\GlsXtrLoadResources[src={abbrvs},
+ field-aliases={fulllong=long}
+] 
+
+\preto{\chapter}{\glsresetall}
+\glsxtrenablerecordcount
+\GlsXtrSetRecordCountAttribute{abbreviation}{1} 
+
+\renewcommand{\glslinkpresetkeys}{% 
+ \glsadd[format=glsignore,counter=chapter]{\glslabel}} 
+
+\renewcommand*{\glsxtrrecordtriggervalue}[1]{% 
+ \GlsXtrLocationRecordCount{#1}{chapter}{\theHchapter}% 
+} 
+\begin{document}
+\chapter{First} \gls{html}. \gls{html}. \gls{html}. \gls{ssi}. 
+
+\chapter{Second} \gls{html}. \gls{ssi}. \gls{ssi}. \gls{xml}. 
+
+\renewcommand*{\printunsrtglossaryentryprocesshook}[1]{% 
+ \glsxtrifhasfield*{location}{#1}{}{\printunsrtglossaryskipentry}% 
+}
+\printunsrtglossaries 
+\end{document}

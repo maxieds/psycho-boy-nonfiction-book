@@ -1,0 +1,727 @@
+\newpage
+
+\section{Class \Iclass{point}} % (fold)
+\label{sec:class_point}
+
+The foundation of the entire framework is the \Iclass{point} class. This class is hybrid in the sense that it deals with both points in a plane and complex numbers. The principle is as follows: the plane is equipped with an orthonormal basis, which allows us to determine the position of a point using its abscissa and ordinate coordinate. Similarly, any complex number can be viewed simply as a pair of real numbers (its real part and its imaginary part).  We can then designate the plane as the complex plane, and the complex number $x+iy$ is represented by the point of the plane with coordinates $(x,y)$. Thus the point $A$ will have coordinates stored in the object $z.A$. Coordinates are attributes of the \code{point} object,  along with type, argument, and modulus.
+
+
+
+The creation of a point is done using the following method, but there are other possibilities. If a scaling factor has been given, the method takes it into account.
+
+   \def\size{42mm}
+\begin{tikzpicture}[remember picture]
+\node[ draw, fill=red!10] (tbl) {%
+ \centering
+\begin{minipage}{\size}
+
+   \hspace{\fill} \texttt{Arguments}\hspace{\fill}
+       
+       \tikz\node[minimum width=\size,font=\small,
+    draw, fill=cyan!10,
+    rectangle split, rectangle split parts=6
+  ] {
+    \texttt{re (real)}
+    \nodepart{two}\texttt{im (real)}
+    \nodepart{three}\texttt{type = 'point'}
+    \nodepart{four}\texttt{argument (rad)}
+    \nodepart{five}\texttt{modulus (cm)}
+    \nodepart{six}\texttt{mtx (matrix)}
+  };
+  
+    \hspace{\fill}  \texttt{Methods}\hspace{\fill}
+    
+    \tikz\node[minimum width=\size,font=\small,
+    draw, fill=orange!20,sharp corners,
+    rectangle split, rectangle split parts=4
+  ] {
+   \texttt{homothety(coeff,obj)}
+    \nodepart{two}\texttt{rotation (angle,object)}
+    \nodepart{three}\texttt{symmetry (object)}
+    \nodepart{four}\texttt{\ldots}
+  };
+\end{minipage}};
+ \node[ draw, fill=red!10,,minimum height = 2em,
+  rounded corners,anchor=south] (tc) at (tbl.north){Class |Point|};
+\end{tikzpicture}
+\hspace{5cm}\begin{tikzpicture}[remember picture]
+   \node[ draw, fill=red!10] (tbl) {%
+ \centering
+\begin{minipage}{\size}
+   \hspace{\fill}    \texttt{Arguments}\hspace{\fill}
+       
+        \tikz\node[minimum width=\size,font=\small,
+    draw, fill=cyan!10,
+    rectangle split, rectangle split parts=6
+  ] {
+    \texttt{re = 1}
+    \nodepart{two}\texttt{im = 2}
+    \nodepart{three}\texttt{type = 'point'}
+    \nodepart{four}\texttt{argument = atan(2)}
+     \nodepart{five}\texttt{modulus = $\sqrt{5}$}
+      \nodepart{six}\texttt{mtx = \{\{1\},\{2\}\}}
+  };
+  
+    \hspace{\fill}  \texttt{Methods}\hspace{\fill}
+    
+        \tikz\node[minimum width=\size,font=\small,
+    draw, fill=orange!20,sharp corners,
+    rectangle split, rectangle split parts=4
+  ] {
+   \texttt{homothety(coeff,obj)}
+    \nodepart{two}\texttt{rotation (angle,object)}
+    \nodepart{three}\texttt{symmetry (object)}
+    \nodepart{four}\texttt{\ldots}
+  };
+\end{minipage}
+     };
+ \node[ draw, fill=red!10,remember picture,minimum height = 2em,
+  rounded corners,anchor=south] (to) at (tbl.north){object |z.A|};
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay]
+\draw [thick,->](tc.east) -- (to.west);
+\end{tikzpicture}
+
+\subsection{Attributes of a point} % (fold)
+\label{sub:attributes_of_a_point}
+% Method \Imeth{point}{new}
+
+\begin{mybox}
+   Creation \\
+   |z.A = point:new (1,2) |
+\end{mybox}
+ The point $A$ has coordinates $x=1$ and $y=2$. If you use the notation |z.A|, then $A$ will be  referenced as a node in \TIKZ\ or in \pkg{tkz-euclide}.
+
+This is the creation of a fixed point with coordinates 1 and 2 and which is named $A$. The notation |z.A| indicates that the coordinates will be stored in a table denoted as  |z| (reference to the notation of the affixes of the complex numbers) that $A$ is the name of the point and the key allowing access to the values. 
+
+\begin{center}
+  \bgroup
+  \small
+  \catcode`_=12
+  \captionof{table}{Point attributes.}\label{point:att}  
+  \begin{tabular}{lll}
+  \toprule
+  \textbf{Attributes}     & \textbf{Application}& \textbf{Example}\\
+  \Iattr{point}{re}       &  |z.A.re = 1|    & [\ref{ssub:methods}] \\
+  \Iattr{point}{im}       &  |z.A.im = 2|    & [\ref{ssub:methods}]  \\
+  \Iattr{point}{type}     &  |z.A.type = 'point'|  & \\  
+  \Iattr{point}{argument} &  |z.A.argument| $\approx$ |0.78539816339745| &  [\ref{ssub:example_point_attributes}] \\
+  \Iattr{point}{modulus}  & |z.A.modulus| $\approx$ |2.2360...| =$\sqrt{5}$ &  [\ref{ssub:example_point_attributes}] \\
+  \Iattr{point}{mtx}  & |z.A.mtx =  = {{1},{2}}|  &  [\ref{ssub:example_point_attributes}] \\
+  \bottomrule
+  \end{tabular}
+  \egroup
+\end{center}
+
+\newpage
+\subsubsection{Example: point attributes} % (fold)
+\label{ssub:example_point_attributes}
+
+\directlua{
+init_elements()
+   z.M = point:new(1,2)
+}
+\hspace*{\fill}
+
+\begin{Verbatim}
+\directlua{
+   init_elements()
+   z.M = point:new(1,2)}
+\end{Verbatim}
+\pgfkeys{/pgf/number format/.cd,std,precision=2}
+\let\pmpn\pgfmathprintnumber
+\DeleteShortVerb{\|}
+
+\begin{Verbatim}
+\begin{tikzpicture}[scale = 1]
+\pgfkeys{/pgf/number format/.cd,std,precision=2}
+\let\pmpn\pgfmathprintnumber
+\tkzDefPoints{2/4/M,2/0/A,0/0/O,0/4/B}
+\tkzLabelPoints(O)
+\tkzMarkAngle[fill=gray!30,size=1](A,O,M)
+\tkzLabelAngle[pos=1,right](A,O,M){%
+$\theta \approx \pmpn{\tkzUseLua{z.M.argument}}$ rad}
+\tkzDrawSegments(O,M)
+\tkzLabelSegment[above,sloped](O,M){%
+$|z_M| =\sqrt{5}\approx \pmpn{\tkzUseLua{z.M.modulus}}$ cm}
+\tkzLabelPoint[right](M){$M: z_M = 1 + 2i$}
+\tkzDrawPoints(M,A,O,B)
+\tkzPointShowCoord(M)
+\tkzLabelPoint[below,teal](A){$\tkzUseLua{z.M.re}$}
+\tkzLabelPoint[left,teal](B){$\tkzUseLua{z.M.im}$}
+\tkzDrawSegments[->,add = 0 and 0.25](O,B O,A)
+\end{tikzpicture}
+\end{Verbatim}
+
+
+\begin{center}
+   \begin{tikzpicture}
+   \pgfkeys{/pgf/number format/.cd,std,precision=2}
+   \let\pmpn\pgfmathprintnumber
+   \tkzDefPoints{2/4/M,2/0/A,0/0/O,0/4/B}
+   \tkzLabelPoints(O)
+   \tkzMarkAngle[fill=gray!30,size=1](A,O,M)
+   \tkzLabelAngle[pos=1,right](A,O,M){%
+   $\theta \approx \pmpn{\tkzUseLua{z.M.argument}}$ rad}
+   \tkzDrawSegments(O,M)
+   \tkzLabelSegment[above,sloped](O,M){%
+   $|z_M| =\sqrt{5}\approx \pmpn{\tkzUseLua{z.M.modulus}}$ cm}
+   \tkzLabelPoint[right](M){$M: z_M = 1 + 2i$}
+   \tkzDrawPoints(M,A,O,B)
+   \tkzPointShowCoord(M)
+   \tkzLabelPoint[below,teal](A){$\tkzUseLua{z.M.re}$}
+   \tkzLabelPoint[left,teal](B){$\tkzUseLua{z.M.im}$}
+   \tkzDrawSegments[->,add = 0 and 0.25](O,B O,A)
+   \begin{scope}[every annotation/.style={fill=lightgray!15,anchor = east}]
+   \node [annotation,font =\small,text width=6cm] at (current bounding box.west) {
+Attributes of \texttt{z.M}
+   \begin{mybox}{}
+     \begin{itemize}
+     \item \texttt{z.M.re} = 1
+     \item \texttt{z.M.im} = 2
+     \item \texttt{z.M.type} = 'point'
+     \item \texttt{z.M.argument} = $\theta \approx \pmpn{\tkzUseLua{z.M.argument}}$ rad
+     \item \texttt{z.M.modulus} = $|z_M| =\sqrt{5}\approx \pmpn{\tkzUseLua{z.M.modulus}}$ cm
+     \item \texttt{z.M.mtx} =  \tkzUseLua{z.M.mtx:print()}
+     \end{itemize}
+   \end{mybox}
+       };
+   \end{scope}
+   \end{tikzpicture}
+\end{center}
+
+ \MakeShortVerb{\|}
+
+\subsubsection{Attribute \Iattr{point}{mtx}} % (fold)
+\label{ssub:attribute_iattr_point_mtx}
+
+This attributes allows the point to be used in conjunction with matrices.
+
+\vspace{6pt}
+\begin{minipage}{.5\textwidth}
+\begin{SVerbatim}
+  \directlua{
+  z.A = point:new(2,-1)
+  z.A.mtx:print() 
+  }
+\end{SVerbatim}
+\end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \begin{center}
+      \directlua{
+      z.A = point:new(2,-1)
+      z.A.mtx:print() 
+      }
+    \end{center}
+  \end{minipage}
+% subsubsection attribute_iattr_point_mtx (end)
+% subsubsection example_point_attributes (end)
+% subsection attributes_of_a_point (end)
+
+
+\subsubsection{Argand diagram} % (fold)
+\label{ssub:argand_diagram}
+\normalsize
+\begin{minipage}{\textwidth}
+\begin{SVerbatim}
+\directlua{
+init_elements()
+   z.A = point:new(2, 3)
+   z.O = point:new(0, 0)
+   z.I = point:new(1, 0)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzInit[xmin=-4,ymin=-4,xmax=4,ymax=4]
+   \tkzDrawCircle[dashed,red](O,A)
+   \tkzPointShowCoord(A)
+   \tkzDrawPoint(A)
+   \tkzLabelPoint[above right](A){\normalsize $a+ib$}
+   \tkzDrawX\tkzDrawY
+   \tkzDrawSegment(O,A)
+   \tkzLabelSegment[above,anchor=south,sloped](O,A){ OA = modulus of $z_A$}
+  \tkzLabelAngle[anchor=west,pos=.5](I,O,A){$\theta$ = argument of $z_A$}
+\end{tikzpicture}
+\end{SVerbatim}
+\end{minipage}
+
+\begin{minipage}{\textwidth}
+\directlua{
+init_elements()
+      z.A = point:new(2, 3)
+      z.O = point:new(0, 0)
+      z.I = point:new(1, 0)
+}
+\begin{center}
+  \begin{tikzpicture}
+        \tkzGetNodes
+        \tkzInit[xmin=-4,ymin=-4,xmax=4,ymax=4]
+        \tkzDrawCircle[dashed,red](O,A)
+        \tkzPointShowCoord(A)
+        \tkzDrawPoint(A)
+        \tkzLabelPoint[above right](A){\normalsize $a+ib$}
+        \tkzDrawX\tkzDrawY
+        \tkzDrawSegment(O,A)
+        \tkzLabelSegment[above,anchor=south,sloped](O,A){ OA = modulus of $z_A$}
+       \tkzLabelAngle[anchor=west,pos=.5](I,O,A){$\theta$ = argument of $z_A$}
+     \end{tikzpicture}
+\end{center}
+\end{minipage}
+
+
+% subsubsection argand_diagram (end)
+\newpage
+\subsection{Methods of the class point} % (fold)
+\label{sub:methods_of_the_class_point}
+
+The methods described in the following table are standard and can be found in most of the examples at the end of this documentation. The result of the different methods presented in the following table is a \tkzNameObj{point}. Refer to section  (\ref{sub:complex_numbers}) for the metamethods.
+
+\vspace{1em}
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{Functions \& Methods of the class point.}\label{point:met}
+\begin{tabular}{lll}
+\toprule
+
+\textbf{Methods} & \textbf{Reference} \\
+\textbf{Creation} &\\
+\Imeth{point}{new(r,r)}     & [\ref{ssub:method_point_new}; \ref{ssub:method_normalize}] \\
+\Imeth{point}{polar(d,an)}   &  [\ref{ssub:method_point_polar}; \ref{sub:archimedes}] \\
+\Imeth{point}{polar\_deg(d,an)} & [\ref{ssub:method_point_polar_deg}]   \\
+\midrule
+
+\textbf{Points} & \textbf{Reference}\\
+\midrule
+\Imeth{point}{north(r)} &   \ref{ssub:methods}]   \\
+\Imeth{point}{south(r)} &  \\
+\Imeth{point}{east(r)}  &  \\
+\Imeth{point}{west(r)}  &  \\
+\Imeth{point}{normalize()} &   [\ref{ssub:method_normalize}] \\
+\Imeth{point}{normalize\_from(pt)} &   [\ref{ssub:method_normalize}] \\
+\Imeth{point}{orthogonal(d)} & [\ref{ssub:orthogonal_method}]\\
+\Imeth{point}{at()} &   [\ref{ssub:_imeth_point_at_method}] \\
+\midrule
+
+\textbf{Transformations} &\textbf{Reference}\\
+\midrule
+\Imeth{point}{symmetry(obj)} & [\ref{ssub:object_symmetry}] \\
+\Imeth{point}{rotation(an, obj)}  &  [\ref{ssub:object_rotation}] \\
+\Imeth{point}{homothety(r,obj)}    & [\ref{ssub:method_point_homothety_k_obj}]   \\
+\midrule
+
+\textbf{Misc.} &\\
+\midrule
+\Imeth{point}{print()} & [\ref{ssub:object_symmetry} ]\\
+\midrule
+
+\textbf{Associated.} &\\ 
+\Igfct{misc}{get\_points(obj)}  &  [\ref{sub:_misc_get_points_obj}; \ref{ssub:object_rotation}; \ref{ssub:apollonius_circle_ma_mb_k} ]  \\
+\bottomrule %
+\end{tabular}
+\egroup
+
+\subsubsection{Method  \Imeth{point}{new(r,r)}} % (fold)
+\label{ssub:method_point_new}
+
+This method creates a point
+
+\begin{tkzexample}[latex = 7cm]
+  \directlua{
+    init_elements()
+     z.A  = point:new(0, 0)
+     z.B  = point:new(2, 1)
+  }
+  \begin{tikzpicture}[gridded]
+  \tkzGetNodes
+  \tkzDrawPoints(A,B)
+  \tkzLabelPoints(A,B) 
+  \end{tikzpicture}
+\end{tkzexample}
+
+% subsubsection method_point_new (end)
+
+\subsubsection{Method \Imeth{point}{polar(r,an)}} % (fold)
+\label{ssub:method_point_polar}
+
+This involves defining a point using its modulus and argument.
+The first proposed method was the one below, but since the latest version, I've preferred to 
+add a \code{polar} function to make the code more homogeneous. 
+ 
+\begin{mybox}
+\begin{SVerbatim}
+  z.B = point:polar(2, math.pi/4)
+  better 
+  z.B = point:new(polar(2, math.pi/4))
+\end{SVerbatim}
+\end{mybox}
+
+\begin{tkzexample}[latex = 7cm]
+\directlua{
+  init_elements()
+  z.O = point:new(0, 0)
+  z.A = point:new(3, 0)
+  z.F = point:new(polar(3, math.pi/3))
+}
+\begin{center}
+\begin{tikzpicture}[scale=.75]
+   \tkzGetNodes
+   \tkzDrawCircle(O,A)
+   \tkzDrawSegments[new](O,A)
+   \tkzDrawSegments[purple](O,F)
+   \tkzDrawPoints(A,O,F)
+   \tkzLabelPoints[below right=6pt](A,O)
+   \tkzLabelPoints[above](F)
+\end{tikzpicture}
+\end{center}
+
+\end{tkzexample}
+% subsubsection method_point_polar (end)
+
+
+\subsubsection{Method \Imeth{point}{polar\_deg(d,an)}} % (fold)
+\label{ssub:method_point_polar_deg}
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{
+ init_elements()
+ z.A = point:new(0, 0)
+ z.B = point:new(polar_deg(3, 60))
+ z.C = point:new(polar_deg(3, 0))
+}
+\begin{center}
+  \begin{tikzpicture}[gridded]
+  \tkzGetNodes
+  \tkzDrawPolygon(A,B,C)
+  \tkzDrawPoints(A,B,C)
+  \tkzLabelPoints(A,C)
+  \tkzLabelPoints[above](B)
+  \end{tikzpicture}
+\end{center}
+\end{tkzexample}
+
+% subsubsection method_point_polar_deg(end)
+
+\subsubsection{Method  \Imeth{point}{north(d)} } % (fold)
+\label{ssub:example_method_imeth_point_north_d}
+
+This function defines a point located on a vertical line passing through the given point. This function is useful if you want to report a certain distance (Refer to the following example).
+If |d| is absent then it is considered equal to 1.
+
+
+\begin{tkzexample}[latex = 7cm]
+\directlua{
+ init_elements()
+ z.O = point:new(0, 0)
+ z.A = z.O:east()
+ z.Ap= z.O:east(1):north(1)
+ z.B = z.O:north()
+ z.C = z.O:west()
+ z.D = z.O:south()
+}
+\begin{center}
+  \begin{tikzpicture}
+     \tkzGetNodes
+     \tkzDrawPolygon(A,B,C,D)
+     \tkzDrawPoints(A,B,C,D,O,A')
+  \end{tikzpicture}
+\end{center}
+
+\end{tkzexample}
+% subsubsection example_method_imeth_point_north_d (end)
+
+
+\subsubsection{Method \Imeth{point}{normalize()}} % (fold)
+\label{ssub:method_normalize}
+
+The result is a point located between the origin and the initial point at a distance of $1$ from the origin. It is possible to apply this method to a segment, |z.U = (z.C-z.B):normalize()+z.B|, here |BU =1| and $U$ is a point on the segment $[BC]$. There are two other ways of achieving the same result: 
+
+\begin{mybox}
+  \begin{SVerbatim}
+    or z.U = z.C:normalize_from(z.B)
+    or z.U = L.BC:normalize()
+  \end{SVerbatim}
+\end{mybox}
+
+The second requires the creation of the line \code{L.BC}
+
+
+\vspace{6pt}
+
+\begin{tkzexample}[latex=8cm]
+\directlua{
+  z.A  = point:new(0, 0)
+  z.B  = point:new(4, 3)
+  z.C  = point:new(1, 5)
+  L.AB = line:new(z.A, z.B)
+  L.BC = line:new(z.B, z.C)
+% z.U  =(z.C-z.B):normalize()+z.B
+  z.N = z.B:normalize()
+  z.U = z.C:normalize_from(z.B)
+% z.U = L.BC:normalize()
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawLines(A,B  B,C)
+\tkzDrawPoints(A,B,C,U,N)
+\tkzLabelPoints(A,B,C,U,N)
+\tkzDrawSegment(B,C)
+\end{tikzpicture}
+\end{tkzexample}
+
+% subsubsection method_normalize (end)
+
+\subsubsection{Method \Imeth{point}{orthogonal(d)}} % (fold)
+\label{ssub:orthogonal_method}
+
+Let $O$ be the origin of the plane. The \code{orthogonal (d)} method is used to obtain a point $B$ from a point $A$ such that $\overrightarrow{OB}\perp \overrightarrow{OA}$ with $OB=OA$ if $d$ is empty, otherwise $OB = d$.
+
+
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{
+  init_elements()
+    z.A = point:new(3, 1)
+    z.B = z.A:orthogonal(1)
+    z.O = point:new(0, 0)
+    z.C = z.A:orthogonal()
+  }
+  \begin{center}
+    \begin{tikzpicture}[gridded]
+      \tkzGetNodes
+      \tkzDrawSegments(O,A O,C)
+      \tkzDrawPoints(O,A,B,C)
+      \tkzLabelPoints[below right](O,A,B,C)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+
+% subsubsection orthogonal_method(end)
+
+\subsubsection{Method \Imeth{point}{at(pt)}} %(fold)
+\label{ssub:_imeth_point_at_method}
+
+This method is complementary to the previous one, so you may not wish to have $\overrightarrow{OB}\perp \overrightarrow{OA}$ but $\overrightarrow{AB}\perp \overrightarrow{OA}$.
+
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+  z.O = point:new(0,0 )
+  z.A = point:new(3, 2 )
+  z.B = z.A:orthogonal(1)
+  z.C = z.A+z.B
+  z.D =(z.C-z.A):orthogonal(2):at(z.C) 
+  }
+  \begin{center}
+    \begin{tikzpicture}[gridded]
+    \tkzGetNodes
+    \tkzLabelPoints[below right](O,A,C)
+    \tkzLabelPoints[above](B,D)
+    \tkzDrawSegments(O,A A,B A,C C,D O,B)
+    \tkzDrawPoints(O,A,B,C,D)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+
+% subsubsection _imeth_point_at_method (end)
+
+\subsubsection{Method \Imeth{point}{rotation(obj)} first example} % (fold)
+\label{ssub:example_rotation_of_points}
+
+The arguments are the angle of rotation in radians, and here a list of points.
+
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+    z.a       = point:new(0, -1)
+    z.b       = point:new(4, 0)
+    z.o       = point:new(6, -2)
+    z.ap,z.bp = z.o:rotation(math.pi/2,z.a,z.b)
+  }
+  \begin{center}
+  \begin{tikzpicture}[scale = .5]
+     \tkzGetNodes
+     \tkzDrawLines(o,a o,a' o,b o,b')
+     \tkzDrawPoints(a,a',b,b',o)
+     \tkzLabelPoints(b,b',o)
+     \tkzLabelPoints[below left](a,a')
+     \tkzDrawArc(o,a)(a')
+     \tkzDrawArc(o,b)(b')
+  \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection example_rotation_of_points (end)
+
+\subsubsection{Method \Imeth{point}{rotation(an,obj)} second example} % (fold)
+\label{ssub:object_rotation}
+Rotate a triangle by an angle of $\pi/6$ around $O$.  Please refer to the end of this section for the use of \code{get\_points}.
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{%
+ init_elements()
+ z.O  = point:new(-1, -1)
+ z.A  = point:new(2, 0)
+ z.B  = point:new(5, 0)
+ L.AB  = line:new(z.A, z.B)
+ T.ABC = L.AB:equilateral()
+ S.fig = L.AB:square()
+ _,_,z.E,z.F = get_points(S.fig)
+ S.new = z.O:rotation(math.pi/3, S.fig)
+ _,_,z.Ep,z.Fp = get_points(S.new)
+ z.C = T.ABC.pc
+ T.ApBpCp = z.O:rotation(math.pi/3, T.ABC)
+ z.Ap,z.Bp,z.Cp = get_points(T.ApBpCp)
+}
+\begin{center}
+\begin{tikzpicture}[scale = .6]
+ \tkzGetNodes
+ \tkzDrawPolygons(A,B,C A',B',C' A,B,E,F)
+ \tkzDrawPolygons(A',B',E',F')
+ \tkzDrawPoints(A,B,C,A',B',C',O)
+ \tkzLabelPoints(A,B,C,A',B',C',O)
+ \begin{scope}
+  \tkzDrawArc[delta=0,->,dashed,red](O,A)(A')
+  \tkzDrawSegments[dashed,red](O,A O,A')
+ \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+
+
+% subsubsection object_rotation (end)
+
+\subsubsection{Method \Imeth{point}{symmetry}(obj)} % (fold)
+\label{ssub:object_symmetry}
+
+Example of the symmetry of an object. Please refer to the end of this section for the use of \code{get\_points}.
+
+
+\begin{tkzexample}[latex=7cm]
+  \directlua{%
+  init_elements()
+    z.a = point:new(0,-1)
+    z.b = point:new(2, 0)
+    L.ab = line:new(z.a,z.b)
+    C.ab = circle:new(z.a,z.b)
+    z.o = point:new(1,1)
+    z.ap,z.bp = get_points(z.o:symmetry(C.ab))
+  }
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes
+    \tkzDrawCircles(a,b a',b')
+    \tkzDrawLines(a,a' b,b')
+    \tkzDrawLines[red](a,b a',b')
+    \tkzDrawPoints(a,a',b,b',o)
+    \tkzLabelPoints(a,a',b,b',o)
+    \end{tikzpicture}
+  \end{center}
+\end{tkzexample}
+% subsubsection object_symmetry (end)
+
+\subsubsection{Method \Imeth{point}{homothety(k,obj)}} % (fold)
+\label{ssub:method_point_homothety_k_obj}
+
+It is possible to transform a point, several points or an object.
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{%
+ init_elements()
+ z.A = point:new(0, 0)
+ z.B = point:new(1, 2)
+ z.E = point:new(-3, 2)
+ z.C,z.D = z.E:homothety(2, z.A, z.B)
+}
+\begin{center}
+\begin{tikzpicture}[scale = .5]
+  \tkzGetNodes
+  \tkzDrawPoints(A,B,C,E,D)
+  \tkzLabelPoints(A,B,C,E)
+  \tkzDrawCircles(A,B C,D)
+  \tkzDrawLines(E,C E,D)
+\end{tikzpicture}
+\end{center}
+\end{tkzexample}
+
+\subsubsection{Method \Imeth{point}{print()}} % (fold)
+\label{ssub:_imeth_point_print}
+
+|tkz_dc = 0| sets the number of decimal places to 0. By default, the \code{ init\_elements()} function sets |tkz_dc| to 2.
+
+\begin{SVerbatim}
+  \directlua{%
+  init_elements()
+  z.A = point:new(1, 2)
+  z.B = point:new(1, -1)
+  z.a = z.A + z.B
+  z.m = z.A * z.B
+  tkz_dc = 0
+  }
+  Les affixes respectives  des points $A$ et $B$ étant 
+   \tkzUseLua{z.A:print()} et \tkzUseLua{z.B:print()},
+  leur somme est  \tkzUseLua{z.a:print()} et 
+  leur produit \tkzUseLua{z.m:print()}.
+\end{SVerbatim}
+
+\directlua{%
+init_elements()
+z.A = point:new(1, 2)
+z.B = point:new(1, -1)
+z.a = z.A + z.B
+z.m = z.A * z.B
+tkz_dc = 0
+}
+
+Les affixes respectives  des points $A$ et $B$ étant 
+ \tkzUseLua{z.A:print()} et \tkzUseLua{z.B:print()},
+leur somme est  \tkzUseLua{z.a:print()} et 
+leur produit \tkzUseLua{z.m:print()}.
+
+
+% subsubsection _imeth_point_print (end)
+
+\subsection{Function \Igfct{misc}{get\_points(obj)}} % (fold)
+\label{sub:_misc_get_points_obj}
+
+This function isn't part of the \code{point} class, but it's related to it. The following classes are objects made up of several points. This function gets the points that define the object, if there are a finite number of them.
+
+For example, you can define a circle by its center and radius. Sometimes, we don't have the points required to draw it with tkz-euclide. \code{get\_points} lets us get these points. Later, we'll see that it's possible to write:
+
+\begin{mybox}
+  \begin{SVerbatim}
+    z.O = C.center| and |z.T = C.through
+\end{SVerbatim}
+ \end{mybox}
+
+
+\begin{tkzexample}[latex=7cm]
+\directlua{
+  z.A = point:new(0,0)
+  z.B = point:new(4,2)
+  C = circle:new(through(midpoint(z.A,z.B),2))
+  z.O,z.T = get_points(C)
+}
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawCircle(O,T)
+\tkzDrawPoints(A,B,O,T)
+\tkzLabelPoints(A,B,O,T)
+\end{tikzpicture}
+\end{tkzexample}
+
+
+
+% subsection _misc_get__points_obj (end)
+
+% subsubsection method_point_homothety_k_obj (end)
+% subsection methods_of_the_class_point (end)
+
+% section class_point (end)
+\endinput

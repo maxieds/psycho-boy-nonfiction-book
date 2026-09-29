@@ -1,0 +1,43 @@
+% This file is embedded in datatool-user.pdf version 3.0.1 2025-03-05
+% Example 58 Sorting Lists with \DTLsortwordlist (comma and parenthetical markers)
+% Label: "ex:wordsortlistcommas"
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[10pt]{article}
+\pagestyle{empty}
+\usepackage{multicol}
+\usepackage{datatool-base}
+\newcommand{\mylist}{duckling,
+ Duck\datatoolplacecomma Mallard County,
+ Duck\datatoolpersoncomma Robbie,
+ Duck\datatoolsubjectcomma Anatomy of a,
+ duck\datatoolparenstart (cricket),
+ duck\datatoolparen{verb},
+ {Duck, Duck, Goose},
+ duck soup, duck, duck and dive
+ }
+\renewcommand{\DTLlistformatsep}{\newline}
+\renewcommand{\DTLlistformatlastsep}{\newline}
+\ExplSyntaxOn
+\NewDocumentCommand \mycustomhandler { m m } 
+ {
+  \tl_set:Nn #2 { #1 }
+    \regex_replace_all:nnN { , } { } #2
+    \DTLsortletterhandler { #2 } #2
+  }
+ \ExplSyntaxOff 
+\begin{document}
+\begin{multicols}{3}
+{\DTLsortwordlist{\mylist}{\DTLsortwordhandler}
+Word sort:\newline
+\DTLformatlist{\mylist}.}
+
+
+{\DTLsortwordlist{\mylist}{\DTLsortletterhandler}
+Letter sort:\newline
+\DTLformatlist{\mylist}.}
+
+
+\DTLsortwordlist{\mylist}{\mycustomhandler} Custom sort:\newline
+\DTLformatlist{\mylist}. \end{multicols} 
+\end{document}

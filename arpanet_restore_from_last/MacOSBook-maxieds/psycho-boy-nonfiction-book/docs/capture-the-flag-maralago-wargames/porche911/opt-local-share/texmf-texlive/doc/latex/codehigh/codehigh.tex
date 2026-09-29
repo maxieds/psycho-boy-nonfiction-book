@@ -1,0 +1,245 @@
+%  -*- coding: utf-8 -*-
+\documentclass[oneside]{book}
+\usepackage[a4paper,margin=2cm]{geometry}
+
+\newcommand*{\myversion}{2025C}
+\newcommand*{\mydate}{Version \myversion\ (\the\year-\mylpad\month-\mylpad\day)}
+\newcommand*{\mylpad}[1]{\ifnum#1<10 0\the#1\else\the#1\fi}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+
+\usepackage{codehigh}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue3,
+  linkcolor=green3,
+}
+\usepackage{tabularx,booktabs}
+
+\begin{document}
+
+\title{\textsf{\color{green3}Codehigh: Highlight Codes and Demos with l3RegEx and LPeg}}
+\author{Jianrui Lyu (tolvjr@163.com)\\ \url{https://github.com/lvjr/codehigh}}
+\date{\mydate}
+\maketitle
+
+\tableofcontents
+
+\chapter{Package Interfaces}
+
+\section{Introduction}
+
+\verb!Codehigh! package uses \verb!l3regex!\footnote{\url{https://www.ctan.org/pkg/l3regex}}
+package in \LaTeX3 Programming Layer to parse and highlight source codes and demos.
+It is more powerful than \verb!listings! package, and more easy to use than \verb!minted! package.
+But it is slower than both of them.
+Therefore in LuaTeX the package provides another way to highlight code: using \verb!LPeg!%
+\footnote{\url{http://www.inf.puc-rio.br/~roberto/lpeg/}}.
+\verb!LPeg! is much more powerful and faster than \verb!l3regex!.
+
+%At present, this package is in \underline{\color{red3}\textbf{experimental}} status.
+%Don’t use it in important documents, unless you have time
+%to update them for the newer versions of \verb!codehigh! package in the future.
+
+\section{Highlighting Code}
+
+There are several predefined languages: \verb!latex!, \verb!latex/latex2!, \verb!latex/latex3!,
+\verb!latex/math! and \verb!latex/table!.
+The following example is typeset by \verb!codehigh! environment with default option \verb!language=latex!.
+\begin{codehigh}
+%  -*- coding: utf-8 -*-
+\documentclass{article}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{codehigh}
+\usepackage{hyperref}
+\newcommand*{\myversion}{2021C}
+\newcommand*{\mydate}{Version \myversion\ (\the\year-\mylpad\month-\mylpad\day)}
+\newcommand*{\mylpad}[1]{\ifnum#1<10 0\the#1\else\the#1\fi}
+\setlength{\abc}{1}
+\begin{document}
+% some comment
+\section{Section Name}
+\subsection*{Suction Name}
+Math $a+b$.
+\end{document}
+\end{codehigh}
+
+The following example is typeset by \verb!codehigh! environment with option \verb!language=latex/latex2!.
+\begin{codehigh}[language=latex/latex2]
+\def\abcd#1#2{
+  % some comment
+  \unskip
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{0pt}%
+  \setcounter{choice}{0}%
+  \let\item=\my@item@temp
+  \settowidth{\my@item@len}{\vbox{\halign{##1\hfil\cr\BODY\crcr}}}%
+  \setcounter{choice}{0}%
+}
+\end{codehigh}
+This language is for highlighting LaTeX2 classes and packages.
+It highlights private commands and public commands with different colors.
+
+The following example is typeset by \verb!codehigh! environment with option \verb!language=latex/latex3!.
+\begin{codehigh}[language=latex/latex3]
+\cs_new_protected:Npn \__codehigh_typeset_demo:
+  {
+    \__codehigh_build_code:
+    \__codehigh_build_demo:
+    \dim_set:Nn \l_tmpa_dim { \box_wd:N \g__codehigh_code_box }
+    \dim_set:Nn \l_tmpb_dim { \box_wd:N \g__codehigh_demo_box }
+    \par\addvspace{0.5em}\noindent
+    % more code
+  }
+\end{codehigh}
+This language is for highlighting LaTeX3 classes and packages.
+It highlights private commands/variables and public commands/variables with different colors.
+
+The following example is typeset by \verb!codehigh! environment with option \verb!language=latex/math!.
+\begin{codehigh}[language=latex/math]
+\begin{align}
+  \pi\left[\frac13z^3\right]\sin(2x+1)_0^4 = \frac{64}{3}\pi
+\end{align}
+\end{codehigh}
+
+The following example is typeset by \verb!codehigh! environment with option \verb!language=latex/table!.
+\begin{codehigh}[language=latex/table]
+\begin{tabular}[b]{|lc|r|}
+\hline
+One   &  Two  & Three \\
+%\hline
+Four  & Five  &   Six \\
+\hline%\hline\hline
+Seven & Eight &  Nine \\
+\hline
+\end{tabular}
+\end{codehigh}
+
+There is also a \texttt{codehigh*} environment which shows each space character as \textvisiblespace{} in the code.
+
+\section{Highlighting Demo}
+
+The followings are typeset by \verb!demohigh! environment with option \verb!language=latex/table!.
+\begin{demohigh}[language=latex/table]
+\begin{tabular}{lccr}
+\hline
+ Alpha   & Beta  & Gamma  & Delta \\
+\hline
+ Epsilon & Zeta  & Eta    & Theta \\
+\hline
+ Iota    & Kappa & Lambda & Mu    \\
+\hline
+\end{tabular}
+\end{demohigh}
+\begin{demohigh}[language=latex/table]
+\begin{tabular}{llccrr}
+\hline
+ Alpha & Beta  & Gamma & Delta & Epsilon & Zeta \\
+\hline
+ Eta   & Theta & Iota  & Kappa & Lambda & Mu \\
+\hline
+\end{tabular}
+\end{demohigh}
+Note that \verb!demohigh! environment will measure the width of source lines.
+When it is too large, the result will be put below.
+
+There is also a \texttt{demohigh*} environment which shows each space character as \textvisiblespace{} in the code.
+
+\section{Highlighting File}
+
+Using \verb!\dochighinput! command, you can input and highlight some file.
+The last chapter of this manual is typeset with the following code line:
+\begin{codehigh}
+\dochighinput[language=latex/latex3]{codehigh.sty}
+\end{codehigh}
+
+In reading an input file, lines starting wtih \verb!%%%! will be omitted,
+and lines starting with \verb!%%>! will be extracted and typeset as normal text.
+
+\section{Customization}
+
+The following example changes default background colors with \verb!\CodeHigh! command:
+\begin{codehigh}
+\CodeHigh{language=latex/table,style/main=yellow9,style/code=red9,style/demo=azure9}
+\end{codehigh}
+\CodeHigh{language=latex/table,style/main=yellow9,style/code=red9,style/demo=azure9}
+Note that \verb!codehigh! package will load \verb!ninecolors!%
+\footnote{\url{https://www.ctan.org/pkg/ninecolors}} package for proper color contrast.
+\begin{demohigh}
+\begin{tabular}{lccr}
+\hline
+ Alpha   & Beta  & Gamma  & Delta \\
+\hline
+ Epsilon & Zeta  & Eta    & Theta \\
+\hline
+ Iota    & Kappa & Lambda & Mu    \\
+\hline
+\end{tabular}
+\end{demohigh}
+
+To modify or add languages and themes, please read the source files
+\verb!codehigh.sty! and \verb!codehigh.lua! for reference.
+
+\section{Fake Verbatim Command}
+
+\CodeHigh{language=latex/table,style/main=gray9,style/code=gray9,style/demo=white}
+
+To ease the pain of writing verbatim commands
+(such as in \verb|tabularx| and \verb|tabularray| tables),
+This package provides \verb|\fakeverb| command.
+
+This command will remove the backslashes in the following control symbols
+before typesetting its content:
+
+\renewcommand\arraystretch{1.3}
+\begin{center}
+\begin{tabularx}{0.9\linewidth}{llX}
+\toprule
+Input           & Result        & Remark \\
+\midrule
+\fakeverb{\\\\} & \fakeverb{\\} &
+  Need to be escaped only when typesetting other control symbols in this table \\
+\fakeverb{\\\{}	& \fakeverb{\{} &
+  Need to be escaped only when left and right curly braces are unmatched \\
+\fakeverb{\\\}}	& \fakeverb{\}} &
+  Need to be escaped only when left and right curly braces are unmatched \\
+\fakeverb{\\\#}	& \fakeverb{\#} &
+  Always need to be escaped \\
+\fakeverb{\\\^}	& \fakeverb{\^} &
+  Need to be escaped only when there are more than one in a row \\
+\texttt{\textbackslash\textvisiblespace} & \texttt{\textvisiblespace} &
+  Need to be escaped only when more than one in a row or after control words \\
+\fakeverb{\\\%}	& \fakeverb{\%} &
+  Always need to be escaped \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The argument of \verb|\fakeverb| command need to be enclosed with curly braces.
+Therefore it could be safely used inside \verb|tabularray| tables and other LaTeX commands.
+
+Here is an example of using \verb!\fakeverb! commands inside \verb|tabularx| environment:
+
+\begin{demohigh}[language=latex/table]
+\begin{tabularx}{0.5\textwidth}{lX}
+\hline
+ Alpha & \fakeverb{\abc{}$&^_^uvw 123} \\
+\hline
+ Beta  & \fakeverb{\bfseries\ \#\%} \\
+\hline
+\end{tabularx}
+\end{demohigh}
+
+Here is another example of using \verb!\fakeverb! commands inside \verb|\fbox| command:
+
+\begin{demohigh}[language=latex/latex2]
+Hello\fbox{\fakeverb{$\left\\\{A\right.$\#}}Verb!
+\end{demohigh}
+
+\chapter{The Source Code}
+
+\dochighinput[language=latex/latex3]{codehigh.sty}
+
+\end{document}

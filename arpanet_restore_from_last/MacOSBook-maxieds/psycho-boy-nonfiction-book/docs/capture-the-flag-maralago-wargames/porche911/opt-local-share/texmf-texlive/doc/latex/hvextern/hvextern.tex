@@ -1,0 +1,1924 @@
+%% $Id: hvextern.tex 884 2024-03-27 19:50:43Z herbert $
+\DocumentMetadata{}% for lualatex and pstricks
+\documentclass[english,paper=a4,twoside,usegeometry]{scrartcl}
+\usepackage{babel}
+\usepackage{libertinus}
+\setmonofont[Scale=MatchLowercase,FakeStretch=0.88]{AnonymousPro}
+\newfontfamily\NotoSansMono[Ligatures=TeX,Scale=MatchLowercase,
+	FakeStretch=0.90,Ligatures=ResetAll%,RawFeature=-tlig
+	]{Noto Sans Mono}
+\newfontfamily\CodeTwo{CODE2000}[Scale=MatchLowercase]
+
+\usepackage[includeheadfoot,bmargin=1cm,tmargin=5mm,textwidth=16cm]{geometry}
+
+\usepackage{iftex}
+
+\usepackage[automark]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\usepackage{hvlogos}
+\usepackage[checkCode]{hvextern}
+\usepackage{hvindex}
+\usepackage{hvdoctools}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small,language=[LaTeX]TeX,breaklines}  
+\usepackage{xcolor,xspace,varioref}
+\usepackage{hyperref}
+
+\def\Python{\textsf{Python}\xspace}
+\def\Perl{\textsf{Perl}\xspace}
+\def\Lua{\textsf{Lua}\xspace}
+\def\Java{\textsf{Java}\xspace}
+
+
+
+\begin{document}
+\title{Writing, running and including the output of external documents 
+from within a main\newline \LaTeX\ document~--v. \hvexternFileversion}
+\author{Herbert Voß \url{hvoss@tug.org}\thanks{Thanks to Karl Berry; Denis Bitouzé;
+Werner Lemberg; Rolf Niepraschk}}
+\maketitle
+\tableofcontents
+
+%\newpage
+
+\setkeys{hv}{moveToExampleDir,ExampleDir=Exa,showFilename,verbose,force=true}
+
+
+%\clearpage
+
+\section{Loading the package}
+
+\begin{verbatim}
+\usepackage[Option]{hvextern}
+\end{verbatim}
+
+There exists only one  option \Loption{checkCode} which is  valid
+for all \TeX-compiler. In this case an already existing  external file will only be compiled, if the
+external code changed. This doesn't depends on the setting of the option \Lkeyword{force}. 
+\Loption{checkCode} can speed up the compilation time.
+
+\section{Syntax}
+
+\addtocontents{toc}{\protect\enlargethispage{2ex}}
+
+\begin{sloppypar}
+This package allows to write external \MP, \TeX, \ConTeXt, \LaTeX, \LuaTeX, \LuaLaTeX, \XeTeX, \XeLaTeX, 
+\Index{Lua}, \Index{Perl}, \Index{Java}, \Index{Python}, and /or \Index{R}
+source code, which will then be run via \texttt{shell escape} to create a PDF or text output to include
+it into the main \LaTeX\ document. The values for the
+optional argument \Lkeyword{compiler}  must be the real prgram name  on the the local system, e.g. for Windows:
+mpost, tex, context.exe, latex.exe, luatex.exe, lualatex.exe, xetex.exe, xelatex.exe, 
+lua.exe, perl.exe, java.exe, pathon.exe, and /or Rscript.exe.
+\end{sloppypar}
+
+
+There is only one environment and one command:
+
+\begin{verbatim}
+\begin{externalDocument}[<options>]{<external filename without extension>}
+...
+source code
+...
+\end{externalDocument}
+
+\runExtCmd[<options>]
+    {<command with arguments>}
+    {<external filename without extension>}
+\end{verbatim}
+
+The very first compilation run of the main document must be done
+  with the \Loption{-shell-escape} command-line option, otherwise it won't
+  work.  Follow-up runs, for example, to resolve references, should
+  usually be done without \Loption{-shell-escape}.
+The currently used filename for the example is saved in the macro \Lcs{hvExternFilename}.
+
+\begin{verbatim}
+lualatex --shell-escape <file>
+\end{verbatim}
+
+The purpose for this package is to show the output of documents which have to be compiled with
+a different preamble or a different engine or a complete different system, but integrating the output
+automatically in the main document..
+
+\bigskip
+\noindent
+\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+\emph{All} examples in this document are created on-the-fly while running this \LaTeX\ document
+with \texttt{lualatex} with the  \texttt{-\kern1pt-shell-escape} option.
+\end{minipage}}
+
+
+
+\section{First examples}
+\subsection{Without showing the code}
+
+This document was run with \LuaLaTeX. Suppose you want to insert the output of a document
+which needs for several reasons a \XeLaTeX\ run. Instead of created and running a document 
+outside of the main document and then to insert the output
+we can do this from within this \LuaLaTeX\ document itself. The external document is compiled
+with \XeLaTeX\ and the output is insert as pdf image:
+\begin{externalDocument}[%
+  compiler=xelatex, inline, runs=2, grfOptions={height=8pt},%
+  crop, cropmargin=0, cleanup, docType=latex,vshift=-1pt]{voss}
+\documentclass{ctexart}
+\pagestyle{empty}
+\begin{document} 
+美好的一天.
+\end{document}
+\end{externalDocument}
+%
+The current filename of the above example is \hvExternFilename\ and for the source 
+see page \pageref{inline-exa}.
+
+Let's show another example which needs a \pdfLaTeX\ run.  The \Index{source} code 
+itself is also not
+shown by the environment \Lenv{externalDocument}.
+
+
+\begin{minipage}{.59\linewidth}
+\begin{lstlisting}
+\begin{externalDocument}[
+  compiler=pdflatex,cleanup]{voss}
+\documentclass{standalone}
+%StartVisiblePreamble
+\usepackage{fontenc}
+\usepackage{libertinus}
+\usepackage[linguistics]{forest}
+\forestapplylibrarydefaults{linguistics, edges}
+%StopVisiblePreamble
+\begin{document}
+\begin{forest}
+[VP
+  [DP]
+  [V’
+    [V]
+  [DP]
+  ]
+]
+\end{forest}
+\end{document}
+\end{externalDocument}
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}{.39\linewidth}
+\begin{externalDocument}[
+  compiler=pdflatex,cleanup={log,aux},showFilename=false]{voss}
+\documentclass{standalone}
+%StartVisiblePreamble
+\usepackage{fontenc}
+\usepackage{libertinus}
+\usepackage[linguistics]{forest}
+\forestapplylibrarydefaults{linguistics, edges}
+%StopVisiblePreamble
+\begin{document}
+\begin{forest}
+[VP
+  [DP]
+  [V’
+   [V]
+  [DP]
+  ]
+]
+\end{forest}
+\end{document}
+\end{externalDocument}
+\end{minipage}
+
+\subsection{Showing code and output of a Python example}
+The \ttIndex{png} image  is created on the fly with the following arguments of \Lenv{externalDocument}:
+
+\begin{Verbatim}
+\begin{externalDocument}[
+  compiler=python3,
+  code,
+  ext=py,
+  docType=py,
+  usefancyvrb,
+  grfOptions={width=\linewidth}]{python}
+... Python code ...
+\end{externalDocument}
+\end{Verbatim}
+
+The code which is declared as header and main can be marked by:
+
+\begin{Verbatim}
+\hv@extern@exampleType{py}
+  {\NumChar StartVisibleMain}
+  {\NumChar StopVisibleMain}
+  {\NumChar StartVisiblePreamble}
+  {\NumChar StopVisiblePreamble}
+\end{Verbatim}
+
+\Lcs{NumChar} is the default Python comment character \#\index{\#} and needs to be saved with a different
+catagory, which is done internally by the package. The complete definition of the code is:
+
+
+\begin{Verbatim}
+\begin{externalDocument}[
+  compiler=python3,
+  code,
+  ext=py,
+  docType=py,
+  usefancyvrb,
+  grfOptions={width=\linewidth}]{python}
+import os
+#StartVisiblePreamble
+from PIL import Image
+import subprocess
+# drawing area (xa < xb and ya < yb)
+xa = -0.1716
+xb = -0.1433
+ya = 1.022
+yb = 1.044
+maxIt = 1024  # iterations
+imgx = 1000   # image size
+imgy = 750
+image = Image.new("RGB", (imgx, imgy))
+#StopVisiblePreamble
+
+#StartVisibleMain
+for y in range(imgy):
+    cy = y * (yb - ya) / (imgy - 1)  + ya
+    for x in range(imgx):
+        cx = x * (xb - xa) / (imgx - 1) + xa
+        c = complex(cx, cy)
+        z = 0
+        for i in range(maxIt):
+            if abs(z) > 2.0: break 
+            z = z * z + c 
+        r = i % 4 * 6
+        g = i % 8 * 32
+        b = i % 16 * 16
+        image.putpixel((x, y), b * 65536 + g * 256 + r)
+#StopVisibleMain
+# now get the filename created by the latex document
+imageName = os.path.basename(os.path.splitext(__file__)[0])+".png" # get filename
+image.save(imageName, "PNG")
+\end{externalDocument}
+\end{Verbatim}
+
+And with using this code we get the image as png inserted. The given filename of the external
+document is 
+internally extended by a consecutive number which isn't known to the \Index{Python} code. However,
+it is no problem in any programming language to get the name of a running file. The  forlast
+line in the above code shows how it can be done with Python.
+
+
+\begin{externalDocument}[
+  compiler=python3,
+  progpath=/usr/local/bin/,
+  runs=1,
+  code,
+  ext=py,
+  docType=py,
+  usefancyvrb,
+  grfOptions={width=\linewidth}]{python}
+import os
+#StartVisiblePreamble
+from PIL import Image
+import subprocess
+# drawing area (xa < xb and ya < yb)
+xa = -0.1716
+xb = -0.1433
+ya = 1.022
+yb = 1.044
+maxIt = 1024  # iterations
+imgx = 1000   # image size
+imgy = 750
+image = Image.new("RGB", (imgx, imgy))
+#StopVisiblePreamble
+
+#StartVisibleMain
+for y in range(imgy):
+    cy = y * (yb - ya) / (imgy - 1)  + ya
+    for x in range(imgx):
+        cx = x * (xb - xa) / (imgx - 1) + xa
+        c = complex(cx, cy)
+        z = 0
+        for i in range(maxIt):
+            if abs(z) > 2.0: break 
+            z = z * z + c 
+        r = i % 4 * 6
+        g = i % 8 * 32
+        b = i % 16 * 16
+        image.putpixel((x, y), b * 65536 + g * 256 + r)
+#StopVisibleMain
+# now get the filename created by the latex document
+imageName = os.path.basename(os.path.splitext(__file__)[0]) # get filename
+image.save(imageName+".png", "PNG")
+\end{externalDocument}
+
+
+The external filename, extended by a consequtive number, kan be printed in the
+margin by setting the keyword \Lkeyword{showFilename}. In general it is printed 
+in the outer margin or in twocolumn mode in the outer column. If the example is
+set in twocolumn mode but inside a starred floating environment over both
+column, then use the keyword \Lkeyword{outerFN}. Then \Lpack{hvextern} doesn't
+test for twocolumn mode.
+
+\enlargethispage{\normalbaselineskip}
+
+A vertical shift of the filename is possible by setting a length to the keyword \Lkeyword{shiftFN},
+e.g. \texttt{shiftFN=5ex}. 
+
+
+%\clearpage%%%%%%%%%%%%
+
+\begin{externalDocument}[grfOptions={width=0.95\linewidth},
+  compiler=xelatex,code,mpwidth=0.6\linewidth,
+  crop,cleanup,usefancyvrb=false,ext=tex,showFilename=false]{voss}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage{tikz}
+\usepackage[hks,pantone,xcolor]{xespotcolor}
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\SetPageColorSpace{HKS}
+\definecolor{HYellow}{spotcolor}{HKS05N,0.5}
+\definecolor{HRed}{spotcolor}{HKS14N,0.5}
+\definecolor{HBlue}{spotcolor}{HKS38N,0.5}
+\begin{tikzpicture}[scale=0.7,fill opacity=0.7]
+ \fill[HYellow]( 90:1.2) circle (2);
+ \fill[HRed]   (210:1.2) circle (2);
+ \fill[HBlue]  (330:1.2) circle (2);
+ \node at ( 90:2)  {Typography};
+ \node at ( 210:2) {Design};
+ \node at ( 330:2) {Coding};
+ \node {\LaTeX};
+\end{tikzpicture}
+\end{document}
+\end{externalDocument}
+
+
+
+\section{Setting marker in the source}
+The marker for the code ranges which should be listed depend to the used programming language:
+
+\begin{verbatim}
+[...]
+%StartVisiblePreamble
+[... listed preamble code ]
+%StopVisiblePreamble
+[...]
+\begin{document}
+[...]
+\end{document}
+\end{verbatim}
+
+everything between \ttIndex{\%StartVisiblePreamble} and \ttIndex{\%StopVisiblePreamble} will be listed as
+preamble and in case of a \LaTeX\ source everything between
+ \Lcs{begin\{document\}} and \Lcs{end\{document\}} as body. The marker must be defined with an own
+macro, e.g.:
+ 
+\begin{verbatim}
+\hv@extern@exampleType{py}
+  {\NumChar StartVisibleMain}
+  {\NumChar StopVisibleMain}
+  {\NumChar StartVisiblePreamble}
+  {\NumChar StopVisiblePreamble}
+\end{verbatim}
+ 
+\Lcs{NumChar} is the comment character \#, which needs a special handling. This version of \Lpack{hvextern}
+supports the following programming languages (option \Lkeyword{compiler}):
+\Lkeyval{mpost}, \Lkeyval{tex}, \Lkeyval{latex}, \Lkeyval{luatex}, 
+\Lkeyval{python3}, \Lkeyval{perl}, \Lkeyval{lua}, \Lkeyval{xetex}, 
+\Lkeyval{pdflatex}, \Lkeyval{lualatex}, \Lkeyval{xelatex}, and \Lkeyval{context}. The default
+is \Lkeyval{pdflatex}. The option \Lkeyword{docType} selects the config file, which must be one of 
+\Lkeyval{context}, \Lkeyval{lua}, \Lkeyval{pl}, \Lkeyval{tex}, \Lkeyval{latex}, 
+\Lkeyval{mp}, and \Lkeyval{py}. For Lua it is
+
+\begin{verbatim}
+\hv@extern@exampleType{lua}
+  {--StartVisibleMain}
+  {--StopVisibleMain}
+  {--StartVisiblePreamble}
+  {--StopVisiblePreamble}
+\end{verbatim}
+
+
+It defines the marker strings for the listed code sequences.  
+In some cases you have to use multiple times the same value
+for different optional arguments, e.g.
+
+\begin{verbatim}
+ext=lua, compiler=lua, docType=lua, ... 
+\end{verbatim}
+
+
+\section{Optional arguments}
+The default setting is always shown in brackets. 
+\subsection{Programs and runs}
+
+The \Lkeyword{progpath} should only in some
+rare cases needed. In general all used compilers will be found by the system. A given \Lkeyword{progpath}
+must be end with a slash, e.g. \Lkeyval{./bin/} 
+
+\begin{verbatim}
+\define@key{hv}{progpath}[]{\def\hv@extern@progpath{#1}}
+\define@key{hv}{compiler}[pdflatex]{\def\hv@extern@compiler{#1}}
+\define@key{hv}{runsequence}[]{\def\hv@extern@runsequence{#1}}
+\define@key{hv}{runs}[1]{\setcounter{hv@extern@runs}{#1}}
+\end{verbatim}
+
+For Windows the \Lkeyword{progpath} should always be written with slashes and not
+backslashes. e.g.
+
+\begin{verbatim}
+  compiler=Rscript.exe,
+  progpath=C:/Program Files/R/R-4.3.3/bin/x64/,
+\end{verbatim}
+
+For macOS it is something like this:
+
+\begin{externalDocument}[
+  compiler=Rscript,
+  progpath=/opt/homebrew/bin/,
+  grfOptions={width=0.5\linewidth},
+  code=true,
+  usefancyvrb,
+  ext=R,
+  docType=R]{voss}
+#StartVisibleMain
+head(pressure) # Die ersten Werte der internen Datenliste
+pdf()          # erzeugt die PDF "Rplots.pdf"
+plot(pressure)
+#StopVisibleMain
+\end{externalDocument}
+
+
+
+Instead of the optional arguments
+ \Lkeyword{compiler}, \Lkeyword{biber}, and \Lkeyword{xindex} one can define an individual
+ command sequence by using the optional argument
+ \Lkeyword{runsequence}. It must be comma separated list:
+ 
+\begin{verbatim}
+runsequence={lualatex,biber,xindex -l de -c AU,lualatex,lualatex}
+\end{verbatim}
+
+\begin{externalDocument}[
+  grfOptions={width=0.30\linewidth},
+  pages={1,3,5},
+  pagesep=2pt,
+  frame,
+  runsequence={lualatex,biber,xindex -l de -c AU,lualatex,lualatex},
+  verbose,
+  cleanup={log,aux,toc,bbl,blg},
+  code,docType=latex,
+  lstOptions={columns=fixed}]{voss}
+\documentclass[paper=a5,parskip=half-,DIV=12,fontsize=12pt]{scrbook}
+%StartVisiblePreamble
+\usepackage[ngerman]{babel}
+\usepackage{libertinus,hvindex}
+\usepackage{makeidx}\makeindex
+\usepackage{biblatex}\addbibresource{biblatex-examples.bib}
+%StopVisiblePreamble
+\usepackage{blindtext}
+\begin{document}
+Sort with xindex \verb|-l DE --config AU|
+\blindtext
+\Index{Österreich} \Index{Öresund} 
+\Index{Ostern} \Index{Ober} \Index{Oberin} 
+\Index{Österreich} \Index{Öresund} 
+\Index{Ödem} \Index{Oligarch} \Index{Oder} 
+\Index{Goldmann}
+\printindex
+\nocite{*}\printbibliography
+\blindtext
+\blinddocument
+
+\end{document}
+\end{externalDocument}
+
+
+The following \Java-program creates the Mandelbrot set as png image. The valid setting for 
+the environment \Lenv{externalDocument} is:
+
+\begin{verbatim}
+  compiler=java,ext=java,docType=java,
+\end{verbatim}
+
+\begin{externalDocument}[
+  verbose,
+  compiler=java,ext=java,code,
+  docType=java,includegraphic,
+  usefancyvrb,grfOptions={width=0.9\linewidth}]{java}
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
+
+public class Main {
+
+//StartVisiblePreamble
+  public static int iterZahl(final double cx, final double cy, int maxIt, 
+                final double radius) {
+  // bestimmt Anzahl der Iterationen
+    int zaehler = 0;
+    double zx = 0.0, zy = 0.0, tmp;
+    do {
+      tmp = zx*zx - zy*zy + cx;
+      zy = 2*zx*zy + cy; zx = tmp;
+      zaehler++;
+    } while (zx*zx + zy*zy <= radius && zaehler < maxIt);
+    return zaehler;
+  }
+//StopVisiblePreamble
+  public static void main(String[] argv) throws Exception {  
+    String f_name = new File ((Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getName();
+    String basename = f_name.replaceAll("\\.[^.]*$", "");
+    int imageBreite = 540, imageHoehe = 405;
+    BufferedImage bufferedImage = new BufferedImage(imageBreite, imageHoehe, BufferedImage.TYPE_INT_RGB);
+    Graphics g = bufferedImage.createGraphics();
+//StartVisibleMain
+    double xa = -2.5, xe = 0.7, ya = -1.2, ye = 1.2; // Ratio 20:15 
+    double dx = (xe-xa)/(imageBreite-1), dy = (ye-ya)/(imageHoehe-1);
+    double cx, cy; int R, G, B;
+    double radius = 10.0;  int maxIt = 1024;
+    cx = xa;
+    for (int sp = 0; sp < imageBreite; sp++) {
+      cy = ye; // von oben nach unten
+      for (int ze = 0; ze < imageHoehe; ze++) {
+        int zIter = iterZahl(cx, cy, maxIt, radius);
+        if (zIter == maxIt) {
+          g.setColor(Color.WHITE);
+          g.drawLine(sp, ze, sp, ze);
+        } else { 
+          R = zIter % 4 * 6 ; G = zIter % 8 * 32; B = zIter % 16 * 16;
+          g.setColor(new Color(R,G,B));
+          g.drawLine(sp, ze, sp, ze);
+        }
+        cy = cy - dy;
+      } // for ze
+      cx = cx + dx;
+    } // for sp
+//StopVisibleMain
+    g.dispose();
+    RenderedImage rendImage = bufferedImage;
+
+    File file = new File(basename+".png");
+    ImageIO.write(rendImage, "png", file);
+  }
+}
+\end{externalDocument}
+
+
+%$
+
+
+\clearpage
+
+\subsection{Grafik options}
+\begin{verbatim}
+\define@key{hv}{grfOptions}[]{\def\hv@extern@grfOptions{#1}}
+\end{verbatim}
+
+The option is passed to \Lcs{includegraphics}, e.g. \verb|angle=90,width=\linewidth| for
+the follwing example.
+
+\begin{externalDocument}[grfOptions={angle=90,width=\linewidth},
+  compiler=xelatex,code,mpwidth=0.6\linewidth,
+  crop,cleanup]{voss}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage{tikz}
+\usepackage[hks,pantone,xcolor]{xespotcolor}
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\SetPageColorSpace{HKS}
+\definecolor{HYellow}{spotcolor}{HKS05N,0.5}
+\definecolor{HRed}{spotcolor}{HKS14N,0.5}
+\definecolor{HBlue}{spotcolor}{HKS38N,0.5}
+\begin{tikzpicture}[scale=0.7,fill opacity=0.7]
+ \fill[HYellow]   ( 90:1.2) circle (2);
+ \fill[HRed] (210:1.2) circle (2);
+ \fill[HBlue]  (330:1.2) circle (2);
+ \node at ( 90:2) {Typography};
+ \node at ( 210:2) {Design};
+ \node at ( 330:2) {Coding};
+ \node {\LaTeX};
+\end{tikzpicture}
+\end{document}
+\end{externalDocument}
+
+
+
+\newpage%%%%%%%%%%%
+
+
+\subsection{Listings options}
+
+\begin{verbatim}
+\define@key{hv}{lstOptions}[]{\def\hv@extern@lstOptions{#1}}
+\end{verbatim}
+
+The option is passed either to \Lcs{lstinputlisting}, or, if \Lkeyword{usefancyvrb} is active, 
+to \Lcs{VerbatimInput}. The following example uses 
+
+\begin{verbatim}
+  lstOptions={basicstyle=\sffamily\itshape\scriptsize},
+\end{verbatim}
+
+
+
+\begin{externalDocument}[
+  grfOptions={width=\linewidth},
+  lstOptions={basicstyle=\sffamily\itshape\scriptsize},
+  compiler=lualatex,
+  code,
+  mpwidth=0.6\linewidth,
+  crop,
+  cleanup,
+  docType=latex]{voss}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage{pst-calendar} 
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\psscalebox{0.3}{%
+  \psCalDodecaeder[Year=2022,style=april]%
+}
+\end{document}
+\end{externalDocument}
+
+
+
+\subsection{Background color}
+
+There are different colors for the preamble and body listing: the backgrund and frame color.
+\begin{verbatim}
+\define@key{hv}{BGpreamble}[black12]{\def\hv@extern@BGpreamble{#1}}
+\define@key{hv}{BGbody}[black8]{\def\hv@extern@BGbody{#1}}
+\define@key{hv}{BOpreamble}[black12]{\def\hv@extern@BOpreamble{#1}}
+\define@key{hv}{BObody}[black8]{\def\hv@extern@BObody{#1}}
+\end{verbatim}
+
+The options are passed to \Lpack{tcolorbox} and preset to \Lcolor{black"!12} and \Lcolor{black"!8}.
+The color of the frame is set to the same values, hence not seen. The following example uses
+
+\begin{verbatim}
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+\end{verbatim}
+
+%\clearpage
+
+\begin{externalDocument}[
+  grfOptions={width=\linewidth},
+  lstOptions={fontsize=\small,fontfamily=tt},
+  compiler=lualatex,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  mpwidth=0.6\linewidth,
+  crop,
+  cleanup,
+  usefancyvrb,
+  docType=latex]{voss}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage{pst-calendar} 
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\psscalebox{0.3}{%
+  \psCalDodecaeder[Year=2022,style=may]%
+}
+\end{document}
+\end{externalDocument}
+
+\subsection{Type of the source code}
+
+The current version of \Lpack{hvextern} supports code written as
+\MP, \plainTeX, \LaTeX, \ConTeXt, and Python. Every type has its own keywords for the 
+linerange which should be printed for the preamble and
+the body. For example the \texttt{latex} config is:
+
+\begin{verbatim}
+\hv@extern@exampleType{latex}%                   for _all_LaTeX engines   
+  {\string\begin\string{document\string}}%       
+  {\string\end\string{document\string}}%         
+  {\perCent StartVisiblePreamble}%               
+  {\perCent StopVisiblePreamble}%                
+
+% only for the sequence latex->dvips->ps2pdf
+\def\hv@extern@runLATEX#1#2#3#4{% path compiler file extension  
+  \ifhv@extern@verbose \typeout{>>>> running #1#2 #3#4}\fi
+  \ShellEscape{#1#2\space #3#4}%
+  \ifhv@extern@verbose \typeout{>>>> running #1dvips #3}\fi
+  \ShellEscape{#1dvips\space #3.dvi}%
+  \ifhv@extern@verbose \typeout{>>>> running ps2pdf #3.ps}\fi
+  \ShellEscape{#1ps2pdf\space -dAutoRotatePages=/None\space -dALLOWPSTRANSPARENCY\space  #3.ps}%
+}
+\end{verbatim}
+
+If a source needs more than running the defined compiler, it must be defined by a macro
+\begin{verbatim}
+\def\hv@extern@run<NAME>#1#2#3#4{% path compiler file extension
+...}
+\end{verbatim}
+
+The type of the source code can be different to the compiler, e.g. source \Lkeyval{latex},
+but compiler \Lkeyval{lualatex}.
+
+\subsection{Output more than one page}
+The pages which should be printed can be defined by
+
+
+\begin{verbatim}
+\define@key{hv}{pages}[1]{\def\hv@extern@pages{#1}}
+\define@key{hv}{pagesep}[1em]{\hv@extern@pagesep=#1}
+\define@boolkey{hv}[hv@extern@]{frame}[true]{}
+\end{verbatim}
+
+With \Lkeyword{frame} the pages can be framed (internally by \Lcs{fbox}).
+It is leaved to the user to choose the correct image width for the pages.
+The separation between the pages is defined by the length \Lkeyword{pagesep}.
+The following example uses:
+
+\begin{verbatim}
+  pages={1,2,3},
+  pagesep=2pt,
+  grfOptions={width=0.3\linewidth},
+  compiler=lualatex, runs=2,  % for the TOC
+  frame,
+\end{verbatim}
+
+\begin{externalDocument}[
+  pages={1,2,3},
+  pagesep=2pt,
+  shiftFN=5ex,
+  grfOptions={width=0.3\linewidth},
+%  lstOptions={fontsize=\small,fontfamily=tt},
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+%  mpwidth=0.6\linewidth,
+%  crop,
+  cleanup,
+  frame,
+%  usefancyvrb,
+%  float,
+%  caption={An example for Coxeter images},
+%  label=img:cox,
+  docType=latex]{voss}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage[american]{babel}
+\usepackage{libertinus} 
+\usepackage{blindtext} 
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\title{A multipage example}
+\author{Erasmus von Rotterdam}
+\maketitle
+\tableofcontents
+\blinddocument
+\end{document}
+\end{externalDocument}
+
+
+
+
+\subsection{Output as floating object with caption and label}
+
+By default the images are not inserted as a float. This can be changed by
+the keyword \Lkeyword{float}, a caption and a label are optional. The float type is always
+\Lenv{figure}.
+
+\begin{verbatim}
+\define@boolkey{hv}[hv@extern@]{float}[true]{}
+\define@key{hv}{floatsetting}[]{\def\hv@extern@floatsetting{#1}}
+\define@key{hv}{caption}[]{\def\hv@extern@caption{#1}}
+\define@key{hv}{label}[]{\def\hv@extern@label{#1}}
+\end{verbatim}
+
+The image Figure~\ref{img:cox} shows an example for a floating object, which uses the floatsetting \verb|!htb|,
+which is the default. Using a caption and a label are optional.
+
+\begin{externalDocument}[
+  grfOptions={width=\linewidth},
+  lstOptions={fontsize=\small,fontfamily=tt},
+%  lstOptions={basicstyle=\small\ttfamily},
+  compiler=lualatex,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+%  mpwidth=0.6\linewidth,
+  crop,
+  cleanup,
+  usefancyvrb,
+  float,
+  floatsetting=!ht,
+  caption={An example for Coxeter images},
+  label=img:cox,
+  docType=latex]{voss}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage{pst-coxeterp} 
+%StopVisiblePreamble
+\pagestyle{empty}
+\begin{document}
+\begin{pspicture}(-1,-1)(1,1)\Simplex[dimension=2]\end{pspicture}
+\begin{pspicture}(-1,-1)(1,1)\Simplex[dimension=3]\end{pspicture}
+\begin{pspicture}(-1,-1)(1,1)\Simplex[dimension=5]\end{pspicture}
+\begin{pspicture}(-1,-1)(1,1)\Simplex[dimension=7]\end{pspicture}
+\end{document}
+\end{externalDocument}
+
+
+
+%\clearpage%%%%%%%%%%%%%%%%%
+
+
+\subsection{Cropping the PDF}
+Instead of using the \Index{documentclass} \Lclass{standalone}, which already crops the created PDF,
+one can use the optional argument \Lkeyword{crop}.
+
+\begin{verbatim}
+\define@boolkey{hv}[hv@extern@]{crop}[true]{}
+\define@key{hv}{cropmargin}[2]{\def\hv@extern@cropmargin{#1 }}% length in pt
+\end{verbatim}
+
+
+It is also possible to crop a document with more than one page. In this case the
+beginning and end of the pages should be on the same height. Otherwise the pages
+will have different heights after \Index{cropping} (see next image). 
+The follwoing example was created with
+
+\begin{verbatim}
+  pages={1,2,3},
+  pagesep=2pt,
+  grfOptions={width=0.3\linewidth},
+  compiler=lualatex, runs=2,  % for the TOC
+  frame,
+  crop, cropmargin=5,%    5pt margin
+\end{verbatim}
+
+\begin{externalDocument}[
+  pages={1,2,3},
+  pagesep=2pt,
+  grfOptions={width=0.3\linewidth},
+%  lstOptions={fontsize=\small,fontfamily=tt},
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+%  mpwidth=0.6\linewidth,
+  crop, cropmargin=5,
+  cleanup,
+  frame,
+%  usefancyvrb,
+%  float,
+%  caption={An example for Coxeter images},
+%  label=img:cox,
+  docType=latex]{voss}
+\documentclass{article}
+%StartVisiblePreamble
+\usepackage[american]{babel}
+\usepackage{libertinus} 
+\usepackage{blindtext} 
+\pagestyle{headings}
+%StopVisiblePreamble
+\begin{document}
+\title{A multipage example}
+\author{Erasmus von Rotterdam}
+\maketitle
+\tableofcontents
+\Blinddocument
+\end{document}
+\end{externalDocument}
+
+
+\subsection{Code and output side by side}
+By default the code and the output is on top of each other. With setting the
+width of a minipage with \Lkeyword{mpwidth} greater than 0\,pt  the output will be side by side.
+
+\begin{verbatim}
+\define@key{hv}{mpwidth}[0pt]{\setlength\hv@extern@mpwidth{#1}}
+\define@key{hv}{mpvalign}[0pt]{\def\hv@extern@mpvalign{#1}}
+\end{verbatim}
+
+\Lkeyword{mpwidth} is  the width of the code. The rest of the line, minus 1em for the space between
+the minipages, will be the possible
+width for the output and will be calculated automatically. The two \Index{minipages} are
+aligned by defaults to its top. This can be changed by setting \Lkeyword{mpvalign} to \Lkeyval{c} 
+or \Lkeyval{b}.
+
+
+
+\subsection{Horizontal alignment of the output}
+
+%\begin{verbatim}
+%\define@key{hv}{align}[\centering]{\def\hv@extern@align{#1}}
+%\end{verbatim}
+
+%\textbf{the default}
+%
+\begin{verbatim}
+  align=\centering,  % default
+\end{verbatim}
+%
+\begin{externalDocument}[
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  showFilename=false,
+  crop,
+  cleanup,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.5\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+%\textbf{Left aligned}
+
+\begin{verbatim}
+  align=\raggedright,
+\end{verbatim}
+
+\begin{externalDocument}[
+  align=\raggedright,
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  showFilename=false,
+  code,
+  crop,
+  cleanup,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.5\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+%\textbf{Right aligned}
+
+\begin{verbatim}
+  align=\raggedleft,
+\end{verbatim}
+
+
+\begin{externalDocument}[
+  align=\raggedleft,
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  showFilename=false,
+  crop,
+  cleanup,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.5\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+
+%Now the same for side by side output.
+
+%\textbf{the default -- side by side}
+\begin{verbatim}
+  align=\centering,  mpwidth=0.5\linewidth,   % default for side by side
+\end{verbatim}
+
+\begin{externalDocument}[
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  crop,
+  showFilename=false,
+  cleanup,
+  mpwidth=0.5\linewidth,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.25\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+%\textbf{Left aligned -- side by side}
+
+\begin{verbatim}
+  align=\raggedright,   mpwidth=0.5\linewidth,
+\end{verbatim}
+
+\begin{externalDocument}[
+  align=\raggedright,
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  showFilename=false,
+  crop,
+  cleanup,
+  mpwidth=0.5\linewidth,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.25\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+%\textbf{Right aligned -- side by side}
+
+\begin{verbatim}
+  align=\raggedleft,  mpwidth=0.5\linewidth,
+\end{verbatim}
+
+
+\begin{externalDocument}[
+  align=\raggedleft,
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  showFilename=false,
+  crop,
+  cleanup,
+  mpwidth=0.5\linewidth,
+  aboveskip=0pt,belowskip=0pt,
+  docType=latex]{voss}
+\documentclass{article}
+\pagestyle{empty}
+\begin{document}
+\rule{0.25\linewidth}{5mm}
+\end{document}
+\end{externalDocument}
+
+
+
+
+\subsection{Inline images}
+By default code and image are own paragraphs. With the optional argument \Lkeyword{inline} the created
+image can be part of the \Index{current line}. This may make sense, if you need characters which are
+not part of your current font.
+
+\begin{verbatim}
+\define@boolkey{hv}[hv@extern@]{inline}[true]{%
+    \hv@extern@codefalse
+    \hv@extern@showFilenamefalse}
+\end{verbatim}
+
+With the setting \LKeyset{inline=true} the optional keyword \Lkeyword{code}  and \Lkeyword{showFilename}
+is automatically set to false. The
+next  Chinese characters \label{inline-exa}
+\begin{externalDocument}[
+  compiler=xelatex, inline, runs=2, grfOptions={height=8pt},
+  crop, cropmargin=0, vshift=-1pt,usefancyvrb,
+  cleanup, docType=latex]{voss}%
+\documentclass{ctexart}
+\pagestyle{empty}
+\begin{document}
+美好的一天
+\end{document}
+\end{externalDocument}
+are inserted as \Index{inline image} without showing the code. The complete code looks like:
+
+
+\let\myFont\CodeTwo
+
+\begin{Verbatim}[fontfamily=myFont]
+With \Lkeyset{inline} the optional argument \Lkeyword{code} is 
+automatically set to false. The next  Chinese characters 
+\begin{externalDocument}[vshift=-1pt,
+  compiler=xelatex, inline, runs=2, grfOptions={height=8pt},
+  crop, cropmargin=0, cleanup, docType=latex]{voss}
+\documentclass{ctexart}
+\pagestyle{empty}
+\begin{document}
+美好的一天
+\end{document}
+\end{externalDocument}
+are inserted as inline image without showing the code. The complete 
+code looks like:
+\end{Verbatim}
+
+With the keyword \Lkeyword{vshift} the inserted image can be moed in vertically direction.
+
+\subsection{Input text instead of an image}
+By default the created pdf which can be, of course, only text, will be inserted by \Lcs{includegraphics}.
+If you have only text as output and don't want to create a pdf you can insert this kind of
+output as verbatim text by setting \Lkeyset{includegraphic=false}. 
+
+\begin{verbatim}
+\define@boolkey{hv}[hv@extern@]{includegraphic}[true]{}
+\end{verbatim}
+
+
+The textfile must have the same main filename with the extension
+\Lext{txt}. As already mentioned, in every programming language you can get the current
+used filename from within the code itself. The following \Perl example which calculates the
+\Index{Kaprekar} constants uses 
+
+\begin{verbatim}
+my $filename = $0;             # the current filename
+$filename =~ s/\.pl//;         # without extension .pl
+$filename = "${filename}.txt"; # for the output
+\end{verbatim}
+
+Only for some completeness: a Kaprekar constant is a number $A$ with $\max(A)-\min(A)=A$. 
+$\max$ and $\min$ are the
+sorted digits of the number $A$: $495=954-459$.
+
+
+\begin{externalDocument}[
+  compiler=perl, docType=pl, ext=pl, includegraphic=false,
+  code, mpwidth=0.6\linewidth]{voss}
+#!/usr/bin/perl
+#
+# Herbert Voss 2005-05-31
+#
+#StartVisiblePreamble
+my $zahl = 1;
+my $anfang = 1;
+my $ende = 9;
+#StopVisiblePreamble
+my $filename = $0;             # the current filename
+$filename =~ s/\.pl//;         # without extension .pl
+$filename = "${filename}.txt"; # for the output
+my $found = 0;
+open(my $fh, '>', $filename);
+
+#StartVisibleMain
+print $fh "Finding Kaprekarconstants ...\n";
+while ($zahl < 8) {
+  print $fh "${zahl}-stellig: ";
+  foreach ($anfang...$ende) { # for every row $_
+    @Zeichen = split(//,$_);
+    $Min = join("",sort(@Zeichen));
+    $Max = reverse($Min);
+    $Dif=$Max-$Min;
+    if($_ eq $Dif) {
+      $found = 1;
+      print $fh $_,",  ";
+    }
+  }
+  if (!$found) { print $fh "---\n"; }
+  else         { print $fh "\n";    }
+  $found = false;
+  $zahl = $zahl+1;
+  $anfang = $anfang*10;
+  $ende = $ende*10;
+}
+#StopVisibleMain
+close $fh;
+\end{externalDocument}
+
+
+%$
+Another example with running \Lua to calculate and print the \Index{Pascal's triangle}. The internal filename
+is available with
+
+\begin{verbatim}
+local filename = arg[0]
+local shortFN = str:match("(.+)%..+")   -- delete extension
+outFile = io.open(shortFN..".txt","w+") -- open external file
+\end{verbatim}
+
+
+\begin{externalDocument}[
+  compiler=lua, docType=lua, ext=lua, includegraphic=false, 
+  code, usefancyvrb=false,textOptions={basicstyle=\ttfamily\footnotesize},
+  shiftFN=6ex]{voss}
+#!/usr/bin/env lua
+local filename = arg[0]
+local shortFN = filename:match("(.+)%..+")
+outFile = io.open(shortFN..".txt","w+")
+
+--StartVisiblePreamble
+function nextrow(t)
+  local ret = {}
+  t[0], t[#t+1] = 0, 0
+  for i = 1, #t do ret[i] = t[i-1] + t[i] end
+  return ret
+end
+
+function triangle(n)
+  t = {1}
+  for i = 1, n do
+    m = (n - i)
+    for j = 1,m do outFile:write("    ") end
+    for k = 1,i do outFile:write(string.format("%8s",t[k])) end
+    outFile:write("\n")
+    t = nextrow(t)
+  end
+end
+--StopVisiblePreamble
+
+--StartVisibleMain
+triangle(10)
+--StopVisibleMain
+outFile:close()
+\end{externalDocument}
+
+
+
+
+
+
+\subsection{Running additional external programs}
+
+For a \LaTeX\ additional programs for \Index{bibliography}, \Index{index}, a.s.o. maybe needed.
+
+\begin{verbatim}
+\define@boolkey{hv}[hv@extern@]{biber}[true]{}
+\define@boolkey{hv}[hv@extern@]{xindex}[true]{}
+\define@key{hv}{xindexOptions}[]{\def\hv@extern@xindexOptions{#1}}
+\define@key{hv}{runsequence}[]{\def\hv@extern@runsequence{#1}}
+\end{verbatim}
+
+The \Lkeyword{biber} run needs no additional options, but for \Lkeyword{xindex} it maybe useful.
+The following examples uses
+
+\begin{verbatim}
+\begin{externalDocument}[
+  compiler=lualatex, runs=2, pages=2,crop,
+  xindex, xindexOptions={-l DE --config AU},
+  mpwidth=0.6\linewidth, usefancyvrb=false,
+  docType=latex,
+  ...
+]{voss}
+\end{verbatim}
+
+
+
+
+\begin{externalDocument}[
+  grfOptions={scale=0.75},
+  compiler=lualatex, runs=2,
+  BGpreamble=red!10, BOpreamble=red, 
+  BGbody=blue!8, BObody=blue,
+  code,
+  pages=2,
+  crop,
+  cleanup,
+  xindex,
+  xindexOptions={-l DE --config AU},
+  mpwidth=0.6\linewidth,
+  usefancyvrb=false,
+  docType=latex]{voss}
+\documentclass[paper=a6,DIV=18,parskip=half-]{scrartcl}
+\pagestyle{empty}
+\usepackage{libertinus}
+\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase,FakeStretch=0.9]
+\usepackage[ngerman]{babel}
+\usepackage{multicol}
+\makeatletter
+\def\theindex{%    only for demonstration
+  \newpage
+  \section*{\indexname}
+  \begin{multicols}{2}
+  \parskip\z@ \@plus .3\p@\relax \parindent\z@
+  \let\item\@idxitem}
+\def\endtheindex{\end{multicols}}
+\makeatother
+%StartVisiblePreamble
+\usepackage{makeidx}\makeindex
+\usepackage{hvindex}
+%StopVisiblePreamble
+\begin{document}
+Sort with xindex \verb|-l DE --config AU|
+\Index{Österreich} \Index{Öresund} 
+\Index{Ostern} \Index{Ober} \Index{Oberin} 
+\Index{Österreich} \Index{Öresund} 
+\Index{Ödem} \Index{Oligarch} \Index{Oder} 
+\Index{Ostern} \Index{Ober} \Index{Oberin} 
+\Index{Obstler} \Index{Öl} \Index{ölen} 
+\Index{Oder|seealso{Fluss}} \Index{Göbel}
+\Index{oder} \index{Fluss!Oder}
+\Index{Goethe} \Index{Göthe} \Index{Götz}
+\Index{Goldmann}
+\printindex
+\end{document}
+\end{externalDocument}
+
+
+Instad of using the options \Lkeyword{compiler}, \Lkeyword{biber}, and \Lkeyword{xindex} 
+one can also use only the optional argument \Lkeyword{runsequence} to define an individuell
+sequence of commands, e.g.:
+\begin{verbatim}
+runsequence={lualatex,biber,{xindex -l de -c AU},lualatex,lualatex}
+\end{verbatim}
+
+\begin{externalDocument}[
+  grfOptions={width=0.30\linewidth},
+  pages={1,2,3,4,5,6},
+  pagesep=2pt,
+  frame,
+  runsequence={lualatex,biber,xindex -l de -c AU,lualatex,lualatex},
+  verbose,
+  cleanup={log,aux,toc,bbl,blg},
+  code,docType=latex,
+  lstOptions={columns=fixed}]{voss}
+\documentclass[paper=a5,parskip=half-,DIV=12,fontsize=12pt]{scrbook}
+%StartVisiblePreamble
+\usepackage[ngerman]{babel}
+\usepackage{libertinus,hvindex}
+\usepackage{makeidx}\makeindex
+\usepackage{biblatex}\addbibresource{biblatex-examples.bib}
+%StopVisiblePreamble
+\usepackage{blindtext}
+\begin{document}
+\blindtext
+\Index{Österreich} \Index{Öresund} 
+\Index{Ostern} \Index{Ober} \Index{Oberin} 
+\Index{Österreich} \Index{Öresund} 
+\Index{Ödem} \Index{Oligarch} \Index{Oder} 
+\Index{Goldmann}
+\printindex
+\nocite{*}\printbibliography
+\blindtext
+\blinddocument
+
+\end{document}
+\end{externalDocument}
+
+
+
+
+
+
+\subsection{Using \texttt{listings}}
+The default is using \Lcs{lstinputlisting} for the printed code sequences.
+
+\begin{externalDocument}[
+  grfOptions={width=0.45\linewidth},
+  pages={1,3},
+  frame,compiler=pdflatex,
+%  crop,
+  runs=2,code,docType=latex,
+  frame,
+  lstOptions={columns=fixed}]{voss}
+%StartVisiblePreamble
+\documentclass[chapterprefix=on,parskip=half-,DIV=12,fontsize=12pt]{scrbook}
+\DeclareNewSectionCommand[
+  style=section,
+  level=4,
+  beforeskip=-3.25ex plus -1ex minus -.2ex,
+  afterskip=1.5ex plus .2ex,
+  font=\normalsize,
+  indent=0pt,
+  counterwithin=subsubsection
+]{subsubsubsection}
+\RedeclareSectionCommand[
+  level=5,
+  toclevel=5,
+  tocindent=13em,
+  tocnumwidth=5.9em,
+  counterwithin=subsubsubsection
+]{paragraph}
+\RedeclareSectionCommand[
+  level=6,
+  toclevel=6,
+  tocindent=15em,
+  tocnumwidth=6.8em
+]{subparagraph}
+\setcounter{secnumdepth}{\subsubsubsectionnumdepth}
+\setcounter{tocdepth}{\subsubsubsectiontocdepth}
+%StopVisiblePreamble
+\usepackage[ngerman]{babel}
+\usepackage{libertinus}
+\usepackage{blindtext}
+\begin{document}
+\tableofcontents
+\chapter{Einführung}
+\section{Ein Abschnitt}
+\subsection{Ein Unterabschnitt}
+\subsubsection{Ein Unter-Unterabschnitt}
+\subsubsubsection{Ein Unter-Unter-Unterabschnitt}
+\paragraph{Der normale Paragraph}
+\blindtext
+\subparagraph{Der normale Unterparagraph}
+\blindtext
+\blinddocument
+\end{document}
+\end{externalDocument}
+
+
+
+It also possible to use \Lcs{VerbatimInput} from package \Lpack{fancyvrb}. In general
+it makes no difference using the optional argument \Lkeyword{usefancyvrb} or not.
+
+
+\begin{externalDocument}[
+  grfOptions={width=0.23\linewidth},
+  pages={1,2,3,4},pagesep=1pt,
+  frame,compiler=pdflatex,
+  showFilename,
+%  crop,
+  runs=2,code,docType=latex,
+  frame,framesep=0pt,usefancyvrb]{voss}
+%StartVisiblePreamble
+\documentclass[chapterprefix=on,parskip=half-,DIV=12,fontsize=12pt]{scrbook}
+\DeclareNewSectionCommand[
+  style=section,
+  level=4,
+  beforeskip=-3.25ex plus -1ex minus -.2ex,
+  afterskip=1.5ex plus .2ex,
+  font=\normalsize,
+  indent=0pt,
+  counterwithin=subsubsection
+]{subsubsubsection}
+\RedeclareSectionCommand[
+  level=5,
+  toclevel=5,
+  tocindent=13em,
+  tocnumwidth=5.9em,
+  counterwithin=subsubsubsection
+]{paragraph}
+\RedeclareSectionCommand[
+  level=6,
+  toclevel=6,
+  tocindent=15em,
+  tocnumwidth=6.8em
+]{subparagraph}
+\setcounter{secnumdepth}{\subsubsubsectionnumdepth}
+\setcounter{tocdepth}{\subsubsubsectiontocdepth}
+%StopVisiblePreamble
+\usepackage[ngerman]{babel}
+\usepackage{libertinus}
+\usepackage{blindtext}
+\begin{document}
+\tableofcontents
+\chapter{Einführung}
+\section{Ein Abschnitt}
+\subsection{Ein Unterabschnitt}
+\subsubsection{Ein Unter-Unterabschnitt}
+\subsubsubsection{Ein Unter-Unter-Unterabschnitt}
+\paragraph{Der normale Paragraph}
+\blindtext
+\subparagraph{Der normale Unterparagraph}
+\blindtext
+\blinddocument
+\end{document}
+\end{externalDocument}
+
+
+%\clearpage
+
+
+\subsection{Vertical space}
+
+\begin{verbatim}
+\define@key{hv}{aboveskip}[\medskipamount]{%
+        \setlength\hv@extern@aboveskip{#1}}
+\define@key{hv}{belowpreambleskip}[\smallskipamount]{%
+        \setlength\hv@extern@belowpreambleskip{#1}}
+\define@key{hv}{belowbodyskip}[\smallskipamount]{%
+        \setlength\hv@extern@belowbodyskip{#1}}
+\define@key{hv}{belowskip}[\medskipamount]{%
+        \setlength\hv@extern@belowskip{#1}}
+\end{verbatim}
+
+\begin{description}
+\item[\Lkeyword{aboveskip}] Vertical space \emph{before} the environment \Lenv{externalDocument} or
+    the command \Lcs{runExtCmd} (default \Lcs{medskipamount})
+\item[\Lkeyword{belowpreambleskip}] Vertical  space between preamble and body (default \Lcs{smallskipamount})
+\item[\Lkeyword{belowbodyskip}] Vertical space between  body and output (default \Lcs{smallskipamount})
+\item[\Lkeyword{belowskip}] Vertical space \emph{after}  the environment \Lenv{externalDocument} or
+    the command \Lcs{runExtCmd} (default \Lcs{medskipamount})
+\end{description}
+
+
+The listings environment uses its own keywords \Lkeyword{aboveskip} and \Lkeyword{belowskip}, also preset
+to \Lcs{medskipamount}. These ones can be changed by using the keyword \Lkeyword{lstOptions}:
+
+\begin{verbatim}
+..., lstOptions = {aboveskip=..., belowskip=...}, ...
+\end{verbatim}
+
+
+
+
+\subsection{No output}
+By default there is an image or text as output of the external run. In a case, where
+you are only interested in the code, which should be formatted in the same style as
+other examples, you can set \Lkeyword{showoutput} to false.
+
+
+\begin{externalDocument}[
+  showoutput=false,
+  frame,compiler=pdflatex,
+  crop,
+  runs=2,code,docType=latex,
+  frame,usefancyvrb]{voss}
+%StartVisiblePreamble
+\documentclass[chapterprefix=on,parskip=half-,DIV=12,fontsize=12pt]{scrbook}
+\DeclareNewSectionCommand[
+  style=section,
+  level=4,
+  beforeskip=-3.25ex plus -1ex minus -.2ex,
+  afterskip=1.5ex plus .2ex,
+  font=\normalsize,
+  indent=0pt,
+  counterwithin=subsubsection
+]{subsubsubsection}
+%StopVisiblePreamble
+\RedeclareSectionCommand[
+  level=5,
+  toclevel=5,
+  tocindent=13em,
+  tocnumwidth=5.9em,
+  counterwithin=subsubsubsection
+]{paragraph}
+\RedeclareSectionCommand[
+  level=6,
+  toclevel=6,
+  tocindent=15em,
+  tocnumwidth=6.8em
+]{subparagraph}
+\setcounter{secnumdepth}{\subsubsubsectionnumdepth}
+\setcounter{tocdepth}{\subsubsubsectiontocdepth}
+\usepackage[ngerman]{babel}
+\usepackage{libertinus}
+\usepackage{blindtext}
+\begin{document}
+\tableofcontents
+\chapter{Einführung}
+\section{Ein Abschnitt}
+\subsection{Ein Unterabschnitt}
+\subsubsection{Ein Unter-Unterabschnitt}
+\subsubsubsection{Ein Unter-Unter-Unterabschnitt}
+\blindtext
+\end{document}
+\end{externalDocument}
+
+
+%\clearpage%%%%%%%%%%%%%%
+
+\section{Defining new marker}
+Suppose you do not want for a \LaTeX\ document the complete body part between \Lcs{begin}
+and \Lcs{end} printed. In this case you can define own markers, e.g.:
+
+\begin{Verbatim}[fontsize=\small,label={New marker definition},fontfamily=tt]
+\defMarkerType{ltx}
+  {\perCent StartVisibleBody}
+  {\perCent StopVisibleBody}     
+  {\perCent StartVisiblePreamble}               
+  {\perCent StopVisiblePreamble}
+\end{Verbatim}
+
+Whith this definition and the setting \Lkeyset{docType=ltx} the last example looks like:
+
+
+\defMarkerType{ltx}
+  {\perCent StartVisibleBody}
+  {\perCent StopVisibleBody}     
+  {\perCent StartVisiblePreamble}               
+  {\perCent StopVisiblePreamble}
+
+
+\begin{externalDocument}[
+  grfOptions={width=\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax},
+%  pages={1},
+  crop,
+%  mpwidth=0.6\linewidth,
+  frame,
+  compiler=pdflatex,
+  showFilename,
+  runs=2,code,docType=ltx,
+  usefancyvrb]{voss}
+\documentclass[chapterprefix=on,parskip=half-,DIV=12,fontsize=12pt]{scrreprt}
+%StartVisiblePreamble
+\DeclareNewSectionCommand[
+  style=section,
+  level=4,
+  beforeskip=-3.25ex plus -1ex minus -.2ex,
+  afterskip=1.5ex plus .2ex,
+  font=\normalsize,
+  indent=0pt,
+  counterwithin=subsubsection
+]{subsubsubsection}
+%StopVisiblePreamble
+\RedeclareSectionCommand[
+  level=5,
+  toclevel=5,
+  tocindent=13em,
+  tocnumwidth=5.9em,
+  counterwithin=subsubsubsection
+]{paragraph}
+\RedeclareSectionCommand[
+  level=6,
+  toclevel=6,
+  tocindent=15em,
+  tocnumwidth=6.8em
+]{subparagraph}
+\setcounter{secnumdepth}{\subsubsubsectionnumdepth}
+\setcounter{tocdepth}{\subsubsubsectiontocdepth}
+\usepackage[ngerman]{babel}
+\usepackage{libertinus}
+\usepackage{blindtext}
+\makeatletter\let\ps@plain\ps@empty\makeatother
+\begin{document}
+\tableofcontents
+\chapter{Einführung}
+\section{Ein Abschnitt}
+\subsection{Ein Unterabschnitt}
+\subsubsection{Ein Unter-Unterabschnitt}
+%StartVisibleBody
+\subsubsubsection{Ein Unter-Unter-Unterabschnitt}
+%StopVisibleBody
+\blindtext
+\end{document}
+\end{externalDocument}
+
+
+
+
+\section{Supported engines}
+\subsection{\MP\ example}
+
+Needs the run sequence setting to get a \texttt{pdf} from the created \texttt{dvi} output.
+It is already internally defined. 
+
+\begin{externalDocument}[
+%  grfOptions={width=0.45\linewidth},
+%  pages={1,3},
+  frame,
+  verbose=false,
+  compiler=mpost,
+  showFilename,
+%  crop,
+  cleanup,
+  code,
+  docType=mp,
+  ext=mp,]{voss}
+%StartVisiblePreamble
+defaultfont:="ptmr8r";
+warningcheck:=0;
+%StopVisiblePreamble
+beginfig(1)
+draw fullcircle shifted (0.5,0.6) xscaled 8cm yscaled 3.5cm 
+  withpen pencircle scaled 5bp withcolor red;
+special( " /Times-Roman findfont 150 scalefont setfont " &
+  " 0 10 moveto (MPost) false charpath clip stroke gsave 150 70 translate " &
+  " 2 4 600 {dup 0 moveto 0 exch 0 exch 0 360 arc stroke} for grestore ");
+endfig;
+end;
+\end{externalDocument}
+
+For \MP\ exists an optional argument \Lkeyword{mposttex} which is preset
+to \Lkeyval{tex}. If you want to run the \MP\ part with \LaTeX\ instead of
+\TeX\ then use \texttt{mposttex=latex}.
+
+
+\subsection{plain\TeX\ example}
+
+Needs the run sequence setting to get a \texttt{pdf} from the created \texttt{dvi} output.
+It is already internally defined. 
+
+
+\begin{externalDocument}[
+  grfOptions={width=0.5\linewidth},
+%  pages={1,3},
+  frame,
+  verbose=false,
+  compiler=tex,
+  showFilename,
+%  crop,
+  code,
+  docType=tex,
+  ext=tex,]{voss}
+\magnification=\magstep1
+\baselineskip=12pt
+\hsize=6.3truein
+\vsize=8.7truein
+\font\footsc=cmcsc10 at 8truept
+\font\footbf=cmbx10 at 8truept
+\font\footrm=cmr10 at 10truept
+%StartVisiblePreamble
+\footline={\footsc the electronic journal of combinatorics
+   {\footbf 16} (2009), \#R00\hfil\footrm\folio}
+%StopVisiblePreamble
+%StartBody
+\font\bigrm=cmr12 at 14pt
+\centerline{\bigrm An elementary proof of the reconstruction conjecture}
+
+\bigskip\bigskip
+\centerline{D. Remifa\footnote*{Thanks to the editors of this journal!}}
+\smallskip
+\centerline{Department of Inconsequential Studies}
+\centerline{Solatido College, North Kentucky, USA}
+\centerline{\tt remifa@dis.solatido.edu}
+\bigskip
+\centerline{\footrm 
+Submitted: Jan 1, 2009; Accepted: Jan 2, 2009; Published: Jan 3, 2009}
+\centerline{\footrm Mathematics Subject Classifications: 05C88, 05C89}
+\bigskip\bigskip
+\centerline{\bf Abstract}
+\smallskip
+{\narrower\noindent
+The reconstruction conjecture states that the multiset of unlabeled
+vertex-deleted subgraphs of a graph determines the graph, provided it
+has at least 3 vertices.  A version of the problem was first stated
+by Stanis\l aw Ulam.  In this paper, we show that the conjecture can
+be proved by elementary methods.  It is only necessary to integrate
+the Lenkle potential of the Broglington manifold over the quantum
+supervacillatory measure in order to reduce the set of possible
+counterexamples to a small number (less than a trillion).  A simple
+computer program that implements Pipletti's classification theorem
+for torsion-free Aramaic groups with simplectic socles can then
+finish the remaining cases.}
+
+\bigskip
+\beginsection 1. Introduction.
+
+This is the start of the introduction.
+\bye
+\end{externalDocument}
+
+
+
+\subsection{\LuaLaTeX\ example}
+With Lua\LaTeX\ and and using PostScript code the intermediate GhostScript run is
+not needed. The \texttt{pdf} is directly created.
+
+\begin{externalDocument}[
+  grfOptions={width=0.5\linewidth},
+%  pages={1,3},
+%  frame,
+  verbose=false,
+  compiler=lualatex,
+  showFilename,
+  crop,
+  code,
+  docType=latex,
+  ext=tex,]{voss}
+\documentclass{report}
+\pagestyle{empty}
+%StartVisiblePreamble
+\usepackage{fontenc}\usepackage{libertinus}
+\usepackage{pst-all}
+%StopVisiblePreamble
+\begin{document}
+\psset{unit=0.8cm}
+\begin{pspicture}(-9,-15)(9,2)
+\psaxes(0,0)(-9,-15)(9,2)
+\psplot[algebraic,plotstyle=curve,curvature=1 1 0, 
+  linewidth=2pt,linecolor=red]{-8}{8}{
+  1 - 3876218985722260225*x^2/10892114744073986176 
+    + 14975974793271450625*x^4/174273835905183778816 
+    - 317095420958296875*x^6/26811359370028273664 
+    + 194412970920703125*x^8/214490874960226189312 
+    - 2090988251953125*x^10/53622718740056547328 
+    + 99480224609375*x^12/107245437480113094656 
+    - 7879638671875*x^14/697095343620735115264 
+    + 152587890625*x^16/2788381374482940461056}
+\end{pspicture}
+\end{document}
+\end{externalDocument}
+
+
+\subsection{\ConTeXt\ example}
+
+
+\begin{externalDocument}[
+  grfOptions={width=0.31\linewidth},
+  pages={1,2,3,4,5,6},
+  pagesep=2pt,
+  frame,
+  framesep=0pt,
+  verbose=false,
+  compiler=context,
+  showFilename,
+  runs=2,
+  code,
+  docType=context,
+  ext=tex,]{voss}
+%StartVisiblePreamble
+\definehead
+  [myhead]
+  [section]
+\setuphead
+  [myhead]
+  [numberstyle=bold,
+   textstyle  =bold,
+   before     =\hairline\blank,
+   after      =\nowhitespace\hairline]
+%StopVisiblePreamble
+\starttext
+\startstandardmakeup
+\midaligned{From Hasselt to America}
+\midaligned{by}
+\midaligned{J. Jonker and C. van Marle}
+\stopstandardmakeup
+\placecombinedlist[content]
+\chapter{Introduction}
+\input knuth \input knuth 
+\chapter[rensselaer]{The Rensselaer family}
+\input knuth
+\section{The first born}
+\input knuth 
+\section{The early years}
+... in those days Hasselt was ...
+\input knuth
+\section{Living and workin in America}
+\input knuth
+\chapter[lansing]{The Lansing family}
+... the Lansing family was also ...
+\input knuth
+\chapter[cuyler]{The Cuyler family}
+... much later Tydeman Cuyler ...
+\input knuth
+\myhead[headlines]{And the end of all}
+foo
+\stoptext
+\end{externalDocument}
+
+
+%\addtocontents{toc}{\protect\newpage}
+
+
+\section{Running external commands}
+Integrating the current directory of this document we can use the macro \Lcs{runExtCmd} with
+the optional argument \Lkeyword{redirect}
+
+\begin{verbatim}
+\runExtCmd[redirect]{ls -la}{voss}
+\end{verbatim}
+
+to get the directory listed:
+
+\medskip
+\runExtCmd[redirect,verbose]{ls -la}{voss}
+
+
+\begin{verbatim}
+\runExtCmd[redirect,verbose,lstOptions={basicstyle=\ttfamily\small}]{du}{voss}% *nix
+\end{verbatim}
+
+
+
+\medskip
+\runExtCmd[redirect,verbose,lstOptions={basicstyle=\ttfamily\small}]{du}{voss}
+
+
+
+
+
+\section{Other options}
+
+\begin{description}
+\item[\Lkeyword{vshift}] A length for a vertical shift of the object, only valid for the inline mode.
+See document source of example~\vpageref{inline-exa}.
+%\item[\Lkeyword{outerFN}] Only valid for the twocolumn mode with onecolumn floats (environment \texttt{figure*}),
+%    to get the filename on the right or left of the whole page.
+%\item[\Lkeyword{shiftFN}] A length to move the printed filename up or down.
+\item[\Lkeyset{force=false}] can speed up the comiling time for the document. If a created image/output
+already exists, there is no need to create it with the next run again and again. \emph This option is not valid
+if the package option \Loption{checkCode} exists.
+\item[\Lkeyword{cleanup}] the auxiliary files of a \LaTeX-run are deleted, preset to \texttt{aux}, \texttt{log}.
+   It must be a comma seperated list of the extensions of the main file, s.g. \texttt{cleanup=\{aux,log\}}.
+\item[\Lkeyword{moveToExampleDir}] move all examples into a directory, must be set \emph{before} the
+option \Lkeyword{ExampleDir}.
+\item[\Lkeyword{ExampleDir}] name of a directory for the examples, must 
+	first be created by the user himself.
+\item[\Lkeyset{tcbox=false}] Can be used if there are some negative interactions between package \Lpack{listings}
+   and package \Lpack{tcolorbox}.
+\item[\Lkeyword{framesep}] Value for \Lcs{fbox} if keyword \texttt{frame} is used.
+\item[\Lkeyword{mpsep}] Distance between code and output (default 1\,em).
+\item[\Lkeyword{pagesep}] Distance between pages for multipage output (default 1\,em).
+\item[\Lkeyword{verbose}] Print control messages into the terminal and logfile.
+\item[\Lkeyword{eps}] create an eps from the pdf (historical).
+\end{description}
+
+
+
+
+
+\printindex
+
+
+\end{document}
+
+

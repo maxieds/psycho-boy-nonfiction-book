@@ -1,0 +1,188 @@
+\begin{tikzpicture}
+  \renewcommand*\sfdefault{txss}
+
+  \begin{sankeydiagram}%[debug]
+    \sankeyset{
+      ratio=4cm/524.3,
+      minimum radius=3mm,
+      start style=arrow,
+      end style=arrow,
+      fill/.style={
+        line width=0pt,
+        fill=cyan!50!blue!50!black,
+        draw=cyan!50!blue!50!black,
+      },
+      draw/.style={draw=none},
+      every node/.style={angle=-90},
+    }
+
+    \sankeynodestart{name=B,at={-.5,0},quantity=7.2}
+    \coordinate[below=1mm of B.center] (B label);
+    \sankeyadvance{B}{5mm}
+    \sankeynodestart{name=GI,at={1,0},quantity=137.3}
+    \coordinate[below=1mm of GI.center] (GI label);
+    \sankeyadvance{GI}{5mm}
+    \sankeynodestart{name=I,at={4,0},quantity=397.8}
+    \coordinate[below=1mm of I.center] (I label);
+    \sankeynode{
+      name=EI,at={2.86,-3},quantity=542.3,
+      forked={397.8/Ia,137.3/GIa,7.2/Ba}
+    }
+    \sankeydubins[minimum radius=1.2cm]{I}{Ia}
+    \sankeyoutin{GI}{GIa}
+    \sankeyoutin{B}{Ba}
+    \sankeyadvance{EI}{5mm}
+    \coordinate (EI label) at (EI);
+    \sankeyadvance{EI}{5mm}
+    \sankeyfork{EI}{63.1/EB,479.2/P}
+
+    \sankeyturnleft{EB}{90}
+    \sankeyadvance{EB}{4cm}
+    \coordinate (EB label) at ($(EB)!.5!(EB-old)$);
+    \sankeyend{EB}
+
+    \sankeyadvance{P}{10mm}
+    \coordinate (P label) at (P);
+    \sankeyadvance{P}{5mm}
+
+    \sankeyfork{P}{33.5/NV,445.7/P-NV}
+
+    {
+      \colorlet{NV color}{cyan!80!lime!50!gray}
+      \sankeyset{fill/.append style={fill=NV color,draw=NV color}}
+      \sankeyturnleft{NV}{90}
+      \sankeynode{as=NV,name=NV2,at=NV -| EB}
+      \sankeyoutin{NV}{NV2}
+      \coordinate (NV label) at (NV -| EB label);
+      \sankeyend{NV2}
+    }
+
+    \sankeyadvance{P-NV}{10mm}
+    \sankeyfork{P-NV}{118.1/U,327.6/P-NV-U}
+
+    {
+      \sankeyset{
+        fill/.style={fill=orange!70!gray!50,draw=orange!70!gray!50}
+      }
+      \sankeyturnleft{U}{90}
+      \sankeynode{as=U,name=U2,at=U -| EB}
+      \sankeyoutin{U}{U2}
+      \coordinate (U label) at (U -| EB label);
+      \sankeyend{U2}
+    }
+
+    \sankeyadvance{P-NV-U}{10mm}
+    \sankeyfork{P-NV-U}{327.2/P-NV-U-SD,0.4/SD}
+
+    {
+      \sankeyturnright{SD}{90}
+      \sankeyadvance{SD}{15mm}
+      \coordinate (SD label) at (SD);
+      \sankeyadvance{SD}{15mm}
+      \sankeyend{SD}
+    }
+
+    \sankeyadvance{P-NV-U-SD}{8mm}
+    \sankeyfork{P-NV-U-SD}{18.8/VE,308.4/E}
+
+    {
+      \sankeyset{fill/.append style={orange!70!gray!30}}
+      \sankeyturnleft{VE}{90}
+      \sankeynode{as=VE,name=VE2,at=VE -| EB}
+      \sankeyoutin{VE}{VE2}
+      \coordinate (VE label) at (VE -| EB label);
+      \sankeyend{VE2}
+    }
+
+    \sankeyadvance{E}{8mm}
+    \coordinate (E label) at (E);
+    \sankeyadvance{E}{20mm}
+    \sankeyfork{E}{135.1/H+GHD,87.2/V,86.1/In}
+
+    \sankeyturnright{In}{90}
+    \sankeyadvance{In}{10mm}
+    \sankeyturnleft{In}{90}
+    \sankeyadvance{In}{5mm}
+    \coordinate (In label)  at (In);
+    \sankeyadvance{In}{10mm}
+    \sankeyend{In}
+
+    \sankeynode{as=V,name=V2,at=V|-In label}
+    \sankeyoutin{V}{V2}
+    \coordinate (V label) at (V2);
+    \sankeyadvance{V2}{10mm}
+    \sankeyend{V2}
+
+    \sankeyturnleft{H+GHD}{90}
+    \sankeyadvance{H+GHD}{5mm}
+    \sankeyfork{H+GHD}{47.0/GHD,88.1/H}
+
+    \sankeyturnright{H}{90}
+    \sankeynode{as=H,name=H2,at=H|-In label}
+    \sankeyoutin{H}{H2}
+    \coordinate (H label) at (H2);
+    \sankeyadvance{H2}{10mm}
+    \sankeyend{H2}
+
+    \sankeyadvance{GHD}{30mm}
+    \sankeyturnright{GHD}{90}
+    \sankeynode{as=GHD,name=GHD2,at=GHD|-In label}
+    \sankeyoutin{GHD}{GHD2}
+    \coordinate (GHD label) at (GHD2);
+    \sankeyadvance{GHD2}{10mm}
+    \sankeyend{GHD2}
+  \end{sankeydiagram}
+
+  % labels
+  \tikzset{
+    label/.style={
+      fill=white,fill opacity=.8,text opacity=1,
+      inner sep=1mm,
+      text=cyan!50!blue!50!black,
+      inner xsep=2mm,
+      font=\sffamily\bfseries\footnotesize,
+      align=center,
+    },
+  }
+  \node[label,anchor=north] (B label) at (B label) {7.2};
+  \node[label,left=1mm of B label] {Bestands-\\entnahme};
+  \node[label,anchor=north] at (GI label) {137.3};
+  \node[label,above=5mm of GI label] {Gewinnung\\im Inland};
+  \node[label,anchor=north] at (I label) {397.8};
+  \node[label,above=5mm of I label] {Import};
+
+  \node[label] at (EI label) {542.3\\Energieaufkommen im Inland};
+
+  \node[label,anchor=center] (EB label) at (EB label) {63.1};
+  \node[label,above=1mm of EB label] {Export und\\Bunkerung};
+
+  \node[label] at (P label) {479.2\\Primärenergieverbrauch};
+
+  \node[label,anchor=center] (NV label) at (NV label) {33.5};
+  \node[label,above=0mm of NV label] {Nichtenergetischer Verbrauch};
+
+  \node[label,anchor=center] (U label) at (U label) {118.1};
+  \node[label,below=3mm of U label] {Umwandlungsverluste};
+
+  \node[label,anchor=center] (SD label) at (SD label) {0.4};
+  \node[label,above=0mm of SD label] {Statistische\\Differenzen};
+
+  \node[label,anchor=center] (VE label) at (VE label) {18.8};
+  \node[label,below=0mm of VE label] {Verbrauch in den\\Energiesktoren};
+
+  \node[label,anchor=north] (E label) at (E label)
+  {308.4\\Endenergieverbrauch};
+
+  \node[label,anchor=north] (In label) at (In label) {86.1};
+  \node[label,anchor=north,below=1cm of In label] {Industrie};
+
+  \node[label,anchor=north] (V label) at (V label) {87.2};
+  \node[label,anchor=north,below=1cm of V label] {Verkehr};
+
+  \node[label,anchor=north] (H label) at (H label) {88.1};
+  \node[label,anchor=north,below=1cm of H label] {Haushalte};
+
+  \node[label,anchor=north] (GHD label) at (GHD label) {47.0};
+  \node[label,anchor=north,below=1cm of GHD label]
+  {Gewerbe, Handel\\Diensleistungen};
+\end{tikzpicture}

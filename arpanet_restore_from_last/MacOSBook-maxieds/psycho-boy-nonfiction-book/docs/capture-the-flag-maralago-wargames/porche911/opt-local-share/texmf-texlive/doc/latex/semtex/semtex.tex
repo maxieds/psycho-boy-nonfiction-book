@@ -1,0 +1,176 @@
+\documentclass[a4paper,article,oneside,english,10pt]{memoir}
+
+\makeatletter
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage[noDcommand,slantedGreeks]{kpfonts}
+
+\frenchspacing
+
+\usepackage{mathtools,etoolbox,	microtype,xspace,color}
+
+\usepackage[shortlabels]{enumitem}%control lists
+
+\usepackage[draft]{fixme}
+
+%Setup of memoir:
+\pagestyle{plain} %change to heading for running headings
+\nouppercaseheads %running heads should not be capitalized
+\captionnamefont{\small} %captions with small font
+\captiontitlefont{\small}
+\makeevenhead{headings}{\thepage}{}{\itshape\leftmark} %make headings italic instead of slanted (though we do not use headings right now)
+\makeoddhead{headings}{\itshape\rightmark}{}{\thepage}
+
+\setlrmarginsandblock{4cm}{*}{*}
+\setulmarginsandblock{4cm}{*}{*}
+\checkandfixthelayout 
+
+\raggedbottomsectiontrue%less harse than \raggedbottom
+%\allowdisplaybreaks %long equations may break
+
+\g@addto@macro\bfseries{\boldmath} %make math in bold text automatically bold
+
+\usepackage[english=american]{csquotes}
+
+\usepackage[hidelinks]{hyperref}
+	
+\usepackage[nameinlink]{cleveref}
+
+\title{\texttt{semtex}: For stripped Seman\!\TeX\ documents (v0.45)}
+\date{\today}
+\author{Sebastian Ørsted (\href{mailto:sorsted@gmail.com}{sorsted@gmail.com})}
+
+\hypersetup{
+	pdfauthor={Sebastian Ørsted},
+	pdftitle={semtex: For stripped SemanTeX documents},
+	%pdfsubject={},
+	%pdfkeywords={},
+	%pdfproducer={Latex with hyperref, or other system},
+	%pdfcreator={pdflatex, or other tool},
+}
+
+\usepackage{showexpl}
+
+\lstset{%
+	language=[LaTeX]TeX,
+	basicstyle=\ttfamily\small,
+	commentstyle=\itshape\ttfamily\small,
+	alsoletter={\\},
+	%escapechar=@,
+	breaklines=true,
+	breakindent={0pt},
+	captionpos=t,
+	pos=r,
+	tabsize=2,
+	%inputencoding=utf8,
+	explpreset={numbers=none,},
+	texcl=false,
+	wide=false,
+	width=.45\textwidth,
+}
+
+\newcommand\mylst{\lstinline[mathescape]}
+
+\def\<#1\>{\textrm{\textlangle\textit{#1}\textrangle}}
+
+\def\usercommand\<#1\>{\textrm{\textbackslash\textlangle\textit{#1}\textrangle}}
+
+\def\values\<#1\>{\textrm{\textlangle\textup{#1}\textrangle}}
+
+\def\num#1{\textsubscript{\textup{#1}}}
+
+\newcommand\default[1]{\smash{\underline{\smash{#1}}}}
+
+\newcommand\commandname[1]{\textbackslash\texttt{#1}}
+
+\let\pack=\texttt
+
+\newcommand\semantex{Seman\!\TeX\xspace}
+
+\newcommand\stripsemantex{\texttt{stripsemantex}\xspace}
+
+\usepackage{hologo}
+
+% Setting up SemanTeX:
+
+\usepackage{semtex}
+
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent
+The package~\pack{semtex} is a small package
+that adds a collection of simple macros for parentheses
+and bullets.
+It exists for one purpose only:
+To be loaded by documents which were originally typeset
+using the package \semantex, but which have been stripped
+of \semantex markup using the package~\pack{stripsemantex}.
+Therefore, unless your document is one of those,
+simply \textbf{don't use this package}.
+
+
+And even if your document \emph{is} one of those, there is a good chance
+you will not have to load it after all. In most cases, you will be able to replace
+the macros it provides by macros from other packages.
+
+\chapter*{Bullet commands}
+
+The package provides the commands \mylst!\SemantexBullet! and \mylst!\SemantexDoubleBullet!.
+These commands print bullets which are smaller (and prettier, in my opinion)
+than the standard \lstinline!\bullet! command from~\LaTeX.
+They are (of course) based on code by egreg, see \url{tex.stackexchange.com/a/564506/19809}.
+\begin{LTXexample}
+$ H^{\SemantexBullet} $,
+$ H^{\SemantexDoubleBullet} $
+(compare to $H^{\bullet}$)
+\end{LTXexample}
+You can recreate them yourself as follows, rendering
+the package \pack{semtex} unnecessary for this purpose:
+\begin{lstlisting}
+\usepackage{graphicx}
+
+\makeatletter
+\DeclareRobustCommand\SemantexBullet{%
+  \mathord{\mathpalette\SemantexBullet@{0.5}}%
+}
+\newcommand\SemantexBullet@[2]{%
+  \vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}%
+}
+\DeclareRobustCommand\SemantexDoubleBullet{\SemantexBullet \SemantexBullet}
+\makeatother
+\end{lstlisting}
+	
+\chapter*{Replacements for \texorpdfstring{\textbackslash\texttt{left} and~\textbackslash\texttt{right}}{\left and \right}}
+
+The package provides the commands \mylst!\SemantexLeft!
+and~\mylst!\SemantexRight!
+These work just like \lstinline!\left...\right!, but fix some spacing issues
+around these:
+\begin{LTXexample}
+\[
+	\SemantexLeft(
+		\frac{1}{2}
+	\SemantexRight]
+\]
+\end{LTXexample}
+They are completely equivalent to~\lstinline!\mleft! and~\lstinline!\mright!
+from the package~\pack{mleftright}, so it is safe to just load that package
+and replace the above commands by \lstinline!\mleft...\mright! instead.
+Alternatively, you can recreate them yourself by
+\begin{lstlisting}
+\newcommand\SemantexLeft{%
+	\mathopen{}\mathclose\bgroup\left
+}
+
+\newcommand\SemantexRight{%
+	\aftergroup\egroup\right
+}
+\end{lstlisting}
+
+\end{document}

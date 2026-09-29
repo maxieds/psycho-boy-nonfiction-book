@@ -1,0 +1,140 @@
+%%
+%% This is file `mathfont_doc_patch.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mathfont_code.dtx  (with options: `doc')
+%% 
+%% This file is from version 2.3 of the free and open-source
+%% LaTeX package "mathfont," released September 2023, to be used
+%% with the XeTeX or LuaTeX engines. (As of version 2.0, LuaTeX
+%% is recommended.)
+%% 
+%% Copyright 2018-2023 by Conrad Kosowsky
+%% 
+%% This Work may be used, distributed, and modified under the
+%% terms of the LaTeX Public Project License, version 1.3c or
+%% any later version. The most recent version of this license
+%% is available online at
+%% 
+%%           https://www.latex-project.org/lppl/.
+%% 
+%% This Work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this package may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% For more information, see mathfont_code.dtx. Happy TeXing!
+%% 
+
+\let\?\SpecialUsageIndex
+\expandafter\newif\csname if@def\endcsname
+\newtoks\index@nomainlist
+\index@nomainlist{}
+\MacrocodeTopsep=2.5pt plus 3pt minus 1pt
+\def\@defname{def}
+\def\@edefname{edef}
+\def\@letname{let}
+\let\main\textbf
+
+\def\DoNotIndexMain{\bgroup
+  \catcode`\\=12\relax
+  \do@not@index@main}
+\def\do@not@index@main#1{\egroup
+  \index@nomainlist\expandafter{\the\index@nomainlist#1,}}
+
+\def\macro@finish{\macro@namepart
+  \if@def
+    \@deffalse
+    \@expandtwoargs\in@{\macro@namepart}{\the\index@excludelist}\relax
+    \ifin@
+    \else
+      \@expandtwoargs\in@{\macro@namepart}{\the\index@nomainlist}\relax
+      \ifin@
+        \edef\@tempa{\noexpand\SpecialIndex{\bslash\macro@namepart}}\relax
+        \@tempa
+      \else
+        \edef\@tempa{\noexpand\SpecialMainIndex{\bslash\macro@namepart}}\relax
+        \@tempa
+      \fi
+    \fi
+  \else
+    \ifx\macro@namepart\@defname
+      \@deftrue
+    \else
+      \ifx\macro@namepart\@edefname
+        \@deftrue
+      \else
+        \ifx\macro@namepart\@letname
+          \@deftrue
+        \fi
+      \fi
+    \fi
+    \@expandtwoargs\in@{\macro@namepart}{\the\index@excludelist}\relax
+    \ifin@
+    \else
+      \edef\@tempa{\noexpand\SpecialIndex{\bslash\macro@namepart}}\relax
+      \@tempa
+    \fi
+  \fi}
+
+\def\macro@code{%
+   \topsep \MacrocodeTopsep
+   \@beginparpenalty0% \predisplaypenalty
+   \if@inlabel\leavevmode\fi
+   \trivlist \parskip 0pt plus 0.2pt \item[]%
+   \macro@font
+   \leftskip\@totalleftmargin \advance\leftskip\MacroIndent
+   \rightskip\z@ \parindent\z@ \parfillskip\@flushglue
+   \blank@linefalse \def\par{\ifblank@line
+                             \leavevmode\fi
+                             \blank@linetrue\@@par
+                             \penalty\interlinepenalty}
+   \obeylines
+   \let\do\do@noligs \verbatim@nolig@list
+   \let\do\@makeother \dospecials
+   \global\@newlistfalse
+   \global\@minipagefalse
+   \ifcodeline@index
+     \everypar{\global\advance\c@CodelineNo\@ne
+               \llap{\theCodelineNo\ \hskip\@totalleftmargin}%
+               \check@module}%
+   \else \everypar{\check@module}%
+   \fi
+   \init@crossref}
+\endinput
+%%
+%% End of file `mathfont_doc_patch.tex'.

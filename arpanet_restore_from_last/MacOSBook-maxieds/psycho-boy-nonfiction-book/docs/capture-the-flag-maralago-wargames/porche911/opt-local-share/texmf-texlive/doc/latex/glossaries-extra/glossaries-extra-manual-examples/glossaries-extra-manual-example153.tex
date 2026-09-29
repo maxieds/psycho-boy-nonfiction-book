@@ -1,0 +1,70 @@
+% This file is embedded in glossaries-extra-manual.pdf 
+% Example 153 Using bib2gls: smallcap abbreviations
+% Label: "ex:bib2glsscabbrvs"
+% arara: pdflatex
+% arara: bib2gls
+% arara: pdflatex
+% arara: pdfcrop
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\begin{filecontents*}{abbrvs.bib}
+@string{ssi={server-side includes}}
+@string{html={hypertext markup language}} 
+
+@abbreviation{shtml,
+  short="shtml",
+  fulllong = ssi # " enabled " # html,
+  nestedlong = "\glsps{ssi} enabled \glsps{html}",
+  description={a combination of \gls{html} and \gls{ssi}}
+} 
+
+@abbreviation{html,
+  short ="html",
+  long = html,
+  description={a markup language for creating web pages}
+} 
+
+@abbreviation{ssi,
+  short="ssi",
+  long = ssi,
+  description={a simple interpreted server-side scripting language}
+}
+
+@abbreviation{xml,
+  short={xml},
+  long={extensible markup language},
+  description={a simple text-base format for representing structured information}
+}
+
+@abbreviation{mathml,
+  short={m\BibGlsNoCaseChange{ath}ml},
+  long={mathematical markup language},
+  description={an \gls{xml}-based language for describing mathematical notation}
+}
+\end{filecontents*}
+\usepackage[T1]{fontenc}
+\usepackage{relsize}
+\usepackage[colorlinks]{hyperref}
+\usepackage[record=nameref]{glossaries-extra} 
+
+\BibGlsOptions{mfirstuc-protection={long}}% requires bib2gls v4.0+
+ 
+
+\setabbreviationstyle{long-short-sc} \newcommand{\BibGlsNoCaseChange}[1]{\textsmaller{#1}} 
+
+\GlsXtrLoadResources[
+ src={abbrvs},
+ field-aliases={nestedlong=long},
+ ignore-fields={description}
+] 
+
+
+\begin{document}
+\tableofcontents
+\section{\Glsfmtlong{shtml}}
+First use: \gls{shtml}, \gls{html}, \gls{ssi}, \gls{mathml}. 
+
+Next use: \gls{shtml}, \gls{html}, \gls{ssi}, \gls{mathml}. All caps: \GLS{mathml}. 
+
+\printunsrtglossaries 
+\end{document}

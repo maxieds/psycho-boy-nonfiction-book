@@ -1,0 +1,242 @@
+\documentclass{beery}
+
+\NewDocumentCommand\textbulletfactor{}{\cs{textbullet} factor}
+
+
+\begin{document}
+
+
+\section*
+  {%
+    \SetFontStep*{1}%
+    The \pkg{scaletextbullet} package%
+  }
+
+Resize the \cs{textbullet} without changing its vertical center
+
+Oliver Beery
+
+Version 2.0.0\quad{}11 February 2025
+
+
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{About}
+
+The \pkg{scaletextbullet} package enables the user to resize the \cs{textbullet} without moving its vertical center, unlike direct usage of the \LaTeXe{} and \pkg{expl3} commands \cs{scalebox} and \cs{box_scale:}.
+This process is not fully automated\---the user must use \cs{settextbulletfactor} to set the \textbulletfactor{} to the correct value to display the resized \cs{textbullet} at the correct height.
+The \textbulletfactor{} is the ratio of the width of the \cs{textbullet}, excluding its empty space, to its width, including its empty space.
+One way of estimating the \textbulletfactor{} is by using \cs{scaletextbulletdebug}.
+
+This package provides a solution that works only in text mode.
+For a solution that works only in math mode, see the linked \TeX{} Stack Exchange thread.%
+\footnote{\url{https://tex.stackexchange.com/questions/119319/how-to-correctly-shrink-the-bullets-of-itemize}}
+
+\subsection{Loading the package}
+
+\listheading{Requirements:}
+\begin{itemize}
+  \item \LaTeXe{} version 2023-11-01 or newer
+  \item \pkg{l3kernel} version 2023-10-10 or newer
+\end{itemize}
+
+You may need to ensure that your \LaTeX{} installation is up\-/to\-/date before using this package.
+
+
+\section{Commands}
+\label{sec:commands}
+
+This package defines some commands whose argument takes a \meta{floating point expression} or \meta{integer expression}.
+This syntax has the same representation as the arguments to \cs{fpeval} and \cs{inteval}, documented in \pkg{usrguide}.
+
+\begin{mydisplaycode}
+  \cs{settextbulletfactor} \marg{floating point expression}
+\end{mydisplaycode}
+
+Sets the \textbulletfactor{} to the result of computing the \meta{floating point expression}.
+The \textbulletfactor{} is the ratio of the width of the \cs{textbullet}, excluding its empty space, to its width, including its empty space.
+The scope of the effect is local to the current group.
+The initial \textbulletfactor{} is \num{0.4}\---this matches the dimensions of the \cs{textbullet} of the Latin Modern font at size \qty{10}{pt}.
+\pagebreak%manual
+
+\begin{mydisplaycode}
+  \cs{scaletextbullet} \marg{floating point expression}
+\end{mydisplaycode}
+
+Prints a \cs{textbullet} with its size scaled by the result of computing the \meta{floating point expression}.
+The new \cs{textbullet} will be printed with the same vertical center only if the \textbulletfactor{} is set to the correct value.
+Cannot be used in math mode.
+
+\begin{mydisplaycode}
+  \cs{scaletextbullets} \oarg{floating point expression} \marg{integer expression}
+\end{mydisplaycode}
+
+Prints a number of \cs{textbullet}s equal to the value of \meta{integer expression} with about the same total area as the original \cs{textbullet}.%
+\footnote
+  {%
+    In calculating the total area, I have approximated each \cs{textbullet} as a perfect circle, but, of course, the actual shape depends on the font used.%
+  }
+If the optional argument is used, the size of each \cs{textbullet} is instead scaled by the result of computing the \meta{floating point expression}.
+The new \cs{textbullet} will be printed with the same vertical center only if the \textbulletfactor{} is set to the correct value.
+Cannot be used in math mode.
+
+\begin{mydisplaycode}
+  \cs{scaletextbulletdebug}
+\end{mydisplaycode}
+
+This command is provided only to help the user estimate the \textbulletfactor{}.
+Prints \num{15} consecutive \cs{textbullet}s with decreasing sizes.
+The \cs{textbullet}s are followed by the original \cs{textbullet} inside a framed box.
+The framed box has width equal to the \textbulletfactor{} \texttimes{} the total width of the \cs{textbullet} (this includes its empty space).
+The \textbulletfactor{} is set to the correct value when the \num{15} consecutive \cs{textbullet}s have the same vertical center and the \cs{textbullet} fits nicely inside the framed box.
+Cannot be used in math mode.
+
+
+\section{Application}
+\label{sec:application}
+
+I wrote this package primarily to create nicer\-/looking itemized lists.
+The default list labels in \LaTeX{} (and other programs) fail to communicate the list level within the list hierarchy:
+
+\begin{multicols}{2}
+  \begin{itemize}[label=\textbullet]
+    \item List level 1
+    \begin{itemize}[label=\textbf{--}]
+      \item List level 2
+      \item List level 2
+      \begin{itemize}[label=\textasteriskcentered]
+        \item List level 3
+      \end{itemize}
+    \end{itemize}
+    \item List level 1
+    \begin{itemize}[label=\textbf{--}]
+      \item List level 2
+      \begin{itemize}[label=\textasteriskcentered]
+        \item List level 3
+        \item List level 3
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{multicols}
+
+This contrasts with traditional enumerated list structures where the list level is obvious from the numbering of the list label:
+
+\begin{multicols}{2}
+  \begin{enumerate}
+    \item List level 1
+    \begin{enumerate}
+      \item List level 2
+      \item List level 2
+      \begin{enumerate}
+        \item List level 3
+      \end{enumerate}
+    \end{enumerate}
+    \item List level 1
+    \begin{enumerate}
+      \item List level 2
+      \begin{enumerate}
+        \item List level 3
+        \item List level 3
+      \end{enumerate}
+    \end{enumerate}
+  \end{enumerate}
+\end{multicols}
+
+This package allows the user to create nice\-/looking itemized lists using \cs{scaletextbullets}:
+
+\begin{multicols}{2}
+  \begin{itemize}
+    \item List level 1
+    \begin{itemize}
+      \item List level 2
+      \item List level 2
+      \begin{itemize}
+        \item List level 3
+      \end{itemize}
+    \end{itemize}
+    \item List level 1
+    \begin{itemize}
+      \item List level 2
+      \begin{itemize}
+        \item List level 3
+        \item List level 3
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{multicols}
+
+The visual effect may be more clear with different fonts.
+This example uses STIX Two Text and Source Serif 4, respectively.
+
+\begingroup
+  \settextbulletfactor{0.54}
+  \newfontfamilystixtwo
+  \begin{multicols}{2}
+    \begin{itemize}
+      \item List level 1
+      \begin{itemize}
+        \item List level 2
+        \item List level 2
+        \begin{itemize}
+          \item List level 3
+        \end{itemize}
+      \end{itemize}
+      \item List level 1
+      \begin{itemize}
+        \item List level 2
+        \begin{itemize}
+          \item List level 3
+          \item List level 3
+        \end{itemize}
+      \end{itemize}
+    \end{itemize}
+  \end{multicols}
+\endgroup
+
+\begingroup
+  \settextbulletfactor{0.75}
+  \newfontfamilysourceseriffour
+  \begin{multicols}{2}
+    \begin{itemize}
+      \item List level 1
+      \begin{itemize}
+        \item List level 2
+        \item List level 2
+        \begin{itemize}
+          \item List level 3
+        \end{itemize}
+      \end{itemize}
+      \item List level 1
+      \begin{itemize}
+        \item List level 2
+        \begin{itemize}
+          \item List level 3
+          \item List level 3
+        \end{itemize}
+      \end{itemize}
+    \end{itemize}
+  \end{multicols}
+\endgroup
+
+
+\section{Implementation notes}
+\label{sec:implementation}
+
+The procedure of resizing the \cs{textbullet} without changing its vertical center, including the definition of the \textbulletfactor{}, makes an important assumption:
+That the \cs{textbullet} is a perfect circle.
+Of course, this is not completely accurate and the actual shape depends on the font used.
+This means that the \textbulletfactor{} may not be exactly the ratio of the width of the \cs{textbullet}, excluding its empty space, to its width, including its empty space.
+
+In writing this package, I have referenced a comment on the \TeX{} Stack Exchange by the user egreg.%
+\footnote{\url{https://tex.stackexchange.com/questions/620507/how-to-resize-textbullet-without-the-bullet-moving-down/638599\#638599}}
+This package uses the same procedure for resizing the \cs{textbullet} without changing its vertical center.
+
+
+\section{Programming}
+\label{sec:programming}
+
+This package is written in \pkg{expl3}, but does not provide any public functions or variables.
+
+
+\end{document}

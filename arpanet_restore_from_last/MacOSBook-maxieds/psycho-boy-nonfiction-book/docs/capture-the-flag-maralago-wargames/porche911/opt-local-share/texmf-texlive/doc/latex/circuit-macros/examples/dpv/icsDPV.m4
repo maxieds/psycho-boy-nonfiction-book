@@ -1,0 +1,366 @@
+divert(-1)
+
+   Macros defining some integrated circuits and connectors for svg
+
+                     `A sequence of pins along the east or west side of a chip:
+                      lg_pinseq(initial pin no, final pin no,
+                         e|w, initial offset, pinnum_root, Labelroot, [N])'
+                     `e.g., lg_pinseq(1,8,w)'
+define(`lg_pinseq',`for_($1,$2,1,
+   `lg_pin( Chip.s`$3'+(0,eval($4+m4x)*lg_pinsep),
+      $6`'m4x,Pin`'eval($5`'m4x),`$3'`$7',eval($5`'m4x))') ')
+
+define(`ic_tiny',`iflatex(`\hbox{\tiny `$1'}',ifsvg(`svg_small(`$1')',`$1'))')
+
+define(`ic6116',`[ Chip: box wid_ lg_chipwd ht_ 15*lg_pinsep
+   lg_pin(Chip.sw_+(0,lg_pinsep),GND,Pin12,w,12)
+   lg_pin(Chip.sw_+(0,2*lg_pinsep),lg_bartxt(CS),Pin18,wN,18)
+   lg_pinseq(0,2,w,4,9+,D)
+   lg_pinseq(3,7,w,4,10+,D)
+   lg_pin(Chip.sw_+(0,13*lg_pinsep),R/lg_bartxt(W),Pin21,w,21)
+   lg_pin(Chip.sw_+(0,14*lg_pinsep),V`'ic_tiny(CC),Pin24,w,24)
+   lg_pin(Chip.se_+(0,lg_pinsep),lg_bartxt(OE),Pin20,eN,20)
+   lg_pinseq(0,7,e,3,8-,A)
+   lg_pinseq(8,9,e,3,31-,A)
+   lg_pin(Chip.se_+(0,13*lg_pinsep),A10,Pin19,e,19)
+    `$1']')
+
+define(`ic6502',`[ Chip: box wid_ lg_chipwd ht_ 24*lg_pinsep
+   lg_pin(Chip.sw_+(0,lg_pinsep),V`'ic_tiny(SS),Pin21,w,21)
+   lg_pin(Chip.sw_+(0,2*lg_pinsep),V`'ic_tiny(SS),Pin1,w,1)
+   lg_pin(Chip.sw_+(0,4*lg_pinsep),R/lg_bartxt(W),Pin34,w,34)
+   lg_pinseq(0,7,w,6,33-,D)
+   lg_pin(Chip.sw_+(0,15*lg_pinsep),lg_bartxt(RESET),Pin40,wN,40)
+   lg_pin(Chip.sw_+(0,17*lg_pinsep),SYNC,Pin7,w,7)
+   lg_pin(Chip.sw_+(0,19*lg_pinsep),lg_bartxt(NMI),Pin6,wN,6)
+   lg_pin(Chip.sw_+(0,21*lg_pinsep),RDY,Pin2,w,2)
+   lg_pin(Chip.sw_+(0,22*lg_pinsep),SO,Pin38,w,38)
+   lg_pin(Chip.sw_+(0,23*lg_pinsep),V`'ic_tiny(CC),Pin8,w,8)
+   lg_pin(Chip.se_+(0,lg_pinsep),CK`'ic_tiny(1)(in),Pin39,e,39)
+   lg_pin(Chip.se_+(0,4*lg_pinsep), CK`'ic_tiny(2)(out),Pin37,e,37)
+   lg_pinseq(0,11,e,6,9+,A)
+   lg_pinseq(12,15,e,6,10+,A)
+   lg_pin(Chip.se+(0,23*lg_pinsep),lg_bartxt(IRQ),Pin4,eN,4)
+    `$1']')
+
+define(`ic6522',`[ Chip: box wid_ lg_chipwd ht_ 24*lg_pinsep
+   lg_pin(Chip.sw_+(0,lg_pinsep),V`'ic_tiny(SS),Pin1,w,1)
+   lg_pin(Chip.sw_+(0,3*lg_pinsep),CS1,Pin24,w,24)
+   lg_pin(Chip.sw_+(0,4*lg_pinsep),CK,Pin25,w,25)
+   lg_pin(Chip.sw_+(0,5*lg_pinsep),lg_bartxt(CS2),Pin23,wN,23)
+   lg_pin(Chip.sw_+(0,7*lg_pinsep),RS0(A0),Pin38,w,38)
+   lg_pin(Chip.sw_+(0,8*lg_pinsep),RS1(A1),Pin37,w,37)
+   lg_pin(Chip.sw_+(0,9*lg_pinsep),RS2(A2),Pin36,w,36)
+   lg_pin(Chip.sw_+(0,10*lg_pinsep),RS3(A3),Pin35,w,35)
+   lg_pinseq(0,7,w,12,33-,D)
+   lg_pin(Chip.sw_+(0,21*lg_pinsep),R/lg_bartxt(W),Pin22,w,22)
+   lg_pin(Chip.sw_+(0,22*lg_pinsep),lg_bartxt(IRQ),Pin21,wN,21)
+   lg_pin(Chip.sw_+(0,23*lg_pinsep),V`'ic_tiny(CC),Pin20,w,20)
+   lg_pinseq(0,7,e,1,10+,PB)
+   lg_pinseq(1,2,e,8,17+,CB)
+   lg_pinseq(0,7,e,12,2+,PA)
+   lg_pinseq(1,2,e,19,41-,CA)
+   lg_pin(Chip.se_+(0,23*lg_pinsep),lg_bartxt(RESET),Pin34,eN,34)
+    `$1']')
+
+define(`ic74LS138',`[ Chip: box wid_ lg_chipwd ht_ 11*lg_pinsep
+   lg_pin(Chip.sw_+(0,lg_pinsep),GND,Pin8,w,8)
+   lg_pin(Chip.sw_+(0,2*lg_pinsep),lg_bartxt(G2a),Pin4,wN,4)
+   lg_pin(Chip.sw_+(0,3*lg_pinsep),lg_bartxt(G2b),Pin5,wN,5)
+   lg_pin(Chip.sw_+(0,5*lg_pinsep),A,Pin1,w,1)
+   lg_pin(Chip.sw_+(0,6*lg_pinsep),B,Pin2,w,2)
+   lg_pin(Chip.sw_+(0,7*lg_pinsep),C,Pin3,w,3)
+   lg_pin(Chip.sw_+(0,9*lg_pinsep),G1,Pin6,w,6)
+   lg_pin(Chip.sw_+(0,10*lg_pinsep),V`'ic_tiny(CC),Pin16,w,16)
+   lg_pinseq(0,6,e,2,15-,Y,n)
+   lg_pin(Chip.se_+(0,9*lg_pinsep),Y7,Pin7,eN,7)
+    `$1']')
+
+define(`ic4017',`[ Chip: DIP_chip_outline(16)
+  foreach_(`x',
+   `lg_pin(Chip.nw-(0,lg_pinsep*m4Lx),x,Pin`'m4Lx,w,m4Lx)',
+    PL, Q3, I3, I0, CLE, Q0, TC, GND)
+  foreach_(`x',
+   `lg_pin(Chip.se+(0,lg_pinsep*m4Lx),x,Pin`'eval(m4Lx+8),e,eval(m4Lx+8))',
+    MR, U/D, Q1, I1, I2, Q2, CLK, Vcc)
+   `$1']')
+
+define(`ic4510',`[ Chip: DIP_chip_outline(16)
+  foreach_(`x',
+   `lg_pin(Chip.nw-(0,lg_pinsep*m4Lx),x,Pin`'m4Lx,w,m4Lx)',
+    PL, Q3, I3, I0, CLE, Q0, TC, GND)
+  foreach_(`x',
+   `lg_pin(Chip.se+(0,lg_pinsep*m4Lx),x,Pin`'eval(m4Lx+8),e,eval(m4Lx+8))',
+    MR, U/D, Q1, I1, I2, Q2, CLK, Vcc)
+   `$1']')
+
+define(`icVS1053',`[ Chip: DIP_chip_outline(32)
+  foreach_(`x',
+   `lg_pin(Chip.nw-(0,lg_pinsep*m4Lx),x,Pin`'m4Lx,w,m4Lx)',
+    LOUT,ROUT,GBUF,AGND,AGND,DREG,Vcc,3V3,GND,MISO,MOSI,sclk,RST,CS,DCS,DCS)
+  foreach_(`x',
+   `lg_pin(Chip.se+(0,lg_pinsep*m4Lx),x,Pin`'eval(m4Lx+16),e,eval(m4Lx+16))',
+    SDCD,RX,TX,7,6,5,4,3,2,1,0,GND,3V3,AGND,MIC`'svg_it(-),MIC`'svg_it(+))
+   `$1']')
+
+                           `ArduinoUno( wid,ht,pinlen )'
+define(`ArduinoUno',`[
+ define(`m4bwid',`ifelse(`$1',,`24*L_unit',`$1')')dnl
+ define(`m4bht',`ifelse(`$2',,`20*lg_pinsep',`$2')')dnl
+#
+
+ Connector: box wid m4bwid ht m4bht
+#
+ m4pl = ifelse(`$3',,`2*L_unit',`$3')
+#
+foreach_(`x',`ifelse(x,nul,,
+ `Pin`'eval(5+m4Lx): line left_ m4pl from Connector.nw-(0,(5+m4Lx)*lg_pinsep)
+  { "x" ljust at last line.start }')',
+ IOREF, RESET,svg_it(+)3V3,svg_it(+)5V, GND, GND, VIN,
+ nul, A0, A1, A2, A3, A4, A5)
+#
+foreach_(`x',`ifelse(x,nul,,
+ `Pin`'eval(22-m4Lx): line right_ m4pl from Connector.ne-(0,m4Lx*lg_pinsep)
+  { "x" rjust at last line.start }')',
+ SCL, SDA, AREF, GND, D13, D12, ~D11, ~D10, ~D9, D8,
+ nul, D7, ~D6, ~D5, D4, ~D3, D2, TX D1, RX D0)
+#
+ `$4'] ')
+
+                           `ArduinoLeonardo( wid,ht,pinlen )'
+define(`ArduinoLeonardo',`[
+ define(`m4bwid',`ifelse(`$1',,`24*L_unit',`$1')')dnl
+ define(`m4bht',`ifelse(`$2',,`20*lg_pinsep',`$2')')dnl
+#
+ Connector: box wid m4bwid ht m4bht
+#
+ m4pl = ifelse(`$3',,`2*L_unit',`$3')
+#
+foreach_(`x',`ifelse(x,nul,,
+ `Pin`'eval(5+m4Lx): line left_ m4pl from Connector.nw-(0,(5+m4Lx)*lg_pinsep)
+  { "x" ljust at last line.start }')',
+ IOREF, RESET,svg_it(+)3V3,svg_it(+)5V, GND, GND, VIN,
+ nul, A0, A1, A2, A3, A4, A5)
+#
+foreach_(`x',`ifelse(x,nul,,
+ `Pin`'eval(22-m4Lx): line right_ m4pl from Connector.ne-(0,m4Lx*lg_pinsep)
+  { "x" rjust at last line.start }')',
+ SCL, SDA, AREF, GND,
+ ~D13, D12, ~D11, ~D10, ~D9, D8,
+ nul, D7, ~D6, ~D5, D4, ~D3, D2, TX D1, RX D0)
+#
+ `$4'] ')
+
+                           `RPi( wid,ht,pinlen )'
+define(`RPi',`[
+   define(`m4bwid',`ifelse(`$1',,`34*L_unit',`$1')')dnl
+   define(`m4bht',`ifelse(`$2',,`21*lg_pinsep',`$2')')dnl
+#
+ GPIO: box wid m4bwid ht m4bht
+ m4pl = ifelse(`$3',,`6*L_unit',`$3')
+#
+define A_LeftGPIO {
+ exec sprintf("Pin%g: line left_ m4pl from GPIO.nw-(0,%g)",\
+  2*(`$'1)-1,(`$'1)*lg_pinsep)
+  { "`$'3" ljust at last line.start }
+  "`$'2" at last line.c above }
+#
+foreach_(`x',`ifelse(x,nul,,`A_LeftGPIO(m4Lx,patsubst(x,;,`,'))')',
+  ;3V3,
+  2;SDA1, 3;SCL1, 4;GPIO_GCLK,
+  ;GND,
+  17;GPIO_GEN0, 27;GPIO_GEN2,
+  22;GPIO_GEN3,
+  ;3V3,
+  10;SPI_MOSI, 9;SPI_MISO,
+  11;SPI_SCLK,
+  ;GND,
+  ;ID_SD,
+  5;, 6;, 13;, 19;, 26;,
+  ;GND )
+#
+define A_RightGPIO {
+ exec sprintf("Pin%g: line right_ m4pl from GPIO.ne-(0,%g)",\
+  2*(`$'1),(`$'1)*lg_pinsep)
+  { "`$'3" rjust at last line.start }
+  "`$'2" at last line.c above }
+#
+foreach_(`x',`ifelse(x,nul,,`A_RightGPIO(m4Lx,patsubst(x,;,`,'))')',
+  ;5V,
+  ;5V,
+  ;GND,
+  14;TXD0, 15;RXD0, 18;GPIO_GEN1,
+  ;GND,
+  23;GPIO_GEN4, 24;GPIO_GEN5,
+  ;GND,
+  25;GPIO_GEN6, 8;SPI_CEO_N,
+  7;SPI_CE1_N,
+  ;ID_SC,
+  ;GND,
+  12;,
+  ;GND,
+  16;, 20;, 21; ) 
+#
+ `$4'] ')
+
+                           `USB_C_Socket( wid, ht, pinlen )'
+define(`USB_C_Socket',`[
+ define(`m4bwid',`ifelse(`$1',,`18*L_unit',`$1')')dnl
+ define(`m4bht',`ifelse(`$2',,`14*lg_pinsep',`$2')')dnl
+#
+ Base: box wid m4bwid ht m4bht rad 5/3*lg_pinsep
+ m4pl = ifelse(`$3',,`6*L_unit',`$3')
+#
+ foreach_(`x',
+  `B`'eval(13-m4Lx): dnl
+  line left_ m4pl from Base.n-(m4bwid/2,(m4Lx+0.5)*lg_pinsep)
+   {"x" ljust at last line.start}',
+  GND, RX1`'svg_it(+), RX1`'svg_it(-), VBUS, SBU2, D`'svg_it(-),
+  D`'svg_it(+), CC2, VBUS, TX2`'svg_it(-), TX2`'svg_it(+), GND)
+#
+ foreach_(`x',
+  `A`'m4Lx: line right_ m4pl from Base.n+(m4bwid/2,-(m4Lx+0.5)*lg_pinsep)
+   {"x" rjust at last line.start}',
+  GND, TX1`'svg_it(+), TX1`'svg_it(-), VBUS, CC1, D`'svg_it(+),
+  D`'svg_it(-), SBU1, VBUS, RX2`'svg_it(-), RX2`'svg_it(+), GND)
+#
+ `$4']')
+
+                           `HDMI_micro( wid, ht, pinlen )'
+define(`HDMI_micro',`[
+ define(`m4bwid',`ifelse(`$1',,`16*L_unit',`$1')')dnl
+ define(`m4bht',`ifelse(`$2',,`19*lg_pinsep+m4bwid*2/3',`$2')')dnl
+#
+ Base:[line up m4bht/2 then right m4bwid*2/3 \
+  then right m4bwid/3 down m4bwid/3 \
+  then down m4bht-2*m4bwid/3 then down m4bwid/3 left m4bwid/3 \
+  then left m4bwid*2/3 then to Here]
+ m4pl = ifelse(`$3',,`6*L_unit',`$3')
+#
+ foreach_(`x',
+  `Pin`'m4Lx: line left_ m4pl from Base.nw-(0,m4bwid/3+(m4Lx-1/2)*lg_pinsep)
+   {"x" ljust at last line.start}
+   "m4Lx" at last line.c above',
+  HPD, UTILITY, D2`'svg_it(+), D2_SH, D2`'svg_it(-),
+  D1`'svg_it(+), D1_SH, D1`'svg_it(-),D0`'svg_it(+), D0_SH,
+  D0`'svg_it(-), CLK`'svg_it(+), CLK_SH, CLK`'svg_it(-),
+  CEC, GND, SCL, SDA,svg_it(+)5V)
+L1: line from Base.nw+(m4bwid*2/3-lg_pinsep,0) up m4pl
+ svg_rot(90,"21",at last line.c +(-4bp__,0))
+ svg_rot(90,"SH2",at last line.start + (4bp__,-8bp__))
+ line from Base.nw+(m4bwid*2/3-2*lg_pinsep,0) up m4pl
+ svg_rot(90,"20",at last line.c+(-4bp__,0))
+ svg_rot(90,"SH1",at last line.start + (4bp__,-8bp__))
+ line from Base.sw+(m4bwid*2/3-lg_pinsep,0) down m4pl
+ svg_rot(90,"23",at last line.c+(-4bp__,0))
+ svg_rot(90,"SH4",at last line.start + (4bp__,14bp__))
+ line from Base.sw+(m4bwid*2/3-2*lg_pinsep,0) down m4pl
+ svg_rot(90,"22",at last line.c+(-4bp__,0))
+ svg_rot(90,"SH3",at last line.start + (4bp__,14bp__))
+#
+ `$4']')
+
+                     `DIP_chip_outline( pin count, wid )'
+define(`DIP_chip_outline',
+ `[ define(`m4pinct',`ifelse(`$1',,16,`$1')')dnl
+    define(`m4chgw',`ifelse(`$2',,(18*L_unit),`$2')')dnl
+    Chip: box invis wid m4chgw ht lg_pinsep*eval((m4pinct)/2+1)
+    arcd(last box.n, lg_pinsep/2, 180, 360)
+    { line to last box.ne chop -linewid bp__/2 }
+    { line from last arc.start to last box.nw chop -linewid bp__/2 }
+    line from last box.nw to last box.sw then to last box.se then to last box.ne
+   `$3']')
+
+                     `DIP( pin count, attributes)
+                      Dual in-line package
+                      attributes=semicolon-separated list of optional terms:
+                       bodywid=expr;  (default 0.25 = 5*L_unit )
+                       bodylen=expr;  (default pin count/2 x pinpitch)
+                       pinpitch=expr; (default 0.1)
+                       pinwid=expr;   (default 0.06)
+                       pinlen=expr;   (default 0.05)
+                       direct=U|D|L|R;(default U for up)
+                       type=I|Q;      (default I for uniform-length pins;
+                                       Q: staggered) '
+define(`DIP',`[ pinct= ifelse(`$1',,8,`$1')
+ foreach_(`Z',`pushkey_(`$2',patsubst(Z,:.*),patsubst(Z,.*:))',
+   bodywid: 5*L_unit,
+   bodylen: m4pinpitch*int(pinct/2+0.5),
+   pinpitch:2*L_unit,
+   pinwid:  1.2*L_unit,
+   pinlen:  L_unit)
+ foreach_(`Z',`pushkey_(`$2',patsubst(Z,:.*),patsubst(Z,.*:),N)',
+   direct:U,
+   type:I)
+ setdir_(m4direct,U)
+ Body: box ht_ m4bodywid wid_ m4bodylen
+ arcs = ifelse(m4_dir_,right,90,m4_dir_,up,180,m4_dir_,left,270,0)
+ arcd(Body.e_, 0.1/2, arcs,arcs+180)
+ np2 = int(pinct/2+0.5)
+ define(`m4bxht',`m4pinlen ifelse(m4type,Q,`*(1+(i%%2))')')dnl
+ for i=0 to np2-1 do {
+   exec sprintf("Pin%g: box ht_ m4bxht wid_ m4pinwid \
+     with .s_ at (i+0.5)/np2 between Body.ne_ and Body.nw_",i+1) }
+ for i=np2+1 to pinct do {
+   exec sprintf("Pin%g: box ht_ m4bxht wid_ m4pinwid \
+     with .n_ at (i-np2-0.5)/(pinct-np2) between Body.sw_ and Body.se_",i) }
+ `$3'; resetdir_
+ popdef(`m4bodywid',`m4bodylen',`m4pinpitch',`m4pinwid',`m4pinlen',`m4direct',
+        `m4type') ]'))
+
+                           `There is more than one way to draw an IC and
+                            label its pins; here is one:'
+
+                           `LT3724( keys ) IC in a [] block
+                            keys: pinsep=expr; (svg_baselineskip*2.5)
+                                  pincount=expr; (8 per side)
+                                  hght=expr; ((pincount+1)*pinsep)
+                                  wdth=expr; (0.6*hght)'
+                            `8 pins per side; pin labels
+                             VIN, SHDN, CSS, BURST_EN, VFB, VC, SYNC, FSET,
+                             SGND, SENSEM, SENSEP, PGND, VCC, SW, TG, BOOST' 
+define(`LT3724',`[ pushkeys_(`$1',`pinsep:svg_baselineskip*2.5; pincount:8;
+   hght:(m4`'m4pincount+1)*m4`'pinsep; wdth:0.6*m4`'hght')dnl
+  Chip: box wid wdth ht hght shaded rgbstring(.94,.68,.76) "`LT3724'"
+  foreach_(`m4hx',`ifelse(m4hx,nil,,
+   `patsubst(m4hx,^[^:]*:): Chip.nw-(0,m4Lx*hght/(m4pincount+1))
+   "patsubst(m4hx,:.*)" ljust at Chip.nw-(0,m4Lx*hght/(m4pincount+1))')',
+  V`'svg_sub(IN):VIN, SHDN, C`'svg_sub(SS):CSS, BURST_EN,
+  V`'svg_sub(FB):VFB, V`'svg_sub(C):VC, SYNC, f`'svg_sub(SET):FSET)
+  line right_ textht*4 from SHDN+(textoffset,textht/2+2bp__)
+  foreach_(`m4hx',`ifelse(m4hx,nil,,
+   `patsubst(m4hx,^[^:]*:): Chip.se+(0,m4Lx*hght/(m4pincount+1))
+   "patsubst(m4hx,:.*)" rjust at Chip.se+(0,m4Lx*hght/(m4pincount+1))')',
+  SGND, SENSE`'svg_sup(-):SENSEM, SENSE`'svg_sup(+):SENSEP, PGND,
+  V`'svg_sub(CC):VCC, SW, TG, BOOST)
+  `$2' popdef(`m4pinsep',`m4pincount',`m4hght',`m4wdth') ]')
+
+
+                           `Here is another way to draw an IC and
+                            label its pins:'
+
+                           `LT3757( keys ) IC in a [] block
+                            keys: pinsep=expr; (svg_baselineskip*2.5)
+                                  pincount=expr; (8 per side)
+                                  hght=expr; ((pincount+1)*pinsep)
+                                  wdth=expr; (0.6*hght)'
+                            `8 pins per side; pin labels
+                             top: VIN; left: SHU, SYNC, RT, SS;
+                             right: GATE, SENSE, FBX;
+                             bottom: VC, GND, INTVCC'
+define(`LT3757',`[ pushkeys_(`$1',`pinsep:svg_baselineskip*2.5; pincount:8;
+   hght:(m4`'pincount+1)*m4`'pinsep; wdth:0.6*m4`'hght')dnl
+ Chip: box wid wdth ht hght shaded rgbstring(0.65,0.52,0.325) "`LT3757'" above
+  VIN: Chip.n; "V`'svg_sub(IN)" at VIN below
+  foreach_(`LL',`m43757label(nw,sw,ljust,patsubst(LL,:,`,'))',
+    SHU:2:"SHDN/UVLO", SYNC:5, RT:7, SS:8)
+  line from SHU+(2bp__,5bp__) right_ 24bp__
+  foreach_(`LL',`m43757label(se,ne,rjust,patsubst(LL,:,`,'))',
+    FBX:1, SENSE:3, GATE:5)
+  foreach_(`LL',`m43757label(sw,se,+(0,textht/3) above,patsubst(LL,:,`,'))',
+    VC:2:"V`'svg_sub(C)", GND:5, INTVCC:8:"INTV`'svg_sub(CC)")
+  `$2' popdef(`m4pinsep',`m4pincount',`m4hght',`m4wdth') ]')
+define(`m43757label',``$4': `$5'/(m4pincount+1) between Chip.`$1' and Chip.`$2' 
+  ifelse(`$6',,"`$4'",`$6') at `$4' `$3'')
+
+divert(0)dnl

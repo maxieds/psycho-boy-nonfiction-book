@@ -1,0 +1,154 @@
+
+\documentclass[11pt,a4paper,english]{article}
+
+\usepackage{babel}
+\usepackage[margin=25mm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\usepackage[helvratio=0.9]{newpxtext}
+\usepackage[upint]{newpxmath}
+\usepackage[nonpxmath]{../tex/eulerpx}
+\def\hmmax{0}
+\def\bmmax{0}
+\usepackage{bm}
+\usepackage{microtype}
+
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{biblatex}
+
+\usepackage{fonttable}
+
+\newcommand*\pkg[1]{{\sf #1}}
+\newcommand*\cs[1]{{\tt\textbackslash #1}}
+\newcommand*\printdef[2]{{\tt\cs{def}\cs{#1}\{#2\}}}
+
+%\urlstyle{tt}
+
+\frenchspacing
+
+\title{The \pkg{eulerpx} font package}
+\author{%
+  Luuk T\ij ssen\thanks{%
+    The intial versions of this package were written by Jabir Ali Ouassou.
+  }\\
+  \nolinkurl{ltijssen2502@gmail.com}%
+}
+
+\begin{document}
+
+\maketitle
+
+\section*{Getting started}
+You can start using \pkg{eulerpx} in your document right away by adding
+\begin{verbatim}
+  \usepackage{newpxtext}
+  \usepackage{eulerpx}
+\end{verbatim}
+to your document preamble.
+Euler Fraktur can be accessed through the \cs{mathfrak}-macro, likewise Euler Script through \cs{mathscr}.
+The bold math font (Euler) can be accessed through \cs{boldsymbol}, and the bold text font through \cs{mathbf}.
+Alternative versions of various math symbols and alphabets from \pkg{newpx} are provided by \cs{varmathfrak}, \cs{varmathscr}, \cs{varsum} and \cs{varaleph}.
+
+%In case you get the error
+%\begin{verbatim}
+%  $! LaTeX Error: Too many math alphabets used in version normal.
+%\end{verbatim}
+%with this package, try using
+%\begin{verbatim}
+%  \let\mathfrak=\varmathfrak
+%  \let\mathscr=\varmathscr
+%\end{verbatim}
+%and do \emph{not} use the \pkg{amssymb} package with \pkg{eulerpx}!
+
+\section{Introduction}
+\AmS{} Euler (from here on simply referred to as `Euler') is a typeface created by Hermann Zapf (1918-2015) in 1983.
+Unfortunately, Zapf wasn't able to complete the font during his lifetime, meaning that many frequently-used math symbols are missing from it.
+In order to make Euler usable, these symbols have to be substituted from other fonts.
+Other \LaTeX{} implementations of Euler, such as the \pkg{euler} and \pkg{eulervm} packages, use the default Computer Modern typeface for these substitutions.
+
+The big issue with using Computer Modern for substituting math symbols in Euler, is that these two fonts generally don't go well together.
+The \pkg{eulerpx} package tries to alleviate this issue by allowing the user to choose different math fonts for its substitutions.
+The obvious and default choice for this font is the Palatino typeface, another typeface created by Zapf.
+This font is conveniently provided by the package \pkg{newpx}, and hence the name `eulerpx.'
+
+%\subsection{Further reading}
+%Test
+
+\section{Options}
+In initial versions of this package, \pkg{newpx} was the only font option.
+But, since version 1{.}0, you can load your own math font \emph{before} \pkg{eulerpx}, if you use the \verb|nonpxmath|-option.
+We additionally provide the key-value option \verb|scale| (for instance, \verb|scale=0.9|, for a fractional scale of 0{.}9).
+This allows you to scale the Euler symbols to match the size of the symbols from the other font.
+
+Not all font combinations are guaranteed to look good, so exercise some caution in your font choice.
+Additionally, you should try to stick to math fonts that include upright integrals (for instance, through an \verb|upint|-option), and slanted versions of the inequality symbols, which are selected automatically by \pkg{eulerpx}, if available.
+If you prefer the non-slanted inequality symbols, this behaviour can be inhibited using the \verb|noslant|-option.
+
+\subsection{Example}
+For instance, in order to use the Times typeface (package \pkg{newtx}) with Euler, you can add
+\begin{verbatim}
+  \usepackage{newtxtext}
+  \usepackage[upint]{newtxmath}
+  \usepackage[nonpxmath,scale=0.95]{eulerpx}
+\end{verbatim}
+to your document preamble.
+The scale factor of 0{.}95 was derived empirically by trying to match the height of the text and math `x;' \verb|x$x$|.
+
+\section{Deprecated options}
+Some of the options that were previously offered by this package are now deprecated.
+These options were not correctly implemented and could cause visual artifacts.
+If you would still like to use some of these options, alternatives that mimic their original behaviour are provided below.
+
+\subsection{The {\tt sansmath}-option}
+If you want to use the sans-serif text font for operators (as opposed to the default serif text font), you can add the following to your document preamble:
+\begin{verbatim}
+  \usepackage{newpxtext}
+  \let\oldrmdefault=\rmdefault
+  \let\rmdefault=\sfdefault
+  \usepackage{eulerpx}
+  \let\rmdefault=\oldrmdefault
+\end{verbatim}
+
+\subsection{The {\tt unicode}-option}
+If you want to write mathematics in Unicode in {\tt pdflatex}, you can add this to your document preamble:\footnote{Credit: David Carlisle on Stack Exchange, \url{https://tex.stackexchange.com/a/601583}.}
+\begin{verbatim}
+  \usepackage{newpxtext}
+  \usepackage{eulerpx}
+  \let\rmdefault=\oldrmdefault
+  \def\z"{}
+  \def\UnicodeMathSymbol#1#2#3#4{%
+    \ifnum#1>"A0
+      \DeclareUnicodeCharacter{\z#1}{#2}%
+    \fi
+  }
+  \input unicode-math-table
+\end{verbatim}
+Though, in that case, you may also want to switch to Xe\LaTeX, in which case you can use the \pkg{unicode-math} package.
+
+\pagebreak
+\appendix
+\section{Font sample}\label{sec:sample}
+The following excerpt is taken from Michael Sharpe's \pkg{stickstoo} package documentation (page 4), who in turn sourced it from the \TeX Book and Karl Berry's torture test.
+
+\input sample.tex 
+
+\newpage
+\section{Font tables}\label{sec:tables}
+\subsection{euf}
+\fonttable{eufm10}
+
+\newpage
+\subsection{zeur}
+\fonttable{zeurm10}
+
+\newpage
+\subsection{zeus}
+\fonttable{zeusm10}
+
+\newpage
+\subsection{zeuex}
+\fonttable{zeuex10}
+
+\end{document}

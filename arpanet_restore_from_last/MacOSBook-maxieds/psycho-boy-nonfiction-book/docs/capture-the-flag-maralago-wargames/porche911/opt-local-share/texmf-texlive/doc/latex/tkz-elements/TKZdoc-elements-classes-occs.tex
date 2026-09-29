@@ -1,0 +1,349 @@
+\newpage
+\section{Orthormal cartesian coordinate system} % (fold)
+\label{sec:orthormal_cartesian_coordinate_system}
+
+This new class is still experimental. I mainly use it for drawing conics.
+
+It is also an opportunity to remind you of some key concepts related to this package. Although the goal of the package is not to use equations, drawing with \TIKZ{} requires a coordinate system. To keep development simple, I have chosen to work exclusively with an orthonormal Cartesian coordinate system (OCCS).
+
+For now, the objective is to transition from one orthonormal Cartesian coordinate system to another, also orthonormal. The new coordinate system is obtained from the first through translation and rotation. The arguments are a straight line that defines the direction of the new ordinate axis and a point that will serve as the center of the new coordinate system.
+
+Let's consider a concrete example. We want to find the intersections of a parabola with a straight line. The parabola is defined by a directrix and a focus. In a reference frame centered at the vertex $S$ of the parabola, with the x-axis being a parallel passing through this vertex to the directrix, the equation of the parabola is $y =\dfrac{x^2}{2p}$, where $p$ is the value of the \code{latus rectum}. This corresponds to the length of the segment originating from the focus, parallel to the directrix, and ending on the parabola. $p$ is also the distance from the focus to the directrix.
+
+To find the intersections, we simply determine the equation of the line in the new reference frame and use $y =\dfrac{x^2}{2p}$ as the equation of the curve. In this example, two internal functions are used. It is best not to use them at this stage, as their names may change. The function \code{param\_line} is used to determine the coefficients of the line, and \code{solve\_para\_line} finds the intersection points.
+
+If solutions exist, the result provides two values, $r_1$ and $r_2$, which are the abscissas of the intersection points in the new reference frame. After computing the ordinates, one could use a function to determine the coordinates in \TIKZ{} within the new coordinate system. However, there is another approach: we determine the points $x$ and $y$ corresponding to the values found ($r_1$, $r_2$) on the abscissa axis of the new reference frame \code{OCCS.abscissa}. Then, geometrically, we locate the intersection points on the parabola.
+
+\vspace{6pt}
+\begin{Verbatim}
+\directlua{
+ init_elements()
+z.O       = point : new (0,0)
+z.i       = point : new (1,0)
+z.j       = point : new (0,1)
+z.A       = point : new (-1 , 0)
+z.B       = point : new (5 , 4)
+L.dir     = line  : new (z.A , z.B)
+z.F       = point : new (0 , 3)        
+PA        = conic : new (z.F,L.dir,1)
+curve     = PA    : points (-3,3,50)
+local p   = PA.p
+z.P       = L.dir : report (p,z.K)
+z.X       = PA : point (p)
+z.H       = L.dir : projection (z.X)
+z.K       = PA.K
+z.S       = PA.vertex
+L.KF      = PA.major_axis
+% new occs          
+OCCS      = occs  : new (L.KF,z.S)
+z.u       = OCCS.x
+z.v       = OCCS.y
+% line a,b
+z.a       = point : new (-1,1)
+z.b       = point : new (3,5)
+L.ab      = line  : new (z.a,z.b)
+% % coordinates in the new occs
+X,Y       = OCCS : coordinates (z.F)
+Xa,Ya     = OCCS : coordinates (z.a)
+Xb,Yb     = OCCS : coordinates (z.b)
+% solve in the new occs
+local r,s = param_line (Xa,Ya,Xb,Yb)
+r1,r2     = solve_para_line (p,r,s)
+z.x       = OCCS.abscissa :report(r1,z.K)
+z.y       = OCCS.abscissa :report(r2,z.K)
+L1        = L.dir : ortho_from (z.x)
+L2        = L.dir : ortho_from (z.y)
+z.s1      = intersection (L.ab,L1)
+z.s2      = intersection (L.ab,L2)
+}
+
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawCoordinates[smooth,orange,thick](curve)
+ \tkzDrawLines(A,B)
+ \tkzDrawLines[add = 1 and 1](K,F)
+ \tkzDrawSegments[add = .5 and .5,blue](a,b)
+ \tkzDrawSegments[dashed](s1,x s2,y)
+ \tkzDrawPoints(A,B,F,K,S)
+ \tkzDrawPoints[blue,size=2](a,b)
+ \tkzDrawPoints[blue,size=2](s1,s2,x,y)
+ \tkzLabelPoints[blue](a,b)
+ \tkzLabelPoints[blue,above left](s1,s2)
+ \tkzLabelPoints(O,i,u,S,A,B,x,y)
+ \tkzLabelPoints[left](j,v)
+ \tkzLabelPoints[right](F,K)
+ \tkzDrawSegments[->,red,thick](O,i O,j)
+ \tkzDrawSegments[->,purple,thick](S,u S,v)
+ \tkzLabelSegment[below,sloped,pos=.7](A,B){Directrix}
+\end{tikzpicture}
+\end{Verbatim}
+
+\directlua{
+ init_elements()
+z.O       = point : new (0,0)
+z.i       = point : new (1,0)
+z.j       = point : new (0,1)
+z.A       = point : new (-1 , 0)
+z.B       = point : new (5 , 4)
+L.dir     = line  : new (z.A , z.B)
+z.F       = point : new (0 , 3)        
+PA        = conic : new (z.F,L.dir,1)
+curve     = PA    : points (-3,3,50)
+local p   = PA.p
+z.P       = L.dir : report (p,z.K)
+z.X       = PA : point (p)
+z.H       = L.dir : projection (z.X)
+z.K       = PA.K
+z.S       = PA.vertex
+L.KF      = PA.major_axis
+% new occs          
+OCCS      = occs  : new (L.KF,z.S)
+z.u       = OCCS.x
+z.v       = OCCS.y
+% line a,b
+z.a       = point : new (-1,1)
+z.b       = point : new (3,5)
+L.ab      = line  : new (z.a,z.b)
+% % coordinates in the new occs
+X,Y       = OCCS : coordinates (z.F)
+Xa,Ya     = OCCS : coordinates (z.a)
+Xb,Yb     = OCCS : coordinates (z.b)
+% solve in the new occs
+local r,s = param_line (Xa,Ya,Xb,Yb)
+r1,r2     = solve_para_line (p,r,s)
+z.x       = OCCS.abscissa :report(r1,z.K)
+z.y       = OCCS.abscissa :report(r2,z.K)
+L1        = L.dir : ortho_from (z.x)
+L2        = L.dir : ortho_from (z.y)
+z.s1      = intersection (L.ab,L1)
+z.s2      = intersection (L.ab,L2)
+}
+
+\begin{center}
+  \begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawCoordinates[smooth,orange,thick](curve)
+   \tkzDrawLines(A,B)
+   \tkzDrawLines[add = 1 and 1](K,F)
+   \tkzDrawSegments[add = .5 and .5,blue](a,b)
+   \tkzDrawSegments[dashed](s1,x s2,y)
+   \tkzDrawPoints(A,B,F,K,S)
+   \tkzDrawPoints[blue,size=2](a,b)
+   \tkzDrawPoints[blue,size=2](s1,s2,x,y)
+   \tkzLabelPoints[blue](a,b)
+   \tkzLabelPoints[blue,above left](s1,s2)
+   \tkzLabelPoints(O,i,u,S,A,B,x,y)
+   \tkzLabelPoints[left](j,v)
+   \tkzLabelPoints[right](F,K)
+   \tkzDrawSegments[->,red,thick](O,i O,j)
+   \tkzDrawSegments[->,purple,thick](S,u S,v)
+   \tkzLabelSegment[below,sloped,pos=.7](A,B){Directrix}
+  \end{tikzpicture}
+\end{center}
+
+\subsection{Attributes of an occs} % (fold)
+\label{sub:attributes_of_an_occs}
+
+\begin{mybox}
+   Creation: \hspace{12pt} |sys = occs: new (L.AB,z.S) |
+\end{mybox}
+
+\bgroup
+\catcode`_=12
+\small
+\captionof{table}{occs attributes.}\label{occs:att}
+\begin{tabular}{lll}
+\toprule
+\textbf{Attributes}     & \textbf{Application} &\\
+\Iattr{occs}{type}  & |sys.type = "occs"| & \\
+\Iattr{occs}{origin} & |sys.origin = z.S| &\\
+\Iattr{occs}{x}    &  |sys.x = z.I|   &  |SI = 1|\\
+\Iattr{occs}{y}    &  |sys.x = z.J|   &  |SJ = 1|\\
+\Iattr{occs}{abscissa}    &  |sys.abscissa = L.SI|   &  \\
+\Iattr{occs}{ordinate}    &  |sys.ordinate = L.SJ|   &  \\
+\bottomrule %
+\end{tabular}
+\egroup
+
+\subsubsection{Example: attributes of occs} % (fold)
+\label{ssub:example_attributes_of_occs}
+
+A few words about the arguments of the \code{new} method. The most important is the line that will support the new ordinate axis. For a parabola, its orientation should be from the director to the focus, and for a hyperbola or ellipse, from the center to the main focus. The orientation (direction) is that which runs from the first point to the second in the creation of the line.
+
+
+If this line is obtained as an orthogonal line to another line (as in the following example), then the direction will depend on the latter.
+
+\vspace{6pt}
+
+\begin{Verbatim}
+\directlua{
+z.O       = point : new (0,0)
+z.i       = point : new (1,0)
+z.j       = point : new (0,1)
+z.A       = point : new (-1 , -1)
+z.B       = point : new (4 , 2)
+L.AB      = line  : new (z.A , z.B)
+z.S       = point : new (0 , 3) 
+L.axis    = L.AB : ortho_from (z.S)       
+% new occs          
+sys       = occs  : new (L.axis,z.S)
+z.u       = sys.x
+z.v       = sys.y
+z.ax      = sys.abscissa.pa
+z.bx      = sys.ordinate.pa
+z.ay      = sys.abscissa.pb
+z.by      = sys.ordinate.pb
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawLines(A,B)
+ \tkzDrawLines[purple,add=4 and 4](ax,ay bx,by)
+ \tkzDrawSegments[->,red,thick](O,i O,j)
+ \tkzDrawSegments[->,purple,thick](S,u S,v)
+ \tkzLabelSegment[below,sloped,pos=.9](A,B){L.AB the directrix}
+ \tkzLabelSegment[below,sloped,pos=3](ax,ay){abscissa}
+ \tkzLabelSegment[below,sloped,pos=5](bx,by){ordinate major\_axis}
+ \tkzLabelPoints(O,S)
+ \tkzLabelPoints[left](j,v)
+ \tkzLabelPoints[below right](i,u)
+\end{tikzpicture}
+\end{Verbatim}
+
+
+\directlua{
+z.O       = point : new (0,0)
+z.i       = point : new (1,0)
+z.j       = point : new (0,1)
+z.A       = point : new (-1 , -1)
+z.B       = point : new (4 , 2)
+L.AB      = line  : new (z.A , z.B)
+z.S       = point : new (0 , 3) 
+L.axis    = L.AB : ortho_from (z.S)       
+% new occs          
+sys       = occs  : new (L.axis,z.S)
+z.u       = sys.x
+z.v       = sys.y
+z.ax      = sys.abscissa.pa
+z.bx      = sys.ordinate.pa
+z.ay      = sys.abscissa.pb
+z.by      = sys.ordinate.pb
+}
+
+\begin{center}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawLines(A,B)
+ \tkzDrawLines[purple,add=4 and 4](ax,ay bx,by)
+ \tkzDrawSegments[->,red,thick](O,i O,j)
+ \tkzDrawSegments[->,purple,thick](S,u S,v)
+ \tkzLabelSegment[below,sloped,pos=.9](A,B){L.AB the directrix}
+ \tkzLabelSegment[below,sloped,pos=3](ax,ay){abscissa}
+ \tkzLabelSegment[below,sloped,pos=5](bx,by){ordinate major\_axis}
+ \tkzLabelPoints(O,S)
+ \tkzLabelPoints[left](j,v)
+ \tkzLabelPoints[below right](i,u)
+\end{tikzpicture}
+    \end{center}
+
+
+% subsubsection example_attributes_of_occs (end)
+% subsection attributes_of_an_occs (end)
+
+\subsection{Methods of the class occs} % (fold)
+\label{sub:methods_of_the_class_occs}
+
+Currently, there are only two methods. \code{new} for creation and \code{coordinates} for obtaining the new coordinates of a point.
+
+The affix of $S$ in the original system is $\tkzUseLua{tostring(z.S)}$.
+The new coordinates of $S$ are $\tkzUseLua{XS}$ and $\tkzUseLua{YS}$.
+The affix of $u$ in the original system is $\tkzUseLua{tostring(z.u)}$.
+The new coordinates of $u$ are $\tkzUseLua{Xu}$ and $\tkzUseLua{Yu}$.
+
+The point $M$ whose coordinates are $(2,6)$ in the original system has coordinates $(4.6305; 1.8865)$ in the new one.
+
+\begin{Verbatim}
+  \directlua{
+  z.O       = point : new (0,0)
+  z.i       = point : new (1,0)
+  z.j       = point : new (0,1)
+  z.A       = point : new (-1 , -1)
+  z.B       = point : new (4 , 2)
+  L.AB      = line  : new (z.A , z.B)
+  z.S       = point : new (-1 , 2)  
+  L.axis    = L.AB : ortho_from (z.S)        
+  % new occs          
+  sys       = occs  : new (L.axis,z.S)
+  z.u       = sys.x
+  z.v       = sys.y
+  z.ax      = sys.abscissa.pa
+  z.bx      = sys.ordinate.pa
+  z.ay      = sys.abscissa.pb
+  z.by      = sys.ordinate.pb
+  XS,YS     = sys : coordinates (z.S)
+  Xu,Yu     = sys : coordinates (z.u)
+  Xv,Yv     = sys : coordinates (z.v)
+  z.M       = point : new (2,6)
+  XM,YM     = sys : coordinates (z.M)
+  z.xm = sys.abscissa :projection (z.M) 
+  z.ym = sys.ordinate :projection (z.M) 
+  }
+
+  \begin{tikzpicture}[gridded]
+   \tkzGetNodes
+   \tkzDrawLines(A,B)
+   \tkzDrawLines[purple,add=4 and 4](ax,ay bx,by)
+   \tkzDrawSegments[->,red,thick](O,i O,j)
+   \tkzDrawSegments[->,purple,thick](S,u S,v M,xm M,ym)
+   \tkzDrawPoint(M)
+   \tkzLabelPoint[above](M){$M:$ ($\pmpn{\tkzUseLua{XM}};\pmpn{\tkzUseLua{YM}})$}
+   \tkzLabelPoints(O,S)
+   \tkzLabelPoints[left](j,v)
+   \tkzLabelPoints[below right](i,u)
+  \end{tikzpicture}
+\end{Verbatim}
+
+  \directlua{
+  z.O       = point : new (0,0)
+  z.i       = point : new (1,0)
+  z.j       = point : new (0,1)
+  z.A       = point : new (-1 , -1)
+  z.B       = point : new (4 , 2)
+  L.AB      = line  : new (z.A , z.B)
+  z.S       = point : new (-1 , 2)        
+  L.axis    = L.AB : ortho_from (z.S)        
+  % new occs          
+  sys       = occs  : new (L.axis,z.S)
+  z.u       = sys.x
+  z.v       = sys.y
+  z.ax      = sys.abscissa.pa
+  z.bx      = sys.ordinate.pa
+  z.ay      = sys.abscissa.pb
+  z.by      = sys.ordinate.pb
+  XS,YS     = sys : coordinates (z.S)
+  Xu,Yu     = sys : coordinates (z.u)
+  Xv,Yv     = sys : coordinates (z.v)
+  z.M       = point : new (2,6)
+  XM,YM     = sys : coordinates (z.M)
+  z.xm = sys.abscissa :projection (z.M) 
+  z.ym = sys.ordinate :projection (z.M) 
+  }
+
+  \begin{center}
+    \begin{tikzpicture}[gridded]
+     \tkzGetNodes
+     \tkzDrawLines(A,B)
+     \tkzDrawLines[purple,add=4 and 4](ax,ay bx,by)
+     \tkzDrawSegments[->,red,thick](O,i O,j)
+     \tkzDrawSegments[->,purple,thick](S,u S,v M,xm M,ym)
+     \tkzDrawPoint(M)
+     \tkzLabelPoint[above](M){$M:$ ($\pmpn{\tkzUseLua{XM}};\pmpn{\tkzUseLua{YM}})$}
+     \tkzLabelPoints(O,S)
+     \tkzLabelPoints[left](j,v)
+     \tkzLabelPoints[below right](i,u)
+    \end{tikzpicture}
+  \end{center}
+
+
+% subsection methods_of_the_class_occs (end)
+% section orthormal_cartesian_coordinate_system (end)
+\endinput

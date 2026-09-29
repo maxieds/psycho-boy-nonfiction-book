@@ -1,0 +1,114 @@
+%  -*- coding: utf-8 -*-
+\documentclass[oneside,11pt]{article}
+\usepackage[a4paper,margin=2cm]{geometry}
+
+\newcommand*{\myversion}{2025A}
+\newcommand*{\mydate}{Version \myversion\ (\the\year-\mylpad\month-\mylpad\day)}
+\newcommand*{\mylpad}[1]{\ifnum#1<10 0\the#1\else\the#1\fi}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+
+\usepackage{enumerate}
+\usepackage{codehigh}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue3,
+  linkcolor=green3,
+}
+
+%% The \oiint operator is defined with utopia font
+\usepackage[utopia]{mathdesign}
+
+\usepackage[mediummath]{nccmath}
+\usepackage{medmath}
+\booltrue{mdm@bare}
+
+\NewDocumentCommand\mypkg{m}{\textcolor{blue3}{\mbox{#1}}}
+\NewDocumentCommand\myopt{m}{\textcolor{yellow3}{\mbox{#1}}}
+\NewDocumentCommand\mycmd{m}{\textcolor{green3}{\ttfamily\fakeverb{#1}}}
+
+\begin{document}
+
+\title{\textsf{\color{green3}The \texttt{medmath} package}}
+\author{Jianrui Lyu (tolvjr@163.com)}
+\date{\mydate}
+\maketitle
+
+\section{Introduction}
+
+\subsection{The \texttt{mediummath} option in \texttt{nccmath} package}
+
+There are several problems with \myopt{mediummath} option in \mypkg{nccmath} package.
+
+\begin{enumerate}
+  \item The big operators in superscripts and subscripts are too large.
+\begin{demohigh}
+\[A^{\sum_{0}^{1}x}=B\]
+\end{demohigh}
+  \item The definite integrals inside \texttt{cases} environment sometimes cause infinite loops.
+\begin{codehigh}
+\[\begin{cases}
+ a & \int_1^t
+\end{cases}\]
+\end{codehigh}
+  \item The \verb!\oiint! operators are not scaled to medium size.
+\begin{demohigh}
+\[\oiint_{\Sigma}xyzdS=\frac{\sqrt{3}}{120}\]
+\end{demohigh}
+\end{enumerate}
+
+\subsection{The \texttt{medmath} package}
+
+\makeatletter
+\mdm@activate@all
+\makeatother
+
+The \mypkg{medmath} package started as a fork of \myopt{mediummath} code in \mypkg{nccmath}
+package, aiming to provide more stable and flexible medium-size math commands.
+
+\begin{enumerate}
+  \item The big operators in superscripts and subscripts are in medium size.
+\begin{demohigh}
+\[A^{\sum_{0}^{1}x}=B\]
+\end{demohigh}
+  \item The definite integrals inside \texttt{cases} environment always work.
+\begin{demohigh}
+\[\begin{cases}
+ a & \int_1^t
+\end{cases}\]
+\end{demohigh}
+  \item The \verb!\oiint! operators are scaled to medium size.
+\begin{demohigh}
+\[\oiint_{\Sigma}xyzdS=\frac{\sqrt{3}}{120}\]
+\end{demohigh}
+\end{enumerate}
+
+\section{Usage}
+
+Since \mypkg{medmath} package is a fork of \myopt{mediummath} option in \mypkg{nccmath}
+package, the usage is basically the same. Here is a minimal example:
+
+\begin{codehigh}
+\documentclass{article}
+\usepackage{medmath}
+\begin{document}
+Inline $\int_0^1x^2dx=\frac13$.
+Displayed \[ \int_0^1x^2dx=\frac13. \]
+\end{document}
+\end{codehigh}
+\vspace{0.5em}\hrule
+Inline $\int_0^1x^2dx=\frac13$.
+Displayed \[ \int_0^1x^2dx=\frac13. \]
+\hrule\vspace{0.5em}
+
+You will see that both integral symbols and both fractions are in medium size.
+You could see the differences if you remove \mycmd{\usepackage{medmath}} line.
+
+Since version 2024E, \mypkg{medmath} package is able to adjust \mycmd{\medintcorr} for some math fonts,
+hence integral operators with subscripts will look better. As a start, only three fonts
+(Computer Modern, Mathdesign Utopia, and Mathdesign Charter) are detected.
+
+
+\end{document}

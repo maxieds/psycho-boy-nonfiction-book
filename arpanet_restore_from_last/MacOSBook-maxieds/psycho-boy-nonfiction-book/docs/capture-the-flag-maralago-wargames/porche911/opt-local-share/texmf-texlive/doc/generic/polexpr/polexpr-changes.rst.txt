@@ -1,0 +1,518 @@
+.. comment: -*- fill-column: 72; mode: rst -*-
+
+=========
+ CHANGES
+=========
+
+.. _firstrelease:
+
+0.1 (2018/01/11): initial release. Features:
+--------------------------------------------
+
+* The :ref:`\\poldef <poldef;>` parser itself,
+* Differentiation and anti-differentiation,
+* Euclidean division and GCDs,
+* Various utilities such as :ref:`\\PolFromCSV <PolFromCSV>`,
+  :ref:`\\PolMapCoeffs <PolMapCoeffs>`,
+  :ref:`\\PolToCSV <PolToCSV>`, :ref:`\\PolToExpr <PolToExpr>`, ...
+
+Only one-variable polynomials so far.
+
+0.2 (2018/01/14)
+----------------
+
+* Fix: ``"README thinks \numexpr recognizes ^ operator"``.
+* Convert README to reStructuredText markup.
+* Move main documentation from README to separate ``polexpr.txt`` file.
+* Provide ``polexpr.html`` as obtained via DocUtils_ ``rst2html.py``.
+* Convert README to (CTAN compatible) Markdown markup.
+
+Due to lack of available time the test suite might not be extensive
+enough. Bug reports are very welcome!
+
+0.3 (2018/01/17)
+----------------
+
+* Bug fixes:
+
+  - The ``0.1`` :ref:`\\PolEval <PolEvalAt>` accepted expressions for its
+    second argument, but this was removed by mistake at ``0.2``. Restored.
+
+    **Attention**: at ``0.4`` this has been reverted again, and
+    :ref:`\\PolEval{P}\\AtExpr{foo} <PolEvalAtExpr>` syntax is needed for
+    using expressions in the second argument.
+* Incompatible or breaking changes:
+
+  - :ref:`\\PolToExpr <PolToExpr>` now by default uses *descending*
+    powers (it also treats differently coefficients equal to 1 or -1.)
+    Use :ref:`\\PolToExpr* <PolToExpr*>` for *ascending* powers.
+  - :ref:`\\PolEval <PolEvalAt>` reduced the output to smallest terms,
+    but as this is costly with big fractions and not needed if e.g.
+    wrapped in an ``\xintRound`` or ``\xintFloat``, this step has been
+    removed; the former meaning is available as 
+    :ref:`\\PolEvalReduced <PolEvalReducedAt>`.
+* New (or newly documented) macros:
+
+  - :ref:`\\PolTypesetCmd <PolTypesetCmd>`
+  - :ref:`\\PolTypesetCmdPrefix <PolTypesetCmdPrefix>`
+  - :ref:`\\PolTypesetMonomialCmd <PolTypesetMonomialCmd>`
+  - :ref:`\\PolEvalReducedAt <PolEvalReducedAt>`
+  - :ref:`\\PolToFloatExpr <PolToFloatExpr>`
+  - :ref:`\\PolToExprOneTerm <PolToExprOneTerm>`
+  - :ref:`\\PolToFloatExprOneTerm <PolToFloatExprOneTerm>`
+  - :ref:`\\PolToExprCmd <PolToExprCmd>`
+  - :ref:`\\PolToFloatExprCmd <PolToFloatExprCmd>`
+  - :ref:`\\PolToExprTermPrefix <PolToExprTermPrefix>`
+  - :ref:`\\PolToExprVar <PolToExprVar>`
+  - :ref:`\\PolToExprTimes <PolToExprTimes>`
+* Improvements:
+
+  - Documentation has a table of contents, internal hyperlinks,
+    standardized signature notations and added explanations.
+  - One can do ``\PolLet{g}={f}`` or ``\PolLet{g}{f}``.
+  - ``\PolToExpr{f}`` is highly customizable.
+  - :ref:`\\poldef <poldef;>` and other defining macros prepare the
+    polynomial functions for usage within ``\xintthefloatexpr`` (or
+    ``\xintdeffloatvar``). Coefficients are pre-rounded to the floating
+    point precision. Indispensible for numerical algorithms, as exact
+    fractions, even reduced, quickly become very big. See the documentation
+    about how to use the exact polynomials also in floating point context.
+
+    **Attention**: this has been reverted at ``0.4``. The macro
+    :ref:`\\PolGenFloatVariant <PolGenFloatVariant>` must be used for
+    generation floating point polynomial functions.
+
+0.3.1 (2018/01/18)
+------------------
+
+Fixes two typos in example code included in the documentation.
+
+0.4 (2018/02/16)
+----------------
+
+* Bug fixes:
+
+  - When Euclidean division gave a zero remainder, the internal
+    representation of this zero polynomial could be faulty; this
+    could cause mysterious bugs in conjunction with other package
+    macros such as :ref:`\\PolMapCoeffs <PolMapCoeffs>`.
+  - :ref:`\\PolGCD <PolGCD>` was buggy in case of first polynomial being
+    of lesser degree than the second one.
+* Breaking changes:
+
+  - Formerly :ref:`\\PolEval{P}\\At{foo} <PolEvalAt>` allowed ``foo`` to
+    be an expression, which was transparently handled via
+    ``\xinttheexpr``. Now, ``foo`` must be a fraction (or a macro
+    expanding to such) in the format acceptable by ``xintfrac.sty``
+    macros. Use :ref:`\\PolEval{P}\\AtExpr{foo} <PolEvalAtExpr>` for more
+    general arguments using expression syntax. E.g., if ``foo`` is the
+    name of a variable known to ``\xintexpr``.
+
+    The same holds for :ref:`\\PolEvalReduced <PolEvalReducedAt>`
+    and :ref:`\\PolFloatEval <PolFloatEvalAt>`.
+  - The ``3.0`` automatic generation of floating point variants has
+    been reverted. Not only do *not* the package macros automatically
+    generate floating point variants of newly created polynomials,
+    they actually make pre-existing such variant undefined.
+
+    See :ref:`\\PolGenFloatVariant <PolGenFloatVariant>`.
+* New non-expandable macros:
+
+  - :ref:`\\PolGenFloatVariant <PolGenFloatVariant>`
+  - :ref:`\\PolGlobalLet <PolGlobalLet>`
+  - :ref:`\\PolTypesetOne <PolTypesetOne>`
+  - :ref:`\\PolQuo <PolQuo>`
+  - :ref:`\\PolRem <PolRem>`
+  - :ref:`\\PolToSturm <PolToSturm>`
+  - :ref:`\\PolToSturm\* <PolToSturm*>`
+  - :ref:`\\PolSetToSturmChainSignChangesAt <PolSetToSturmChainSignChangesAt>`
+  - :ref:`\\PolSetToNbOfZerosWithin <PolSetToNbOfZerosWithin>`
+  - :ref:`\\PolSturmIsolateZeros <PolSturmIsolateZeros>`
+  - :ref:`\\PolRefineInterval* <PolRefineInterval*>`
+  - :ref:`\\PolRefineInterval[N] <PolRefineInterval[]>`
+  - :ref:`\\PolEnsureIntervalLength <PolEnsureIntervalLength>`
+  - :ref:`\\PolEnsureIntervalLengths <PolEnsureIntervalLengths>`
+  - :ref:`\\PolPrintIntervals <PolPrintIntervals>`
+  - :ref:`\\PolPrintIntervalsPrintExactZero <PolPrintIntervalsPrintExactZero>`
+  - :ref:`\\PolPrintIntervalsPrintLeftEndPoint <PolPrintIntervalsPrintLeftEndPoint>`
+  - :ref:`\\PolPrintIntervalsPrintRightEndPoint <PolPrintIntervalsPrintRightEndPoint>`
+  - :ref:`\\PolReduceCoeffs* <PolReduceCoeffs*>`
+  - :ref:`\\PolMakeMonic <PolMakeMonic>`
+* New expandable macros:
+
+  - :ref:`\\PolToExprOneTermStyleA <PolToExprOneTermStyleA>`
+  - :ref:`\\PolIfCoeffIsPlusOrMinusOne <PolIfCoeffIsPlusOrMinusOne>`
+  - :ref:`\\PolLeadingCoeff <PolLeadingCoeff>`
+  - :ref:`\\PolSturmChainLength <PolSturmChainLength>`
+  - :ref:`\\PolSturmNbOfIsolatedZeros <PolSturmNbOfIsolatedZeros>`
+  - :ref:`\\PolSturmIfZeroExactlyKnown <PolSturmIfZeroExactlyKnown>`
+  - :ref:`\\PolSturmIsolatedZeroLeft <PolSturmIsolatedZeroLeft>`
+  - :ref:`\\PolSturmIsolatedZeroRight <PolSturmIsolatedZeroRight>`
+  - ``\PolPrintIntervalsTheEndPoint`` (removed at 0.7)
+  - :ref:`\\PolPrintIntervalsTheIndex <PolPrintIntervalsTheIndex>`
+  - ``\PolIfEndPointIsPositive`` (removed at 0.7)
+  - ``\PolIfEndPointIsNegative`` (removed at 0.7)
+  - ``\PolIfEndPointIsZero`` (removed at 0.7)
+  - :ref:`\\PolIntervalWidth <PolIntervalWidth>`
+  - :ref:`\\PolDecToString <PolDecToString>`
+* Improvements:
+
+  The main new feature is implementation of the `Sturm algorithm`_
+  for localization of the real roots of polynomials.
+
+0.4.1 (2018/03/01)
+------------------
+
+Synced with xint 1.3.
+
+0.4.2 (2018/03/03)
+------------------
+
+Documentation fix.
+
+0.5 (2018/04/08)
+----------------
+
+* Bug fix:
+
+  - :ref:`\\PolGet{polname}\\fromarray\\macro <PolGet>`
+    crashed when ``\macro`` was
+    an xinttools_ array macro with no items. It now produces the zero
+    polynomial.
+* Breaking changes:
+
+  - :ref:`\\PolToSturm <PolToSturm>` creates primitive integer coefficients
+    polynomials. This speeds up localization of roots via
+    :ref:`\\PolSturmIsolateZeros <PolSturmIsolateZeros>`. In case of user
+    protests the author will make available again the code producing the
+    bona fide Sturm polynomials as used formerly.
+  - Polynomials created from :ref:`\\PolFromCSV <PolFromCSV>` or 
+    :ref:`\\PolGet <PolGet>`
+    get their coefficients normalized via xintfrac_\ 's ``\xintRaw``.
+* Experimental change:
+
+  - Optional argument to :ref:`\\PolSturmIsolateZeros <PolSturmIsolateZeros>`
+    (see ``The degree 41 polynomial with -2, -1.9, -1.8, ..., 0, 0.1, ...,
+    1.9, 2 as roots`` in ``polexpr-examples.pdf``). It will presumably be
+    replaced in future by an interval specification.
+* New non-expandable macro:
+
+  - :ref:`\\PolMakePrimitive <PolMakePrimitive>`
+* New expandable macro:
+
+  - :ref:`\\PolIContent <PolIContent>`
+    
+0.5.1 (2018/04/22)
+------------------
+
+* New feature:
+
+  - The character ``'`` can be used in polynomial names.
+
+0.6 (2018/11/20)
+----------------
+
+* Bug fixes:
+
+  - The starred variant
+    :ref:`\\PolToSturm*{\<polname\>}{\<sturmname\>} <PolToSturm*>`
+    was broken. On the occasion of the fix, its meaning has
+    been modified, see its documentation.
+
+  - Using :ref:`\\PolToSturm <PolToSturm>` with a constant polynomial
+    caused a division by zero error.
+
+* New macro:
+
+  - :ref:`\\PolSturmIsolateZeros* <PolSturmIsolateZeros*>`
+    acts like the :ref:`non-starred variant
+    <PolSturmIsolateZeros>` then computes all the multiplicities.
+
+* New expandable macros:
+
+  - :ref:`\\PolSturmIsolatedZeroMultiplicity{\<sturmname\>}{\<index\>} <PolSturmIsolatedZeroMultiplicity>`
+  - :ref:`\\PolSturmNbOfRootsOf{\<sturmname\>}\\LessThanOrEqualTo{\<value\>} <PolSturmNbOfRootsOfLessThanOrEqualTo>`
+  - :ref:`\\PolSturmNbOfRootsOf{\<sturmname\>}\\LessThanOrEqualToExpr{\<num. expr.\>} <PolSturmNbOfRootsOfLessThanOrEqualToExpr>`
+  - :ref:`\\PolSturmNbWithMultOfRootsOf{\<sturmname\>}\\LessThanOrEqualTo{\<value\>} <PolSturmNbWithMultOfRootsOfLessThanOrEqualTo>`
+  - :ref:`\\PolSturmNbWithMultOfRootsOf{\<sturmname\>}\\LessThanOrEqualToExpr{\<num. expr.\>} <PolSturmNbWithMultOfRootsOfLessThanOrEqualToExpr>`
+
+0.7 (2018/12/08), 0.7.1 (bugfix), 0.7.2 (2nd bugfix) (2018/12/09)
+-----------------------------------------------------------------
+
+* Breaking changes:
+
+  - Although :ref:`\\PolPrintIntervals[\<varname\>]{\<sturmname\>} <PolPrintIntervals>` default output
+    remains the same, some auxiliary macros for user-customization
+    have been removed: ``\PolPrintIntervalsTheEndPoint``,
+    ``\PolIfEndPointIsPositive{T}{F}``,
+    ``\PolIfEndPointIsNegative{T}{F}``, and
+    ``\PolIfEndPointIsZero{T}{F}``.
+
+* Bug fixes:
+
+  - It could happen that, contrarily to documentation, an interval computed
+    by :ref:`\\PolSturmIsolateZeros{\<sturmname\>} <PolSturmIsolateZeros>` had
+    zero as an endpoint,
+  - :ref:`\\PolEnsureIntervalLength{\<sturmname\>}{\<index\>}{\<exponent\>}
+    <PolEnsureIntervalLength>` could under certain circumstances erroneously
+    replace a non-zero root by zero,
+  - :ref:`\\PolEnsureIntervalLengths{\<sturmname\>}{\<exponent\>}
+    <PolEnsureIntervalLengths>` crashed when used with a polynomial with no
+    real roots, hence for which no isolation intervals existed (thanks to
+    Thomas Söll for report).
+
+* New macros:
+
+  - :ref:`\\PolSturmIsolateZeros**{\<sturmname\>} <PolSturmIsolateZeros**>`
+  - :ref:`\\PolSturmIsolateZerosGetMultiplicitiesAndRationalRoots{\<sturmname\>} <PolSturmIsolateZerosGetMultiplicitiesAndRationalRoots>`
+  - :ref:`\\PolSturmIsolateZerosAndFindRationalRoots{\<sturmname\>} <PolSturmIsolateZerosAndFindRationalRoots>`
+  - :ref:`\\polexprsetup <polexprsetup>`
+  - :ref:`\\PolPrintIntervals* <PolPrintIntervals*>`
+  - :ref:`\\PolPrintIntervalsNoRealRoots <PolPrintIntervalsNoRealRoots>`
+  - :ref:`\\PolPrintIntervalsBeginEnv <PolPrintIntervalsBeginEnv>`
+  - :ref:`\\PolPrintIntervalsEndEnv <PolPrintIntervalsEndEnv>`
+  - :ref:`\\PolPrintIntervalsKnownRoot <PolPrintIntervalsKnownRoot>`
+  - :ref:`\\PolPrintIntervalsUnknownRoot <PolPrintIntervalsUnknownRoot>`
+  - :ref:`\\PolPrintIntervalsPrintMultiplicity <PolPrintIntervalsPrintMultiplicity>`
+
+* New expandable macros:
+
+  - :ref:`\\PolSturmNbOfRationalRoots{\<sturmname\>} <PolSturmNbOfRationalRoots>`
+  - :ref:`\\PolSturmNbOfRationalRootsWithMultiplicities{\<sturmname\>} <PolSturmNbOfRationalRootsWithMultiplicities>`
+  - :ref:`\\PolSturmRationalRoot{\<sturmname\>}{\<k\>} <PolSturmRationalRoot>`
+  - :ref:`\\PolSturmRationalRootIndex{\<sturmname\>}{\<k\>} <PolSturmRationalRootIndex>`
+  - :ref:`\\PolSturmRationalRootMultiplicity{\<sturmname\>}{\<k\>} <PolSturmRationalRootMultiplicity>`
+  - :ref:`\\PolPrintIntervalsTheVar <PolPrintIntervalsTheVar>`
+  - :ref:`\\PolPrintIntervalsTheSturmName <PolPrintIntervalsTheSturmName>`
+  - :ref:`\\PolPrintIntervalsTheMultiplicity <PolPrintIntervalsTheMultiplicity>`
+
+0.7.3 (2019/02/04)
+------------------
+
+* Bug fixes:
+
+  - Debugging information not destined to user showed in log if root
+    finding was done under ``\xintverbosetrue`` regime.
+  - :ref:`\\PolPrintIntervalsTheVar <PolPrintIntervalsTheVar>` remained
+    defined after :ref:`\\PolPrintIntervals <PolPrintIntervals>` but was
+    left undefined after :ref:`\\PolPrintIntervals* <PolPrintIntervals*>`
+    (reported by Jürgen Gilg). Now remains defined in both cases, and
+    :ref:`\\PolPrintIntervalsTheSturmName <PolPrintIntervalsTheSturmName>`
+    also.
+  - Polynomial names ending in digits caused errors (reported by Thomas
+    Söll).
+
+0.7.4 (2019/02/12)
+------------------
+
+* Bug fix:
+
+  - 20000000000 is too big for ``\numexpr``, shouldn't I know that?
+    Thanks to Jürgen Gilg for report.
+
+0.7.5 (2020/01/31)
+------------------
+
+Synced with xintexpr 1.4. Requires it.
+
+.. _polexpr08release:
+
+0.8 (2021/03/29)
+----------------
+
+Synced with xintexpr 1.4d. Requires it.
+
+* Breaking changes:
+
+  - As the usability of character ``'`` in names has been extended
+    from ``\poldef`` to also generally ``\xintexpr``, ``\xintdefvar``,
+    and ``\xintdeffunc``, it means that the infix operators
+    ``'and'``, ``'or'``, and ``'mod'`` must be replaced
+    by ``&&``, ``||``, and ``/:`` if they
+    follow immediately a variable name (similarly ``'xor'`` must
+    be replaced by the ``xor()`` function in such case).
+
+  - :ref:`\\PolToExpr <PolToExpr>` by default uses a catcode 12
+    ``^``. See its documentation and the new configuration
+    :ref:`\\PolToExprCaret <PolToExprCaret>`.
+
+* Deprecated:
+
+  - Usage of ``P/Q`` for the euclidean quotient of two polynomials is
+    deprecated.  Start using ``quo(P,Q)`` in its place.
+
+* Bug fixes:
+
+  - The ``\xintglobaldefstrue`` setting was obeyed only partially
+    by the polexpr macros defining polynomials.
+
+  - The ``\xintexpr`` variables storing the values of the extremities of the
+    intervals as found by :ref:`\\PolSturmIsolateZeros
+    <PolSturmIsolateZeros>` were not updated at 0.7.5 to the xintexpr 1.4
+    format and thus caused low-level TeX errors if used.
+
+  - Attempting to use in ``\poldef`` a function previously declared
+    via ``\xintdeffunc`` which made usage of the indexing or slicing
+    "ople" syntax typically caused ``TeX capacity exceeded`` error.
+    Indeed 0.7.5 only partially made polexpr able to cope with the
+    extended possibilities for xintexpr 1.4 user-declared functions.
+    Hopefully ``0.8`` achieves full functionality in this context.
+
+* New macros:
+
+  - :ref:`\\polnewpolverbosefalse <polnewpolverbosefalse>`
+  - :ref:`\\PolToExprCaret <PolToExprCaret>`
+  - :ref:`\\PolToExprInVar <PolToExprInVar>`
+  - Alongside the major new functionalities described in the next item
+    :ref:`\\PolTypeset <PolTypeset>` and :ref:`\\PolToExpr <PolToExpr>` have
+    been enhanced to accept as argument a general expression and not
+    only a pre-declared polynomial name.
+
+* New features:
+
+  - The package is usable under Plain and probably most any TeX format,
+    and not only under LaTeX.
+
+  - The core of the package has been rewritten entirely in order to
+    start letting ``\xintexpr`` recognize a polynomial type as a genuine
+    variable.  This has allowed:
+
+    - to solve the reduced inter-operability problems between polexpr
+      and xintexpr_ which arose as consequences to the deep xintexpr_ ``1.4``
+      evolution,
+
+    - to make available most of the functionality associated to
+      expandable macros directly in the ``\xinteval`` syntax as
+      operators or functions,
+
+    - to provide (expandable) functional interface in ``\xinteval`` to
+      features previously available only via (for some, non-expandable)
+      macro interface such as gcd computations.
+
+See the updated :ref:`Quick syntax overview <quick>` and then
+:ref:`the extended syntax description <polexpr08>`.
+
+0.8.1 (2021/04/12)
+------------------
+
+* Breaking changes:
+
+  - Renamed 0.8's ``icontent()`` to :ref:`cont() <cont>`.
+  - Renamed 0.8's ``lcoeff()`` to :ref:`lc() <lc>`.
+
+* Bug fixes:
+
+  - Sadly, ``diff1()``, ``diff2()``,  ``diffn()`` were broken
+    for polynomials of degrees 8 or more, due to a typo and
+    insufficient testing.
+
+  - The package should have (as documented) required xintexpr_ 1.4d
+    but in practice it accepted to work with xintexpr_ 1.4c, whose
+    ``\xinteval`` does not know how to "output" a polynomial.
+
+  - The definition of one of the two variants of 
+    :ref:`\\PolSturmNbOfRootsOf... <PolSturmNbOfRootsOfLessThanOrEqualTo>`
+    was broken by an end-of-line space, left-over
+    from mass conversion from LaTeX to TeX syntax.
+
+* Added:
+
+  - :ref:`lpol() <lpol>`
+  - :ref:`lcoeffs() <lcoeffs>`
+
+0.8.2 (2021/05/05)
+------------------
+
+* Breaking change:
+
+  - Usage of ``\xintPFloat`` in place of ``\xintFloat`` for
+    :ref:`\\PolToFloatExprCmd <PolToFloatExprCmd>`.
+
+* Improved:
+
+  - Some xintexpr_ functions such as ``rseq()`` use the semi-colon,
+    and it was mentioned in the documentation that :ref:`\\poldef <poldef;>`
+    will be confused by this and that inner semi-colons could be
+    set within braces ``{;}`` as a work-around.  It was not clear from
+    this documentation that also :ref:`\\PolDef <PolDef>` required
+    this work-around.  With this relase only :ref:`\\poldef <poldef;>` but
+    not :ref:`\\PolDef <PolDef>` needs the work-around.
+
+* Track xintexpr_ ``1.4e`` changes relative to powers.
+
+0.8.3 (2021/05/27)
+------------------
+
+* Small internal update to track an xintexpr_ ``1.4h`` change
+  regarding handling of exceptions.  Will require this version at
+  least on loading.
+
+0.8.4 (2021/11/01)
+------------------
+
+* Bug fix: :ref:`\\PolSturmIsolateZeros**{\<sturmname\>}
+  <PolSturmIsolateZeros**>` did not declare the ``<sturmname>_norr`` and
+  ``<sturmname>_sqf_norr`` polynomials if original polynomial had no real
+  root!
+
+0.8.5 (2021/11/30)
+------------------
+
+* Bug fix: support for the ``intfrom()`` function was in the code,
+  but the declaration to the polynomial parser had not been done.
+
+* Track (belatedly) upstream deprecation of ``\xintSignedFrac`` and
+  ``\xintSignedFwOver`` at xintexpr_ ``1.4g``
+
+0.8.6 (2022/01/09)
+------------------
+
+* Provide a separate ``polexpr-examples.pdf`` with examples formerly
+  shown as part of the html documentation.
+
+* Minor improvement to the computation of a priori bounds on real roots.
+
+* Add :ref:`\\PolPrintIntervalsRowSeparator <PolPrintIntervalsRowSeparator>`
+  and allow usage of ``amsmath`` environments in custom
+  :ref:`\\PolPrintIntervalsBeginEnv <PolPrintIntervalsBeginEnv>` and
+  :ref:`\\PolPrintIntervalsEndEnv <PolPrintIntervalsEndEnv>`.
+
+0.8.7 (2022/05/14)
+------------------
+
+* Bug fix: catcode sanitization by :ref:`\\poldef <poldef;>` was minimal
+  ever since ``0.1`` and handled only the semi-colon.  Thus e.g. the
+  active ``!`` from babel-french caused errors and ``\string!`` was
+  needed as work-around for factorials.  Now the same sanitization as
+  for ``\xintdefvar`` and ``\xintdeffunc`` is applied.  This however can
+  only work at locations where the catcodes are not yet frozen at the
+  time ``\poldef`` expands.
+
+* Split the html documentation into three files and enhance it via CSS
+  styling.
+
+0.8.7a (2022/05/19)
+-------------------
+
+* Documentation updates.
+
+
+.. _xinttools:
+.. _xintfrac:
+.. _xint: https://www.ctan.org/pkg/xint
+
+.. _xintexpr: https://www.ctan.org/pkg/xintexpr
+
+.. _xintsession: https://www.ctan.org/pkg/xintsession
+
+.. _Wilkinson polynomial: https://en.wikipedia.org/wiki/Wilkinson%27s_polynomial
+
+.. _Sturm algorithm:
+.. _Sturm Theorem: https://en.wikipedia.org/wiki/Sturm%27s_theorem
+
+.. _DocUtils: http://docutils.sourceforge.net/docs/index.html
+
+
+.. Local variables:
+.. sentence-end-double-space: t;
+.. End:

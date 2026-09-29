@@ -1,0 +1,267 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{enumitem}
+\geometry{margin=1in}
+
+\title{README FOR pdfannotations PACKAGE}
+\date{Version: 3.1\\Date: 2023-11-22}
+\author{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+pdfannotations is a \LaTeX{} package designed for annotating PDF slides with \LaTeX{} elements, adding interludes, and including code snippets. In its latest version, the package has been enhanced with improved error handling and debug logging for more robust and informative user interaction. It offers a flexible way to enhance PDF presentation slides with additional \LaTeX{} content. The package utilizes \LaTeX3 syntax and requires the pdf\LaTeX{} compiler.
+
+\section*{Features and Usage}
+The pdfannotations package includes the following commands and environments:
+\begin{enumerate}
+    \item \textbf{slideannotate:} 
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash begin\{slideannotate\}\{PDF Number-Slide Number\} ... \textbackslash end\{slideannotate\}}
+        \item Allows annotations directly onto PDF slides.
+        \item Supports math and \LaTeX{} markup.
+        \item Limitation: Content does not extend to multiple pages.
+    \end{itemize}
+    \item \textbf{slideinterlude:}
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash begin\{slideinterlude\}\{PDF Number-Slide Number\} ... \textbackslash end\{slideinterlude\}}
+        \item Inserts interludes between slides for additional content.
+        \item Supports math, \LaTeX{} markup, and programming code.
+        \item For short code snippets, \texttt{\{verbatim\}} can be used.
+    \end{itemize}
+    \item \textbf{\textbackslash annotatepdf:}
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash annotatepdf\{PDF Number\}}
+        \item Invokes the annotation process for a specified PDF.
+    \end{itemize}
+    \item \textbf{\textbackslash labelgraphics:}
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash labelgraphics[options]\{filename\}}
+        \item Includes graphics with filename labels.
+    \end{itemize}
+    \item \textbf{\textbackslash suppressslide:}
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash suppressslide\{PDF Number-Slide Number\}}
+        \item Suppresses specific slides.
+    \end{itemize}
+    \item \textbf{\textbackslash includecode:}
+    \begin{itemize}
+        \item Syntax: \texttt{\textbackslash includecode[options]\{filename\}}
+        \item Includes external code with syntax highlighting.
+        \item Auto-detects language formatting by file extension.
+        \item \texttt{\{verbatim\}} recommended for short snippets within \texttt{\{slideinterlude\}}.
+    \end{itemize}
+    \item \textbf{\textbackslash listpdfs:}
+    \begin{itemize}
+        \item Lists all PDFs and their index numbers as specified in the user configuration.
+    \end{itemize}
+\end{enumerate}
+
+\section*{User Configuration}
+Customize document metadata and settings by modifying the variables in the user configuration section at the top of the package code.
+
+Here are the descriptions for each part of the user configuration section of your script:
+\begin{itemize}
+    \item \texttt{\textbackslash newcommand\{\textbackslash MyTitle\}\{...\}}: Defines the document's title.
+    \item \texttt{\textbackslash newcommand\{\textbackslash MyAuthor\}\{...\}}: Sets the author's name for the document.
+    \item \texttt{\textbackslash newcommand\{\textbackslash MyDate\}\{...\}}: Defines the date associated with the document.
+    \item \texttt{\textbackslash newcommand\{\textbackslash FirstSectionName\}\{...\}}: Sets the name of the first section or chapter.
+    \item \texttt{\textbackslash newcommand\{\textbackslash PDFMaxWidth\}\{0.80\textbackslash textwidth\}}: Specifies the maximum width for included PDF pages.
+    \item \texttt{\textbackslash newcommand\{\textbackslash MaxInterludes\}\{20\}}
+
+: Sets the maximum number of interludes allowed in the document.
+    \item \texttt{\textbackslash newcommand\{\textbackslash PDFList\}\{"Career.pdf"\}}: Creates a list of PDF files to be used in the document.
+\end{itemize}
+
+\section*{System Requirements}
+\begin{itemize}
+    \item \LaTeX3 syntax.
+    \item pdf\LaTeX{} compiler.
+\end{itemize}
+
+\section*{Successfully Tested With Packages}
+\begin{itemize}
+    \item \texttt{mathtools} - Enhances mathematical content presentation and formatting.
+    \item \texttt{cancel} - Allows simple cancellation lines in math formulas.
+    \item \texttt{booktabs} - For professional-looking tables.
+    \item \texttt{array} - Extends options for table column formats.
+    \item \texttt{longtable} - For creating multi-page tables.
+    \item \texttt{mathrsfs} - Provides mathematical script font.
+    \item \texttt{scrlayer-scrpage} - For creating and managing headers and footers.
+    \item \texttt{xcolor} - For driver-independent use of color.
+    \item \texttt{listings} - For formatting source code listings.
+    \item \texttt{seqsplit} - For splitting long sequences of characters.
+    \item \texttt{enumitem} - For customizing layout of lists.
+    \item \texttt{adjustbox} - For dynamic sizing of content.
+\end{itemize}
+
+\section*{Minimal Example}
+\begin{verbatim}
+\documentclass{article}
+\usepackage{pdfannotations}
+
+% Start of User configuration section
+% -----------------------------------
+
+% Document metadata
+\newcommand{\MyTitle}{UCSanDiegoX Probability and Statistics in Data Science using Python: Topic 3: Counting}
+\newcommand{\MyAuthor}{Chevan Nanayakkara}
+\newcommand{\MyDate}{November 2023}
+\newcommand{\FirstSectionName}{Lecture Notes: Topic 3 Counting}
+
+% User variables
+\newcommand{\PDFMaxWidth}{0.80\textwidth} 
+\newcommand{\MaxInterludes}{20} 
+\newcommand{\PDFList}{"Career.pdf"}
+
+% Variable Documentation:
+% PDFMaxWidth: a user-configurable command in LaTeX that sets a global 
+% PDFMaxWidth: maximum width for included PDF documents, ensuring they are scaled 
+% PDFMaxWidth: appropriately to fit within the specified width of the text area. 
+% PDFMaxWidth: This command is particularly useful for consistently resizing 
+% PDFMaxWidth: larger PDF pages to maintain a uniform and visually appealing
+% PDFMaxWidth: layout in the document.
+
+% MaxInterludes: Define the maximum number of interludes
+
+% PDFList: User-defined list of PDFs
+% PDFList: Ensure there are no spaces between the commas and each filename
+% PDFList: Ensure each filename ends in .pdf
+% PDFList: An empty string {""} is not supported and the document will not compile
+% PDFList: No string is supported {}
+
+% Define expandable commands for title, author, and date to use in headers/footers
+\NewExpandableDocumentCommand{\thetitle}{}{\MyTitle}
+\NewExpandableDocumentCommand{\theauthor}{}{\MyAuthor}
+\NewExpandableDocumentCommand{\thedate}{}{\MyDate}
+
+% --------------------------
+% End of User configuration section
+
+\begin{document}
+
+\begin{slideannotate}{1-2}
+Annotation for slide 2 of the first PDF.
+\end{slideannotate}
+
+\begin{slideinterlude}{1-3}
+Interlude with \LaTeX{} markup and math like \( E = mc^2 \).
+\includecode{example.py}
+\end{slideinterlude}
+
+\annotatepdf{1}
+\listpdfs
+
+\end{document}
+\end{verbatim}
+(Replace "example.py" with a real file path.)
+
+\subsection*{GitHub Repository}
+\url{https://github.com/chevannanayakkara/pdfannotations}
+
+\subsection*{License}
+Free with no warranty under the LaTeX Project Public License (LPPL) version 1.3c.
+
+\section*{Changelog}
+
+\begin{itemize}
+    \item \textbf{Version 3.1 (2023-11-22):}
+    \begin{itemize}
+        \item Introduced `PDFMaxWidth` for dynamic scaling of included PDF documents.
+    \end{itemize}
+
+    \item \textbf{Version 3.0 (2023-11-21):}
+    \begin{itemize}
+        \item Improved error trapping and messages for empty or malformed PDF List.
+        \item Provided verbose messages in the document for out of bounds indexes for \texttt{\textbackslash annotatepdf} and \texttt{\textbackslash listpdfs}.
+        \item Added detailed debug log information, search for "PDFAnnotations".
+    \end{itemize}
+
+    \item \textbf{Version 2.4.1 (2023-11-15):}
+    \begin{itemize}
+        \item Added new command \texttt{\textbackslash listpdfs} that shows all PDFs and their index number for use with the \texttt{\textbackslash annotatepdf} command.
+    \end{itemize}
+
+    \item \textbf{Version 2.3 (2023-11-10):}
+    \begin{itemize}
+        \item Brought all user-specified variables to the top of the preamble for easier customization.
+        \item Added \texttt{\textbackslash listpdfs} command to list all PDFs and their index numbers.
+    \end{itemize}
+
+    \item \textbf{Version 2.2.3 (2023-11-08):}
+    \begin{itemize}
+        \item Added packages booktabs and longtable for table environment support.
+        \item Reformatted the entire document for improved readability and structure.
+    \end{itemize}
+
+    \item \textbf{Version 2.2.2 (2023-11-07):}
+    \begin{itemize}
+        \item Removed the changelog from the code to be included in the README file instead.
+    \end{itemize}
+
+    \item \textbf{Version 2.2.1 (2023-11-06):}
+    \begin{itemize}
+        \item Modified when \texttt{\textbackslash clearpage} is invoked to make slide transitions more natural.
+    \end{itemize}
+
+    \item \textbf{Version 2.2:}
+    \begin{itemize}
+        \item Moved title, author, and date to user-specified variables.
+        \item Ensured that full text is used without stripping spaces.
+        \item Reorganized the code and added comments to sections for clarity.
+    \end{itemize}
+
+    \item \textbf{Version 2.1:}
+    \begin{itemize}
+        \item Added syntax highlighting and line numbers for included Python code blocks.
+        \item Language formatting is auto-detected by the included file's extension.
+    \end{itemize}
+
+    \item \textbf{Version 2.0:}
+    \begin{itemize}
+        \item Added functionality to include multi-line code from an external file into the \{slideinterlude\} environment.
+    \end{itemize}
+
+    \item \textbf{Version 1.9.1:}
+    \begin{itemize}
+        \item Fixed a bug in \texttt{\textbackslash labelgraphics} where the interlude format was not preserved.
+    \end{itemize}
+
+    \item \textbf{Version 1.9:}
+    \begin{itemize}
+        \item Introduced \texttt{\textbackslash suppressslide\{x-y\}} command to exclude specific slides from being displayed.
+    \end{itemize}
+
+    \item \textbf{Version 1.8:}
+    \begin{itemize}
+        \item Introduced \texttt{\textbackslash labelgraphics} to auto-display image filename below the image.
+    \end{itemize}
+
+    \item \textbf{Version 1.7.1:}
+    \begin{itemize}
+        \item Changed interlude slide labels to: "Slide Interlude".
+    \end{itemize}
+
+    \item \textbf{Version 1.7:}
+    \begin{itemize}
+        \item Added auto-detection of the number of pages in PDFs.
+    \end{itemize}
+
+    \item \textbf{Version 1.6:}
+    \begin{itemize}
+        \item Grouped user-specified variables.
+        \item Cleaned up code and eliminated redundant elements.
+    \end{itemize}
+
+    \item \textbf{Version 1.5:}
+    \begin{itemize}
+        \item Converted \texttt{\textbackslash begin\{slideannotate\}} command to slideannotate environment.
+    \end{itemize}
+\end{itemize}
+
+
+Note: This README complements the full documentation available on GitHub.
+
+\end{document}

@@ -1,0 +1,389 @@
+\documentclass[full]{l3doc}
+\usepackage[scheme=plain]{ctex}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{titling}
+\usepackage{geometry}
+\usepackage{fancyvrb-ex}
+\usepackage{pascaltriangle}
+
+\IndexPrologue
+  {
+    \section*{Index}
+    \markboth{Index}{Index}
+    \addcontentsline{toc}{section}{Index}
+    The~italic~numbers~denote~the~pages~where~the~
+    corresponding~entry~is~described,~
+    numbers~underlined~point~to~the~definition,~
+    all~others~indicate~the~places~where~it~is~used.
+  }
+
+\newcommand\tikzmark[1]{\tikz \coordinate[overlay, remember picture] (#1);}
+
+\geometry{
+  left=4.5cm,
+  right=2cm,
+  top=2cm,
+  bottom=2cm,
+}
+\hypersetup {
+  CJKbookmarks,
+  bookmarksopen,
+  bookmarksopenlevel=3,
+  pdfstartview=FitH,
+  pdfinfo = {
+   Title = The package pascaltriangle ,
+   Subject = A LaTeX3 package ,
+   Author = Geng Nan
+ }
+}
+
+\DoNotIndex{\begin, \end}
+\setlength{\parskip}{\medskipamount}
+\DeclareDocumentEnvironment { noteen } { +b } {
+  \par\textbf{\textsf{NOTE:~}}#1\par
+} {}
+\DeclareDocumentEnvironment { notezh } { +b } {
+  \par\textbf{\textsf{注意:~}}#1\par
+} {}
+
+\AtEndDocument{
+  \newgeometry{
+    left=2cm,
+    right=2cm,
+    top=2cm,
+    bottom=2cm
+  }
+  \PrintIndex
+}
+
+\ExplSyntaxOn
+\dim_new:N \l__my_syntax_dim
+\box_new:N \g__my_syntax_box
+\NewDocumentEnvironment { Syntax } { s }
+  {
+    \dim_set:Nn \l__my_syntax_dim
+      { \textwidth }
+    \hbox_gset:Nw \g__my_syntax_box
+      \small \ttfamily
+      \begin{minipage}[t]{\l__my_syntax_dim}
+        \raggedright\obeyspaces\obeylines
+  }
+  {
+      \end{minipage}
+    \hbox_gset_end:
+    \IfValueF { #1 } { \smallskip }
+    \box_use_drop:N \g__my_syntax_box
+    \smallskip
+  }
+
+\DeclareDocumentEnvironment { Description } { o +b } {
+  \hbox_set:Nn \l_tmpa_box { #1 }
+  \dim_set:Nn \l_tmpa_dim { \box_wd:N \l_tmpa_box }
+  \begin{itemize}[labelwidth=\l_tmpa_dim, align=left]
+    #2
+  \end{itemize}
+} {  }
+
+\keys_define:nn { pascal/doc } {
+  opt .tl_set:N = \l_opt_tl,
+  desc .tl_set:N = \l_desc_tl,
+  init .tl_set:N = \l_init_tl,
+  init .initial:n = init-none,
+}
+
+\box_new:N \l__option_box
+\NewDocumentEnvironment { option } { m +b } {
+  \keys_set:nn { pascal/doc } { #1 }
+  \hbox_set:Nw \l__option_box
+    \small \ttfamily
+    \begin{minipage}[t]{\textwidth}
+      \obeyspaces\obeylines
+      \textcolor{red}{
+        \l_opt_tl
+        \exp_args:Nx\SpecialOptionIndex{\l_opt_tl}
+      }
+      {~}\l_desc_tl
+      \hfill(
+      \tl_if_eq:NnTF \l_init_tl { init-none } { no~value }
+        { initially~\texttt{\l_init_tl} }
+      )
+    \end{minipage}
+  \hbox_gset_end:
+  \box_use_drop:N \l__option_box
+  #2
+  \medskip
+} {  }
+
+\DeclareDocumentCommand \opt { O{} m }
+  { \__codedoc_cmd:no {#1} { #2 } }
+\ExplSyntaxOff
+
+\def\vers{\texttt{v1.0.1}
+\thanks{\url{https://github.com/registor/pascaltriangle}}
+\thanks{\url{https://gitee.com/nwafu_nan/pascaltriangle}}
+}
+
+\begin{document}
+\title{
+  \pkg{pascaltriangle} 宏包
+  \rlap{\makebox[4cm][r]{
+    \normalsize $\Longrightarrow$ \color{red}
+    \protect\hyperlink{en}{English Version}
+    \protect\hypertarget{zh}{}
+  }}
+}
+\author{\textit{耿楠} \texttt{<nangeng@nwafu.edu.cn>}}
+\date{\the\year 年\the\month 月\the\day 日\qquad \vers
+}
+\maketitle
+
+{\small
+\tableofcontents
+}
+\newpage
+
+\begin{documentation}
+
+\section{引言}
+\pkg{pascaltriangle}是一个基于\pkg{TikZ}用\pkg{expl3}开发的
+Pascal三角形(杨辉三角形)生成宏包，它提供了一个唯一的绘图命令
+\tn{pascal}，并可以通过不同命令的命令选项或\tn{pascalset}命令
+设置生成不同外观的等腰或直角Pascal三角形。
+
+\section{用户接口}
+
+\subsection{\cs{pascal}绘图命令}
+
+\begin{function}{\pascal}
+  \begin{syntax}
+    \cs{pascal} \oarg{外观选项} \marg{层数}
+  \end{syntax}
+
+\end{function}
+
+  用于绘制一个Pascal三角形。
+
+  该命令仅有一个必选参数\marg{层数}，用于指定Pascal三角形的层数。
+
+  在\oarg{外观选项}中可以通过key-value方式设置三角形形状、大小等外观。
+
+  三角形的外观也可以通过\cs{pascalset}命令的逗号分隔key-value列表进行设置
+
+\subsection{\cs{pascalset}}
+\begin{function}{\pascalset}
+  \begin{syntax}
+    \cs{pascalset} \marg{外观选项}
+  \end{syntax}
+
+\end{function}
+
+  用于设置一个Pascal三角形的外观。
+
+  在\marg{外观选项}中可以通过key-value方式设置三角形形状、大小等外观。
+
+\section{外观选项}
+
+\begin{option}{ opt = shape, desc = {= \meta{形状}}, init=iso }
+  设置Pascal三角形的形状，目前支持|iso|---等腰三角形和
+  |rt|---直角三角形。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal{5}\qquad
+  \pascal[shape=rt]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = radius, desc = {= \meta{半径}}, init=0.5cm }
+  设置三角形每个单元外接圆半径，注意需要带有单位。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal[radius=0.8cm]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = fontsize, desc = {= \meta{字号命令}}, init=\cs{small} }
+  设置三角形每个单元中数字文本大小。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal[radius=0.8cm,
+    fontsize=\Huge]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{opt=withnum, desc={= \meta{布尔值}}, init=false}
+    设置是否显示Pascal三角形的行列编号。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.63\linewidth,gobble=2]
+  \centering
+  \pascal[withnum]{4}
+  \pascal[withnum,shape=rt]{4}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{opt = binom, desc = {= \meta{布尔值}}, init=false}
+  设置是否显示用二项式表达式显示各元素值。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.63\linewidth,gobble=2]
+  \centering
+  \pascal[binom]{5}
+  \pascal[binom,shape=rt]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = fillr, desc = {= \meta{整数}}, init=1 }
+  设置需要表示前列累加的单元格行号，注意行号是当前列自顶向下从0开始计数。
+\end{option}
+
+\begin{option}{ opt = fillc, desc = {= \meta{整数}}, init=1 }
+  设置需要表示前列累加的单元格列号，注意列号是自左向右从0开始计数。
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.64\linewidth,gobble=2]
+  \centering
+  \pascalset{fillr=2,fillc=6,
+             radius=0.4cm}
+  \pascal{10}\\
+  \pascal[shape=rt]{10}
+\end{SideBySideExample}
+
+\bigskip
+
+\title{
+  Package \pkg{pascaltriangle}
+  \rlap{\makebox[4cm][r]{
+    \normalsize $\Longrightarrow$ \color{red}
+    \protect\hyperlink{zh}{中文版本}
+    \protect\hypertarget{en}{}
+  }}
+}
+\author{Nan Geng \texttt{<nangeng@nwafu.edu.cn>}}
+\date{\today\qquad \vers}
+\maketitle
+
+\section{Introduction}
+
+\pkg{pascaltriangle} is a Pascal triangle(Yanghui triangle) generation package
+based on TikZ developed in expl3, which provides a unique drawing command \cs{pascal},
+and can be set by different options or \cs{pascalset} macro to
+generates isosceles or right-angle Pascal triangles with different appearances.
+
+\section{Interfaces}
+
+\subsection{\cs{pascal} macro}
+
+\begin{function}{\pascal}
+  \begin{syntax}
+    \cs{pascal} \oarg{options} \marg{order}
+  \end{syntax}
+\end{function}
+Used to draw a Pascal triangle.
+
+This macro has only one mandatory parameter \marg{order},
+which specifies the number of layers of the Pascal triangle.
+
+In \oarg{options} you can set the appearance of the triangle shape,
+size, etc. by key-value method.
+
+The appearance of the triangle can also be set via the comma-separated
+key-value list of the \cs{pascalset} macro
+
+\subsection{\cs{pascalset} macro}
+
+\begin{function}{\pascalset}
+  \begin{syntax}
+    \cs{pascalset} \marg{options}
+  \end{syntax}
+\end{function}
+
+Used to set the appearance of Pascal triangle.
+
+In \oarg{options} you can set the appearance of the triangle shape,
+size, etc. by key-value method.
+
+\section{options}
+
+\begin{option}{ opt = shape, desc = {= \meta{shape}}, init=iso }
+  Sets the shape of Pascal triangle
+  currently supporting |iso|---isosceles triangles and |rt|---right-angle triangles.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal{5}\qquad
+  \pascal[shape=rt]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = radius, desc = {= \meta{radius}}, init=0.5cm }
+  Set the radius of the outer circle of each cell of the triangle,
+  note that it needs to have units.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal[radius=0.8cm]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = fontsize, desc = {= \meta{fontsize}}, init=\cs{small} }
+  Sets the fontsize of each cell of the triangle.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.65\linewidth,gobble=2]
+  \centering
+  \pascal[radius=0.8cm,
+    fontsize=\Huge]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{opt=withnum, desc={= \meta{bool}}, init=false}
+  Sets whether to show the Pascal triangle row/col numbers or not.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.63\linewidth,gobble=2]
+  \centering
+  \pascal[withnum]{4}
+  \pascal[withnum,shape=rt]{4}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{opt = binom, desc = {= \meta{bool}}, init=false}
+  Sets whether to show each element value with binomial expressions or not.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.63\linewidth,gobble=2]
+  \centering
+  \pascal[binom]{5}
+  \pascal[binom,shape=rt]{5}
+\end{SideBySideExample}
+
+\bigskip
+
+\begin{option}{ opt = fillr, desc = {= \meta{integer}}, init=1 }
+  Set the row number of the cell that needs to indicate the sum of the pre-column,
+  note that the row number is in the current column counted from the top down based 0.
+\end{option}
+
+\begin{option}{ opt = fillc, desc = {= \meta{integer}}, init=1 }
+  Set the col number of the cell that needs to indicate the sum of the pre-column,
+  note that the col number is counted from the left to right based 0.
+\end{option}\\
+\begin{SideBySideExample}[frame=single,numbers=left,xrightmargin=.64\linewidth,gobble=2]
+  \centering
+  \pascalset{fillr=2,fillc=6,
+             radius=0.4cm}
+  \pascal{10}\\
+  \pascal[shape=rt]{10}
+\end{SideBySideExample}
+
+\end{documentation}
+
+
+\end{document}

@@ -1,0 +1,387 @@
+\documentclass{l3doc}
+\usepackage{updatemarks}
+\usepackage[a4paper,top=2cm,bottom=2.5cm,left=5cm,right=2cm]{geometry}
+
+\title{Update marks in box\thanks{Issues: \url{https://github.com/Sophanatprime/updatemarks/issues}}}
+\author{WenJian Chern\thanks{Email: longaster@163.com}}
+\date{\today\qquad v0.2f}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+There are some cases where one may put title in box and still want its 
+\cs{markboth} working. This brings the \pkg{updatemarks} package.
+The \pkg{updatemarks} package provides interface to extract marks where are in a 
+inner box and then can put the first and last marks back to outer.
+It can automatically update marks where are in \env{minipage}, 
+\textit{boxed multicols} and \env{tcolorbox} environments.
+\end{abstract}
+
+
+\tableofcontents
+
+
+\section{Usage of the package}
+
+You simply insert \verb|\usepackage{updatemarks}| or 
+\verb|\usepackage|\oarg{options}\verb|{updatemarks}| in the preamble of your document.
+
+There are three package options \texttt{minipage}, 
+\texttt{multicol}(an optional \texttt s) and 
+\texttt{tcolorbox}, which are used to enable the function of automatical updating marks
+in \env{minipage}, \env{multicols} and 
+\env{tcolorbox} (both \env{tcolorbox} environment and \tn{tcbox} command), respectively.
+
+No automatical updatings are enable, by default.
+
+If your {\LaTeX} version is 2022-06-01 or newer, you can use 
+\cs{SetKeys}\texttt{[updatemarks]}\marg{options} to enable or disable
+automatical updating locally.
+
+Such as,
+\begin{verbatim}
+  \SetKeys[updatemarks]{minipage=false, tcolorbox=true, multicol}
+\end{verbatim}
+so marks in \env{minipage} would not update, 
+whereas \env{tcolorbox} and \env{multicols} do.
+
+The total empty mark will not be extracted and updated.
+But \verb|\markboth{}{}| and \verb|\InsertMark{}| do will be extracted and updated,
+because they are not total empty internally.
+
+However, the updating is not once for all.
+For example, if you are using \env{minipage} in \tn{makebox}, even if you enable
+the automatical updating, the marks still can not be found by \LaTeX.
+But, if you put \env{minipage} in \env{tcolorbox} or the other way round, 
+\LaTeX\ still can get correct marks.
+
+The point is, updating marks is done inner to outer and level by level, 
+if any level is not updated, you will lost all marks in inner boxes.
+Furthermore, whether marks are updated or not is only influenced by box level
+instead of group level, so if you try to limit marks in a certain position, you should
+use a box instead of \tn{begingroup} and \tn{endgroup}.
+
+The extracting and updating would not remove these marks, they still be there, you 
+can find them by your own method as well.
+
+
+\section{\env{minipage}}
+
+You can enable automatically extracting and updating marks where are in \env{minipage}
+to its nearest outer box level,
+by using \texttt{minipage} package option or set \texttt{minipage} key to true.
+
+\pkg{updatemarks} patches the \tn{endminipage}, if you enable the function,
+marks in any other environments that use \env{minipage} will be updated, 
+including \env{varwidth} of \pkg{varwidth} package, etc.
+
+
+\section{\pkg{multicol} and \pkg{adjmulticol}}
+
+If \env{multicols} or \env{adjmulticols} or their starred versions are put in a box
+--- so called \emph{boxed multicols}, you are able to eanble automatically extracting 
+and updating marks into the box (not outer of the box, because they are only updated
+one level).
+If you need to update marks in this box, you have to do it manually.
+Of cause, if the box is \env{minipage} or \env{tcolorbox} or another \env{multicols}
+or any other supported environments or commands, then no more things to do.
+
+All \env{multicols} and \env{adjmulticols} and their starred versions share the 
+same option \texttt{multicol}(an optional \texttt s).
+
+For \emph{non boxed multicols}, i.e, not in any other box except 
+the main vertical list, the \tn{topmark} (and \tn{topmarks}) at first and last page 
+are not correct. Multiple contiguous forced break or \tn{clearpage} may cause the 
+wrong marks.
+
+If your {\LaTeX} version is 2022-06-01 or newer,
+you can get more correct mark values by using \cs{TopMark}, \cs{FirstMark} 
+and \cs{LastMark} in head and foot, but only the 
+\texttt{previous-page} region and \texttt{page} region are supported for now.
+Still, Multiple contiguous forced break or \tn{clearpage} may cause the wrong marks.
+
+
+\section{\pkg{tcolorbox}}
+
+The \pkg{updatemarks} package can also update marks in \env{tcolorbox} environments
+(both breakable and unbreakable) and \tn{tcbox} commands.
+
+You are allowed to use \verb|updatemarks=true| or \verb|updatemarks| in \tn{tcbset}
+or as environment and command option to enable the function, and 
+\verb|updatemarks=false| to disable.
+
+
+\section{Set automatical updating list}
+
+\pkg{updatemarks} can automatically detect mark classes allocated by \tn{newmarks}
+and \cs{NewMarkClass} in preamble. But if you allocate mark class after preamble
+(which I strongly recommend you do not),
+\pkg{updatemarks} also provides interfaces to enable you add these mark class to 
+automatical updating list. If you are not using these two commands, then nothing need 
+to be done.
+
+
+\begin{function}{\AddToUpdateMarksList,\SetUpdateMarksList,\RemoveFromUpdateMarksList}
+  \begin{syntax}
+    \verb|\AddToUpdateMarksList|      \marg{number list}
+    \verb|\SetUpdateMarksList|        \marg{number list}
+    \verb|\RemoveFromUpdateMarksList| \marg{number list}
+  \end{syntax}
+You can use these functions to globally add items to, set items, and remove items from 
+the list of mark classes which need to be automatically updated.
+
+The \meta{number} is the first argument of \tn{newmarks}, or literally, a number.
+Specially, for those mark classes declared by \cs{NewMarkClass}, you are able to use 
+\oarg{class} or \cs{MarkClass}\marg{class}. Such as 
+\begin{verbatim}
+  \RemoveFromUpdateMarksList { [2e-right], 4, \MarkClass{my-class} }
+\end{verbatim}
+You can also use number ranges in \meta{number list}, such as \verb|2 -> 5|.
+\end{function}
+
+
+\begin{function}{\AddAllocatedToUpdateMarksList}
+  \begin{syntax}
+    \verb|\AddAllocatedToUpdateMarksList|
+  \end{syntax}
+The function add all mark classes allocated by \tn{newmarks} and \cs{NewMarkClass}
+to automatical updating list.
+\end{function}
+
+
+\section{Generic interfaces of extracting and updating}
+
+If you need to extract and update marks manually, \cs{ExtractMarks}, 
+\cs{ExtractSplitMarks} and \cs{UpdateMarks} will help you.
+
+\begin{function}{\ExtractMarks}
+  \begin{syntax}
+    \verb|\ExtractMarks| \marg{box number}
+    \verb|\ExtractMarks| \oarg{number list} \marg{box number}
+    \verb|\ExtractMarks| * \marg{text}
+    \verb|\ExtractMarks| * \oarg{number list} \marg{text}
+  \end{syntax}
+Save first marks and last marks of specified mark classes
+which are directly presented in \meta{box number} or \meta{text} 
+if these marks is not total empty. 
+Marks in deeper boxes will not be detected, unless they are moved out.
+
+If \meta{number list} is presented, the mark classes are these numbers, otherwise
+they are the automatical updating list.
+
+The \meta{box number} is the first argument of \tn{newbox} or \tn{newsavebox}, etc.,
+and have saved contents by using \env{lrbox} or \tn{sbox} or similar.
+
+The \meta{text} is typeset material and \emph{will be executed}.
+
+If the \meta{box number} is a vbox and contains forced page break, then all marks after 
+the first forced page break will not be detected.
+\end{function}
+
+\begin{function}{\ExtractSplitMarks}
+  \begin{syntax}
+    \verb|\ExtractSplitMarks|
+    \verb|\ExtractSplitMarks| \oarg{number list}
+  \end{syntax}
+This command is used after a \tn{vsplit}, and save 
+first marks and last marks of specified mark classes which are directly
+presented in being split part if these marks is not total empty. 
+Marks in deeper boxes will not be detected, unless they are moved out.
+
+If \meta{number list} is presented, the mark classes are these numbers, otherwise
+they are the automatical updating list.
+\end{function}
+
+\begin{function}{\UpdateMarks}
+  \begin{syntax}
+    \verb|\UpdateMarks|
+    \verb|\UpdateMarks| \oarg{number list}
+  \end{syntax}
+Reinserting saved first marks and last marks of specified mark classes 
+(if have been saved) into the current box, 
+or if not in a box then the main vertical list.
+
+If \meta{number list} is presented, the mark classes are these numbers, otherwise
+they are the automatical updating list.
+
+\texttt{insertmark} hook would not be used as it's already been used.
+\end{function}
+
+\begin{function}[added=2024-02-19]{\ExtractMarksTo}
+  \begin{syntax}
+    \verb|\ExtractMarks| \marg{box number} \marg{cmd}
+    \verb|\ExtractMarks| \oarg{number list} \marg{box number} \marg{cmd}
+    \verb|\ExtractMarks| * \marg{text} \marg{cmd}
+    \verb|\ExtractMarks| * \oarg{number list} \marg{text} \marg{cmd}
+  \end{syntax}
+It collect all marks to \meta{cmd}, you can use \meta{cmd} to reinsert these marks.
+
+\texttt{insertmark} hook would not be used as it's already been used.
+\end{function}
+
+\section{Disable patches or write your own patches}
+
+By default, \pkg{updatemarks} use its own patches to support \env{minipage},
+\env{multicols} and \env{tcolorbox}, however, you can write your own patches and 
+remove the patches will be done by \pkg{updatemarks}.
+
+To the patches for \env{minipage}, you can define \tn{updatemarks@minipage@patch}
+before \pkg{updatemarks} is loaded, then \pkg{updatemarks} will use your patches.
+Specially, if you set \tn{updatemarks@minipage@patch} to empty, then no patches will 
+be done for \cs{endminipage}.
+
+The patches for \pkg{multicol}, \pkg{adjmulticol} and \pkg{tcolorbox}, 
+are \tn{updatemarks@multicol@patch}, \tn{updatemarks@adjmulticol@patch}, 
+\tn{updatemarks@tcolorbox@patch} and \linebreak\tn{updatemarks@multicolnewmark@patch},
+\tn{updatemarks@adjmulticolnewmark@patch} for new mark mechanism,
+you are able set them in preamble before or after \pkg{updatemarks} is loaded.
+
+
+\section{Programming interfaces}
+
+This section describes the interfaces of \LaTeX3.
+
+\begin{function}[added=2024-02-19]{\updatemarks_parse_classes:Nn}
+  \begin{syntax}
+    \verb|\updatemarks_parse_classes:Nn| \meta{seq var} \marg{number list}
+  \end{syntax}
+Parse number list and save it to \meta{seq var}.
+\end{function}
+
+\begin{function}{\updatemarks_extract:nN,\updatemarks_extract_split:N}
+  \begin{syntax}
+    \verb|\updatemarks_extract:nN| \marg{material} \meta{seq var}
+    \verb|\updatemarks_extract_split:N| \meta{seq var}
+  \end{syntax}
+Programming interface of \cs{ExtractMarks} and \cs{ExtractSplitMarks}, respectively.
+
+\meta{material} is content to build a box.
+Such as unpacked box using \cs{hbox_unpack:N} or \cs{vbox_unpack:N} or text.
+
+\meta{seq var} is the number sequence of mark classes which are need to be extracted.
+
+They only save the marks whose positions are first or last.
+\end{function}
+
+\begin{function}[added=2024-02-19]{\updatemarks_extract:nNN}
+  \begin{syntax}
+    \verb|\updatemarks_extract:nNN| \marg{material} \meta{seq var} \meta{tl var}
+  \end{syntax}
+Programming interface of \cs{ExtractMarksTo}.
+
+\texttt{insertmark} hook would not be used as it's already been used.
+\end{function}
+
+\begin{function}[added=2024-02-19]{\updatemarks_extract_act:nNn}
+  \begin{syntax}
+    \verb|\updatemarks_extract_act:nNn| \marg{material} \meta{seq var} \marg{code}
+  \end{syntax}
+Run \meta{code} for every mark classes in \meta{seq var}, the code can use one 
+parameter, which is the current mark class, and two \texttt{tl} variable
+\cs{l_updatemarks_first_tl} and \cs{l_updatemarks_last_tl}, which save
+the first and last marks at specified mark class, respectively. If these two \texttt{tl}
+is not exist, then no marks at the mark class are inserted.
+\end{function}
+
+\begin{function}{\updatemarks_update:N}
+  \begin{syntax}
+    \verb|\updatemarks_update:N| \meta{seq var}
+  \end{syntax}
+This function has the same function of \cs{UpdateMarks}.
+
+\meta{seq var} is the number sequence of mark classes which are need to be 
+reinserted into the current box or the main vertical list.
+
+It only reinserts marks whose positions are first or last.
+
+\texttt{insertmark} hook would not be used as it's already been used.
+\end{function}
+
+\begin{function}{\updatemarks_save:Nnn}
+  \begin{syntax}
+    \verb|\updatemarks_save:Nnn| \meta{seq var} \marg{position} \marg{value code}
+  \end{syntax}
+Saving marks at \meta{position} of specified mark classes \meta{seq var},
+whose values are expanding \meta{value code} \emph{once}.
+
+If \cs{l_updatemarks_nonempty_bool} is set to \texttt{true}, then the expanded value
+will not be saved if it is total empty.
+
+The \meta{value code} receives each item in the \meta{seq var} 
+as a trailing brace group, than expand the whole part of
+\meta{value code} and the trailing group \emph{once}.
+\end{function}
+
+\begin{function}{\updatemarks_save_e:Nnn}
+  \begin{syntax}
+    \verb|\updatemarks_save_e:Nnn| \meta{seq var} \marg{position} \marg{value code}
+  \end{syntax}
+Saving marks at \meta{position} of specified mark classes \meta{seq var},
+whose values are fully expanding \meta{value code}.
+
+If \cs{l_updatemarks_nonempty_bool} is set to \texttt{true}, then the expanded value
+will not be saved if it is total empty.
+
+The \meta{value code} receives each item in the \meta{seq var} 
+as a trailing brace group, then \emph{fully expand} the whole part of 
+\meta{value code} and the trailing group.
+\end{function}
+
+\begin{function}{\updatemarks_alias:Nnn}
+  \begin{syntax}
+    \verb|\updatemarks_alias:Nnn| \meta{seq var} \marg{alias position} \marg{source position}
+  \end{syntax}
+Setting marks at \meta{alias position} are equal to \meta{source position} 
+of specified mark classes \meta{seq var}.
+
+If \cs{l_updatemarks_nonempty_bool} is set to \texttt{true}, then the expanded value
+will not be saved if it is total empty.
+\end{function}
+
+\begin{function}{\updatemarks_remove:Nn}
+  \begin{syntax}
+    \verb|\updatemarks_remove:Nn| \meta{seq var} \marg{position}
+  \end{syntax}
+Remove marks at \meta{position} of specified mark classes \meta{seq var}.
+\end{function}
+
+\begin{function}[EXP]{\updatemarks_value:nn}
+  \begin{syntax}
+    \verb|\updatemarks_value:nn| \marg{position} \marg{mark class}
+  \end{syntax}
+Return the value of \meta{mark class} at \meta{position}.
+If it has not been saved, then return to total empty.
+
+\begin{texnote}
+  The result is returned within the \tn{unexpanded} primitive (\cs{exp_not:n}).
+\end{texnote}
+\end{function}
+
+\begin{function}{\g_updatemarks_max_int}
+Readonly interger, its value is the maximum mark class number allocated.
+\end{function}
+
+\begin{function}{\g_updatemarks_seq}
+The number sequence which holds the mark classes needed to be automatical updated.
+\end{function}
+
+\begin{function}{\g_updatemarks_classes_seq}
+Readonly number sequence which holds the mark classes allocated by 
+\cs{NewMarkClass}. If \cs{NewMarkClass} is undefined, then it's empty.
+\end{function}
+
+\begin{function}{\l_updatemarks_nonempty_bool}
+A local \texttt{bool} variable which is used to control if is going to save 
+a total empty value.
+\end{function}
+
+\begin{function}{\l_updatemarks_first_tl,\l_updatemarks_last_tl}
+A local \texttt{tl} variable which are use to save the first and last marks.
+\end{function}
+
+
+\PrintIndex
+
+\end{document}

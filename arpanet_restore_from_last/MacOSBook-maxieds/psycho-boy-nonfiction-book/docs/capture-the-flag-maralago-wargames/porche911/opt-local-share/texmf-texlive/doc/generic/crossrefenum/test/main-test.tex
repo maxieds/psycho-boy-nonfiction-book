@@ -1,0 +1,456 @@
+\input ../tex/crossrefenum
+\crfnmOriginalCatcodeAt=\catcode`\@
+\catcode`\@=11
+\input config-formats
+\input format-specific-defs
+\catcode`\@=\crfnmOriginalCatcodeAt
+\input config-crossrefenum
+
+%\tracingmacros=1
+%\tracingcommands=2
+%\tracingoutput=2
+\showboxbreadth=100
+\showboxdepth=50
+
+\def\withvisiblespace{\tt}
+
+\long\def\iflatex#1{%
+  \expandafter\ifx\csname usepackage\endcsname\relax\else #1\fi
+}
+\long\def\ifcontext#1{%
+  \expandafter\ifx\csname contextformat\endcsname\relax\else #1\fi
+}
+
+% TODO : verser dans crossrefenum.tex et commenter le code dans le README
+\catcode`\@=11
+\ifcontext{
+\def\crfnm@line{Line}
+\def\crfnm@pageline{Pageline}
+\crfnm@newListFrom[\crfnm@simpleRefTypes][\crfnm@line] -> \crfnm@simpleRefTypes
+\crfnm@newListFrom[\crfnm@doubleRefTypes][\crfnm@pageline] -> \crfnm@doubleRefTypes
+\let\crfnm@PagelinePrimary\crfnm@page
+\let\crfnm@PagelineSecondary\crfnm@line
+\def\crfnm@LineRef#1{\in[lr:b:#1]}
+\def\crfnm@getLineNumber#1{\directlua{get_raw_ref_number('lr:b:#1', 'linenumber')}}
+\def\crfnmLine{l. }
+\def\crfnmLines{ll.}
+\def\crfnmLineBeforeLastInSecond{, }
+\def\crfnmPagelineSubtypesSep{}
+\def\crfnmPagelinePrintFirstPrefix{once}
+\def\crfnmLineFormatInSecond#1{\crfnmSuperscript{#1}}
+\def\crfnmLinePrintPrefixInSecond{no}
+}
+\catcode`\@=\crfnmOriginalCatcodeAt
+
+\parindent=0pt
+
+\long\def\crfnmtestenum#1#2#3#4#5{%
+  \def\crfnmtestdesc{#1}
+  \def\crfnmempty{}
+  \ifx\crfnmtestdesc\crfnmempty\else
+    \vbox{%
+      \lineskiplimit=10000pt\lineskip=1ex
+      \parskip=2ex
+      
+      {\it #1}
+      
+      \everypar={\leftskip=1em}
+      
+      \raggedright Enumeration: \crfnmTypesetEnumArg#2{crfnmEnumArgEnd}
+      
+      Reference type: {\tt #3}
+      
+      Expected: {\withvisiblespace [#5]}
+      
+      Result: \hbox to 1.3em{}{\withvisiblespace [\crossrefenum[#3][#4]{#2}]}
+      
+    }%
+  \vskip2.5\bigskipamount
+  \fi
+}
+
+\def\crfnmEnumArgEnd{crfnmEnumArgEnd}
+
+\def\crfnmTypesetEnumArg#1{%
+  \def\crfnmTheArg{#1}%
+  \ifx\crfnmTheArg\crfnmEnumArgEnd\else
+    \allowbreak{\tt\detokenize{{#1}}}\expandafter\crfnmTypesetEnumArg
+  \fi
+}
+
+\long\def\crfnmheader#1{{\crfnmsc #1}\nobreak\vglue\baselineskip}
+
+\def\crfnmverbatim#1#2{{\tt\detokenize{#1}}#2}
+
+\iflatex{
+  \begin{document}
+  \begin{english}
+}
+\ifcontext{
+  \starttext
+  \language[en]
+}
+
+\vfill
+
+\crfnmheader{All references point to different pages}
+
+\crfnmtestenum{Nothing}
+{}
+{page}
+{withprefix}
+{p. }
+
+\crfnmtestenum{One single page}
+{{matthaeus-14}}
+{page}
+{withprefix}
+{p. 2}
+
+\crfnmtestenum{One single page without prefix}
+{{matthaeus-18}}
+{page}
+{noprefix}
+{2}
+
+\crfnmtestenum{Two single pages}
+{{matthaeus-14}{matthaeus-025}}
+{page}
+{withprefix}
+{pp. 2 and 4}
+
+\crfnmtestenum{Two single pages without prefix}
+{{matthaeus-19}{matthaeus-0210}}
+{page}
+{noprefix}
+{2 and 4}
+
+\crfnmtestenum{More than two single pages}
+{{matthaeus-14}{matthaeus-026}{matthaeus-0223}}
+{page}
+{withprefix}
+{pp. 2, 4 and 6}
+
+\crfnmtestenum{One single page again}
+{{matthaeus-027}}
+{page}
+{withprefix}
+{p. 4}
+
+\crfnmtestenum{One range}
+{{matthaeus-14 to matthaeus-23}}
+{page}
+{withprefix}
+{pp. 2-3}
+
+\crfnmheader{Some references point to the same page}
+
+\crfnmtestenum{One range that returns a single page}
+{{matthaeus-027 to matthaeus-029}}
+{page}
+{withprefix}
+{p. 4}
+
+\crfnmtestenum{Two identical pages}
+{{matthaeus-026}{matthaeus-028}}
+{page}
+{withprefix}
+{p. 4}
+
+\crfnmtestenum{A range followed by a reference on its end page}
+{{matthaeus-2 to matthaeus-15}{matthaeus-16}}
+{page}
+{withprefix}
+{pp. 1-2}
+
+\crfnmtestenum{Two ranges with a common boundary}
+{{matthaeus-5 to matthaeus-21}{matthaeus-25 to matthaeus-0214}}
+{page}
+{withprefix}
+{pp. 1-5}
+
+\crfnmtestenum{Two ranges with a common boundary, the second one having boths ends on a single page}
+{{matthaeus-5 to matthaeus-21}{matthaeus-25 to matthaeus-022}}
+{page}
+{withprefix}
+{pp. 1-3}
+
+\crfnmtestenum{A range followed by a reference to its end page and a reference to another page}
+{{matthaeus-2 to matthaeus-15}{matthaeus-16}{matthaeus-0216}}
+{page}
+{withprefix}
+{pp. 1-2 and 5}
+
+\crfnmtestenum{A range followed by two references to its end page}
+{{matthaeus-2 to matthaeus-15}{matthaeus-16}{matthaeus-18}}
+{page}
+{withprefix}
+{pp. 1-2}
+
+\crfnmtestenum{A range preceded by a reference to its begin page}
+{{matthaeus-1}{matthaeus-2 to matthaeus-15}}
+{page}
+{withprefix}
+{pp. 1-2}
+
+\crfnmheader{Some references point to successive pages}
+
+\crfnmtestenum{Successive pages forming a range}
+{{matthaeus-2}{matthaeus-15}{matthaeus-22}{matthaeus-025}}
+{page}
+{withprefix}
+{pp. 1-4}
+
+\crfnmtestenum{A range followed by a page that extends it}
+{{matthaeus-2 to matthaeus-15}{matthaeus-22}}
+{page}
+{withprefix}
+{pp. 1-3}
+
+\crfnmtestenum{A range preceded by a page that extends it}
+{{matthaeus-1}{matthaeus-14 to matthaeus-0210}}
+{page}
+{withprefix}
+{pp. 1-4}
+
+\crfnmtestenum{A range extended by another range}
+{{matthaeus-2 to matthaeus-15}{matthaeus-22 to matthaeus-025}}
+{page}
+{withprefix}
+{pp. 1-4}
+
+\crfnmheader{References to notes}
+
+\crfnmtestenum{One note}
+{{note-Aminadab-undecim}}
+{note}
+{withprefix}
+{n. 1}
+
+\crfnmtestenum{Two notes}
+{{note-autem-non}{note-generatio-Persarum}}
+{note}
+{withprefix}
+{nn. 2 and 4}
+
+\crfnmtestenum{Two consecutive notes}
+{{note-autem-non}{note-generationes-quis}}
+{note}
+{withprefix}
+{nn. 2 and 3}
+
+\crfnmtestenum{Three consecutive notes}
+{{note-congregans-conteram}{note-Israhel-mittam}{note-regem-Theman}}
+{note}
+{withprefix}
+{nn. 1, 2 and 3}
+
+\crfnmheader{References to notes with page number}
+
+\crfnmtestenum{One note with page number}
+{{note-Babylonis-Libani}}
+{pagenote}
+{withprefix}
+{p. 2, n. 1}
+
+\def\crfnmPagenoteOrder{inverted}
+\crfnmtestenum{Same thing, but with \crfnmverbatim{\crfnmPagenoteOrder} set to {\tt inverted}}
+{{note-quaerat-clamate}}
+{pagenote}
+{withprefix}
+{n. 3, p. 5}
+\def\crfnmPagenoteOrder{normal}
+
+\crfnmtestenum{Four notes on different pages}
+{{note-Aminadab-undecim}{note-generationes-quis}{note-regem-Theman}}
+{pagenote}
+{withprefix}
+{p. 1, n. 1, p. 2, n. 3 and p. 4, n. 3}
+
+\def\crfnmPagenotePrintFirstPrefix{once}
+\crfnmtestenum{Same thing, but with \crfnmverbatim{\crfnmPagenotePrintFirstPrefix} set to {\tt once}}
+{{note-Aminadab-undecim}{note-generationes-quis}{note-regem-Theman}}
+{pagenote}
+{withprefix}
+{pp. 1, n. 1, 2, n. 3 and 4, n. 3}
+\def\crfnmPagenotePrintFirstPrefix{always}
+
+\crfnmtestenum{Several notes on the same page}
+{{note-et-et}{note-puerum-et}{note-habitavit-quae}}
+{pagenote}
+{withprefix}
+{p. 6, nn. 1, 3 and 4}
+
+\crfnmtestenum{Same thing, but followed by an isolated reference on another page}
+{{note-somnis-hic}{note-cum-haec}{note-quaerat-clamate}}
+{pagenote}
+{withprefix}
+{p. 3, nn. 1 and 2 and p. 5, n. 3}
+
+\def\crfnmPagenoteOrder{inverted}
+\crfnmtestenum{Same thing, but with \crfnmverbatim{\crfnmPagenoteOrder} set to {\tt inverted}}
+{{note-somnis-hic}{note-cum-haec}{note-quaerat-clamate}{note-obitum-mittite}}
+{pagenote}
+{withprefix}
+{nn. 1 and 2, p. 3 and nn. 3 and 4, p. 5}
+\def\crfnmPagenoteOrder{normal}
+
+\iflatex{
+
+  \crfnmheader{Reledmac}
+  
+  \crfnmtestenum{Simple reference to a line}
+  {{vulgate-12}}
+  {edline}
+  {withprefix}
+  {l. 8}
+  
+  \crfnmtestenum{Simple reference to page and line}
+  {{vulgate-14}}
+  {edpageline}
+  {withprefix}
+  {p. 8\crfnmSuperscript{12}}
+  
+  \crfnmtestenum{Several lines on different pages}
+  {{vulgate-15}{vulgate-24}{vulgate-215}}
+  {edpageline}
+  {withprefix}
+  {pp. 8\crfnmSuperscript{13}, 9\crfnmSuperscript{15} and 11\crfnmSuperscript{13}}
+  
+  \crfnmtestenum{A range of lines on a single page}
+  {{vulgate-22 to vulgate-23}}
+  {edpageline}
+  {withprefix}
+  {p. 9\crfnmSuperscript{9-11}}
+  
+  \crfnmtestenum{A range of lines on two different pages}
+  {{vulgate-24 to vulgate-212}}
+  {edpageline}
+  {withprefix}
+  {pp. 9\crfnmSuperscript{15}-11\crfnmSuperscript{6}}
+  
+  \def\crfnmEdpagelineGroupSubtypes{yes}
+  \crfnmtestenum{A range of lines on two different pages
+    with \crfnmverbatim{\crfnmEdpagelineGroupSubtypes} set to {\tt yes}}
+  {{vulgate-11 to vulgate-215}}
+  {edpageline}
+  {withprefix}
+  {pp. 8-11\crfnmSuperscript{4-13}}
+  \def\crfnmEdpagelineGroupSubtypes{no}
+  
+  \crfnmtestenum{Two ranges of lines on the same page that should be merged}
+  {{vulgate-211 to vulgate-212}{vulgate-213 to vulgate-217}}
+  {edpageline}
+  {withprefix}
+  {p. 11\crfnmSuperscript{4-19}}
+  
+  \crfnmtestenum{Two ranges of lines on the same page that should not be merged}
+  {{vulgate-219 to vulgate-221}{vulgate-224 to vulgate-227}}
+  {edpageline}
+  {withprefix}
+  {p. 12\crfnmSuperscript{1-6, 12-19}}
+  
+  \crfnmtestenum{Two ranges of lines spanning across pages that should be merged}
+  {{vulgate-214 to vulgate-223}{vulgate-224 to vulgate-233}}
+  {edpageline}
+  {withprefix}
+  {pp. 11\crfnmSuperscript{10}-13\crfnmSuperscript{15}}
+  
+  \crfnmtestenum{Two ranges of lines on consecutive pages,
+    the beginning of the second being at the same line number as the end of the first + 1.
+    They should not be merged, since the document is lineated per page.}
+  {{vulgate-2 to vulgate-6}{vulgate-14 to vulgate-18}}
+  {edpageline}
+  {withprefix}
+  {pp. 7\crfnmSuperscript{3-11} and 8\crfnmSuperscript{12-20}}
+  
+  \def\crfnmEdlineNumberingContinuousAcrossDocument{yes}
+  \crfnmtestenum{Same as the above, but with
+    \crfnmverbatim{\crfnmEdlineNumberingContinuousAcrossDocument} set to {\tt yes}.
+    We make {\em crossrefenum} believe that the first range ends at the end of a page
+    and the second begins at the first line of the following page.}
+  {{vulgate-2 to vulgate-6}{vulgate-14 to vulgate-18}}
+  {edpageline}
+  {withprefix}
+  {pp. 7\crfnmSuperscript{3}-8\crfnmSuperscript{20}}
+  \def\crfnmEdlineNumberingContinuousAcrossDocument{no}
+  
+ \crfnmtestenum{A range of lines whose page boundaries are identical to those of the preceding and following references}
+ {{vulgate-3}{vulgate-7 to vulgate-20}{vulgate-25}}
+ {edpageline}
+ {withprefix}
+ {pp. 7\crfnmSuperscript{5}, 7\crfnmSuperscript{13}-9\crfnmSuperscript{5} and 9\crfnmSuperscript{17}}
+
+}
+
+\ifcontext{
+
+  \crfnmheader{References to lines}
+
+  {See the tests on reledmac in the file produced by LaTeX for a more extensive coverage.}\vskip\baselineskip
+  
+  \crfnmtestenum{Simple reference to a line}
+  {{soph-2}}
+  {line}
+  {withprefix}
+  {l. 3}
+  
+  \crfnmtestenum{Simple reference to page and line}
+  {{soph-5}}
+  {pageline}
+  {withprefix}
+  {p. 7\crfnmSuperscript{9}}
+  
+  \crfnmtestenum{Several lines on different pages}
+  {{soph-7}{soph-13}{soph-012}}
+  {pageline}
+  {withprefix}
+  {pp. 7\crfnmSuperscript{12}, 8\crfnmSuperscript{5} and 10\crfnmSuperscript{3}}
+  
+  \crfnmtestenum{A range of lines on a single page}
+  {{soph-04 to soph-06}}
+  {pageline}
+  {withprefix}
+  {p. 9\crfnmSuperscript{5-9}}
+
+  \crfnmtestenum{A range of lines on two different pages}
+  {{soph-14 to soph-014}}
+  {pageline}
+  {withprefix}
+  {pp. 8\crfnmSuperscript{8}-10\crfnmSuperscript{6}}
+
+  \crfnmtestenum{}
+  {}
+  {}
+  {}
+  {}
+  
+  \crfnmtestenum{}
+  {}
+  {}
+  {}
+  {}
+  
+}
+
+\iflatex{\end{english}}
+\ifcontext{
+  \language[latin]
+  \setupinterlinespace[big]
+}
+
+\vfill\penalty-10000
+
+\crfnmresetpage
+
+\input data-common
+
+\iflatex{\input data-reledmac}
+
+\input data-lines
+
+\ifcontext{\stoptext}
+\iflatex{
+  \def\crfnmtheend{\end{document}}
+  \expandafter\crfnmtheend
+}

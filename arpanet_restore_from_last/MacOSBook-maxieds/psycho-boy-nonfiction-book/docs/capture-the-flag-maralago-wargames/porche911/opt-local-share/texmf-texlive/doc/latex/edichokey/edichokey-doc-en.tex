@@ -1,0 +1,164 @@
+%% edichokey-doc-en.tex
+%% Copyright 2017--2020 Yuchang Yang < yang.yc.allium@gmail.com >
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Yuchang Yang.
+%
+% This work consists of:
+%   - the style file: [edichokey.sty];
+%   - the manual files: [edichokey-doc-en.tex, edichokey-doc-en.pdf, README.md];
+%   - the example files: [edichokey-ex.tex, edichokey-ex.pdf].
+%%
+
+% arara: xelatex
+
+\documentclass[a4paper]{article}
+
+\usepackage[top=32mm,bottom=32mm,textwidth=39em]{geometry}
+\usepackage{marvosym}
+\usepackage{fontspec}
+\usepackage{nth}
+\usepackage{color}
+	\definecolor{mikudark}{RGB}{19,149,139}
+\usepackage{edichokey}
+\usepackage{enumitem}
+	\setlist[description]{font=\color{mikudark}\bfseries,leftmargin=2em}
+
+\makeatletter
+\def\@fnsymbol#1{\ifcase#1\or*\or\Letter\fi}
+\makeatother
+
+\let\pkgname\textsf
+\def\zh#1{{\fontspec{SimSun}#1}}
+\def\url#1{\texttt{#1}\rlap{\char00}}
+\def\param#1{\textrm{\ensuremath{\langle}\textit{#1}\ensuremath{\rangle}}}
+\catcode`<\active %>
+\def<#1>{\param{#1}}
+\def\cmd#1{{\ttfamily\color{mikudark}#1}}
+\catcode`\$=\active 
+\def$#1${\cmd{#1}}
+\title{Package \pkgname{edichokey}%
+	\footnote{Github repository: \url{https://github.com/Mikumikunisiteageru/edichokey}.}
+	\ for dichotomous identification keys}
+\author{\zh{杨宇昌} (Yuchang \textsc{Yang})%	
+	\footnote{Email address: \url{yang.yc.allium@gmail.com}.}}
+\date{August \nth{31}, 2020\qquad ver.~2.01y}
+\hypersetup{hidelinks}
+\frenchspacing
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\parskip=1ex\relax
+
+\emph{Identification key} is a distinctive component of taxonomic literature. Traditional identification keys are \emph{single-access}, which consist of groups of alternatives, each alternative leading to another group or ending at a taxon, following which the user can distinguish the taxa and then identify specimens. In a \emph{dichotomous identification key}, each group has exactly two alternatives, which makes the key isomorphic to a binary tree. 
+
+There are mainly three ways to present a dichotomous key:\par
+\smallskip
+\fboxsep=10pt
+\centerline{\fbox{\parbox{\dimexpr\linewidth-24pt\relax}{%
+\kern-4pt
+\def\edknamestyle{\itshape}
+\begin{Key}
+	\alter Conjugated alternatives seperated by subsequent groups of alternatives if present.
+		\alter Subsequent groups indented more deeply; conjugated alternatives using the same number (possibly with different suffixes)
+			\name{Nested style}
+		\alter Depth of indentation identical for all groups; conjugated alternatives using different numbers (but annotating each other)
+			\name{Indented style}
+	\alter Conjugated alternatives always adjacent
+		\name{Linked style}
+\end{Key}\kern-4pt}}}
+\smallskip
+
+\pkgname{edichokey} typesets dichotomous identification keys in indented style, just as Nico Dam's package \pkgname{dichokey}\footnote{This package is available on CTAN: \url{https://ctan.org/pkg/dichokey}.}. The latter one, last updated on Dec. \nth{17}, 1999, uses a 4-byte integer counter $binarycounter$ to save the current position on (a subtree of) the binary tree, one bit for one node. However, the value of a \TeX{} counter cannot be arbitrarily large, so such mechanism may result in an arithmetic overflow, especially when the key is complex. The package \pkgname{edichokey}, as an extended version of \pkgname{dichokey}, applies a less elegant but more robust algorithm, making it capable of dealing with complicated keys with more groups of alternatives. The ease-of-use has been inherited from \pkgname{dichokey} --- the tree structure is still taken care of automatically, so there is no need to manually begin or end groups --- provided that the key is \emph{strictly} dichotomous. For those who insist on making polychotomous keys in indented style, the package \pkgname{biokey} may be a better choice (see the ``leveled keys" section in its documentation). 
+
+\pkgname{edichokey} is distributed under the terms of \LaTeX{} Project Public License (LPPL) 1.3c\footnote{Details of the license are available on \url{http://www.latex-project.org/lppl.txt}.}.
+
+\section{Usage}
+
+An identification key should be made within a $Key$ environment, i.e. between $\string\begin\{Key\}\allowbreak[<prefix>]$ and $\string\end\{Key\}$. The optional parameter $<prefix>$ can be applied when typesetting a key for species in a genus, say, \textit{Allium}; in that case, all species share the same genus part (usually abbreviated) ``\textit{A.}", thus the $<prefix>$ should be $A.$ ($A.\textvisiblespace$ and $A.\textasciitilde$ are also okay; there will always be a space no matter given explicitly or not, unless the parameter is omitted). To be compatible with \pkgname{dichokey}, starting the environment with $\string\begin\{Key\}\{<prefix>\}$ is also acceptable.
+
+Within a key, every alternative should follow an $\string\alter$ macro. When a taxon is keyed out after an alternative, it should be written as $\string\name[<prefix>]\{<taxon name>\}$. Here $<prefix>$ is still an optional parameter, which will be used before this $<taxon name>$ instead of the parameter of the $Key$ environment.  
+
+Every $<prefix>$ and $<taxon name>$ use the font style defined by $\string\edknamestyle$, or by default $\string\bfseries\string\itshape$. The user can redefine $\string\edknamestyle$ to customize the style.
+
+Here a simple demo is presented, showing how to use the package \pkgname{edichokey}:
+
+\medskip
+\noindent
+\begin{minipage}{0.6\linewidth}
+\color{mikudark}
+\begin{verbatim}
+	\begin{Key}[P.]
+	\alter Leaves large \name{macrophyllus}
+	\alter Leaves small.
+	  \alter Flower solitary.
+	    \alter Fruits white \name{leucocarpus}
+	    \alter Fruits black \name{melanocarpus}
+	  \alter Flowers many \name{pleianthus}
+	\end{Key}
+\end{verbatim}
+\end{minipage}%
+\hskip -1000pt plus 1fill
+\begin{minipage}{0.42\linewidth}
+	\begin{Key}[P.]
+	\alter Leaves large \name{macrophyllus}
+	\alter Leaves small.
+		\alter Flower solitary.
+			\alter Fruits white \name{leucocarpus}
+			\alter Fruits black \name{melanocarpus}
+		\alter Flowers many \name{pleianthus}
+	\end{Key}
+\end{minipage}%
+\par
+\medskip
+
+A larger example key containing 107 \textit{Allium} species is provided separatedly in the package as file \texttt{edichokey-ex.tex}, which was taken almost verbatim from \textit{Flora of North America} (see the file for full citation; reusable under CC BY license\footnote{Re-use terms of FNA: \url{http://beta.floranorthamerica.org/Copyright}.}), except that the two branches at the base (led by alternatives with number 1) were exchanged (but its meaning stayed the same). This example, in the given order, cannot be constructed with \pkgname{dichokey}. 
+
+The package option $hyperref$ (type $\string\usepackage[hyperref]\{edichokey\}$ instead of $\string\usepackage\{edichokey\}$) can make the output key in PDF file easier to use on electronic devices: conjugated alternatives in a key will be hyperlinked to each other, so a reader can jump quickly by clicking their numbers. However, to apply this feature, the source file is required to be compiled twice.
+
+Apart from the mentioned modifications, \pkgname{edichokey} behaves differently from \pkgname{dichokey} in two more aspects: 
+{\parskip-5pt 
+\begin{itemize}
+	\parskip0pt\itemsep0pt
+	\item Dots connecting an alternative and a taxon can be wrapped into two lines;
+	\item All alternatives (maybe with following dots) are wrapped at $\string\righttaxonskip$ length (by default $2em$) from the right margin, leaving only the keyed out taxa reaching the true right boundary.
+\end{itemize}}
+
+\section{Change history}
+
+\begingroup
+\parskip=0pt
+\parindent=0pt
+\begin{description}[style=nextline]
+	\item[ver. 2.01y (2020.8.31)]
+		Package option $hyperref$ added.
+	\item[ver. 2.00 (2020.7.14)] 
+		Package renamed as \pkgname{edichokey}. \\
+		Documentation in English finished. \\
+		Example key from \textit{Flora of North America} provided. \\
+		All codes rewritten. \\
+		Environment name changed from $Key*$ to $Key$. \\
+		Paragraph shape handled more carefully to be compatible with \pkgname{changepage}. \\
+		First distribution on CTAN (Comprehensive \TeX{} Archive Network). 
+	\item[ver. 1.01 (2017.12.14)] 
+		Some minimal changes. 
+	\item[ver. 1.00 (2017.12.13)] 
+		First implementation, named as \pkgname{qdichokey} temporarily. \\
+		Distributed on Github.
+\end{description}
+\endgroup
+
+\end{document}

@@ -1,0 +1,508 @@
+\newpage
+\section{Intersections} % (fold)
+\label{sec:intersections}
+
+It's an essential tool. For the moment, the classes concerned are lines, circles and ellipses, with the following combinations: line-line; line-circle; circle-circle and line-conic. 
+Note that circles form a separate class from conics, which represent parabolas, hyperbolas and ellipses. 
+The argument is a pair of objects, in any order.
+Results consist of one or two values, either points, boolean \tkzname{false} or underscore |_|. 
+
+\subsection{Line-line} % (fold)
+\label{sub:line_line}
+
+The result is of the form: |point| or |false|.
+
+\begin{minipage}{0.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A   = point : new (1,-1)
+   z.B   = point : new (4,1)
+   z.C   = point : new (2,1)
+   z.D   = point : new (4,-2) 
+    z.I  = point : new (0,0)
+   L.AB  = line : new (z.A,z.B)
+   L.CD  = line : new (z.C,z.D)
+   x     = intersection (L.AB,L.CD)
+   if x  == false then 
+   tex.print('error')
+   else 
+   z.I   = x
+   end
+}
+
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawSegments(A,B C,D)
+   \tkzDrawPoints(A,B,C,D,I)
+   \tkzLabelPoints(A,B,C,D,I)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+init_elements()
+z.A   = point : new (1,-1)
+z.B   = point : new (4,1)
+z.C   = point : new (2,1)
+z.D   = point : new (4,-2) 
+ z.I  = point : new (0,0)
+L.AB  = line : new (z.A,z.B)
+L.CD  = line : new (z.C,z.D)
+x = intersection (L.AB,L.CD)
+if x  == false then 
+tex.print('error')
+else 
+z.I   = x
+end
+}
+
+\begin{tikzpicture}[scale = 2]
+   \tkzGetNodes
+   \tkzDrawSegments(A,B C,D)
+   \tkzDrawPoints(A,B,C,D,I)
+   \tkzLabelPoints(A,B,C,D,I)
+\end{tikzpicture}
+\end{minipage}
+
+Other examples: \ref{sub:altshiller}, \ref{sub:lemoine}, \ref{sub:alternate}
+% subsection line_line (end)
+
+\newpage
+\subsection{Line-circle} % (fold)
+\label{sub:line_circle}
+The result is of the form : |point,point| or |false,false|. If the line is tangent to the circle, then the two points are identical. You can ignore one of the points by using the underscore: |_,point| or |point,_|. When the intersection yields two solutions, the order of the points is determined by the argument of |(z.p - z.c)| with |c| center of the circle and |p| point of intersection. The first solution corresponds to the smallest argument (arguments are between 0 and $2\pi$).
+
+\begin{minipage}{0.6\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A   = point : new (1,-1)
+   z.B   = point : new (1,2)
+   L.AB  = line : new (z.A,z.B)
+   z.O   = point : new (2,1)
+   z.D   = point : new (3,1)
+   z.E   = point : new (3,2)
+   L.AE  = line : new (z.A,z.E)
+   C.OD  = circle : new (z.O,z.D)
+   z.I,_ = intersection (L.AB,C.OD)
+   _,z.K = intersection (C.OD,L.AE)
+}
+
+\begin{tikzpicture}
+\tkzGetNodes
+   \tkzDrawLines(A,B A,E)
+   \tkzDrawCircle(O,D)
+   \tkzDrawPoints(A,B,O,D,I,K)
+   \tkzLabelPoints[left](A,B,O,D,I,K)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\directlua{%
+init_elements()
+z.A = point : new (1,-1)
+z.B = point : new (1,2)
+L.AB = line : new (z.A,z.B)
+z.O = point : new (2,1)
+z.D = point : new (3,1)
+z.E = point : new (3,2)
+L.AE = line : new (z.A,z.E)
+C.OD = circle : new (z.O,z.D)
+z.I,_ = intersection (L.AB,C.OD)
+_,z.K = intersection (C.OD,L.AE)
+}
+
+\begin{tikzpicture}[ scale = 2]
+\tkzGetNodes
+\tkzDrawLines[add=.1 and .1](A,B A,E)
+\tkzDrawCircle(O,D)
+\tkzDrawPoints(A,B,O,D,I,K)
+\tkzLabelPoints[left](A,B,O,D,I,K)
+\end{tikzpicture}
+\hfill
+\end{minipage}
+
+Other examples: \ref{sub:altshiller}
+% subsection line_circle (end)
+
+\newpage
+\subsection{Circle-circle} % (fold)
+\label{sub:circle_circle}
+
+The result is of the form : |point,point| or |false,false|. If the circles are  tangent, then the two points are identical. You can ignore one of the points by using the underscore: |_ , point| or |point , _|. As for the intersection of a line and a circle, consider the argument of |z.p-z.c|  with |c| center of the first circle and |p| point of intersection. The first solution corresponds to the smallest argument (arguments are between 0 and $2\pi$).
+
+\begin{minipage}{0.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+init_elements()
+   z.A      = point : new (1,1)
+   z.B      = point : new (2,2)
+   z.C      = point : new (3,3)
+   z.D      = point : new (3,0)
+   C.AB     = circle : new (z.A,z.B)
+   C.CB     = circle : new (z.C,z.B)
+   z.I,_    = intersection (C.AB,C.CB)
+   C.DC     = circle : new (z.D,z.C)
+   z.J,z.K  = intersection (C.DC,C.CB)
+}
+\begin{tikzpicture}
+   \tkzGetNodes
+   \tkzDrawCircles(A,B C,B D,C)
+   \tkzDrawPoints(A,I,C,D,J,K)
+   \tkzLabelPoints(A,I,C,D,J,K)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+init_elements()
+z.A = point : new (1,1)
+z.B = point : new (2,2)
+z.C = point : new (3,3)
+z.D = point : new (3,0)
+C.AB = circle : new (z.A,z.B)
+C.CB = circle : new (z.C,z.B)
+z.I,_ = intersection (C.AB,C.CB)
+C.DC = circle : new (z.D,z.C)
+ z.J,z.K = intersection (C.DC,C.CB)
+}
+
+\begin{tikzpicture}
+\tkzGetNodes
+\tkzDrawCircles(A,B C,B D,C)
+\tkzDrawPoints(A,I,C,D,J,K)
+\tkzLabelPoints(A,I,C,D,J,K)
+\end{tikzpicture}
+\end{minipage}
+
+Other examples: \ref{sub:altshiller}, \ref{sub:the_figure_pappus_circle}
+% subsection circle_circle (end)
+
+\newpage
+\subsection{Line-conic} % (fold)
+\label{sub:line_conic}
+The following example is complex, but it shows the possibilities of Lua.
+The designation of intersection points is a little more complicated than the previous one, as the argument characterizing the major axis must be taken into account.  The principle is the same, but this argument must be subtracted. In concrete terms, you need to consider the slopes of the lines formed by the center of the ellipse and the points of intersection, and the slope of the major axis.
+\vspace{1em}
+
+\begin{minipage}{0.5\textwidth}
+\begin{Verbatim}
+\directlua{%
+ init_elements()
+ z.a      = point: new (5 , 2)
+ z.b      = point: new (-4 , 0)
+ L.ab     = line : new (z.a,z.b)
+ z.c      = L.ab.mid
+ z.v      = L.ab: point (-.2)
+ local a  = length (z.c,z.v)
+ local c  = .5 * length(z.a, z.b)
+ local e  = c / a
+ z.K      = L.ab : report (a^2 / c, z.c)
+ z.Kp     = (z.K-z.a) : orthogonal(2): at (z.K)
+ L.dir    = line : new (z.K,z.Kp)
+ EL       = conic: new (z.b,L.dir,e)
+ curve    = EL : points (0,1,50)
+ z.m      = point: new (2 , 4)
+ z.n      = point: new (4 , 4)
+ L.mn     = line : new (z.m,z.n)
+ z.r,z.s  = intersection (EL,L.mn)
+}
+\begin{tikzpicture}[scale =.5]
+   \tkzGetNodes
+   \tkzDrawLines[red](a,b r,s)
+   \tkzDrawSegments(c,r c,s)
+   \tkzDrawPoints(a,b,c,r,s)
+   \tkzLabelPoints(a,b,c,r,s)
+   \tkzDrawCoordinates[smooth,red](curve)
+   \tkzFillAngles[green!30,opacity=.4](v,c,s)
+   \tkzFillAngles[green!80,opacity=.4](v,c,r)
+\end{tikzpicture}
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\directlua{%
+ init_elements()
+ z.a      = point: new (5 , 2)
+ z.b      = point: new (-4 , 0)
+ L.ab     = line : new (z.a,z.b)
+ z.c      = L.ab.mid
+ z.v      = L.ab: point (-.2)
+ local a  = length (z.c,z.v)
+ local c  = .5 * length(z.a, z.b)
+ local e  = c / a
+ z.K      = L.ab : report (a^2 / c, z.c)
+ z.Kp     = (z.K-z.a) : orthogonal(2): at (z.K)
+ L.dir    = line : new (z.K,z.Kp)
+ EL       = conic: new (z.b,L.dir,e)
+ curve    = EL : points (0,1,50)
+ z.m      = point: new (2 , 4)
+ z.n      = point: new (4 , 4)
+ L.mn     = line : new (z.m,z.n)
+ z.r,z.s  = intersection (EL,L.mn)
+}
+
+
+\begin{center}
+\begin{tikzpicture}[scale =.5]
+   \tkzGetNodes
+   \tkzDrawLines[red](a,b r,s)
+   \tkzDrawSegments(c,r c,s)
+   \tkzDrawPoints(a,b,c,r,s)
+   \tkzLabelPoints(a,b,c,r,s)
+   \tkzDrawCoordinates[smooth,red](curve)
+   \tkzFillAngles[green!30,opacity=.4](v,c,s)
+   \tkzFillAngles[green!80,opacity=.4](v,c,r)
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+
+Other examples:  \ref{sub:hexagram}
+
+\subsubsection{Intersection all subtypes of conics} % (fold)
+\label{ssub:intersection_all_subtypes_of_conics}
+
+\begin{Verbatim}
+\directlua{
+ z.A         = point : new ( 0 , 0 )
+ z.B         = point : new ( 4 , -2 )
+ L.dir       = line  : new (z.A,z.B)
+ z.F         = point : new ( 2 , 2)
+ CO1         = conic : new(z.F,L.dir,.8)
+ CO2         = conic : new(z.F,L.dir, 1)
+ CO3         = conic : new(z.F,L.dir, 1.2)
+ curve1      = CO1 : points ( 0,1,50)
+ curve2      = CO2 : points (-5,5,50)
+ curve3      = CO3 : points (-5,5,50)
+ z.K         = CO1.K
+ z.u,z.v     = get_points(CO1.major_axis)
+ z.x         = L.dir : report (-4,z.K)
+ z.y         = L.dir : report ( 4,z.K)
+ z.r         = point : new ( 0 , 4 )
+ z.s         = point : new ( 4 , 1 )
+ L.rs        = line  : new (z.r,z.s)
+ z.u_1,z.u_2 = intersection (L.rs,CO1)
+ z.v_1,z.v_2 = intersection (L.rs,CO2)
+ z.w_1,z.w_2 = intersection (L.rs,CO3)
+}
+\begin{tikzpicture}
+ \tkzGetNodes
+ \tkzDrawCoordinates[smooth](curve1)
+ \tkzDrawCoordinates[smooth](curve2)
+ \tkzDrawCoordinates[smooth](curve3)
+ \tkzDrawLines[add =.5 and .5](r,s u,v)
+ \tkzDrawLines(x,y)
+ \tkzDrawPoints[red](u_1,u_2,v_2,v_1,w_1,w_2)
+\end{tikzpicture}
+\end{Verbatim}
+\directlua{
+z.A         = point : new ( 0 , 0 )
+z.B         = point : new ( 4 , -2 )
+L.dir       = line  : new (z.A,z.B)
+z.F         = point : new ( 2 , 2)
+CO1         = conic : new(z.F,L.dir,.8)
+CO2         = conic : new(z.F,L.dir, 1)
+CO3         = conic : new(z.F,L.dir, 1.2)
+curve1      = CO1 : points ( 0,1,50)
+curve2      = CO2 : points (-5,5,50)
+curve3      = CO3 : points (-5,5,50)
+z.K         = CO1.K
+z.u,z.v     = get_points(CO1.major_axis)
+z.x         = L.dir : report (-4,z.K)
+z.y         = L.dir : report ( 4,z.K)
+z.r         = point : new ( 0 , 4 )
+z.s         = point : new ( 4 , 1 )
+L.rs        = line  : new (z.r,z.s)
+z.u_1,z.u_2 = intersection (L.rs,CO1)
+z.v_1,z.v_2 = intersection (L.rs,CO2)
+z.w_1,z.w_2 = intersection (L.rs,CO3)
+}
+
+\begin{center}
+  \begin{tikzpicture}[scale =.75]
+  \tkzGetNodes
+  \tkzDrawCoordinates[smooth](curve1)
+  \tkzDrawCoordinates[smooth](curve2)
+  \tkzDrawCoordinates[smooth](curve3)
+  \tkzDrawLines[add =.5 and .5](r,s u,v)
+  \tkzDrawLines(x,y)
+  \tkzDrawPoints[red](u_1,u_2,v_2,v_1,w_1,w_2)
+  \end{tikzpicture}
+\end{center}
+% subsubsection intersection_all_subtypes_of_conics (end)
+
+\subsubsection{Intersection line-parabola, explained} % (fold)
+\label{ssub:intersection_line_parabola_explained}
+
+In this example, we're looking for a parabola inscribed in a triangle, i.e. tangent to the triangle's three sides.
+I won't go into detail about the first part to obtain the parabola. You'll notice this line
+
+\begin{mybox}
+\begin{verbatim}
+ L.euler   = T : euler_line (): swap_line()
+\end{verbatim}
+\end{mybox}
+
+it swaps the ends of the Euler line, as we'll see later.
+
+ To construct the points of contact, it is necessary to find the intersections of the parabola with the sides:
+
+\begin{mybox}
+\begin{Verbatim}
+   z.ta      = intersection (PA,T.bc)
+   z.tb      = intersection (PA,T.ca)
+   z.tc      = intersection (PA,T.ab)
+\end{Verbatim}
+\end{mybox}
+
+We will now detail how to determine the intersection of a line $(ab)$ with the parabola. In this case, Euler's line serves as the directrix of the parabola. Its points have been swapped to maintain the correct order of abscissas—that is, negative values on the left and positive values on the right.
+
+To simplify calculations, it is useful to change the coordinate system by setting the vertex of the parabola as the origin. The focal axis (\code{major\_axis}), oriented from $K$ to $F$, becomes the ordinate axis, while the abscissa axis is chosen so that the new system is \code{direct}.
+
+I have kept |z.U = OCCS.x| and |z.V = OCCS.y| in the code to visualize the new coordinate system, for example, using |\tkzDrawSegments[red,->](S,U S,V)|. This new system is created with:
+
+\begin{mybox}
+\begin{Verbatim}
+ OCCS      = occs  : new (L.KF,z.S)
+\end{Verbatim}
+\end{mybox}
+
+The line $(KF)$, the axis of symmetry of the parabola, becomes the ordinate axis. In this new coordinate system, the equation of the parabola is $y = \dfrac{x^2}{2p}$, where $p$ is the distance $KF$, also known as the \code{latus rectum}.
+
+The \code{coordinates} method of the \code{occs} class allows you to obtain the new coordinates of each point. The \code{param\_line} function calculates the coefficients of the line's equation (this function is currently internal and its name may change). Then, \code{solve\_para\_line} is used to find the common points between the line and the parabola (again, this function is internal and subject to modification).
+
+The result is two abscissas that must be placed on the axis passing through $S$ and orthogonal to the focal axis. This is why it was important to position the curve correctly. If you remove |swap_line| for Euler's line, you will see that the curve becomes the reflection of the previous one. While the parabola remains unchanged overall, the intersection points will not.
+
+Finally, the abscissas of the intersection points must be placed, and then the intersections of the lines orthogonal to Euler's line passing through these abscissas with the line $(ab)$ must be determined.
+
+Note: This geometric method is more appropriate than determining the intersection points' coordinates using formulas. Indeed, those coordinates would be expressed in the new coordinate system, requiring an additional transformation to return to the original system.
+  
+
+
+\begin{Verbatim}
+\directlua{%
+   z.A       = point : new ( 0 , 0 )
+   z.B       = point : new ( 6, 0 )
+   z.C       = point : new ( 2, 3 )
+   T         = triangle : new (z.A, z.B, z.C)
+   L.euler   = T : euler_line (): swap_line()
+   z.F       = T : kimberling (110) 
+   z.H       = T.orthocenter
+   z.O       = T.circumcenter
+   z.Ω       = point : new (0,0)
+   z.i       = point : new (1,0)
+   z.j       = point : new (0,1)      
+   PA        = conic : new (z.F,L.euler,1)
+   curve     = PA    : points (-3.5,5.5,50)
+   local p   = PA.p
+   z.K       = PA.K
+   z.S       = midpoint(z.F,z.K)
+   L.KF      = PA.major_axis
+   z.ta      = intersection (PA,T.bc)
+   z.tb      = intersection (PA,T.ca)
+   z.tc      = intersection (PA,T.ab)
+% new occs
+  OCCS      = occs  : new (L.KF,z.S)
+  z.U       = OCCS.x
+  z.V       = OCCS.y
+% line a,b
+  z.a       = point : new (3,6)
+  z.b       = point : new (8,-1)
+  L.ab      = line  : new (z.a,z.b)
+% coordinates in the new occs
+  Xa,Ya     = OCCS : coordinates (z.a)
+  Xb,Yb     = OCCS : coordinates (z.b)
+% solve in the new occs
+  local r,s = param_line (Xa,Ya,Xb,Yb)
+  r1,r2     = solve_para_line (p,r,s)
+  z.x       = OCCS.abscissa :report(r1,z.K)
+  z.y       = OCCS.abscissa :report(r2,z.K)
+  L1        = L.euler : ortho_from (z.x)
+  L2        = L.euler : ortho_from (z.y)
+  z.s_1     = intersection (L.ab,L1)
+  z.s_2     = intersection (L.ab,L2)
+  } 
+  \begin{tikzpicture}
+  \tkzGetNodes 
+   \tkzDrawCoordinates[smooth,purple,thick](curve)
+   \tkzDrawLines[add = .2 and 1](A,B A,C B,C K,F O,H)
+   \tkzDrawPolygon[thick,cyan](A,B,C)
+   \tkzDrawSegment[blue](a,b)
+   \tkzDrawPoints(F,K,H,S,O)
+   \tkzDrawPoints(A,B,F,K,S,ta,tb,tc)
+   \tkzDrawPoints[red,size=2](s_1,s_2)
+   \tkzLabelPoints[red,above](s_1)
+   \tkzLabelPoints[red,right](s_2)
+   \tkzLabelPoints(F,S,O,A,B)
+   \tkzLabelPoints[above](C)
+   \tkzLabelPoints[left](H,K)
+  \end{tikzpicture}
+\end{Verbatim}
+
+  \directlua{%
+   z.A       = point : new ( 0 , 0 )
+   z.B       = point : new ( 6, 0 )
+   z.C       = point : new ( 2, 3 )
+   T         = triangle : new (z.A, z.B, z.C)
+   L.euler   = T : euler_line (): swap_line()
+   z.F       = T : kimberling (110) 
+   z.H       = T.orthocenter
+   z.O       = T.circumcenter
+   z.Ω       = point : new (0,0)
+   z.i       = point : new (1,0)
+   z.j       = point : new (0,1)         
+   PA        = conic : new (z.F,L.euler,1)
+   curve     = PA    : points (-3.5,5.5,50)
+   local p   = PA.p
+   z.K       = PA.K
+   z.S       = midpoint(z.F,z.K)
+   L.KF      = PA.major_axis
+   z.ta = intersection (PA,T.bc)
+   z.tb = intersection (PA,T.ca)
+   z.tc = intersection (PA,T.ab)
+% new occs
+  OCCS      = occs  : new (L.KF,z.S)
+  z.U       = OCCS.x
+  z.V       = OCCS.y
+% line a,b
+  z.a       = point : new (3,6)
+  z.b       = point : new (8,-1)
+  L.ab      = line  : new (z.a,z.b)
+% coordinates in the new occs
+  Xa,Ya     = OCCS : coordinates (z.a)
+  Xb,Yb     = OCCS : coordinates (z.b)
+% solve in the new occs
+  local r,s = param_line (Xa,Ya,Xb,Yb)
+  r1,r2     = solve_para_line (p,r,s)
+  z.x       = OCCS.abscissa :report(r1,z.K)
+  z.y       = OCCS.abscissa :report(r2,z.K)
+  L1        = L.euler : ortho_from (z.x)
+  L2        = L.euler : ortho_from (z.y)
+  z.s_1     = intersection (L.ab,L1)
+  z.s_2     = intersection (L.ab,L2)
+  } 
+
+  \begin{center}
+    \begin{tikzpicture}
+    \tkzGetNodes 
+     \tkzDrawCoordinates[smooth,purple,thick](curve)
+     \tkzDrawLines[add = .2 and 1](A,B A,C B,C K,F O,H)
+     \tkzDrawPolygon[thick,cyan](A,B,C)
+     \tkzDrawSegment[blue](a,b)
+     \tkzDrawPoints(F,K,H,S,O)
+     \tkzDrawPoints(A,B,F,K,S,ta,tb,tc)
+     \tkzDrawPoints[red,size=2](s_1,s_2)
+     \tkzLabelPoints[red,above](s_1)
+     \tkzLabelPoints[red,right](s_2)
+     \tkzLabelPoints(F,S,O,A,B)
+     \tkzLabelPoints[above](C)
+     \tkzLabelPoints[left](H,K)
+    \end{tikzpicture}
+  \end{center}
+
+
+% subsubsection intersection_line_parabola_explained (end)
+
+
+% subsection line_conic (end)
+% section intersections (end)

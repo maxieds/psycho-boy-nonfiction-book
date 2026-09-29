@@ -1,0 +1,161 @@
+\documentclass[10pt,a4paper,french]{article}
+\usepackage[margin=2.25cm]{geometry}
+\usepackage[no-math]{fontspec}
+\usepackage[libertine]{newtxmath}
+\usepackage{libertineRoman,babel,calcfrac,longtable,hyperref,enumitem}
+\usepackage[scaled=0.8]{GoMono}
+\frenchbsetup{StandardLists=true,og=«,fg=»}
+\newcommand*\tabstrut{\vrule width0pt height3.25ex depth2ex }
+\newcommand*\calcfractab[1]{\tabstrut\texttt{\string\calcfrac\{\textbf{#1}\}}&\calcfrac{#1}\\}
+\newcommand*\printfrdate{\expandafter\printfrdatea\calcfracdate\relax}
+\def\printfrdatea#1/#2/#3\relax{#3/#2/#1}
+\setitemize{leftmargin=3em,topsep=0pt,parsep=0pt,itemsep=4pt,label=--}
+\parindent=0pt
+\parskip=5pt
+\pagestyle{empty}
+\begin{document}
+\parskip=8pt plus 2.5pt minus 1.5pt
+\begingroup
+	\centering
+	\parskip=0pt
+	\null\vskip.5cm
+	{\large\bfseries L'extension pour \TeX\space\& \LaTeX\par \Huge \calcfracname\par}
+	\bigbreak
+	\calcfracver
+	\smallbreak
+	\printfrdate
+	\vskip.5cm
+	\TeX périmental\smallbreak
+	\href{mailto:texperimental@mailo.fr}{\texttt{texperimental@mailo.fr}}\par
+\endgroup
+\vskip1cm
+
+\hfill
+	\vtop{\hsize=0.62\linewidth
+	\small
+	Cette extension est un moteur de calcul d'expressions numériques contenant des fractions. La valeur numérique de l'expression est calculée de façon non développable et affichée sous forme d'une fraction irréductible ou, le cas écheant, d'un entier.\par
+	L'extension \texttt{calcfrac} ne dépend d'aucune extension et est écrite en \TeX.
+	}%
+\hfill\null
+\vskip1cm
+\section{Présentation}
+Ce document est autant un manuel \emph{minimaliste} à destination des utilisateurs qu'un recueil d'exemples.
+
+Le package se charge classiquement à l'aide de:
+\begin{itemize}
+	\item \verb|\usepackage{calcfrac}| pour les utilisateurs de \LaTeX;
+	\item \verb|\input calcfrac.tex| pour les utilisateurs de \TeX.
+\end{itemize}
+
+Le package \texttt{calcfrac} est avant tout un package à vocation pédagogique puisque sa génèse fait l'objet de 7~vidéos sur youtube. On y voit la création de ce package, entièrement enregistrée du tout début jusqu'à sa publication sur le CTAN. Toutes les explications nécessaires à la compréhension de son fonctionnement y sont données. Les personnes désireuses de découvrir la machinerie \TeX{} qui agit en coulisses ou souhaitant en apprendre davantage sur la programmation en \TeX{} sont invitées à visionner ces vidéos. Il s'agit de l'épisode~24 (\href{https://youtu.be/6lF4P6B3msw}{https://youtu.be/6lF4P6B3msw}) et suivants.
+
+\section{Fonctionnement}
+La macro non développable \verb|\calcfrac| lit un argument obligatoire qui est non développé et détokénisé. S'il est vide, aucune action n'est faite sinon, il doit contenir une expression numérique. Cette expression numérique est constituée de nombres, des opérations arithmétiques classiques \texttt+, \texttt-, \texttt* et \texttt/ ainsi que de parenthèses correctement équilibrées. Les espaces sont ignorés.
+
+Un seul signe \texttt+ ou \texttt- est admis avant chaque terme et donc, l'expression \verb|2/3--3/2| produira une erreur, alors que \verb|2/3-(-3/2)| est valide. Par ailleurs, un signe \texttt+ ou \texttt- n'est pas accepté après \texttt* ou \texttt/. L'expression \verb|2/7*-3/5| n'est donc pas licite. L'utilisateur devrait écrire \verb|2/7*(-3)/5| ou \verb|2/7*(-3/5)|.
+
+Après avoir évalué l'expresssion numérique, \texttt{calcfrac} renvoie 3~arguments représentant le résultat : son signe (\texttt+ ou~\texttt-) et 2~nombres \emph{non signés} qui sont le numérateur et le dénominateur. Ces 3~arguments sont passés à la macro \verb|\cfdisp| qui les lit. Par défaut, cette macro affiche le résultat de façon «naturelle», c'est-à-dire que le signe est omis s'il est positif et un entier est affiché si le dénominateur est~1. Si une fraction doit être affichée, la macro \verb|\frac| est utilisée pour les utilisateurs de \LaTeX{} et c'est la primitive \verb|\over| pour ceux compilant avec \TeX.
+
+Il appartient à l'utilisateur de programmer \verb|\cfdisp| selon ses convenances s'il souhaite faire une autre utilisation des 3~arguments.
+
+À titre d'information, voici la version par défaut de la macro \verb|\cfdisp|, à gauche pour \LaTeX{} et à droite pour \TeX.
+
+\leavevmode\vtop{%
+\hsize=0.3\linewidth
+\small
+\begin{verbatim}
+\def\cfdisp#1#2#3{%
+    \ensuremath
+        {%
+        \ifnum#11=-1 -\fi
+        \ifnum#3=1
+            #2%
+        \else
+            \frac{#2}{#3}%
+        \fi
+        }%
+}%
+\end{verbatim}
+}
+\hfill
+\vtop{%
+\hsize=0.6\linewidth
+\small
+\begin{verbatim}
+\def\cfdisp#1#2#3{%
+    \ifmmode\expandafter\cf@execarg\else\expandafter\cf@matharg\fi
+            {\ifnum#11=-1 -\fi
+            {\ifnum#3=1
+                #2%
+            \else
+                #2\over#3%
+            \fi
+            }%
+            }%
+}%
+\end{verbatim}
+}\hfill\null
+\section{Exemples}
+Le tableau ci-dessous reprend les expressions utilisées par les tests unitaires exécutés lors de l'élaboration du package. Ils testent tout d'abord des expresions sans parenthèses pour ensuite finir avec des expressions plus complexes avec parenthèses. Il va sans dire que les tous tests unitaires ont été passés sans erreur et donc, les résultats affichés qui sont calculés par \texttt{calcfrac}, sont exacts.
+
+\begin{longtable}[c]{lc}\hline
+	\tabstrut Commande&Affichage\\\hline\endhead
+	\calcfractab{7/40+3/5-1/2+9/10}
+	\calcfractab{1/2+1/3}
+	\calcfractab{0}
+	\calcfractab{-1+1}
+	\calcfractab{1/2+1/2}
+	\calcfractab{-11/12+5/6-1/4}
+	\calcfractab{1-1/2+1/3-1/4+1/5-1/6}
+	\calcfractab{2/3/4*5-2*3/4/5}
+	\calcfractab{2*3*4*5/3/4/5/6-1}
+	\calcfractab{100/100}
+	\calcfractab{-100/100}
+	\calcfractab{1/2/3-2/3/4-3/4/5}
+	\calcfractab{1*2*3-2*3*4-4*5*6}
+	\calcfractab{9/10-10/11+11/12-12/13}
+	\calcfractab{9/10*10/11*11/12*12/13}
+	\calcfractab{7/20-8/25+7/10-3/50}
+	\calcfractab{2023/2024-2024/2023}
+	\calcfractab{1/2-2/1-2/2}
+	\calcfractab{1-2+3-4+5-6/2}
+	\calcfractab{-1/4-1/3-1/2+1}
+	\calcfractab{-9/10*5/2+2*8-7}
+	\calcfractab{0-0/2+0/3-0/4+0/5}
+	\calcfractab{-1/2+1/4-1/8+1/16}
+	\calcfractab{1/2+1/4+1/8+1/16+1/32+1/64+1/64}
+	\calcfractab{1/4+1/4+1/4+1/4-1/4-1/4-1/4-1/4}
+	\calcfractab{-1+1/2+1/3+1/4}
+	\calcfractab{32227/42143}
+	\calcfractab{(1)}
+	\calcfractab{((((((((((((((((((1))))))))))))))))))}
+	\calcfractab{(-1)}
+	\calcfractab{((((((((((((((((((-1))))))))))))))))))}
+	\calcfractab{(1/2-1/3)*(-1/4)}
+	\calcfractab{(1/2-2/5)*2}
+	\calcfractab{(1/2-2/5)*(-2)}
+	\calcfractab{2*(1/2-2/5)}
+	\calcfractab{(2/7-2/5)/21}
+	\calcfractab{1/21*(2/7-2/5)}
+	\calcfractab{1/(1/2-1/3)/(1/3-1/4)/(1/4-1/5)}
+	\calcfractab{(1/2-1/3)*(1/3-1/4)*(1/4-1/5)}
+	\calcfractab{(1/2-5/6*(3/8-2/3))*(1-1/4)}
+	\calcfractab{1/2-(1/3-(1/4-(1/5-1/6)))}
+	\calcfractab{1+1/(2+1/(2+1/(2+1/(2+1/2))))}
+	\calcfractab{-1-(-2-(-3-(-4-(-5-6))))}
+	\calcfractab{-1*(-2*(-3*(-4*(-5-6))))}
+	\calcfractab{-1/(-2/(-3/(-4/(-5-6))))}
+	\calcfractab{(1+1/2)*(1+1/3)*(1+1/4)*(1+1/5)*(1+1/6)}
+	\calcfractab{(1+1/2)/(1+1/3)+(1+1/4)/(1+1/5)-(1+1/6)}
+	\calcfractab{-(-1-(-2-(-3-4-5)))}
+	\calcfractab{-1/(-1-2/(-2-3/(-3-4)))}
+	\calcfractab{1/2/(1/2-1/(1/2-1))}
+	\calcfractab{(((1/2-1)/2-1)/3-1)/4}
+	\calcfractab{-(-(-(-(1-2)-3)-4)-5)-6}
+	\calcfractab{-2*(-3*(1-5)-3)/(-4)}
+	\calcfractab{-(-1-(-1-(-1-2)/3)/4)/5}
+	\calcfractab{-1*(-2*(-3*(-4-5/6)/7)/8)/9}
+	\calcfractab{(1+1/(1+1/(1+1/(1+1/2)/3)))*4}
+	\hline
+\end{longtable}
+\end{document}

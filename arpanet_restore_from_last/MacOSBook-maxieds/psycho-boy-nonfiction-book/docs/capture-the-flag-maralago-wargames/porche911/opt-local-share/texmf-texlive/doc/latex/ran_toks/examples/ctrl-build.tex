@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage{shellesc}
+\usepackage{fancyvrb}
+
+\newif\ifcompileit \compileittrue
+
+\begin{document}
+
+\noindent
+This is a dummy file to help compile multiple versions of the same source file.
+The commands are very simple, they can be improved in a variety of ways.
+
+\def\basename{mc-dbu-ctrld} % base name of target file
+\def\altbasename{mc-dbu}    % base name of output file
+% define a simple \forVersion command, convert letter to upper case
+\def\forVersion#1{\uppercase{\edef\selVersion{#1}}}
+
+% select the version letter (upper or lower case)
+\forVersion{a}
+% define a suffix that follows \altbasename, redefine as desired
+\edef\altsuffix{%
+  \if\selVersion Asec01\else
+  \if\selVersion Bsec02\else
+  \if\selVersion Csec03\else
+  \if\selVersion Dsec04\fi\fi\fi\fi}
+
+\begin{VerbatimOut}[commandchars=!()]{build-info.tex}
+\examNum{1}
+\numVersions{4}
+\forVersion{!selVersion}
+\vA{\useThisSeed{54356}}
+\vB{\useThisSeed{577867}}
+\vC{\useThisSeed{6746788}}
+\vD{\useThisSeed{856785}}
+%\viewIDstrue % to view the IDs of problems used
+\end{VerbatimOut}
+
+\medskip\noindent
+Compiling the file \texttt{\basename.tex} for version~\selVersion\space(\altsuffix), and renaming the final
+PDF produced to \texttt{\altbasename-\altsuffix.pdf}
+
+
+\ifcompileit
+
+% compile using the PDF creator of your choice, copy and paste this next
+% line to execute multiple compiles to bring labels, if any, up to date
+\ShellEscape{pdflatex \basename}
+%\ShellEscape{pdflatex \basename}
+%\ShellEscape{pdflatex \basename}
+
+% copy the newly created file to a new file name
+\ShellEscape{move \basename.pdf \altbasename-\altsuffix.pdf}
+% delete build-info.tex
+\ShellEscape{del build-info.tex}
+
+\fi
+
+\end{document} 
