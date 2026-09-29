@@ -1,0 +1,559 @@
+%% aboensis.sty
+%% Copyright 2021 Tommi Syrjänen 
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Tommi Syrjänen 
+%
+% See file MANIFEST-Aboensis.txt to a list of files that make up this
+% work.
+\ProvidesPackage{aboensis}[2021/07/16 v1.0 XeLaTeX Package (Use Aboensis Open Type Font)]
+%% Author: Tommi Syrjänen (tssyrjan@iki.fi)
+%%
+
+%% This is a package for using the Aboensis OpenType medieval cursiva
+%% littera font with xelatex. Documentation is in the file
+%% 'aboensis.pdf'.
+
+% Necessary packages
+\RequirePackage{fontspec}
+\RequirePackage{xcolor}
+
+\makeatletter
+
+\newif\ifFibonacciNumbers
+\FibonacciNumbersfalse
+
+%% Package option: use numbers from Fibonacci manuscript
+\DeclareOption{Fibonacci}{\FibonacciNumberstrue}
+
+\ProcessOptions*{}
+
+% Set tilde and underline to be normal letters
+\def\abtildes{\catcode`~11\catcode`_11}
+
+% There are three predefined colors that are defined using basic
+% fontspec functionality and a way for the user to define their own
+% colors with xcolor. This package doesn't require that xcolor is in
+% use and the user has to include xcolor in the document separately if
+% those funcitions are used. For the predefined colors there are also
+% darker variants to use when drawing strikes over black (or otherwise
+% dark) letters
+\newcommand{\ab@red}{B1523E}
+\newcommand{\ab@darkred}{4D231C}
+\newcommand{\ab@green}{62876E}
+\newcommand{\ab@darkgreen}{3F4D3C}
+\newcommand{\ab@blue}{455F9B}
+\newcommand{\ab@darkblue}{202F4D}
+
+% The color commands
+\newcommand{\ab@textcolor}{black}
+\newcommand{\ab@rubriccolor}{\ab@red}
+\newcommand{\ab@darkrubriccolor}{\ab@darkred}
+\newcommand{\ab@otherrubriccolor}{\ab@green}
+\newcommand{\ab@darkotherrubriccolor}{\ab@darkgreen}
+
+
+% Set rubrics to red
+\newcommand{\abrubricred}{\absetrubriccolor{abred}}
+
+% Set rubric to green
+\newcommand{\abrubricgreen}{\absetrubriccolor{abgreen}}
+
+% Set rubrics to blue
+\newcommand{\abrubricblue}{\absetrubriccolor{abblue}}
+
+% Set otherrubrics to red
+\newcommand{\abotherrubricred}{\absetotherrubriccolor{abred}}
+
+% Set rubrics to green
+\newcommand{\abotherrubricgreen}{\absetotherrubriccolor{abgreen}}
+
+% Set rubrics to blue
+\newcommand{\abotherrubricblue}{\absetotherrubriccolor{abblue}}
+
+% Set rubric color 
+\newcommand{\absetrubriccolor}[1]{%
+  \renewcommand{\ab@rubriccolor}{#1}}
+
+% Set other rubric color
+\newcommand{\absetotherrubriccolor}[1]{%
+  \renewcommand{\ab@otherrubriccolor}{#1}}
+
+% User command for setting the text color
+\newcommand{\absettextcolor}[1]{%
+  \def\ab@textcolor{#1}}
+
+
+
+% Define the xcolors
+\def\ab@mixpercentage{45}
+\def\ab@othermixpercentage{45}
+
+\definecolor{abred}{HTML}{\ab@red}
+\definecolor{abgreen}{HTML}{\ab@green}
+\definecolor{abblue}{HTML}{\ab@blue}
+\definecolor{abdarkred}{HTML}{\ab@darkred}
+\definecolor{abdarkgreen}{HTML}{\ab@darkgreen}
+\definecolor{abdarkblue}{HTML}{\ab@darkblue}
+\absetrubriccolor{abred}%
+\absetotherrubriccolor{abgreen}
+
+
+
+% Set the argument using the primary rubric color
+\newcommand{\abrubric}[1]{%
+  {\color{\ab@rubriccolor}#1}}
+
+
+% Turn on the primary rubric color 
+\newcommand{\abtorubric}{%
+  \color{\ab@rubriccolor}}
+
+
+% Set the argument using the secondary rubric color
+\newcommand{\abotherrubric}[1]{%
+  {\color{\ab@otherrubriccolor}#1}}
+
+
+% Turn on the secondary rubric color
+\newcommand{\abtootherrubric}{%
+  \color{\ab@otherrubriccolor}}
+
+
+% Set the argument using text color
+\newcommand{\abtext}[1]{%
+  {\color{\ab@textcolor}#1}}
+
+
+% Turn on Aboensis with either normal or the alternative set of
+% numbers
+\newcommand{\ab@startaboensis}{
+  \ifFibonacciNumbers\fontspec[RawFeature=+tnum;]{Aboensis}\else%
+  \fontspec{Aboensis}\fi}
+
+% Change font to Aboensis with text color 
+\newcommand{\abcursivefamily}{%
+  \ab@startaboensis\color{\ab@textcolor}\abtildes
+}
+
+% Typeset the argument with Aboensis
+\newcommand{\aboensis}[1]{%
+  {\ab@startaboensis\color{\ab@textcolor}#1}}
+
+% Typeset the font name
+\newcommand{\Aboensis}[1]{{\fontspec{Aboensis}\large Aboensis}}
+
+
+% Set the color mixing percentage for highlighted capitals with
+% primary rubrics color
+\newcommand{\absetcolormixpercentage}[1]{%
+  \def\ab@mixpercentage{#1}}
+
+% Set the color mixing percentage for highlighted capitals with the
+% secondary rubrics color
+\newcommand{\absetothercolormixpercentage}[1]{%
+  \def\ab@othermixpercentage{#1}}
+
+
+%% Add a highlighted capital in the primary rubrics color. 
+\newcommand{\abcapital}[1]{%
+  \ab@capital{#1}{\ab@rubriccolor}{\ab@mixpercentage}%
+}
+
+%% Add a highlighted capital in the secondary rubrics color. 
+\newcommand{\abcapitalother}[1]{%
+  \ab@capital{#1}{\ab@otherrubriccolor}{\ab@othermixpercentage}%
+}
+
+% Internal command for actually adding the highlighted capital The
+% first argument is the letter, second is the highlight color, and
+% third the mix percentge
+\newcommand{\ab@capital}[3]{%
+  % The text color letter
+  {\color{\ab@textcolor}#1}%
+  % The highlight color
+  {\addfontfeature{RawFeature=+ss01;}\color{#2}#1}%
+  % Finally a mixed percentage strike
+  {\addfontfeature{RawFeature=+ss02;}\color{#2!#3!\ab@textcolor}#1}}
+
+
+% The boolean \ab@MainColor is used to control space for two-color
+% lombardic initials. The problem is that when we kern the initial,
+% the first line of text after the two-line initial is spaced
+% correctly but the second line goes wrong if the kern is not applied
+% to it. The @abMainColor is true when setting the primary intial
+% color and false when adding the second color. 
+\newif\ifab@MainColor
+\ab@MainColortrue
+
+%% Insert a two-line Lombardic initial in primary rubrics color
+\newcommand{\abinitial}[1]{%
+  \ab@initial{#1}{\ab@rubriccolor}{1.0}{0pt}{0pt}%
+}
+
+
+%% Insert a two-line Lombardic initial in secondary rubrics color
+\newcommand{\abinitialother}[1]{%
+  \ab@initial{#1}{\ab@otherrubriccolor}{1.0}{0pt}{0pt}}
+
+
+%% Insert a two-line Lombardic initial where primary color is the
+%% primary rubrics color 
+\newcommand{\abinitialtwo}[1]{%
+  \ab@initial{#1:}{\ab@rubriccolor}{1.0}{0pt}{0pt}%
+  \ab@MainColorfalse%
+  \ab@initial{#1/}{\ab@otherrubriccolor}{1.0}{0pt}{0pt}%
+  \ab@MainColortrue%
+}
+
+%% Insert a two-line Lombardic initial where primary color is the
+%% secondary rubrics color
+\newcommand{\abinitialothertwo}[1]{%
+  \ab@initial{#1:}{\ab@otherrubriccolor}{1.0}{0pt}{0pt}%
+  \ab@MainColorfalse%
+  \ab@initial{#1/}{\ab@rubriccolor}{1.0}{0pt}{0pt}%
+  \ab@MainColortrue%
+}
+
+
+% Insert two line Lombardic initial that is scaled and kerned.
+% Arguments are:
+%  1. The initial
+%  2. Scaling factor (1.0 is default initial size)
+%  3. Horizontal kerning 
+%  4. Vertical kerning
+\newcommand{\abinitwpos}[4]{%
+  \ab@initial{#1}{\ab@rubriccolor}{#2}{#3}{#4}}
+
+% Insert two line Lombardic initial with secondary rubrics color.
+% Arguments are the same as above 
+\newcommand{\abinitowpos}[4]{%
+  \ab@initial{#1}{\ab@otherrubriccolor}{#2}{#3}{#4}}
+
+% Insert a two-color two-line Lombardic initial where the primary
+% color is the primary rubric color. Arguments are the same as above
+\newcommand{\abinittwowpos}[4]{%
+  \ab@initial{#1:}{\ab@rubriccolor}{#2}{#3}{#4}%
+  \ab@MainColorfalse%
+  \ab@initial{#1/}{\ab@otherrubriccolor}{#2}{0pt}{#4}%
+  \ab@MainColortrue%
+}
+
+% Insert a two-color two-line Lombardic initial where the primary
+% color is the secondary rubric color. Arguments are the same as above
+\newcommand{\abinitotwowpos}[4]{%
+  \ab@initial{#1:}{\ab@rubriccolor}{#2}{#3}{#4}%
+  \ab@MainColorfalse%
+  \ab@initial{#1/}{\ab@otherrubriccolor}{#2}{0pt}{#4}%
+  \ab@MainColortrue%
+}
+
+
+% Auxiliary length that helps typesetting Lombardic initials
+\newlength{\ab@initialwidth}
+\setlength{\ab@initialwidth}{0pt}
+\newbox\ab@initialbox
+
+% An internal command to add a one-color initial the arguments are in
+% order:
+%  1. The initial to add
+%  2. The color of the initial
+%  3. Scaling factor x. The size of the initial will be: x * 2.2 times
+%     the font size 
+%  4. Additional horizontal kerning for the initial
+%  5. Additional vertical kerning for the initial
+\newcommand{\ab@initial}[5]{%
+  \ab@formatinitial{#1}{#2}{#3}%
+  % Add the kerning amount to the initial width. We don't need to
+  % worry about adding this twice because it is zero with the second
+  % color
+  \advance\ab@initialwidth by #4%
+  \mbox{}\smash{\lower1.1\baselineskip\hbox{\kern#4\smash{\lower-#5\box\ab@initialbox}}}%
+}
+
+
+% Formats a single initial 
+\newcommand{\ab@formatinitial}[3]{%
+  \setbox\ab@initialbox\hbox{\scalebox{#3}{\hbox{%
+        \addfontfeature{Scale=2.2}%
+        \color{#2}+#1+%
+      }}}%
+  % Set the box width if we are not adding the second color
+  \ifab@MainColor\ab@initialwidth=\wd\ab@initialbox\relax\fi%
+}
+
+
+%% Indent the width of the initial letter
+\newcommand{\abindent}{\mbox{}\hspace{\ab@initialwidth}}
+
+
+%% Add a cursive initial in default position
+\newcommand{\abcursiveinitial}[1]{%
+  \abcursiveinitialwithpos{#1}{1.0}{0pt}{0pt}%
+}
+
+
+%% Add a cursive initial with manually set position. The arguments
+%% are:
+%
+% 1. Initial to add
+% 2. The scale
+% 3. Horizontal kerning
+% 4. Vertical kerning
+\newcommand{\abcursiveinitialwithpos}[4]{%
+  \setbox\ab@initialbox\hbox{\scalebox{#2}{\addfontfeature{Scale=5.5}++#1++}}%
+   \ab@initialwidth=\wd\ab@initialbox%
+   \advance\ab@initialwidth by #3%
+   \mbox{}\smash{\hbox{\kern#3\smash{\lower-#4\box\ab@initialbox}}}%
+ }
+
+
+
+% Start a chapter with a two-line Lombardic initial with primary
+% rubrics color. The arguments are:
+% 1. The initial letter 
+% 2. The first line of text
+% 3. The second line of text
+\newcommand{\abstartchapter}[3]{%
+  \ab@startchapter{#1}{\ab@rubriccolor}{1.0}{0pt}{0pt}{#2}{#3}%
+}
+
+% Start a chapter with a two-line two-color Lombardic initial where
+% the primary color is the primary rubrics color. The arguments are:
+% 1. The initial letter 
+% 2. The first line of text
+% 3. The second line of text
+\newcommand{\abstartchaptertwo}[3]{%
+  \ab@startchaptertwo{#1}{\ab@rubriccolor}{\ab@otherrubriccolor}{1.0}{0pt}{0pt}{#2}{#3}%
+}
+
+
+% Start a chapter with a two-line Lombardic initial with secondary
+% rubrics color. The arguments are:
+% 1. The initial letter 
+% 2. The first line of text
+% 3. The second line of text
+\newcommand{\abstartchapterother}[3]{%
+  \ab@startchapter{#1}{\ab@otherrubriccolor}{1.0}{0pt}{0pt}{#2}{#3}%
+}
+
+% Start a chapter with a two-line two-color Lombardic initial where
+% the primary color is the secondary rubrics color. The arguments are:
+% 1. The initial letter 
+% 2. The first line of text
+% 3. The second line of text
+\newcommand{\abstartchapterothertwo}[3]{%
+  \ab@startchaptertwo{#1}{\ab@otherrubriccolor}{\ab@rubriccolor}{1.0}{0pt}{0pt}{#2}{#3}%
+}
+
+% Start a chapter with a two-line lombardic initial in the primary
+% rubrics color that is scaled and positioned. The arguments are:
+% 1. initial
+% 2. scale
+% 3. xkern
+% 4. ykern
+% 5. first line
+% 6. second line
+\newcommand{\abstartchapterwithpos}[6]{%
+  \ab@startchapter{#1}{\ab@rubriccolor}{#2}{#3}{#4}{#5}{#6}}
+
+% Start a chapter with a two-color two-line lombardic initial where
+% the primary color is the primary rubric color.
+% rubrics color that is scaled and positioned. The arguments are:
+% 1. initial
+% 2. scale
+% 3. xkern
+% 4. ykern
+% 5. first line
+% 6. second line
+\newcommand{\abstartchaptertwowithpos}[6]{%
+  \ab@startchaptertwo{#1}{\ab@rubriccolor}{\ab@otherrubriccolor}{#2}{#3}{#4}{#5}{#6}}
+
+
+% Start a chapter with a two-line lombardic initial in the secondary
+% rubrics color that is scaled and positioned. The arguments are:
+% 1. initial
+% 2. scale
+% 3. xkern
+% 4. ykern
+% 5. first line
+% 6. second line
+\newcommand{\abstartchapterotherwithpos}[6]{%
+  \ab@startchapter{#1}{\ab@otherrubriccolor}{#2}{#3}{#4}{#5}{#6}}
+
+% Start a chapter with a two-color two-line lombardic initial where
+% the primary color is the secondary rubric color.
+% rubrics color that is scaled and positioned. The arguments are:
+% 1. initial
+% 2. scale
+% 3. xkern
+% 4. ykern
+% 5. first line
+% 6. second line
+\newcommand{\abstartchapterothertwowithpos}[6]{%
+  \ab@startchaptertwo{#1}{\ab@otherrubriccolor}{\ab@rubriccolor}{#2}{#3}{#4}{#5}{#6}}
+
+
+% Arguments:
+% 1. initial
+% 2. color
+% 3. scale
+% 4. xkern
+% 5. ykern
+% 6. first line
+% 7. second line
+\newcommand{\ab@startchapter}[7]{%
+  \ab@initial{#1}{#2}{#3}{#4}{#5}%
+  \abl{#6}%
+  \abindent\abl{#7}%
+}
+
+\newcommand{\ab@startchapterswash}[7]{%
+  \ab@initial{#1:}{#2}{#3}{#4}{#5}%
+  \abl{#6}%
+  \abindent\abl{#7}%
+}
+
+\newcommand{\ab@startchaptertwo}[8]{%
+  \ab@initial{#1:}{#2}{#4}{#5}{#6}%
+  \ab@MainColorfalse
+  \ab@initial{#1/}{#3}{#4}{0pt}{#6}%
+  \ab@MainColortrue
+  \abl{#7}%
+  \abindent\abl{#8}%
+}
+
+
+
+
+
+%% The commands to add pointing fingers in different directions. 
+\newcommand{\ableftindex}{\scalebox{5.5}{\char`\^^^^261c}}
+\newcommand{\abrightindex}{\scalebox{5.5}{\char`\^^^^261e}}
+\newcommand{\abupindex}{\scalebox{7}{\char`\^^^^261d}}
+\newcommand{\abdownindex}{\scalebox{7}{\char`\^^^^261f}}
+
+
+% Typeset one row of text with even line distances 
+\newcommand{\abl}[1]{\strut\smash{\mbox{#1}}\linebreak}
+\newcommand{\abb}[1]{\strut\smash{\mbox{#1}}}
+
+
+% Typeset the pillcrow symbol in a rubrics color
+\newcommand{\abpara}{\abrubric{¶}}
+\newcommand{\abparaother}{\abotherrubric{¶}}
+
+
+%% Medieval measurement unit abbreviations
+\catcode`~11
+\newcommand{\ablibra}{[libra]}
+\newcommand{\abmark}{[mark]}
+\newcommand{\abmarc}{[mark:]}
+\newcommand{\abmk}{[mark::]}
+\newcommand{\absolidus}{so~l}
+\newcommand{\abdenarius}{/d}
+\newcommand{\ablod}{lodh}
+\newcommand{\abquintin}{[quintin]}
+\newcommand{\abore}{[ore]}
+\newcommand{\abortug}{[ortug]}
+\newcommand{\abpenning}{pe~n}
+\newcommand{\ablispund}{lis[pund]}
+\newcommand{\ablispundtwo}{[lispund]}
+\newcommand{\ablispundthree}{l[pund]}
+\newcommand{\ablispundfour}{[lispund:]}
+\newcommand{\abskeppund}{skep[pund]}
+\newcommand{\abskeppundtwo}{[skeppund]}
+\newcommand{\abbesmanspund}{[libra]}
+\newcommand{\abpund}{[pund]}
+\newcommand{\abpundtwo}{p~ud}
+\newcommand{\abpundthree}{~p}
+\newcommand{\abpundfour}{~pp}
+\newcommand{\abskaalpund}{skaal[pund]}
+\newcommand{\abmarkpund}{m[pund]}
+\newcommand{\abmarkpundtwo}{[ma][pund]}
+\newcommand{\abtunna}{[tunna]}
+\newcommand{\abtunnor}{[tunnor]}
+\newcommand{\abspann}{~sp}
+\newcommand{\abfjarding}{~ffi}
+\newcommand{\abfjardingtwo}{fjard~ug}
+\newcommand{\absattung}{s*}
+\newcommand{\abskappa}{skäppa}
+\newcommand{\abskole}{skaale}
+\newcommand{\abkappa}{cap[per]}
+\newcommand{\abkappatwo}{kap[per]}
+\newcommand{\abthyn}{þyn}
+\newcommand{\abkolmannes}{kol~m}
+\newcommand{\abkylmitta}{kyl~m}
+\newcommand{\ablast}{läst}
+\newcommand{\abvakka}{vacka}
+\newcommand{\abmodius}{mo~d}
+\newcommand{\absoll}{saaldh}
+\newcommand{\abkarpio}{*k[per]}
+\newcommand{\abkarpiotwo}{k}
+\newcommand{\abparmas}{[par]mas}
+\newcommand{\abdragu}{dragu}
+\newcommand{\abaam}{aam}
+\newcommand{\ablass}{lass}
+\newcommand{\absommarlass}{so~marlass}
+\newcommand{\abvinterlass}{vin't\kern0.6pt{}lass}
+\newcommand{\absommardragu}{so~mardragu}
+\newcommand{\abvinterdragu}{v~iterdragu}
+\newcommand{\abfangh}{faangh}
+\newcommand{\abkarve}{kärffue}
+\newcommand{\abambar}{ämbar}
+\newcommand{\abstop}{stope}
+\newcommand{\abkanna}{[kanna]}
+\newcommand{\abkannatwo}{ka~na}
+\newcommand{\abotting}{attu~g}
+\newcommand{\abbaat}{baat}
+\newcommand{\abquarter}{q~t}
+\newcommand{\abfat}{fat}
+\newcommand{\abstang}{[stång]}
+\newcommand{\abaln}{aln}
+\newcommand{\abhalvaln}{halvaln}
+\newcommand{\abfot}{fot}
+\newcommand{\abmil}{mil}
+\newcommand{\abrast}{rast}
+\newcommand{\abvika}{vika}
+\newcommand{\abvecka}{vecka}
+\newcommand{\abfamn}{ffa~pn}
+\newcommand{\abtum}{tum}
+\newcommand{\abspannland}{\abspann{}aland}
+\newcommand{\abtunnland}{\abtunna{}land}
+\newcommand{\abpundland}{\abpund{}l~ad}
+\newcommand{\abpundlandtwo}{p~udal~ad}
+\newcommand{\abmarksland}{\abmark{}aland}
+\newcommand{\abmarkslandtwo}{\abmk{}al~ad}
+\newcommand{\aboresland}{\abore{}sl~ad}
+\newcommand{\abortugsland}{\abortug{}al~ad}
+\newcommand{\abpenningsland}{\abpenning{}al~ad}
+\newcommand{\abskattemark}{skathe[mark:]}
+\newcommand{\abhalvbol}{halffbool}
+\newcommand{\abbol}{booll}
+\newcommand{\abstycke}{s~t}
+\newcommand{\abdacker}{deker}
+\newcommand{\abtimber}{[timber]}
+\newcommand{\abtimmer}{ti~m}
+\newcommand{\abothernum}[1]{{\addfontfeature{RawFeature=+tnum;}#1}}
+\newcommand{\abroman}[1]{{\addfontfeature{RawFeature=+onum;}#1}}
+\newcommand{\abthousand}{{\fontspec[RawFeature=+sups;]{Aboensis}*m*}}
+\newcommand{\abhundred}{{\fontspec[RawFeature=+sups;]{Aboensis}*c*}}
+\newcommand{\abromanother}[3]{\abroman{#1}\abthousand{}\abroman{*#2}\abhundred{}\abroman{*#3}}
+\newcommand{\abthird}{{\fontspec{Aboensis}}{t}}
+\newcommand{\abfourth}{{\fontspec{Aboensis}q~t}}
+\newcommand{\absixth}{{\fontspec{Aboensis}s*}}
+\newcommand{\abitem}{[item]}
+
+\catcode`~\active
+
+\makeatother
+

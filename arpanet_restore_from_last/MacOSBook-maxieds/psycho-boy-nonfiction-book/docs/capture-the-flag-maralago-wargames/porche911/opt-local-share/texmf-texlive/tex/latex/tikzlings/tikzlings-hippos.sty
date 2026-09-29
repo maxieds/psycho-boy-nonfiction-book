@@ -1,0 +1,263 @@
+ % !TeX root = ./examples/hippo.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This package is part of the TikZlings package
+%% A package to bring cute little animals and other beings into tikz
+%% Maintained by samcarter
+%%
+%% Project repository and bug tracker:
+%% https://github.com/samcarter/tikzlings
+%%
+%% Released under the LaTeX Project Public License v1.3c or later
+%% See https://www.latex-project.org/lppl.txt
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProvidesPackage{tikzlings-hippos}[2025/01/05 version v2.2 Drawing hippos in TikZ]
+
+\RequirePackage{tikz}
+\RequirePackage{tikzlings-addons}
+
+\newcommand*{\hippo}[1][]{%
+  \begin{scope}%
+    \tikzset{/hippo/.cd,#1}%
+    \hippo@draw%
+  \end{scope}%
+  \thing[#1]%
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname hippohookforeground\endcsname
+  \csname tikzlinghookforeground\endcsname
+}
+
+\newif\ifhippo@threeD
+\newif\ifhippo@back
+\newif\ifhippo@contour
+\newif\ifhippo@openmouth
+
+\tikzset{
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % Pass unknown keys on to tikz
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  /hippo/.search also={/tikz,/pgf,/thing},
+  /hippo/.cd,
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % body
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  body/.store in     = \hippo@body,
+  body               = gray!55!white,
+  eye/.store in      = \hippo@eye,
+  eye                = white,
+  pupil/.store in    = \hippo@pupil,
+  pupil              = black,
+  toes/.store in     = \hippo@toes,
+  toes               = \hippo@body,
+  mouth/.store in    = \hippo@mouth,
+  mouth              = \hippo@body!50!black,
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % options
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  openmouth/.code    = \hippo@openmouthtrue,
+  open mouth/.forward to = /hippo/openmouth,
+  3D/.code           = \hippo@threeDtrue
+                       \def\hippo@mouth{black},
+  back/.code         = \hippo@backtrue,
+  contour/.code      = \hippo@contourtrue
+                       \def\hippo@contour{#1}
+                       \def\hippo@mouth{#1},
+  contour/.default   = black,
+  outline/.forward to = /hippo/contour,
+}
+
+\def\hippo@draw{%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % minimal bounding box size
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \path (-0.625,0.1) rectangle (0.625, 2.17);
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % store the current scale factor
+  % from https://github.com/samcarter/tikzlings/issues/3#issuecomment-461373494
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \pgfgettransformentries{\tmpscaleA}{\tmpscaleB}{\tmpscaleC}{\tmpscaleD}{\tmp}{\tmp}%
+  \pgfmathsetmacro{\scalingfactor}{sqrt(abs(\tmpscaleA*\tmpscaleD-\tmpscaleB*\tmpscaleC))*sqrt(abs((\pgf@xx/1cm)*(\pgf@yy/1cm)-(\pgf@xy/1cm)*(\pgf@yx/1cm)))}%
+  \pgfmathsetmacro{\xscalefactor}{\tmpscaleA}
+  \pgfmathsetmacro{\yscalefactor}{\tmpscaleD}
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % switch between 2D, 3D and contours, from
+  % https://chat.stackexchange.com/transcript/message/45991801#45991801
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifhippo@threeD
+    \def\hippo@part@draw[##1]{\shade[ball color=##1]}
+  \else% 3D
+    \ifhippo@contour
+      \def\hippo@part@draw[##1]{\draw[##1,\hippo@contour,fill=white,line width=\scalingfactor*0.4pt]}
+    \else% contour
+      \def\hippo@part@draw[##1]{\fill[##1]}
+    \fi% contour
+  \fi% 3D
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % Body parts
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname hippohookbackground\endcsname
+  \csname tikzlinghookbackground\endcsname
+  %
+  % Ears %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \hippo@part@draw[\hippo@body!70!black] (0.23,2.03) ellipse[x radius=0.09, y radius=0.13, rotate=-30];
+  \hippo@part@draw[\hippo@body!70!black] (-0.23,2.03) ellipse[x radius=0.09, y radius=0.13, rotate=30];
+  %
+  % Feet if back %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifhippo@back
+    \hippo@part@draw[\hippo@body!70!black] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.17, y radius=0.19] -- cycle;
+    \hippo@part@draw[\hippo@body!70!black](0.08,0.13) arc [start angle=180, end angle=0, x radius=0.17, y radius=0.19] -- cycle;
+  \fi% back
+  %
+  % Nose if back %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifhippo@back
+    \hippo@part@draw[\hippo@body!85!black] (0, 1.55) ellipse[x radius=0.42, y radius=0.2];
+  \fi% back
+  %
+  % Body %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \hippo@part@draw[\hippo@body] ( 0.6,  0.8 ) .. controls ( 0.6 , 0.4) and ( 0.35, 0.19) .. ( 0.0,  0.19) .. controls (-0.35, 0.19) and (-0.6 , 0.4) .. (-0.6,  0.8 ) .. controls (-0.6 , 1.3) and (-0.35, 1.65) .. ( 0.0,  1.65) .. controls ( 0.35, 1.65) and ( 0.6 , 1.3) .. ( 0.6,  0.8) -- cycle;
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname hippohookbelly\endcsname
+  \csname tikzlinghookbelly\endcsname
+  %
+  % Arms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \unless\ifhippo@back
+    \hippo@part@draw[\hippo@body!70!black] (0.35,1.0) ellipse[x radius=0.24, y radius=0.13, rotate=90];
+    \hippo@part@draw[\hippo@body!70!black] (-0.35,1.0) ellipse[x radius=0.24, y radius=0.13, rotate=-90];
+  \fi% back
+  %
+  % Head %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \hippo@part@draw[\hippo@body] (0, 1.76) circle[radius=0.36];
+  %
+  % Show details only from the front %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \unless\ifhippo@back
+    %
+    % Eyes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \ifhippo@contour
+      \hippo@part@draw[\hippo@eye] (-0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \hippo@part@draw[\hippo@eye] (0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \hippo@part@draw[\hippo@pupil] (-0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+      \hippo@part@draw[\hippo@pupil] (0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+    \else% contour
+      \fill[\hippo@eye] (-0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \fill[\hippo@eye] (0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \fill[\hippo@pupil] (-0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+      \fill[\hippo@pupil] (0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+    \fi% contour
+    %
+    % Nose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \hippo@part@draw[\hippo@body!85!black] (0, 1.55) ellipse[x radius=0.42, y radius=0.2];
+    \hippo@part@draw[\hippo@mouth]  (-0.07, 1.63) circle[radius=0.035];
+    \hippo@part@draw[\hippo@mouth]  (0.07, 1.63) circle[radius=0.035];
+    %
+    % Mouth %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \ifhippo@openmouth
+      \filldraw[\hippo@mouth,line width=\scalingfactor*0.4pt] (0.125, 1.5) arc [start angle=-50, end angle=-130, radius=0.2];
+    \else% open mouth
+      \draw[\hippo@mouth,line width=\scalingfactor*0.4pt] (0.125, 1.5) arc [start angle=-50, end angle=-130, radius=0.2];
+    \fi% open mouth
+    %
+    % Feet %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \hippo@part@draw[\hippo@body!70!black] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.17, y radius=0.19] -- cycle;
+    \hippo@part@draw[\hippo@body!70!black](0.08,0.13) arc [start angle=180, end angle=0, x radius=0.17, y radius=0.19] -- cycle;
+    \hippo@part@draw[\hippo@toes] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.08] -- cycle;
+    \hippo@part@draw[\hippo@toes] (-0.2,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.1] -- cycle;
+    \hippo@part@draw[\hippo@toes] (-0.32,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.08] -- cycle;
+    \hippo@part@draw[\hippo@toes] (0.08,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.08] -- cycle;
+    \hippo@part@draw[\hippo@toes] (0.2,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.1] -- cycle;
+    \hippo@part@draw[\hippo@toes] (0.32,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.08] -- cycle;
+  %
+  \fi% back
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname hippohookbody\endcsname
+  \csname tikzlinghookbody\endcsname
+  %
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Documentation
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\clearpage
+%\section[Hippo]{Sieglinde, the hippo}
+%
+%\emph{For the winner of the 2019 Groundhog Challenge}
+%
+%\subsection{Package name}
+%
+%\begin{tcolorbox}[title={Package usage}]
+%\begin{samcode}
+%\usepackage{tikzlings-hippos}
+%\end{samcode}
+%\end{tcolorbox}
+%
+%\subsection{Basic Usage}
+%
+%\begin{tcblisting}{title={Basic hippo}}
+%\hippo
+%\end{tcblisting}
+%
+%\subsection{Options}
+%
+%The basic hippo can be modified by changing its colour:
+%\begin{tcblisting}{title={Body colour}}
+%\hippo[body=blue]
+%\end{tcblisting}
+%
+%In addition to the colour of the body, the colour of various body parts can be adjusted:
+%\begin{tcblisting}{title={Eye colour}}
+%\hippo[eye=red]
+%\end{tcblisting}
+%\begin{tcblisting}{title={Pupil colour}}
+%\hippo[pupil=red]
+%\end{tcblisting}
+%\begin{tcblisting}{title={Mouth colour}}
+%\hippo[mouth=red]
+%\end{tcblisting}
+%
+% The hippo can open its mouth:
+%\begin{tcblisting}{title={Open mouth}}
+%\hippo[openmouth]
+%\end{tcblisting}
+%
+%The hippo can also do its nails:
+%\begin{tcblisting}{title={Toe colour}}
+%\hippo[toes=red]
+%\end{tcblisting}
+%
+%To view the hippo from behind:
+%\begin{tcblisting}{title={Back view}}
+%\hippo[back]
+%\end{tcblisting}
+%
+%The key \saminline|3D| will make the hippo 3-dimensional:
+%\begin{tcblisting}{title={3D view}}
+%\hippo[3D]
+%\end{tcblisting}
+%
+%And finally the \saminline|contour| key will only draw the outlines:
+%\begin{tcblisting}{title={Contours}}
+%\hippo[contour=black]
+%\end{tcblisting}

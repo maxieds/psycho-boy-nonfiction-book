@@ -1,0 +1,1031 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz-bpmn}[2011/08/16 BPMN diagrams using the
+Tikz library]
+
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{bm}
+
+%this can be overridden to set the background colour, necessary for drawing double lines and other things.
+\colorlet{defaultbackgroundcolour}{white}
+
+\usetikzlibrary{shapes,shapes.geometric}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+
+\tikzstyle{every task} = []
+\tikzstyle{every gateway} = []
+\tikzstyle{every sequence} = []
+\tikzstyle{every message} = []
+\tikzstyle{every association} = []
+\tikzstyle{every event} = []
+\tikzstyle{every intermediate event} = []
+\tikzstyle{every token} = []
+\tikzstyle{every call activity} = []
+
+\tikzstyle{task} = [rectangle, draw, minimum width=4em, minimum height=2em,rounded corners,align=center,every task]
+
+\tikzstyle{sequence} = [->,>=triangle 45,every sequence]
+\tikzstyle{reverse sequence} = [sequence,<-]
+\tikzstyle{message} = [o->,dashed,>=open triangle 45,every sequence]
+\tikzstyle{reverse message} = [message,<-o]
+\tikzstyle{association} = [densely dotted,>=angle 45,every association]
+\tikzstyle{event} = [circle,minimum width=1.5em, minimum height=1.5em,draw,every event]
+\tikzstyle{end event} = [event,ultra thick,every event]
+\tikzstyle{intermediate event}[defaultbackgroundcolour] = [event,double=#1,every event, every intermediate event]
+\tikzstyle{token} = [solid,circle,fill,inner sep=0.5mm]
+\tikzstyle{open token} = [solid,circle,draw,fill=red,inner sep=0.5mm,thick]
+
+\tikzset{fit margins/.style={/tikz/afit/.cd,#1,
+    /tikz/.cd,
+    inner xsep=\pgfkeysvalueof{/tikz/afit/left}+\pgfkeysvalueof{/tikz/afit/right},
+    inner ysep=\pgfkeysvalueof{/tikz/afit/top}+\pgfkeysvalueof{/tikz/afit/bottom},
+    xshift=-\pgfkeysvalueof{/tikz/afit/left}+\pgfkeysvalueof{/tikz/afit/right},
+    yshift=-\pgfkeysvalueof{/tikz/afit/bottom}+\pgfkeysvalueof{/tikz/afit/top}},
+    afit/.cd,left/.initial=2pt,right/.initial=2pt,bottom/.initial=2pt,top/.initial=2pt}
+
+\tikzstyle{text annotation} = [
+	font=\tiny,
+	path picture = {
+		\def\w{3mm}
+		\draw ($(path picture bounding box.north west)+(\w,0)$) to (path picture bounding box.north west) to (path picture bounding box.south west) to ($(path picture bounding box.south west)+(\w,0)$);
+	}
+]
+
+%%%%% gateways %%%%%
+
+\tikzstyle{gateway} = [
+	diamond, 
+	draw, 
+	inner sep=0pt,
+	minimum width=1.5em,
+	minimum height=1.5em,
+	align=center,
+	every gateway
+]
+
+\tikzstyle{and gateway} = [parallel gateway]
+\tikzstyle{parallel gateway} = [
+	gateway,
+	label=center:\Large +
+]
+
+\tikzstyle{xor gateway} = [exclusive gateway]
+\tikzstyle{exclusive gateway} = [
+	gateway,
+	label=center:\Large\texttimes
+]
+
+\tikzstyle{or gateway} = [inclusive gateway]
+\tikzstyle{inclusive gateway} = [
+	gateway,
+	path picture = {
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\d{\csname pgf@y\endcsname}
+		\node [draw, thick, circle, inner sep=0, minimum size=0.55*\d pt, anchor=center] at (path picture bounding box.center) {};
+	}
+]
+
+\tikzstyle{eventbased gateway} = [
+	gateway,
+	path picture = {
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\d{\csname pgf@y\endcsname}
+		\node [draw, thin, circle, inner sep=0, minimum size=0.6*\d pt, anchor=center] at (path picture bounding box.center) {};
+		\node [draw, thin, circle, inner sep=0, minimum size=0.5*\d pt, anchor=center] at (path picture bounding box.center) {};
+		\node [draw, thin, regular polygon, regular polygon sides=5, inner sep=0, minimum size=0.35*\d pt, anchor=center] at (path picture bounding box.center) {};
+	}
+]
+
+%%%%% empty events %%%%%
+
+\tikzstyle{start event} = [event]
+\tikzstyle{none start event} = [start event]
+
+%%%%% message events %%%%%
+
+\tikzstyle{message start event} = [
+	start event,
+	draw message
+]
+
+\tikzstyle{catching message intermediate event}[defaultbackgroundcolour] = [
+	draw message,
+	intermediate event=#1
+]
+
+\tikzstyle{throwing message event}[defaultbackgroundcolour] = [
+	path picture = {
+		\def\w{1.7mm}
+		\def\h{1.1mm}
+		\fill ($(path picture bounding box)+(\w,\h)$) rectangle ($(path picture bounding box)+(-\w,-\h)$);
+		\draw [#1, line cap=round, thin] ($(path picture bounding box)+(\w,\h)$) to (path picture bounding box.center);
+		\draw [#1, line cap=round, thin] ($(path picture bounding box)+(-\w,\h)$) to (path picture bounding box.center);
+	}	
+]
+
+\tikzstyle{throwing message intermediate event}[defaultbackgroundcolour] = [
+	draw filled message={#1},
+	intermediate event=#1
+]
+
+\tikzstyle{message end event}[defaultbackgroundcolour] = [
+	end event,
+	draw filled message={#1}
+]
+
+\tikzstyle{terminate event} = [
+	end event,
+	path picture = {
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\d{\csname pgf@y\endcsname}
+		\node [fill, circle, inner sep=0, minimum size=0.65*\d pt, anchor=center] at (path picture bounding box.center) {};
+	}
+]
+
+%%%%% other events %%%%%
+
+\tikzstyle{draw signal}[] = [
+	path picture = {
+		\def\ma{0.8} %1 - margin
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\d{\csname pgf@y\endcsname}
+		\coordinate (a) at ($(path picture bounding box.center)+(90:\ma*0.5*\d pt)$);
+		\coordinate (b) at ($(path picture bounding box.center)+(210:\ma*0.5*\d pt)$);
+		\coordinate (c) at ($(path picture bounding box.center)+(330:\ma*0.5*\d pt)$);
+		\draw [solid, #1] (a) to (b) to (c) to cycle;
+	}
+]
+
+\tikzstyle{draw error}[] = [
+	path picture = {
+		\def\de{38} %degrees low peaks
+		\def\df{100} %degrees high peaks
+		\def\dd{0.38} %width at valleys
+		\def\ma{0.8} %1 - margin
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\d{\csname pgf@y\endcsname}
+		\coordinate (path picture bounding box a) at ($(path picture bounding box.center)+(\de:\ma*0.5*\d pt)$);
+		\coordinate (path picture bounding box b) at ($(path picture bounding box.center)+(180+\de:\ma*0.5*\d pt)$);
+		\coordinate (path picture bounding box c) at ($(path picture bounding box.center)+(\df:\ma*0.5*\d pt)$);
+		\coordinate (path picture bounding box d) at ($(path picture bounding box.center)+(180+\df:\ma*0.5*\d pt)$);
+		\coordinate (path picture bounding box e) at ($(path picture bounding box c)+(0,-\dd*\d pt)$);
+		\coordinate (path picture bounding box f) at ($(path picture bounding box d)+(0,\dd*\d pt)$);
+		\draw [solid, #1] (path picture bounding box a) to (path picture bounding box f) to (path picture bounding box c) to (path picture bounding box b) to (path picture bounding box e) to (path picture bounding box d) to cycle;
+	}
+]
+
+\tikzstyle{draw message} = [
+	path picture = {
+		\def\de{38} %degrees
+		\def\ma{0.2} %margin
+		\def\li{0.4} %lid
+		\coordinate (path picture bounding box a1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.north east)$);
+		\coordinate (path picture bounding box a2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.east)$);
+		\coordinate (path picture bounding box a) at (path picture bounding box a1 -| path picture bounding box a2);
+		\coordinate (path picture bounding box b1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.south east)$);
+		\coordinate (path picture bounding box b) at (path picture bounding box b1 -| path picture bounding box a2);
+		\coordinate (path picture bounding box c1) at ($(path picture bounding box.west)!{sin(\de)-\ma}!(path picture bounding box.north west)$);
+		\coordinate (path picture bounding box c2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.west)$);
+		\coordinate (path picture bounding box c) at (path picture bounding box c1 -| path picture bounding box c2);
+		\coordinate (path picture bounding box d1) at ($(path picture bounding box.west)!{sin(\de)-\ma}!(path picture bounding box.south west)$);
+		\coordinate (path picture bounding box d) at (path picture bounding box d1 -| path picture bounding box c2);
+		\coordinate (path picture bounding box e1) at ($(path picture bounding box a)!0.5!(path picture bounding box c)$);
+		\coordinate (path picture bounding box e2) at ($(path picture bounding box b)!0.5!(path picture bounding box d)$);
+		\coordinate (path picture bounding box e) at ($(path picture bounding box e1)!\li!(path picture bounding box e2)$);
+		\draw [solid] (path picture bounding box a) to (path picture bounding box b) to (path picture bounding box d) to (path picture bounding box c) to cycle;
+		\draw [solid, line cap=round] (path picture bounding box a) to (path picture bounding box e) to (path picture bounding box c);
+	}
+]
+
+\tikzstyle{draw filled message} = [
+	path picture = {
+		\def\de{38} %degrees
+		\def\ma{0.2} %margin
+		\def\li{0.4} %lid
+		\coordinate (path picture bounding box a1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.north east)$);
+		\coordinate (path picture bounding box a2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.east)$);
+		\coordinate (path picture bounding box a) at (path picture bounding box a1 -| path picture bounding box a2);
+		\coordinate (path picture bounding box b1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.south east)$);
+		\coordinate (path picture bounding box b) at (path picture bounding box b1 -| path picture bounding box a2);
+		\coordinate (path picture bounding box c1) at ($(path picture bounding box.west)!{sin(\de)-\ma}!(path picture bounding box.north west)$);
+		\coordinate (path picture bounding box c2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.west)$);
+		\coordinate (path picture bounding box c) at (path picture bounding box c1 -| path picture bounding box c2);
+		\coordinate (path picture bounding box d1) at ($(path picture bounding box.west)!{sin(\de)-\ma}!(path picture bounding box.south west)$);
+		\coordinate (path picture bounding box d) at (path picture bounding box d1 -| path picture bounding box c2);
+		\coordinate (path picture bounding box e1) at ($(path picture bounding box a)!0.5!(path picture bounding box c)$);
+		\coordinate (path picture bounding box e2) at ($(path picture bounding box b)!0.5!(path picture bounding box d)$);
+		\coordinate (path picture bounding box e) at ($(path picture bounding box e1)!\li!(path picture bounding box e2)$);
+		\fill (path picture bounding box a) to (path picture bounding box b) to (path picture bounding box d) to (path picture bounding box c) to cycle;
+		\draw [line cap=round, line width=1pt, #1] (path picture bounding box a) to (path picture bounding box e) to (path picture bounding box c);
+	}
+]
+
+\tikzstyle{draw compensation}[] = [
+	path picture = {
+		\def\de{40} %degrees
+		\def\ma{0.2} %margin
+		\coordinate (a1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.north east)$);
+		\coordinate (a2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.east)$);
+		\coordinate (a) at (a1 -| a2);
+		\coordinate (b1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.south east)$);
+		\coordinate (b) at (b1 -| a2);
+		\coordinate (c) at ($(path picture bounding box.west)!\ma!(path picture bounding box.center)$);
+		\coordinate (d1) at ($(a)!0.5!(b)$);
+		\coordinate (d) at ($(c)!0.5!(d1)$);
+		\coordinate (e) at (d |- a);
+		\coordinate (f) at (d |- b);
+		\draw [solid, #1] (d)
+		to (a)
+		to (b)
+		to cycle;
+		\draw [solid, #1] (c)
+		to (e)
+		to (f)
+		to cycle;
+	}
+]
+
+\tikzstyle{draw timer} = [
+	path picture = {
+		\def\ma{0.75} %1 - margin
+		\pgfpointdiff{\pgfpointanchor{path picture bounding box}{south east}}{\pgfpointanchor{path picture bounding box}{north east}}
+		\pgfmathsetmacro\r{\csname pgf@y\endcsname}
+		\draw [solid, #1] (path picture bounding box.center) circle (\ma*0.5*\r pt);
+		\foreach \angle in {0,30,...,330}
+	  		\draw [solid, ultra thin, #1] ($(path picture bounding box.center)+(\angle:\ma*0.4*\r pt)$) to ($(path picture bounding box.center)+(\angle:\ma*0.5*\r pt)$);
+	  	\draw [solid, line cap=round, #1] ($(path picture bounding box.center)+(77:\ma*0.425*\r pt)$) to (path picture bounding box.center);
+	  	\draw [solid, line cap=round, #1] ($(path picture bounding box.center)+(0:\ma*0.3*\r pt)$) to (path picture bounding box.center);
+	}
+]
+
+\tikzstyle{throwing compensation intermediate event}[defaultbackgroundcolour] = [
+	draw compensation={fill},
+	intermediate event=#1,
+]
+
+\tikzstyle{throwing compensation end event} = [
+	end event,
+	draw compensation={fill,thin}
+]
+
+\tikzstyle{error event} = [throwing error end event]
+\tikzstyle{throwing error end event} = [
+	end event,
+	draw error={fill,thin}
+]
+
+\tikzstyle{timer start event} = [
+	start event,
+	draw timer
+]
+
+\tikzstyle{timer event} = [timer intermediate event]
+\tikzstyle{timer intermediate event}[defaultbackgroundcolour] = [
+	intermediate event=#1,
+	draw timer
+]
+
+\tikzstyle{signal start event} = [
+	start event,
+	draw signal
+]
+
+\tikzstyle{signal intermediate event}[defaultbackgroundcolour] = [catching signal intermediate event=#1]
+\tikzstyle{catching signal intermediate event}[defaultbackgroundcolour] = [
+	intermediate event=#1,
+	draw signal
+]
+
+\tikzstyle{throwing signal intermediate event}[defaultbackgroundcolour] = [
+	intermediate event=#1,
+	draw signal={fill,draw=none}
+]
+
+\tikzstyle{signal end event} = [
+	end event,
+	draw signal={fill,draw=none}
+]
+
+%%%%% boundary events %%%%%
+
+\tikzstyle{boundary event}[defaultbackgroundcolour] = [
+	circle,
+	draw,
+	fill=#1,
+	double=#1,
+	anchor=center
+]
+
+\tikzstyle{noninterrupting boundary event}[defaultbackgroundcolour] = [
+	circle,
+	dashed,
+	dash pattern=on 1.5pt off 1pt,
+	draw,
+	fill=#1,
+	double=#1,
+	anchor=center
+]
+
+\tikzstyle{compensation boundary event}[defaultbackgroundcolour] = [
+	boundary event=#1,
+	draw compensation
+]
+
+\tikzstyle{message boundary event}[defaultbackgroundcolour] = [
+	boundary event=#1,
+	draw message
+]
+
+\tikzstyle{message noninterrupting boundary event}[defaultbackgroundcolour] = [	
+	draw message,
+	noninterrupting boundary event=#1
+]
+
+\tikzstyle{timer boundary event}[defaultbackgroundcolour] = [
+	boundary event=#1,
+	draw timer
+]
+
+\tikzstyle{timer noninterrupting boundary event}[defaultbackgroundcolour] = [
+	draw timer,
+	noninterrupting boundary event=#1
+]
+
+\tikzstyle{error boundary event}[defaultbackgroundcolour] = [
+	boundary event=#1,
+	draw error
+]
+
+\tikzstyle{signal boundary event}[defaultbackgroundcolour] = [
+	boundary event=#1,
+	draw signal
+]
+
+\tikzstyle{signal noninterrupting boundary event}[defaultbackgroundcolour] = [
+	draw signal,
+	noninterrupting boundary event=#1
+]
+
+%%%%% event sub-process %%%%%
+
+\tikzstyle{event subprocess} = [
+	expanded subprocess,
+	dotted
+]
+
+\tikzstyle{collapsed event subprocess} = [
+	collapsed subprocess,
+	dotted,
+	label={[anchor=north west,#1,circle,draw,minimum size=0.3cm,inner sep=0,xshift=0.1cm,yshift=-0.1cm]north west:}
+]
+
+\tikzstyle{collapsed noninterrupting event subprocess} = [
+	collapsed subprocess,
+	dotted,
+	label={[anchor=north west,
+		#1,
+		dashed,
+		draw,
+		circle,
+		dash pattern=on 1pt off 1pt,
+		minimum size=0.3cm,
+		inner sep=0,
+		xshift=0.1cm,
+		yshift=-0.1cm]north west:}
+]
+
+\tikzstyle{event subprocess label} = [
+	task, 
+	fit margins={left=1.5mm,right=1.5mm,bottom=1.5mm,top=2.1mm},
+	label={[anchor=north west]north west:\footnotesize#1},
+	dotted
+]
+
+\tikzstyle{message event subprocess} = [
+	collapsed event subprocess=draw message
+]
+
+\tikzstyle{timer event subprocess} = [
+	collapsed event subprocess=draw timer
+]
+
+\tikzstyle{compensation event subprocess} = [
+	collapsed event subprocess=draw compensation
+]
+
+\tikzstyle{signal event subprocess} = [
+	collapsed event subprocess=draw signal
+]
+
+\tikzstyle{error event subprocess} = [
+	collapsed event subprocess=draw error
+]
+
+\tikzstyle{message noninterrupting event subprocess} = [
+	collapsed noninterrupting event subprocess=draw message
+]
+
+\tikzstyle{timer noninterrupting event subprocess} = [
+	collapsed noninterrupting event subprocess=draw timer
+]
+
+\tikzstyle{signal noninterrupting event subprocess} = [
+	collapsed noninterrupting event subprocess=draw signal
+]
+
+\tikzstyle{subprocess event} = [
+	start event
+]
+
+\tikzstyle{noninterrupting subprocess event} = [
+	start event,
+	dashed,
+	dash pattern=on 2pt off 2pt
+]
+
+\tikzstyle{message subprocess event} = [
+	subprocess event,
+	draw message
+]
+
+\tikzstyle{message noninterrupting subprocess event} = [
+	noninterrupting subprocess event,
+	draw message
+]
+
+\tikzstyle{timer subprocess event} = [
+	subprocess event,
+	draw timer
+]
+
+\tikzstyle{timer noninterrupting subprocess event} = [
+	noninterrupting subprocess event,
+	draw timer
+]
+
+\tikzstyle{signal subprocess event} = [
+	subprocess event,
+	draw signal
+]
+
+\tikzstyle{signal noninterrupting subprocess event} = [
+	noninterrupting subprocess event,
+	draw signal
+]
+
+\tikzstyle{compensation subprocess event} = [
+	subprocess event,
+	draw compensation
+]
+
+\tikzstyle{error subprocess event} = [
+	subprocess event,
+	draw error
+]
+
+%%%%% call activity %%%%%
+
+\tikzstyle{call task} = [
+	task,
+	thick,
+	every call activity
+]
+
+\tikzstyle{collapsed call subprocess} = [call subprocess]
+\tikzstyle{call subprocess} = [
+	call task, 
+	inner sep=3mm, 
+	label={[anchor=south,
+		inner sep=-0.25mm,
+		shape=square,
+		draw,
+		regular polygon,
+		regular polygon sides=4,
+		yshift=0.5mm
+	]below:\footnotesize +},
+	every call activity
+]
+
+%%%%% sub-processes %%%%%
+
+\def\tikzsubprocessmarker{\tikz{\node[draw, regular polygon, regular polygon sides=4, inner sep=-0.25mm]{\footnotesize +};}}
+\def\tikzmultimarker{%
+	\def\x{0.5mm}%
+	\def\y{0.6mm}%
+	\tikz{
+		\node (b) [opacity=0, draw, regular polygon, regular polygon sides=4, inner sep=-0.25mm]{\footnotesize +};
+		\draw ($(b.center)+(0,-\y)$) to ++(0,2*\y);
+		\draw ($(b.center)+(\x,-\y)$) to ++(0,2*\y);
+		\draw ($(b.center)+(-\x,-\y)$) to ++(0,2*\y);
+	}%
+}
+\def\tikzloopmarker{%
+	\tikz{
+		\node (b) [opacity=0, draw, regular polygon, regular polygon sides=4, inner sep=-0.25mm]{\footnotesize +};
+		\node at (b.center) [rotate=170,yshift=-0.9mm] {\pmb{\circlearrowleft}};
+	}%
+}
+\def\tikzcompensationmarker{%
+	\tikz{
+		\def\y{0.4mm}
+		\node (b) [opacity=0, draw, regular polygon, regular polygon sides=4, inner sep=-0.25mm]{\footnotesize +};
+		\draw [rounded corners=0.05mm] (b.center) to ($(b.north)+(0,-\y)$) to (b.west) to ($(b.south)+(0,\y)$) to (b.center);
+		\draw [rounded corners=0.05mm] (b.center) to ($(b.north east)+(0,-\y)$) to ($(b.south east)+(0,\y)$) to cycle;
+	}%
+}
+
+\tikzstyle{subprocess marker} = [
+	task,
+	inner sep=3mm,
+	task marker=#1
+]
+\tikzstyle{task marker} = [
+	task,
+	label={[anchor=south,inner sep=0]below:#1}
+]
+
+\tikzstyle{subprocess} = [
+	subprocess marker=\tikzsubprocessmarker
+]
+\tikzstyle{collapsed subprocess} = [subprocess]
+\tikzstyle{expanded subprocess} = [task, inner sep=3mm]
+\tikzstyle{subprocess label} = [task, fit margins={left=1.5mm,right=1.5mm,bottom=1.5mm,top=2.1mm}, label={[anchor=north]above:\footnotesize#1}]
+
+\tikzstyle{adhoc subprocess} = [collapsed adhoc subprocess]
+\tikzstyle{collapsed adhoc subprocess} = [
+	subprocess marker=\tikzsubprocessmarker{} $\thicksim$
+]
+
+\tikzstyle{expanded adhoc subprocess} = [
+	subprocess marker=$\thicksim$
+]
+
+\tikzstyle{multiinstance task} = [
+	subprocess marker=\tikzmultimarker
+]
+
+\tikzstyle{multiinstance subprocess} = [collapsed multiinstance subprocess]
+\tikzstyle{collapsed multiinstance subprocess} = [
+	subprocess marker=\tikzsubprocessmarker \tikzmultimarker
+]
+
+\tikzstyle{expanded multiinstance subprocess} = [
+	subprocess marker=\tikzmultimarker
+]
+
+\tikzstyle{loop task} = [
+	task marker=\tikzloopmarker
+]
+
+\tikzstyle{loop subprocess} = [collapsed loop subprocess]
+\tikzstyle{collapsed loop subprocess} = [
+	subprocess marker=\tikzsubprocessmarker{} \tikzloopmarker
+]
+
+\tikzstyle{expanded loop subprocess} = [	
+	subprocess marker=\tikzloopmarker
+]
+
+\tikzstyle{compensation task} = [
+	fit margins={left=0.8mm,right=0.8mm,bottom=2.1mm,top=0.8mm},
+	task marker=\tikzcompensationmarker
+]
+
+\tikzstyle{compensation subprocess} = [collapsed compensation subprocess]
+\tikzstyle{collapsed compensation subprocess} = [
+	subprocess marker=\tikzsubprocessmarker{} \tikzcompensationmarker
+]
+
+\tikzstyle{expanded compensation subprocess} = [	
+	subprocess marker=\tikzcompensationmarker
+]
+
+%%%%% task type marker %%%%%
+
+\tikzstyle{task type marker} = [
+	task,
+	label={[anchor=north west,
+		line width=0.1pt,
+		#1,
+		minimum size=0.2cm,
+		inner sep=0,
+		xshift=0.05cm,
+		yshift=-0.05cm]north west:}
+]
+
+\tikzstyle{manual task} = [
+	task type marker=draw manual
+]
+
+\tikzstyle{receive task} = [
+	task type marker=draw message
+]
+
+\tikzstyle{script task} = [
+	task type marker=draw script
+]
+
+\tikzstyle{send task}[defaultbackgroundcolour] = [
+	task type marker={draw filled message={#1, line width=0.1pt}}
+]
+
+\tikzstyle{service task}[defaultbackgroundcolour] = [
+	task type marker={draw service={#1}}
+]
+
+\tikzstyle{user task} = [
+	task type marker=draw user
+]
+
+\tikzstyle{draw service}[defaultbackgroundcolour] = [
+	path picture = {
+		\coordinate (ne) at ($(path picture bounding box.north east)-(0.5pt,0.5pt)$);
+		\coordinate (sw) at ($(path picture bounding box.south west)+(0.5pt,0.5pt)$);
+		%\draw (path picture bounding box.north east) rectangle (path picture bounding box.south west);
+\coordinate (c1x) at ($(sw)!0.613157894736843!(ne)$);\coordinate (c1y) at ($(sw)!0.774869109947646!(ne)$);\coordinate (c4x) at ($(sw)!0.673684210526316!(ne)$);\coordinate (c4y) at ($(sw)!0.837696335078536!(ne)$);\coordinate (c8x) at ($(sw)!0.665789473684211!(ne)$);\coordinate (c8y) at ($(sw)!0.869109947643979!(ne)$);\coordinate (c12x) at ($(sw)!0.649999999999999!(ne)$);\coordinate (c12y) at ($(sw)!0.890052356020943!(ne)$);\coordinate (c16x) at ($(sw)!0.626315789473683!(ne)$);\coordinate (c16y) at ($(sw)!0.908376963350787!(ne)$);\coordinate (c20x) at ($(sw)!0.594736842105263!(ne)$);\coordinate (c20y) at ($(sw)!0.916230366492146!(ne)$);\coordinate (c24x) at ($(sw)!0.526315789473684!(ne)$);\coordinate (c24y) at ($(sw)!0.853403141361256!(ne)$);\coordinate (c28x) at ($(sw)!0.489473684210527!(ne)$);\coordinate (c28y) at ($(sw)!0.869109947643979!(ne)$);\coordinate (c32x) at ($(sw)!0.452631578947368!(ne)$);\coordinate (c32y) at ($(sw)!0.882198952879582!(ne)$);\coordinate (c36x) at ($(sw)!0.444736842105262!(ne)$);\coordinate (c36y) at ($(sw)!0.976439790575915!(ne)$);\coordinate (c40x) at ($(sw)!0.421052631578948!(ne)$);\coordinate (c40y) at ($(sw)!0.992146596858639!(ne)$);\coordinate (c44x) at ($(sw)!0.389473684210526!(ne)$);\coordinate (c44y) at ($(sw)!1!(ne)$);\coordinate (c48x) at ($(sw)!0.360526315789475!(ne)$);\coordinate (c48y) at ($(sw)!0.992146596858639!(ne)$);\coordinate (c52x) at ($(sw)!0.33421052631579!(ne)$);\coordinate (c52y) at ($(sw)!0.976439790575915!(ne)$);\coordinate (c56x) at ($(sw)!0.328947368421053!(ne)$);\coordinate (c56y) at ($(sw)!0.882198952879582!(ne)$);\coordinate (c60x) at ($(sw)!0.278947368421053!(ne)$);\coordinate (c60y) at ($(sw)!0.866492146596859!(ne)$);\coordinate (c64x) at ($(sw)!0.234210526315788!(ne)$);\coordinate (c64y) at ($(sw)!0.840314136125656!(ne)$);\coordinate (c68x) at ($(sw)!0.150000000000001!(ne)$);\coordinate (c68y) at ($(sw)!0.916230366492146!(ne)$);\coordinate (c72x) at ($(sw)!0.121052631578947!(ne)$);\coordinate (c72y) at ($(sw)!0.908376963350787!(ne)$);\coordinate (c76x) at ($(sw)!0.0947368421052642!(ne)$);\coordinate (c76y) at ($(sw)!0.890052356020943!(ne)$);\coordinate (c80x) at ($(sw)!0.0789473684210531!(ne)$);\coordinate (c80y) at ($(sw)!0.869109947643979!(ne)$);\coordinate (c84x) at ($(sw)!0.0736842105263161!(ne)$);\coordinate (c84y) at ($(sw)!0.837696335078536!(ne)$);\coordinate (c88x) at ($(sw)!0.150000000000001!(ne)$);\coordinate (c88y) at ($(sw)!0.751308900523561!(ne)$);\coordinate (c92x) at ($(sw)!0.131578947368421!(ne)$);\coordinate (c92y) at ($(sw)!0.709424083769635!(ne)$);\coordinate (c96x) at ($(sw)!0.118421052631578!(ne)$);\coordinate (c96y) at ($(sw)!0.667539267015707!(ne)$);\coordinate (c100x) at ($(sw)!0.0184210526315796!(ne)$);\coordinate (c100y) at ($(sw)!0.662303664921466!(ne)$);\coordinate (c104x) at ($(sw)!0.00263157894736852!(ne)$);\coordinate (c104y) at ($(sw)!0.636125654450263!(ne)$);\coordinate (c108x) at ($(sw)!0!(ne)$);\coordinate (c108y) at ($(sw)!0.607329842931938!(ne)$);\coordinate (c112x) at ($(sw)!0.00263157894736852!(ne)$);\coordinate (c112y) at ($(sw)!0.578534031413614!(ne)$);\coordinate (c116x) at ($(sw)!0.0184210526315796!(ne)$);\coordinate (c116y) at ($(sw)!0.55497382198953!(ne)$);\coordinate (c120x) at ($(sw)!0.118421052631578!(ne)$);\coordinate (c120y) at ($(sw)!0.547120418848168!(ne)$);\coordinate (c124x) at ($(sw)!0.126315789473684!(ne)$);\coordinate (c124y) at ($(sw)!0.510471204188483!(ne)$);\coordinate (c128x) at ($(sw)!0.147368421052632!(ne)$);\coordinate (c128y) at ($(sw)!0.473821989528796!(ne)$);\coordinate (c132x) at ($(sw)!0.0736842105263161!(ne)$);\coordinate (c132y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c136x) at ($(sw)!0.0789473684210531!(ne)$);\coordinate (c136y) at ($(sw)!0.363874345549739!(ne)$);\coordinate (c140x) at ($(sw)!0.0947368421052642!(ne)$);\coordinate (c140y) at ($(sw)!0.340314136125655!(ne)$);\coordinate (c144x) at ($(sw)!0.121052631578947!(ne)$);\coordinate (c144y) at ($(sw)!0.321989528795811!(ne)$);\coordinate (c148x) at ($(sw)!0.150000000000001!(ne)$);\coordinate (c148y) at ($(sw)!0.316753926701573!(ne)$);\coordinate (c152x) at ($(sw)!0.226315789473685!(ne)$);\coordinate (c152y) at ($(sw)!0.382198952879583!(ne)$);\coordinate (c156x) at ($(sw)!0.273684210526316!(ne)$);\coordinate (c156y) at ($(sw)!0.353403141361257!(ne)$);\coordinate (c160x) at ($(sw)!0.328947368421053!(ne)$);\coordinate (c160y) at ($(sw)!0.337696335078534!(ne)$);\coordinate (c164x) at ($(sw)!0.33421052631579!(ne)$);\coordinate (c164y) at ($(sw)!0.23821989528796!(ne)$);\coordinate (c168x) at ($(sw)!0.360526315789475!(ne)$);\coordinate (c168y) at ($(sw)!0.222513089005236!(ne)$);\coordinate (c172x) at ($(sw)!0.389473684210526!(ne)$);\coordinate (c172y) at ($(sw)!0.217277486910995!(ne)$);\coordinate (c176x) at ($(sw)!0.421052631578948!(ne)$);\coordinate (c176y) at ($(sw)!0.222513089005236!(ne)$);\coordinate (c180x) at ($(sw)!0.444736842105262!(ne)$);\coordinate (c180y) at ($(sw)!0.23821989528796!(ne)$);\coordinate (c184x) at ($(sw)!0.452631578947368!(ne)$);\coordinate (c184y) at ($(sw)!0.337696335078534!(ne)$);\coordinate (c188x) at ($(sw)!0.492105263157896!(ne)$);\coordinate (c188y) at ($(sw)!0.350785340314137!(ne)$);\coordinate (c192x) at ($(sw)!0.53421052631579!(ne)$);\coordinate (c192y) at ($(sw)!0.36910994764398!(ne)$);\coordinate (c196x) at ($(sw)!0.594736842105263!(ne)$);\coordinate (c196y) at ($(sw)!0.316753926701573!(ne)$);\coordinate (c200x) at ($(sw)!0.626315789473683!(ne)$);\coordinate (c200y) at ($(sw)!0.321989528795811!(ne)$);\coordinate (c204x) at ($(sw)!0.649999999999999!(ne)$);\coordinate (c204y) at ($(sw)!0.340314136125655!(ne)$);\coordinate (c208x) at ($(sw)!0.665789473684211!(ne)$);\coordinate (c208y) at ($(sw)!0.363874345549739!(ne)$);\coordinate (c212x) at ($(sw)!0.673684210526316!(ne)$);\coordinate (c212y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c216x) at ($(sw)!0.621052631578948!(ne)$);\coordinate (c216y) at ($(sw)!0.452879581151832!(ne)$);\coordinate (c220x) at ($(sw)!0.647368421052631!(ne)$);\coordinate (c220y) at ($(sw)!0.500000000000001!(ne)$);\coordinate (c224x) at ($(sw)!0.663157894736842!(ne)$);\coordinate (c224y) at ($(sw)!0.547120418848168!(ne)$);\coordinate (c228x) at ($(sw)!0.760526315789472!(ne)$);\coordinate (c228y) at ($(sw)!0.55497382198953!(ne)$);\coordinate (c232x) at ($(sw)!0.776315789473683!(ne)$);\coordinate (c232y) at ($(sw)!0.578534031413614!(ne)$);\coordinate (c236x) at ($(sw)!0.778947368421052!(ne)$);\coordinate (c236y) at ($(sw)!0.607329842931938!(ne)$);\coordinate (c240x) at ($(sw)!0.776315789473683!(ne)$);\coordinate (c240y) at ($(sw)!0.636125654450263!(ne)$);\coordinate (c244x) at ($(sw)!0.760526315789472!(ne)$);\coordinate (c244y) at ($(sw)!0.662303664921466!(ne)$);\coordinate (c248x) at ($(sw)!0.663157894736842!(ne)$);\coordinate (c248y) at ($(sw)!0.667539267015707!(ne)$);\coordinate (c252x) at ($(sw)!0.642105263157894!(ne)$);\coordinate (c252y) at ($(sw)!0.722513089005235!(ne)$);\coordinate (c256x) at ($(sw)!0.613157894736843!(ne)$);\coordinate (c256y) at ($(sw)!0.774869109947646!(ne)$);
+		\draw (c1x |- c1y) -- (c4x |- c4y) -- (c8x |- c8y) -- (c12x |- c12y) -- (c16x |- c16y) -- (c20x |- c20y) -- (c24x |- c24y) -- (c28x |- c28y) -- (c32x |- c32y) -- (c36x |- c36y) -- (c40x |- c40y) -- (c44x |- c44y) -- (c48x |- c48y) -- (c52x |- c52y) -- (c56x |- c56y) -- (c60x |- c60y) -- (c64x |- c64y) -- (c68x |- c68y) -- (c72x |- c72y) -- (c76x |- c76y) -- (c80x |- c80y) -- (c84x |- c84y) -- (c88x |- c88y) -- (c92x |- c92y) -- (c96x |- c96y) -- (c100x |- c100y) -- (c104x |- c104y) -- (c108x |- c108y) -- (c112x |- c112y) -- (c116x |- c116y) -- (c120x |- c120y) -- (c124x |- c124y) -- (c128x |- c128y) -- (c132x |- c132y) -- (c136x |- c136y) -- (c140x |- c140y) -- (c144x |- c144y) -- (c148x |- c148y) -- (c152x |- c152y) -- (c156x |- c156y) -- (c160x |- c160y) -- (c164x |- c164y) -- (c168x |- c168y) -- (c172x |- c172y) -- (c176x |- c176y) -- (c180x |- c180y) -- (c184x |- c184y) -- (c188x |- c188y) -- (c192x |- c192y) -- (c196x |- c196y) -- (c200x |- c200y) -- (c204x |- c204y) -- (c208x |- c208y) -- (c212x |- c212y) -- (c216x |- c216y) -- (c220x |- c220y) -- (c224x |- c224y) -- (c228x |- c228y) -- (c232x |- c232y) -- (c236x |- c236y) -- (c240x |- c240y) -- (c244x |- c244y) -- (c248x |- c248y) -- (c252x |- c252y) -- (c256x |- c256y) ;
+		\coordinate (c301x) at ($(sw)!0.476315789473685!(ne)$);\coordinate (c301y) at ($(sw)!0.672774869109948!(ne)$);\coordinate (c304x) at ($(sw)!0.499999999999999!(ne)$);\coordinate (c304y) at ($(sw)!0.696335078534033!(ne)$);\coordinate (c308x) at ($(sw)!0.49736842105263!(ne)$);\coordinate (c308y) at ($(sw)!0.709424083769635!(ne)$);\coordinate (c312x) at ($(sw)!0.489473684210527!(ne)$);\coordinate (c312y) at ($(sw)!0.719895287958115!(ne)$);\coordinate (c316x) at ($(sw)!0.481578947368422!(ne)$);\coordinate (c316y) at ($(sw)!0.725130890052356!(ne)$);\coordinate (c320x) at ($(sw)!0.471052631578948!(ne)$);\coordinate (c320y) at ($(sw)!0.730366492146597!(ne)$);\coordinate (c324x) at ($(sw)!0.442105263157894!(ne)$);\coordinate (c324y) at ($(sw)!0.704188481675394!(ne)$);\coordinate (c328x) at ($(sw)!0.413157894736843!(ne)$);\coordinate (c328y) at ($(sw)!0.712041884816756!(ne)$);\coordinate (c332x) at ($(sw)!0.410526315789474!(ne)$);\coordinate (c332y) at ($(sw)!0.751308900523561!(ne)$);\coordinate (c336x) at ($(sw)!0.389473684210526!(ne)$);\coordinate (c336y) at ($(sw)!0.761780104712043!(ne)$);\coordinate (c340x) at ($(sw)!0.368421052631578!(ne)$);\coordinate (c340y) at ($(sw)!0.751308900523561!(ne)$);\coordinate (c344x) at ($(sw)!0.365789473684209!(ne)$);\coordinate (c344y) at ($(sw)!0.712041884816756!(ne)$);\coordinate (c348x) at ($(sw)!0.347368421052632!(ne)$);\coordinate (c348y) at ($(sw)!0.706806282722515!(ne)$);\coordinate (c352x) at ($(sw)!0.331578947368421!(ne)$);\coordinate (c352y) at ($(sw)!0.701570680628274!(ne)$);\coordinate (c356x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c356y) at ($(sw)!0.730366492146597!(ne)$);\coordinate (c360x) at ($(sw)!0.286842105263159!(ne)$);\coordinate (c360y) at ($(sw)!0.725130890052356!(ne)$);\coordinate (c364x) at ($(sw)!0.276315789473685!(ne)$);\coordinate (c364y) at ($(sw)!0.719895287958115!(ne)$);\coordinate (c368x) at ($(sw)!0.271052631578948!(ne)$);\coordinate (c368y) at ($(sw)!0.709424083769635!(ne)$);\coordinate (c372x) at ($(sw)!0.268421052631579!(ne)$);\coordinate (c372y) at ($(sw)!0.696335078534033!(ne)$);\coordinate (c376x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c376y) at ($(sw)!0.664921465968586!(ne)$);\coordinate (c380x) at ($(sw)!0.28421052631579!(ne)$);\coordinate (c380y) at ($(sw)!0.630890052356022!(ne)$);\coordinate (c384x) at ($(sw)!0.244736842105262!(ne)$);\coordinate (c384y) at ($(sw)!0.630890052356022!(ne)$);\coordinate (c388x) at ($(sw)!0.239473684210525!(ne)$);\coordinate (c388y) at ($(sw)!0.62041884816754!(ne)$);\coordinate (c392x) at ($(sw)!0.239473684210525!(ne)$);\coordinate (c392y) at ($(sw)!0.599476439790576!(ne)$);\coordinate (c396x) at ($(sw)!0.244736842105262!(ne)$);\coordinate (c396y) at ($(sw)!0.586387434554973!(ne)$);\coordinate (c400x) at ($(sw)!0.28421052631579!(ne)$);\coordinate (c400y) at ($(sw)!0.586387434554973!(ne)$);\coordinate (c404x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c404y) at ($(sw)!0.55759162303665!(ne)$);\coordinate (c408x) at ($(sw)!0.268421052631579!(ne)$);\coordinate (c408y) at ($(sw)!0.526178010471204!(ne)$);\coordinate (c412x) at ($(sw)!0.271052631578948!(ne)$);\coordinate (c412y) at ($(sw)!0.513089005235604!(ne)$);\coordinate (c416x) at ($(sw)!0.276315789473685!(ne)$);\coordinate (c416y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c420x) at ($(sw)!0.286842105263159!(ne)$);\coordinate (c420y) at ($(sw)!0.497382198952881!(ne)$);\coordinate (c424x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c424y) at ($(sw)!0.49476439790576!(ne)$);\coordinate (c428x) at ($(sw)!0.328947368421053!(ne)$);\coordinate (c428y) at ($(sw)!0.518324607329842!(ne)$);\coordinate (c432x) at ($(sw)!0.365789473684209!(ne)$);\coordinate (c432y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c436x) at ($(sw)!0.368421052631578!(ne)$);\coordinate (c436y) at ($(sw)!0.465968586387435!(ne)$);\coordinate (c440x) at ($(sw)!0.378947368421052!(ne)$);\coordinate (c440y) at ($(sw)!0.458115183246073!(ne)$);\coordinate (c444x) at ($(sw)!0.389473684210526!(ne)$);\coordinate (c444y) at ($(sw)!0.455497382198952!(ne)$);\coordinate (c448x) at ($(sw)!0.4!(ne)$);\coordinate (c448y) at ($(sw)!0.458115183246073!(ne)$);\coordinate (c452x) at ($(sw)!0.410526315789474!(ne)$);\coordinate (c452y) at ($(sw)!0.465968586387435!(ne)$);\coordinate (c456x) at ($(sw)!0.413157894736843!(ne)$);\coordinate (c456y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c460x) at ($(sw)!0.444736842105262!(ne)$);\coordinate (c460y) at ($(sw)!0.515706806282724!(ne)$);\coordinate (c464x) at ($(sw)!0.471052631578948!(ne)$);\coordinate (c464y) at ($(sw)!0.49476439790576!(ne)$);\coordinate (c468x) at ($(sw)!0.481578947368422!(ne)$);\coordinate (c468y) at ($(sw)!0.497382198952881!(ne)$);\coordinate (c472x) at ($(sw)!0.489473684210527!(ne)$);\coordinate (c472y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c476x) at ($(sw)!0.49736842105263!(ne)$);\coordinate (c476y) at ($(sw)!0.513089005235604!(ne)$);\coordinate (c480x) at ($(sw)!0.499999999999999!(ne)$);\coordinate (c480y) at ($(sw)!0.526178010471204!(ne)$);\coordinate (c484x) at ($(sw)!0.481578947368422!(ne)$);\coordinate (c484y) at ($(sw)!0.547120418848168!(ne)$);\coordinate (c488x) at ($(sw)!0.489473684210527!(ne)$);\coordinate (c488y) at ($(sw)!0.568062827225132!(ne)$);\coordinate (c492x) at ($(sw)!0.49736842105263!(ne)$);\coordinate (c492y) at ($(sw)!0.586387434554973!(ne)$);\coordinate (c496x) at ($(sw)!0.53421052631579!(ne)$);\coordinate (c496y) at ($(sw)!0.586387434554973!(ne)$);\coordinate (c500x) at ($(sw)!0.542105263157895!(ne)$);\coordinate (c500y) at ($(sw)!0.599476439790576!(ne)$);\coordinate (c504x) at ($(sw)!0.542105263157895!(ne)$);\coordinate (c504y) at ($(sw)!0.62041884816754!(ne)$);\coordinate (c508x) at ($(sw)!0.53421052631579!(ne)$);\coordinate (c508y) at ($(sw)!0.630890052356022!(ne)$);\coordinate (c512x) at ($(sw)!0.49736842105263!(ne)$);\coordinate (c512y) at ($(sw)!0.633507853403143!(ne)$);\coordinate (c516x) at ($(sw)!0.489473684210527!(ne)$);\coordinate (c516y) at ($(sw)!0.651832460732984!(ne)$);\coordinate (c520x) at ($(sw)!0.476315789473685!(ne)$);\coordinate (c520y) at ($(sw)!0.672774869109948!(ne)$);
+			\draw (c301x |- c301y) -- (c304x |- c304y) -- (c308x |- c308y) -- (c312x |- c312y) -- (c316x |- c316y) -- (c320x |- c320y) -- (c324x |- c324y) -- (c328x |- c328y) -- (c332x |- c332y) -- (c336x |- c336y) -- (c340x |- c340y) -- (c344x |- c344y) -- (c348x |- c348y) -- (c352x |- c352y) -- (c356x |- c356y) -- (c360x |- c360y) -- (c364x |- c364y) -- (c368x |- c368y) -- (c372x |- c372y) -- (c376x |- c376y) -- (c380x |- c380y) -- (c384x |- c384y) -- (c388x |- c388y) -- (c392x |- c392y) -- (c396x |- c396y) -- (c400x |- c400y) -- (c404x |- c404y) -- (c408x |- c408y) -- (c412x |- c412y) -- (c416x |- c416y) -- (c420x |- c420y) -- (c424x |- c424y) -- (c428x |- c428y) -- (c432x |- c432y) -- (c436x |- c436y) -- (c440x |- c440y) -- (c444x |- c444y) -- (c448x |- c448y) -- (c452x |- c452y) -- (c456x |- c456y) -- (c460x |- c460y) -- (c464x |- c464y) -- (c468x |- c468y) -- (c472x |- c472y) -- (c476x |- c476y) -- (c480x |- c480y) -- (c484x |- c484y) -- (c488x |- c488y) -- (c492x |- c492y) -- (c496x |- c496y) -- (c500x |- c500y) -- (c504x |- c504y) -- (c508x |- c508y) -- (c512x |- c512y) -- (c516x |- c516y) -- (c520x |- c520y) ;
+			\coordinate (c601x) at ($(sw)!0.834210526315788!(ne)$);\coordinate (c601y) at ($(sw)!0.55497382198953!(ne)$);\coordinate (c604x) at ($(sw)!0.892105263157893!(ne)$);\coordinate (c604y) at ($(sw)!0.62041884816754!(ne)$);\coordinate (c608x) at ($(sw)!0.88421052631579!(ne)$);\coordinate (c608y) at ($(sw)!0.649214659685863!(ne)$);\coordinate (c612x) at ($(sw)!0.86578947368421!(ne)$);\coordinate (c612y) at ($(sw)!0.675392670157068!(ne)$);\coordinate (c616x) at ($(sw)!0.844736842105262!(ne)$);\coordinate (c616y) at ($(sw)!0.691099476439792!(ne)$);\coordinate (c620x) at ($(sw)!0.815789473684211!(ne)$);\coordinate (c620y) at ($(sw)!0.701570680628274!(ne)$);\coordinate (c624x) at ($(sw)!0.742105263157895!(ne)$);\coordinate (c624y) at ($(sw)!0.636125654450263!(ne)$);\coordinate (c628x) at ($(sw)!0.705263157894736!(ne)$);\coordinate (c628y) at ($(sw)!0.651832460732984!(ne)$);\coordinate (c632x) at ($(sw)!0.668421052631579!(ne)$);\coordinate (c632y) at ($(sw)!0.662303664921466!(ne)$);\coordinate (c636x) at ($(sw)!0.663157894736842!(ne)$);\coordinate (c636y) at ($(sw)!0.761780104712043!(ne)$);\coordinate (c640x) at ($(sw)!0.636842105263157!(ne)$);\coordinate (c640y) at ($(sw)!0.777486910994766!(ne)$);\coordinate (c644x) at ($(sw)!0.607894736842106!(ne)$);\coordinate (c644y) at ($(sw)!0.782722513089005!(ne)$);\coordinate (c648x) at ($(sw)!0.578947368421052!(ne)$);\coordinate (c648y) at ($(sw)!0.777486910994766!(ne)$);\coordinate (c652x) at ($(sw)!0.550000000000001!(ne)$);\coordinate (c652y) at ($(sw)!0.761780104712043!(ne)$);\coordinate (c656x) at ($(sw)!0.547368421052632!(ne)$);\coordinate (c656y) at ($(sw)!0.662303664921466!(ne)$);\coordinate (c660x) at ($(sw)!0.49736842105263!(ne)$);\coordinate (c660y) at ($(sw)!0.649214659685863!(ne)$);\coordinate (c664x) at ($(sw)!0.452631578947368!(ne)$);\coordinate (c664y) at ($(sw)!0.623036649214661!(ne)$);\coordinate (c668x) at ($(sw)!0.365789473684209!(ne)$);\coordinate (c668y) at ($(sw)!0.701570680628274!(ne)$);\coordinate (c672x) at ($(sw)!0.336842105263158!(ne)$);\coordinate (c672y) at ($(sw)!0.691099476439792!(ne)$);\coordinate (c676x) at ($(sw)!0.31578947368421!(ne)$);\coordinate (c676y) at ($(sw)!0.675392670157068!(ne)$);\coordinate (c680x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c680y) at ($(sw)!0.649214659685863!(ne)$);\coordinate (c684x) at ($(sw)!0.289473684210527!(ne)$);\coordinate (c684y) at ($(sw)!0.62041884816754!(ne)$);\coordinate (c688x) at ($(sw)!0.365789473684209!(ne)$);\coordinate (c688y) at ($(sw)!0.534031413612566!(ne)$);\coordinate (c692x) at ($(sw)!0.347368421052632!(ne)$);\coordinate (c692y) at ($(sw)!0.49476439790576!(ne)$);\coordinate (c696x) at ($(sw)!0.33421052631579!(ne)$);\coordinate (c696y) at ($(sw)!0.452879581151832!(ne)$);\coordinate (c700x) at ($(sw)!0.234210526315788!(ne)$);\coordinate (c700y) at ($(sw)!0.445026178010473!(ne)$);\coordinate (c704x) at ($(sw)!0.21842105263158!(ne)$);\coordinate (c704y) at ($(sw)!0.421465968586388!(ne)$);\coordinate (c708x) at ($(sw)!0.215789473684211!(ne)$);\coordinate (c708y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c712x) at ($(sw)!0.21842105263158!(ne)$);\coordinate (c712y) at ($(sw)!0.363874345549739!(ne)$);\coordinate (c716x) at ($(sw)!0.234210526315788!(ne)$);\coordinate (c716y) at ($(sw)!0.337696335078534!(ne)$);\coordinate (c720x) at ($(sw)!0.33421052631579!(ne)$);\coordinate (c720y) at ($(sw)!0.332460732984293!(ne)$);\coordinate (c724x) at ($(sw)!0.347368421052632!(ne)$);\coordinate (c724y) at ($(sw)!0.293193717277488!(ne)$);\coordinate (c728x) at ($(sw)!0.363157894736841!(ne)$);\coordinate (c728y) at ($(sw)!0.259162303664921!(ne)$);\coordinate (c732x) at ($(sw)!0.289473684210527!(ne)$);\coordinate (c732y) at ($(sw)!0.17539267015707!(ne)$);\coordinate (c736x) at ($(sw)!0.294736842105264!(ne)$);\coordinate (c736y) at ($(sw)!0.146596858638744!(ne)$);\coordinate (c740x) at ($(sw)!0.31578947368421!(ne)$);\coordinate (c740y) at ($(sw)!0.120418848167541!(ne)$);\coordinate (c744x) at ($(sw)!0.336842105263158!(ne)$);\coordinate (c744y) at ($(sw)!0.104712041884818!(ne)$);\coordinate (c748x) at ($(sw)!0.365789473684209!(ne)$);\coordinate (c748y) at ($(sw)!0.0994764397905771!(ne)$);\coordinate (c752x) at ($(sw)!0.442105263157894!(ne)$);\coordinate (c752y) at ($(sw)!0.164921465968588!(ne)$);\coordinate (c756x) at ($(sw)!0.492105263157896!(ne)$);\coordinate (c756y) at ($(sw)!0.136125654450262!(ne)$);\coordinate (c760x) at ($(sw)!0.547368421052632!(ne)$);\coordinate (c760y) at ($(sw)!0.117801047120421!(ne)$);\coordinate (c764x) at ($(sw)!0.550000000000001!(ne)$);\coordinate (c764y) at ($(sw)!0.0235602094240846!(ne)$);\coordinate (c768x) at ($(sw)!0.578947368421052!(ne)$);\coordinate (c768y) at ($(sw)!0.00785340314136155!(ne)$);\coordinate (c772x) at ($(sw)!0.607894736842106!(ne)$);\coordinate (c772y) at ($(sw)!0!(ne)$);\coordinate (c776x) at ($(sw)!0.636842105263157!(ne)$);\coordinate (c776y) at ($(sw)!0.00785340314136155!(ne)$);\coordinate (c780x) at ($(sw)!0.663157894736842!(ne)$);\coordinate (c780y) at ($(sw)!0.0235602094240846!(ne)$);\coordinate (c784x) at ($(sw)!0.668421052631579!(ne)$);\coordinate (c784y) at ($(sw)!0.117801047120421!(ne)$);\coordinate (c788x) at ($(sw)!0.710526315789473!(ne)$);\coordinate (c788y) at ($(sw)!0.133507853403141!(ne)$);\coordinate (c792x) at ($(sw)!0.750000000000001!(ne)$);\coordinate (c792y) at ($(sw)!0.154450261780105!(ne)$);\coordinate (c796x) at ($(sw)!0.815789473684211!(ne)$);\coordinate (c796y) at ($(sw)!0.0994764397905771!(ne)$);\coordinate (c800x) at ($(sw)!0.844736842105262!(ne)$);\coordinate (c800y) at ($(sw)!0.104712041884818!(ne)$);\coordinate (c804x) at ($(sw)!0.86578947368421!(ne)$);\coordinate (c804y) at ($(sw)!0.120418848167541!(ne)$);\coordinate (c808x) at ($(sw)!0.88421052631579!(ne)$);\coordinate (c808y) at ($(sw)!0.146596858638744!(ne)$);\coordinate (c812x) at ($(sw)!0.892105263157893!(ne)$);\coordinate (c812y) at ($(sw)!0.17539267015707!(ne)$);\coordinate (c816x) at ($(sw)!0.836842105263157!(ne)$);\coordinate (c816y) at ($(sw)!0.235602094240839!(ne)$);\coordinate (c820x) at ($(sw)!0.863157894736842!(ne)$);\coordinate (c820y) at ($(sw)!0.280104712041885!(ne)$);\coordinate (c824x) at ($(sw)!0.878947368421053!(ne)$);\coordinate (c824y) at ($(sw)!0.332460732984293!(ne)$);\coordinate (c828x) at ($(sw)!0.976315789473683!(ne)$);\coordinate (c828y) at ($(sw)!0.337696335078534!(ne)$);\coordinate (c832x) at ($(sw)!0.992105263157895!(ne)$);\coordinate (c832y) at ($(sw)!0.363874345549739!(ne)$);\coordinate (c836x) at ($(sw)!1!(ne)$);\coordinate (c836y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c840x) at ($(sw)!0.992105263157895!(ne)$);\coordinate (c840y) at ($(sw)!0.421465968586388!(ne)$);\coordinate (c844x) at ($(sw)!0.976315789473683!(ne)$);\coordinate (c844y) at ($(sw)!0.445026178010473!(ne)$);\coordinate (c848x) at ($(sw)!0.878947368421053!(ne)$);\coordinate (c848y) at ($(sw)!0.452879581151832!(ne)$);\coordinate (c852x) at ($(sw)!0.863157894736842!(ne)$);\coordinate (c852y) at ($(sw)!0.505235602094242!(ne)$);\coordinate (c856x) at ($(sw)!0.834210526315788!(ne)$);\coordinate (c856y) at ($(sw)!0.55497382198953!(ne)$);
+			\draw [fill=#1] (c601x |- c601y) -- (c604x |- c604y) -- (c608x |- c608y) -- (c612x |- c612y) -- (c616x |- c616y) -- (c620x |- c620y) -- (c624x |- c624y) -- (c628x |- c628y) -- (c632x |- c632y) -- (c636x |- c636y) -- (c640x |- c640y) -- (c644x |- c644y) -- (c648x |- c648y) -- (c652x |- c652y) -- (c656x |- c656y) -- (c660x |- c660y) -- (c664x |- c664y) -- (c668x |- c668y) -- (c672x |- c672y) -- (c676x |- c676y) -- (c680x |- c680y) -- (c684x |- c684y) -- (c688x |- c688y) -- (c692x |- c692y) -- (c696x |- c696y) -- (c700x |- c700y) -- (c704x |- c704y) -- (c708x |- c708y) -- (c712x |- c712y) -- (c716x |- c716y) -- (c720x |- c720y) -- (c724x |- c724y) -- (c728x |- c728y) -- (c732x |- c732y) -- (c736x |- c736y) -- (c740x |- c740y) -- (c744x |- c744y) -- (c748x |- c748y) -- (c752x |- c752y) -- (c756x |- c756y) -- (c760x |- c760y) -- (c764x |- c764y) -- (c768x |- c768y) -- (c772x |- c772y) -- (c776x |- c776y) -- (c780x |- c780y) -- (c784x |- c784y) -- (c788x |- c788y) -- (c792x |- c792y) -- (c796x |- c796y) -- (c800x |- c800y) -- (c804x |- c804y) -- (c808x |- c808y) -- (c812x |- c812y) -- (c816x |- c816y) -- (c820x |- c820y) -- (c824x |- c824y) -- (c828x |- c828y) -- (c832x |- c832y) -- (c836x |- c836y) -- (c840x |- c840y) -- (c844x |- c844y) -- (c848x |- c848y) -- (c852x |- c852y) -- (c856x |- c856y) -- cycle;
+			\coordinate (c901x) at ($(sw)!0.694736842105262!(ne)$);\coordinate (c901y) at ($(sw)!0.455497382198952!(ne)$);\coordinate (c904x) at ($(sw)!0.71578947368421!(ne)$);\coordinate (c904y) at ($(sw)!0.481675392670158!(ne)$);\coordinate (c908x) at ($(sw)!0.71578947368421!(ne)$);\coordinate (c908y) at ($(sw)!0.49476439790576!(ne)$);\coordinate (c912x) at ($(sw)!0.710526315789473!(ne)$);\coordinate (c912y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c916x) at ($(sw)!0.699999999999999!(ne)$);\coordinate (c916y) at ($(sw)!0.510471204188483!(ne)$);\coordinate (c920x) at ($(sw)!0.686842105263159!(ne)$);\coordinate (c920y) at ($(sw)!0.510471204188483!(ne)$);\coordinate (c924x) at ($(sw)!0.657894736842105!(ne)$);\coordinate (c924y) at ($(sw)!0.486910994764399!(ne)$);\coordinate (c928x) at ($(sw)!0.628947368421051!(ne)$);\coordinate (c928y) at ($(sw)!0.497382198952881!(ne)$);\coordinate (c932x) at ($(sw)!0.626315789473683!(ne)$);\coordinate (c932y) at ($(sw)!0.534031413612566!(ne)$);\coordinate (c936x) at ($(sw)!0.61842105263158!(ne)$);\coordinate (c936y) at ($(sw)!0.541884816753927!(ne)$);\coordinate (c940x) at ($(sw)!0.607894736842106!(ne)$);\coordinate (c940y) at ($(sw)!0.544502617801048!(ne)$);\coordinate (c944x) at ($(sw)!0.594736842105263!(ne)$);\coordinate (c944y) at ($(sw)!0.541884816753927!(ne)$);\coordinate (c948x) at ($(sw)!0.586842105263157!(ne)$);\coordinate (c948y) at ($(sw)!0.534031413612566!(ne)$);\coordinate (c952x) at ($(sw)!0.58157894736842!(ne)$);\coordinate (c952y) at ($(sw)!0.497382198952881!(ne)$);\coordinate (c956x) at ($(sw)!0.563157894736841!(ne)$);\coordinate (c956y) at ($(sw)!0.489528795811519!(ne)$);\coordinate (c960x) at ($(sw)!0.547368421052632!(ne)$);\coordinate (c960y) at ($(sw)!0.481675392670158!(ne)$);\coordinate (c964x) at ($(sw)!0.513157894736841!(ne)$);\coordinate (c964y) at ($(sw)!0.510471204188483!(ne)$);\coordinate (c968x) at ($(sw)!0.502631578947367!(ne)$);\coordinate (c968y) at ($(sw)!0.510471204188483!(ne)$);\coordinate (c972x) at ($(sw)!0.492105263157896!(ne)$);\coordinate (c972y) at ($(sw)!0.502617801047122!(ne)$);\coordinate (c976x) at ($(sw)!0.486842105263159!(ne)$);\coordinate (c976y) at ($(sw)!0.49476439790576!(ne)$);\coordinate (c980x) at ($(sw)!0.48421052631579!(ne)$);\coordinate (c980y) at ($(sw)!0.481675392670158!(ne)$);\coordinate (c984x) at ($(sw)!0.513157894736841!(ne)$);\coordinate (c984y) at ($(sw)!0.445026178010473!(ne)$);\coordinate (c988x) at ($(sw)!0.499999999999999!(ne)$);\coordinate (c988y) at ($(sw)!0.413612565445027!(ne)$);\coordinate (c992x) at ($(sw)!0.460526315789473!(ne)$);\coordinate (c992y) at ($(sw)!0.413612565445027!(ne)$);\coordinate (c996x) at ($(sw)!0.457894736842105!(ne)$);\coordinate (c996y) at ($(sw)!0.400523560209424!(ne)$);\coordinate (c1000x) at ($(sw)!0.455263157894736!(ne)$);\coordinate (c1000y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c1004x) at ($(sw)!0.457894736842105!(ne)$);\coordinate (c1004y) at ($(sw)!0.379581151832462!(ne)$);\coordinate (c1008x) at ($(sw)!0.460526315789473!(ne)$);\coordinate (c1008y) at ($(sw)!0.36910994764398!(ne)$);\coordinate (c1012x) at ($(sw)!0.499999999999999!(ne)$);\coordinate (c1012y) at ($(sw)!0.36649214659686!(ne)$);\coordinate (c1016x) at ($(sw)!0.513157894736841!(ne)$);\coordinate (c1016y) at ($(sw)!0.340314136125655!(ne)$);\coordinate (c1020x) at ($(sw)!0.48421052631579!(ne)$);\coordinate (c1020y) at ($(sw)!0.308900523560211!(ne)$);\coordinate (c1024x) at ($(sw)!0.486842105263159!(ne)$);\coordinate (c1024y) at ($(sw)!0.295811518324608!(ne)$);\coordinate (c1028x) at ($(sw)!0.492105263157896!(ne)$);\coordinate (c1028y) at ($(sw)!0.287958115183247!(ne)$);\coordinate (c1032x) at ($(sw)!0.502631578947367!(ne)$);\coordinate (c1032y) at ($(sw)!0.280104712041885!(ne)$);\coordinate (c1036x) at ($(sw)!0.513157894736841!(ne)$);\coordinate (c1036y) at ($(sw)!0.277486910994765!(ne)$);\coordinate (c1040x) at ($(sw)!0.544736842105264!(ne)$);\coordinate (c1040y) at ($(sw)!0.30366492146597!(ne)$);\coordinate (c1044x) at ($(sw)!0.563157894736841!(ne)$);\coordinate (c1044y) at ($(sw)!0.293193717277488!(ne)$);\coordinate (c1048x) at ($(sw)!0.58157894736842!(ne)$);\coordinate (c1048y) at ($(sw)!0.287958115183247!(ne)$);\coordinate (c1052x) at ($(sw)!0.586842105263157!(ne)$);\coordinate (c1052y) at ($(sw)!0.248691099476442!(ne)$);\coordinate (c1056x) at ($(sw)!0.594736842105263!(ne)$);\coordinate (c1056y) at ($(sw)!0.243455497382201!(ne)$);\coordinate (c1060x) at ($(sw)!0.607894736842106!(ne)$);\coordinate (c1060y) at ($(sw)!0.23821989528796!(ne)$);\coordinate (c1064x) at ($(sw)!0.61842105263158!(ne)$);\coordinate (c1064y) at ($(sw)!0.243455497382201!(ne)$);\coordinate (c1068x) at ($(sw)!0.626315789473683!(ne)$);\coordinate (c1068y) at ($(sw)!0.248691099476442!(ne)$);\coordinate (c1072x) at ($(sw)!0.628947368421051!(ne)$);\coordinate (c1072y) at ($(sw)!0.287958115183247!(ne)$);\coordinate (c1076x) at ($(sw)!0.663157894736842!(ne)$);\coordinate (c1076y) at ($(sw)!0.298429319371729!(ne)$);\coordinate (c1080x) at ($(sw)!0.686842105263159!(ne)$);\coordinate (c1080y) at ($(sw)!0.277486910994765!(ne)$);\coordinate (c1084x) at ($(sw)!0.699999999999999!(ne)$);\coordinate (c1084y) at ($(sw)!0.280104712041885!(ne)$);\coordinate (c1088x) at ($(sw)!0.710526315789473!(ne)$);\coordinate (c1088y) at ($(sw)!0.287958115183247!(ne)$);\coordinate (c1092x) at ($(sw)!0.71578947368421!(ne)$);\coordinate (c1092y) at ($(sw)!0.295811518324608!(ne)$);\coordinate (c1096x) at ($(sw)!0.71578947368421!(ne)$);\coordinate (c1096y) at ($(sw)!0.308900523560211!(ne)$);\coordinate (c1100x) at ($(sw)!0.69736842105263!(ne)$);\coordinate (c1100y) at ($(sw)!0.332460732984293!(ne)$);\coordinate (c1104x) at ($(sw)!0.705263157894736!(ne)$);\coordinate (c1104y) at ($(sw)!0.348167539267016!(ne)$);\coordinate (c1108x) at ($(sw)!0.713157894736841!(ne)$);\coordinate (c1108y) at ($(sw)!0.36910994764398!(ne)$);\coordinate (c1112x) at ($(sw)!0.750000000000001!(ne)$);\coordinate (c1112y) at ($(sw)!0.36910994764398!(ne)$);\coordinate (c1116x) at ($(sw)!0.757894736842104!(ne)$);\coordinate (c1116y) at ($(sw)!0.379581151832462!(ne)$);\coordinate (c1120x) at ($(sw)!0.760526315789472!(ne)$);\coordinate (c1120y) at ($(sw)!0.392670157068063!(ne)$);\coordinate (c1124x) at ($(sw)!0.757894736842104!(ne)$);\coordinate (c1124y) at ($(sw)!0.400523560209424!(ne)$);\coordinate (c1128x) at ($(sw)!0.750000000000001!(ne)$);\coordinate (c1128y) at ($(sw)!0.413612565445027!(ne)$);\coordinate (c1132x) at ($(sw)!0.713157894736841!(ne)$);\coordinate (c1132y) at ($(sw)!0.413612565445027!(ne)$);\coordinate (c1136x) at ($(sw)!0.705263157894736!(ne)$);\coordinate (c1136y) at ($(sw)!0.437172774869111!(ne)$);\coordinate (c1140x) at ($(sw)!0.694736842105262!(ne)$);\coordinate (c1140y) at ($(sw)!0.455497382198952!(ne)$);
+			\draw (c901x |- c901y) -- (c904x |- c904y) -- (c908x |- c908y) -- (c912x |- c912y) -- (c916x |- c916y) -- (c920x |- c920y) -- (c924x |- c924y) -- (c928x |- c928y) -- (c932x |- c932y) -- (c936x |- c936y) -- (c940x |- c940y) -- (c944x |- c944y) -- (c948x |- c948y) -- (c952x |- c952y) -- (c956x |- c956y) -- (c960x |- c960y) -- (c964x |- c964y) -- (c968x |- c968y) -- (c972x |- c972y) -- (c976x |- c976y) -- (c980x |- c980y) -- (c984x |- c984y) -- (c988x |- c988y) -- (c992x |- c992y) -- (c996x |- c996y) -- (c1000x |- c1000y) -- (c1004x |- c1004y) -- (c1008x |- c1008y) -- (c1012x |- c1012y) -- (c1016x |- c1016y) -- (c1020x |- c1020y) -- (c1024x |- c1024y) -- (c1028x |- c1028y) -- (c1032x |- c1032y) -- (c1036x |- c1036y) -- (c1040x |- c1040y) -- (c1044x |- c1044y) -- (c1048x |- c1048y) -- (c1052x |- c1052y) -- (c1056x |- c1056y) -- (c1060x |- c1060y) -- (c1064x |- c1064y) -- (c1068x |- c1068y) -- (c1072x |- c1072y) -- (c1076x |- c1076y) -- (c1080x |- c1080y) -- (c1084x |- c1084y) -- (c1088x |- c1088y) -- (c1092x |- c1092y) -- (c1096x |- c1096y) -- (c1100x |- c1100y) -- (c1104x |- c1104y) -- (c1108x |- c1108y) -- (c1112x |- c1112y) -- (c1116x |- c1116y) -- (c1120x |- c1120y) -- (c1124x |- c1124y) -- (c1128x |- c1128y) -- (c1132x |- c1132y) -- (c1136x |- c1136y) -- (c1140x |- c1140y);
+	}
+]
+
+\tikzstyle{draw manual} = [
+	path picture = {
+		\coordinate (ne) at ($(path picture bounding box.north east)-(0.5pt,0.5pt)$);
+		\coordinate (sw) at ($(path picture bounding box.south west)+(0.5pt,0.5pt)$);
+		%\draw (path picture bounding box.north east) rectangle (path picture bounding box.south west);
+\coordinate (c1x) at ($(sw)!0.70189701897019!(ne)$);
+\coordinate (c2x) at ($(sw)!0.520325203252032!(ne)$);
+\coordinate (c3x) at ($(sw)!0.51219512195122!(ne)$);
+\coordinate (c4x) at ($(sw)!0.506775067750678!(ne)$);
+\coordinate (c5x) at ($(sw)!0.51219512195122!(ne)$);
+\coordinate (c6x) at ($(sw)!0.520325203252032!(ne)$);
+\coordinate (c7x) at ($(sw)!0.905149051490515!(ne)$);
+\coordinate (c8x) at ($(sw)!0.932249322493225!(ne)$);
+\coordinate (c9x) at ($(sw)!0.956639566395664!(ne)$);
+\coordinate (c10x) at ($(sw)!0.975609756097561!(ne)$);
+\coordinate (c11x) at ($(sw)!0.994579945799458!(ne)$);
+\coordinate (c12x) at ($(sw)!1!(ne)$);
+\coordinate (c13x) at ($(sw)!0.986449864498645!(ne)$);
+\coordinate (c14x) at ($(sw)!0.97289972899729!(ne)$);
+\coordinate (c15x) at ($(sw)!0.959349593495935!(ne)$);
+\coordinate (c16x) at ($(sw)!0.284552845528455!(ne)$);
+\coordinate (c17x) at ($(sw)!0.314363143631436!(ne)$);
+\coordinate (c18x) at ($(sw)!0.485094850948509!(ne)$);
+\coordinate (c19x) at ($(sw)!0.528455284552846!(ne)$);
+\coordinate (c20x) at ($(sw)!0.563685636856369!(ne)$);
+\coordinate (c21x) at ($(sw)!0.590785907859079!(ne)$);
+\coordinate (c22x) at ($(sw)!0.590785907859079!(ne)$);
+\coordinate (c23x) at ($(sw)!0.582655826558266!(ne)$);
+\coordinate (c24x) at ($(sw)!0.168021680216802!(ne)$);
+\coordinate (c25x) at ($(sw)!0!(ne)$);
+\coordinate (c26x) at ($(sw)!0!(ne)$);
+\coordinate (c27x) at ($(sw)!0.0921409214092141!(ne)$);
+\coordinate (c28x) at ($(sw)!0.769647696476965!(ne)$);
+\coordinate (c29x) at ($(sw)!0.794037940379404!(ne)$);
+\coordinate (c30x) at ($(sw)!0.815718157181572!(ne)$);
+\coordinate (c31x) at ($(sw)!0.831978319783198!(ne)$);
+\coordinate (c32x) at ($(sw)!0.840108401084011!(ne)$);
+\coordinate (c33x) at ($(sw)!0.826558265582656!(ne)$);
+\coordinate (c34x) at ($(sw)!0.799457994579946!(ne)$);
+\coordinate (c35x) at ($(sw)!0.669376693766938!(ne)$);
+\coordinate (c36x) at ($(sw)!0.650406504065041!(ne)$);
+\coordinate (c37x) at ($(sw)!0.542005420054201!(ne)$);
+\coordinate (c38x) at ($(sw)!0.531165311653117!(ne)$);
+\coordinate (c39x) at ($(sw)!0.528455284552846!(ne)$);
+\coordinate (c40x) at ($(sw)!0.531165311653117!(ne)$);
+\coordinate (c41x) at ($(sw)!0.542005420054201!(ne)$);
+\coordinate (c42x) at ($(sw)!0.688346883468834!(ne)$);
+\coordinate (c43x) at ($(sw)!0.823848238482385!(ne)$);
+\coordinate (c44x) at ($(sw)!0.853658536585366!(ne)$);
+\coordinate (c45x) at ($(sw)!0.875338753387534!(ne)$);
+\coordinate (c46x) at ($(sw)!0.894308943089431!(ne)$);
+\coordinate (c47x) at ($(sw)!0.910569105691057!(ne)$);
+\coordinate (c48x) at ($(sw)!0.921409214092141!(ne)$);
+\coordinate (c49x) at ($(sw)!0.905149051490515!(ne)$);
+\coordinate (c50x) at ($(sw)!0.894308943089431!(ne)$);
+\coordinate (c51x) at ($(sw)!0.880758807588076!(ne)$);
+\coordinate (c52x) at ($(sw)!0.550135501355014!(ne)$);
+\coordinate (c53x) at ($(sw)!0.542005420054201!(ne)$);
+\coordinate (c54x) at ($(sw)!0.536585365853658!(ne)$);
+\coordinate (c55x) at ($(sw)!0.542005420054201!(ne)$);
+\coordinate (c56x) at ($(sw)!0.550135501355014!(ne)$);
+\coordinate (c57x) at ($(sw)!0.688346883468834!(ne)$);
+\coordinate (c58x) at ($(sw)!0.70189701897019!(ne)$);
+\coordinate (c59x) at ($(sw)!0.856368563685637!(ne)$);
+\coordinate (c60x) at ($(sw)!0.888888888888889!(ne)$);
+\coordinate (c61x) at ($(sw)!0.91869918699187!(ne)$);
+\coordinate (c62x) at ($(sw)!0.940379403794038!(ne)$);
+\coordinate (c63x) at ($(sw)!0.959349593495935!(ne)$);
+\coordinate (c64x) at ($(sw)!0.970189701897019!(ne)$);
+\coordinate (c65x) at ($(sw)!0.953929539295393!(ne)$);
+\coordinate (c66x) at ($(sw)!0.937669376693767!(ne)$);
+\coordinate (c67x) at ($(sw)!0.924119241192412!(ne)$);
+\coordinate (c68x) at ($(sw)!0.70189701897019!(ne)$);
+\coordinate (c1y) at ($(sw)!0.73657094216209!(ne)$);
+\coordinate (c2y) at ($(sw)!0.73657094216209!(ne)$);
+\coordinate (c3y) at ($(sw)!0.741947045383272!(ne)$);
+\coordinate (c4y) at ($(sw)!0.752699251825636!(ne)$);
+\coordinate (c5y) at ($(sw)!0.760763406657407!(ne)$);
+\coordinate (c6y) at ($(sw)!0.763451458268!(ne)$);
+\coordinate (c7y) at ($(sw)!0.763451458268!(ne)$);
+\coordinate (c8y) at ($(sw)!0.768827561489182!(ne)$);
+\coordinate (c9y) at ($(sw)!0.774203664710364!(ne)$);
+\coordinate (c10y) at ($(sw)!0.787643922763317!(ne)$);
+\coordinate (c11y) at ($(sw)!0.803772232426863!(ne)$);
+\coordinate (c12y) at ($(sw)!0.82796469692218!(ne)$);
+\coordinate (c13y) at ($(sw)!0.862909367859866!(ne)$);
+\coordinate (c14y) at ($(sw)!0.873661574302225!(ne)$);
+\coordinate (c15y) at ($(sw)!0.879037677523407!(ne)$);
+\coordinate (c16y) at ($(sw)!0.879037677523407!(ne)$);
+\coordinate (c17y) at ($(sw)!0.895165987186953!(ne)$);
+\coordinate (c18y) at ($(sw)!0.895165987186953!(ne)$);
+\coordinate (c19y) at ($(sw)!0.905918193629317!(ne)$);
+\coordinate (c20y) at ($(sw)!0.924734554903457!(ne)$);
+\coordinate (c21y) at ($(sw)!0.956991174230544!(ne)$);
+\coordinate (c22y) at ($(sw)!0.981183638725865!(ne)$);
+\coordinate (c23y) at ($(sw)!1!(ne)$);
+\coordinate (c24y) at ($(sw)!1!(ne)$);
+\coordinate (c25y) at ($(sw)!0.879037677523407!(ne)$);
+\coordinate (c26y) at ($(sw)!0.427445006944135!(ne)$);
+\coordinate (c27y) at ($(sw)!0.376372026342908!(ne)$);
+\coordinate (c28y) at ($(sw)!0.376372026342908!(ne)$);
+\coordinate (c29y) at ($(sw)!0.379060077953497!(ne)$);
+\coordinate (c30y) at ($(sw)!0.392500336006455!(ne)$);
+\coordinate (c31y) at ($(sw)!0.403252542448814!(ne)$);
+\coordinate (c32y) at ($(sw)!0.422068903722953!(ne)$);
+\coordinate (c33y) at ($(sw)!0.448949419828863!(ne)$);
+\coordinate (c34y) at ($(sw)!0.459701626271228!(ne)$);
+\coordinate (c35y) at ($(sw)!0.459701626271228!(ne)$);
+\coordinate (c36y) at ($(sw)!0.46507772949241!(ne)$);
+\coordinate (c37y) at ($(sw)!0.46507772949241!(ne)$);
+\coordinate (c38y) at ($(sw)!0.467765781102998!(ne)$);
+\coordinate (c39y) at ($(sw)!0.478517987545362!(ne)$);
+\coordinate (c40y) at ($(sw)!0.486582142377133!(ne)$);
+\coordinate (c41y) at ($(sw)!0.494646297208908!(ne)$);
+\coordinate (c42y) at ($(sw)!0.494646297208908!(ne)$);
+\coordinate (c43y) at ($(sw)!0.486582142377133!(ne)$);
+\coordinate (c44y) at ($(sw)!0.489270193987726!(ne)$);
+\coordinate (c45y) at ($(sw)!0.497334348819497!(ne)$);
+\coordinate (c46y) at ($(sw)!0.510774606872454!(ne)$);
+\coordinate (c47y) at ($(sw)!0.524214864925407!(ne)$);
+\coordinate (c48y) at ($(sw)!0.543031226199542!(ne)$);
+\coordinate (c49y) at ($(sw)!0.575287845526634!(ne)$);
+\coordinate (c50y) at ($(sw)!0.586040051968998!(ne)$);
+\coordinate (c51y) at ($(sw)!0.59141615519018!(ne)$);
+\coordinate (c52y) at ($(sw)!0.59141615519018!(ne)$);
+\coordinate (c53y) at ($(sw)!0.594104206800774!(ne)$);
+\coordinate (c54y) at ($(sw)!0.604856413243132!(ne)$);
+\coordinate (c55y) at ($(sw)!0.615608619685497!(ne)$);
+\coordinate (c56y) at ($(sw)!0.620984722906679!(ne)$);
+\coordinate (c57y) at ($(sw)!0.620984722906679!(ne)$);
+\coordinate (c58y) at ($(sw)!0.623672774517272!(ne)$);
+\coordinate (c59y) at ($(sw)!0.620984722906679!(ne)$);
+\coordinate (c60y) at ($(sw)!0.623672774517272!(ne)$);
+\coordinate (c61y) at ($(sw)!0.631736929349043!(ne)$);
+\coordinate (c62y) at ($(sw)!0.642489135791407!(ne)$);
+\coordinate (c63y) at ($(sw)!0.661305497065547!(ne)$);
+\coordinate (c64y) at ($(sw)!0.68280990995027!(ne)$);
+\coordinate (c65y) at ($(sw)!0.717754580887955!(ne)$);
+\coordinate (c66y) at ($(sw)!0.731194838940908!(ne)$);
+\coordinate (c67y) at ($(sw)!0.739258993772679!(ne)$);
+\coordinate (c68y) at ($(sw)!0.739258993772679!(ne)$);
+\draw[line width=0.1pt, line cap=rect,line join=round]
+	(c1x |- c1y) -- (c2x |- c2y)-- (c3x |- c3y)-- (c4x |- c4y)-- (c5x |- c5y)-- (c6x |- c6y)-- (c7x |- c7y)-- (c8x |- c8y)-- (c9x |- c9y)-- (c10x |- c10y)-- (c11x |- c11y)-- (c12x |- c12y)-- (c13x |- c13y)-- (c14x |- c14y)-- (c15x |- c15y)-- (c16x |- c16y)-- (c17x |- c17y)-- (c18x |- c18y)-- (c19x |- c19y)-- (c20x |- c20y)-- (c21x |- c21y)-- (c22x |- c22y)-- (c23x |- c23y)-- (c24x |- c24y)-- (c25x |- c25y)-- (c26x |- c26y)-- (c27x |- c27y)-- (c28x |- c28y)-- (c29x |- c29y)-- (c30x |- c30y)-- (c31x |- c31y)-- (c32x |- c32y)-- (c33x |- c33y)-- (c34x |- c34y)-- (c35x |- c35y)-- (c36x |- c36y)-- (c37x |- c37y)-- (c38x |- c38y)-- (c39x |- c39y)-- (c40x |- c40y)-- (c41x |- c41y)-- (c42x |- c42y)-- (c43x |- c43y)-- (c44x |- c44y)-- (c45x |- c45y)-- (c46x |- c46y)-- (c47x |- c47y)-- (c48x |- c48y)-- (c49x |- c49y)-- (c50x |- c50y)-- (c51x |- c51y)-- (c52x |- c52y)-- (c53x |- c53y)-- (c54x |- c54y)-- (c55x |- c55y)-- (c56x |- c56y)-- (c57x |- c57y)-- (c58x |- c58y)-- (c59x |- c59y)-- (c60x |- c60y)-- (c61x |- c61y)-- (c62x |- c62y)-- (c63x |- c63y)-- (c64x |- c64y)-- (c65x |- c65y)-- (c66x |- c66y)-- (c67x |- c67y)-- (c68x |- c68y);
+	}
+]
+
+\tikzstyle{draw script} = [
+	path picture = {
+		\def\de{40} %degrees
+		\def\ma{0.2} %margin
+		\coordinate (a1) at ($(path picture bounding box.east)!{sin(\de)-\ma}!(path picture bounding box.north east)$);
+		\coordinate (a2) at ($(path picture bounding box.center)!{cos(\de)-\ma}!(path picture bounding box.east)$);
+		%\coordinate (ne) at (4.323838pt, -0.8041138pt);
+		%\coordinate (sw) at (0.7419678pt, -4.077197pt);
+		\coordinate (ne) at ($(path picture bounding box.north east)-(0.5pt,0.5pt)$);
+		\coordinate (sw) at ($(path picture bounding box.south west)+(0.5pt,0.5pt)$);
+		\coordinate (sm) at ($(sw)!0.6793108!(ne |- sw)$); %south middle: lower right corner
+		\coordinate (nm) at ($(ne)!0.6793108!(ne -| sw)$); %north middle: top left corner
+		\coordinate (l1) at ($(ne)!0.20377!(sw)$);
+		\coordinate (l2) at ($(ne)!0.4!(sw)$);
+		\coordinate (l3) at ($(ne)!0.626414!(sw)$);
+		\coordinate (l4) at ($(ne)!0.826416!(sw)$);
+		\coordinate (linestart12) at ($(sw)!0.179310!(ne)$);
+		\coordinate (lineend12) at ($(sw)!0.637931!(ne)$);
+		\coordinate (linestart3) at ($(sw)!0.2965524!(ne)$);
+		\coordinate (lineend3) at ($(sw)!0.751723!(ne)$);
+		\coordinate (linestart4) at ($(sw)!0.286207!(ne)$);
+		\coordinate (lineend4) at ($(sw)!0.74137868!(ne)$);
+		\coordinate (em) at ($(ne)!0.4792457!(sw)$);
+		\coordinate (bezierright) at ($(sw)!0.7793097!(ne)$);
+		\coordinate (bezierleft) at ($(sw)!0.0965516!(ne)$);
+		\coordinate (b11x) at ($(sw)!0.632702!(ne)$);
+		\coordinate (b11y) at ($(ne)!0.219119!(sw)$);
+		\coordinate (b12x) at ($(sw)!0.775287!(ne)$);
+		\coordinate (b12y) at ($(ne)!0.087421!(sw)$);
+		\coordinate (b21x) at ($(sw)!0.951148!(ne)$);
+		\coordinate (b21y) at ($(ne)!0.686793!(sw)$);
+		\coordinate (b22x) at ($(sw)!0.933448!(ne)$);
+		\coordinate (b22y) at ($(ne)!0.898365!(sw)$);
+		\coordinate (b31x) at ($(sw)!-0.051781!(ne)$);
+		\coordinate (b31y) at ($(ne)!0.220063!(sw)$);
+		\coordinate (b32x) at ($(sw)!0.092529!(ne)$);
+		\coordinate (b32y) at ($(ne)!0.084087!(sw)$);
+		\coordinate (b41x) at ($(sw)!0.265459!(ne)$);
+		\coordinate (b41y) at ($(ne)!0.694026!(sw)$);
+		\coordinate (b42x) at ($(sw)!0.250402!(ne)$);
+		\coordinate (b42y) at ($(ne)!0.886981!(sw)$);
+		\draw[line width=0.1pt, solid,line cap=round,line join=round]
+			(linestart12 |- l1) -- (lineend12 |- l1) %(302.6953pt, -147.1082pt)
+			(linestart12 |- l2) -- (lineend12 |- l2) %(302.6953pt, -211.3347pt) 
+			(linestart3 |- l3) -- (lineend3 |- l3) %(343.4541pt, -285.4421pt)
+			(linestart4 |- l4) -- (lineend4 |- l4) %(339.749pt, -350.9043pt)
+			(ne) -- (nm) %top
+			(sw) -- (sm) %bottom
+			(bezierright |- em) 
+				.. controls (b11x |- b11y) and (b12x |- b12y) .. 
+				(ne)
+			(bezierright |- em) 
+				.. controls (b21x |- b21y) and (b22x |- b22y) .. 
+				(sm)
+			(bezierleft |- em) 
+				.. controls (b31x |- b31y) and (b32x |- b32y) .. 
+				(nm)
+			(bezierleft |- em) 
+				.. controls (b41x |- b41y) and (b42x |- b42y) .. 
+				(sw);
+	}
+]
+
+\tikzstyle{draw user} = [
+	path picture = {
+		\coordinate (ne) at ($(path picture bounding box.north east)-(0.5pt,0.5pt)$);
+		\coordinate (sw) at ($(path picture bounding box.south west)+(0.5pt,0.5pt)$);
+%		\draw (path picture bounding box.north east) rectangle (path picture bounding box.south west);
+\coordinate (c1x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c1y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c2x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c2y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c3x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c3y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c4x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c4y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c5x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c5y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c6x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c6y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c7x) at ($(sw)!0.67936507936508!(ne)$);	\coordinate (c7y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c8x) at ($(sw)!0.644444444444444!(ne)$);	\coordinate (c8y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c9x) at ($(sw)!0.644444444444444!(ne)$);	\coordinate (c9y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c10x) at ($(sw)!0.644444444444444!(ne)$);	\coordinate (c10y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c11x) at ($(sw)!0.644444444444444!(ne)$);	\coordinate (c11y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c12x) at ($(sw)!0.511111111111112!(ne)$);	\coordinate (c12y) at ($(sw)!1!(ne)$);
+\coordinate (c13x) at ($(sw)!0.511111111111112!(ne)$);	\coordinate (c13y) at ($(sw)!1!(ne)$);
+\coordinate (c14x) at ($(sw)!0.511111111111112!(ne)$);	\coordinate (c14y) at ($(sw)!1!(ne)$);
+\coordinate (c15x) at ($(sw)!0.371428571428571!(ne)$);	\coordinate (c15y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c16x) at ($(sw)!0.371428571428571!(ne)$);	\coordinate (c16y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c17x) at ($(sw)!0.371428571428571!(ne)$);	\coordinate (c17y) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (c18x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c18y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c19x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c19y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c20x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c20y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c21x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c21y) at ($(sw)!0.555905797101449!(ne)$);
+\coordinate (c22x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c22y) at ($(sw)!0.509316770186336!(ne)$);
+\coordinate (c23x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c23y) at ($(sw)!0.509316770186336!(ne)$);
+\coordinate (c24x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c24y) at ($(sw)!0.509316770186336!(ne)$);
+\coordinate (c25x) at ($(sw)!0.336507936507936!(ne)$);	\coordinate (c25y) at ($(sw)!0.509316770186336!(ne)$);
+\coordinate (c26x) at ($(sw)!0.333333333333333!(ne)$);	\coordinate (c26y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c27x) at ($(sw)!0.333333333333333!(ne)$);	\coordinate (c27y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c28x) at ($(sw)!0.333333333333333!(ne)$);	\coordinate (c28y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c29x) at ($(sw)!0.333333333333333!(ne)$);	\coordinate (c29y) at ($(sw)!0.527950310559006!(ne)$);
+\coordinate (c30x) at ($(sw)!0!(ne)$);	\coordinate (c30y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c31x) at ($(sw)!0!(ne)$);	\coordinate (c31y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c32x) at ($(sw)!0!(ne)$);	\coordinate (c32y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c33x) at ($(sw)!0!(ne)$);	\coordinate (c33y) at ($(sw)!0!(ne)$);
+\coordinate (c34x) at ($(sw)!0!(ne)$);	\coordinate (c34y) at ($(sw)!0!(ne)$);
+\coordinate (c35x) at ($(sw)!0!(ne)$);	\coordinate (c35y) at ($(sw)!0!(ne)$);
+\coordinate (c36x) at ($(sw)!0!(ne)$);	\coordinate (c36y) at ($(sw)!0!(ne)$);
+\coordinate (c37x) at ($(sw)!1!(ne)$);	\coordinate (c37y) at ($(sw)!0!(ne)$);
+\coordinate (c38x) at ($(sw)!1!(ne)$);	\coordinate (c38y) at ($(sw)!0!(ne)$);
+\coordinate (c39x) at ($(sw)!1!(ne)$);	\coordinate (c39y) at ($(sw)!0!(ne)$);
+\coordinate (c40x) at ($(sw)!1!(ne)$);	\coordinate (c40y) at ($(sw)!0!(ne)$);
+\coordinate (c41x) at ($(sw)!1!(ne)$);	\coordinate (c41y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c42x) at ($(sw)!1!(ne)$);	\coordinate (c42y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c43x) at ($(sw)!1!(ne)$);	\coordinate (c43y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c44x) at ($(sw)!1!(ne)$);	\coordinate (c44y) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (c45x) at ($(sw)!0.444444444444444!(ne)$);	\coordinate (c45y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c46x) at ($(sw)!0.444444444444444!(ne)$);	\coordinate (c46y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c47x) at ($(sw)!0.444444444444444!(ne)$);	\coordinate (c47y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c48x) at ($(sw)!0.555555555555556!(ne)$);	\coordinate (c48y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c49x) at ($(sw)!0.555555555555556!(ne)$);	\coordinate (c49y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c50x) at ($(sw)!0.555555555555556!(ne)$);	\coordinate (c50y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c51x) at ($(sw)!0.555555555555556!(ne)$);	\coordinate (c51y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (c52x) at ($(sw)!0.53015873015873!(ne)$);	\coordinate (c52y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c53x) at ($(sw)!0.53015873015873!(ne)$);	\coordinate (c53y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c54x) at ($(sw)!0.53015873015873!(ne)$);	\coordinate (c54y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c55x) at ($(sw)!0.53015873015873!(ne)$);	\coordinate (c55y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c56x) at ($(sw)!0.498412698412698!(ne)$);	\coordinate (c56y) at ($(sw)!0.397515527950311!(ne)$);
+\coordinate (c57x) at ($(sw)!0.498412698412698!(ne)$);	\coordinate (c57y) at ($(sw)!0.397515527950311!(ne)$);
+\coordinate (c58x) at ($(sw)!0.498412698412698!(ne)$);	\coordinate (c58y) at ($(sw)!0.397515527950311!(ne)$);
+\coordinate (c59x) at ($(sw)!0.498412698412698!(ne)$);	\coordinate (c59y) at ($(sw)!0.397515527950311!(ne)$);
+\coordinate (c60x) at ($(sw)!0.473015873015873!(ne)$);	\coordinate (c60y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c61x) at ($(sw)!0.473015873015873!(ne)$);	\coordinate (c61y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c62x) at ($(sw)!0.473015873015873!(ne)$);	\coordinate (c62y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c63x) at ($(sw)!0.473015873015873!(ne)$);	\coordinate (c63y) at ($(sw)!0.400626293995859!(ne)$);
+\coordinate (c64x) at ($(sw)!0.444444444444444!(ne)$);	\coordinate (c64y) at ($(sw)!0.406832298136645!(ne)$);
+\coordinate (b11x1) at ($(sw)!0.798148148148148!(ne)$);
+\coordinate (b11y1) at ($(sw)!0.722670807453416!(ne)$);
+\coordinate (b11x2) at ($(sw)!0.722222222222222!(ne)$);
+\coordinate (b11y2) at ($(sw)!0.994151138716356!(ne)$);
+\coordinate (b11x3) at ($(sw)!0.511111111111112!(ne)$);
+\coordinate (b11y3) at ($(sw)!1!(ne)$);
+\coordinate (b14x1) at ($(sw)!0.297671957671958!(ne)$);
+\coordinate (b14y1) at ($(sw)!1.00020703933747!(ne)$);
+\coordinate (b14x2) at ($(sw)!0.215714285714286!(ne)$);
+\coordinate (b14y2) at ($(sw)!0.723240165631469!(ne)$);
+\coordinate (b14x3) at ($(sw)!0.371428571428571!(ne)$);
+\coordinate (b14y3) at ($(sw)!0.593167701863355!(ne)$);
+\coordinate (b29x1) at ($(sw)!0.209100529100529!(ne)$);
+\coordinate (b29y1) at ($(sw)!0.531418219461698!(ne)$);
+\coordinate (b29x2) at ($(sw)!0.062804232804232!(ne)$);
+\coordinate (b29y2) at ($(sw)!0.455020703933747!(ne)$);
+\coordinate (b29x3) at ($(sw)!0!(ne)$);
+\coordinate (b29y3) at ($(sw)!0.350931677018634!(ne)$);
+\coordinate (b44x1) at ($(sw)!0.935185185185186!(ne)$);
+\coordinate (b44y1) at ($(sw)!0.454606625258799!(ne)$);
+\coordinate (b44x2) at ($(sw)!0.800899470899472!(ne)$);
+\coordinate (b44y2) at ($(sw)!0.523654244306418!(ne)$);
+\coordinate (b44x3) at ($(sw)!0.67936507936508!(ne)$);
+\coordinate (b44y3) at ($(sw)!0.527950310559006!(ne)$);
+\draw[line width=0.1pt, line cap=rect,line join=round]
+	(c1x |- c1y) -- (c2x |- c2y) -- (c3x |- c3y) -- (c4x |- c4y) -- (c5x |- c5y) -- (c6x |- c6y) -- (c7x |- c7y) -- (c8x |- c8y) -- (c9x |- c9y) -- (c10x |- c10y) -- (c11x |- c11y) .. controls (b11x1 |- b11y1) and (b11x2 |- b11y2) .. (b11x3 |- b11y3) -- (c12x |- c12y) -- (c13x |- c13y) -- (c14x |- c14y) .. controls (b14x1 |- b14y1) and (b14x2 |- b14y2) .. (b14x3 |- b14y3) -- (c15x |- c15y) -- (c16x |- c16y) -- (c17x |- c17y) -- (c18x |- c18y) -- (c19x |- c19y) -- (c20x |- c20y) -- (c21x |- c21y) -- (c22x |- c22y) -- (c23x |- c23y) -- (c24x |- c24y) -- (c25x |- c25y) -- (c26x |- c26y) -- (c27x |- c27y) -- (c28x |- c28y) -- (c29x |- c29y) .. controls (b29x1 |- b29y1) and (b29x2 |- b29y2) .. (b29x3 |- b29y3) -- (c30x |- c30y) -- (c31x |- c31y) -- (c32x |- c32y) -- (c33x |- c33y) -- (c34x |- c34y) -- (c35x |- c35y) -- (c36x |- c36y) -- (c37x |- c37y) -- (c38x |- c38y) -- (c39x |- c39y) -- (c40x |- c40y) -- (c41x |- c41y) -- (c42x |- c42y) -- (c43x |- c43y) -- (c44x |- c44y) .. controls (b44x1 |- b44y1) and (b44x2 |- b44y2) .. (b44x3 |- b44y3);
+	 (c45x |- c45y) -- (c46x |- c46y) -- (c47x |- c47y) -- (c48x |- c48y) -- (c49x |- c49y) -- (c50x |- c50y) -- (c51x |- c51y) -- (c52x |- c52y) -- (c53x |- c53y) -- (c54x |- c54y) -- (c55x |- c55y) -- (c56x |- c56y) -- (c57x |- c57y) -- (c58x |- c58y) -- (c59x |- c59y) -- (c60x |- c60y) -- (c61x |- c61y) -- (c62x |- c62y) -- (c63x |- c63y) -- (c64x |- c64y) -- cycle;
+	}
+]
+
+%%%%% resources %%%%%
+
+\tikzstyle{pool} = [
+	draw
+]
+
+\tikzstyle{pool label} = [
+	pool,
+	label={[rotate=90,anchor=north]left:\footnotesize #1},
+	fit margins={left=0.8em,right=0.1em,bottom=0.1em,top=0.1em},
+	path picture = {
+		\def\x{1.2em}
+		\draw ($(path picture bounding box.north west)+(\x,0)$) to ($(path picture bounding box.south west)+(\x,0)$);
+	}
+]
+
+%%%%% data %%%%%
+
+\tikzstyle{data object} = [
+	inner sep=0, 
+	minimum width=1em, 
+	minimum height=1.5em, 
+	path picture = {
+		\def\i{0.3em}
+		\draw (path picture bounding box.north west) to (path picture bounding box.south west) to (path picture bounding box.south east) |- ($(path picture bounding box.north east)+(-\i,-\i)$) |- cycle;
+		\draw ($(path picture bounding box.north east)+(-\i,0)$) to ($(path picture bounding box.north east)+(0,-\i)$);
+	}
+]
+
+\tikzstyle{data collection} = [
+	data object,
+	label={[anchor=south,inner sep=0]below:\tikzmultimarker}
+]
+
+\tikzstyle{data store} = [
+	database,
+	database segment height=0.3mm,
+	database bottom segment height=3mm,
+	database aspect ratio=0.25,
+	database radius=0.35cm
+]
+
+%adapted from https://tex.stackexchange.com/questions/442991/database-shape-in-tikz
+\makeatletter
+\tikzset{
+	database/.style={
+		path picture={
+			\draw (0, 1.5*\database@segmentheight+0.5*\database@bottomsegmentheight) circle [x radius=\database@radius,y radius=\database@aspectratio*\database@radius];
+			\draw (-\database@radius, 0.5*\database@segmentheight+0.5*\database@bottomsegmentheight) arc [start angle=180,end angle=360,x radius=\database@radius, y radius=\database@aspectratio*\database@radius];
+			\draw (-\database@radius,-0.5*\database@segmentheight+0.5*\database@bottomsegmentheight) arc [start angle=180,end angle=360,x radius=\database@radius, y radius=\database@aspectratio*\database@radius];
+			\draw (-\database@radius,1.5*\database@segmentheight+0.5*\database@bottomsegmentheight) 
+			to ++(0,-2*\database@segmentheight-\database@bottomsegmentheight) 
+			arc [start angle=180,end angle=360,x radius=\database@radius, y radius=\database@aspectratio*\database@radius] 
+			to ++(0,2*\database@segmentheight+\database@bottomsegmentheight);
+		},
+		minimum width=2*\database@radius + 2*\pgflinewidth,
+		minimum height=2*\database@segmentheight + \database@bottomsegmentheight + 2*\database@aspectratio*\database@radius + 2*\pgflinewidth,
+	},
+	database segment height/.store in=\database@segmentheight,
+	database bottom segment height/.store in=\database@bottomsegmentheight,
+    database radius/.store in=\database@radius,
+    database aspect ratio/.store in=\database@aspectratio,
+    database segment height=0.1cm,
+    database radius=0.25cm,
+    database aspect ratio=0.35,
+}
+\makeatother

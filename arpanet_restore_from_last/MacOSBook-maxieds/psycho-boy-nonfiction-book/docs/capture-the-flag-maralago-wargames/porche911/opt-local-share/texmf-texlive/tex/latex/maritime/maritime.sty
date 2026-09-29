@@ -1,0 +1,671 @@
+% =============================================================================
+% worldflags.sty - International Maritime Signal Flags with TikZ
+% (c) N. E. Davis 2025-02-15
+% =============================================================================
+\ProvidesPackage{maritime}[2025/02/15 v1.0 International Maritime Signal Flags with TikZ]
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+\RequirePackage{etex}
+\RequirePackage{xkeyval}
+\RequirePackage{graphicx}
+\RequirePackage{xstring}
+\usetikzlibrary{calc,shadows,shapes,shapes.symbols,positioning,math,decorations.text}
+
+% ----------------------------------------------------------------------------
+% Default values
+% ----------------------------------------------------------------------------
+\makeatletter
+\newdimen\fl@gwidth
+\newdimen\fl@glength
+\newdimen\cutdepth
+\newdimen\saltiredepth
+
+\def\setflagdimensions{%
+    \fl@gwidth=15ex
+    \fl@glength=\fl@gwidth
+    \cutdepth=0.75\fl@gwidth
+    % 1.414 / 10 = 0.1414
+    \saltiredepth=0.1414\fl@gwidth
+}
+\def\fl@gvariant{0} % 2022-07-09
+\def\fl@gstretch{0}
+\def\fr@mecolor{black!60}
+\def\gr@dcolor{black!80}
+\newif\if@mbl@m\@mbl@mtrue
+\newif\if@rid\@ridfalse
+\newif\ifn@@mbl@m\n@@mbl@mtrue
+\def\view@ngle{0}
+\def\hang@ngle{0}
+
+% ----------------------------------------------------------------------------
+% Colors
+% ----------------------------------------------------------------------------
+\definecolor{gridcolor}{rgb}{0.8,0.8,0.8}
+
+\definecolor{argent}{rgb}{1.0,1.0,1.0}
+\definecolor{or}{rgb}{1.0,1.0,0.0}
+\definecolor{gules}{rgb}{1.0,0.0,0.0}
+\definecolor{azure}{rgb}{0.0,0.5,1.0}
+\definecolor{vert}{rgb}{0.0,0.5,0.0}
+\definecolor{sable}{rgb}{0.0,0.0,0.0}
+
+% ----------------------------------------------------------------------------
+% Base flag
+% ----------------------------------------------------------------------------
+% A Alfa, swallowtailed per pale argent and azure
+\newcommand{\flagAname}{Alfa}
+\newcommand{\flagAblazon}{swallowtailed per pale argent and azure}
+\newcommand{\flagA}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [azure] (0.5\fl@gwidth,0)
+                  -- (\fl@gwidth,0)
+                  -- (\cutdepth,0.5\fl@glength)
+                  -- (\fl@gwidth,\fl@glength)
+                  -- (0.5\fl@gwidth,\fl@glength)
+                  -- cycle;
+    \draw [gridcolor] (0,0)
+                      -- (\fl@gwidth,0)
+                      -- (\cutdepth,0.5\fl@glength)
+                      -- (\fl@gwidth,\fl@glength)
+                      -- (0,\fl@glength)
+                      -- cycle;
+  \end{tikzpicture}%
+}
+
+% B Bravo, swallowtailed gules
+\newcommand{\flagBname}{Bravo}
+\newcommand{\flagBblazon}{swallowtailed gules}
+\newcommand{\flagB}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (00,0)
+                  -- (\fl@gwidth,0)
+                  -- (\cutdepth,0.5\fl@glength)
+                  -- (\fl@gwidth,\fl@glength)
+                  -- (0,\fl@glength)
+                  -- cycle;
+    \draw [gridcolor] (0,0)
+                      -- (\fl@gwidth,0)
+                      -- (\cutdepth,0.5\fl@glength)
+                      -- (\fl@gwidth,\fl@glength)
+                      -- (0,\fl@glength)
+                      -- cycle;
+  \end{tikzpicture}%
+}
+
+% C Charlie, azure a fess gules fimbriated argent
+\newcommand{\flagCname}{Charlie}
+\newcommand{\flagCblazon}{azure a fess gules fimbriated argent}
+\newcommand{\flagC}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,0.2\fl@glength);
+    \fill [argent] (0,0.2\fl@glength) rectangle (\fl@gwidth,0.4\fl@glength);
+    \fill [gules] (0,0.4\fl@glength) rectangle (\fl@gwidth,0.6\fl@glength);
+    \fill [argent] (0,0.6\fl@glength) rectangle (\fl@gwidth,0.8\fl@glength);
+    \fill [azure] (0,0.8\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% D Delta, gules a pale argent
+\newcommand{\flagDname}{Delta}
+\newcommand{\flagDblazon}{gules a pale argent}
+\newcommand{\flagD}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,0.25\fl@glength);
+    \fill [azure] (0,0.25\fl@glength) rectangle (\fl@gwidth,0.75\fl@glength);
+    \fill [or] (0,0.75\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% E Echo, per fess azure and gules
+\newcommand{\flagEname}{Echo}
+\newcommand{\flagEblazon}{per fess azure and gules}
+\newcommand{\flagE}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (\fl@gwidth,0.5\fl@glength);
+    \fill [azure] (0,0.5\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% F Foxtrot, argent, a lozenge throughout gules
+\newcommand{\flagFname}{Foxtrot}
+\newcommand{\flagFblazon}{argent, a lozenge throughout gules}
+\newcommand{\flagF}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [gules] (0.5\fl@gwidth,0)
+                  -- (\fl@gwidth,0.5\fl@glength)
+                  -- (0.5\fl@gwidth,\fl@glength)
+                  -- (0,0.5\fl@glength)
+                  -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% G Golf, Paly of six or and azure
+\newcommand{\flagGname}{Golf}
+\newcommand{\flagGblazon}{Paly of six or and azure}
+\newcommand{\flagG}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (0.1666667\fl@gwidth,\fl@glength);
+    \fill [azure] (0.1666667\fl@gwidth,0) rectangle (0.3333333\fl@gwidth,\fl@glength);
+    \fill [or] (0.3333333\fl@gwidth,0) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [azure] (0.5\fl@gwidth,0) rectangle (0.6666667\fl@gwidth,\fl@glength);
+    \fill [or] (0.6666667\fl@gwidth,0) rectangle (0.8333333\fl@gwidth,\fl@glength);
+    \fill [azure] (0.8333333\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% H Hotel, per pale argent and gules
+\newcommand{\flagHname}{Hotel}
+\newcommand{\flagHblazon}{per pale argent and gules}
+\newcommand{\flagH}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [gules] (0.5\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% I India, or, a pellet
+\newcommand{\flagIname}{India}
+\newcommand{\flagIblazon}{or, a pellet}
+\newcommand{\flagI}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [sable] (0.5\fl@gwidth,0.5\fl@glength) circle (0.25\fl@gwidth);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% J Juliet, azure, a fess argent
+\newcommand{\flagJname}{Juliet}
+\newcommand{\flagJblazon}{azure, a fess argent}
+\newcommand{\flagJ}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,0.333333*\fl@glength);
+    \fill [argent] (0,0.333333*\fl@glength) rectangle (\fl@gwidth,0.666667*\fl@glength);
+    \fill [azure] (0,0.666667*\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% K Kilo, per pale or and azure
+\newcommand{\flagKname}{Kilo}
+\newcommand{\flagKblazon}{per pale or and azure}
+\newcommand{\flagK}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [azure] (0.5\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% L Lima, quarterly or and sable
+\newcommand{\flagLname}{Lima}
+\newcommand{\flagLblazon}{quarterly or and sable}
+\newcommand{\flagL}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [sable] (0,0) rectangle (0.5\fl@gwidth,0.5\fl@glength);
+    \fill [or] (0.5\fl@gwidth,0) rectangle (\fl@gwidth,0.5\fl@glength);
+    \fill [or] (0,0.5\fl@glength) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [sable] (0.5\fl@gwidth,0.5\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% M Mike, azure, a saltire argent
+\newcommand{\flagMname}{Mike}
+\newcommand{\flagMblazon}{azure, a saltire argent}
+\newcommand{\flagM}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [argent] (0,0)
+                   -- (\saltiredepth,0)
+                   -- (\fl@gwidth,\fl@glength-\saltiredepth)
+                   -- (\fl@gwidth,\fl@glength)
+                   -- (\fl@gwidth-\saltiredepth,\fl@glength)
+                   -- (0,\saltiredepth)
+                   -- cycle;
+    \fill [argent] (0,\fl@glength)
+                   -- (\saltiredepth,\fl@glength)
+                   -- (\fl@gwidth,\saltiredepth)
+                   -- (\fl@gwidth,0)
+                   -- (\fl@gwidth-\saltiredepth,0)
+                   -- (0,\fl@glength-\saltiredepth)
+                   -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% N November, chequy of sixteen azure and argent
+\newcommand{\flagNname}{November}
+\newcommand{\flagNblazon}{chequy of sixteen azure and argent}
+\newcommand{\flagN}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (0.25\fl@gwidth,0.25\fl@glength);
+    \fill [azure] (0.25\fl@gwidth,0) rectangle (0.5\fl@gwidth,0.25\fl@glength);
+    \fill [argent] (0.5\fl@gwidth,0) rectangle (0.75\fl@gwidth,0.25\fl@glength);
+    \fill [azure] (0.75\fl@gwidth,0) rectangle (\fl@gwidth,0.25\fl@glength);
+    \fill [azure] (0,0.25\fl@glength) rectangle (0.25\fl@gwidth,0.5\fl@glength);
+    \fill [argent] (0.25\fl@gwidth,0.25\fl@glength) rectangle (0.5\fl@gwidth,0.5\fl@glength);
+    \fill [azure] (0.5\fl@gwidth,0.25\fl@glength) rectangle (0.75\fl@gwidth,0.5\fl@glength);
+    \fill [argent] (0.75\fl@gwidth,0.25\fl@glength) rectangle (\fl@gwidth,0.5\fl@glength);
+    \fill [argent] (0,0.5\fl@glength) rectangle (0.25\fl@gwidth,0.75\fl@glength);
+    \fill [azure] (0.25\fl@gwidth,0.5\fl@glength) rectangle (0.5\fl@gwidth,0.75\fl@glength);
+    \fill [argent] (0.5\fl@gwidth,0.5\fl@glength) rectangle (0.75\fl@gwidth,0.75\fl@glength);
+    \fill [azure] (0.75\fl@gwidth,0.5\fl@glength) rectangle (\fl@gwidth,0.75\fl@glength);
+    \fill [azure] (0,0.75\fl@glength) rectangle (0.25\fl@gwidth,\fl@glength);
+    \fill [argent] (0.25\fl@gwidth,0.75\fl@glength) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [azure] (0.5\fl@gwidth,0.75\fl@glength) rectangle (0.75\fl@gwidth,\fl@glength);
+    \fill [argent] (0.75\fl@gwidth,0.75\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% O Oscar, per bend gules and or
+\newcommand{\flagOname}{Oscar}
+\newcommand{\flagOblazon}{per bend gules and or}
+\newcommand{\flagO}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) -- (0,\fl@glength) -- (\fl@gwidth,0) -- cycle;
+    \fill [gules] (0,\fl@glength) -- (\fl@gwidth,\fl@glength) -- (\fl@gwidth,0) -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% P Papa, azure, an inescutcheon argent
+\newcommand{\flagPname}{Papa}
+\newcommand{\flagPblazon}{azure, an inescutcheon argent}
+\newcommand{\flagP}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [argent] (0.333333\fl@gwidth,0.333333\fl@glength) rectangle (0.666667\fl@gwidth,0.666667\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% Q Quebec, or
+\newcommand{\flagQname}{Quebec}
+\newcommand{\flagQblazon}{or}
+\newcommand{\flagQ}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% R Romeo, gules, a cross or
+\newcommand{\flagRname}{Romeo}
+\newcommand{\flagRblazon}{gules, a cross or}
+\newcommand{\flagR}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [or] (0.4\fl@gwidth,0) rectangle (0.6\fl@gwidth,\fl@glength);
+    \fill [or] (0,0.4\fl@glength) rectangle (\fl@gwidth,0.6\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% S Sierra, argent, an inescutcheon azure
+\newcommand{\flagSname}{Sierra}
+\newcommand{\flagSblazon}{argent, an inescutcheon azure}
+\newcommand{\flagS}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [azure] (0.333333\fl@gwidth,0.333333\fl@glength) rectangle (0.666667\fl@gwidth,0.666667\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% T Tango, tierced in pale gules, argent and azure
+\newcommand{\flagTname}{Tango}
+\newcommand{\flagTblazon}{tierced in pale gules, argent and azure}
+\newcommand{\flagT}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (0.333333\fl@gwidth,\fl@glength);
+    \fill [argent] (0.333333\fl@gwidth,0) rectangle (0.666667\fl@gwidth,\fl@glength);
+    \fill [azure] (0.666667\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% U Uniform, quarterly gules and argent
+\newcommand{\flagUname}{Uniform}
+\newcommand{\flagUblazon}{quarterly gules and argent}
+\newcommand{\flagU}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (0.5\fl@gwidth,0.5\fl@glength);
+    \fill [gules] (0.5\fl@gwidth,0) rectangle (\fl@gwidth,0.5\fl@glength);
+    \fill [gules] (0,0.5\fl@glength) rectangle (0.5\fl@gwidth,\fl@glength);
+    \fill [argent] (0.5\fl@gwidth,0.5\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% V Victor, argent, a saltire gules
+\newcommand{\flagVname}{Victor}
+\newcommand{\flagVblazon}{argent, a saltire gules}
+\newcommand{\flagV}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [gules] (0,0)
+                  -- (\saltiredepth,0)
+                  -- (\fl@gwidth,\fl@glength-\saltiredepth)
+                  -- (\fl@gwidth,\fl@glength)
+                  -- (\fl@gwidth-\saltiredepth,\fl@glength)
+                  -- (0,\saltiredepth)
+                  -- cycle;
+    \fill [gules] (0,\fl@glength)
+                  -- (\saltiredepth,\fl@glength)
+                  -- (\fl@gwidth,\saltiredepth)
+                  -- (\fl@gwidth,0)
+                  -- (\fl@gwidth-\saltiredepth,0)
+                  -- (0,\fl@glength-\saltiredepth)
+                  -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% W Whiskey, azure, an inescutcheon gules fimbriated argent
+\newcommand{\flagWname}{Whiskey}
+\newcommand{\flagWblazon}{azure, an inescutcheon gules fimbriated argent}
+\newcommand{\flagW}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [argent] (0.2\fl@gwidth,0.2\fl@glength) rectangle (0.8\fl@gwidth,0.8\fl@glength);
+    \fill [gules] (0.4\fl@gwidth,0.4\fl@glength) rectangle (0.6\fl@gwidth,0.6\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% X X-ray, argent, a cross azure
+\newcommand{\flagXname}{X-ray}
+\newcommand{\flagXblazon}{argent, a cross azure}
+\newcommand{\flagX}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [azure] (0.4\fl@gwidth,0) rectangle (0.6\fl@gwidth,\fl@glength);
+    \fill [azure] (0,0.4\fl@glength) rectangle (\fl@gwidth,0.6\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% Y Yankee, bendy sinister of ten or and gules
+\newcommand{\flagYname}{Yankee}
+\newcommand{\flagYblazon}{bendy sinister of ten or and gules}
+\newcommand{\flagY}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [gules] (0,0.8\fl@glength)
+                  -- (0.2\fl@gwidth,\fl@glength)
+                  -- (0.4\fl@gwidth,\fl@glength)
+                  -- (0,0.6\fl@glength)
+                  -- cycle;
+    \fill [gules] (0,0.4\fl@glength)
+                  -- (0.6\fl@gwidth,\fl@glength)
+                  -- (0.8\fl@gwidth,\fl@glength)
+                  -- (0,0.2\fl@glength)
+                  -- cycle;
+    \fill [gules] (0,0)
+                  -- (\fl@gwidth,\fl@glength)
+                  -- (\fl@gwidth,0.8\fl@glength)
+                  -- (0.2\fl@gwidth,0)
+                  -- cycle;
+    \fill [gules] (0.4\fl@gwidth,0)
+                  -- (\fl@gwidth,0.6\fl@glength)
+                  -- (\fl@gwidth,0.4\fl@glength)
+                  -- (0.6\fl@gwidth,0)
+                  -- cycle;
+    \fill [gules] (0.8\fl@gwidth,0)
+                  -- (\fl@gwidth,0.2\fl@glength)
+                  -- (\fl@gwidth,0)
+                  -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% Z Zulu, per saltire or, sable, gules, and azure
+\newcommand{\flagZname}{Zulu}
+\newcommand{\flagZblazon}{per saltire or, sable, gules, and azure}
+\newcommand{\flagZ}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [sable] (0,0) -- (0,\fl@glength) -- (0.5\fl@gwidth,0.5\fl@glength) -- cycle;
+    \fill [gules] (0,0) -- (\fl@gwidth,0) -- (0.5\fl@gwidth,0.5\fl@glength) -- cycle;
+    \fill [azure] (\fl@gwidth,0) -- (\fl@gwidth,\fl@glength) -- (0.5\fl@gwidth,0.5\fl@glength) -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 0 Zero, argent, five crosses hummetty azure in saltire
+\newcommand{\flagZeroName}{Zero}
+\newcommand{\flagZeroBlazon}{argent, five crosses hummetty azure in saltire}
+\newcommand{\flagZero}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    %
+    \fill [azure] (0.066667\fl@gwidth,0.066667\fl@glength) rectangle (0.266667\fl@gwidth,0.266667\fl@glength);
+    \fill [argent] (0.066667\fl@gwidth,0.066667\fl@glength) rectangle (0.133333\fl@gwidth,0.133333\fl@glength);
+    \fill [argent] (0.066667\fl@gwidth,0.2\fl@glength) rectangle (0.133333\fl@gwidth,0.266667\fl@glength);
+    \fill [argent] (0.2\fl@gwidth,0.066667\fl@glength) rectangle (0.266667\fl@gwidth,0.133333\fl@glength);
+    \fill [argent] (0.2\fl@gwidth,0.2\fl@glength) rectangle (0.266667\fl@gwidth,0.266667\fl@glength);
+    \draw [argent] (0.066667\fl@gwidth,0.066667\fl@glength) rectangle (0.266667\fl@gwidth,0.266667\fl@glength);
+    %
+    \fill [azure] (0.066667\fl@gwidth,0.733333\fl@glength) rectangle (0.266667\fl@gwidth,0.933333\fl@glength);
+    \fill [argent] (0.066667\fl@gwidth,0.733333\fl@glength) rectangle (0.133333\fl@gwidth,0.8\fl@glength);
+    \fill [argent] (0.066667\fl@gwidth,0.866667\fl@glength) rectangle (0.133333\fl@gwidth,0.933333\fl@glength);
+    \fill [argent] (0.2\fl@gwidth,0.733333\fl@glength) rectangle (0.266667\fl@gwidth,0.8\fl@glength);
+    \fill [argent] (0.2\fl@gwidth,0.866667\fl@glength) rectangle (0.266667\fl@gwidth,0.933333\fl@glength);
+    \draw [argent] (0.066667\fl@gwidth,0.733333\fl@glength) rectangle (0.266667\fl@gwidth,0.933333\fl@glength);
+    %
+    \fill [azure] (0.733333\fl@gwidth,0.066667\fl@glength) rectangle (0.933333\fl@gwidth,0.266667\fl@glength);
+    \fill [argent] (0.733333\fl@gwidth,0.066667\fl@glength) rectangle (0.8\fl@gwidth,0.133333\fl@glength);
+    \fill [argent] (0.733333\fl@gwidth,0.2\fl@glength) rectangle (0.8\fl@gwidth,0.266667\fl@glength);
+    \fill [argent] (0.866667\fl@gwidth,0.066667\fl@glength) rectangle (0.933333\fl@gwidth,0.133333\fl@glength);
+    \fill [argent] (0.866667\fl@gwidth,0.2\fl@glength) rectangle (0.933333\fl@gwidth,0.266667\fl@glength);
+    \draw [argent] (0.733333\fl@gwidth,0.066667\fl@glength) rectangle (0.933333\fl@gwidth,0.266667\fl@glength);
+    %
+    \fill [azure] (0.733333\fl@gwidth,0.733333\fl@glength) rectangle (0.933333\fl@gwidth,0.933333\fl@glength);
+    \fill [argent] (0.733333\fl@gwidth,0.733333\fl@glength) rectangle (0.8\fl@gwidth,0.8\fl@glength);
+    \fill [argent] (0.733333\fl@gwidth,0.866667\fl@glength) rectangle (0.8\fl@gwidth,0.933333\fl@glength);
+    \fill [argent] (0.866667\fl@gwidth,0.733333\fl@glength) rectangle (0.933333\fl@gwidth,0.8\fl@glength);
+    \fill [argent] (0.866667\fl@gwidth,0.866667\fl@glength) rectangle (0.933333\fl@gwidth,0.933333\fl@glength);
+    \draw [argent] (0.733333\fl@gwidth,0.733333\fl@glength) rectangle (0.933333\fl@gwidth,0.933333\fl@glength);
+    % cross centered on 0.5\fl@gwidth, 0.5\fl@glength
+    \fill [azure] (0.4\fl@gwidth,0.4\fl@glength) rectangle (0.6\fl@gwidth,0.6\fl@glength);
+    \fill [argent] (0.4\fl@gwidth,0.4\fl@glength) rectangle (0.466667\fl@gwidth,0.466667\fl@glength);
+    \fill [argent] (0.4\fl@gwidth,0.533333\fl@glength) rectangle (0.466667\fl@gwidth,0.6\fl@glength);
+    \fill [argent] (0.533333\fl@gwidth,0.4\fl@glength) rectangle (0.6\fl@gwidth,0.466667\fl@glength);
+    \fill [argent] (0.533333\fl@gwidth,0.533333\fl@glength) rectangle (0.6\fl@gwidth,0.6\fl@glength);
+    \draw [argent] (0.4\fl@gwidth,0.4\fl@glength) rectangle (0.6\fl@gwidth,0.6\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 1 One, gules, a fess or
+\newcommand{\flagOneName}{One}
+\newcommand{\flagOneBlazon}{gules, a fess or}
+\newcommand{\flagOne}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (\fl@gwidth,0.333333\fl@glength);
+    \fill [or] (0,0.333333\fl@glength) rectangle (\fl@gwidth,0.666667\fl@glength);
+    \fill [gules] (0,0.666667\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 2 Two, or, a fess gules
+\newcommand{\flagTwoName}{Two}
+\newcommand{\flagTwoBlazon}{or, a fess gules}
+\newcommand{\flagTwo}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,0.333333\fl@glength);
+    \fill [gules] (0,0.333333\fl@glength) rectangle (\fl@gwidth,0.666667\fl@glength);
+    \fill [or] (0,0.666667\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 3 Three, azure, a fess gules
+\newcommand{\flagThreeName}{Three}
+\newcommand{\flagThreeBlazon}{azure, a fess gules}
+\newcommand{\flagThree}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (\fl@gwidth,0.333333\fl@glength);
+    \fill [gules] (0,0.333333\fl@glength) rectangle (\fl@gwidth,0.666667\fl@glength);
+    \fill [azure] (0,0.666667\fl@glength) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 4 Four, gules, a saltire argent
+\newcommand{\flagFourName}{Four}
+\newcommand{\flagFourBlazon}{gules, a saltire argent}
+\newcommand{\flagFour}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [argent] (0,0)
+                   -- (\saltiredepth,0)
+                   -- (\fl@gwidth,\fl@glength-\saltiredepth)
+                   -- (\fl@gwidth,\fl@glength)
+                   -- (\fl@gwidth-\saltiredepth,\fl@glength)
+                   -- (0,\saltiredepth)
+                   -- cycle;
+    \fill [argent] (0,\fl@glength)
+                   -- (\saltiredepth,\fl@glength)
+                   -- (\fl@gwidth,\saltiredepth)
+                   -- (\fl@gwidth,0)
+                   -- (\fl@gwidth-\saltiredepth,0)
+                   -- (0,\fl@glength-\saltiredepth)
+                   -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 5 Five, or, a saltire azure
+\newcommand{\flagFiveName}{Five}
+\newcommand{\flagFiveBlazon}{or, a saltire azure}
+\newcommand{\flagFive}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [azure] (0,0)
+                   -- (\saltiredepth,0)
+                   -- (\fl@gwidth,\fl@glength-\saltiredepth)
+                   -- (\fl@gwidth,\fl@glength)
+                   -- (\fl@gwidth-\saltiredepth,\fl@glength)
+                   -- (0,\saltiredepth)
+                   -- cycle;
+    \fill [azure] (0,\fl@glength)
+                   -- (\saltiredepth,\fl@glength)
+                   -- (\fl@gwidth,\saltiredepth)
+                   -- (\fl@gwidth,0)
+                   -- (\fl@gwidth-\saltiredepth,0)
+                   -- (0,\fl@glength-\saltiredepth)
+                   -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 6 Six, bendy sinister of seven argent and azure
+\newcommand{\flagSixName}{Six}
+\newcommand{\flagSixBlazon}{bendy sinister of seven argent and azure}
+\newcommand{\flagSix}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [argent] (0,0) rectangle (\fl@gwidth,\fl@glength);
+    \fill [azure] (0,0.142857\fl@glength)
+                  -- (0.857143\fl@gwidth,\fl@glength)
+                  -- (\fl@gwidth,\fl@glength)
+                  -- (\fl@gwidth,0.857143\fl@glength)
+                  -- (0.142857\fl@gwidth,0)
+                  -- (0,0)
+                  -- cycle;
+    \fill [azure] (0,0.428571\fl@glength)
+                  -- (0.571429\fl@gwidth,\fl@glength)
+                  -- (0.285714\fl@gwidth,\fl@glength)
+                  -- (0,0.714286\fl@glength)
+                  -- cycle;
+    \fill [azure] (\fl@gwidth,0.571429\fl@glength)
+                  -- (\fl@gwidth,0.285714\fl@glength)
+                  -- (0.714286\fl@gwidth,0)
+                  -- (0.428571\fl@gwidth,0)
+                  -- cycle;
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 7 Seven, gules, a pale argent
+\newcommand{\flagSevenName}{Seven}
+\newcommand{\flagSevenBlazon}{gules, a pale argent}
+\newcommand{\flagSeven}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [gules] (0,0) rectangle (0.333333\fl@gwidth,\fl@glength);
+    \fill [argent] (0.333333\fl@gwidth,0) rectangle (0.666667\fl@gwidth,\fl@glength);
+    \fill [gules] (0.666667\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 8 Eight, or, a pale azure
+\newcommand{\flagEightName}{Eight}
+\newcommand{\flagEightBlazon}{or, a pale azure}
+\newcommand{\flagEight}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [or] (0,0) rectangle (0.333333\fl@gwidth,\fl@glength);
+    \fill [azure] (0.333333\fl@gwidth,0) rectangle (0.666667\fl@gwidth,\fl@glength);
+    \fill [or] (0.666667\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}
+
+% 9 Nine, azure, a pale argent
+\newcommand{\flagNineName}{Nine}
+\newcommand{\flagNineBlazon}{azure, a pale argent}
+\newcommand{\flagNine}{%
+  \setflagdimensions
+  \begin{tikzpicture}
+    \fill [azure] (0,0) rectangle (0.333333\fl@gwidth,\fl@glength);
+    \fill [argent] (0.333333\fl@gwidth,0) rectangle (0.666667\fl@gwidth,\fl@glength);
+    \fill [azure] (0.666667\fl@gwidth,0) rectangle (\fl@gwidth,\fl@glength);
+    \draw [gridcolor] (0,0) rectangle (\fl@gwidth,\fl@glength);
+  \end{tikzpicture}%
+}

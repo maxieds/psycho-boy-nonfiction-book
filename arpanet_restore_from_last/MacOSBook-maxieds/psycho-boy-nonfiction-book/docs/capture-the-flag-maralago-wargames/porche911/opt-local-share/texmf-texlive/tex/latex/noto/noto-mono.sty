@@ -1,0 +1,150 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{noto-mono}
+    [2022/09/11 (Bob Tennent)  Supports NotoSansMono fonts for all LaTeX engines.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+
+\newif\ifnotomono@ttf 
+\ifxetex
+  \notomono@ttftrue
+\else\ifluatex
+  \notomono@ttftrue
+\else  % [pdf]LaTeX
+  \notomono@ttffalse
+\fi\fi
+
+\newcommand*{\NotoSansMono@scale}{1}
+\DeclareOptionX{scaled}{\renewcommand*{\NotoSansMono@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\NotoSansMono@scale}{#1}}
+
+
+\DeclareOptionX{type1}{\notomono@ttffalse}
+
+\newif\ifnotomono@oldstyle \notomono@oldstylefalse
+\newif\ifnotomono@proportional \notomono@proportionalfalse
+
+\DeclareOptionX{lining}{\notomono@oldstylefalse}
+\DeclareOptionX{lf}{\notomono@oldstylefalse}
+\DeclareOptionX{tabular}{\notomono@proportionalfalse}
+\DeclareOptionX{tf}{\notomono@proportionalfalse}
+\DeclareOptionX{proportional}{\notomono@proportionaltrue}
+\DeclareOptionX{pf}{\notomono@proportionaltrue}
+\DeclareOptionX{oldstyle}{\notomono@oldstyletrue}
+\DeclareOptionX{osf}{\notomono@oldstyletrue}
+
+\newif\ifnotomono@thin \notomono@thinfalse
+\newif\ifnotomono@extralight \notomono@extralightfalse
+\newif\ifnotomono@light \notomono@lightfalse
+\newif\ifnotomono@medium \notomono@mediumfalse
+\newif\ifnotomono@semibold \notomono@semiboldfalse
+\newif\ifnotomono@extrabold \notomono@extraboldfalse
+\newif\ifnotomono@black \notomono@blackfalse
+
+\DeclareOptionX{thin}{\notomono@thintrue}
+\DeclareOptionX{extralight}{\notomono@extralighttrue}
+\DeclareOptionX{light}{\notomono@lighttrue}
+\DeclareOptionX{regular}{\notomono@lightfalse\notomono@thinfalse\notomono@extralightfalse\notomono@mediumfalse}
+\DeclareOptionX{medium}{\notomono@mediumtrue}
+\DeclareOptionX{semibold}{\notomono@semiboldtrue}
+\DeclareOptionX{extrabold}{\notomono@extraboldtrue}
+\DeclareOptionX{black}{\notomono@blacktrue}
+\DeclareOptionX{bold}{\notomono@blackfalse\notomono@semiboldfalse\notomono@extraboldfalse}
+
+\ProcessOptionsX\relax
+
+\ifnotomono@ttf
+  \def\notomono@boldstyle{Bold}
+  \ifnotomono@semibold\def\notomono@boldstyle{SemiBold}\fi
+  \ifnotomono@extrabold\def\notomono@boldstyle{ExtraBold}\fi
+  \ifnotomono@black\def\notomono@boldstyle{Black}\fi
+  \def\notomono@regstyle{Regular}
+  \ifnotomono@thin\def\notomono@regstyle{Thin}\fi
+  \ifnotomono@extralight\def\notomono@regstyle{ExtraLight}\fi
+  \ifnotomono@light\def\notomono@regstyle{Light}\fi
+  \ifnotomono@medium\def\notomono@regstyle{Medium}\fi
+
+\else % type1
+  \def\bfseries@tt{bold}\def\mdseries@tt{m}
+  \ifnotomono@semibold\def\bfseries@tt{sb}\fi
+  \ifnotomono@extrabold\bfseries@tt{eb}\fi
+  \ifnotomono@black\def\bfseries@tt{ub}\fi
+  \ifnotomono@thin\def\mdseries@tt{ul}\fi
+  \ifnotomono@extralight\def\mdseries@tt{el}\fi
+  \ifnotomono@light\def\mdseries@tt{l}\fi
+  \ifnotomono@medium\def\mdseries@tt{medium}\fi
+
+\fi
+
+\ifnotomono@ttf
+  
+  \def\notomono@figurestyle{Lining}
+  \ifnotomono@oldstyle\def\notomono@figurestyle{OldStyle}\fi
+  \def\notomono@figurealign{Monospaced}
+  \ifnotomono@proportional\def\notomono@figurealign{Proportional}\fi
+
+\else % type1
+
+  \def\notomono@figurestyle{LF}
+  \ifnotomono@oldstyle\def\notomono@figurestyle{OsF}\fi
+  \def\notomono@figurealign{T}
+  \ifnotomono@proportional\def\notomono@figurealign{}\fi
+
+\fi
+
+\ifnotomono@ttf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+  \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+  \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+  \def\sufigures{\@nomath\sufigures
+      \fontfigurestyle{superior}\selectfont}
+\fi
+
+\ifnotomono@ttf
+  \def\notomono@regular{Regular}
+  \defaultfontfeatures{
+        HyphenChar=None, 
+        Extension = .ttf }
+  \def\notomono@Lining{Lining}
+  \setmonofont 
+    [ Numbers   = {\ifx\notomono@figurestyle\notomono@Lining\else\notomono@figurestyle\fi} ,
+      Scale     = \NotoSansMono@scale ,
+      UprightFont    = *-\notomono@regstyle ,
+      BoldFont       = *-\notomono@boldstyle , 
+    ]
+    {NotoSansMono}
+    \let\notomonofamily\ttdefault  
+  \newfontfamily\notomono 
+      [ Numbers   = {\ifx\notomono@figurestyle\notomono@Lining\else\notomono@figurestyle\fi} ,
+        Scale     = \NotoSansMono@scale ,
+        UprightFont    = *-\notomono@regstyle ,
+        BoldFont       = *-\notomono@boldstyle , 
+      ]
+      {NotoSansMono}
+   \providecommand\sufigures{\addfontfeatures{VerticalPosition=Superior}}
+\else % type1
+  \def\notomonofamily{NotoSansMono-T\notomono@figurestyle}
+  \newcommand*\notomono{\fontfamily{\notomonofamily}\selectfont}
+  \def\ttdefault{\notomonofamily} 
+\fi
+
+\DeclareTextFontCommand{\textsu}{\sufigures}
+
+
+% LGR
+
+\def\notomono@figurestyle{LF}
+\ifnotomono@oldstyle\def\notomono@figurestyle{OsF}\fi
+\def\notomono@figurealign{T}
+\ifnotomono@proportional\def\notomono@figurealign{}\fi
+
+\newcommand*\notomonolgr{\fontencoding{LGR}\fontfamily{NotoSansMono-\notomono@figurealign\notomono@figurestyle}\selectfont}
+
+
+\ifnotomono@ttf
+  % turn off defaults in case other fonts are selected:
+  \defaultfontfeatures{}
+\fi
+
+\endinput

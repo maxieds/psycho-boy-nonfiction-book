@@ -1,0 +1,73 @@
+%%
+%% This is file `memoize-beamer.code.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% memoize.dtx  (with options: `beamer')
+%% 
+%% This file is a part of Memoize, a TeX package for externalization of
+%% graphics and memoization of compilation results in general, available at
+%% https://ctan.org/pkg/memoize and https://github.com/sasozivanovic/memoize.
+%%
+%% Copyright (c) 2020- Saso Zivanovic <saso.zivanovic@guest.arnes.si>
+%%                     (Sa\v{s}o \v{Z}ivanovi\'{c})
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or (at
+%% your option) any later version.  The latest version of this license is in
+%% https://www.latex-project.org/lppl.txt and version 1.3c or later is part of
+%% all distributions of LaTeX version 2008 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is Saso Zivanovic.
+%%
+%% The files belonging to this work and covered by LPPL are listed in
+%% (<texmf>/doc/generic/memoize/)FILES.
+\mmzset{
+  per overlay/.code={},
+  beamer mode to prefix/.style={
+    prefix=\mmz@prefix@dir\mmz@prefix@name\beamer@currentmode_mode.
+  },
+}%
+\@ifclassloaded{beamer}{%
+  \mmzset{
+    per overlay/.style={
+      /mmz/context={%
+        overlay=\csname beamer@overlaynumber\endcsname,
+        pauses=\ifmemoizing
+                 \mmzBeamerPauses
+               \else
+                 \expandafter\the\csname c@beamerpauses\endcsname
+               \fi
+      },
+      /mmz/at begin memoization={%
+        \xdef\mmzBeamerPauses{\the\c@beamerpauses}%
+        \xtoksapp\mmzCMemo{%
+          \noexpand\mmzSetBeamerOverlays{\mmzBeamerPauses}{\beamer@overlaynumber}}%
+        \gtoksapp\mmzCCMemo{%
+          \only<all:\mmzBeamerOverlays>{}}%
+      },
+      /mmz/at end memoization={%
+        \xtoksapp\mmzCCMemo{%
+          \noexpand\setcounter{beamerpauses}{\the\c@beamerpauses}}%
+      },
+      /mmz/per overlay/.code={},
+    },
+  }
+  \def\mmzSetBeamerOverlays#1#2{%
+    \ifnum\c@beamerpauses=#1\relax
+      \gdef\mmzBeamerOverlays{#2}%
+      \ifnum\beamer@overlaynumber<#2\relax \mmz@temptrue \else \mmz@tempfalse \fi
+    \else
+      \mmz@temptrue
+    \fi
+    \ifmmz@temp
+      \appto\mmzAtBeginMemoization{%
+        \gtoksapp\mmzCMemo{\mmzSetBeamerOverlays{#1}{#2}}}%
+    \fi
+  }%
+}%
+\endinput
+%%
+%% End of file `memoize-beamer.code.tex'.

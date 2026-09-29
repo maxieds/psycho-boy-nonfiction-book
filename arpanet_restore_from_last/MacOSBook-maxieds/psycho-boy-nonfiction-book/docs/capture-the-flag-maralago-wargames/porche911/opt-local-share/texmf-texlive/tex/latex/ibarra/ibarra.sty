@@ -1,0 +1,101 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ibarra}
+    [2024/04/23 (Bob Tennent)  Supports IbarraRealNova Real Nova fonts for all LaTeX engines.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+
+\newif\ifibarra@ttf 
+\ifxetex
+  \ibarra@ttftrue
+\else\ifluatex
+  \ibarra@ttftrue
+\else  % [pdf]LaTeX
+  \ibarra@ttffalse
+\fi\fi
+
+\newif\ifibarra@default \ibarra@defaultfalse
+\newif\ifibarra@semi \ibarra@semifalse
+\newif\ifibarra@lining \ibarra@liningtrue
+\newcommand*{\IbarraRealNova@scale}{1}
+\DeclareOptionX{scaled}{\renewcommand*{\IbarraRealNova@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\IbarraRealNova@scale}{#1}}
+
+\DeclareOptionX{lining}{\ibarra@liningtrue}
+\DeclareOptionX{oldstyle}{\ibarra@liningfalse}
+\DeclareOptionX{type1}{\ibarra@ttffalse}
+\DeclareOptionX{semibold}{\ibarra@semitrue}
+
+\ProcessOptionsX\relax
+
+\ifibarra@ttf
+  \def\ibarra@boldstyle{Bold}
+  \ifibarra@semi\def\ibarra@boldstyle{SemiBold}\fi
+  \ifibarra@lining
+    \def\ibarra@figurestyle{}
+  \else
+    \def\ibarra@figurestyle{OldStyle}
+  \fi
+
+\else % type1
+
+  \def\bfseries@rm{b}
+  \def\mdseries@rm{m}
+  \ifibarra@semi\def\bfseries@rm{sb}\fi
+  \ifibarra@lining
+    \def\ibarra@figurestyle{LF}
+  \else
+    \def\ibarra@figurestyle{OsF}
+  \fi
+\fi
+
+\ifibarra@ttf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+\fi
+
+\ifibarra@ttf
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Scale     = \IbarraRealNova@scale ,
+        Extension = .ttf }
+  \setmainfont
+      [ Numbers = {\ibarra@figurestyle}, 
+        UprightFont    = *-Regular ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\ibarra@boldstyle , 
+        BoldItalicFont = *-\ibarra@boldstyle Italic ]
+      {IbarraRealNova}
+  % grab current family in case of subsequent change:
+  \let\ibarrafamily\rmdefault  
+  \newfontfamily\ibarra
+      [ Numbers = {\ibarra@figurestyle}, 
+        UprightFont    = *-Regular ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\ibarra@boldstyle , 
+        BoldItalicFont = *-\ibarra@boldstyle Italic ]
+      {IbarraRealNova}
+  \newfontfamily\ibarraSemiBold
+      [ Numbers = {\ibarra@figurestyle},
+        UprightFont    = *-SemiBold ,
+        ItalicFont     = *-SemiBoldItalic ,
+        BoldFont       = *-SemiBold , 
+        BoldItalicFont = *-SemiBoldItalic ]
+      {IbarraRealNova}
+  \DeclareTextFontCommand{\oldstylenums}{\addfontfeatures{Numbers={OldStyle}}}
+  \DeclareTextFontCommand{\liningnums}{\addfontfeatures{Numbers={}}}
+\else % type1
+  \def\ibarrafamily{IbarraRealNova-\ibarra@figurestyle}
+  \def\ibarra{\fontfamily{\ibarrafamily}\selectfont}
+  \renewcommand*\rmdefault{\ibarrafamily}
+  \def\ibarraSemiBold{\fontfamily{\ibarrafamily}\fontseries{sb}\selectfont}
+  \DeclareTextFontCommand{\oldstylenums}{\fontfamily{IbarraRealNova-OsF}\selectfont}
+  \DeclareTextFontCommand{\liningnums}{\fontfamily{IbarraRealNova-LF}\selectfont}
+\fi
+
+\ifibarra@ttf
+% turn off defaults in case other fonts are selected:
+  \defaultfontfeatures{}
+\fi
+
+\endinput

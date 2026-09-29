@@ -1,0 +1,115 @@
+%%
+%% This is file `listings.hak',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% scrhack-2023-07-07.dtx  (with options: `hack,listings,identify')
+%% scrhack-2023-07-07.dtx  (with options: `hack,listings,body')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from listings.hak.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file scrhack-2023-07-07.dtx scrhack-2023-07-07.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+\ProvidesFile{listings.hak}[%
+  2024-04-17 v3.42
+  scrhack part
+  (hacking package
+    listings)%
+]
+\newcommand*{\scr@do@hack@listings}{%
+  \RequirePackage{tocbasic}%
+  \addtotoclist[float]{lol}%
+  \setuptoc{lol}{chapteratlist}%
+  \PackageInfo{scrhack}{redefining \string\lstlistoflistings}%
+  \renewcommand*{\lstlistoflistings}{\listoftoc[{\lstlistlistingname}]{lol}}%
+  \providecommand*{\ext@lstlisting}{lol}%
+  \@tempswafalse
+  \xpatchcmd\lst@MakeCaption
+    {\addcontentsline{lol}}%
+    {\addcontentsline{\ext@lstlisting}}%
+    {\PackageInfo{scrhack}{patching \string\lst@MakeCaption}\@tempswatrue}%
+    {\PackageWarning{scrhack}{cannot patch \string\lst@MakeCaption}}%
+  \@whilesw\if@tempswa\fi{%
+    \xpatchcmd\lst@MakeCaption
+      {\addcontentsline{lol}}%
+      {\addcontentsline{\ext@lstlisting}}%
+      {}%
+      {\@tempswafalse}%
+  }%
+  \AtBeginDocument{%
+    \scr@ifexpected{\float@addtolists}{%
+      \def\float@addtolists##1{\addtocontents{lol}{##1}}%
+    }{%
+      \PackageInfo{scrhack}{undefining \string\float@addtolists}%
+      \let\float@addtolists\relax
+    }{%
+      \scr@ifexpected{\float@addtolists}{%
+        \def\float@addtolists##1{\addtocontents{lol}{##1}%
+          \orig@float@addtolists{##1}}%
+      }{%
+        \PackageInfo{scrhack}{setting \string\float@addtolists\MessageBreak
+          to \string\orig@float@addtolists}%
+        \let\float@addtolists\orig@float@addtolists
+      }{%
+        \PackageWarningNoLine{scrhack}{unkown \string\float@addtolists\space
+          definition found!\MessageBreak
+          Maybe you are using a unsupported listings version}%
+      }%
+    }%
+  }%
+  \expandafter\def\expandafter\lst@makecaption\expandafter{%
+    \expandafter\def\expandafter\@captype\expandafter{%
+      \expandafter l\expandafter s\expandafter t\expandafter l%
+      \expandafter i\expandafter s\expandafter t\expandafter i%
+      \expandafter n\expandafter g\expandafter}\lst@makecaption
+  }%
+  \let\scr@do@hack@listings\relax
+}
+\scr@ifexpected{\lstlistoflistings}{%
+  \def\lstlistoflistings{\bgroup
+    \let\contentsname\lstlistlistingname
+    \let\lst@temp\@starttoc \def\@starttoc##1{\lst@temp{lol}}%
+    \tableofcontents \egroup}%
+}{%
+  \scr@do@hack@listings
+}{%
+  \scr@ifexpected{\lstlistoflistings}{%
+    \def\lstlistoflistings{%
+      \begingroup
+        \@ifundefined{@restonecoltrue}{}{%
+          \if@twocolumn
+            \@restonecoltrue\onecolumn
+          \else
+            \@restonecolfalse
+          \fi
+        }%
+        \float@listhead{\lstlistlistingname}%
+        \parskip\z@\parindent\z@\parfillskip \z@ \@plus 1fil%
+        \@starttoc{lol}%
+        \@ifundefined{@restonecoltrue}{}{%
+          \if@restonecol\twocolumn\fi
+        }%
+      \endgroup
+    }%
+  }{%
+    \scr@do@hack@listings
+  }{%
+    \PackageWarningNoLine{scrhack}{unknown \string\lstlistoflistings\space
+      definition found!\MessageBreak
+      Maybe you are using a unsupported listings version}%
+  }%
+}
+\endinput
+%%
+%% End of file `listings.hak'.

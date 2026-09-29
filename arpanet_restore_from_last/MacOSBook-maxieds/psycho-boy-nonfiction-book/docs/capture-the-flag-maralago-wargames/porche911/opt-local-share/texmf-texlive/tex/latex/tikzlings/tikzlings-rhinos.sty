@@ -1,0 +1,270 @@
+ % !TeX root = ./examples/rhino.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This package is part of the TikZlings package
+%% A package to bring cute little animals and other beings into tikz
+%% Maintained by samcarter
+%%
+%% Project repository and bug tracker:
+%% https://github.com/samcarter/tikzlings
+%%
+%% Released under the LaTeX Project Public License v1.3c or later
+%% See https://www.latex-project.org/lppl.txt
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProvidesPackage{tikzlings-rhinos}[2025/01/05 version v2.2 Drawing rhinos in TikZ]
+
+\RequirePackage{tikz}
+\RequirePackage{tikzlings-addons}
+
+\newcommand*{\rhino}[1][]{%
+  \begin{scope}%
+    \tikzset{/rhino/.cd,#1}%
+    \rhino@draw%
+  \end{scope}%
+  \thing[#1]%
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname rhinohookforeground\endcsname
+  \csname tikzlinghookforeground\endcsname
+  %
+}
+
+\newif\ifrhino@threeD
+\newif\ifrhino@back
+\newif\ifrhino@contour
+\newif\ifrhino@openmouth
+
+\tikzset{
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % Pass unknown keys on to tikz
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  /rhino/.search also={/tikz,/pgf,/thing},
+  /rhino/.cd,
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % body
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  body/.store in     = \rhino@body,
+  body               = gray!55!white,
+  toes/.store in     = \rhino@toes,
+  toes               = \rhino@body,
+  eye/.store in      = \rhino@eye,
+  eye                = white,
+  pupil/.store in    = \rhino@pupil,
+  pupil              = black,
+  mouth/.store in    = \rhino@mouth,
+  mouth              = \rhino@body!50!black,
+  horn/.store in     = \rhino@horn,
+  horn               = white!95!yellow,
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % options
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  openmouth/.code    = \rhino@openmouthtrue,
+  open mouth/.forward to = /rhino/openmouth,
+  3D/.code           = \rhino@threeDtrue
+                       \def\rhino@mouth{black},
+  back/.code         = \rhino@backtrue,
+  contour/.code      = \rhino@contourtrue
+                       \def\rhino@contour{#1}
+                       \def\rhino@mouth{#1},
+  contour/.default   = black,
+  outline/.forward to = /rhino/contour,
+}
+
+\def\rhino@draw{%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % minimal bounding box size
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \path (-0.625,0.1) rectangle (0.625, 2.17);
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % store the current scale factor
+  % from https://github.com/samcarter/tikzlings/issues/3#issuecomment-461373494
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \pgfgettransformentries{\tmpscaleA}{\tmpscaleB}{\tmpscaleC}{\tmpscaleD}{\tmp}{\tmp}%
+  \pgfmathsetmacro{\scalingfactor}{sqrt(abs(\tmpscaleA*\tmpscaleD-\tmpscaleB*\tmpscaleC))*sqrt(abs((\pgf@xx/1cm)*(\pgf@yy/1cm)-(\pgf@xy/1cm)*(\pgf@yx/1cm)))}%
+  \pgfmathsetmacro{\xscalefactor}{\tmpscaleA}
+  \pgfmathsetmacro{\yscalefactor}{\tmpscaleD}
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % switch between 2D, 3D and contours, from
+  % https://chat.stackexchange.com/transcript/message/45991801#45991801
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifrhino@threeD
+    \def\rhino@part@draw[##1]{\shade[ball color=##1]}
+  \else% 3D
+    \ifrhino@contour
+      \def\rhino@part@draw[##1]{\draw[##1,\rhino@contour,fill=white,line width=\scalingfactor*0.4pt]}
+    \else% contour
+      \def\rhino@part@draw[##1]{\fill[##1]}
+    \fi% contour
+  \fi% 3D
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % Body parts
+  %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname rhinohookbackground\endcsname
+  \csname tikzlinghookbackground\endcsname
+  %
+  % Ears %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \rhino@part@draw[\rhino@body!70!black]  (-0.1772, 2.0686) .. controls (-0.2057, 2.1602) and (-0.3552, 2.2076) .. (-0.3552, 2.1922) .. controls (-0.3552, 2.1922) and (-0.3694, 1.9615) .. (-0.2855, 1.9615) .. controls (-0.2264, 1.9462) and (-0.1772, 1.9462) .. (-0.1772, 2.0686) -- cycle;
+  \rhino@part@draw[\rhino@body!70!black]  (0.1772, 2.0686) .. controls (0.2057, 2.1602) and (0.3552, 2.2076) .. (0.3552, 2.1922) .. controls (0.3552, 2.1922) and (0.3694, 1.9615) .. (0.2855, 1.9615) .. controls (0.2264, 1.9462) and (0.1772, 1.9462) .. (0.1772, 2.0686) -- cycle;
+  %
+  % Feet if back %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifrhino@back
+    \rhino@part@draw[\rhino@body!70!black] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.17, y radius=0.19] -- cycle;
+    \rhino@part@draw[\rhino@body!70!black](0.08,0.13) arc [start angle=180, end angle=0, x radius=0.17, y radius=0.19] -- cycle;
+  \fi% back
+  %
+  % Nose if back %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifrhino@back
+    \rhino@part@draw[\rhino@body!83!black] (0, 1.55) ellipse[x radius=0.36, y radius=0.2];
+  \fi% back
+  %
+  % Body %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \rhino@part@draw[\rhino@body] ( 0.55,  0.8 ) .. controls ( 0.55 , 0.4) and ( 0.35, 0.19) .. ( 0.0,  0.19) .. controls (-0.35, 0.19) and (-0.55 , 0.4) .. (-0.55,  0.8 ) .. controls (-0.55 , 1.3) and (-0.35, 1.65) .. ( 0.0,  1.65) .. controls ( 0.35, 1.65) and ( 0.55 , 1.3) .. ( 0.55,  0.75) -- cycle;
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname rhinohookbelly\endcsname
+  \csname tikzlinghookbelly\endcsname
+  %
+  % Arms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \unless\ifrhino@back
+    \rhino@part@draw[\rhino@body!70!black] (0.3,1.0) ellipse[x radius=0.24, y radius=0.13, rotate=90];
+    \rhino@part@draw[\rhino@body!70!black] (-0.3,1.0) ellipse[x radius=0.24, y radius=0.13, rotate=-90];
+  \fi% back
+  %
+  % Head %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \rhino@part@draw[\rhino@body] (0, 1.76) circle[radius=0.36];
+  %
+  % Show details only from the front %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \unless\ifrhino@back
+    %
+    % Eyes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \ifrhino@contour
+      \rhino@part@draw[\rhino@eye] (-0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \rhino@part@draw[\rhino@eye] (0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \rhino@part@draw[\rhino@pupil] (-0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+      \rhino@part@draw[\rhino@pupil] (0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+    \else% contour
+      \fill[\rhino@eye] (-0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \fill[\rhino@eye] (0.11, 1.83) ellipse[x radius=0.08, y radius=0.12];
+      \fill[\rhino@pupil] (-0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+      \fill[\rhino@pupil] (0.105, 1.78) ellipse[x radius=0.04, y radius=0.07];
+    \fi% contour
+    %
+    % Nose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \rhino@part@draw[\rhino@body!83!black] (0, 1.55) ellipse[x radius=0.36, y radius=0.2];
+    %
+    % Horn %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \rhino@part@draw[\rhino@horn] (0, 1.7911) .. controls (-0.0231, 1.7372) and (-0.0463, 1.6832) .. (-0.0642, 1.6274) .. controls (-0.0687, 1.6132) and (-0.0724, 1.5981) .. (-0.0678, 1.5834) .. controls (-0.0603, 1.552) and (-0.0287, 1.5287) .. (0, 1.531) .. controls (0.0287, 1.5287) and (0.0603, 1.552) .. (0.0678, 1.5834) .. controls (0.0724, 1.5981) and (0.0687, 1.6132) .. (0.0642, 1.6274) .. controls (0.0463, 1.6832) and (0.0231, 1.7372) .. (0, 1.7911) -- cycle;
+    %
+    % Mouth %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \ifrhino@openmouth
+      \filldraw[\rhino@mouth,line width=\scalingfactor*0.4pt] (0.125, 1.5) arc [start angle=-50, end angle=-130, radius=0.2];
+    \else
+      \draw[\rhino@mouth,line width=\scalingfactor*0.4pt] (0.125, 1.5) arc [start angle=-50, end angle=-130, radius=0.2];
+    \fi
+    %
+    % Feet %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \rhino@part@draw[\rhino@body!70!black] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.17, y radius=0.19] -- cycle;
+    \rhino@part@draw[\rhino@toes] (-0.08,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.08] -- cycle;
+    \rhino@part@draw[\rhino@toes] (-0.2,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.1] -- cycle;
+    \rhino@part@draw[\rhino@toes] (-0.32,0.13) arc [start angle=0, end angle=180, x radius=0.05, y radius=0.08] -- cycle;
+    \rhino@part@draw[\rhino@body!70!black](0.08,0.13) arc [start angle=180, end angle=0, x radius=0.17, y radius=0.19] -- cycle;
+    \rhino@part@draw[\rhino@toes] (0.08,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.08] -- cycle;
+    \rhino@part@draw[\rhino@toes] (0.2,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.1] -- cycle;
+    \rhino@part@draw[\rhino@toes] (0.32,0.13) arc [start angle=180, end angle=0, x radius=0.05, y radius=0.08] -- cycle;
+    %
+  \fi% back
+  %
+  % adding hook for users to customise %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \csname rhinohookbody\endcsname
+  \csname tikzlinghookbody\endcsname
+  %
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Documentation
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\clearpage
+%\section[Rhino]{D\"urer, the rhino}
+%
+%\emph{Named after Albrecht D\"urer who painted an amazing rhino merely based on stories}
+%
+%\subsection{Package name}
+%
+%\begin{tcolorbox}[title={Package usage}]
+%\begin{samcode}
+%\usepackage{tikzlings-rhinos}
+%\end{samcode}
+%\end{tcolorbox}
+%
+%\subsection{Basic Usage}
+%
+%\begin{tcblisting}{title={Basic rhino}}
+%\rhino
+%\end{tcblisting}
+%
+%\subsection{Options}
+%
+%The basic rhino can be modified by changing its colour:
+%\begin{tcblisting}{title={Body colour}}
+%\rhino[body=blue]
+%\end{tcblisting}
+%
+%In addition to the colour of the body, the colour of various body parts can be adjusted:
+%\begin{tcblisting}{title={Eye colour}}
+%\rhino[eye=red]
+%\end{tcblisting}
+%\begin{tcblisting}{title={Pupil colour}}
+%\rhino[pupil=red]
+%\end{tcblisting}
+%\begin{tcblisting}{title={Mouth colour}}
+%\rhino[mouth=red]
+%\end{tcblisting}
+%\begin{tcblisting}{title={Horn colour}}
+%\rhino[horn=red]
+%\end{tcblisting}
+%
+% The rhino can open its mouth:
+%\begin{tcblisting}{title={Open mouth}}
+%\rhino[openmouth]
+%\end{tcblisting}
+%
+%The hippo can also do its nails:
+%\begin{tcblisting}{title={Toe colour}}
+%\rhino[toes=red]
+%\end{tcblisting}
+%
+%To view the rhino from behind:
+%\begin{tcblisting}{title={Back view}}
+%\rhino[back]
+%\end{tcblisting}
+%
+%The key \saminline|3D| will make the rhino 3-dimensional:
+%\begin{tcblisting}{title={3D view}}
+%\rhino[3D]
+%\end{tcblisting}
+%
+%And finally the \saminline|contour| key will only draw the outlines:
+%\begin{tcblisting}{title={Contours}}
+%\rhino[contour=black]
+%\end{tcblisting}

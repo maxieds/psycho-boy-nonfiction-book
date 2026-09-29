@@ -1,0 +1,128 @@
+\ProvidesPackage{crimson}[%
+   2024/12/08 (Bob Tennent)  Supports crimson fonts for all LaTeX engines. ] 
+
+\RequirePackage{ifxetex,ifluatex,textcomp}
+
+\newif\ifcrimson@otf
+\ifxetex
+  \crimson@otftrue
+\else\ifluatex
+  \crimson@otftrue
+\else  % [pdf]LaTeX
+  \crimson@otffalse
+\fi\fi
+
+\newcommand*{\Crimson@scale}{1}  
+
+\RequirePackage{xkeyval}
+\DeclareOptionX{scaled}{\renewcommand*{\Crimson@scale}{#1}}
+\DeclareOptionX{scale}{\renewcommand*{\Crimson@scale}{#1}}
+
+
+\newif\ifcrimson@semibold  \crimson@semiboldfalse
+\newif\ifcrimson@lining \crimson@liningtrue
+
+\DeclareOptionX{type1}{\crimson@otffalse}
+\DeclareOptionX{semibold}{\crimson@semiboldtrue}
+\DeclareOptionX{sb}{\crimson@semiboldtrue}
+\DeclareOptionX{bold}{\crimson@semiboldfalse}
+\DeclareOptionX{lining}{\crimson@liningtrue}
+\DeclareOptionX{lf}{\crimson@liningtrue}
+\DeclareOptionX{oldstyle}{\crimson@liningfalse}
+\DeclareOptionX{osf}{\crimson@liningfalse}
+
+\ProcessOptionsX\relax
+
+\ifcrimson@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+\fi
+
+\ifcrimson@otf
+  \def\crimson@boldstyle{Bold}
+  \ifcrimson@semibold\def\crimson@boldstyle{Semibold}\fi
+  \ifcrimson@lining
+    \def\crimson@figurestyle{Lining}
+  \else
+    \def\crimson@figurestyle{OldStyle} 
+  \fi
+  \def\crimson@figurealign{Monospaced}
+
+
+\else % type1
+
+  \def\bfseries@rm{b}
+  \ifcrimson@semibold\def\bfseries@rm{sb}\fi
+
+  \ifcrimson@lining
+    \def\crimson@figurestyle{LF}
+  \else
+    \def\crimson@figurestyle{OsF}
+  \fi
+  \def\crimson@figurealign{T}
+
+
+  \def\mdseries@rm{m}
+\fi
+
+
+\ifcrimson@otf
+  \defaultfontfeatures{
+     Ligatures = TeX ,
+     Scale = \Crimson@scale,
+     Extension = .otf ,
+  }
+  \setmainfont
+      [ Numbers = {\crimson@figurealign,\crimson@figurestyle},
+        UprightFont    = *-Roman ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\crimson@boldstyle , 
+        BoldItalicFont = *-\crimson@boldstyle Italic ]
+      {Crimson}
+  \newfontfamily\crimson
+      [ Numbers = {\crimson@figurealign,\crimson@figurestyle},
+        UprightFont    = *-Roman ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\crimson@boldstyle , 
+        BoldItalicFont = *-\crimson@boldstyle Italic ]
+      {Crimson}
+  \newfontfamily\crimsonsemibold
+      [ UprightFont    = *-Semibold ,
+        ItalicFont     = *-SemiboldItalic ,
+        BoldFont       = *-Semibold , 
+        BoldItalicFont = *-SemiboldItalic ]
+      {Crimson}
+  \newfontfamily\crimsonoldstyle
+      [ Numbers = {\crimson@figurealign,OldStyle},
+        UprightFont    = *-Roman ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\crimson@boldstyle , 
+        BoldItalicFont = *-\crimson@boldstyle Italic ]
+      {Crimson}
+  \newfontfamily\crimsonlining
+      [ Numbers = {\crimson@figurealign,Lining},
+        UprightFont    = *-Roman ,
+        ItalicFont     = *-Italic ,
+        BoldFont       = *-\crimson@boldstyle , 
+        BoldItalicFont = *-\crimson@boldstyle Italic ]
+      {Crimson}
+
+\else % type1
+
+  \def\crimson@family{Crimson-\crimson@figurealign\crimson@figurestyle}
+  \renewcommand*\rmdefault{\crimson@family}
+  \def\crimson{\fontfamily{\crimson@family}\selectfont}
+  \def\crimsonsemibold{\fontfamily{\crimson@family}\fontseries{sb}\selectfont}
+  \def\crimsonoldstyle{\fontfamily{Crimson-TOsF}\selectfont}
+  \def\crimsonlining{\fontfamily{Crimson-TLF}\selectfont}
+
+\fi
+
+% turn off defaults in case other fonts are selected:
+\ifcrimson@otf
+  \defaultfontfeatures{}
+\fi
+
+\endinput
+

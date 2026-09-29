@@ -1,0 +1,98 @@
+%%
+%% This is file `doibanner.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% doibanner.dtx  (with options: `package')
+%% 
+%% Copyright (C) 2024 Christian Schreinemachers
+%% 
+%% This work may be distributed and/or modified under the conditions
+%% of the LaTeX Project Public License, either version 1.3c of this
+%% license or (at your option) any later version. The latest version
+%% of this license is in
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2008-05-04 or later.
+%% 
+%% This work has the LPPL maintenance status `maintained'.
+%% 
+%% The current maintainer of this work is
+%%   Christian Schreinemachers.
+%% 
+%% This work consists of the files
+%%    doibanner.dtx
+%%    doibanner.ins
+%% and the derived files
+%%    doibanner.sty
+%%    doibanner.pdf
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{doibanner}
+  [2024-07-28 v0.3 Generate DOI banners and links]
+\RequirePackage{adjustbox}
+\RequirePackage{hyperref}
+\RequirePackage{tikz}
+\definecolor{leftcolor}{RGB}{82,82,82}
+\definecolor{rightcolor}{RGB}{6,119,183}
+\definecolor{toptextcolor}{RGB}{235,235,235}
+\definecolor{bottomtextcolor}{RGB}{59,59,59}
+\tikzstyle{toptextstyle} = [
+  font=\fontfamily{\sfdefault}\selectfont\bfseries\Large,toptextcolor]
+\tikzstyle{bottomtextstyle} = [
+  font=\fontfamily{\sfdefault}\selectfont\bfseries\Large,bottomtextcolor]
+\DeclareKeys[@doibanner]{
+  label.store = \@doibanner@label,
+  label.usage = load,
+  urlbase.store = \@doibanner@urlbase,
+  urlbase.usage = load,
+  width.store = \@doibanner@width,
+  width.usage = load,
+}
+\SetKeys[@doibanner]{
+  label=DOI,
+  urlbase=https://doi.org/,
+  width=3.6cm,
+}
+\ProcessKeyOptions[@doibanner]\relax
+\NewDocumentCommand\doiurl{s m}{%
+  \IfBooleanTF#1
+    {\@doibanner@urlbase#2}%
+    {\href{\@doibanner@urlbase#2}{#2}}%
+}
+\NewDocumentCommand\@doibanner@draw{o m}{%
+  \adjustbox{#1}{%
+    \begin{tikzpicture}
+      \fill [leftcolor,draw]
+        (1.5,0) --
+        ++(0,.8) {[rounded corners=5] --
+        ++(-1.5,0) --
+        ++(0,-.8)} --
+        cycle
+        {};
+      \node[bottomtextstyle] at (.75,.35) {\@doibanner@label};
+      \node[toptextstyle] at (.75,.4) {\@doibanner@label};
+      \fill [rightcolor,draw]
+        (1.5,0) {[rounded corners=5] --
+        ++(6.5,0) --
+        ++(0,.8)} --
+        ++(-6.5,0) --
+        cycle
+        {};
+      \node[bottomtextstyle] at (4.75,.35) {#2};
+      \node[toptextstyle] at (4.75,.4) {#2};
+    \end{tikzpicture}%
+  }%
+}
+\NewDocumentCommand\doibanner{s O{width=\@doibanner@width} m}{%
+  \IfBooleanTF#1
+  {\@doibanner@draw[#2]{#3}}%
+  {\href{\@doibanner@urlbase#3}{\@doibanner@draw[#2]{#3}}}%
+}
+\endinput
+%%
+%% End of file `doibanner.sty'.

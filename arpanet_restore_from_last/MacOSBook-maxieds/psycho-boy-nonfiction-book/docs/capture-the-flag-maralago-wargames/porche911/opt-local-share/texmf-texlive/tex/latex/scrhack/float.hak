@@ -1,0 +1,121 @@
+%%
+%% This is file `float.hak',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% scrhack-2023-07-07.dtx  (with options: `hack,float,identify')
+%% scrhack-2023-07-07.dtx  (with options: `hack,float,body')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from float.hak.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file scrhack-2023-07-07.dtx scrhack-2023-07-07.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+\ProvidesFile{float.hak}[%
+  2024-04-17 v3.42
+  scrhack part
+  (hacking package
+    float)%
+]
+\scr@ifexpected{\newfloat}{%
+  \long\def\newfloat#1#2#3{\@namedef{ext@#1}{#3}
+    \let\float@do=\relax
+    \xdef\@tempa{\noexpand\float@exts{\the\float@exts \float@do{#3}}}%
+    \@tempa
+    \floatplacement{#1}{#2}%
+    \@ifundefined{fname@#1}{\floatname{#1}{#1}}{}
+    \expandafter\edef\csname ftype@#1\endcsname{\value{float@type}}%
+    \addtocounter{float@type}{\value{float@type}}
+    \restylefloat{#1}%
+    \expandafter\edef\csname fnum@#1\endcsname%
+    {\expandafter\noexpand\csname fname@#1\endcsname{}
+      \expandafter\noexpand\csname the#1\endcsname}
+    \@ifnextchar[%]
+    {\float@newx{#1}}%
+    {\@ifundefined{c@#1}{\newcounter{#1}\@namedef{the#1}{\arabic{#1}}}%
+      {}}}%
+}{%
+  \scr@ifexpected{\listof}{%
+    \def\listof#1#2{%
+      \@ifundefined{ext@#1}{\float@error{#1}}{%
+        \@namedef{l@#1}{\@dottedtocline{1}{1.5em}{2.3em}}%
+        \float@listhead{#2}%
+        \begingroup\setlength{\parskip}{\z@}%
+        \@starttoc{\@nameuse{ext@#1}}%
+        \endgroup}}%
+  }{%
+    \RequirePackage{tocbasic}%
+    \PackageInfo{scrhack}{redefining \string\newfloat}%
+    \renewcommand\newfloat[3]{%
+      \Ifattoclist{#3}{%
+        \PackageError{scrhack}{extension `#3' already in use}{%
+          Each extension may be used only once.\MessageBreak
+          You, the class, or another package already uses extension
+          `#3'.\MessageBreak
+          \string\newfloat\space command will be ignored!}%
+      }{%
+        \addtotoclist[float]{#3}%
+        \setuptoc{#3}{chapteratlist}%
+        \@namedef{ext@#1}{#3}%
+        \let\float@do=\relax
+        \xdef\@tempa{\noexpand\float@exts{\the\float@exts \float@do{#3}}}%
+        \@tempa
+        \floatplacement{#1}{#2}%
+        \@ifundefined{fname@#1}{\floatname{#1}{#1}}{}%
+        \expandafter\edef\csname ftype@#1\endcsname{\value{float@type}}%
+        \addtocounter{float@type}{\value{float@type}}
+        \restylefloat{#1}%
+        \expandafter\edef\csname fnum@#1\endcsname%
+        {\expandafter\noexpand\csname fname@#1\endcsname{}
+          \expandafter\noexpand\csname the#1\endcsname}%
+        \@ifnextchar[%]
+        {\float@newx{#1}}%
+        {\@ifundefined{c@#1}{\newcounter{#1}\@namedef{the#1}{\arabic{#1}}}%
+          {}}}%
+    }%
+    \PackageInfo{scrhack}{redefining \string\listof}%
+    \renewcommand*\listof[2]{%
+      \@ifundefined{ext@#1}{\float@error{#1}}{%
+        \@ifundefined{l@#1}{\expandafter\let\csname l@#1\endcsname\l@figure
+          \@ifundefined{l@#1}{%
+            \DeclareTOCStyleEntry[level=1,numwidth=2.3em,indent=1.5em]
+            {default}{#1}%
+          }{}%
+        }{}%
+        \listoftoc[{#2}]{\csname ext@#1\endcsname}%
+      }%
+    }%
+    \scr@ifexpected{\float@addtolists}{%
+      \long\def\float@addtolists#1{%
+        \def\float@do##1{\addtocontents{##1}{#1}} \the\float@exts}%
+    }{%
+      \PackageInfo{scrhack}{undefining \string\float@addtolists}%
+      \let\float@addtolists\relax
+    }{%
+      \PackageWarningNoLine{scrhack}{unkown \string\float@addtolists\space
+        definition found!\MessageBreak
+        Maybe you are using a unsupported float version}%
+    }%
+  }{%
+    \PackageWarningNoLine{scrhack}{unknown \string\listof\space
+      definition found!\MessageBreak
+      Maybe you are using a unsupported float version}%
+  }%
+}{%
+  \PackageWarningNoLine{scrhack}{unknown \string\newfloat\space
+    definition found!\MessageBreak
+    Maybe you are using a unsupported float version}%
+}
+\endinput
+%%
+%% End of file `float.hak'.

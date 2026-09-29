@@ -1,0 +1,132 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{gelasio}
+    [2024/04/23 (Bob Tennent and autoinst)  Style file for Gelasio fonts.]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}
+
+\newif\ifgelasio@otf 
+\ifxetex
+  \gelasio@otftrue
+\else\ifluatex
+  \gelasio@otftrue
+\else  % [pdf]LaTeX
+  \gelasio@otffalse
+\fi\fi
+
+\newif\ifgelasio@lining \gelasio@liningfalse
+\newif\ifgelasio@tabular \gelasio@tabularfalse
+\newif\ifgelasio@medium \gelasio@mediumfalse
+\newif\ifgelasio@semibold \gelasio@semiboldfalse
+
+\newcommand*{\Gelasio@scale}{1}
+\DeclareOptionX{scale}{\renewcommand*{\Gelasio@scale}{#1}}
+\DeclareOptionX{type1}{\gelasio@otffalse}
+\DeclareOptionX{lining}{\gelasio@liningtrue}
+\DeclareOptionX{tabular}{\gelasio@tabulartrue}
+\DeclareOptionX{proportional}{\gelasio@tabularfalse}
+\DeclareOptionX{medium}{\gelasio@mediumtrue}
+\DeclareOptionX{semibold}{\gelasio@semiboldtrue}
+
+\ProcessOptionsX\relax
+
+\ifgelasio@otf
+  \ifgelasio@lining
+    \def\gelasio@figurestyle{Lining}
+  \else
+    \def\gelasio@figurestyle{OldStyle} 
+  \fi
+  \ifgelasio@tabular
+    \def\gelasio@figurealign{Monospaced} 
+  \else
+    \def\gelasio@figurealign{Proportional} 
+  \fi
+  \ifgelasio@medium
+    \def\gelasio@regularstyle{Medium}
+  \else
+    \def\gelasio@regularstyle{Regular}
+  \fi
+  \ifgelasio@semibold
+    \def\gelasio@boldstyle{SemiBold}
+  \else
+    \def\gelasio@boldstyle{Bold}
+  \fi
+    
+\else % type1
+  \ifgelasio@lining
+    \def\gelasio@figurestyle{LF}
+  \else
+    \def\gelasio@figurestyle{OsF}
+  \fi
+  \ifgelasio@tabular
+    \def\gelasio@figurealign{T}
+  \else
+    \def\gelasio@figurealign{}
+  \fi
+  \ifgelasio@medium
+    \def\mdseries@rm{medium}
+  \else
+    \def\mdseries@rm{m}
+  \fi
+  \def\seriesdefault{\mdseries@rm}
+  \ifgelasio@semibold
+    \def\bfseries@rm{sb}
+  \else
+    \def\bfseries@rm{b}
+  \fi
+
+\fi
+
+\ifgelasio@otf
+  \RequirePackage{fontspec}
+\else
+  \RequirePackage{fontenc,fontaxes,mweights}
+\fi
+
+\ifgelasio@otf
+  \def\gelasio@regular{Regular}
+
+  \defaultfontfeatures{
+        Ligatures = TeX ,
+        Scale     = \Gelasio@scale ,
+        Extension = .otf }
+  \setmainfont
+      [ Numbers = {\gelasio@figurealign,\gelasio@figurestyle},
+        UprightFont    = *-\gelasio@regularstyle ,
+        ItalicFont     = *-\ifx\gelasio@regularstyle\gelasio@regular Italic\else\gelasio@regularstyle Italic\fi,
+        BoldFont    = *-\gelasio@boldstyle ,
+        BoldItalicFont     = *-\gelasio@boldstyle Italic ,
+      ]
+      {Gelasio}
+  \newfontfamily\gelasio
+      [ Numbers = {\gelasio@figurealign,\gelasio@figurestyle},
+        UprightFont    = *-\gelasio@regularstyle ,
+        ItalicFont     = *-\ifx\gelasio@regularstyle\gelasio@regular Italic\else\gelasio@regularstyle Italic\fi ,
+        BoldFont    = *-\gelasio@boldstyle ,
+        BoldItalicFont     = *-\gelasio@boldstyle Italic ,
+      ]
+      {Gelasio}
+  \DeclareTextFontCommand{\liningnums}{\addfontfeatures{Numbers=Lining}}
+  \DeclareTextFontCommand{\tabularnums}{\addfontfeatures{Numbers=Tabular}}
+  \providecommand\sufigures{\addfontfeatures{VerticalPosition=Superior}}
+
+\else % type1
+
+  \def\gelasio@family{Gelasio-\gelasio@figurealign\gelasio@figurestyle}
+  \renewcommand*\rmdefault{\gelasio@family}
+  \newcommand*\gelasio{\fontfamily{\gelasio@family}\selectfont}
+
+  \fa@naming@exception{figures}{{superior}{proportional}}{Sup}
+  \fa@naming@exception{figures}{{superior}{tabular}}{Sup}
+  \def\sufigures{\@nomath\sufigures\fontfigurestyle{superior}\selectfont}
+  \DeclareTextFontCommand{\tabularnums}{\fontfamily{Gelasio-T\gelasio@figurestyle}\selectfont}
+  \DeclareTextFontCommand{\liningnums}{\fontfamily{Gelasio-\gelasio@figurealign LF}\selectfont}
+
+\fi
+
+\DeclareTextFontCommand{\textsu}{\sufigures}
+\ifgelasio@otf
+  \defaultfontfeatures{}
+\fi
+
+\endinput
+

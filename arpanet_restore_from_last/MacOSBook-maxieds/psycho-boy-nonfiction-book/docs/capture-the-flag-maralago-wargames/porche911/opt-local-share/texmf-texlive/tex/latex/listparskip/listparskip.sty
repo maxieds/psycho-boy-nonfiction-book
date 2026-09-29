@@ -1,0 +1,112 @@
+%%
+%% This is file `listparskip.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% listparskip_code.dtx  (with options: `package')
+%% 
+%% This file is from version 1.0 of the free and open-source
+%% LaTeX package "listparskip," released December 2024.
+%% 
+%% Copyright 2024 Conrad Kosowsky
+%% 
+%% This file may be used, distributed, and modified under the
+%% terms of the LaTeX Public Project License, version 1.3c or
+%% any later version. The most recent version of this license
+%% is available online at
+%% 
+%%           https://www.latex-project.org/lppl/
+%% 
+%% This work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this software may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% Happy TeXing!
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{listparskip}[2024/12/17 v. 1.0 Package listparskip]
+\newdimen\@saveparskip
+\long\def\patch@trivlist#1\ifvmode#2\else#3%
+  \advance\@topsep\parskip#4\@nil{%
+    #1%
+    \ifvmode
+      \advance\@topsepadd\partopsep
+      \advance\@topsepadd\parskip
+    \else
+    #3#4}
+\toks@\expandafter\expandafter\expandafter
+  {\expandafter\patch@trivlist\@trivlist\@nil}
+\edef\@trivlist{\the\toks@}
+\def\@endparenv{%
+  \addpenalty\@endparpenalty
+  \addvspace\topsep
+  \global\@tempskipa\glueexpr\topsep+\partopsep\relax
+  \@endpetrue}
+\let\@restoreparskip\relax
+\def\@doendpe{%
+  \@endpetrue
+  \@saveparskip\parskip
+  \parskip\z@
+  \def\@restoreparskip{%
+    \parskip\@saveparskip
+    \let\@restoreparskip\relax}
+  \edef\par{%
+    \unexpanded{\clubpenalty\@clubpenalty
+      \everypar{}%
+      \@restorepar\par
+      \@restoreparskip
+      \@endpefalse}%
+    \noexpand\addvspace{\the\@tempskipa}}%
+  \everypar{\@restorepar
+    \@restoreparskip
+    {\setbox\z@\lastbox}%
+    \everypar{}%
+    \@endpefalse}}
+\def\patch@item#1{%
+  \edef#1{\noexpand\@restorepar
+    \noexpand\@restoreparskip
+    \expandafter\unexpanded\expandafter{#1}}}
+\@ifpackageloaded{hyperref}{%
+  \ifHy@implicit
+    \patch@item\H@item
+  \else
+    \patch@item\item
+  \fi}{\patch@item\item}
+\def\nullline{\ifvmode\nointerlineskip\leavevmode\par\fi}
+\endinput
+%%
+%% End of file `listparskip.sty'.

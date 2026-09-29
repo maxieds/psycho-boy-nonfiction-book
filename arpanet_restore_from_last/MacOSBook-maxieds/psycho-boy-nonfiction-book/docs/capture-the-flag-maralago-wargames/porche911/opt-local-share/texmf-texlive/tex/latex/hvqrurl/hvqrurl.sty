@@ -1,0 +1,90 @@
+%% $Id: hvqrurl.sty 901 2024-05-26 07:18:06Z herbert $
+%%
+%% This file is distributed under the terms of the LaTeX Project Public
+%% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+%% Either version 1.3 or, at your option, any later version.
+%%
+% Copyright 2019,21,23,24 Herbert Voss hvoss@tug.org
+%%
+\ProvidesPackage{hvqrurl}[%
+  2024/05/26 v.0.09 (Herbert Voss) Supports qr images into the margin (hv)] 
+%
+\NeedsTeXFormat{LaTeX2e}
+\RequirePackage{url}
+\RequirePackage{xcolor}
+\RequirePackage{marginnote}
+%\RequirePackage{qrcode}
+\RequirePackage{xkeyval}
+
+\newif\if@hv@forget 
+\@hv@forgetfalse
+\DeclareOption{forget}{\@hv@forgettrue}           
+
+\newif\if@no@hyperref 
+\@no@hyperreffalse
+\DeclareOption{nohyperref}{\@no@hyperreftrue}           
+\ProcessOptions 
+
+\if@hv@forget\RequirePackage[forget]{qrcode}\else\RequirePackage{qrcode}\fi
+\if@no@hyperref\else\RequirePackage{hyperref}\fi
+
+\newlength\qr@url@qrheight
+\newlength\qr@url@qradjust
+
+\define@key{hvqr}{qrheight}[1cm]{\setlength\qr@url@qrheight{#1}}
+\define@key{hvqr}{qradjust}[-1.5\normalbaselineskip]{\setlength\qr@url@qradjust{#1}}
+\define@key{hvqr}{qrcolor}[black]{\colorlet{qr@url@qrcolor}{#1}}
+\define@key{hvqr}{qrlevel}[M]{\def\qr@url@qrlevel{#1}}
+\define@key{hvqr}{qrlink}[link]{\def\qr@url@qrlink{#1}}
+\define@key{hvqr}{linktext}[]{\def\qr@url@linktext{#1}}
+\define@boolkey{hvqr}[hv@]{qrreverse}[true]{}
+
+\newcommand*\qr@url@qr@nolink{nolink}
+
+\setkeys{hvqr}{qrheight,qrcolor=black,qradjust,qrlevel,qrlink=link,
+	qrreverse=false,linktext={}}% the default setting
+
+\newcommand*\hvqrset[1]{\setkeys{hvqr}{#1}}
+
+\def\hvqrurl{\@ifnextchar*{\@tempswafalse\hvqr@url}{\@tempswatrue\hvqr@@url}}
+
+\def\hvqr@url*{\hvqr@@url}
+
+
+\newcommand*\hvqr@@url[2][]{%
+  \begingroup
+  \providecommand*\qr@blank{0}%
+  \if@tempswa
+    \ifx\@empty\qr@url@linktext % alternative link text?
+      \edef\hv@foo{\detokenize\expandafter{#2}}%
+      \url{\hv@foo}%
+    \else
+      % \href[options]{URL}{text}
+      \typeout{>>>(hvqrurl) Alternative URL text}%
+      \edef\hv@fooA{\detokenize\expandafter{#2}}%
+      \edef\hv@fooB{\detokenize\expandafter{\qr@url@linktext}}%
+      \href{\hv@fooA}{\hv@fooB}%
+    \fi
+  \fi
+%  \endgroup
+%  \begingroup
+  \ifx\relax#1\relax \else\hvqrset{#1}\fi
+  % Set options for package qrcode
+  \expandafter\qrset\expandafter{\qr@url@qrlink,height=\qr@url@qrheight,level=\qr@url@qrlevel}%
+  \ifhv@qrreverse\reversemarginpar\fi
+  \if@no@hyperref
+    \color{qr@url@qrcolor}%
+  \else
+    \ifx\qr@url@qrlink\qr@url@qr@nolink
+      \color{qr@url@qrcolor}%
+    \else 
+      \hypersetup{urlcolor=qr@url@qrcolor}%
+    \fi
+  \fi
+  \edef\reserved@a{\noexpand\marginnote{\noexpand\qrcode{%
+     \detokenize\expandafter{#2}}}[\qr@url@qradjust]}%
+    \reserved@a
+  \endgroup
+}
+
+\endinput

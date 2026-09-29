@@ -1,0 +1,260 @@
+%%
+%% This is file `pagecolor.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% pagecolor.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Project: pagecolor
+%% Version: 2025-01-28 v1.2d
+%% Info: Provides thepagecolor
+%% 
+%% Copyright (C) 2011 - 2025 by
+%%     H.-Martin Muench <Martin dot Muench at Uni-Bonn dot de>
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2005-12-01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The Current Maintainer of this work is H.-Martin Muench.
+%% 
+%% This work consists of the main source file pagecolor.dtx,
+%% the README, and the derived files
+%%    pagecolor.sty, pagecolor.pdf,
+%%    pagecolor.ins, pagecolor.drv,
+%%    pagecolor-example.tex, pagecolor-example.pdf.
+%% 
+%% In memoriam
+%%  Claudia Simone Barth + 1996-01-30
+%%  Tommy Muench         + 2014-01-02
+%%  Hans-Klaus Muench    + 2014-08-24
+%% 
+\NeedsTeXFormat{LaTeX2e}[2024-11-01]
+\ProvidesPackage{pagecolor}[2025-01-28 v1.2d Provides thepagecolor (HMM)]
+%% Provides the \thepagecolor, \thepagecolornone, \newpagecolor{...},
+%% \restorepagecolor, \backgroundpagecolor, \newbackgroundpagecolor{...},
+%% and \restorebackgroundpagecolor commands and a replacement for the
+%% \nopagecolor command, if this is not available.
+
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+
+\IfFormatAtLeastTF{2024/11/01}{}{%
+  \PackageError{pagecolor}{Newer LaTeX format needed or older pagecolor package%
+    }{Needed LaTeX format version: 2024-11-01 or newer.\MessageBreak%
+      Found\space\space LaTeX format version: \fmtversion.\MessageBreak%
+      Please update your TeX distribution.%
+     }
+  }
+
+%% \RequirePackage{ either color or xcolor }:
+\IfPackageLoadedTF{xcolor}{% xcolor loaded
+   \RequirePackage{xcolor}[2024/09/29]% v3.02 LaTeX color extensions (UK)
+ }{% xcolor not loaded
+   \IfPackageLoadedTF{color}{%
+      \RequirePackage{color}[2024-06-23]% v1.3e Standard LaTeX Color (DPC)
+    }{\PackageWarningNoLine{pagecolor}{%
+        The pagecolor package must be loaded after either\MessageBreak%
+        package color or after package xcolor (at your\MessageBreak%
+        option). Neither package was loaded before package\MessageBreak%
+        pagecolor. Loading of package xcolor will now be\MessageBreak%
+        tried automatically.\MessageBreak%
+        When the pagecolor package is used with option\MessageBreak%
+        pagecolor using a color requiring e.g. x11names\MessageBreak%
+        option for xcolor package, this will not work%
+       }
+     }
+   \RequirePackage{xcolor}[2024/09/29]% v3.02 LaTeX color extensions (UK)
+  }
+
+\DeclareKeys[pagecolor]
+ {pagecolor   .store = \pagecolor@pagecolor ,
+  pagecolor   .usage = preamble ,
+  nopagecolor .store = \pagecolor@nopagecolor ,
+  nopagecolor .usage = preamble
+ }
+
+\SetKeys[pagecolor]{pagecolor=white,nopagecolor=none}
+
+\ProcessKeyOptions[pagecolor]
+
+\ifdefined\nopagecolor\relax
+\else
+  \PackageNoteNoLine{pagecolor}{\string\nopagecolor\ is undefined}
+  \def\pagecolortmpb{none}
+  \edef\pagecolortmpa{\pagecolor@nopagecolor}
+  \ifx\pagecolortmpa\pagecolortmpb
+    \PackageWarningNoLine{pagecolor}{%
+      Option nopagecolor=none requested but \string\nopagecolor\space unknown:\MessageBreak%
+      By option nopagecolor the "color" to be used with \string\nopagecolor\MessageBreak%
+      is set. The current value is "none" (maybe by default),\MessageBreak%
+      but command \string\nopagecolor\space is undefined.\MessageBreak%
+      Therefore the color cannot be "none".\MessageBreak%
+      Please change the option accordingly! -\MessageBreak%
+      As first aid nopagecolor is now set to white%
+     }
+    \SetKeys[pagecolor]{nopagecolor=white}
+  \fi
+  \edef\pagecolortmpa{\pagecolor@pagecolor}
+  \ifx\pagecolortmpa\pagecolortmpb\relax
+    \PackageWarningNoLine{pagecolor}{%
+      Option pagecolor=none (maybe by default) used,\MessageBreak%
+      but \string\nopagecolor\ is unknown.\MessageBreak%
+      Please use another option value;\MessageBreak%
+      \pagecolor@nopagecolor\ will be used now%
+     }
+    \SetKeys[pagecolor]{pagecolor={\pagecolor@nopagecolor}}
+  \fi
+  \newcommand{\nopagecolor}{\pagecolor{\pagecolor@nopagecolor}}
+\fi
+
+\NewCommandCopy{\origpagecolor}{\pagecolor}
+
+\renewcommand{\pagecolor}[1]{\@bsphack%
+  \edef\pagecolortmpa{#1}%
+  \def\pagecolortmpb{none}%
+  \ifx\pagecolortmpa\pagecolortmpb\relax%
+    \ifdefined\nopagecolor\relax%
+      \nopagecolor%
+    \else%
+      \PackageWarning{pagecolor}{%
+        pagecolor=none requested but \string\nopagecolor\space unknown:\MessageBreak%
+        \string\pagecolor{none} was used, but the command\MessageBreak%
+        \string\nopagecolor\space is undefined.\MessageBreak%
+        Please use another color.\MessageBreak%
+        pagecolor=\pagecolor@nopagecolor\MessageBreak%
+        will be used now.\MessageBreak%
+       }%
+      \xdef\thepagecolor{\pagecolor@nopagecolor}%
+      \xdef\thepagecolornone{\pagecolor@nopagecolor}%
+        % although it should be "none"
+      \origpagecolor{\pagecolor@nopagecolor}%
+    \fi%
+  \else%
+    \xdef\thepagecolor{#1}%
+    \xdef\thepagecolornone{#1}%
+    \origpagecolor{\thepagecolornone}%
+  \fi%
+  \@esphack%
+}
+
+\NewCommandCopy{\orignopagecolor}{\nopagecolor}
+
+\gdef\pagecolor@cl{0}
+\IfPackageLoadedTF{crop}{% crop loaded
+  \gdef\pagecolor@cl{1}
+  \PackageNoteNoLine{pagecolor}{%
+    \string\nopagecolor\space did not work with the crop package\MessageBreak%
+    2017/11/19 v1.10. Using\MessageBreak%
+    \pagecolor@nopagecolor\MessageBreak%
+    as nopagecolor now%
+    }
+  \def\pagecolortmpb{none}
+  \edef\pagecolortmpa{\pagecolor@nopagecolor}
+  \ifx\pagecolortmpa\pagecolortmpb\relax
+    \PackageWarningNoLine{pagecolor}{%
+      Option nopagecolor=none requested but this does not work with the\MessageBreak%
+      crop package. By option nopagecolor the "color" to be used with\MessageBreak%
+      \string\nopagecolor\ is set. The current value is "none" (maybe by\MessageBreak%
+      default), but the crop package broke \string\nopagecolor .\MessageBreak%
+      Therefore the color cannot be "none".\MessageBreak%
+      Please change the option accordingly!\MessageBreak%
+      As first aid nopagecolor is now set to white%
+     }
+    \SetKeys[pagecolor]{nopagecolor=white}
+  \fi
+  \renewcommand{\nopagecolor}{\pagecolor{\pagecolor@nopagecolor}}
+ }{% crop not loaded
+   \ifdefined\nopagecolor\relax
+     \gdef\pagecolortmpa{none}
+   \else
+     \gdef\pagecolortmpa{\pagecolor@nopagecolor}
+   \fi
+   \renewcommand{\nopagecolor}{%
+     \xdef\thepagecolor{white}%
+     \xdef\thepagecolornone{\pagecolortmpa}%
+     \orignopagecolor%
+     }
+  }
+
+\pagecolor{\pagecolor@pagecolor}
+
+\newcommand{\newpagecolor}[1]{%
+\xdef\pagecolortmpc{\thepagecolornone}%
+\pagecolor{#1}%
+}
+
+\newcommand{\restorepagecolor}{\pagecolor{\pagecolortmpc}}
+
+\gdef\pagecolortmpc{\thepagecolor}
+
+\newcommand{\backgroundpagecolor}[1]{%
+  \IfPackageLoadedTF{crop}{%
+    \xdef\pagecolortmpd{\thepagecolor}%
+    \pagecolor{#1}%
+    \xdef\pagecolortmpe{\CROP@pagecolor}%
+    \pagecolor{\pagecolortmpd}%
+    \xdef\CROP@stockcolor{\pagecolortmpe}%
+    }{\PackageInfo{pagecolor}{\string\backgroundpagecolor\space does not do\MessageBreak%
+           anything when the crop package has not been loaded;\MessageBreak}%
+    }%
+  }
+
+\newcommand{\newbackgroundpagecolor}[1]{%
+  \IfPackageLoadedTF{crop}{%
+    \xdef\pagecolortmpf{\CROP@stockcolor}%
+    \backgroundpagecolor{#1}%
+    }{\PackageInfo{pagecolor}{\string\newbackgroundpagecolor\space does not do\MessageBreak%
+              anything when the crop package has not been loaded;\MessageBreak}%
+     }%
+  }
+
+\newcommand{\restorebackgroundpagecolor}{%
+  \IfPackageLoadedTF{crop}{\xdef\CROP@stockcolor{\pagecolortmpf}}{%
+    \PackageInfo{pagecolor}{\string\newbackgroundpagecolor\space does not do\MessageBreak%
+             anything when the crop package has not been loaded;\MessageBreak}}%
+  }
+
+\AddToHook{begindocument/end}{%
+  \def\pagecolortmpb{0}%
+  \ifx\pagecolor@cl\pagecolortmpb\relax%
+    % crop not loaded before pagecolor, but maybe afterwards:
+    \IfPackageLoadedT{crop}{% crop indeed loaded afterwards.
+      \gdef\pagecolor@cl{1}%
+      \PackageInfo{pagecolor}{\string\nopagecolor\space did not work with the crop package\MessageBreak%
+        2017/11/19 v1.10. Using\MessageBreak%
+        \pagecolor@nopagecolor\MessageBreak%
+        as nopagecolor now.\MessageBreak%
+        }%
+      \def\pagecolortmpb{none}%
+      \edef\pagecolortmpa{\pagecolor@nopagecolor}%
+      \ifx\pagecolortmpa\pagecolortmpb\relax%
+        \PackageWarningNoLine{pagecolor}{%
+          Option nopagecolor=none requested but this does not work with\MessageBreak%
+          the crop package. By option nopagecolor the "color" to be used\MessageBreak%
+          with \string\nopagecolor\space is set. The current value is "none"\MessageBreak%
+          (maybe by default), but the crop package broke\MessageBreak%
+          \string\nopagecolor . Therefore the color cannot be "none".\MessageBreak%
+          Please change the option accordingly!\MessageBreak%
+          As first aid nopagecolor is now set to white%
+         }%
+        \SetKeys[pagecolor]{nopagecolor=white}%
+      \fi%
+      \renewcommand{\nopagecolor}{\pagecolor{\pagecolor@nopagecolor}}%
+      }%
+  \fi%
+  }
+
+\endinput
+%%
+%% End of file `pagecolor.sty'.

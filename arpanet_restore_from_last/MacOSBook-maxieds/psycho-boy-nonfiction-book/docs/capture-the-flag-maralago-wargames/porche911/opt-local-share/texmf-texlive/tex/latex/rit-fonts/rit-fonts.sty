@@ -1,0 +1,275 @@
+%
+% rit-fonts.sty
+%
+% Copyright (c) 2023, CV Radhakrishnan and
+%               Rachana Institute of Typography
+%               JWRA 34, Jagathy, Trivandrum 695014
+%               Kerala, India
+%               http://www.rachana.org.in
+%               email: <cvr@river-valley.org>
+%
+% Tel: +91 9495 99 2575
+% 
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, either version 1.3 of this license
+% or (at your option) any later version.  The latest version of this
+% license is in http://www.latex-project.org/lppl.txt and version 1.3
+% or later is part of all distributions of LaTeX version 2005/12/01 or
+% later.
+% 
+% This work has the LPPL maintenance status “maintained”.
+% 
+% The Current Maintainer of this work is CV Radhakrishnan.
+% 
+% This work consists of all files listed in manifest.txt.
+%
+%
+\NeedsTeXFormat{LaTeX2e}
+\def\Fileversion$#1: #2 ${\gdef\fileversion{#2}}
+\def\Filedate$#1: #2 #3 ${\gdef\filedate{#2}}
+\Fileversion$Revision: 0.9 $
+\Filedate$Date: 2023/06/12 04:24:22 $
+\ProvidesPackage{rit-fonts}
+   [\filedate\space\fileversion\space RIT font support for PDF (CVR)]
+\PackageWarningNoLine{rit-fonts}
+   {****************************************\MessageBreak
+    Package rit-fonts v,\fileversion\space loaded\MessageBreak
+    [Font support for RIT fonts (CVR)]\MessageBreak
+    ****************************************}
+%
+\RequirePackage{ifxetex,ifluatex,xkeyval,textcomp}  
+\newif\ifrit@lining \rit@liningtrue
+\let\thefontpath\@empty
+\DeclareOptionX{path}{\gdef\thefontpath{#1}}
+\DeclareOptionX{extn}{\renewcommand*{\rit@extn}{#1}}
+\DeclareOptionX{lining}[true]{\@nameuse{rit@lining#1}}
+\DeclareOptionX{lf}[true]{\@nameuse{rit@lining#1}}
+\DeclareOptionX{oldstyle}[true]{\@nameuse{if#1}%
+  \rit@liningfalse\else\rit@liningtrue\fi}
+\DeclareOptionX{osf}[true]{\@nameuse{if#1}%
+  \rit@liningfalse\else\rit@liningtrue\fi}
+
+\newcommand*\ritRM@scale{1}  
+\newcommand*\ritDS@scale{1} 
+\newcommand*\ritSF@scale{1}
+\newcommand*\ritHW@scale{1}
+\newcommand*\rit@extn{.ttf}
+
+\DeclareOptionX{ScaleRM}{\renewcommand*{\ritRM@scale}{#1}}
+\DeclareOptionX{ScaleSF}{\renewcommand*{\ritSF@scale}{#1}}
+\DeclareOptionX{ScaleDS}{\renewcommand*{\ritDS@scale}{#1}}
+\DeclareOptionX{ScaleHW}{\renewcommand*{\ritHW@scale}{#1}}
+
+\DeclareOptionX{RM}{\renewcommand*{\rmdefault}{#1}}
+\DeclareOptionX{SF}{\renewcommand*{\sfdefault}{#1}}
+
+\def\rit@defaultfeatures{Ligatures=TeX}
+\DeclareOptionX{df}{%
+  \edef\rit@defaultfeatures{\rit@defaultfeatures,#1}}
+\DeclareOptionX*{\PassOptionsToPackage{\CurrentOption}{fontspec}}
+
+\ProcessOptionsX \relax
+\@ifpackageloaded{polyglossia} 
+  {\PassOptionsToPackage{luatexrenderer=Harfbuzz}{polyglossia}
+    \setotherlanguage{malayalam}}
+  {\RequirePackage[luatexrenderer=Harfbuzz]{polyglossia}
+    \setdefaultlanguage{malayalam}\setotherlanguage{english}}
+
+\def\FontPath{\ifx\thefontpath\@empty\else Path=\thefontpath\fi}
+\def\fontpath#1{\gdef\thefontpath{#1}}
+
+\ifrit@lining
+    \def\rit@figurestyle{+lnum}
+\else
+    \def\rit@figurestyle{+onum}
+\fi
+
+\ifxetex
+  \defaultfontfeatures{Ligatures=TeX}
+  \iflanguageloaded{malayalam}
+    {\defaultfontfeatures+{HyphenChar="0000}}{}
+ \else
+  \defaultfontfeatures{Ligatures=TeX,Renderer=Harfbuzz}
+  \AtBeginDocument{\prehyphenchar="0000}
+\fi
+
+\newfontfamily\Rachana[Script=Malayalam]{RIT-Rachana}
+[
+  RawFeature     = {+onum;-lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritRM@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont     = *-Regular,
+  ItalicFont     = *-Italic,
+  BoldFont       = *-Bold,
+  BoldItalicFont = *-BoldItalic,
+]
+
+\newfontfamily\Ezhuthu[Script=Malayalam]{RIT-Ezhuthu}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritHW@scale},
+  Extension          = \rit@extn,
+  \FontPath,
+  UprightFont        = *-Regular,
+  ItalicFont         = *-Regular,
+  ItalicFeatures     = {FakeSlant=0.2},
+  BoldFont           = *-Regular,
+  BoldFeatures       = {FakeBold=1.25},
+  BoldItalicFont     = *-Regular,
+  BoldItalicFeatures = {FakeBold=1.25,FakeSlant=0.2},
+]
+  
+\newfontfamily\Panmana[Script=Malayalam]{RIT-Panmana}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritRM@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *-Regular,
+  ItalicFont     = *-Regular,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *-Regular,
+  BoldFeatures   = {FakeBold=1.25},
+  BoldItalicFont = *-Regular,
+  BoldItalicFeatures  = {FakeBold=1.25,FakeSlant=0.2},
+]
+
+\newfontfamily\Meera[Script=Malayalam]{RIT-MeeraNew}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritSF@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *,
+  ItalicFont     = *,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *,
+  BoldFeatures   = {FakeBold=1.25},
+  BoldItalicFont = *,
+  BoldItalicFeatures  = {FakeBold=1.25,FakeSlant=0.2},
+]
+
+\newfontfamily\Keraleeyam[Script=Malayalam]{RIT-Keraleeyam}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritDS@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *-Regular,
+  ItalicFont     = *-Italic,
+  BoldFont       = *-Regular,
+  BoldFeatures   = {FakeBold=1.25},
+  BoldItalicFont = *-Italic,
+  BoldItalicFeatures  = {FakeBold=1.25},
+]
+
+\newfontfamily\Sundar[Script=Malayalam]{RIT-Sundar}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritDS@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *,
+  ItalicFont     = *,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *,
+  BoldItalicFont = *,
+  BoldItalicFeatures  = {FakeSlant=0.2},
+]
+
+\newfontfamily\Uroob[Script=Malayalam]{RIT-Uroob}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritDS@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *,
+  ItalicFont     = *,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *,
+  BoldFeatures   = {FakeBold=1.25},
+  BoldItalicFont = *,
+  BoldItalicFeatures  = {FakeBold=1.25,FakeSlant=0.2},
+]
+
+\newfontfamily\Joy[Script=Malayalam]{RIT-tnjoy}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritSF@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *-regular,
+  ItalicFont     = *-regular,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *-bold,
+  BoldItalicFont = *-extrabold,
+]
+
+\newfontfamily\Karuna[Script=Malayalam]{RIT-Karuna-Bold}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritDS@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *,
+  ItalicFont     = *,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *,
+   BoldFeatures   = {FakeBold=1.35},
+  BoldItalicFont = *,
+  BoldItalicFeatures  = {FakeBold=1.35,FakeSlant=0.2},
+]
+
+\newfontfamily\Kutty[Script=Malayalam]{RIT-Kutty-Bold}
+[
+  RawFeature     = {-onum;+lnum},
+  \rit@defaultfeatures,
+  Scale          = {\ritHW@scale},
+  Extension      = \rit@extn,
+  \FontPath,
+  UprightFont    = *,
+  ItalicFont     = *,
+  ItalicFeatures = {FakeSlant=0.2},
+  BoldFont       = *,
+  BoldFeatures   = {FakeBold=1.35},
+  BoldItalicFont = *,
+  BoldItalicFeatures  = {FakeBold=1.35,FakeSlant=0.2},
+]
+
+
+%%
+%% not released yet, will be done anytime from now
+%% 
+% \newfontfamily\Chingam[Script=Malayalam]{Chingam}
+% [
+%   RawFeature     = {-onum;+lnum},
+%   \rit@defaultfeatures,
+%   Scale          = {\ritDS@scale},
+%   Extension      = \rit@extn,
+%   \FontPath,
+%   UprightFont    = *,
+%   ItalicFont     = *,
+%   ItalicFeatures = {FakeSlant=0.2},
+%   BoldFont       = *,
+%   BoldFeatures   = {FakeBold=1.35},
+%   BoldItalicFont = *,
+%   BoldItalicFeatures  = {FakeBold=1.35,FakeSlant=0.2},
+% ]
+
+\let\malayalamfont=\Rachana
+
+\AtBeginDocument{%
+  \ifluatex\prehyphenchar="0000\else\defaulthyphenchar="0000\fi
+}
+\endinput
+
